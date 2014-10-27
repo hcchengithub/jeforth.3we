@@ -47,7 +47,7 @@
 		kvm.version = "1.00";
 		kvm.greeting = function(){
 			print("j e f o r t h . 3 h t m -- v"+kvm.version+'\n');
-			print("source code http://github.com/hcchengithub/jeforth.3hta\n");
+			print("source code http://github.com/hcchengithub/jeforth.3we\n");
 			print("Program path " + window.location.toString());
 			return(parseFloat(kvm.version));
 		}
@@ -128,7 +128,7 @@
 		var plain = kvm.plain = function (s) {
 			var ss = s + ""; // avoid numbers to fail at s.replace()
 			ss = ss.replace(/\t/g,' &nbsp; &nbsp; &nbsp; &nbsp;');
-			ss = ss.replace(/  /g,' &nbsp;');
+			ss = ss.replace(/ /g,'&nbsp;');
 			ss = ss.replace(/</g,'&lt;');
 			ss = ss.replace(/>/g,'&gt;');
 			ss = ss.replace(/\n/g,'<br>');

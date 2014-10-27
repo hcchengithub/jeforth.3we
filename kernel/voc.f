@@ -175,6 +175,14 @@ code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear sea
 					==>judge [if] <js> [ ] </jsV> all-pass [then]
 				</selftest>
 
+: forget		( <name> -- ) \ Forget the current vocabulary from <name>
+				BL word dup (') js> tos().vid js> current = if ( -- name Word )
+					js> words[current].length-pop().wid for (forget) next
+				else
+					drop ." Oooops! '" . ." ' not found in the current vocabulary, "
+					current . char . . cr
+				then ;
+
 \ marker 十分複雜。
 \ 引進 vocabulary 之後，marker 要改寫。請想想: 'here' 只有一個，當 here 退回到某處，在此之後的所有 words 都要丟
 \ 掉，不管它屬哪個 word list. 執行一個 vocabulary words 切入之前就存在的 marker 會怎樣？會把 forth-wordlist 倒

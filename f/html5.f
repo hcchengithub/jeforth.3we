@@ -69,7 +69,7 @@ s" html5.f"		source-code-header
 				
 : <e>			( "jQuery selector" <html> -- "html" ) \ HTML section header. Get HTML tags.
 				char \s*(</e>|</o>|</h>) word \ 前置空白會變成 [object Text] 必須消除。
-				[compile] compiling if [compile] literal then ; immediate
+				compiling if [compile] literal then ; immediate
 				last dup alias <o> immediate // ( <html> -- "html" ) Starting a HTML section append to output box.
 				alias <h> immediate // ( <html> -- "html" ) Starting a HTML section append to <HEAD>. 
 				/// Section ending can be </e> </o> or </h> which are element, outputbox, and header
@@ -77,20 +77,20 @@ s" html5.f"		source-code-header
 
 : </o>			( "html" -- element ) \ Delimiter of <o>, (O)utputbox.
 				char #outputbox
-				[compile] compiling if 
+				compiling if 
 				[compile] literal compile doElement else 
 				doElement 
 				then ; immediate
 
 : </h>			( "html" -- element ) \ Delimiter of <h>, (H)ead section.
 				char head
-				[compile] compiling if 
+				compiling if 
 				[compile] literal compile doElement else 
 				doElement 
 				then ; immediate
 
 : </e>			( "jQuery selector" "html" -- element ) \ Delimiter of <e>, general purpose.
-				[compile] compiling if 
+				compiling if 
 				compile swap compile doElement 
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>

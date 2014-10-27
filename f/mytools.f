@@ -1,10 +1,19 @@
 
 s" mytools.f"	source-code-header
 		
-code tib.       ( thing -- ) \ Print the command line and the TOS.
-				print(tib.slice(0, ntib).match(/\s*(.*)/)[1] + " \\ ==> " + tos() + " (" + mytypeof(pop()) + ")\n");
+code tib.       ( result -- ) \ Print the command line and the TOS.
+				var lastCRindex = tib.slice(0, ntib).lastIndexOf('\n')+1;
+				var cmd = tib.slice(lastCRindex).match(/\s*(.*) tib\.\s*/)[1]; 
+				var L1 = cmd.length;
+				cmd = cmd.replace(/\s*""\s*$/,""); // remove the ending ""
+				var L2 = cmd.length;
+				print(cmd+" \\ ==> ");
+				if (L1==L2) print(tos() + " (" + mytypeof(pop()) + ")");
+				else pop();
+				print('\n');
 				end-code 
 				/// Good for experiments that need to show command line and the result.
+				/// "" tib. prints the command line only, w/o the TOS.
 
 code now 		( -- Time ) \ Get the Time object of now.
 				push(new Date());

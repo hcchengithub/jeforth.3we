@@ -276,17 +276,7 @@ code jsFuncNo	( "statements" -- function ) \ Compile JavaScript to a function()
 
 code [          compiling=false end-code immediate // ( -- ) 進入直譯狀態, 輸入指令將會直接執行 *** 20111224 sam
 code ]          compiling=true end-code // ( -- ) 進入編譯狀態, 輸入指令將會編碼到系統 dictionary *** 20111224 sam
-code compiling  push(compiling) end-code immediate // ( -- boolean ) Get system state
-
-				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** compiling should return the recent forth VM state ...
-						: dummy compiling literal ; last execute
-						compiling not and ==>judge
-						[if] js> ['literal'] all-pass [then]
-						(forget)
-				</selftest>
-
+code compiling  push(compiling) end-code // ( -- boolean ) Get system state
 code last 		push(last()) end-code // ( -- word ) Get the word that was last defined.
 
 				<selftest>
@@ -806,6 +796,7 @@ code .          ( sth -- ) \ Print number or string on TOS.
 : space      	(space) . ; // ( -- ) Print a space.
 code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from TIB.
 				push(nexttoken(pop())) end-code
+				/// First character after 'word' will always be skipped first, token separator.
 				/// If delimiter is RegEx '\s' then white spaces before the "token"
 				/// will be removed. Otherwise, return TIB[ntib] up to but not include the delimiter.
 				/// If delimiter not found then return the entire remaining TIB (can be multiple lines!).
@@ -826,7 +817,6 @@ code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from T
 
 : [compile]     ' , ; immediate // ( <string> -- ) Compile the next immediate word.
 				/// 把下個 word 當成「非立即詞」進行正常 compile, 等於是把它變成正常 word 使用。
-				/// 常見 [compile] compiling 出現在 colon definition 裡，查看當時的 state。
 
 : compile       ( -- ) \ Compile the next word at dictionary[ip] to dictionary[here].
 				r> dup @ , 1+ >r ; compile-only 
@@ -1098,27 +1088,26 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 				</selftest>
 
 : char          ( <str> -- str ) \ Get character(s).
-				BL word [compile] compiling if [compile] literal then ; immediate
+				BL word compiling if [compile] literal then ; immediate
 				/// "char abc" gets "abc", Note! ANS forth "char abc" gets only 'a'.
 				\ 本來 compiling 時的 [ char " ] literal word 改由 char support dual mode 如今只要 char " word 即可。
 : .(            char \) word . BL word drop ; immediate // ( <str> -- ) Print following string down to ')' immediately.
-: (             char \) word drop BL word drop ; immediate // ( <str> -- ) Ignore the comment down to ')'.
 : ."			( <str> -- ) \ Print following string down to '"'.
-				char " word [compile] compiling if
+				char " word compiling if
 				[compile] literal compile .
 				else . then BL word drop ; immediate
 				\ 本來是 compile-only, 改成都可以。 hcchen5600 2014/07/17 16:40:04
 : .'            ( <str> -- ) \ Print following string down to "'".
-				char ' word [compile] compiling if
+				char ' word compiling if
 				[compile] literal compile .
 				else . then BL word drop ; immediate
 				\ 本來是 compile-only, 改成都可以。 hcchen5600 2014/07/17 16:40:04
 : s"  			( <str> -- str ) \ Get string down to the next delimiter.
-				char " word [compile] compiling if [compile] literal then BL word drop ; immediate
+				char " word compiling if [compile] literal then BL word drop ; immediate
 : s'  			( <str> -- str ) \ Get string down to the next delimiter.
-				char ' word [compile] compiling if [compile] literal then BL word drop ; immediate
+				char ' word compiling if [compile] literal then BL word drop ; immediate
 : s`  			( <str> -- str ) \ Get string down to the next delimiter.
-				char ` word [compile] compiling if [compile] literal then BL word drop ; immediate
+				char ` word compiling if [compile] literal then BL word drop ; immediate
 : does>         r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; // ( -- ) redirect the last new colon word.xt to after does>
 : constant      create , does> r> @ ; // ( n <name> -- ) Create a constant.
 ' constant alias value // ( n <name> -- ) \ Create a value-variable with the init value.
@@ -1185,11 +1174,23 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 : [then] 		( -- ) \ Conditional compilation [if] [else] [then]
 				; immediate
 : js>  			( <expression> -- value ) \ Evaluate JavaScript <expression> which has no white space within.
-				BL word [compile] compiling if jsFunc , else jsEval then  ; immediate
+				BL word compiling if jsFunc , else jsEval then  ; immediate
 				/// Same thing as "s' blablabla' jsEval" but simpler. Return the last statement's value.
 : js:  			( <expression> -- ) \ Evaluate JavaScript <expression> which has no white space within
-				BL word [compile] compiling if jsFuncNo , else jsEvalNo then  ; immediate
+				BL word compiling if jsFuncNo , else jsEvalNo then  ; immediate
 				/// Same thing as "s' blablabla' jsEvalNo" but simpler. No return value.
+: ::  			char pop(). BL word + compiling if jsFuncNo , else jsEvalNo then ; immediate
+				// ( obj <foo.bar> ) Simplified form of "obj js: pop().foo.bar" w/o return value
+: :> 			char pop(). BL word + compiling if jsFunc , else jsEval then ; immediate
+				// ( obj <foo.bar> ) Simplified form of "obj js> pop().foo.bar" w/return value
+: (				( <str> -- ) \ Ignore the comment down to ')', can be nested but must be balanced
+				js> nextstring(/\(|\)/).str \ word 固定會吃掉第一個 character 故不適用。
+				drop js> tib[ntib++] \ 撞到停下來的字母非 '(' 即 ')' 要不就是行尾，都可以 skip 過去
+				char ( = if \ 剛才那個字母是啥？
+					[ last ] literal dup \ 取得本身
+					execute \ recurse nested level
+					execute \ recurse 剩下來的部分
+				then ; immediate 
 
 code doTo		( n Word -- ) \ Run time of 'to' command.
 				if(!tos()) panic("'to' command writing something to a NULL!\n",true);
@@ -1197,7 +1198,7 @@ code doTo		( n Word -- ) \ Run time of 'to' command.
 				end-code
 				/// see 'value' command
 : to 			( n <name> -- ) \ Assign n to <name> where <name> is a 'value' word.
-				' js> compiling if [compile] literal compile doTo else doTo then ; immediate
+				' compiling if [compile] literal compile doTo else doTo then ; immediate
 				/// see 'value' command
 
 				<selftest>
@@ -1254,27 +1255,40 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				char </text> word ; immediate
 
 : </text> 		( "text" -- ... ) \ Delimiter of <text>
-				[compile] compiling if [compile] literal then ; immediate
+				compiling if [compile] literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
-: <comment>		( <comemnt> -- ) \ Ignore everything in the following comment section.
-				char </comment> word drop ; immediate
+: <comment>		( <comemnt> -- ) \ Can be nested
+				[ last ] literal :: level+=1 char <comment>|</comment> word drop 
+				; immediate last :: level=0
 
-: </comment>	( -- ) \ Delimiter of <comment>
-				; immediate
+: </comment>	( -- ) \ Can be nested
+				['] <comment> js> tos().level>1 swap ( -- flag obj )
+				js: tos().level=Math.max(0,pop().level-2) \ 一律減一，再預減一餵給下面加回來
+				( -- flag ) if [compile] <comment> then ; immediate 
 
+				<selftest>
+					**** <comment>...</comment> can be nested now ... 
+					<comment> 
+						aaaa <comment> bbbbbb </comment> cccccc 
+					</comment> 
+					111 222 <comment> 333 </comment> 444
+					444 = swap 222 = and swap 111 = and ==>judge [if] 
+					<js> ['<comment>', '</comment>', '::'] </jsV> all-pass [then]
+				</selftest>
+				
 : <js> 			( <js statements> -- "statements" ) \ Evaluate JavaScript statements
 				char </js>|</jsV>|</jsN>|</jsRaw> word ; immediate
 
 : </jsN> 		( "statements" -- ) \ No return value
-				[compile] compiling if jsFuncNo , else jsEvalNo then ; immediate
+				compiling if jsFuncNo , else jsEvalNo then ; immediate
 				last alias </js>  immediate
 
 : </jsV> 		( "statements" -- ) \ Retrun the value of last statement
-				[compile] compiling if jsFunc , else jsEval then ; immediate
+				compiling if jsFunc , else jsEval then ; immediate
 
 \ : </jsRaw> 		( "statements" -- {value,err,flag} ) \ Retrun {value,err,flag} of last statement.
-\ 				[compile] compiling if compile jsEvalRaw else jsEvalRaw then ; immediate
+\ 				compiling if compile jsEvalRaw else jsEvalRaw then ; immediate
 \ 				/// Use this option to avoid errors, where err is from try{}catch{}.
 
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
@@ -1308,6 +1322,7 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				;
 
 \ ------------------ Tools  ----------------------------------------------------------------------
+
 : int 			( float -- integer )
 				js> parseInt(pop()) ;
 
@@ -1429,7 +1444,7 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				push(String.fromCharCode(pop())) end-code
 				/// 65 ASCII>char tib. \ ==> A (string)
 : ASCII			( <str> -- ASCII ) \ Get a character's ASCII code.
-				BL word (ASCII) [compile] compiling if [compile] literal then
+				BL word (ASCII) compiling if [compile] literal then
 				; immediate
 
 				<selftest>
@@ -1681,7 +1696,8 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
 				readTextFileAuto ( -- file )
 				js> tos().indexOf("source-code-header")!=-1 if \ 有 selftest 的正常 .f 檔
-					<text> \ 跟 source-code-header 成對的尾部
+					<text> 
+						\ 跟 source-code-header 成對的尾部
 						<selftest>
 						js> tick('<selftest>').masterMarker tib.insert
 						</selftest>
@@ -1696,7 +1712,7 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 						ss += pop(); // Now ss becomes the TOS
 					</jsV>
 				then
-				js> pop()+'\n' ( 避免最後是 \ comment 時吃到後面來 ) tib.insert ;
+				js> '\n'+pop()+'\n' ( 避免最後是 \ comment 時吃到後面來 ) tib.insert ;
 
 : include       ( <filename> -- ... ) \ Load the source file if it's not included yet.
 				BL word sinclude ; interpret-only
@@ -1786,7 +1802,7 @@ code notpass	( -- ) \ List words their sleftest flag are not 'pass'.
 				s" *debug* " swap + s"  " + js: kvm.prompt=pop() suspend ;
 
 : *debug*		( <prompt> -- ) \ Forth debug console. 'q' to exit.
-				BL word [compile] compiling
+				BL word compiling
 				if [compile] literal compile (*debug*) else (*debug*) then
 				; immediate
 
@@ -1794,11 +1810,6 @@ code q			( -- ) \ Exit from forth debug console.
 				kvm.prompt="OK";
 				resumeForthVM();
 				end-code
-
-\ JavaScript common user interface
-code alert				alert(pop()) end-code // ( 'msg' -- )
-code confirm			push(confirm(pop())) end-code // ( 'msg' -- boolean )
-code prompt 			push(prompt(pop())) end-code // ( 'msg' -- 'answer' )
 
 \ ----------------- play ground -------------------------------------
 
@@ -1808,25 +1819,15 @@ code prompt 			push(prompt(pop())) end-code // ( 'msg' -- 'answer' )
 	<js> ['accept', 'refill', 'wut', '==>judge', 'all-pass', '***',
 		  '~~selftest~~', '.((', 'sleep'
 	] </jsV> all-pass
-	\ /* Now I think these are annoying */
-	\ cr .( The following words are not tested yet : ) cr
-	\ notpass cr cr
-	\ .( Saving selftest information to log file 'selftest.log'. ) cr
-	\ js> kvm.screenbuffer char selftest.log writeFile
-	~~selftest~~ 								\ forget self-test temporary words
-	\ js: $.terminal.active().echo(kvm.screenbuffer) 	\ print the self-test results to terminal
-	js> kvm.appname s" jeforth.3htm" != [if]
-		js> kvm.screenbuffer char selftest.log writeTextFile \ save selftest log file
-	[then]
-	js: tick('<selftest>').buffer="" 			\ clear the self-test section, recycle the memory
+	~~selftest~~ \ forget self-test temporary words
 </selftest>
 
 \ jeforth.f kernel code is now common for different application. I/O may not ready enough to read 
-\ selftest.f at this moment, so the below code has been moved to quit.f of applications.
-\ Do the jeforth.f self-test only when there's no command line
-\	js> kvm.argv.length 1 > \ Do we have jobs from command line?
-\	[if] \ We have jobs from command line to do. Disable self-test.
-\		js: tick('<selftest>').enabled=false
-\	[else] \ We don't have jobs from command line to do. So we do the self-test.
-\		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
-\	[then] js: tick('<selftest>').buffer="" \ recycle the memory
+\ selftest.f at this moment, so the below code has been moved to quit.f of each applications.
+	\ Do the jeforth.f self-test only when there's no command line
+	\	js> kvm.argv.length 1 > \ Do we have jobs from command line?
+	\	[if] \ We have jobs from command line to do. Disable self-test.
+	\		js: tick('<selftest>').enabled=false
+	\	[else] \ We don't have jobs from command line to do. So we do the self-test.
+	\		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
+	\	[then] js: tick('<selftest>').buffer="" \ recycle the memory

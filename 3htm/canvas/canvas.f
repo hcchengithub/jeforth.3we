@@ -86,19 +86,19 @@ s" canvas.f"			source-code-header
 							<selftest>	
 								clearCanvas beginPath 
 								100 100 moveTo 200 50 lineTo stroke 
-								s" clearCanva beginPath 不會清掉已有的 lineWidth strokeStyle 等 " confirm [if] [else] \s [then]
-								1 lineWidth stroke s" lineWidth 都是 1, 看不出效果 " confirm [if] [else] \s [then]
-								10 lineWidth stroke s" lineWidth 加寬可看出效果 "    confirm [if] [else] \s [then]
-								5 lineWidth stroke s" lineWidth 簡寬看不出效果 "     confirm [if] [else] \s [then]
+								<js> confirm("clearCanva beginPath 不會清掉已有的 lineWidth strokeStyle 等")</jsV> [if] [else] \s [then]
+								1 lineWidth stroke <js> confirm(" lineWidth 都是 1, 看不出效果 ")</jsV> [if] [else] \s [then]
+								10 lineWidth stroke <js> confirm("lineWidth 加寬可看出效果 ")</jsV>     [if] [else] \s [then]
+								5 lineWidth stroke <js> confirm(" lineWidth 簡寬看不出效果 ")</jsV>     [if] [else] \s [then]
 								char red strokeStyle stroke 
-								s" path 不變, lineWidth, strokeStyle 與 fillStyle 可隨時改變 "  confirm [if] [else] \s [then]
+								<js> confirm(" path 不變, lineWidth, strokeStyle 與 fillStyle 可隨時改變 ")</jsV> [if] [else] \s [then]
 							
 								0 0 moveTo 100 100 lineTo 50 150 lineTo stroke
 								fill \ black
-								s" See a black triangle?" confirm [if] [else] \s [then]
+								<js> confirm(" See a black triangle?")</jsV> [if] [else] \s [then]
 								char green fillStyle
 								fill \ green
-								s" See a green triangle?" confirm [if] [else] \s [then]
+								<js> confirm(" See a green triangle?")</jsV> [if] [else] \s [then]
 								
 							</selftest>
 							

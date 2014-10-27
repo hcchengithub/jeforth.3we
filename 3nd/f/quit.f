@@ -18,6 +18,9 @@
 	\ ---------------- include other modules ------------------------------------------
 	include voc.f
 	include mytools.f
+	include process.f
+	include path.f
+	include fs.f
 
 \ ----------------- save selftest.log -------------------------------------
 	js> tick('<selftest>').enabled [if]

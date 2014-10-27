@@ -1,0 +1,12 @@
+{
+  "version": "17",
+  "name": "jeforth.3nw",
+  "description": "jeforth with the 3WE kernel for node-webkit",
+  "main": "jeforth.3nw.html",
+  "window": {
+	"icon":"3nw/img/icon.png",
+    "toolbar": true,
+    "width": 860,
+    "height": 500
+  }
+}

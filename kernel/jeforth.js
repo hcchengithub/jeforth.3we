@@ -443,7 +443,7 @@ var kvm = (function(){
 		// things. Instead, let jeforth.f to take care of the I/O. That means that
 		// we'll need to re-write 'code', 'end-code' in jeforth.f! 
 		function docode() {
-			compiling = true;
+			compiling = 11; // 11: code word
 			newname = nexttoken();
 			if(isReDef(newname)) print("reDef "+newname+"\n"); 	// 若用 tick(newname) 就錯了
 			newhelp = newname + " " + packhelp(); // help messages packed
@@ -458,22 +458,6 @@ var kvm = (function(){
 				reset();
 			}
 			
-		}
-		function docode_old() {
-			compiling = true;
-			newname = nexttoken();
-			if(isReDef(newname)) print("reDef "+newname+"\n"); 	// 若用 tick(newname) 就錯了
-			newhelp = newname + " " + packhelp(); // help messages packed
-			var _codebody = 'newxt=function(){ /* '+newname+' */\n';
-			var _ss = nextstring("end-code"); // 將來所有的 code words 都會認得這裡的 local variables 所以要放前墜。 
-			if (_ss.flag) {
-				_codebody += _ss.str;
-				_codebody += '\n}';  // the ending "\n}" allows // comment at the end
-				eval(_codebody); // translate code word body source code into js function.
-			} else {
-				panic("Error! expecting 'end-code' but not found!\n");
-				reset();
-			}
 		}
 		
 		words[current] = [
@@ -491,6 +475,7 @@ var kvm = (function(){
 			new Word([
 				"end-code",
 				function(){
+					if(compiling!=11){ panic("Error! end-code to a none code word.\n"); return};
 					current_word_list().push(new Word([newname,newxt,"this.help=newhelp"]));
 					last().vid = current;
 					last().wid = current_word_list().length-1;
@@ -535,21 +520,31 @@ var kvm = (function(){
 		// -------------------- end of main() -----------------------------------------
 	
 		// Top of Stack access easier. ( tos(2) tos(1) tos(void|0) -- ditto )
+		// tos(i,new) returns tos(i) and by the way change tos(i) to new value this is good
+		// for counting up or down in a loop.
 		function tos(index,value) {	
 			switch (arguments.length) {
 				case 0 : return stack[stack.length-1];
 				case 1 : return stack[stack.length-1-index];
-				default : return(stack[stack.length-1-index] = value); // TOS=value,同時置換指定的 stack cell. 有何用途？
+				default : 
+					var data = stack[stack.length-1-index]
+					stack[stack.length-1-index] = value; 
+					return(data); 
 			}
 		}
 		vm.tos = tos;
 	
 		// Top of return Stack access easier. ( rtos(2) rtos(1) rtos(void|0) -- ditto )
+		// rtos(i,new) returns rtos(i) and by the way change rtos(i) to new value this is good
+		// for counting up or down in a loop.
 		function rtos(index,value) {	
 			switch (arguments.length) {
 				case 0 : return rstack[rstack.length-1];
 				case 1 : return rstack[rstack.length-1-index];
-				default : return(rstack[rstack.length-1-index] = value); // rtos().value = 123 returns 123 too.
+				default : 
+					var data = rstack[rstack.length-1-index]
+					rstack[rstack.length-1-index] = value; 
+					return(data); 
 			}
 		}
 		// vm.rtos = rtos;
@@ -564,7 +559,7 @@ var kvm = (function(){
 		vm.pop = pop;
 	
 		// Stack access easier. e.g. push(data,1) inserts data to tos(1), ( tos2 tos1 tos -- tos2 tos1 data tos )
-		function push(data, index) { // It returns stack.length because stack.push() does so.
+		function push(data, index) { 
 			switch (arguments.length) {
 				case 0  : 	panic(" push() what?\n");
 				case 1  : 	stack.push(data); 
@@ -576,7 +571,6 @@ var kvm = (function(){
 								stack.splice(stack.length-1-index, 1, datawas, data);
 							}
 			}
-			// return stack.length;
 		}
 		vm.push = push;
 	
@@ -639,17 +633,8 @@ var kvm = (function(){
 						if (obj.toString==undefined) 
 							print(tab + Object.prototype.toString.apply(obj) + '\n');
 						else {
+							if (tab) print('\n');
 							for(var i in obj) {
-							//	if (i=="selfTest") {
-							//		print(tab + i + " : ..skip.. ("+mytypeof(obj[i])+")\n");
-							//		continue;
-							//	}
-							//	try {
-							//		var ss = obj[i] + ''; // Print-able test
-							//	} catch(err) {
-							//		ss = Object.prototype.toString.apply(obj[i]);
-							//	}
-							//	print(tab + i + " : " + ss + " (" + mytypeof(obj[i]) + ")\n");  // Entire array already printed here.
 								print(tab + i + " : ");  // Entire array already printed here.
 								see(obj[i], tab);
 							}
@@ -657,12 +642,8 @@ var kvm = (function(){
 						break;  // if is Word then do default
 					} // else go on to the default section . . . 
 				default : // Word(), Constant(), number, string, null, undefined
-				//	try {
-						var ss = obj + ''; // Print-able test
-				//	} catch(err) {
-				//		ss = Object.prototype.toString.apply(obj);
-				//	}
-					print(tab + ss + " (" + mytypeof(obj) + ")\n");
+					var ss = obj + ''; // Print-able test
+					print(ss + " (" + mytypeof(obj) + ")\n");
 			}
 		}
 		// vm.see = see;

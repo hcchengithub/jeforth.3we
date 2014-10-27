@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title class=appname>jeforth.3nw</title> 
+	<meta charset="utf-8" />
+   <style id=styleBase type="text/css">
+			body {
+				font-family: courier new;
+				font-size: 20px;
+				padding:20px; 
+				word-wrap:break-word;
+				border: 1px ridge;
+				background:#F0F0F0;
+			}
+			textarea {
+				font-family: courier new;
+				color:black;
+				font-size: 20px;
+				width:100%;
+				border: 0px solid;
+				background:#BBBBBB;
+			}
+    </style>
+	<!-- 分別定義 textarea:focus 才可以隨時修改 -->
+    <style id=styleTextareaFocus type="text/css"> 
+			textarea:focus {
+				border: 0px solid;
+				background:#E0E0E0;
+			}
+    </style>
+    <script src="js/jquery-1.10.2.js"></script>
+	<Script src="kernel/jeforth.js"></Script>
+	<script id=js>
+	(function(){
+		kvm.gui = require('nw.gui'); // 等效寫法 gui = global.window.nwDispatcher.requireNwGui(); https://github.com/rogerwang/node-webkit/issues/707
+		kvm.appname = kvm.gui.App.manifest.name; // defined by package.json
+		kvm.version = kvm.gui.App.manifest.version; // defined by package.json
+		kvm.host = window;
+		kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3nd/f", "3nw/f", "3nw", "playground"];
+		kvm.print = function (s) { 
+			try {
+				var ss = s + ''; // Print-able test
+			} catch(err) {
+				ss = Object.prototype.toString.apply(s);
+			}
+			kvm.screenbuffer += ss;
+			$('#outputbox').append(plain(ss)); 
+		};
+		kvm.greeting = function(){
+			kvm.print("j e f o r t h . 3 n w -- v"+kvm.version+'\n');
+			kvm.print("source code http://github.com/hcchengithub/jeforth.3we\n");
+			kvm.print("Program path " + process.cwd());
+			return(parseFloat(kvm.version));
+		}
+		kvm.debug = false;
+		kvm.fso = require( "fs" ); // http://nodejs.org/api/fs.html
+		kvm.readTextFile = function(pathname){return kvm.fso.readFileSync(pathname,'utf8')}
+		kvm.writeTextFile = function(pathname,data){kvm.fso.writeFileSync(pathname,data,'utf8')}
+		kvm.jsc = {prompt:""};
+		kvm.jsc.help = kvm.readTextFile('3nw/f/jsc.hlp');
+		kvm.jsc.xt = kvm.readTextFile('3nw/f/jsc.js');
+		kvm.screenbuffer = ""; // print() to screenbuffer before I/O ready
+		kvm.inputbox = "";
+		kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
+ 		kvm.prompt = "OK";
+		kvm.argv = kvm.gui.App.argv;
+		kvm.bye = function(){window.close()};
+		
+		// System initialization
+		jQuery(document).ready(
+			// jQuery convention, learned from W3School, make sure web page is ready.
+			function() {
+				$('#rev').html(kvm.version); // also .commandLine, .applicationName, ...
+				$('#location').html(window.location.toString()); // it's built-in in DOM
+				$('.appname').html(kvm.appname);
+				document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
+				kvm.init();
+				kvm.fortheval(kvm.readTextFile("kernel/jeforth.f")+kvm.readTextFile("3nw/f/quit.f"));
+			}                       
+		);                          
+                                    
+		// There's no main loop, event driven call back function is this.
+		kvm.forthConsoleHandler = function(cmd) {
+			kvm.print(cmd+'\n');
+			kvm.fortheval(cmd);  // Pass the line to KsanaVM
+			kvm.print(" " + kvm.prompt + " ");
+			scrollToElement($('#endofinputbox'));
+			$('#inputbox').focus();
+		}
+
+		// onkeydown,onkeypress,onkeyup
+		// event.shiftKey event.ctrlKey event.altKey event.metaKey
+		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
+		function hotKeyHandler(e) {
+			switch(e.keyCode) {
+				case 13: /* Enter */
+					scrollToElement($('#endofinputbox'));
+					$('#inputbox').focus(); 
+					kvm.inputbox = document.getElementById("inputbox").value; // w/o the '\n' character ($10). 
+					document.getElementById("inputbox").value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+					kvm.forthConsoleHandler(kvm.inputbox);
+					return(false); 
+			}
+			return (true); // pass down to following handlers 
+		}
+		
+		// http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
+		// evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
+		// 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
+        var scrollToElement = kvm.scrollToElement = function (ele) {
+        	$(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
+        }
+		
+		kvm.clearScreen = function () {
+			$('#outputbox').empty();
+		}
+		
+		var plain = kvm.plain = function (s) {
+			var ss = s + ""; // avoid numbers to fail at s.replace()
+			ss = ss.replace(/\t/g,' &nbsp; &nbsp; &nbsp; &nbsp;');
+			ss = ss.replace(/ /g,'&nbsp;');
+			ss = ss.replace(/</g,'&lt;');
+			ss = ss.replace(/>/g,'&gt;');
+			ss = ss.replace(/\n/g,'<br>');
+			return ss;
+		}
+	})();
+	</script>
+</head>
+<body>
+	<div id=header name=header>
+	<div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
+	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div>
+	<div style="font-family:verdana;">
+	<b><div id=title class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
+	<div style="color:#40B3DF;">
+	Revision <span id=rev style="background-color:#B4009E;color:#ffffff;">rev</span><br>
+	Source code http://github.com/hcchengithub/jeforth.3we<br>
+	Program path <span id=location>location</span><br>
+	</div>
+	</div>
+	</div>
+	<div id="outputbox" name="outputbox" class="outputbox">
+	</div><p>
+	<textarea id="inputbox" name="inputbox" cols=100 rows=1></textarea>
+	<div id=endofinputbox name=endofinputbox style="position:absolute"></div>
+</body>
+</html>
+

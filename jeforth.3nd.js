@@ -9,7 +9,7 @@ var z = require('./kernel/jeforth.js')
 global.kvm = z.kvm;
 kvm.host = global;
 kvm.appname = "jeforth.3nd";
-kvm.path = ["dummy", "kernel", "f", "3nd/f", "3nd", "3nd/eforth.com", "3nd/playground", "playground"];
+kvm.path = ["dummy", "kernel", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
 kvm.include = ""+
 			  "include voc.f	  "+
 			  "include mytools.f  "+
@@ -28,7 +28,7 @@ kvm.greeting = function(){
 			var revision = "1.00";
 			print("j e f o r t h . 3 n d -- r"+revision+'\n');
 			print("Node.js "+process.version+'\n');
-			print("Source code http://github.com/hcchengithub/jeforth.3hta\n");
+			print("Source code http://github.com/hcchengithub/jeforth.3we\n");
 			print("Executing " + process.execPath + '\n');
 			print("argv " + process.argv + '\n');
 			return(parseFloat(revision));
