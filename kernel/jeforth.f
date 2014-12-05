@@ -774,8 +774,10 @@ code depth      ( -- depth ) \ Data stack depth
 				push(stack.length) end-code
 code pick       ( nj ... n1 n0 j -- nj ... n1 n0 nj ) \ Get a copy of a cell in stack.
 				push(tos(pop())) end-code
+				/// see rot -rot roll pick
 code roll       ( ... n3 n2 n1 n0 3 -- ... n2 n1 n0 n3 )
 				push(pop(pop())) end-code
+				/// see rot -rot roll pick
 
 				<selftest>
 					depth [if] .( Data stack should be empty! ) cr \s [then]
@@ -901,10 +903,12 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 \ 				/// It's like a colon word's "this" or "self" command.
 \ 				/// Use this command at the very beginning in a colon definition.
 
-: nip           ( a b -- b ) swap drop ;
-: rot           ( w1 w2 w3 -- w2 w3 w1 ) >r swap r> swap ;
-: -rot          ( w1 w2 w3 -- w3 w1 w2 ) swap >r swap r> ;
-: 2drop         ( a b -- ) drop drop ;
+code nip		pop(1) end-code // ( a b -- b ) 
+code rot		push(pop(2)) end-code // ( w1 w2 w3 -- w2 w3 w1 ) 
+				/// see rot -rot roll pick
+code -rot		push(pop(),1) end-code // ( w1 w2 w3 -- w3 w1 w2 ) 
+				/// see rot -rot roll pick
+code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : 2dup          ( w1 w2 -- w1 w2 w1 w2 ) over over ;
 ' NOT alias invert // ( w -- ~w )
 : negate        -1 * ; // ( n -- -n ) Negated TOS.
@@ -1183,6 +1187,12 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				// ( obj <foo.bar> ) Simplified form of "obj js: pop().foo.bar" w/o return value
 : :> 			char pop(). BL word + compiling if jsFunc , else jsEval then ; immediate
 				// ( obj <foo.bar> ) Simplified form of "obj js> pop().foo.bar" w/return value
+: ::  			( obj <foo.bar> ) \ Simplified form of "obj js: pop().foo.bar" w/o return value
+				BL word js> tos().charAt(0)=='['||tos().charAt(0)=='(' if char pop() else  char pop(). then 
+				swap + compiling if jsFuncNo , else jsEvalNo then ; immediate
+: :> 			( obj <foo.bar> ) \ Simplified form of "obj js> pop().foo.bar" w/return value
+				BL word js> tos().charAt(0)=='['||tos().charAt(0)=='(' if char pop() else  char pop(). then 
+				swap + compiling if jsFunc , else jsEval then ; immediate
 : (				( <str> -- ) \ Ignore the comment down to ')', can be nested but must be balanced
 				js> nextstring(/\(|\)/).str \ word 固定會吃掉第一個 character 故不適用。
 				drop js> tib[ntib++] \ 撞到停下來的字母非 '(' 即 ')' 要不就是行尾，都可以 skip 過去
@@ -1779,22 +1789,6 @@ code notpass	( -- ) \ List words their sleftest flag are not 'pass'.
 					<js> kvm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
 					==>judge [if] <js> ['dump', 'd'] </jsV> all-pass [then]
 				</selftest>
-				js> kvm.appname s" jeforth.3htm" != [if] <selftest>
-					marker ---
-					*** notpass readTextFile writeTextFile ...
-					notpass cr
-					js> kvm.screenbuffer char selftest.log writeTextFile
-					char selftest.log readTextFile constant verify // read back the selftest.log for verification
-					verify <js> pop().indexOf('bye') !=-1 </jsV> \ true
-					verify <js> pop().indexOf('***') !=-1 </jsV> \ true
-					verify <js> pop().indexOf('pass') !=-1 </jsV> \ true
-					verify <js> pop().indexOf('Fail') ==-1 </jsV> \ true
-					verify <js> pop().indexOf('Error') ==-1 </jsV> \ true
-					and and and and ==>judge [if]
-					<js> ['notpass', 'readTextFile', 'writeTextFile'] </jsV> all-pass
-					[then]
-					---
-				</selftest> [then]
 
 \ -------------- Forth Debug Console -------------------------------------------------
 

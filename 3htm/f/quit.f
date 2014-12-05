@@ -91,4 +91,4 @@
 
 \ ------------ End of jeforth.f -------------------
 	.(  OK ) \ The first prompt after system start up.
-	\ js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.
+	js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.

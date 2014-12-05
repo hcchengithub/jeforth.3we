@@ -26,6 +26,14 @@
 	include process.f
 	include path.f
 	include fs.f
+	
+\ ----------------- save selftest.log -------------------------------------
+	s" I want to view selftest.log" s" yes" = [if]
+		js> tick('<selftest>').enabled [if]
+			js> kvm.screenbuffer char selftest.log writeTextFile
+		[then]
+	[then]	
+
 \ ----------------- run the command line -------------------------------------
 	js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.
 	<js> (kvm.argv.slice()).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.

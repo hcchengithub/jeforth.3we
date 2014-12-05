@@ -38,6 +38,7 @@ var kvm = (function(){
 		var ip=0; // forth VM instruction pointer
 		var stack = [] ;
 		var rstack = [];
+		var bp=0; // Secondary return stack pointer
 		var stackwas = []; // Definition of : ... ; needs a temp storage.
 		var words = {forth:[]}; // VID vocabulary id "forth" 是原始的 word list. 終端 index 是 WID word ID. forth word 可以 reDef 全在這 array 裡面。每一格都是一個 word object。
 		var current = "forth"; // The current word-list new words are going to.
@@ -267,9 +268,10 @@ var kvm = (function(){
 		
 		// execute() 類似 CPU instruction 的 single step, 而 inner() 類似 CPU 的 call 指令。
 		// 會用 到 inner() 的只有 outer() 以及 colon word 的 xt(), 而 execute() 則到處有用。 
-		// 從 code word 裡 call forth words 有 execute('word') 與 fortheval('word word word')
-		// 兩種可供選擇。 execute() 屬 inner loop 參考到原來的 TIB，而 fortheval() 暫時岔開一
-		// 層 outer loop, 於其中只看到臨時的 TIB 也就是 fortheval() 的 input string。
+		// 從 code word 裡 call forth word 的方法有 execute('word') 與 fortheval('word word word')
+		// 加上後來發現的 inner(cfa) 或 execute(cfa) 三種方法可供選擇。 execute() 屬 inner loop 
+		// 參考到原來的 TIB，而 fortheval() 暫時岔開一層 outer loop, 於其中只看到臨時的 TIB 也就是 
+		// fortheval() 的 input string。
 
 		// 讓 inner loop 自己判斷種種不同的 argument 統一執行一個 word 的方式。
 		// 本來 wid 與 entry point address 無法分辨，自從把 wid 改成 Word() object 以後，這
@@ -295,7 +297,7 @@ var kvm = (function(){
 
 		phaseA["undefined"] = function(){return last()}; // call the last word when entry is absent.
 		phaseA["string"   ] = function(entry){return tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/g,''))}; // remove 頭尾 whitespaces
-		phaseA["number"   ] = function(entry){ip=entry; return dictionary[ip]}; // number could be wid (應該不會出現了) or dictionary entry or even 0 (will do nothing). 可能是 does> branch 等的或 ret exit rstack pop 出來的。
+		phaseA["number"   ] = function(entry){ip=entry; return dictionary[ip]}; // number could be dictionary entry or 0 (will do nothing). 可能是 does> branch 等的或 ret exit rstack pop 出來的。
 		phaseA["function" ] =
 		phaseA["object"   ] = function(entry){return entry}; // 這裡看到 word object 或 function 一定是從外面剛進來的。下面的 while(w) inner loop 裡看到的才是 colon word 裡面的。
 		phaseA["boolean"  ] = function(entry){panic("Error! execute() doesn't know how to handle this thing : "+entry+" ("+mytypeof(entry)+")","error")};
@@ -325,6 +327,7 @@ var kvm = (function(){
 			// innerlevel += 1; for debug
 			var w=phaseA[typeof(entry)](entry); // phaseA 整理各種不同種類的 entry 翻譯成恰當的 w.
 			while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
+				if(ip==vm.breakpoint){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 kvm.breakpoint=ip 設斷點, debug colon words.
 				ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 				endinner = false; // 碰到 colon word 的結尾時，被舉起來。通常是 ret 或 exit, also doVar.
 				phaseB[typeof(w)](w);
@@ -567,8 +570,9 @@ var kvm = (function(){
 				default : 	if (index >= stack.length) {
 								stack.unshift(data);
 							} else {
-								var datawas = tos(index);
-								stack.splice(stack.length-1-index, 1, datawas, data);
+								// var datawas = tos(index);
+								// stack.splice(stack.length-1-index, 1, datawas, data);
+								stack.splice(stack.length-1-index,0,data);
 							}
 			}
 		}
@@ -624,23 +628,24 @@ var kvm = (function(){
 		// This is a useful common tool. Help to recursively see an object or forth Word.
 		// For forth Words, view the briefing. For other objects, try to see into it.
 		function see(obj,tab){
-			if (tab==undefined) tab = ""; else tab += "\t";
+			if (tab==undefined) tab = "  "; else tab += "  ";
 			switch(mytypeof(obj)){
 				case "object" :
 				case "array" :
 					if (obj.constructor != Word && obj.constructor != Constant ) {
-						if(tab > "\t\t\t\t\t") break; // too deep
-						if (obj.toString==undefined) 
-							print(tab + Object.prototype.toString.apply(obj) + '\n');
-						else {
-							if (tab) print('\n');
-							for(var i in obj) {
-								print(tab + i + " : ");  // Entire array already printed here.
-								see(obj[i], tab);
-							}
+						if (obj&&obj.toString) 
+							print(obj.toString() + '\n');
+						else 
+							print(Object.prototype.toString.apply(obj) + '\n');
+						for(var i in obj) {
+							print(tab + i + " : ");  // Entire array already printed here.
+								if (obj[i]&&obj[i].toString) 
+									print(tab + obj[i].toString() + '\n');
+								else 
+									print(tab + Object.prototype.toString.apply(obj[i]) + '\n');
 						}
 						break;  // if is Word then do default
-					} // else go on to the default section . . . 
+					}
 				default : // Word(), Constant(), number, string, null, undefined
 					var ss = obj + ''; // Print-able test
 					print(ss + " (" + mytypeof(obj) + ")\n");
@@ -757,6 +762,7 @@ var kvm = (function(){
 
 		// vm.resumeForthVM = resumeForthVM;
 		vm.stack = stack; // debug easier
+		vm.rstack = rstack; // debug easier especially debugging TSR
 		vm.words = words; // debug easier
 		vm.dictionary = dictionary; // debug easier
 	}

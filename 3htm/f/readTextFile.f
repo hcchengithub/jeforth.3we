@@ -1,4 +1,10 @@
 
+	\	$.get() 有 cache 的現象，在 IE 特別嚴重，根本不去讀新版！
+	\	http://stackoverflow.com/questions/367786/prevent-caching-of-ajax-call
+	\	http://stackoverflow.com/questions/10610034/jquery-get-caching-working-too-well
+	\	I choose the global setting as my solution : $.ajaxSetup({cache:false})
+	js: $.ajaxSetup({cache:false})
+
 	: getTextFile	( "pathname" -- string ) \ "" if file not found
 		js> pop().replace(/^\s*|\s*$/g,'') \ remove white spaces ( -- pathname )
 		<js>
@@ -21,11 +27,6 @@
 	js: tick('readTextFile').creater=tick('getTextFile').creater
 	js: tick('readTextFile').xt=tick('getTextFile').xt
 
-	\	$.get() 有 cache 的現象，在 IE 特別嚴重，根本不去讀新版！
-	\	http://stackoverflow.com/questions/367786/prevent-caching-of-ajax-call
-	\	http://stackoverflow.com/questions/10610034/jquery-get-caching-working-too-well
-	\	I choose the global setting as my solution : $.ajaxSetup({cache:false})
-	js: $.ajaxSetup({cache:false})
 	
 	
 	

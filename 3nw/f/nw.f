@@ -18,6 +18,16 @@ s" nw.f"	source-code-header
 
 js> kvm.gui.Window.get() constant nw // ( -- object ) the Window object of the nw.exe session
 
+				\ nw obj>keys .
+				\ routing_id,_events,addListener,on,handleEvent,window,x,y,width,height,title,
+				\ zoomLevel,menu,isFullscreen,isKioskMode,moveTo,moveBy,resizeTo,resizeBy,focus,
+				\ blur,show,hide,close,maximize,unmaximize,minimize,restore,enterFullscreen,
+				\ leaveFullscreen,toggleFullscreen,enterKioskMode,leaveKioskMode,toggleKioskMode,
+				\ showDevTools,__setDevToolsJail,setMinimumSize,setMaximumSize,setResizable,
+				\ setAlwaysOnTop,requestAttention,setPosition,reload,reloadIgnoringCache,
+				\ reloadOriginalRequestURL,reloadDev,capturePage,setMaxListeners,emit,once,
+				\ removeListener,removeAllListeners,listeners
+
 				<selftest> 
 				***** nw :> window is window but window's parent is itself ..... 
 				marker -%-%-%-%-%- 

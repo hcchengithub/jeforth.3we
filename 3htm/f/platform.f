@@ -6,7 +6,7 @@ s" platform.f"		source-code-header
 also forth definitions
 
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
-				<js> confirm("Really want to restart jeforth.3hta?") </jsV> ;
+				<js> confirm("Really want to restart?") </jsV> ;
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
 

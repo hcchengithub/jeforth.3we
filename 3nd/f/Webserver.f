@@ -15,10 +15,23 @@
 \ 
 \	Windows jeforth.3nd README -- hcchen5600 2014/10/19 17:36:20 
 \		I port it to jeforth.3nd by modify nearly nothing. Except the argv order.
+\		It works on jeforth.3nd and jeforth.3nw.
 \
-\		Usage: d:\jeforth\node.exe jeforth.3nd.js include webserver.f 888
+\		Usage: ~\jeforth.3we\node.exe jeforth.3nd.js include webserver.f 8888
+\			   ~\jeforth.3we\nw ../jeforth.3we include webserver.f 8888
+\
+\	本來是現成 JavaScript 的程式改成 forth 有啥好處？如下例，可以把任何變數拉出來
+\	隨時觀察，
+\		push(filename); fortheval("to filename"); <== in the callback function of http.createServer
 \
 
+	0 value request
+	0 value response
+	0 value uri
+	0 value filename
+	0 value err
+	0 value file
+	
 	<js>
 	var http = require("http"),
 		url = require("url"),
@@ -27,36 +40,45 @@
 		port = process.argv[3] || 8888; // for jeforth.3nd it's argv[3]
 	 
 	http.createServer(function(request, response) {
-	 
-	  var uri = url.parse(request.url).pathname
+		push(response); fortheval("to response"); push(request); fortheval("to request");
+		var uri = url.parse(request.url).pathname
 		, filename = path.join(process.cwd(), uri);
+		push(uri); fortheval("to uri"); push(filename); fortheval("to filename");
 	  
-	  path.exists(filename, function(exists) {
-		if(!exists) {
-		  response.writeHead(404, {"Content-Type": "text/plain"});
-		  response.write("404 Not Found\n");
-		  response.end();
-		  return;
-		}
-	 
-		if (fs.statSync(filename).isDirectory()) filename += '/index.html';
-	 
-		fs.readFile(filename, "binary", function(err, file) {
-		  if(err) {        
-			response.writeHead(500, {"Content-Type": "text/plain"});
-			response.write(err + "\n");
-			response.end();
-			return;
-		  }
-	 
-		  response.writeHead(200);
-		  response.write(file, "binary");
-		  response.end();
+		path.exists(filename, function(exists) {
+			if(!exists) {
+				response.writeHead(404, {"Content-Type": "text/plain"});
+				response.write("404 Not Found\n");
+				response.end();
+				return;
+			}
+		 
+			// 不會當成 directory 處理，不加這行會出錯 "Error: EISDIR, read"
+			if (fs.statSync(filename).isDirectory()) filename += '/index.html';
+			push(filename); fortheval("to filename");
+		 
+			fs.readFile(filename, "binary", function(err, file) {
+				push(err); fortheval("to err"); push(file); fortheval("to file");	
+				if(err) {        
+					response.writeHead(500, {"Content-Type": "text/plain"});
+					response.write(err + "\n");
+					response.end();
+					return;
+				}
+				response.writeHead(200);
+				response.write(file, "binary");
+				response.end();
+			});
 		});
-	  });
 	}).listen(parseInt(port, 10));
-	 
-	console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
+	switch(kvm.appname){
+		case "jeforth.3nw":
+			print("Static file server running at\n  => http://localhost:" + port);
+			break;
+		case "jeforth.3nd":
+			console.log("Static file server running at\n  => http://localhost:" + port);
+			break;
+	}
 	</js>
 	
 

@@ -1,9 +1,9 @@
 
 
-.( including voc.f ) cr
+.( Including voc.f ) cr
 
 marker --voc.f-- 
-\ Initialize the jeforth system for vocabulary features. This is a one time word.
+
 char forth constant forth-wordlist // ( -- "forth" ) The vid of forth-wordlist.
 
 code obj>keys	( obj -- keys[] ) \ Get all keys of an object.
@@ -349,16 +349,8 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					---
 				</selftest>
 
-<selftest> --voc.f-self-test-- 
-	js> kvm.appname s" jeforth.3htm" != [if]
-		js> kvm.screenbuffer char selftest.log writeTextFile \ save selftest log file
-	[then]
-</selftest>
+<selftest> --voc.f-self-test-- </selftest>
 js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 
 js: tick('<selftest>').buffer="" \ recycle the memory
-
-\ ---------------------------------- Play ground ----------------------------------
-
-\ ---------------------------------------------------------------------------------
 
 \ --EOF--

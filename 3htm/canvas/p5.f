@@ -47,13 +47,18 @@ s" p5.f"			source-code-header
 		arc ( x y r sAngle eAngle !clockwise -- ) fill 
 	;
 
-\ processing.js loop
+\ processing.js loop, Started when in interpreter waiting state, rstack.length is supposed to be 0. 
+\ if triggered in suspending state, rstack.length!=0, then we have to avoid using the working rstack
+\ by pushing a dummy 0 into rstack so as to return to interpreter waiting state. 
+\ This is very important for any TSR. 
 	: processing ( -- ) \ Processing main loop
-		[ s" push(function(){inner(" js> last().cfa + s" )})" + jsEvalNo ] literal ( -- callBackFunction )
-		frameInterval [ s" push(function(){setTimeout(pop(1),pop())})" jsEvalNo , ]
+		[ s" push(function(){inner(" js> last().cfa + s" )})" + </js> ] literal ( -- callBackFunction )
+		frameInterval [ s" push(function(){setTimeout(pop(1),pop())})" </js> , ]
 		frameCount 1+ to frameCount draw
-	; 
-last execute
-	\ 取得 colon word 本身的 cfa 有兩法 
+		js> rstack.length if 0 >r then ; interpret-only
+	last execute
+
+	\ 取得 colon word 本身的 cfa 有下列方法 
 	\ 1）[ js> last().cfa ] literal 即是
-	\ 2）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
+	\ 2） [ last ] literal :> cfa 同上，這個不 optimize。
+	\ 3）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。

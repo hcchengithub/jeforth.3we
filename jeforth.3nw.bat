@@ -1,13 +1,17 @@
-if a%COMPUTERNAME%==aWKS-38EN3476     path=c:\Program Files (x86)\Google\Chrome\Application
-if a%COMPUTERNAME%==aWKS-38EN3476     path=%path%;c:\Users\8304018\Dropbox\learnings\node-webkit\node-webkit-v0.7.0-win-ia32
-if a%COMPUTERNAME%==aWKS-38EN3476     path=%path%;c:\Users\8304018\Dropbox\learnings\JavaScript\node.js
+if a%COMPUTERNAME%==aWKS-38EN3476     set CHROMEPATH=c:\Program Files (x86)\Google\Chrome\Application
+if a%COMPUTERNAME%==aWKS-38EN3476     set NWPATH=c:\Users\8304018\Dropbox\learnings\node-webkit\node-webkit-v0.7.0-win-ia32
+if a%COMPUTERNAME%==aWKS-38EN3476     set NODEJSHOME=c:\Users\8304018\Dropbox\learnings\JavaScript\node.js
 
-if a%COMPUTERNAME%==aDP-20121028UGNO  path=C:\Program Files\Google\Chrome\Application
-if a%COMPUTERNAME%==aDP-20121028UGNO  path=%path%;d:\hcchen\Dropbox\learnings\node-webkit\node-webkit-v0.7.0-win-ia32
-if a%COMPUTERNAME%==aDP-20121028UGNO  path=%path%;d:\hcchen\Dropbox\learnings\JavaScript\node.js
-if a%COMPUTERNAME%==aWKS-38EN3477     path=c:\Program Files (x86)\Google\Chrome\Application
-if a%COMPUTERNAME%==aWKS-38EN3477     path=%path%;c:\Users\8304018.WKSCN\Dropbox\learnings\node-webkit\node-webkit-v0.7.0-win-ia32
-if a%COMPUTERNAME%==aWKS-38EN3477     path=%path%;c:\Users\8304018.WKSCN\Dropbox\learnings\JavaScript\node.js
+if a%COMPUTERNAME%==aDP-20121028UGNO  set CHROMEPATH=C:\Program Files\Google\Chrome\Application
+if a%COMPUTERNAME%==aDP-20121028UGNO  set NWPATH=d:\hcchen\Dropbox\learnings\node-webkit\node-webkit-v0.7.0-win-ia32
+if a%COMPUTERNAME%==aDP-20121028UGNO  set NODEJSHOME=d:\hcchen\Dropbox\learnings\JavaScript\node.js
+
+if a%COMPUTERNAME%==aWKS-38EN3477     set CHROMEPATH=c:\Program Files (x86)\Google\Chrome\Application
+if a%COMPUTERNAME%==aWKS-38EN3477     set NWPATH=c:\Users\8304018.WKSCN\Dropbox\learnings\node-webkit\node-webkit-v0.7.0-win-ia32
+if a%COMPUTERNAME%==aWKS-38EN3477     set NODEJSHOME=c:\Users\8304018.WKSCN\Dropbox\learnings\JavaScript\node.js
+
+path=%CHROMEPATH%;%NWPATH%;%NODEJSHOME%
+
 chcp 950
 
 @REM ------ debug -------------------

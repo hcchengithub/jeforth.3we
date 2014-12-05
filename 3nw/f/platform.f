@@ -7,7 +7,7 @@ s" platform.f"		source-code-header
 also forth definitions
 
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm reload the application.
-				<js> confirm("Really want to restart jeforth.3nw?") </jsV> 
+				<js> confirm("Really want to restart?") </jsV> 
 				if nw :: reloadIgnoringCache() then false ;
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.

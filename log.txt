@@ -4,56 +4,6 @@
                  Same kernel - jeforth.js, jeforth.f, voc.f - for 
                  all applications - HTA, HTM, Node.js - and more?
                     http://github.com/hcchengithub/jeforth.3we
-How to run:
-
-    Working directory is always the jeforth.3we/ root folder. Do self-test automatically if there
-    is no further forth commands in the command line.
-
-    HTA
-        Double click the jeforth.3we/jeforth.hta or execute the below command line from a DOS box,
-        jeforth.hta cls .' Hello world' cr 3000 sleep bye
-
-    Node.js
-        Execute below command lines from a DOS box, you setup the path to your node.exe in prior,
-			node jeforth.3nd
-			node jeforth.3nd cls .' Hello world' cr 3000 sleep bye
-        There's a local Web server which is also under jeforth.3nd. See jeforth.3we/Webserver.bat.
-        To have a local Web server is necessary to run jeforth.3htm.
-
-    HTML
-        Setup your local Web server by running jeforth.3we/Webserver.bat (modify path in it for 
-        your Node.js first), then visit,
-        http://localhost:8888/jeforth.3htm.html
-        , from IE or Chome. Firefox and other web browsers are not tested yet.
-        Then, try "include clock3.f" and "include p5.f" to see world clocks and a bouncing ball.
-
-	Node-webkit
-		Setup your Node.js and Node-Webkit path in prior. See jeforth.3nw.bat as an example. 
-		CD to ~/jeforth.3we as the root directory. Run,
-			d:\jeforth.3we> nw ../jeforth.3we cls .' Hello World!!' 5000 sleep bye
-		or run,
-			d:\jeforth.3we> nw ../jeforth.3we
-		... without CLI command so as to run self-test.
-	
-More demo programs:
-
-    *** Use jeforth.3nd, 3 words engine jeforth for Node.js, to compile eforth.com ( eforth executable
-        for DOS 16 bits )
-    1.  jeforth.3nd works on DOS box. Setup the path to your node.exe 32 bits or 64 bits.
-        jeforth.3we/jeforth.3nd.bat is an example.
-    2.  run: node.exe jeforth.3nd.js 86ef202.f bye
-    3.  you got jeforth.3we/eforth.com
-    4.  my windows 8 is 32bits, so I can run eforth.com directly. If your Windows system has been
-        64 bits, you'll need a DOS virtual machine like vmware, virtual box, or I recommend DOSBox.
-
-    *** Use jeforth.3hta, 3 words engine jeforth for Windows HTA, to work on excel spread sheets.
-        This example gets a column from a reference excel file to your target excel file.
-    1.  Double click on jeforth.3we/jeforth.hta to start it. After the self-test "include merge2.f"
-    2.  Or run this command line for the same thing, but skip the self-test,
-        ~/jeforth.3we> jeforth.hta include merge2.f
-
-    *** and more . . . . 
-
 
 ---------- developping log --------------------------------------------------------------
 
@@ -125,7 +75,7 @@ More demo programs:
     that VBScript to launch jeforth.js would be fine.
     [x] Put the jeforth.js into jeforth.wsc, Open jeforth.WSC in jeforth.hta
         ==> use <script src='jeforth.js'></script> to include jeforth.js in WSC is ok.
-    [ ] we can publicate properties and methods but how to publicate objects?
+    [/] we can publicate properties and methods but how to publicate objects?
         <public>
         <property name="propertyname"/>
         <property name="kvm"/>
@@ -133,8 +83,8 @@ More demo programs:
         </public>
         ==> If you are thinking of a <object> tag, see this http://msdn.microsoft.com/en-us/library/thwwf7y9(v=vs.84).aspx
             But it's wrong anyway. An object is simply a property I guess.
-    [ ] Note! Only define things in WSC, don't try to run anything in WSC.
-    [ ] By the experiments of Dropbox\learnings\JavaScript\WSC , if run 2.vbs then
+    [*] Note! Only define things in WSC, don't try to run anything in WSC.
+    [/] By the experiments of Dropbox\learnings\JavaScript\WSC , if run 2.vbs then
         JS section in 2.wsc doesn't know about WScript.echo but MsgBox of VBS works fine.
         why? WSC do not have any I/O? unless that are VBS built-in, right? This is great!
         VBScript has many built-in U/I functions.
@@ -460,7 +410,7 @@ More demo programs:
     : test begin 80 for char * . 100 sleep next cr again ; \ 弄一個印 * 的 long run 程式。
     jeforth.hta inputbox 本身就是個最兇的 event 他會改 stack. 別的 event handler 都得負責恢復 stack.
     
-[ ] Found a bug!! This bug is still in ~.3wsh and ~.3nw
+[/] Found a bug!! This bug is still in ~.3wsh and ~.3nw
     wsh.f run command reads the whole line as a command line. The old definition
     
         10 ASCII>char ( \n ) word (run)
@@ -510,11 +460,13 @@ More demo programs:
     code ... end-code 不跨行。相較之下， jeforth.3nw 的 code ... end-code 是可跨行的。
     ==> 就這樣吧！不管他了。
 
-[ ] 又抓到一個 bug, jeforth.3nw still has the problem
+[x] 又抓到一個 bug, jeforth.3nw still has the problem
     // keyboard.waiting = false; // jeforth.3nw 的 jeforth.js 裡有這種 platform dependent 的東西！不應該啊 []
     // term.set_prompt(prompt); // restore default jQuery-terminal prompt constant
-
-[ ] Bug found: 
+    ==> jeforth.3we common kernel should have resolved these problems. But in jeforth.3nw stand
+    alone version, well ... forget it. hcchen5600 2014/10/29 08:35:43 
+    
+[/] Bug found: 
     keycode 13 時，keyup 清除 textarea 不對，當 EditMode=true 時就糗了。hcchen5600 2014/07/13 17:48:07 
     正在幫 vb.f 寫 selftest, 構想每個 word command 該怎麼測試。。。
 
@@ -894,7 +846,7 @@ More demo programs:
     ==> RI: print(tab + dictionary[i] + ...) 時，某些 object 沒有 .toString() 無法做 + operation.
     ==> 應該幫所有不具 toString() method 的 object 都加上 toString()。 <=== Not allowed!
     e.g. kvm.fso.FolderExists() is a method in fso. 但用 jsc 去檢查 kvm.fso.FolderExists 結果是 undefined!
-    所有未知的 object 真不知道該怎麼 see ??? [ ] 
+    所有未知的 object 真不知道該怎麼 see ??? [x] <=== Node.js 的 console.log() 很好！
 [x] Constant() 能不能也屬於 Word()? 一致，且 see() 較簡單。 ==> 不 merge, 但一併考慮。
 [x] dump, see, dot, print 功能重複，疊床架屋 ==> 慢慢適應吧！
 
@@ -979,14 +931,18 @@ More demo programs:
                 }
             </text> js> newStyle.innerHTML=pop()
         [x] A separate style in jeforth.hta for textarea:focus --> ok!
-[ ] 應該把 jeforth.3wsh jeforth.3hta jeforth.3nd jeforth.3nw jeforth.3htm 五套融合成一套，共享所有的 .f 檔。
-[ ] canvas.f works on kvm.cv is good, so we can work on many CV's. 
+[x] 應該把 jeforth.3wsh jeforth.3hta jeforth.3nd jeforth.3nw jeforth.3htm 五套融合成一套，共享所有的 .f 檔。
+    ==> jeforth.3we
+[x] canvas.f works on kvm.cv is good, so we can work on many CV's. 
     But it needs an assignment process, instead of being the default only one.
+    ==> 3htm/canvas/canvas.f done
 [ ] Reviewed Processing.js, try to go through "~\Dropbox\learnings\processing\Pomax's guide to Processing.js.pdf" 
     practice on jeforth.hta --> working on playground\p5.f
 [ ] html5.f does not have self-test yet. </e> was wrong when in compiling mode, now fixed.
 [x] To support multiple canvas, clock2.f timeout() needs fine tune.
-[ ] see 把 canvas object 都鑽進去印出來，太多了當掉。
+[x] see 把 canvas object 都鑽進去印出來，太多了當掉。
+    ==> js> window (see) 即可複製該問題。
+    ==> Simplify function see() in jeforth.js
 [x] clock3.f seems ok, but only the last clock can run. 
     By my debugging logic, make a simplified case to try. 
     : hi me ." Hello " js> setTimeout(pop().xt,1000) . space ; last execute
@@ -996,21 +952,24 @@ More demo programs:
     ' wo ' hi  js> pop().xt=pop().xt \ 如果以為是 xt 的問題，錯！ colon word 的 xt 即使是同一個一切依然
     連新定義出來的 code word 也會被 timeout 到，這就是線索了!
     不要懷疑 timeout 收到的 function. 成功過就對了。 奇怪的是，為何總是執行最後一個 word 的 xt ?
-    直接定義一個 ' hi timeout(pop().xt,1000) 來試呀! 果然複製出問題了。結論是 colon word 的 xt 如果
-    這樣執行 ' hi js> pop().xt() 就沒問題，因為參考到的正是 colon word object 本身無誤。如果 
-    ' hi js> pop().xt execute 這樣執行就令人困惑了。困惑不如實測證實，
+    直接定義一個 ' hi timeout(pop().xt,1000) 來試呀! 果然複製出問題了。
+    
+    結論是 colon word 的 xt 如果這樣執行 ' hi js> pop().xt() 就沒問題，因為參考到的正是 colon word object 本身無誤。
+    如果 ' hi js> pop().xt execute 這樣執行就令人困惑了。困惑不如實測證實，
     code tt11 print("he he he 112233") end-code \ 故意弄一個 code word 當成 last
     js> inner(this.cfa) \ 直接執行 colon word 之 xt 裡的這行
     he he he 112233 OK  \ 果然就是這樣！
+
     結論是 colon word 的 xt 不能用來當 call back function 用。這下問題來了，colon word 有 recentcolonword
     可以取得本身的 object 那麼 code word 呢？抄 recentcolonword 的定義即可，這表示 code word 的自身 object
     就是 this. 實驗看看：
-    code ttestt push(this) end-code ttestt . ==> 果然無誤 Bingo!
+        code ttestt push(this) end-code ttestt . ==> 果然無誤 Bingo!
     進一步弄成利用 timeout 重複執行的 code word,
     code rr print(Date()); setTimeout(this.xt,1000) end-code 執行後，第一個 timeout 有印出 Date() 但是
     隨後的 setTimeout() 造成 run time error 'invalid argument'. 我怕是其中的 this 到時候變成別的東西，沒
     有 xt 造成 error 凸顯問題反而是好事。嘗試從 JavaScript 的 recursive 裡找答案 ==> arguments.callee
     code rr print(Date()); setTimeout(arguments.callee,1000) end-code ==> 徹底成功了！！！
+    
     [x] ==> 這下子，clock3.f 的 '時鐘' 產生的 colon word 要如何包裝成 function() 來當 call back function?
     ==> colon words can be executed by inner(cfa), thus 
         code t inner(2730);setTimeout(arguments.callee,1000) end-code last execute
@@ -1018,7 +977,8 @@ More demo programs:
         ==> 取得 colon word 本身的 cfa 有兩法 
             1）colon word 裡一見面 me/recentcolonword js> pop().cfa 即是
             2）colon word 裡一見面 js> ip 2- 也是
-            前者若是由 call-back-function 透過 inner() 發動的，就會出錯！！！ [ ] 實驗看看。可能 recentcolonword 要另想更好的辦法。
+            前者若是由 call-back-function 透過 inner() 發動的，就會出錯！！！ 
+                [x] 實驗看看。可能 recentcolonword 要另想更好的辦法。
     ==> -1 時鐘 tokyo
         ' tokyo js> pop().cfa dump
         02739: 2693 (number)
@@ -1266,6 +1226,7 @@ More demo programs:
         
 [x] Node.js 本身的 REPL 可以 'see' object 效果超好，怎麼應用？
     ==> 那是 console.log() 的效果。 考慮 3nd 的 print() 裡面應該就用 console.log()
+	==> 找到了！用 util.inspect() or sys.inspect() for older Node.js systems.
     
 [ ] FigTaiwan academic topic:
     o   jeforth can compile all function() into dictionary, instead of Word()'s. Hard to read the dictionary
@@ -1309,6 +1270,7 @@ More demo programs:
     http://stackoverflow.com/questions/12760852/how-to-access-plain-text-content-retrieved-via-script-type-text-plain-src 
     https://www.evernote.com/shard/s22/nl/2472143/f8a48817-933d-4681-a6bb-90eb10649fcd
 
+	
 [x] 用 iframe 的方式 include text file, extended filename can not be .f or it will be saved to 
     local disk directly. 暫時改名 jeforth.f==>jeforth.txt, voc.f==>voc.txt 
     Study ...
@@ -1686,8 +1648,8 @@ More demo programs:
 [x] Node-webkit default root folder is jeforth.3we/3nw/ , but it's better be jeforth.3we/
     for the jeforth.3we folder convention. So how to change? 
     ==> set process.chdir() , check process.cwd()
-	==> The way jeforth.3nw.bat deal with this problem : start nw ../jeforth.3we %1 %2 %3 %4 %5 %6 %7 %8 %9
-		It works if only package.json is there.
+    ==> The way jeforth.3nw.bat deal with this problem : start nw ../jeforth.3we %1 %2 %3 %4 %5 %6 %7 %8 %9
+        It works if only package.json is there.
 [ ] Review how to save selftest.log for each module. Like this in voc.f
         <selftest> --voc.f-self-test-- 
             js> kvm.appname s" jeforth.3htm" != [if]
@@ -1712,14 +1674,14 @@ More demo programs:
     Use arguments.callee() instead of giving a name is ok too.
     http://stackoverflow.com/questions/7065120/calling-a-javascript-function-recursively
     [x] comment can be nested, how about ( .( ?
-		: ( 	( <str> -- ) \ Ignore the comment down to ')', can be nested but must be balanced
-				js> nextstring(/\(|\)/).str \ word 固定會吃掉第一個 character 故不適用。
-				drop js> tib[ntib++] \ 撞到停下來的字母非 '(' 即 ')' 要不就是行尾，都可以 skip 過去
-				char ( = if \ 剛才那個字母是啥？
-					[ last ] literal dup \ 取得本身
-					execute \ recurse nested level
-					execute \ recurse 剩下來的部分
-				then ; immediate 
+        : (     ( <str> -- ) \ Ignore the comment down to ')', can be nested but must be balanced
+                js> nextstring(/\(|\)/).str \ word 固定會吃掉第一個 character 故不適用。
+                drop js> tib[ntib++] \ 撞到停下來的字母非 '(' 即 ')' 要不就是行尾，都可以 skip 過去
+                char ( = if \ 剛才那個字母是啥？
+                    [ last ] literal dup \ 取得本身
+                    execute \ recurse nested level
+                    execute \ recurse 剩下來的部分
+                then ; immediate 
 
 [ ] New words :: and :> are better than obj js> pop().foo.bar. Wait and see, if it's really 
     good then go back to replace all existing source code to use them.
@@ -1739,21 +1701,173 @@ More demo programs:
 [x] 3nw can't use 3hta's platform.f, need its own.
     
 [x] user mistake : name . . . . end-code will double the new word with a strange rear one.
-	==> 這個不好解。end-code 本來也沒有防呆。
-	==> 靠 compiling 的數值來分辨也許可以。code 本來設 compiling=true, 改成 compiling=11 (隨便取11)
-		隨後 end-code 時，檢查 compiling 必須是 11 否則就是 Error. ==> 成功！
+    ==> 這個不好解。end-code 本來也沒有防呆。
+    ==> 靠 compiling 的數值來分辨也許可以。code 本來設 compiling=true, 改成 compiling=11 (隨便取11)
+        隨後 end-code 時，檢查 compiling 必須是 11 否則就是 Error. ==> 成功！
     
 [x] Print all utf-8 charaters 
     : print-utf-8 for r@ ASCII>char . next ;
     10000 last execute ( this takes a real long time but it works )
 
 [X] 3nw jsc removes leading space unexpectedly
-	not jsc, print() has the problem, try ... <js> print(" 1234")</js>
-	==> plain() 的問題。所有 ' ' 都該改成 &nbsp; ==> 修正 jeforth.3nw.html
-	==> 3htm 也一樣 ==> 修正 jeforth.3htm.html
+    not jsc, print() has the problem, try ... <js> print(" 1234")</js>
+    ==> plain() 的問題。所有 ' ' 都該改成 &nbsp; ==> 修正 jeforth.3nw.html
+    ==> 3htm 也一樣 ==> 修正 jeforth.3htm.html
     
-[ ]	3nw 用到的 Node.js module 都可以沿用 3nd 現成的 ~.f 檔，妥善安排 kvm.path 即可共用 path.f, process.f,
-	fs.f 等檔案。都放到 3nd/f 裡去。
+[x] 3nw 用到的 Node.js module 都可以沿用 3nd 現成的 ~.f 檔，妥善安排 kvm.path 即可共用 path.f, process.f,
+    fs.f 等檔案。都放到 3nd/f 裡去。
+    
+[x] canvas.f <selftest> always run twice when ignored. Because when ignored, <selftest>.buffer need to
+    be cleared but didn't.
+        
+[ ] 可向 FigTaiwan 報告
+    New idea. Single step execute through the dicionary. Or set break point at
+    dictionary. I guess this is done by inner(), so inner() has different version for debug mode
+    and working mode. ==> Add this line into inner(), it really works!!
+        if(ip==vm.bp){vm.jsc.prompt='ip='+ip;eval(vm.jsc.xt)}; 
+    Very useful actually. We can change vm.bp to stop at next break point, or vm.bp="" to free run.
+    
+[x] Re-write p5.f processing loop call back function. How about :
+    [ last ] literal ...something....  Forget it.
+    
+[x] readTextFileAuto terminated unexpectedly after include p5.f to run the bouncing ball.
+    After p5.f, readTextFileAuto terminates at the half run this happened during p5.f actually.
+    [x] ==> I doube it's caused by skipping the selftest, nope. 
+    [x] ==> It's because p5.f has a lot of timeout() on the run. ... YES! But why?
+        processing loop is running a lot of timeout(). So I can simulate 
+
+    : tsr ( -- ) \ a tsr that triggers timeout() 
+        [ s" var f=function(){inner(" js> last().cfa + s" )};f" + </jsV> ] literal ( -- callBackFunction )
+        [ <js> var f=function(){setTimeout(pop(),5)};f</jsV> , ]
+    ; last execute
+    js: kvm.debug=true;kvm.bp=629 dropall char clock3.f readTextFileAuto .s
+    \ js: if(1){kvm.jsc.prompt='111222>>>';eval(kvm.jsc.xt)}
+    \ forget tsr : tsr ;
+    
+    bp=629 didn't happen. --> How about normal case? --> yes! Normal case (w/o the TSR) bp=629 happens
+    for several times due to path priority.
+    ==> IP must be changed during readTextFile, check IP before and after execute('stopSleeping') 
+        ==> Yes! Become 'undefined'. Who did it?
+    ==> TSR Rule#1  TSR gets control from waiting state 
+        TSR Rule#2  and return to waiting state. That's the assumption.
+        TSR never consider that it can break into another process.
+        While readTextFile is really give up the control to waiting state when sleeping, leaving
+        TSR a big window to break into it.
+    ==> An ideal TSR should not use any rstack. The above tsr pops rstack everytime when on the run!
+        So, how to fix that? TSR should run only once. If a Call back function is running
+        a colon word be carefull about that it will 'ret' <=== What if feed a 0 to the ret? <==== Bingo!!! 
+
+            \ Solution, this TSR works just fine!
+            : tsr ( -- ) \ a tsr that triggers timeout() 
+                [ s" var f=function(){inner(" js> last().cfa + s" )};f" + </jsV> ] literal ( -- callBackFunction )
+                [ <js> var f=function(){setTimeout(pop(),5)};f</jsV> , ]
+                js> rstack.length if 0 >r then ;
+                last execute
+            dropall char clock3.f readTextFileAuto .s
+            js: kvm.debug=true;kvm.bp=1147 dropall char clock3.f readTextFileAuto .s
+
+    [ ] 可向 FigTaiwan 報告
+        TSR important rule!! Modify processing loop
+        ==> p5.f add one line like this : js> rstack.length if 0 >r then ; interpret-only
+            Has fixed the problem. 
+    [x] Experiment : test 111 3000 sleep 222 ; run test when the new p5.f TSR is running ... OK.
+        But clock3.f is wrong. Only [111] , 222 will be missing. ==> Because clock3.f TSR loop
+        needs the solutions too. ==> Yeap. Done!
+
+[x] JUMP is easy in colon word. 
+    1.  One way is to compile the destination ip number to replace the ret/exit return ip in rstack
+        will be used by the destination word's ret/exit. 
+    2.  Another way is thus to replace the rTOS to the destination. Headache!
+    3.  Or push destination to rstack and then make a ret. Very simple.
+
+[ ] js> require('sys') constant sys // ( -- obj ) sys.print, sys.log, sys.isArray, ... etc 
+    sys obj>keys .
+    format,deprecate,print,puts,debug,error,inspect,isArray,isRegExp,isDate,isError,p,log,
+    exec,pump,inherits,_extend
+    Many of them does not work in Node-webkit at first. But I think that's resolvable.
+	
+[ ] call back function study
+    1. Use code word itself to be a call back function.
+        code tt print(Date());this.timer=setTimeout(arguments.callee,1000) end-code
+        js: clearTimeout(tick('rr').timer)
+    This example works file. But it can't stop. The this.timer was refer to tick('tt') at first 
+    time only! For all the rest triggers, 'this' is the DOM window object. So we change it to,
+        code rr print(Date());tick('rr').timer=setTimeout(arguments.callee,1000) end-code
+    and it's perfect. It passed the : test 1111 3000 sleep 22222 ; test too.
+
+    2. Use colon word to be a call back function
+    In this example, the colon word is called by inner(cfa) from another function or code word.
+        : handler char . . ;
+        code tt inner(tick('handler').cfa);setTimeout(arguments.callee,1000) end-code last execute
+    But this example can not pass the : check 111 3000 sleep 222 ; test, 222 will not appear because
+    during the 3 sec sleep, timeout happened and the handler will *eat* the rstack for its ret.
+    Because timeout happens a lot therefore all rstack will be cleared after a while <== problem.
+    The correct implementation of the handler is,
+        : handler char . . js> rstack.length if 0 >r then ;
+    Push 0 to rstack due to the assumption of that all handlers are started from the waiting state, 
+    0 brings the handler back to waiting sate.
+    
+    3. Use an existing code word to setup a call back function
+    This example shows that the xt of a code word can be used as a call back function.
+        code cbServer ( request, response ) \ Web server call back function
+            var response = arguments[1];
+            response.writeHead(200,{"Content-Type":"text/plain"});
+            response.write("Hello-World");
+            response.end();
+        end-code
+        http :: createServer(tick('cbServer').xt).listen(8888);
+
+[ ] 3nd's gets.f is very good. Try to support inputbox edit mode.       
+        
+[x] comment \ in selftest mode should print the line <--- bad idea
+    
+[ ] Double suspend is not allowed so far, but why?  
+
+[ ] local.f try to find a way for forth to be able to associate a family structure to share local
+    variables from parents and also down to children.
+    
+[ ] kvm.bp works fine, go on to develop s command for single step.  
+
+[ ] why execute(Word) does not *eat* rtos() at Word ret?
+    因為 colon word 的 xt 自己有 push IP。TSR trigger 時的 IP 鐵定是 0 吧！？在工作中 event 被 queue
+    起來不會發生。
+    但是，在下例 TSR 的情形下，execute() 當時的 ip 沒有意義，到底 ip 是何值？雖然無所謂，還是看一下。kvm.breakpoint
+    設在 show entry 處，查 rstack 即知 ... 
+        : tsr ( "msg" xx yy -- ) \ a tsr 
+        (-- bp+3 bp+2 bp+1 --) <js> setInterval(function(){execute('show')},1000) </js> 
+        ( 保護 TSR 的 local data 留在 rstack 裡存活 ) 0 >r ;
+    ==> ip=953 jsc> rstack ==> [ 0, 0, 22, 11, 'Hi!', 969, 0 ]
+                                 ^  ^                   ^  ^
+                                 |  |                   |  |     這就是好奇想知道的 IP 值，果然是 0。
+                                 |  |                   |  '---- 從 waiting state 進來時，'show'.xt push 進來的 IP 值。
+                                 |  |                   '------- TSR 回 test 的 return address, 被棄置。
+                                 |  '--------------------------- bp0
+                                 '------------------------------ test 的 return address
+	==> 如上，保護 TSR 所做的 0 >r ; 與正常 event 發生時 execute('show'), 'show'.xt 所 push 的 IP 都是
+		0 ，這個一致性很令人滿意。
+
+[ ] 3nd's jsc can not <backspace> <==== improve the console input method.
+[ ]	3nw's jsc can not <Enter> or <Esc>, must click <==== nw's Problem? Try Google.
+[ ] Improve overall jsc's <up> <down> to support command history.
+[x] Node.js has a 'querystring' module, also 'util' module
+	querystring obj>keys .
+	unescapeBuffer,unescape,escape,encode,stringify,decode,parse
+	==> I think 'querystring' is a HTML POST parser.
+	==> 'util' was 'sys' that provides console I/O and object viewer.
+	
+
+[x] Use full path for nw to require existing external module in Node.js folder
+	char c:\Users\8304018\Dropbox\learnings\JavaScript\node.js\node_modules\formidable >path/ js> require(pop())
+	constant formidable // ( -- module ) Node.js external module
+	==> It works. So 3nw can get Node.js' external modules without knowing how to setup nw correctly with all the
+		path or root settings.
+
+[ ] webserver.f can be run on jeforth.3nd and jeforth.3nw.
+	It is actually a copy from the original JavaScript source.
+	The beauty of jeforth is that I can bring out its internal variables to forth global variables for
+	debug or for fun. [ ] Report to FigTaiwan.
+
 	
 	
 	
+

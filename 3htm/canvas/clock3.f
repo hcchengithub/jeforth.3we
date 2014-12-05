@@ -67,7 +67,8 @@
 			js> pop().getSeconds() 畫秒針 
 			r@ 3 + @ js: kvm.cv=pop() \ restore original cv
 			r> 5 + @ js: setTimeout(pop(),1000)
-    ;
+			js> rstack.length if 0 >r then \ TSR 不要吃到別人 (in suspending) 的 rstack。重要！
+	; interpret-only
 
 	0	時鐘 台北 
 	1	時鐘 東京 

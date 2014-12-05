@@ -2,7 +2,7 @@
 \ HTML5 canvas tutorial http://jo2.org/html5-canvas-tutorial-list/
 \ HTML5 canvas reference http://www.w3schools.com/jsref/dom_obj_canvas.asp
 
-s" canvas.f"			source-code-header
+s" canvas.f"	source-code-header
 
 \ ---------------- Canvas initialization commands -----------------------------------------------
 	\ canvas.f 本身不 create 任何 canvas instance，個別程式要自己 create。
@@ -57,9 +57,9 @@ s" canvas.f"			source-code-header
 									"要執行 canvas.f self-test 嗎？"
 								) </jsV> [if] [else] <js> 
 									push("--E"+"OF--");execute("word"); 
-									// 如果不用 JavaScript code, 到這裡檔尾的 "--EOF--" 將成為下一個指令！
+									// 如果不用 JavaScript code, 到這裡檔尾的 "--E"+"OF--" 將成為下一個指令！
 									pop();execute("BL");execute("word");pop();
-									execute("--canvas.f--selftest--")
+									execute("--canvas.f--selftest--");tick("<selftest>").buffer=""
 								</js> [then]
 										
 								\ html5 Canvas畫圖3：1px線條模糊問題
@@ -143,3 +143,4 @@ s" canvas.f"			source-code-header
 							
 	code font				( "font" -- ) \ Example: s" 20pt bold Arial" font
 							kvm.cv.font=pop() end-code
+

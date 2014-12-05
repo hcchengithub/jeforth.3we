@@ -23,13 +23,15 @@
 	include fs.f
 
 \ ----------------- save selftest.log -------------------------------------
-	js> tick('<selftest>').enabled [if]
-		js> kvm.screenbuffer char selftest.log writeTextFile
-	[then]
+	s" I want to view selftest.log" s" yes" = [if]
+		js> tick('<selftest>').enabled [if]
+			js> kvm.screenbuffer char selftest.log writeTextFile
+		[then]
+	[then]	
 
 \ ---------------- Run command line -----------------------------------------------
 	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the jeforth.3nd.js pathname itself.
 
-	\ ---------------- End of quit.f -----------------------------------------------
+\ ---------------- End of quit.f -----------------------------------------------
 	.(  OK ) \ The first prompt after system start up.
 
