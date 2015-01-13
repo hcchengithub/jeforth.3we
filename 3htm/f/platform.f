@@ -127,7 +127,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 					<text>
 						F2    : Toggle input box EditMode
 						F4    : Copy marked string to input box
-						F5    : Restart jeforth.hta
+						F5    : Restart jeforth.3htm
 						F9    : Smaller input box
 						F10   : Bigger input box
 						Esc   : Clear the input box

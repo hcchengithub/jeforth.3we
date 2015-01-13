@@ -1725,7 +1725,8 @@
     dictionary. I guess this is done by inner(), so inner() has different version for debug mode
     and working mode. ==> Add this line into inner(), it really works!!
         if(ip==vm.bp){vm.jsc.prompt='ip='+ip;eval(vm.jsc.xt)}; 
-    Very useful actually. We can change vm.bp to stop at next break point, or vm.bp="" to free run.
+    Very useful actually. We can change kvm.breakpoint to stop at next break point, or 
+	kvm.breakpoint="" to free run.
     
 [x] Re-write p5.f processing loop call back function. How about :
     [ last ] literal ...something....  Forget it.
@@ -1867,7 +1868,71 @@
 	The beauty of jeforth is that I can bring out its internal variables to forth global variables for
 	debug or for fun. [ ] Report to FigTaiwan.
 
-	
-	
-	
+[x] 3wsh can not use setTimeout() !! JScript does not have it. Try alternative solution.
+	3wsh self-test 不過就算了。用 3HTA 取代即可。
 
+[ ] study ~\Dropbox\learnings\JavaScript\JScript\深入挖掘Windows腳本技術.rtf
+	Try set http=wscript.createobject("Microsoft.XMLHTTP")
+	<js> new ActiveXObject("Microsoft.XMLHTTP") </jsV> constant XMLHTTP // ( -- xmlhttp ) DOM object, old method
+	http://www.w3school.com.cn/xml/xml_http.asp
+	<js> new window.XMLHttpRequest()</jsV> constant XMLHTTP // ( -- xmlhttp ) DOM object, new method
+	XMLHTTP :: onreadystatechange=function(){execute("statusChanged")}
+	: statusChanged ( -- ) \ XMLHTTP status
+		." XMLHTTP readyState changed : " XMLHTTP :> readyState . cr
+		XMLHTTP :> readyState 4 = if
+			XMLHTTP :> status dup ." XMLHTTP :> status : " . cr
+			200 = if
+				XMLHTTP :> responseText .
+			else
+				." Problem retrieving XMLHTTP data:" XMLHTTP :> statusText . cr
+			then
+		then ;	
+	XMLHTTP :: open("GET","http://www.ibm.com",true);
+	XMLHTTP :: send(null);
+	\ XMLHTTP :> status .
+	\ XMLHTTP :> responseText .
+	XMLHTTP.readyState   http://www.cnblogs.com/fsjohnhuang/articles/2345653.html
+	0：请求未初始化（还没有调用 open()）。
+	1：请求已经建立，但是还没有发送（还没有调用 send()）。
+	2：请求已发送，正在处理中（通常现在可以从响应中获取内容头）。
+	3：请求在处理中；通常响应中已有部分数据可用了，但是服务器还没有完成响应的生成。
+	4：响应已完成；您可以获取并使用服务器的响应了。
+	[ ] 用 3HTA,3NW 都可以讀到 ibm.com 以及 apple 行情。但用 3WSH 只能讀到自己的 localhost:8888.
+		與 Webserver 是 Node.js or Python 無關。3htm, 3ND 沒有 window object 但有更好的 http module。
+		3WSH readyState 不會變，不知道怎麼回事。
+	[ ] 讀到的 responseText 是 raw data, 裡面有很多地方是要程式跑起來了才會有東西的地方。怎麼辦？
+
+	[ ] 先看一個支持斷點續傳下載web資源的例子 (for jeforth.3wsh)
+	js> WScript.fullname.slice(-11)=="cscript.exe" [if] [else]
+		." Script host must be cscript.exe." cr bye
+	[then]
+	args :> named("url") ?dup [if] [else]
+		." Command line argument /url:<url> is missing." cr bye
+		." Usage: cscript jeforth.3wsh.bat /url:<url> /filename:<filename> include webdl.f" cr 
+		bye
+	[then]
+	js> kvm.fso constant fso // ( -- obj ) WSH Scripting.FileSystemObject
+	js> kvm.ado constant ado // ( -- obj ) WSH ADODB.Stream
+	<js> new ActiveXObject("Microsoft.XMLHTTP")</jsV> constant http // ( -- obj ) Microsoft.XMLHTTP object
+	args :> named("filename") ?dup [if] [else]
+		js> url.match(/.*\/(.*)/)[1] 
+	[then] constant filename // ( -- string ) Target filename
+
+	0 value start // ( -- int ) 文件寫入開始位置
+	filename fso :> fileexists(pop()) [if] 				\ 判斷要下載的文件是否已經存在
+		filename fso :> getfile(pop()).size to start   	\ 存在，以當前文件大小作為開始位置'
+	[else]
+		filename fso :> createtextfile(pop()).close     \ 新建該文件
+	[then]
+
+[ ] webdl.f 斷點續傳 is not ok. Try 3hta first becaus 3wsh does not work well, don't know why.
+	I better try to improve kvm.breakpoint debugging 
+	n : next ip
+	g : free run
+	[x] 把 kvm.debug=1111 定為單步執行的設定 ==> 很成功！ on 3hta first.
+	
+[ ] kvm.dictionary 可能不是真正的 dictionary! 因為 suspend-resume 中 dictionary 有經過
+	copy by value 的過程。
+	
+	
+	

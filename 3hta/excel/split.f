@@ -1,13 +1,13 @@
-\  ------------ §â¤@±i Excel ªí«ö¦U³¡ªù©î¤À¦¨¦h­ÓÀÉ®× ----------------------------
+\  ------------ æŠŠä¸€å¼µ Excel è¡¨æŒ‰å„éƒ¨é–€æ‹†åˆ†æˆå¤šå€‹æª”æ¡ˆ ----------------------------
 
 s" split.f" source-code-header
 
 	\ objSourceWorksheet    ( -- worksheet ) sheet(source)
-	\ js> idKeyColumn.value	( -- 'column' )	 ³¡ªù«UºÙÄæ 		
-	\ js> idFirstRow.value	( -- row# )		 ³¡ªù«UºÙÄætop    	
-	\ js> idTitleRows.value	( -- "row:row" ) ¼ĞÃD¦C    			
-	\ keyColumnBottom		( -- row# )		 ³¡ªù«UºÙÄæbottom
-	\ keyHashTable			( -- hash )		 ³¡ªù«UºÙªí
+	\ js> idKeyColumn.value	( -- 'column' )	 éƒ¨é–€ä¿—ç¨±æ¬„ 		
+	\ js> idFirstRow.value	( -- row# )		 éƒ¨é–€ä¿—ç¨±æ¬„top    	
+	\ js> idTitleRows.value	( -- "row:row" ) æ¨™é¡Œåˆ—    			
+	\ keyColumnBottom		( -- row# )		 éƒ¨é–€ä¿—ç¨±æ¬„bottom
+	\ keyHashTable			( -- hash )		 éƒ¨é–€ä¿—ç¨±è¡¨
 
 	\ js> idSourceFile		( -- element ) Input type=file element
 	\ js> idKeyColumn		( -- element ) Input type=text source worksheet key column
@@ -16,7 +16,7 @@ s" split.f" source-code-header
 	0 value objSourceWorkbook	// ( -- workbook ) workbook object
 	0 value intSourceSheet		// ( -- int ) Sheet number
 	0 value objSourceWorksheet	// ( -- worksheet ) worksheet object, was sheet(source)
-	0 value ¼ĞÃD¦C¼Æ 			// ( -- n ) Count of title rows
+	0 value æ¨™é¡Œåˆ—æ•¸ 			// ( -- n ) Count of title rows
 	0 value keyColumnBottom		// ( -- row# ) The row number of the last row at the bottom
 	0 value keyHashTable		// ( -- hash-table ) {<name>:count,...}
 	
@@ -49,7 +49,7 @@ s" split.f" source-code-header
 		<td><input id=idFirstRow type=text size=1> number of the first data row (1,2,...)</td>
 	  </tr>
 	  <tr>
-		<td><input type=button onclick="kvm.execute('¦C¥XkeyÄæ¦¨­û')" value="Test"></td>
+		<td><input type=button onclick="kvm.execute('åˆ—å‡ºkeyæ¬„æˆå“¡')" value="Test"></td>
 		<td><Div id=idCheckKeyColumn></Div></td>
 	  </tr>
 	</table></o> drop
@@ -60,7 +60,7 @@ s" split.f" source-code-header
 		value="GO!!"
 		style="width:120px;height:40px;font-size:20px;margin-left: 50px;"
 	></o> drop
-
+	
 	: show-source-worksheet ( -- )
 		excel.app js: pop().visible=true \ Need to see corresponding columns
 		js> idSourceFile.value open.xls dup to objSourceWorkbook
@@ -87,12 +87,12 @@ s" split.f" source-code-header
 		intSourceSheet objSourceWorkbook js> pop().sheets(pop()) to objSourceWorksheet
 		js> idKeyColumn.value objSourceWorksheet js> pop().columns(pop()) bottom to keyColumnBottom ( -- row# )
 		js> idTitleRows.value if else <js> alert("What're the title rows?") </js> exit then
-		js> idTitleRows.value objSourceWorksheet js> pop().rows(pop()).count to ¼ĞÃD¦C¼Æ ( -- n )
+		js> idTitleRows.value objSourceWorksheet js> pop().rows(pop()).count to æ¨™é¡Œåˆ—æ•¸ ( -- n )
 		js> idFirstRow.value if else <js> alert("What's the target file first row?") </js> exit then
 		drop false ;
-		/// Define intSourceSheet objSourceWorksheet keyColumnBottom and ¼ĞÃD¦C¼Æ if everything is fine.
+		/// Define intSourceSheet objSourceWorksheet keyColumnBottom and æ¨™é¡Œåˆ—æ•¸ if everything is fine.
 	
-	: ¦C¥XkeyÄæ¦¨­û ( -- ) \ Event handler of the [Test] button.
+	: åˆ—å‡ºkeyæ¬„æˆå“¡ ( -- ) \ Event handler of the [Test] button.
 		check if exit then objSourceWorksheet keyColumnBottom
 		<js>
 			var column = pop(1).columns(idKeyColumn.value);
@@ -107,7 +107,7 @@ s" split.f" source-code-header
 			}
 		</js> ; 
 		
-	: keyColumn>hash ( -- hash ) \ §â keyColumn ¾ã²z¦¨ hash table {<name>:count,...}
+	: keyColumn>hash ( -- hash ) \ æŠŠ keyColumn æ•´ç†æˆ hash table {<name>:count,...}
 		js> idKeyColumn.value  objSourceWorksheet  js> idFirstRow.value  keyColumnBottom 
 		<js>
 			var bottomRow=pop(), firstRow=parseInt(pop()), worksheet=pop(), keyCol=pop();
@@ -119,8 +119,8 @@ s" split.f" source-code-header
 			push(hash); // return value of the <js>..<//js> section
 		</js> ; 
 
-	: «Ø¥ß¦U³¡ªùªºworksheet ( -- ) \ Works on objSourceWorkbook
-		objSourceWorksheet  ¼ĞÃD¦C¼Æ  js> idTitleRows.value  objSourceWorkbook  keyHashTable 
+	: å»ºç«‹å„éƒ¨é–€çš„worksheet ( -- ) \ Works on objSourceWorkbook
+		objSourceWorksheet  æ¨™é¡Œåˆ—æ•¸  js> idTitleRows.value  objSourceWorkbook  keyHashTable 
 		<js>
 			for (var i in tos() ) {
 				var newsheet = tos(1).sheets.add;
@@ -131,7 +131,16 @@ s" split.f" source-code-header
 		</jsN> 5 drops 
 	;
 
-	: ¤ÀµoÁ`ªí¨ì¦U³¡ªùªºworksheet ( -- )
+	\ hcchen5600 2014/12/11 17:14:04 å‡º bug!!
+	\ é ï¼ è·‘äº†åŠå¤©ï¼Œæ¯å¼µ ME.xls SW.xls è£¡éƒ½åªæœ‰ title rows æ²’æœ‰å“¡å·¥ rows.
+	\ [x] å…ˆæ–·åœ¨ split-groups-of-rows-to-excel-files ä¾†çœ‹çœ‹ç•¶æ™‚çš„æƒ…å½¢ã€‚ã€‚ã€‚
+	\ åŸå› æ­æ›‰ï¼šåŸä¾†çš„ excel çš„ title rows ä¸­æœ‰ã€Œåˆä½µå„²å­˜æ ¼ã€ï¼Œé€ æˆ bottom ç®—éŒ¯äº†ï¼Œç•¶
+	\ rows.copy ä¹‹å¾Œå› ç‚ºç®—éŒ¯äº† bottom è€Œè¦å¾€æœ‰ã€Œåˆä½µå„²å­˜æ ¼ã€çš„ title sheet.paste(rows)
+	\ æ™‚å°±å‡ºéŒ¯äº†ã€‚ç¨‹å¼ä¸æ”¹ï¼Œæ”¹åŸå§‹ excel æª”ï¼Œä¸è¦è®“ bottom ç®—éŒ¯å³å¯ã€‚
+	\ æŠ“å‡ºé€™å€‹å•é¡Œå¾ˆå®¹æ˜“ï¼Œåœ¨ "åˆ†ç™¼ç¸½è¡¨åˆ°å„éƒ¨é–€çš„worksheet" è£¡è¨­ä¸€è¨­æ–·é»ï¼Œè§€å¯Ÿå¹¾ä¸‹ç•¶æ™‚
+	\ çš„ variables å°±çŸ¥é“äº†ã€‚
+
+	: åˆ†ç™¼ç¸½è¡¨åˆ°å„éƒ¨é–€çš„worksheet ( -- )
 		js> idKeyColumn.value  objSourceWorkbook  objSourceWorksheet  js> idFirstRow.value  keyColumnBottom
 		<js>
 			var rowEnd=pop(), rowStart=parseInt(pop()), sheet=pop(), workbook=pop(), dept_name_column_letter=pop();
@@ -145,7 +154,7 @@ s" split.f" source-code-header
 			}
 		</js> ;
 
-	: ¦U³¡ªùªºworksheet¦s¦¨xlsÀÉ ( -- )
+	: å„éƒ¨é–€çš„worksheetå­˜æˆxlsæª” ( -- )
 		excel.app dup js> pop().workbooks.count 1+  \ new workbook's ID 
 		objSourceWorkbook js> pop().path  
 		( excel.app )  ( workbook# )  ( path )  objSourceWorkbook  keyHashTable
@@ -162,15 +171,15 @@ s" split.f" source-code-header
 	: split-groups-of-rows-to-excel-files ( -- ) 
 		check if exit then
 		keyColumn>hash to keyHashTable
-		«Ø¥ß¦U³¡ªùªºworksheet
-		beep ." Now wait! ¤ÀµoÁ`ªí to each worksheet takes a lot of time." cr 10 sleep
-		¤ÀµoÁ`ªí¨ì¦U³¡ªùªºworksheet
-		¦U³¡ªùªºworksheet¦s¦¨xlsÀÉ
+		å»ºç«‹å„éƒ¨é–€çš„worksheet
+		beep ." Now wait! åˆ†ç™¼ç¸½è¡¨ to each worksheet takes a lot of time." cr 10 sleep
+		åˆ†ç™¼ç¸½è¡¨åˆ°å„éƒ¨é–€çš„worksheet
+		å„éƒ¨é–€çš„worksheetå­˜æˆxlsæª”
 		\ objSourceWorkbook excel.close drop
 		<o> D o n e !</o> drop ;
 
 <comment>
-	¤ÀµoÁ`ªí¨ì¦U³¡ªùªºworksheet takes too much time. 
+	åˆ†ç™¼ç¸½è¡¨åˆ°å„éƒ¨é–€çš„worksheet takes too much time. 
 	I don't want to use JSON because I want to copy the format also.
 	I hope batch would help. Which is to copy all rows to array and then paste
 	each array to their worksheet.

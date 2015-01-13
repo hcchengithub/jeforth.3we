@@ -5,15 +5,10 @@
 // Usage: node.exe jeofrth.3nd.js cr .' Hello World!!' cr bye
 //
 
-var z = require('./kernel/jeforth.js')
-global.kvm = z.kvm;
+global.kvm = require('./kernel/jeforth.js').kvm;
 kvm.host = global;
 kvm.appname = "jeforth.3nd";
 kvm.path = ["dummy", "kernel", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
-kvm.include = ""+
-			  "include voc.f	  "+
-			  "include mytools.f  "+
-			  "";
 var print = kvm.print = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test to avoid error 'JavaScript error on word "." : invalid data'
@@ -25,13 +20,12 @@ var print = kvm.print = function (s) {
 		}; 
 kvm.version = "1.00";
 kvm.greeting = function(){
-			var revision = "1.00";
-			print("j e f o r t h . 3 n d -- r"+revision+'\n');
+			print("j e f o r t h . 3 n d -- r"+kvm.version+'\n');
 			print("Node.js "+process.version+'\n');
 			print("Source code http://github.com/hcchengithub/jeforth.3we\n");
 			print("Executing " + process.execPath + '\n');
 			print("argv " + process.argv + '\n');
-			return(parseFloat(revision));
+			return(parseFloat(kvm.version));
 		}; 
 kvm.greeting();
 kvm.fso = require('fs');
@@ -80,7 +74,6 @@ kvm.jsc.xt = kvm.fso.readFileSync('./3nd/f/jsc.js','utf-8');
 kvm.clearScreen = function(){console.log('\033c')} // '\033c' or '\033[2J' http://stackoverflow.com/questions/9006988/node-js-on-windows-how-to-clear-console
 
 // kvm.beep
-// kvm.writeTextFile
 // kvm.inputbox
 // kvm.EditMode
 // kvm.forthConsoleHandler

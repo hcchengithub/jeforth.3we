@@ -64,6 +64,8 @@ code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do any
 				var startTime = new Date().getTime();
 				while(new Date().getTime() < (startTime + ms));
 				end-code
+				/// 'freeze' is not a good word, it totally blocks the entire system, useless maybe.
+				/// Try 'sleep' instead.
 
 code .longwords ( length -- ) \ print long words. I designed this word for fun to see what are they.
 				var limit = pop();

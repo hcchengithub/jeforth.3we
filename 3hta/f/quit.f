@@ -32,7 +32,8 @@
 	<text>
 		J a v a S c r i p t   c o n s o l e
 
-		q, exit, quit, or <Esc> : Stop debugging.
+		g, q, exit, quit, or <Esc> : Stop debugging.
+		n : Single step. (kvm.debug=1111 stop next IP)
 		bye : Terminate the program.
 		help : you are reading me.
 
@@ -55,7 +56,8 @@
 				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
 				print(kvm.jsc.prompt + " jsc>" + _cmd_ + "\n");
 				switch(_cmd_){
-					case "exit" : case "q" : case "quit": return;
+					case "exit" : case "g" : case "q" : case "quit": kvm.debug=kvm.debug?true:false;return;
+					case "n" : kvm.debug=1111; return; // 
 					case "bye"  : execute("bye"); break;
 					case "help" : if(!confirm(kvm.jsc.help)) return; break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去

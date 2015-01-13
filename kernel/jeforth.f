@@ -444,19 +444,22 @@ code resume		( -- ) \ Resume the forth VM after a blocking I/O
 
 					depth [if] .( Data stack should be empty! ) cr \s [then]
 					*** suspend stop the forth VM. resume gets the VM back on running ...
-						marker ---
-						code I/O
-							setTimeout(resumeForthVM,10)
-							end-code
-						: test
-							I/O \ blocking I/O needs 100mS to accomplish
-							<js> new Date().getTime() </jsV> \ cr .s
-							suspend \ pause the forth VM so the next line will not run before the resume
-							<js> new Date().getTime() </jsV> \ cr .s
-							;
-						last execute
-						- 10 <= dup ==>judge drop [if] js: tick('resume').selftest='pass' [then]
-						---
+						js> kvm.appname char jeforth.3wsh != \ JScript does not have setTimeout()
+						[if]
+							marker ---
+							code I/O
+								setTimeout(resumeForthVM,10)
+								end-code
+							: test
+								I/O \ blocking I/O needs 100mS to accomplish
+								<js> new Date().getTime() </jsV> \ cr .s
+								suspend \ pause the forth VM so the next line will not run before the resume
+								<js> new Date().getTime() </jsV> \ cr .s
+								;
+							last execute
+							- 10 <= dup ==>judge drop [if] js: tick('resume').selftest='pass' [then]
+							---
+						[then]
 				</selftest>
 
 code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
@@ -1183,10 +1186,6 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 : js:  			( <expression> -- ) \ Evaluate JavaScript <expression> which has no white space within
 				BL word compiling if jsFuncNo , else jsEvalNo then  ; immediate
 				/// Same thing as "s' blablabla' jsEvalNo" but simpler. No return value.
-: ::  			char pop(). BL word + compiling if jsFuncNo , else jsEvalNo then ; immediate
-				// ( obj <foo.bar> ) Simplified form of "obj js: pop().foo.bar" w/o return value
-: :> 			char pop(). BL word + compiling if jsFunc , else jsEval then ; immediate
-				// ( obj <foo.bar> ) Simplified form of "obj js> pop().foo.bar" w/return value
 : ::  			( obj <foo.bar> ) \ Simplified form of "obj js: pop().foo.bar" w/o return value
 				BL word js> tos().charAt(0)=='['||tos().charAt(0)=='(' if char pop() else  char pop(). then 
 				swap + compiling if jsFuncNo , else jsEvalNo then ; immediate

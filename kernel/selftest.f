@@ -1,14 +1,14 @@
 <text>
     ~%~%~%~%~%~%~%~   S e l f - t e s t   e x a m p l e s   ~%~%~%~%~%~%~%~
 
-O   最原始的 *** 最簡單，靠結尾的 ==>judge 在 wut 及螢幕上打 pass/failed!。請看範例。。。
+O   最原始的 *** 最簡單，靠結尾的 =>judge 在螢幕上打 pass/failed!。請看範例。。。
 
     <selftest>
         *** int 3.14 is 3, "12.34AB" is 12 ...
-        3.14 int 3 =
-        char 12.34AB int 12 =
-        and
-        ==>judge drop \ 沒有用到時，把留給 all-pass 的 flag drop 掉。
+        3.14 int 3 = \ true
+        char 12.34AB int 12 = \ true
+		js> [true,true] =>judge [if] 
+		js> ['int','=','char'] all-pass [else] *debug* selftest-failed->>> [then]
     </selftest>
 
 O   四顆星的 **** 用在一次 test 好幾個 words 時，不用 wut 改用 all-pass。下面範例把螢幕關
@@ -59,6 +59,19 @@ O   五顆星的 ***** 利用 HTML5.f 可以回頭打 pass/failed 適用於 self
     : ==>judge      ( boolean -- boolean ) \ print 'pass'(if true) or 'failed!' and stop testing.
                     if ." pass" cr wut :: selftest='pass' true
                     else ." failed!" cr wut :: selftest='failed!' \s then ;
+					/// Mark wut.selftest='pass' or 'failed!' 用 ==>judge 的是舊程式，
+					/// 我後來覺得自動打 wut.selftest 很討厭，改用 =>judge 比較自由方便。
+
+    code =>judge	( .... [array] -- boolean ) \ check data stack and print 'pass'(if true) or 'failed!'
+					var ary = pop(), flag=true;
+					for (var i=ary.length-1; i>=0; i--) if ( pop() !== ary[i] ) flag = false;
+					if (stack.length != 0 ) flag = false;
+					if (flag) print('pass\n'); else print('failed!\n');
+					push(flag);
+					end-code
+					/// No marking wut.selftest.
+					/// Usage: js> [6,6,20,13,1,6,22] =>judge [if] 
+					/// js> ['w1','w2',...] all-pass [else] *debug* selftest-failed->>> [then]
 
     : ***           ( <name> <description down to '\n'> -- ) \ Start to test ONE word
                     BL word dup (') to wut char \n|\r word ( -- "name" "descriptions ..." )
@@ -121,3 +134,6 @@ code selftest-invisible
                 ( -- ) \ Turn display output back on
                 printwas <js> kvm.print=print=pop() </js> ;
 
+: selftest? 	( -- boolean ) \ Does this session need to run self-test?
+				js> tick('<selftest>').enabled ;
+				/// Usage: selftest? [if] self test bits [then]

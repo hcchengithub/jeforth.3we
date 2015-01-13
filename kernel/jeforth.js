@@ -65,7 +65,6 @@ var kvm = (function(){
 		// var debug = false; move to index.html for easier reachable when working with Chrome debugger.
 		var print = function(){}; // dummy 
 		// var global; 改用 kvm 了。
-
 		// Initialize KsanaVM
 		vm.init = function () { 
 			print = kvm.print;
@@ -327,7 +326,7 @@ var kvm = (function(){
 			// innerlevel += 1; for debug
 			var w=phaseA[typeof(entry)](entry); // phaseA 整理各種不同種類的 entry 翻譯成恰當的 w.
 			while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-				if(ip==vm.breakpoint){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 kvm.breakpoint=ip 設斷點, debug colon words.
+				if(vm.debug==1111||ip==vm.breakpoint){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 kvm.breakpoint=ip 設斷點, debug colon words.
 				ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 				endinner = false; // 碰到 colon word 的結尾時，被舉起來。通常是 ret 或 exit, also doVar.
 				phaseB[typeof(w)](w);
@@ -441,10 +440,7 @@ var kvm = (function(){
 		// will be read from a file that will be a big TIB actually. So we don't 
 		// need to consider about how to get user input from keyboard! Getting
 		// keyboard input is difficult to me on an event-driven or a non-blocking 
-		// environment like Node-webkit. Our console is jQuery-terminal that makes
-		// even more challenges. We'd better keep jeforth.js kernel free from such
-		// things. Instead, let jeforth.f to take care of the I/O. That means that
-		// we'll need to re-write 'code', 'end-code' in jeforth.f! 
+		// environment like Node-webkit.
 		function docode() {
 			compiling = 11; // 11: code word
 			newname = nexttoken();
@@ -721,7 +717,7 @@ var kvm = (function(){
 	
 		// -------------- Save forth VM's context and pause the recent outer loop ------------------
 		// Use resumeForth() to resume. We need to suspend-resume forth VM for blocking words like 
-		// 'accept', '*debug*', and 'jsc', and probably maybe more in the future. Event-driven 
+		// 'accept', '*debug*', and 'jsc', and probably more in the future. Event-driven 
 		// programming does not have sleep(). To wait for a blocking I/O, suspend-resume is my
 		// solution. But note! suspend within a code word will not stop it immediately. It actually
 		// suspend before the beginning of the next word. hcchen5600 2013/10/05 22:45:38 
