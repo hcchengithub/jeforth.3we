@@ -260,22 +260,20 @@ var kvm = (function(){
 		// jeforth 裡 address 與 ip 最後都拿來當 dictionary[] 的 index 用。 
 		// address 或 ip 其實是 dictionary[] 的 index。
 		
-		// 把所有不同版本的 call() dolist() execute() runcolon() 等等都整合成 execute(entry)
-		// 或 inner(entry), 前者只執行一個 word, 後者沿著 ip 繼續跑. The entry can be word
+		// 把所有不同版本的 call() dolist() execute() runcolon() 等等都整合成 execute(w)
+		// 或 inner(entry), 前者只執行一個 word, 後者沿著 ip 繼續跑. The w can be word
 		// object, word name, an dictionary entry, or even nothing (run the last word)
 		// (Note! wid is obsoleted)。 
 		
 		// execute() 類似 CPU instruction 的 single step, 而 inner() 類似 CPU 的 call 指令。
 		// 會用 到 inner() 的只有 outer() 以及 colon word 的 xt(), 而 execute() 則到處有用。 
 		// 從 code word 裡 call forth word 的方法有 execute('word') 與 fortheval('word word word')
-		// 加上後來發現的 inner(cfa) 或 execute(cfa) 三種方法可供選擇。 execute() 屬 inner loop 
-		// 參考到原來的 TIB，而 fortheval() 暫時岔開一層 outer loop, 於其中只看到臨時的 TIB 也就是 
-		// fortheval() 的 input string。
+		// 加上後來發現的 inner(cfa) 或 execute(cfa) 三種方法可供選擇。
+		// fortheval() 暫時岔開一層 outer loop, 於其中只看到臨時的 TIB 也就是 fortheval() 
+		// 的 input string。
 
-		// 讓 inner loop 自己判斷種種不同的 argument 統一執行一個 word 的方式。
 		// 本來 wid 與 entry point address 無法分辨，自從把 wid 改成 Word() object 以後，這
-		// 個問題已經不存在了。 Code word 或 colon word 不分，連 rstack.push(0) 的工作也全包
-		// 了。只管 call 就對了！ jeforth.wsh v1.02 版以後 WID 確定完全沒有用，here 從 10000
+		// 個問題已經不存在了。 jeforth.wsh v1.02 版以後 WID 確定完全沒有用，here 從 10000
 		// 開始這個辦法也用不著了。
 		
 		// dictionary[0] 以及 words[vid][0] 都固定放 0, 就是要造成 w=0 的效果。
@@ -292,48 +290,69 @@ var kvm = (function(){
 		// doVar, does> 等這些東西自己發出 colon word 該結束了的明確信號。
 		
 		// ----------------------------- the inner loop -------------------------------------------------
-		var phaseA = {}; // ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/g,''); // remove 頭尾 white spaces
+		function phaseA (entry) { // 整理各種不同種類的 entry 翻譯成恰當的 w.
+			var w = 0; 
+			switch(typeof(entry)){
+				case "undefined": 
+					w = last(); // call the last word when entry is absent.
+					break;
+				case "string": // "string" is word name
+					w = tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/g,'')); // remove 頭尾 whitespaces
+					break;
+				case "number": // number could be dictionary entry or 0 (will do nothing). 
+					// 可能是 does> branch 等的或 ret exit rstack pop 出來的。
+					ip = entry; 
+					w = dictionary[ip]; 
+					break;
+				case "function": case "object":
+					w = entry; 
+					break;
+				default :
+					panic("Error! execute() doesn't know how to handle this thing : "+entry+" ("+mytypeof(entry)+")\n","error");
+			}
+			return w;
+		}
 
-		phaseA["undefined"] = function(){return last()}; // call the last word when entry is absent.
-		phaseA["string"   ] = function(entry){return tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/g,''))}; // remove 頭尾 whitespaces
-		phaseA["number"   ] = function(entry){ip=entry; return dictionary[ip]}; // number could be dictionary entry or 0 (will do nothing). 可能是 does> branch 等的或 ret exit rstack pop 出來的。
-		phaseA["function" ] =
-		phaseA["object"   ] = function(entry){return entry}; // 這裡看到 word object 或 function 一定是從外面剛進來的。下面的 while(w) inner loop 裡看到的才是 colon word 裡面的。
-		phaseA["boolean"  ] = function(entry){panic("Error! execute() doesn't know how to handle this thing : "+entry+" ("+mytypeof(entry)+")","error")};
+		function phaseB (w) { // 執行 w
+			switch(typeof(w)){
+				case "number":  // 看到 number 一定是 does> 的 entry,用 push-jump 模擬 call instruction.
+								// 若用 inner() 去 call 則是個不易發現的大 bug!!
+					rstack.push(ip); // push
+					ip = w; // jump
+					break;
+				case "function": 
+					w();
+					break;
+				case "object": // Word object
+					try { // 自己處理 JavaScript errors 以免動不動就被甩出去.
+						w.xt();
+					} catch(err) {
+						panic('JavaScript error on word "'+w.name+'" : '+err.message+'\n',"error");
+					}
+					break;
+				default :
+					panic("Error! don't know how to execute this thing : "+w+" ("+mytypeof(w)+")\n","error");
+			}
+		}
 		
-		var phaseB = {};
-		phaseB["number"   ] = function(w){rstack.push(ip); ip = w}; // 看到 number 一定是 does> 的 entry. jump 過去仍得先 push(ip)。v2.7 前用 inner() call 是個不易發現的大 bug!!
-		phaseB["function" ] = function(w){w()};
-		phaseB["object"   ] = function(w){
-								try { // 自己處理 JavaScript errors 以免動不動就被甩出去.
-									w.xt();
-								} catch(err) {
-									panic('JavaScript error on word "'+w.name+'" : '+err.message+'\n',"error");
-								}
-							};
-		phaseB["undefined"] =
-		phaseB["string"   ] =
-		phaseB["boolean"  ] = function(w){panic("Error! don't know how to execute this thing : "+w+" ("+mytypeof(w)+")","error")};
-		
-		function execute(entry) {
-			var w=phaseA[typeof(entry)](entry); // phaseA 整理各種不同種類的 entry 翻譯成恰當的 w.
-			phaseB[typeof(w)](w); 
+		function execute(w) { 
+			phaseB(phaseA(w)); 
 		}
 		vm.execute = execute;
 		
 		// innerlevel = 0; // debug 時用這個來看出 deep inner loop 的問題。
 		function inner(entry, resuming) {
 			// innerlevel += 1; for debug
-			var w=phaseA[typeof(entry)](entry); // phaseA 整理各種不同種類的 entry 翻譯成恰當的 w.
+			var w = phaseA(entry); // 翻譯成恰當的 w.
 			while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
 				if(vm.debug==1111||ip==vm.breakpoint){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 kvm.breakpoint=ip 設斷點, debug colon words.
 				ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 				endinner = false; // 碰到 colon word 的結尾時，被舉起來。通常是 ret 或 exit, also doVar.
-				phaseB[typeof(w)](w);
+				phaseB(w);
 				// endinner turned true by 'ret', 'exit', and doVar .. etc.
 				if (endinner && !resuming) break; // resume 的時候沒有上層 inner loop 必須自己繼續做下去。
 				if (abortexec) break; 
-				w=dictionary[ip];
+				w = dictionary[ip];
 			}
 			// innerlevel -= 1; for debug
 			endinner = false; // turn it off immediately because the caller can be a colon word.
@@ -364,7 +383,7 @@ var kvm = (function(){
 						panic("Error! "+token+" is compile-only.\n", tib.length-ntib>100);
 						return;
 					}
-					execute(w); // inner(w);
+					execute(w);
 				} else { // compile state
 					if (w.immediate) {
 						execute(w); // inner(w);
@@ -373,7 +392,7 @@ var kvm = (function(){
 							panic("Error! "+token+" is interpret-only.\n", tib.length-ntib>100);
 							return;
 						}
-						compilecode(w); // 將 w 編入 dictionary. w is the referecne of a Word() object
+						compilecode(w); // 將 w 編入 dictionary. w is a Word() object
 					}
 				}
 			} else if (isNaN(token)) {

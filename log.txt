@@ -1934,5 +1934,9 @@
 [ ] kvm.dictionary 可能不是真正的 dictionary! 因為 suspend-resume 中 dictionary 有經過
 	copy by value 的過程。
 	
-	
+[x] 把 jeforth.js kernel code 裡頭原來用 hash table 取代 switch(){...} 的寫法改回去用 switch().
+	經 吳政昌 指點，這個場合用 switch 比較好。
+
+
+
 	
