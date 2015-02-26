@@ -38,7 +38,7 @@ var kvm = (function(){
 		var ip=0; // forth VM instruction pointer
 		var stack = [] ;
 		var rstack = [];
-		var bp=0; // Secondary return stack pointer
+		var bp=0; // [Secondary return stack pointer in local.f] Breakpoint for jsc debugger.
 		var stackwas = []; // Definition of : ... ; needs a temp storage.
 		var words = {forth:[]}; // VID vocabulary id "forth" 是原始的 word list. 終端 index 是 WID word ID. forth word 可以 reDef 全在這 array 裡面。每一格都是一個 word object。
 		var current = "forth"; // The current word-list new words are going to.
@@ -257,37 +257,38 @@ var kvm = (function(){
 		compilecode.cases["object"] = function(word){return word};       // assume it's a word object
 		
 		// 討論一下：
-		// jeforth 裡 address 與 ip 最後都拿來當 dictionary[] 的 index 用。 
-		// address 或 ip 其實是 dictionary[] 的 index。
+		// jeforth 裡 address 與 ip 最後都拿來當 dictionary[] 的 index 用。 address 或 ip 其實
+		// 是 dictionary[] 的 index。
 		
 		// 把所有不同版本的 call() dolist() execute() runcolon() 等等都整合成 execute(w)
 		// 或 inner(entry), 前者只執行一個 word, 後者沿著 ip 繼續跑. The w can be word
-		// object, word name, an dictionary entry, or even nothing (run the last word)
-		// (Note! wid is obsoleted)。 
+		// object, word name, a function, or an dictionary entry。[panic for other inputs]
 		
 		// execute() 類似 CPU instruction 的 single step, 而 inner() 類似 CPU 的 call 指令。
-		// 會用 到 inner() 的只有 outer() 以及 colon word 的 xt(), 而 execute() 則到處有用。 
+		// 會用 到 inner() 的有 outer() 以及 colon word 的 xt(), 而 execute() 則到處有用。 
+		
 		// 從 code word 裡 call forth word 的方法有 execute('word') 與 fortheval('word word word')
-		// 加上後來發現的 inner(cfa) 或 execute(cfa) 三種方法可供選擇。
-		// fortheval() 暫時岔開一層 outer loop, 於其中只看到臨時的 TIB 也就是 fortheval() 
-		// 的 input string。
+		// 加上後來發現的 inner(cfa) 三種方法可供選擇。fortheval() 暫時岔開一層 outer loop, 於其中
+		// 只看到臨時的 TIB 也就是 fortheval() 的 input string。
 
 		// 本來 wid 與 entry point address 無法分辨，自從把 wid 改成 Word() object 以後，這
 		// 個問題已經不存在了。 jeforth.wsh v1.02 版以後 WID 確定完全沒有用，here 從 10000
 		// 開始這個辦法也用不著了。
 		
 		// dictionary[0] 以及 words[vid][0] 都固定放 0, 就是要造成 w=0 的效果。
-		// inner loop 執行到 w=0 表示這一路 inner loop 不管有幾層都該結束了。 
+		// inner loop 執行到 w=0 表示這一路 inner loop 不管有幾層都該結束，回 
+		// outter loop 去或 idle interpret state。
 
 		// 從 outer loop 剛進入 inner loop 之時要先 push(0) 到 return stack 讓
-		// 將來 'ret' pop 出來的 ip==0 達到結束這一輪 inner loop 的目的。
+		// 將來 'ret' pop 出來的 ip==0 達到結束 inner loop 的目的。
 
-		// 想像中， colon word 碰到 exit 或 ret 就該結束這一輪 inner()。實際上有問題！
-		// 當前這個 word 執行到 ret 時若只做 ip=rstack.pop() 則本 inner loop 有新 ip 可
-		// 執行還是會繼續執行，不會結束。 等於是接手上層 inner loop 未完成的工作又鑽一層
-		// inner loop 下去。這個過程要等到 ret 或 exit rstack.pop() 出 0 才會整個一起終了。
-		// 這造成我稱為 deep inner loop 的問題!! 解法如下: 引進 endinner flag 讓 ret, exit,
-		// doVar, does> 等這些東西自己發出 colon word 該結束了的明確信號。
+		// 想像中， colon word 碰到 exit 或 ret 就該結束 inner() 實際上有問題！當前這
+		// 個 word 執行到 ret 時若只做 ip=rstack.pop() 則本 inner() 有新 ip 可執行還是
+		// 會繼續執行，不會結束。 等於是接手上層 inner() 未完成的工作又鑽一層下去，增
+		// 加 inner() 的層數最後有可能爆掉 JavaScript interpreter。這個過程要等到 ret 
+		// 或 exit rstack.pop() 出 0 才會整個一起終了。這造成我稱為 deep inner loop 的
+		// 問題!! 解法如下: 引進 endinner flag 讓 ret, exit, doVar, does> 等這些東西自
+		// 己發出 colon word 該結束了的明確信號。
 		
 		// ----------------------------- the inner loop -------------------------------------------------
 		function phaseA (entry) { // 整理各種不同種類的 entry 翻譯成恰當的 w.
@@ -299,13 +300,14 @@ var kvm = (function(){
 				case "string": // "string" is word name
 					w = tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/g,'')); // remove 頭尾 whitespaces
 					break;
-				case "number": // number could be dictionary entry or 0 (will do nothing). 
-					// 可能是 does> branch 等的或 ret exit rstack pop 出來的。
-					ip = entry; 
-					w = dictionary[ip]; 
-					break;
 				case "function": case "object":
 					w = entry; 
+					break;
+				case "number": 
+					// number could be dictionary entry or 0. 
+					// 可能是 does> branch 等的或 ret exit rstack pop 出來的。
+					ip = entry; // inner() 會在 phaseA() 與 phaseB() 之間 ip++ 這裡預先迎合。
+					w = dictionary[ip]; 
 					break;
 				default :
 					panic("Error! execute() doesn't know how to handle this thing : "+entry+" ("+mytypeof(entry)+")\n","error");
@@ -316,9 +318,9 @@ var kvm = (function(){
 		function phaseB (w) { // 執行 w
 			switch(typeof(w)){
 				case "number":  // 看到 number 一定是 does> 的 entry,用 push-jump 模擬 call instruction.
-								// 若用 inner() 去 call 則是個不易發現的大 bug!!
-					rstack.push(ip); // push
-					ip = w; // jump
+								// 若用 inner() 去 call 則是個不易發現的 bug!!
+					rstack.push(ip); // Forth 認為 ip 是「下一個」要執行的指令。
+					ip = w; // jump [ ] 要改成 inner(w) 才對吧！ hcchen5600 2015/02/26 14:33:35 
 					break;
 				case "function": 
 					w();
@@ -334,7 +336,7 @@ var kvm = (function(){
 					panic("Error! don't know how to execute this thing : "+w+" ("+mytypeof(w)+")\n","error");
 			}
 		}
-		
+
 		function execute(w) { 
 			phaseB(phaseA(w)); 
 		}
@@ -345,7 +347,7 @@ var kvm = (function(){
 			// innerlevel += 1; for debug
 			var w = phaseA(entry); // 翻譯成恰當的 w.
 			while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-				if(vm.debug==1111||ip==vm.breakpoint){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 kvm.breakpoint=ip 設斷點, debug colon words.
+				if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
 				ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 				endinner = false; // 碰到 colon word 的結尾時，被舉起來。通常是 ret 或 exit, also doVar.
 				phaseB(w);

@@ -33,7 +33,10 @@
 		J a v a S c r i p t   c o n s o l e
 
 		g, q, exit, quit, or <Esc> : Stop debugging.
-		n : Single step. (kvm.debug=1111 stop next IP)
+		s : Single step. (bp=-1)
+		p : Run until next IP. (bp=ip+1)
+		r : Free run until ret. (bp=rtos)
+		erase : Erase debug message at bottom.
 		bye : Terminate the program.
 		help : you are reading me.
 
@@ -51,13 +54,16 @@
 			var _cmd_ = "";
 			for(;;) {
 				var _ss_, _result_; _ss_ = _result_ = "";
-				kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
+				// kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
 				_cmd_ = prompt("JavaScript debug console\nBreak point:"+kvm.jsc.prompt, _cmd_?_cmd_:"");
 				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
-				print(kvm.jsc.prompt + " jsc>" + _cmd_ + "\n");
+				print(kvm.jsc.prompt + ' ' + _cmd_ + "\n");
 				switch(_cmd_){
-					case "exit" : case "g" : case "q" : case "quit": kvm.debug=kvm.debug?true:false;return;
-					case "n" : kvm.debug=1111; return; // 
+					case "exit" : case "g" : case "q" : case "quit": bp=0; return;
+					case "s" : bp=-1; return; // 
+					case "p" : bp=ip+1; return;
+					case "r" : bp=rstack[rstack.length-1]; return;
+					case "erase" : for(var i=0; i<5; i++){execute('{backSpace}');pop();} break;
 					case "bye"  : execute("bye"); break;
 					case "help" : if(!confirm(kvm.jsc.help)) return; break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
@@ -111,9 +117,9 @@
 	[then]	
 
 \ ----------------- run the command line -------------------------------------
-	js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.
+	\ js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.
 	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
 
 \ ------------ End of jeforth.f -------------------
 	.(  OK ) \ The first prompt after system start up.
-	js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.
+	\ js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.

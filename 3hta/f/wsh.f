@@ -225,7 +225,7 @@ code >path\\	( "path?name" == "path\\name" ) \ Unify path delimiter
 
 				<selftest> 
 					*** >path/ >path\ >path\\ changes path delimiter ... 
-					js> window.location.toString().slice(8)
+					js> window.location.toString().slice(8).replace(/#endofinputbox/,"")
 					>path/ >path/ >path\ >path\ >path\\ >path\\
 					>path/ >path\ >path/ >path\\
 					>path\ >path/ >path\ >path\\
@@ -245,7 +245,7 @@ code GetFileName ( "path-name" -- "filename" ) \ Get file name portion of the gi
 					*** GetFileName is a string operation ... 
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
 					GetFileName \ ==> jeforth.3we (string)
-					js> window.location.toString() \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
+					js> window.location.toString().replace(/#endofinputbox/,"") \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
 					GetFileName \ ==> jeforth.hta (string)
 					char jeforth.hta =
 					swap char jeforth.3we =
@@ -280,7 +280,7 @@ code GetExtensionName ( "path-name" -- "ext-name" ) \ Get file extension name po
 					*** GetExtensionName is a string operation ... 
 					char . full-path  \ ==> C:\lalala\jeforth.3we\ (string)
 					GetExtensionName  \ ==> 3we (string)
-					js> window.location.toString()  \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
+					js> window.location.toString().replace(/#endofinputbox/,"")  \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
 					GetExtensionName \ ==> hta (string)
 					char hta = swap char 3we = and 
 					==>judge [if] <js> ['GetExtensionName'] </jsV> all-pass [then]
@@ -297,7 +297,7 @@ code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
 					GetParentFolderName \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github (string)
 					drop \ demo only, ¤£®³¥¦°µ§PÂ_
-					js> window.location.toString() \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we/jeforth.hta (string)
+					js> window.location.toString().replace(/#endofinputbox/,"") \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we/jeforth.hta (string)
 					GetParentFolderName \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we (string)
 					GetFileName \ jeforth.3we
 					char jeforth.3we = 
@@ -337,3 +337,6 @@ code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given fol
 					char . (dir) js> mytypeof(pop()) char array = 
 					==>judge [if] <js> ['(dir)'] </jsV> all-pass [then]
 				</selftest>
+
+: precise-timer ( -- float ) \ Get precise timer value from VBS's Timer global variable.
+				<vb> kvm.push(Timer)</vb> ;

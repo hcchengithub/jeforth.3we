@@ -78,7 +78,6 @@ kvm.jsc.xt = readTextFile('.\\3wsh\\f\\jsc.js');
 // kvm.inputbox
 // kvm.EditMode
 // kvm.forthConsoleHandler
-// kvm.scrollToElement
 // kvm.plain
 // kvm.cmdhistory
 // kvm.process

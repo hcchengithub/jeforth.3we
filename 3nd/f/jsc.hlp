@@ -3,6 +3,9 @@
 	         for jeforth.3nd
 
 	q, exit, quit, or <Esc> : Stop debugging.
+	s : Single step. (bp=-1)
+	p : Run until next IP. (bp=ip+1)
+	r : Free run until ret. (bp=rtos)
 	bye : Terminate the program.
 	help : you are reading me.
 

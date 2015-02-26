@@ -36,12 +36,13 @@ kvm.gets = function(){
 			// http://stackoverflow.com/questions/3430939/node-js-readsync-from-stdin
 			// A blocking function that returns string from STDIN (keyboard or clipboard) synchronously.
 			// End by pressing Ctrl-Z when kvm.gets.editMode==True, or normally by <Enter>.
+			// 如果敲鍵盤
 			var CHUNKSIZE=256;
 			var chunk = new Buffer(CHUNKSIZE);
-			var bytesRead;
+			var bytesRead; // 收到的 byte 數，敲鍵盤回 1 包括 cr 亦然，Ctrl-z 回 0，copy-past 得實際長度。
 			var ss = "";
 			for(;;) { // Loop as long as stdin input is available. Ctrl-Z to terminate
-				bytesRead = 0;
+				bytesRead = 0; // this loop repeats on every key
 				try {
 					bytesRead = kvm.fso.readSync(process.stdin.fd, chunk, 0, CHUNKSIZE);
 				} catch (e) {
@@ -55,7 +56,8 @@ kvm.gets = function(){
 				if (bytesRead === 0) break; else {
 					var cc = chunk.toString(null, 0, bytesRead);
 					print(cc);
-					ss += cc;
+					if (cc=='\b') ss=ss.slice(0,-1);
+					else ss += cc;
 					if ((cc=='\n'||cc=='\r')&&!arguments.callee.editMode) break;
 				}
 			}
@@ -77,7 +79,6 @@ kvm.clearScreen = function(){console.log('\033c')} // '\033c' or '\033[2J' http:
 // kvm.inputbox
 // kvm.EditMode
 // kvm.forthConsoleHandler
-// kvm.scrollToElement
 // kvm.plain
 // kvm.cmdhistory
 // kvm.process

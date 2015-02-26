@@ -80,3 +80,11 @@ js> process constant process // ( -- object ) Node.js process object
 				js: process.exit(pop()) ;
 			\	/// The exit-code goes %ERRORLEVEL% if run by Node.exe but *not* nw.exe.
 			\	/// 'bye' command uses window.close() so far (jeforth.3nw r16).
+
+js> kvm.appname char jeforth.3nd = [if] \ for 3nd only
+: e 			( -- ) \ Multiple line input mode, not 'edit mode' yet though. Ctrl-z to end.
+				js: kvm.gets.editMode=true 
+				js> kvm.gets()
+				js: kvm.gets.editMode=false
+				tib.insert ;
+[then]

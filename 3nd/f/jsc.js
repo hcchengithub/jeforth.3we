@@ -6,6 +6,9 @@
 		print('\n' + kvm.jsc.prompt+" ");
 		var _line_ = kvm.gets().replace(/(^\s*)|(\s*$)/g,''); // remove 頭尾 white spaces
 		switch(_line_) {
+			case "s" : bp=-1; return; // 
+			case "p" : bp=ip+1; return;
+			case "r" : bp=rstack[rstack.length-1]; return;
 			case "bye"  : execute("bye"); break;
 			case "help" : print(kvm.jsc.help); break;
 			case "exit" : case "q" : case "quit": 

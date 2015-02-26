@@ -5,13 +5,18 @@
 	for(;;) {
 		var _ss_, _result_; _ss_ = _result_ = "";
 		kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
-		_cmd_ = prompt("JavaScript debug console\nBreak point:"+kvm.jsc.prompt, _cmd_?_cmd_:"");
+		inputbox.value = ""; // 防治 3nw jsc 下怪病：inputbox.value 留有 0x0A 致使 erase 無效。
+		_cmd_ = prompt("JavaScript debug console\n"+kvm.jsc.prompt, _cmd_?_cmd_:"");
 		_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
 		print(kvm.jsc.prompt + " jsc>" + _cmd_ + "\n");
 		switch(_cmd_){
-			case "exit" : case "q" : case "quit": return;
+			case "s" : bp=-1; return; // 
+			case "p" : bp=ip+1; return;
+			case "r" : bp=rstack[rstack.length-1]; return;
+			case "erase" : for(var i=0; i<4; i++){execute('{backSpace}');pop();} break;
+			case "exit" : case "q" : case "quit": bp=0; return;
 			case "bye"  : execute("bye"); break;
-			case "help" : if(!confirm(kvm.jsc.help)) return; break;
+			case "help" : print(kvm.jsc.help); break;
 			default : try { // 自己處理 JScript errors 以免動不動就被甩出去
 				_result_ = eval(_cmd_);
 				// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";

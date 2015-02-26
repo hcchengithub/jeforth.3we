@@ -1115,7 +1115,9 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				char ' word compiling if [compile] literal then BL word drop ; immediate
 : s`  			( <str> -- str ) \ Get string down to the next delimiter.
 				char ` word compiling if [compile] literal then BL word drop ; immediate
-: does>         r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; // ( -- ) redirect the last new colon word.xt to after does>
+: does>         ( -- ) \ redirect the last new colon word.xt to after does>
+				['] ret , \ dummy 'ret' mark for 'see' to know where is the end of a creat-does word
+				r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; 
 : constant      create , does> r> @ ; // ( n <name> -- ) Create a constant.
 ' constant alias value // ( n <name> -- ) \ Create a value-variable with the init value.
 				/// 123 value x x . ==> 123

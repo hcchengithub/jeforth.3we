@@ -19,7 +19,7 @@
 				}
 			})();
 		</js>
-		10000 sleep
+		120000 sleep
 		;
 
 	\ Replace instead of redefine, because it has been used.

@@ -95,8 +95,24 @@ code intervals.clear	( n -- ) \ Clear older setInterval IDs leaving the last n o
 						while(a.length>n) clearInterval(a.shift());
 						end-code
 
+: dollar>ntd 			( USD -- NTD ) \ 美金（美元）換算成台幣（元），將來看能不能自動從網路上取得匯率。
+						32 * ; 
+						/// 1 dollar = 100 cent, 1 quarter = 25 cent
+						/// 1 dime = 10 cent, 1 nickel = 5 cent
+: cent>ntd				( cent -- NTD ) \ 美金（美分）換算成台幣（元）
+						100 / dollar>ntd ; 
 
-
-
-
-
+: euro>ntd 				( EUR -- NTD ) \ 歐元（元）換算成台幣（元），將來看能不能自動從網路上取得匯率。
+						35.402 * ; 
+						/// 1 euro = 100 cent, 1 quarter = 25 cent
+						/// 1 dime = 10 cent, 1 nickel = 5 cent
+: euro.cent>ntd			( cent -- NTD ) \ 歐元（分）換算成台幣（元）
+						100 / euro>ntd ; 
+<comment>
+	https://tw.knowledge.yahoo.com/question/question;_ylt=A3eg.oaZmchUwG0AsfHXrYlQ?qid=1513122703211
+	美金有；1分，5分，1角，2角5分，5角，1元。
+	英鎊有；1便士，2便士，10便士，20便士，50便士，1鎊，2鎊，5鎊，10鎊，20鎊。
+	歐元有；1分，2分，5分，10分，20分，50分，1元，2元。
+	日幣有；1元，5元，10元，50元，100元，500元。
+	港幣有；10分，20分，50分，1元，2元，5元，10元。
+</comment>

@@ -7,13 +7,12 @@ s" canvas.f"	source-code-header
 \ ---------------- Canvas initialization commands -----------------------------------------------
 	\ canvas.f 本身不 create 任何 canvas instance，個別程式要自己 create。
 
-	<h> <style type="text/css">canvas{border:dashed 2px #CCC}</style>
+	<h> <style type="text/css">canvas{border:solid 1px #CCC}</style>
 	</h> constant canvasStyle // ( -- [object HTMLStyleElement] ) Canvas style is globally for all canvases.
 							/// See also 'setCanvasStyle' command.
-							\ canvasStyle is an [object HTMLStyleElement] (object)
 							\ canvasStyle js> pop().parentElement ==> [object HTMLHeadElement]  (object)
 
-	: createCanvas			( -- cv ) \ cv is [object CanvasRenderingContext2D], cv.canvas is the whole
+	: createCanvas			( -- cv ) \ cv is [object CanvasRenderingContext2D], cv.canvas is the parent object
 							char body <e> <canvas width=300 height=300></canvas></e>
 							js> pop().getContext('2d') ;
 							/// The new canvas is appended to the end of HTML body. Use insertBefore
@@ -26,14 +25,15 @@ s" canvas.f"	source-code-header
 							kvm.cv.canvas.width=pop(1);kvm.cv.canvas.height=pop(); end-code 
 							/// Canvas size can be changed dynamically.
 
-	: setCanvasStyle		( "canvas{border:solid 2px #CCC}" -- )
-							canvasStyle js: pop().innerHTML=pop() ; 
+	: setCanvasStyle		( "canvas{border:solid 1px #CCC}" -- )
+							canvasStyle :: innerHTML=pop() ; 
 							/// Canvas style can be changed dynamically. border can be: dashed,solid.
-							/// See also 'canvasStyle' constant.
 
 \ ------------------ Drawing commands -------------------------------------------------------
 
-	code save				kvm.cv.save() end-code // ( -- ) Save canvas
+							/// https://www.evernote.com/shard/s22/nl/2472143/21cd4837-e468-468b-b013-56716522dd76
+	code save				kvm.cv.save() end-code // ( -- ) Push canvas settings. 保留座標旋轉、位移、縮放等之前的狀態。
+	code restore			kvm.cv.restore() end-code // ( -- ) Pop canvas settings. 恢復座標旋轉、位移、縮放等之前的狀態。
 	code translate			kvm.cv.translate(pop(1),pop()) end-code // ( x y -- ) Move canvas origin to (x,y)
 	code rotate				kvm.cv.rotate(pop()) end-code // ( angle -- ) 旋轉座標系
 	code beginPath			kvm.cv.beginPath() end-code // ( -- ) Start a new path. http://www.tuicool.com/articles/Bb6RV3
@@ -44,23 +44,21 @@ s" canvas.f"	source-code-header
 	code stroke				kvm.cv.stroke() end-code // ( -- ) Verb, draw the recent path.
 							/// canvas 中的落筆 methods (如 stroke,fill)，都會以上一次 beginPath 之後的所有 path 為基礎下筆。
 							/// see also 'fill'
-							
 
-	code restore			kvm.cv.restore() end-code // ( -- )
 	code lineWidth			kvm.cv.lineWidth=pop() end-code // ( n -- ) 
 	code strokeStyle 		kvm.cv.strokeStyle=pop() end-code // ( 'style' -- ) Sets or returns the color, gradient, or pattern used for strokes
 							/// '#RRGGBB','rgb(255,0,0)','rgba(255,0,0,0.5)' or 'green'
 
 							<selftest>
-								<js> confirm(
-									"canvas.f Self-test 也是 demo 程式又是研讀筆記，請多多利用。"+
-									"要執行 canvas.f self-test 嗎？"
-								) </jsV> [if] [else] <js> 
-									push("--E"+"OF--");execute("word"); 
-									// 如果不用 JavaScript code, 到這裡檔尾的 "--E"+"OF--" 將成為下一個指令！
-									pop();execute("BL");execute("word");pop();
-									execute("--canvas.f--selftest--");tick("<selftest>").buffer=""
-								</js> [then]
+								\ <js> confirm(
+								\ 	"canvas.f Self-test 也是 demo 程式又是研讀筆記，請多多利用。"+
+								\ 	"要執行 canvas.f self-test 嗎？"
+								\ ) </jsV> [if] [else] <js> 
+								\ 	push("--E"+"OF--");execute("word"); 
+								\ 	// 如果不用 JavaScript code, 到這裡檔尾的 "--E"+"OF--" 將成為下一個指令！
+								\ 	pop();execute("BL");execute("word");pop();
+								\ 	execute("--canvas.f--selftest--");tick("<selftest>").buffer=""
+								\ </js> [then]
 										
 								\ html5 Canvas畫圖3：1px線條模糊問題
 								\ http://jo2.org/html5-canvas%E7%94%BB%E5%9B%BE3%EF%BC%9A1px%E7%BA%BF%E6%9D%A1%E6%A8%A1%E7%B3%8A%E9%97%AE%E9%A2%98/
@@ -86,19 +84,19 @@ s" canvas.f"	source-code-header
 							<selftest>	
 								clearCanvas beginPath 
 								100 100 moveTo 200 50 lineTo stroke 
-								<js> confirm("clearCanva beginPath 不會清掉已有的 lineWidth strokeStyle 等")</jsV> [if] [else] \s [then]
-								1 lineWidth stroke <js> confirm(" lineWidth 都是 1, 看不出效果 ")</jsV> [if] [else] \s [then]
-								10 lineWidth stroke <js> confirm("lineWidth 加寬可看出效果 ")</jsV>     [if] [else] \s [then]
-								5 lineWidth stroke <js> confirm(" lineWidth 簡寬看不出效果 ")</jsV>     [if] [else] \s [then]
+								\ <js> confirm("clearCanva beginPath 不會清掉已有的 lineWidth strokeStyle 等")</jsV> [if] [else] \s [then]
+								1 lineWidth stroke  \ <js> confirm(" lineWidth 都是 1, 看不出效果 ")</jsV> [if] [else] \s [then]
+								10 lineWidth stroke \ <js> confirm("lineWidth 加寬可看出效果 ")</jsV>      [if] [else] \s [then]
+								5 lineWidth stroke  \ <js> confirm(" lineWidth 簡寬看不出效果 ")</jsV>     [if] [else] \s [then]
 								char red strokeStyle stroke 
-								<js> confirm(" path 不變, lineWidth, strokeStyle 與 fillStyle 可隨時改變 ")</jsV> [if] [else] \s [then]
+								\ <js> confirm(" path 不變, lineWidth, strokeStyle 與 fillStyle 可隨時改變 ")</jsV> [if] [else] \s [then]
 							
 								0 0 moveTo 100 100 lineTo 50 150 lineTo stroke
 								fill \ black
-								<js> confirm(" See a black triangle?")</jsV> [if] [else] \s [then]
+								\ <js> confirm(" See a black triangle?")</jsV> [if] [else] \s [then]
 								char green fillStyle
 								fill \ green
-								<js> confirm(" See a green triangle?")</jsV> [if] [else] \s [then]
+								\ <js> confirm(" See a green triangle?")</jsV> [if] [else] \s [then]
 								
 							</selftest>
 							

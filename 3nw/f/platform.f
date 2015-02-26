@@ -17,7 +17,7 @@ also forth definitions
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
 				then js> styleTextareaFocus.innerHTML=pop()                
-				js: kvm.scrollToElement($('#endofinputbox'))
+				js: jump2endofinputbox.click();inputbox.focus();
 				false ;
 				/// return a 'false' to stop the hotkey event handler chain.
 
@@ -26,7 +26,7 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the input box.
 				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
 				inputbox.rows = Math.max(r,1);
 				if (!r) $("#inputbox").hide();
-				kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
+				jump2endofinputbox.click();inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -36,7 +36,7 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				var r = 1 * inputbox.rows;
 				if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
 				inputbox.rows = Math.max(r,1);
-				kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
+				jump2endofinputbox.click();inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -62,8 +62,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 					}
 					document.getElementById("inputbox").value += " " + ss;
 				}
-				kvm.scrollToElement($('#endofinputbox'));
-				$('#inputbox').focus();
+				jump2endofinputbox.click();inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -153,7 +152,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 
 <js>
 	kvm.cmdhistory = {
-		max:   20, // maximum length of the command history
+		max:   10000, // maximum length of the command history
 		index: -1,
 		array: [],
 		push:
@@ -206,11 +205,11 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 	document.onkeydown = function (e) {
 		switch(e.keyCode) {
 			case 13:
-				kvm.scrollToElement($('#endofinputbox'));
-				$('#inputbox').focus();
+				// kvm.scrollToElement($('#endofinputbox'));
+				// $('#inputbox').focus();
 				if (!kvm.EditMode || event.ctrlKey) { // CtrlKeyDown
-					kvm.inputbox = document.getElementById("inputbox").value; // w/o the '\n' character ($10).
-					document.getElementById("inputbox").value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10).
+					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					kvm.cmdhistory.push(kvm.inputbox);
 					kvm.forthConsoleHandler(kvm.inputbox);
 					return(false);

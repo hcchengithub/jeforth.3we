@@ -18,7 +18,7 @@ s" html5.f"		source-code-header
 				js: pop(1).appendChild(pop()) ;
 				/// element.parentElement gets parent so we can *move* 
 
-: replaceNode	( newNode targetNode -- ) \ Replace a HTML node to the newNode
+: replaceNode	( Node targetNode -- ) \ Replace a HTML node
 				js: tos().parentElement.replaceChild(pop(1),pop()) ;
 				/// Try it yourself http://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_node_replacechild
 
@@ -95,13 +95,12 @@ s" html5.f"		source-code-header
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>
 
-: open			( "url" "name" -- win ) \ Open the URL return the window element.
+: open			( "http://url" "name" -- win ) \ Open the URL return the window element named 'name' for <a> and <form>.
 				js> window.open(pop(1),pop()) ;
-				/// Overwrite if "name" exists.
-				\ window.open() method http://www.w3schools.com/jsref/met_win_open.asp
-				\ Try "win js: pop().focus()" to switch to the browser window/tab any time.
-				\ Try "win js> pop().document.body.innerHTML ." to see HTML body
-				\ Try "win js> pop().close()" to close the window
+				/// window.open() method http://www.w3schools.com/jsref/met_win_open.asp
+				/// Try "win :: focus()" to switch to the browser window/tab any time.
+				/// Try "win :> document.body.innerHTML ." to see HTML body
+				/// Try "win :: close()" to close the window
 				
 				<comment>
 				s" http://www.taobao.com/about/copyright.php" s" taobaoCopyright" open \ This page responses fast
@@ -153,6 +152,18 @@ s" html5.f"		source-code-header
 : node^			( ele -- ele ) \ Get next sibling node
 				js> pop().nextSibling ;
 				/// see also element.nextElementSibling
+
+: children		( ele -- array ) \ All children of the element
+				js> typeof(tos())!='object' if . ."  is not a HTML-Element!" cr [] exit then
+				js> pop().firstChild ( first )
+				?dup if ( first ) else ( empty ) [] exit then ( first ) 
+				[] swap ( [] 1st ) begin ( [] ele )
+					js> tos(1).push(tos());pop().nextSibling ( [] ele' )
+				dup not until
+				drop ;
+				/// Leaves an empty array if the input is not an object.
+				/// But the input element can have no child.
+
 : []children	( ele n -- array ) \ Beginning n child nodes of the element
 				swap js> pop().firstChild ( n first )
 				?dup if ( n first ) else ( n ) drop [] exit then ( n first ) 

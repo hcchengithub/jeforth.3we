@@ -1,30 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title class=appname>jeforth.3nw</title> 
+	<title class=appname>appname</title> 
 	<meta charset="utf-8" />
-   <style id=styleBase type="text/css">
-			body {
-				font-family: courier new;
-				font-size: 20px;
-				padding:20px; 
-				word-wrap:break-word;
-				border: 1px ridge;
-				background:#F0F0F0;
-			}
-			textarea {
-				font-family: courier new;
-				color:black;
-				font-size: 20px;
-				width:100%;
-				border: 0px solid;
-				background:#BBBBBB;
-			}
-    </style>
-	<!-- 分別定義 textarea:focus 才可以隨時修改 -->
+	<link rel="stylesheet" type="text/css" href="common.css">
+	<!-- 分別定義 textarea:focus 才可以隨時修改，隨 editMode 改變顏色 -->
     <style id=styleTextareaFocus type="text/css"> 
 			textarea:focus {
-				border: 0px solid;
 				background:#E0E0E0;
 			}
     </style>
@@ -45,6 +27,7 @@
 			}
 			kvm.screenbuffer += ss;
 			$('#outputbox').append(plain(ss)); 
+			jump2endofinputbox.click(); inputbox.focus();
 		};
 		kvm.greeting = function(){
 			kvm.print("j e f o r t h . 3 n w -- v"+kvm.version+'\n');
@@ -84,8 +67,8 @@
 			kvm.print(cmd+'\n');
 			kvm.fortheval(cmd);  // Pass the line to KsanaVM
 			kvm.print(" " + kvm.prompt + " ");
-			scrollToElement($('#endofinputbox'));
-			$('#inputbox').focus();
+			// scrollToElement($('#endofinputbox'));
+			// $('#inputbox').focus();
 		}
 
 		// onkeydown,onkeypress,onkeyup
@@ -94,10 +77,10 @@
 		function hotKeyHandler(e) {
 			switch(e.keyCode) {
 				case 13: /* Enter */
-					scrollToElement($('#endofinputbox'));
-					$('#inputbox').focus(); 
-					kvm.inputbox = document.getElementById("inputbox").value; // w/o the '\n' character ($10). 
-					document.getElementById("inputbox").value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+					// scrollToElement($('#endofinputbox'));
+					// $('#inputbox').focus(); 
+					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
+					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					kvm.forthConsoleHandler(kvm.inputbox);
 					return(false); 
 			}
@@ -107,9 +90,9 @@
 		// http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
 		// evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
 		// 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
-        var scrollToElement = kvm.scrollToElement = function (ele) {
-        	$(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
-        }
+        // var scrollToElement = kvm.scrollToElement = function (ele) {
+        // 	$(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
+        // }
 		
 		kvm.clearScreen = function () {
 			$('#outputbox').empty();
@@ -128,11 +111,11 @@
 	</script>
 </head>
 <body>
-	<div id=header name=header>
+	<div id=header>
 	<div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
 	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div>
 	<div style="font-family:verdana;">
-	<b><div id=title class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
+	<b><div class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
 	<div style="color:#40B3DF;">
 	Revision <span id=rev style="background-color:#B4009E;color:#ffffff;">rev</span><br>
 	Source code http://github.com/hcchengithub/jeforth.3we<br>
@@ -140,10 +123,8 @@
 	</div>
 	</div>
 	</div>
-	<div id="outputbox" name="outputbox" class="outputbox">
-	</div><p>
-	<textarea id="inputbox" name="inputbox" cols=100 rows=1></textarea>
-	<div id=endofinputbox name=endofinputbox style="position:absolute"></div>
+	<div id="outputbox"></div>
+	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><br id=endofinputbox>
 </body>
 </html>
 
