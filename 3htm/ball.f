@@ -7,17 +7,22 @@ include processing.f
 
 s" ball.f" source-code-header
 
+\ messages
+	: starting-message ( -- ) ." Start bouncing . . ." cr ;
+	: ending-message ( -- ) ;
+
 \ setup
 	200 200		setCanvasSize	\ ( width height -- ) 
 	60			setFrameRate	\ ( times per second ) 60 已經快到頂了，電腦速度跟不上了。
+	Infinity	setFrameCountLimit \ ( n -- ) None stop
 	1			lineWidth		\ ( n -- )
 	s" green" 	strokeStyle		\ ( '#RRGGBB'|'rgb(255,0,0)'|'rgba(255,0,0,0.5)'|'green'  -- ) 
 	s" blue"  	fillStyle 		\ ( " )
-	20 						value ball_radius // ( -- n )
+	20 			value ball_radius // ( -- n )
 	js> kvm.cv.canvas.width/2 	value ball_x // ( -- n ) initial ball coordinates
-	ball_radius				value ball_y // ( -- n) initial ball coordinates
-	0 						value bounce_height // ( -- n ) ball height for this frame
-	0						value ball_height // ( -- n )
+	ball_radius	value ball_y // ( -- n) initial ball coordinates
+	0 			value bounce_height // ( -- n ) ball height for this frame
+	0			value ball_height // ( -- n )
 	
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function

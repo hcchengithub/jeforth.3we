@@ -4,7 +4,6 @@
 	var _cmd_ = "";
 	for(;;) {
 		var _ss_, _result_; _ss_ = _result_ = "";
-		kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
 		inputbox.value = ""; // 防治 3nw jsc 下怪病：inputbox.value 留有 0x0A 致使 erase 無效。
 		_cmd_ = prompt("JavaScript debug console\n"+kvm.jsc.prompt, _cmd_?_cmd_:"");
 		_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'

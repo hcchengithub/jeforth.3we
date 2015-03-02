@@ -49,11 +49,8 @@ var kvm = (function(){
 		var here=1;      // dictionary[here] 
 		var tib="";      // terminal input buffer
 		var ntib=0;      // index of the TIB
-		var objRet={};   // The word 'ret' object. Very important word. It marks the end of any 
-						 // colon word. 經常要用到故保留一份方便隨時取用。 將來 ret 出生後要隨手
-						 // 來回填此值。
-		var endinner = false; // 2013-6-9 deep inner 的問題還是發生在用到 doVar 的 words 上。既然
-							  // objExit, objRet 都用上了，乾脆還是舉個 flag 來結束 inner loop 吧！
+		var RET=null; // The 'ret' instruction code. It marks the end of any colon word.
+		var EXIT=""; // The 'exit' instruction code.
 		var newname = ""; // new word's name
 		var newxt = function(){}; // new word's function()
 		var newhelp = ""; // new word's help message.
@@ -238,13 +235,9 @@ var kvm = (function(){
 		// Compile 進 dictionary[] 的東西 n 可以是數字,字串,function,object,array .. etc 超厲害的。
 		// 不管是什麼，都只佔 dictionary[] 一格。這麼一來 here++ 還是「指向下一 cell」的意義。
 		function dictcompile(n) {
-			dictionary[here++]=n;
-			if (n!=objRet) { // 不設這個條件的 recursion 會變成無窮迴圈！
-				compilecode('ret'); here--;
-			}
-			// Why here-- ? Because the 'ret' is redundant. 
-			// 'ret is the ending mark for ((see)) to know where to stop. 
-			// Always do this so we always have the ending 'ret'.
+			dictionary[here++] = n;
+			dictionary[here] = RET;  // [here] will be overwritten, we do this dummy 
+										// Because RET is the ending mark for ((see)) to know where to stop. 
 		}
 		
 		// 將 word 編入 dictionary. word can be word name(string) or word obj.
@@ -275,28 +268,30 @@ var kvm = (function(){
 		// 個問題已經不存在了。 jeforth.wsh v1.02 版以後 WID 確定完全沒有用，here 從 10000
 		// 開始這個辦法也用不著了。
 		
-		// dictionary[0] 以及 words[vid][0] 都固定放 0, 就是要造成 w=0 的效果。
-		// inner loop 執行到 w=0 表示這一路 inner loop 不管有幾層都該結束，回 
-		// outter loop 去或 idle interpret state。
+		// 最終極的 inner loop 是 while(w){ip++; w.xt(); w=dictionary[ip]}; ip=rstack.pop(); 只
+		// 要用具有 false 邏輯屬性的東西來當 ret 以及 exit 就可以滿足。 共有 null, '', false, 
+		// NaN and undefined 可供選擇(0 另有用途如下述)。jeforth.js 裡用 RET=null, EXIT="" 來指定。
 
-		// 從 outer loop 剛進入 inner loop 之時要先 push(0) 到 return stack 讓
-		// 將來 'ret' pop 出來的 ip==0 達到結束 inner loop 的目的。
+		// Suspend VM 時，要中止所有的 inner loop 但不 pop retuurn stack 以待 resume 時恢復執行。
+		// dictionary[0] 以及 words[<vid>][0] 都固定放 0, 就是要造成 w=0 來達到這個效果。從 outer 
+		// loop 剛進入 inner loop 之時要先 push(0) 進 return stack 如此既 balance return stack 又
+		// 讓 0 來扮演這個特殊目的。
 
-		// 想像中， colon word 碰到 exit 或 ret 就該結束 inner() 實際上有問題！當前這
-		// 個 word 執行到 ret 時若只做 ip=rstack.pop() 則本 inner() 有新 ip 可執行還是
-		// 會繼續執行，不會結束。 等於是接手上層 inner() 未完成的工作又鑽一層下去，增
-		// 加 inner() 的層數最後有可能爆掉 JavaScript interpreter。這個過程要等到 ret 
-		// 或 exit rstack.pop() 出 0 才會整個一起終了。這造成我稱為 deep inner loop 的
-		// 問題!! 解法如下: 引進 endinner flag 讓 ret, exit, doVar, does> 等這些東西自
-		// 己發出 colon word 該結束了的明確信號。
+		// hcchen5600 2015/03/01 10:30:37 過去的設計有問題！當前這個 word 執行到 ret 時只做 
+		// ip=rstack.pop() 則本 inner() 有新 ip 可執行還是會繼續執行，不會結束。 等於是接手上層 
+		// inner() 未完成的工作又鑽一層下去，增加 inner() 的層數最後有可能爆掉 JavaScript interpreter。
+		// 這個過程要等到 ret 或 exit rstack.pop() 出 0 才會整個一起終了。這造成我稱為 deep inner 
+		// loop 的問題!! 我曾經引進 endinner flag 讓 ret, exit, doVar, does> 等這些東西自己發出 
+		// colon word 該結束了的明確信號。這等於是又倒回 Yap 原版用 abortexec的辦法，失去 w=0 的意義。
+		// 如今 RET=null, EXIT="" 的辦法終於圓滿。
 		
 		// ----------------------------- the inner loop -------------------------------------------------
 		function phaseA (entry) { // 整理各種不同種類的 entry 翻譯成恰當的 w.
 			var w = 0; 
 			switch(typeof(entry)){
-				case "undefined": 
-					w = last(); // call the last word when entry is absent.
-					break;
+				// case "undefined": 
+				// 	w = last(); // call the last word when entry is absent.
+				// 	break;
 				case "string": // "string" is word name
 					w = tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/g,'')); // remove 頭尾 whitespaces
 					break;
@@ -315,12 +310,12 @@ var kvm = (function(){
 			return w;
 		}
 
-		function phaseB (w) { // 執行 w
+		function phaseB (w) { // 針對不同種類的 w 採取正確方式執行它。
 			switch(typeof(w)){
 				case "number":  // 看到 number 一定是 does> 的 entry,用 push-jump 模擬 call instruction.
 								// 若用 inner() 去 call 則是個不易發現的 bug!!
 					rstack.push(ip); // Forth 認為 ip 是「下一個」要執行的指令。
-					ip = w; // jump [ ] 要改成 inner(w) 才對吧！ hcchen5600 2015/02/26 14:33:35 
+					ip = w; // jump
 					break;
 				case "function": 
 					w();
@@ -333,31 +328,29 @@ var kvm = (function(){
 					}
 					break;
 				default :
-					panic("Error! don't know how to execute this thing : "+w+" ("+mytypeof(w)+")\n","error");
+					panic("Error! don't know how to execute : "+w+" ("+mytypeof(w)+")\n","error");
 			}
 		}
 
-		function execute(w) { 
-			phaseB(phaseA(w)); 
+		function execute(entry) { 
+			var w = phaseA(entry); 
+			if(typeof(w)=="number") panic("Error! don't know how to execute : "+entry+" ("+mytypeof(entry)+")\n","error");
+			else phaseB(w); 
 		}
 		vm.execute = execute;
 		
-		// innerlevel = 0; // debug 時用這個來看出 deep inner loop 的問題。
 		function inner(entry, resuming) {
-			// innerlevel += 1; for debug
 			var w = phaseA(entry); // 翻譯成恰當的 w.
-			while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-				if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
-				ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
-				endinner = false; // 碰到 colon word 的結尾時，被舉起來。通常是 ret 或 exit, also doVar.
-				phaseB(w);
-				// endinner turned true by 'ret', 'exit', and doVar .. etc.
-				if (endinner && !resuming) break; // resume 的時候沒有上層 inner loop 必須自己繼續做下去。
-				if (abortexec) break; 
-				w = dictionary[ip];
-			}
-			// innerlevel -= 1; for debug
-			endinner = false; // turn it off immediately because the caller can be a colon word.
+			do{
+				while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
+					if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+					ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
+					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
+					w = dictionary[ip];
+				}
+				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, ip==0 is abortexec
+				if(resuming) w = dictionary[ip];
+			} while(ip && resuming); // ip==0 means resuming has done
 		}
 		// ### End of the inner loop ###
 

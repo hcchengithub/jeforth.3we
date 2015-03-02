@@ -18,7 +18,7 @@
 		kvm.appname = kvm.gui.App.manifest.name; // defined by package.json
 		kvm.version = kvm.gui.App.manifest.version; // defined by package.json
 		kvm.host = window;
-		kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3nd/f", "3nw/f", "3nw", "playground"];
+		kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "playground"];
 		kvm.print = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test
@@ -27,7 +27,7 @@
 			}
 			kvm.screenbuffer += ss;
 			$('#outputbox').append(plain(ss)); 
-			jump2endofinputbox.click(); inputbox.focus();
+			// jump2endofinputbox.click(); inputbox.focus();
 		};
 		kvm.greeting = function(){
 			kvm.print("j e f o r t h . 3 n w -- v"+kvm.version+'\n');
@@ -67,8 +67,7 @@
 			kvm.print(cmd+'\n');
 			kvm.fortheval(cmd);  // Pass the line to KsanaVM
 			kvm.print(" " + kvm.prompt + " ");
-			// scrollToElement($('#endofinputbox'));
-			// $('#inputbox').focus();
+			jump2endofinputbox.click(); inputbox.focus();
 		}
 
 		// onkeydown,onkeypress,onkeyup
@@ -77,8 +76,6 @@
 		function hotKeyHandler(e) {
 			switch(e.keyCode) {
 				case 13: /* Enter */
-					// scrollToElement($('#endofinputbox'));
-					// $('#inputbox').focus(); 
 					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					kvm.forthConsoleHandler(kvm.inputbox);
@@ -86,13 +83,6 @@
 			}
 			return (true); // pass down to following handlers 
 		}
-		
-		// http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
-		// evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
-		// 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
-        // var scrollToElement = kvm.scrollToElement = function (ele) {
-        // 	$(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
-        // }
 		
 		kvm.clearScreen = function () {
 			$('#outputbox').empty();

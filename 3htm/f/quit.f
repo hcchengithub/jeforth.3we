@@ -50,7 +50,6 @@
 			var _cmd_ = "";
 			for(;;) {
 				var _ss_, _result_; _ss_ = _result_ = "";
-				// kvm.scrollToElement($('#endofinputbox')); $('#inputbox').focus();
 				_cmd_ = prompt("JavaScript debug console\nBreak point:"+kvm.jsc.prompt, _cmd_?_cmd_:"");
 				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
 				print(kvm.jsc.prompt + " " + _cmd_ + "\n");
@@ -108,9 +107,7 @@
 	include mytools.f		
 
 \ ----------------- run the command line -------------------------------------
-	\ js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.
 	args tib.insert
 
 \ ------------ End of jeforth.f -------------------
 	.(  OK ) \ The first prompt after system start up.
-	\ js: kvm.scrollToElement($('#inputbox'));$('#inputbox').focus(); \ jump to the inputbox, so user knows the selftest is completed.

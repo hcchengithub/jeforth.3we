@@ -1982,7 +1982,32 @@
 
 [x] Study how to use command-line in jeforth.3htm. 
 	see d:\hcchen\Dropbox\learnings\github\jeforth.3we\3htm\url.f 
+		\ URL Parameter Passing in Javascript, WWW web page URL argument 如何應用 HTML
+		\ https://www.evernote.com/shard/s22/nl/2472143/7f13ae42-668a-4af3-80df-18dc49b07f8a
+		js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
+		url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
+		rnurlterms=urlquery[1].split(",")
+		%20 is space
+		%22 is "
+		what else?
+		只要看到 % 就把後兩 charactor 拿來變成 0xCC 轉換成 String.fromCharCode(0xCC); 
+		cls%20.%22%20hello%20world%20!!%20%22%20cr
+		args :> split('%') --> cls,20.,22,20hello,20world,20!!,20,22,20cr OK 
+		第一個怎麼辦？ ==> 前面故意塞一個 %20 才好。 重來 ...
+		char %20 args + :> split('%') --> ,20cls,20.,22,20hello,20world,20!!,20,22,20cr --> 對了！
+		20aa OK js> "20aa".slice(2) .
+		aa OK js> "20aa".slice(0,2) .
+		20 OK 
+		中文出來變亂碼，英文可以了
+		js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
+		url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
+		char %20 args + :> split('%') <js>
+			for (var ss="",i=1; i<tos().length; i++){
+				ss += String.fromCharCode("0x"+tos()[i].slice(0,2)) + tos()[i].slice(2);
+			};ss
+		</jsV> to args
 	3htm\f\quit.f ... ok
+
 [x] 恢復 jeforth.3htm self-test which is now disabled to avoid annoying.
 [x] Improve help message for calc.f and html5_audio_demo.f 
 
@@ -2054,8 +2079,16 @@
 		}
 	</js>
 	
-[ ] Why <div id=endofinputbox style="position:absolute"></div> and scrollToElement($('#endofinputbox')); ?
+[x] Why <div id=endofinputbox style="position:absolute"></div> and scrollToElement($('#endofinputbox')); ?
 	Why not clicking a <a> tag programmatically?
+	[x] Yeah, scrollToElement() has now been removed,
+		// http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
+		// evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
+		// 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
+        // var scrollToElement = kvm.scrollToElement = function (ele) {
+        // 	$(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
+        // }
+		==> replaced by : jump2endofinputbox.click(); inputbox.focus();
 	
 [x] Is it a good idea to separate kvm.debug and kvm.breakpont?
 	A jsc p command to pass through. Only n next step is not enough.
@@ -2114,7 +2147,7 @@
 		只能用 JavaScript 做 blinking 不能 style。
 		也行了！
 
-[] jeforth.3htm 無法輸出東西到 file, 正規的方法是用 data URI
+[ ] jeforth.3htm 無法輸出東西到 file, 正規的方法是用 data URI
 	http://stackoverflow.com/questions/8693289/how-to-write-localstorage-data-to-a-text-file-in-chrome	
 	<js> window.location = "data:text/plain, My Data"</js> \ 即可，但是會取代現有的 jeforth Window.
 	<js> window.open("data:text/plain, My Data")</js> \ 開新 Window，這個比較好。
@@ -2185,19 +2218,18 @@
 		OK js> start_button :: setAttribute('style','color:black')
 	CSS 連續的 <span> 如果都沒有設 color:green 則第一個 <span> 設了之後，以下全部變成, say, 綠色。
 	一時覺得奇怪，想想這個設計也有道理，否則得全部都去寫 style attribute 不是很笨？
-	[ ] figtaiwan.org ftp is blocked, so it's not updated yet.
 	
 [ ] html5.f 裡的東西，不常用的就覺得不該放裡面，但常用的，如 removeElement 與別人有何差別？
-	總之，整理一下，看要不要把 element.f 並進去。
+	總之，整理一下，看要不要把 element.f 併進去。
 	
 [x] node.js 有提供 precise timer, HTA 需要 precise timer 時怎麼辦？VBS 已經有 Timer 直接可以用，
 	下面 demo 是個例子,
 	: precise-timer-demo 100 for <vb> kvm.push(Timer)</vb> . cr next ;
 	把它加進 mytools.f 裡去
 	: precise-timer <vb> kvm.push(Timer)</vb> ;
-	[ ] 啊錯了！不該加在 mytools.f 裡面，HTA & WSH 專屬。
+	[x] 啊錯了！不該加在 mytools.f 裡面，HTA & WSH 專屬。
 
-[ ] p5.f 的 FrameRate 不準，問題出在 frameInterval 的算法可能要動態調節才行。
+[x] p5.f 的 FrameRate 不準，問題出在 frameInterval 的算法可能要動態調節才行。
 	\ FrameRate 60 時 delta 最小 12mS, 最大 140mS, 平均 26mS, frameInterval 1000/60=16.667mS 與實際平均值差太多，難怪不準。
 	\ FrameRate 15 時 delta 最小 35mS, 最大 203mS, 平均 78mS, frameInterval 1000/15=66.667mS 與實際平均值還是差很多。
 	\ 表示 FrameRate 到 frameInterval 的算法可能要改進才行，frameInterval 都打八折。。。
@@ -2260,33 +2292,51 @@
 			這個倒可以: <js> for (var i=0; i<1000; i++){ execute('precise-timer');print(pop()+'\n')} </js>
 		==>	終於好了！ <js> for(var i=0; i<100; i++) print((new Date()).getTime()+'\n') </js>
 
-[ ] 保留 screenbuffer 在開發早期是很重要的辦法，但已經很久沒有用了。可以停用。
-
-[ ] char no-such-word execute <==== No errormessage! 應該要出個 panic 
-	execute(undefined) 自動執行 last 實在沒有用，一併考慮改善。
-[ ] 讓 execute(ip) 去執行某個 ip 它只執行該處的指令,但是附帶會破壞到 ip 值，值得再想一想。
-	==> 可能簡單不要改 ip 值，skip ip=entry 這行，可乎？ ==> 不行！
-	==> execute() 不能直接套用 phaseA(), 要改寫。
-[ ] 更重要的知識： 0 execute 並非不做事！而是半途終止當前的 colon word
-	: test 1 2 3 0 execute 4 5 6 ;
-	: test2 11 22 33 test 44 55 66 ;
-	OK test2
-	OK test2
-	OK .s
-	  0:          11           bh (number)
-	  1:          22          16h (number)
-	  2:          33          21h (number)
-	  3:           1           1h (number)
-	  4:           2           2h (number)
-	  5:           3           3h (number)
-    * 平時沒有用，因為原本 rstack 沒有人清。考慮這樣用來立刻結束當前 colon word 以供如 TSR 的結尾之用（避免 ret 多 pop 一格 rstack）
-	  這與 0 >r 類似，但自有美感。
-[ ]	phaseB() 裡 ip = w; // jump [ ] 要改成 inner(w) 才對吧！ hcchen5600 2015/02/26 14:33:35 
+[x] re-write ret and exit, they become compiling immediate words.
+[x] find all ret and exit.
+	  
+[x]	phaseB() 裡 ip = w; // jump [x] 要改成 inner(w) 才對吧！ ==> No!  hcchen5600 2015/02/26 14:33:35 
 
 [ ]	In recent console design, 3hta and 3htm when there's a lot of 'printing' to outputbox then inputbox 
 	become strange, type 'jsc' become csj so we have to type 'csj' instead! I guess this is because my 
 	previous modification has made kvm.print() to also clear the inputbox <=== Root cause?
-	
-[ ] dump ( start length -- ) 碰到 null 就會停下來 <=== bug!!!
+	==> 改成印 OK 之後 jump2endofinputbox.click(); inputbox.focus(); ==> 觀察一陣子看效果怎樣。。。。。
 
-[ ] inner() 大翻修前先 save 一版上 github. hcchen5600 2015/02/26 16:28:31 
+[x] dump ( start length -- ) 碰到 null 就會停下來 <=== bug!!!
+[x] inner() 大翻修前先 save 一版上 github. hcchen5600 2015/02/26 16:28:31 
+[x] why now 'see sleep' hangup?, ' sleep (see) hangup too. --> see see hangup too. ==> see wants to end up at 'ret' but
+	there's no 'ret' now. ==> check all objRet
+[x] 當 processing.f 裡要用到的 start-message, ending-message 不存在時，沒有警告直接結束！因為 execute('name')
+	有問題，當 name 不存在時沒有警告，直接結束。因為 execute(0) 會中斷整個 inner(), 因發 inner() 設計大翻修。
+[x] char no-such-word execute <==== No errormessage! 應該要出個 panic 
+	execute(undefined) 自動執行 last 實在沒有用，一併考慮改善。
+[x] 讓 execute(ip) 去執行某個 ip 它只執行該處的指令,但是附帶會破壞到 ip 值，值得再想一想。
+	==> 可能簡單不要改 ip 值，skip ip=entry 這行，可乎？ ==> 不行！
+	==> execute() 不能直接套用 phaseA(), 要改寫。
+    更重要的知識： 0 execute 並非不做事！而是半途終止當前的 colon word
+	: test 1 2 3 0 execute 4 5 6 ;
+	: test2 11 22 33 test 44 55 66 ;
+	這樣用與 inner(entry) 重複，決定取消。
+[x] abortexec is purposed on stopping both inner and outer loop. 
+[x] inner() overhaul, null=ret, ''=exit, 0=abortexec (also false, NaN and undefined).
+	==> re-write inner() ==> hcchen5600 2015/02/27 11:49:34 start debugging. Strange, why the first inner(entry)
+		always got a entry=0 after the first breakpoint in inner() ? Check 3nw call-stack, it's from outer(0) in
+		fortheval() that wants to resolve resumeing case. Not a problem, but probably needs improvement? [x]
+	==> compiling==true when executing 'test' <-- Because dictcompile(null) become infinit loop I guess <==== RI!!!	
+		[x] 'sleep' involves suspend-resume and that has a bug in inner(), the do-while loop needs special treatment .. done.
+	==> Ok now!
+	[x] objRet => RET=null, ret instruction code
+		objExit => EXIT="", exit instruction code
+	[x] remove 'endinner'
+
+[ ] now null is 'ret'. I can say, everything in dictionary are 'instructions'. While null is exactly 'ret' instruction.
+	As well as "" is the 'exit' instruction. (see) should make it clearer.
+	[ ] constants are literal instruction with a constant value, make it clearer too.
+	[ ] 0 is an instruction too, it's abortexec. So dictionary[0]=0; 
+[ ] Very important performance improvement.
+	if everything in dictionary are instructions then why we still need phaseA? phaseA should have done
+	when in compiling time. So inner() should be as simple as while(w){ip++; w.xt(); w=dictionary[ip]}
+	nothing more!
+[ ] 保留 screenbuffer 在開發早期是很重要的辦法，但已經很久沒有用了。可以停用。
+	[x] 3htm [ ]3nd [ ]3wsh [ ]3nd [ ]3hta [ ]3nw
+

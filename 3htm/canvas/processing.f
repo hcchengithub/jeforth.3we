@@ -68,15 +68,9 @@ s" processing.f" source-code-header
 		/// is supposed to be 1. If triggered in suspending state then rstack.length>1, we have to avoid using the 
 		/// working rstack by pushing a dummy 0 into rstack so as to return to interpreter waiting state which is
 		/// where it was from. see (4) above, this is very important for any TSR. 
-	
-	: processing ( -- ) \ 整個程式像新的一樣重跑。
-		char starting-message execute
-		clearCanvas frameTickInterval :: init() 
-		s"  *debug* >>> onFrameTick" tib.append \ onFrameTick 是 TSR 故最好延後到 interpret mode 執行。
-		;
 		
 	: processing ( -- ) \ 整個程式像新的一樣重跑。
 		char starting-message execute
 		frameTickInterval :: init() 
-		s"  *debug* >>> onFrameTick" tib.append \ onFrameTick 是 TSR 故最好延後到 interpret mode 執行。
+		char onFrameTick tib.append \ onFrameTick 是 TSR 故最好延後到 interpret mode 執行。
 		;

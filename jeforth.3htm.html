@@ -23,9 +23,8 @@
 			} catch(err) {
 				ss = Object.prototype.toString.apply(s);
 			}
-			kvm.screenbuffer += ss;
 			$('#outputbox').append(plain(ss)); 
-			jump2endofinputbox.click(); inputbox.focus();
+			// jump2endofinputbox.click(); inputbox.focus();
 		};
 		kvm.version = "1.00";
 		kvm.greeting = function(){
@@ -75,8 +74,7 @@
 			print(cmd+'\n');
 			kvm.fortheval(cmd);  // Pass the line to KsanaVM
 			print(" " + kvm.prompt + " ");
-			// scrollToElement($('#endofinputbox'));
-			// $('#inputbox').focus();
+			jump2endofinputbox.click(); inputbox.focus();
 		}
 
 		// onkeydown,onkeypress,onkeyup
@@ -85,8 +83,6 @@
 		function hotKeyHandler(e) {
 			switch(e.keyCode) {
 				case 13: /* Enter */
-					// scrollToElement($('#endofinputbox'));
-					// $('#inputbox').focus(); 
 					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					kvm.forthConsoleHandler(kvm.inputbox);
@@ -94,14 +90,6 @@
 			}
 			return (true); // pass down to following handlers 
 		}
-		
-		// http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
-		// evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
-		// 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
-		// [ ] 暫時保留，都準備好之後槓掉。 hcchen5600 2015/02/14 19:06:01 
-        var scrollToElement = kvm.scrollToElement = function () {
-        	jump2endofinputbox.click();
-        }
 		
 		kvm.clearScreen = function () {
 			$('#outputbox').empty();

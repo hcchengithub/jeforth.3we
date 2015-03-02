@@ -19,7 +19,8 @@
 				}
 			})();
 		</js>
-		120000 sleep
+		120000 sleep \ 聽說過 typical 要等兩分鐘
+		\ [ ] 太早回來目前不知如何是好。
 		;
 
 	\ Replace instead of redefine, because it has been used.

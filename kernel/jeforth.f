@@ -42,10 +42,8 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 					對「文字蒐集器」在任意處所蒐集「測試程式的本文」，最後再一次把它當成 TIB 執行。實
 					用上〈selftest〉〈/selftest〉出現在每個 word 定義處，裡頭可以放心自由地使用尚未出
 					生的「未來 words」, 感覺很奇異，但對寫程式時的頭腦有很大的幫助。 </comment>
-
 					marker ~~selftest~~
 					include selftest.f \ self-test tools
-
 					.( *** Start self-test ) cr
 					s" *** Data stack should be empty ... " .
 						depth not [if] .( pass) cr [else] .( failed!) cr \s [then]
@@ -287,8 +285,7 @@ code last 		push(last()) end-code // ( -- word ) Get the word that was last defi
 				</selftest>
 
 code exit       ( -- ) \ Exit this colon word.
-				ip = rstack.pop(); endinner=true;
-				end-code compile-only
+				dictcompile(EXIT) end-code immediate compile-only
 
 				<selftest>
 					depth [if] .( Data stack should be empty! ) cr \s [then]
@@ -299,18 +296,7 @@ code exit       ( -- ) \ Exit this colon word.
 				</selftest>
 
 code ret        ( -- ) \ Mark at the end of a colon word.
-				ip = rstack.pop(); endinner=true;
-				end-code compile-only interpret-only
-				/// You have no way to use ret. It's used by compilecode('ret') only.
-
-				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					marker ---
-					*** ret and exit are same ...
-					: test 111 [ ' ret , ] 222 ; last execute \ No normal way to use 'ret' , this is a trick to compile it.
-					111 = depth 1 = and ==>judge drop
-					---
-				</selftest>
+				dictcompile(RET) end-code immediate compile-only
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {};
@@ -341,10 +327,6 @@ code (forget) 	( -- ) \ Forget the last word
 					[then]
 				</selftest>
 
-code SetupObjRet ( -- ) \ Setup the essential global variable objRet, fire and forget.
-                objRet=tick('ret'); end-code
-				last execute (forget)
-
 code :          ( <name> -- ) \ Begin a forth colon definition.
                 newname = nexttoken();
                 newhelp = newname + " " + packhelp(); // help messages packed
@@ -366,7 +348,8 @@ code ;          ( -- ) \ End of the colon definition.
                     panic("Stack changed during colon definition, it must be a mistake!\n", "error");
 					words[current].pop();
                 } else {
-                    compilecode("ret");
+                    // compilecode('ret'); 
+					dictcompile(null);
 					// last().creater[0] = "colon";
                     // last().cfa = newxt; // 如上述，':' 拿 newxt 來暫放本 colon word 在 dictionary 裡的 entry point.
                     // last().help = newhelp;
@@ -798,7 +781,9 @@ code roll       ( ... n3 n2 n1 n0 3 -- ... n2 n1 n0 n3 )
 code .          ( sth -- ) \ Print number or string on TOS.
 				print(pop());
 				end-code
+
 : space      	(space) . ; // ( -- ) Print a space.
+
 code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from TIB.
 				push(nexttoken(pop())) end-code
 				/// First character after 'word' will always be skipped first, token separator.
@@ -1116,7 +1101,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : s`  			( <str> -- str ) \ Get string down to the next delimiter.
 				char ` word compiling if [compile] literal then BL word drop ; immediate
 : does>         ( -- ) \ redirect the last new colon word.xt to after does>
-				['] ret , \ dummy 'ret' mark for 'see' to know where is the end of a creat-does word
+				[compile] ret \ dummy 'ret' mark for 'see' to know where is the end of a creat-does word
 				r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; 
 : constant      create , does> r> @ ; // ( n <name> -- ) Create a constant.
 ' constant alias value // ( n <name> -- ) \ Create a value-variable with the init value.
@@ -1515,7 +1500,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
                         do {
 							push(i); fortheval("5 .0r char : . space");
                             see(dictionary[i]);
-                        } while (dictionary[i++] != objRet);
+                        } while (dictionary[i++] != RET);
                         print("---------- End of the definition -----------\n");
                     } else {
                         for(var i in w){
@@ -1652,8 +1637,11 @@ code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 
 : readTextFileAuto ( "pathname" -- string ) \ Search and read, panic if failed.
 				js> kvm.path.slice(0) \ this is the way javascript copy array by value
-				over readTextFile js> tos()!="" if nip nip exit then drop
+				over readTextFile js> tos()!="" 
+\ *debug* 111>>>
+				if nip nip exit then drop
 				js> tos().length for aft ( -- fname [path] )
+\ *debug* 222>>>
 					js> tos().pop()+'/'+tos(1) 
 					readTextFile js> tos()!=""
 					if ( -- fname [path] file )
@@ -1747,9 +1735,9 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 
 : dump          ( addr length -- addr' ) \ dump dictionary
                 for \ (addr)
-                    dup @ js> pop()==undefined if \ Dictionary 裡往下沒東西了 (addr)
-                        r> drop 0 >r \ terminate the for...next after this cycle
-                    then
+                    \ dup @ js> pop()==undefined if \ Dictionary 裡往下沒東西了 (addr)
+                    \     r> drop 0 >r \ terminate the for...next after this cycle
+                    \ then
                     dup 5 .0r s" : " . dup ? s"  (" . dup @ js> typeof(pop()) . s" )" . cr
                 1+ next \ (addr')
                 ;

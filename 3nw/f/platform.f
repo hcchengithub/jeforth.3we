@@ -205,8 +205,6 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 	document.onkeydown = function (e) {
 		switch(e.keyCode) {
 			case 13:
-				// kvm.scrollToElement($('#endofinputbox'));
-				// $('#inputbox').focus();
 				if (!kvm.EditMode || event.ctrlKey) { // CtrlKeyDown
 					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
