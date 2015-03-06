@@ -15,7 +15,7 @@ var print = kvm.print = function (s) {
 			} catch(err) {
 				var ss = Object.prototype.toString.apply(s);
 			}
-			kvm.screenbuffer += ss;
+			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 			process.stdout.write(ss);
 		}; 
 kvm.version = "1.00";

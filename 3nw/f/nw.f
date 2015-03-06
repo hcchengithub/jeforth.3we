@@ -31,6 +31,7 @@ js> kvm.gui.Window.get() constant nw // ( -- object ) the Window object of the n
 				<selftest> 
 				***** nw :> window is window but window's parent is itself ..... 
 				marker -%-%-%-%-%- 
+				js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
 				js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。 
 				( ------------ Start to do anything --------------- ) 
 				nw :> window==window dup tib. ( -- true )

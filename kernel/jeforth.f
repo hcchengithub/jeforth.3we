@@ -148,8 +148,7 @@ code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added 
                 current_word_list().push(new Word([newname,function(){}]));
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
-				last().creater = ["code"];
-				last().creater.push(this.name); // this.name is "(create)"
+				last().type = "colon-create";
 				last().help = newname + " " + packhelp(); // help messages packed
                 end-code
 
@@ -333,7 +332,7 @@ code :          ( <name> -- ) \ Begin a forth colon definition.
 				push(newname); execute("(create)"); // 故 colon definition 裡有 last or last() 可用來取得本身。
                 compiling=true;
 				stackwas = stack.slice(0); // Should not be changed, ';' will check.
-				last().creater[0] = "colon";
+				last().type = "colon";
 				last().cfa = here;
 				last().help = newhelp;
 				last().xt = colonxt = function(){
@@ -348,17 +347,7 @@ code ;          ( -- ) \ End of the colon definition.
                     panic("Stack changed during colon definition, it must be a mistake!\n", "error");
 					words[current].pop();
                 } else {
-                    // compilecode('ret'); 
-					dictcompile(null);
-					// last().creater[0] = "colon";
-                    // last().cfa = newxt; // 如上述，':' 拿 newxt 來暫放本 colon word 在 dictionary 裡的 entry point.
-                    // last().help = newhelp;
-                    // last().xt = colonxt = function(){
-                    //     rstack.push(ip);
-                    //     // recentcolonword = this; // save recentcolonword at the beginning of a colon definition if you want to access its elements.
-                    //     inner(this.cfa);
-					// 	endinner = false; // better safe than sorry
-                    // }
+					dictcompile(RET);
                 }
                 compiling = false;
 				execute('reveal');
@@ -825,7 +814,7 @@ code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from T
 				</selftest>
 
 code colon-word	( -- ) \ Decorate the last() as a colon word.
-				last().creater[0] = "colon";
+				// last().type = "colon";
 				last().cfa = here;
 				last().xt = colonxt;
 				end-code
@@ -836,8 +825,7 @@ code colon-word	( -- ) \ Decorate the last() as a colon word.
 code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itself and all newers.
                 var lengthwas = current_word_list().length; // save current word list length before create the new marker word
 				execute("(create)");execute("reveal");
-				last().creater[0] = "code";
-				last().creater.push(this.name); // this.name is "(marker)"
+				last().type = "marker";
                 last().herewas = here;
                 last().lengthwas = lengthwas; // [x] 引進 vocabulary 之後，此 marker 在只有 forth-wordlist 時使用。有了多個 word-list 之後要改寫。
 				last().help = newname + " " + packhelp(); // help messages packed
@@ -858,7 +846,10 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 code next       compilecode("doNext");dictionary[here++]=pop(); end-code immediate compile-only // ( -- ) for ... next (FigTaiwan SamSuanChen)
 
 code cr         print("\n") end-code // ( -- ) 到下一列繼續輸出 *** 20111224 sam
-code cls		kvm.screenbuffer=""; kvm.clearScreen() end-code // ( -- ) Clear jeforth console screen
+code cls		( -- ) \ Clear jeforth console screen
+				kvm.screenbuffer = (kvm.screenbuffer==null) ? null : "";
+				kvm.clearScreen();
+				end-code
 code abort      reset() end-code // ( -- ) Reset the forth system.
 
 code literal    dictcompile(new Constant(pop())) end-code immediate compile-only // ( x -- ) Compile the TOS.
@@ -870,8 +861,7 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 				for(var i in w) last()[i] = w[i]; // copy from predecessor but arrays and objects are by reference
 				last().predecessor = last().name;
                 last().name = newname;
-				last().creater = w.creater.slice(0); // this is the way JavaScript copy array by value
-				last().creater.push("alias");
+				last().type = "alias";
                 end-code
 
 				<selftest>
@@ -887,10 +877,6 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 \ ------------------ eforth colon words ---------------------------
 
 ' != alias <>	// ( a b -- f ) 比較 a 是否不等於 b, alias of !=.
-\ ' recentcolonword alias me // ( -- obj ) \ Get the recent colon word obj.
-\ 				/// It's like a colon word's "this" or "self" command.
-\ 				/// Use this command at the very beginning in a colon definition.
-
 code nip		pop(1) end-code // ( a b -- b ) 
 code rot		push(pop(2)) end-code // ( w1 w2 w3 -- w2 w3 w1 ) 
 				/// see rot -rot roll pick
@@ -1000,6 +986,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				compile 0branch here 0 , ; immediate compile-only
 : ahead         ( -- a ) \ aft internal use
 				compile branch here 0 , ; immediate compile-only
+' ahead alias never immediate compile-only // ( -- a ) never ... then for call-back entry inner(word.cfa+n) 
 : repeat        ( a a -- ) \ begin..while..repeat
 				[compile] again here swap ! ; immediate compile-only
 : then          ( a -- ) \ if..then..else
@@ -1033,6 +1020,11 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					---
 				</selftest>
 
+: char          ( <str> -- str ) \ Get character(s).
+				BL word compiling if [compile] literal then ; immediate
+				/// "char abc" gets "abc", Note! ANS forth "char abc" gets only 'a'.
+				\ 本來 compiling 時的 [ char " ] literal word 改由 char support dual mode 如今只要 char " word 即可。
+
 : ?dup          dup if dup then ; // ( w -- w w | 0 ) Dup TOS if it is not 0|""|false.
 
 				<selftest>
@@ -1043,7 +1035,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				</selftest>
 
 : variable      ( <string> -- ) \ Create a variable.
-				create 0 , ;
+				create 0 , [ char push(function(){last().type='colon-variable'}) jsEvalNo , ] ;
 				
 : +!            ( n addr -- ) \ Add n into addr, addr is a variable.
 				swap over @ swap + swap ! ;
@@ -1079,10 +1071,6 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					---
 				</selftest>
 
-: char          ( <str> -- str ) \ Get character(s).
-				BL word compiling if [compile] literal then ; immediate
-				/// "char abc" gets "abc", Note! ANS forth "char abc" gets only 'a'.
-				\ 本來 compiling 時的 [ char " ] literal word 改由 char support dual mode 如今只要 char " word 即可。
 : .(            char \) word . BL word drop ; immediate // ( <str> -- ) Print following string down to ')' immediately.
 : ."			( <str> -- ) \ Print following string down to '"'.
 				char " word compiling if
@@ -1103,7 +1091,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : does>         ( -- ) \ redirect the last new colon word.xt to after does>
 				[compile] ret \ dummy 'ret' mark for 'see' to know where is the end of a creat-does word
 				r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; 
-: constant      create , does> r> @ ; // ( n <name> -- ) Create a constant.
+: constant      create , [ s" push(function(){last().type='colon-constant'})" jsEvalNo , ] does> r> @ ; // ( n <name> -- ) Create a constant.
 ' constant alias value // ( n <name> -- ) \ Create a value-variable with the init value.
 				/// 123 value x x . ==> 123
 				/// 456 to x x . ==> 456
@@ -1209,23 +1197,24 @@ code doTo		( n Word -- ) \ Run time of 'to' command.
 					-%-%-%-%-%-
 				</selftest>
 
-: sleep 		( mS -- ) \ Suspend the recent TIB stream or inner loop for mS of time
-				[ last ] literal \ was recentcolonword ( ms Word )
-				js> setTimeout(resumeForthVM,pop(1)) ( Word timeoutID )
-				js: pop(1).timeoutID=pop()
-				suspend ;
-				/// No multiple sleep level. Only one sleep allowed.
-				/// 'sleep' is actually a context switch to Forth console next command waiting state
-				/// or actually KVM/DOM waiting state. Forth console is certainly still serving during
-				/// 'sleeping' but if your new task occupied the KVM then the already timeout'ed 
-				/// sleeping task will have to be waiting. Resuming will not happen until your task
-				/// released and go back to KVM/DOM waiting state. So, it's possible that we can use 
-				/// 'stopSleeping' command to terminate the sleep state.
-
-code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep command.
-				clearTimeout(tick('sleep').timeoutID);
-				resumeForthVM();
-				end-code
+\ 下有新版取代 hcchen5600 2015/03/05 23:56:55 
+\ : sleep 		( mS -- ) \ Suspend the recent TIB stream or inner loop for mS of time
+\ 				[ last ] literal
+\ 				js> setTimeout(resumeForthVM,pop(1)) ( Word timeoutID )
+\ 				js: pop(1).timeoutID=pop()
+\ 				suspend ;
+\ 				/// No multiple sleep level. Only one sleep allowed.
+\ 				/// 'sleep' is actually a context switch to Forth console next command waiting state
+\ 				/// or actually KVM/DOM waiting state. Forth console is certainly still serving during
+\ 				/// 'sleeping' but if your new task occupied the KVM then the already timeout'ed 
+\ 				/// sleeping task will have to be waiting. Resuming will not happen until your task
+\ 				/// released and go back to KVM/DOM waiting state. So, it's possible that we can use 
+\ 				/// 'stopSleeping' command to terminate the sleep state.
+\ 
+\ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep command.
+\ 				clearTimeout(tick('sleep').timeoutID);
+\ 				resumeForthVM();
+\ 				end-code
 
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
 				cr js: panic(pop()+'\n') abort ;
@@ -1282,6 +1271,42 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 
 : </jsV> 		( "statements" -- ) \ Retrun the value of last statement
 				compiling if jsFunc , else jsEval then ; immediate
+
+: sleep 		( mS -- ) \ Suspend to idle, resume after mS. Can be 'stopSleeping'.
+				[ last ] literal ( mS me )
+				<js>
+					function resume() { 
+						if (!me.timeoutId) return; // 萬一想提前結束時其實已經 timeout 過了則不做事。
+						tib = tibwas; ntib = ntibwas; me.timeoutId = null;
+						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
+					}
+					var tibwas=tib, ntibwas=ntib, ipwas=ip, me=pop(), delay=pop();
+					me.resume = resume; // So resume can be triggered from outside
+					if (me.timeoutId) {
+						panic("Error! double 'sleep' not allowed, use 'nap' instead.\n",true)
+					} else {
+						tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
+						me.timeoutId = setTimeout(resume,delay);
+					}
+				</js> ;
+				/// 為了要能 stopSleeping 引入了 sleep.timeoutId 致使多重 sleeping 必須禁止。
+				/// 另設有不可中止的 nap 命令可以多重 nap.
+
+code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep command.
+				clearTimeout(tick('sleep').timeoutId);
+				tick('sleep').resume();
+				end-code
+
+: nap			( mS -- ) \ Suspend to idle, resume after mS. Multiple nap is allowed.
+				<js>
+					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
+					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
+					setTimeout(resume,delay);
+					function resume() { 
+						tib = tibwas; ntib = ntibwas;
+						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
+					}
+				</js> ;
 
 \ : </jsRaw> 		( "statements" -- {value,err,flag} ) \ Retrun {value,err,flag} of last statement.
 \ 				compiling if compile jsEvalRaw else jsEvalRaw then ; immediate
@@ -1481,55 +1506,6 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					---
 				</selftest>
 
-
-code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
-                var w=pop();
-				var basewas = kvm.base; kvm.base = 10;
-                if (!(w instanceof Word)) {
-                    see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
-                }else{
-                    for(var i in w){
-                        if (typeof(w[i])=="function") continue;
-                        if (i=="comment") continue;
-                        push(i); fortheval("16 .r s'  : ' .");
-                        print(w[i]+" ("+mytypeof(w[i])+")\n");
-                    }
-                    if (w.creater[0] == "colon"){
-                        var i = w.cfa;
-                        print("\n-------- Definition in dictionary --------\n");
-                        do {
-							push(i); fortheval("5 .0r char : . space");
-                            see(dictionary[i]);
-                        } while (dictionary[i++] != RET);
-                        print("---------- End of the definition -----------\n");
-                    } else {
-                        for(var i in w){
-                            if (typeof(w[i])!="function") continue;
-                            // if (i=="selfTest") continue;
-                            push(i); fortheval("16 .r s'  :\n' .");
-                            print(w[i]+"\n");
-                        }
-                    }
-                    if (w.comment != undefined) print("\ncomment:\n"+w.comment+"\n");
-                }
-				kvm.base = basewas;
-                end-code
-: see           ' (see) ; // ( <name> -- ) See definition of the word
-
-				<selftest>
-					marker ---
-					*** see (see) ...
-					: test ; // test.test.test
-					selftest-invisible
-					see test
-					selftest-visible
-					<js> kvm.screenbuffer.indexOf('test.test.test') !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('cfa') !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('colon') !=-1 </jsV> \ true
-					and and ==>judge [if] <js> ['(see)'] </jsV> all-pass [then]
-					---
-				</selftest>
-
 code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
                 // var RegEx = new RegExp(nexttoken(),"i");
 				var pattern = pop(); // nexttoken('\n|\r'); // if use only '\n' then we get an unexpected ending '\r'.
@@ -1637,11 +1613,8 @@ code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 
 : readTextFileAuto ( "pathname" -- string ) \ Search and read, panic if failed.
 				js> kvm.path.slice(0) \ this is the way javascript copy array by value
-				over readTextFile js> tos()!="" 
-\ *debug* 111>>>
-				if nip nip exit then drop
+				over readTextFile js> tos()!="" if nip nip exit then drop
 				js> tos().length for aft ( -- fname [path] )
-\ *debug* 222>>>
 					js> tos().pop()+'/'+tos(1) 
 					readTextFile js> tos()!=""
 					if ( -- fname [path] file )
@@ -1732,29 +1705,77 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 				/// skip including if the module has been included.
 				/// setup the self-test module
 				/// initiate vocabulary for the including module
-
+code (?)        ( a -- ) \ print value of the variable consider ret and exit
+				var x = dictionary[pop()];
+				switch(x){
+					case null: print('RET');break;
+					case "": print('EXIT');break;
+					default: print(x);
+				}; end-code
+: (dump)		( addr -- ) \ dump one cell of dictionary
+				decimal dup 5 .0r s" : " . dup (?) s"  (" . js> mytypeof(dictionary[pop()]) . s" )" . cr ;
 : dump          ( addr length -- addr' ) \ dump dictionary
-                for \ (addr)
-                    \ dup @ js> pop()==undefined if \ Dictionary 裡往下沒東西了 (addr)
-                    \     r> drop 0 >r \ terminate the for...next after this cycle
-                    \ then
-                    dup 5 .0r s" : " . dup ? s"  (" . dup @ js> typeof(pop()) . s" )" . cr
-                1+ next \ (addr')
-                ;
-
+                for ( addr ) dup (dump) 1 nap 1+ next ;
 : d        		( <addr> -- ) \ dump dictionary
-                [ last ] literal \ was recentcolonword \ save the recentcolonword to local stack immediatly, it will be changed soon.
-                BL word  					\ (recentcolonword str)
-                count 0= 					\ (recentcolonword str undef?) No start address?
-                if       					\ (recentcolonword str)
-                    drop 					\ drop the undefined  (recentcolonword)
-					js> tos().lastaddress
-                else  						\ (recentcolonword str)
-                    js> parseInt(pop())		\ (recentcolonword addr)
-                then
-				20 dump 						\ (recentcolonword addr')
+                [ last ] literal
+                BL word  					\ (me str)
+                count 0= 					\ (me str undef?) No start address?
+                if       					\ (me str)
+                    drop 					\ drop the undefined  (me)
+					js> tos().lastaddress   \ (me addr)
+                else  						\ (me str)
+                    js> parseInt(pop())		\ (me addr)
+                then ( me addr )
+				20 dump 						\ (me addr')
 				js: pop(1).lastaddress=pop()
                 ;
+
+code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
+                var w=pop();
+				var basewas = kvm.base; kvm.base = 10;
+                if (!(w instanceof Word)) {
+                    see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
+                }else{
+                    for(var i in w){
+                        if (typeof(w[i])=="function") continue;
+                        if (i=="comment") continue;
+                        push(i); fortheval("16 .r s'  : ' .");
+                        print(w[i]+" ("+mytypeof(w[i])+")\n");
+                    }
+                    if (w.type.indexOf("colon")!=-1){
+                        var i = w.cfa;
+                        print("\n-------- Definition in dictionary --------\n");
+                        do {
+							push(i); execute("(dump)");
+                        } while (dictionary[i++] != RET);
+                        print("---------- End of the definition -----------\n");
+                    } else {
+                        for(var i in w){
+                            if (typeof(w[i])!="function") continue;
+                            // if (i=="selfTest") continue;
+                            push(i); fortheval("16 .r s'  :\n' .");
+                            print(w[i]+"\n");
+                        }
+                    }
+                    if (w.comment != undefined) print("\ncomment:\n"+w.comment+"\n");
+                }
+				kvm.base = basewas;
+                end-code
+: see           ' (see) ; // ( <name> -- ) See definition of the word
+
+				<selftest>
+					marker ---
+					*** see (see) ...
+					: test ; // test.test.test
+					selftest-invisible
+					see test
+					selftest-visible
+					<js> kvm.screenbuffer.indexOf('test.test.test') !=-1 </jsV> \ true
+					<js> kvm.screenbuffer.indexOf('cfa') !=-1 </jsV> \ true
+					<js> kvm.screenbuffer.indexOf('colon') !=-1 </jsV> \ true
+					and and ==>judge [if] <js> ['(see)'] </jsV> all-pass [then]
+					---
+				</selftest>
 
 code isSameArray ( a1 a2 -- T|F ) \ Compare two arrays.
 				push(isSameArray(pop(), pop()));

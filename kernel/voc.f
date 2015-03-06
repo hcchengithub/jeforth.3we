@@ -86,7 +86,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				0 , \ dummy cfa, we need to do this because "(create)" doesn't drop the doVar like "create" does.
 				, \ pfa is the "name"
 				dup js: words[pop()]=[];words[pop()].push(0) ( empty ) \ words[][0] = 0 是源自 jeforth.WSH 的設計。
-				js: last().creater.push('vocabulary') 
+				js: last().type='colon-vocabulary'
 				does> r> @ set-context rescan-word-hash ;
 				
 : vocabulary	( <name> -- ) \ create a new word list.
@@ -137,6 +137,7 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 				<selftest>
 					*** also current order vocs ... 
 					selftest-invisible
+					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
 					cr only forth also vvv also vvv000 definitions current char vvv000 = \ true
 					order 
@@ -198,7 +199,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				// -------------------- the saving part 2/2 ----------------------------------
 				var orderwas = []; // FigTaiwan 爽哥提醒
  				for(var i=0; i<order.length; i++) orderwas[i] = order[i]; // FigTaiwan 爽哥提醒. Marker 也得 restore order[] 跟 vocs[].
-				last().creater.push(this.name); // this.name is "(marker)"
+				last().type='marker'
                 last().herewas = here;
                 last().lengthwas = lengthwas; // dynamic variable array 的 reference 給了別人之後就不會蒸發掉了。
 				last().help =newname + " " + packhelp(); // help messages packed

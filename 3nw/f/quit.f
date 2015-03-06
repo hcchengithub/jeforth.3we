@@ -20,6 +20,7 @@
 
 	include voc.f			\ voc.f is basic of forth language
 	include html5.f			\ leverage jeforth.3htm
+	include element.f		\ HTML element manipulation
 	include mytools.f		
 	include nw.f
 	include platform.f		\ leverage jeforth.3htm
@@ -38,4 +39,5 @@
 	<js> (kvm.argv.slice()).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
 
 \ ------------ End of jeforth.f -------------------
+	js: kvm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.

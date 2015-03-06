@@ -875,11 +875,11 @@
     ==> No way.
 
 [ ] {backSpace} 的 bottom up 跟 top down 程式都類似，可以再簡化。 
-	[x] 用來清理 outputbox 畫面，在 Node-webkit jsc 裡無效。
-		記得在以前也碰過同樣問題，原因是判斷 inputbox 是否 empty 時它並非 empty 而是有個 0x0A 留在
-		裡面。<==== 不該多個 LF，處理 inputbox 的程式有問題。不要妥協！
-		--> 可能是 Node-webkit 的問題 $('#inputbox').focus(); 有嫌疑 <=== 捅不出來，可能不是。
-		進 jsc 一律把 inputbox.value="" 也是簡單的辦法。 <==== 就這麼用補的治好了。
+    [x] 用來清理 outputbox 畫面，在 Node-webkit jsc 裡無效。
+        記得在以前也碰過同樣問題，原因是判斷 inputbox 是否 empty 時它並非 empty 而是有個 0x0A 留在
+        裡面。<==== 不該多個 LF，處理 inputbox 的程式有問題。不要妥協！
+        --> 可能是 Node-webkit 的問題 $('#inputbox').focus(); 有嫌疑 <=== 捅不出來，可能不是。
+        進 jsc 一律把 inputbox.value="" 也是簡單的辦法。 <==== 就這麼用補的治好了。
 
 [x] Now jeforth.3hta default is float instead of integer. Try input 123.456 .s and 0x7fffff .s 
     This is for HTML5 canvas.
@@ -1231,7 +1231,7 @@
         
 [x] Node.js 本身的 REPL 可以 'see' object 效果超好，怎麼應用？
     ==> 那是 console.log() 的效果。 考慮 3nd 的 print() 裡面應該就用 console.log()
-	==> 找到了！用 util.inspect() or sys.inspect() for older Node.js systems.
+    ==> 找到了！用 util.inspect() or sys.inspect() for older Node.js systems.
     
 [ ] FigTaiwan academic topic:
     o   jeforth can compile all function() into dictionary, instead of Word()'s. Hard to read the dictionary
@@ -1275,7 +1275,7 @@
     http://stackoverflow.com/questions/12760852/how-to-access-plain-text-content-retrieved-via-script-type-text-plain-src 
     https://www.evernote.com/shard/s22/nl/2472143/f8a48817-933d-4681-a6bb-90eb10649fcd
 
-	
+    
 [x] 用 iframe 的方式 include text file, extended filename can not be .f or it will be saved to 
     local disk directly. 暫時改名 jeforth.f==>jeforth.txt, voc.f==>voc.txt 
     Study ...
@@ -1731,7 +1731,7 @@
     and working mode. ==> Add this line into inner(), it really works!!
         if(ip==vm.bp){vm.jsc.prompt='ip='+ip;eval(vm.jsc.xt)}; 
     Very useful actually. We can change kvm.breakpoint to stop at next break point, or 
-	kvm.breakpoint="" to free run.
+    kvm.breakpoint="" to free run.
     
 [x] Re-write p5.f processing loop call back function. How about :
     [ last ] literal ...something....  Forget it.
@@ -1771,9 +1771,9 @@
                 last execute
             dropall char clock3.f readTextFileAuto .s
             js: kvm.debug=true;kvm.bp=1147 dropall char clock3.f readTextFileAuto .s
-	[ ]	hcchen5600 2015/02/25 15:32:17 
-		其實 callback=function(){execute('tsr')} 也是個 call back function 的辦法。
-		上例 tsr command on-timeout 時是 call back 直接進來的。這般直接
+    [ ] hcchen5600 2015/02/25 15:32:17 
+        其實 callback=function(){execute('tsr')} 也是個 call back function 的辦法。
+        上例 tsr command on-timeout 時是 call back 直接進來的。這般直接
 
     [ ] 可向 FigTaiwan 報告
         TSR important rule!! Modify processing loop
@@ -1782,8 +1782,8 @@
     [x] Experiment : test 111 3000 sleep 222 ; run test when the new p5.f TSR is running ... OK.
         But clock3.f is wrong. Only [111] , 222 will be missing. ==> Because clock3.f TSR loop
         needs the solutions too. ==> Yeap. Done!
-		
-		
+        
+        
 [x] JUMP is easy in colon word. 
     1.  One way is to compile the destination ip number to replace the ret/exit return ip in rstack
         will be used by the destination word's ret/exit. 
@@ -1795,7 +1795,7 @@
     format,deprecate,print,puts,debug,error,inspect,isArray,isRegExp,isDate,isError,p,log,
     exec,pump,inherits,_extend
     Many of them does not work in Node-webkit at first. But I think that's resolvable.
-	
+    
 [ ] call back function study
     1. Use code word itself to be a call back function.
         code tt print(Date());this.timer=setTimeout(arguments.callee,1000) end-code
@@ -1816,14 +1816,14 @@
         : handler char . . js> rstack.length if 0 >r then ;
     Push 0 to rstack due to the assumption of that all handlers are started from the waiting state, 
     0 brings the handler back to waiting sate.
-	
-		\ 取得 colon word 本身的 cfa 有下列方法 
-		\ a）[ js> last().cfa ] literal 即是
-		\ b） [ last ] literal :> cfa 同上，這個不 optimize。
-		\ c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
+    
+        \ 取得 colon word 本身的 cfa 有下列方法 
+        \ a）[ js> last().cfa ] literal 即是
+        \ b） [ last ] literal :> cfa 同上，這個不 optimize。
+        \ c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
 
-		\ 設定、取得 colon word 本身裡的 static variable 的方法，
-		\ : test2 [ last dup js: pop().vv=1111 ] literal js> pop().vv ;
+        \ 設定、取得 colon word 本身裡的 static variable 的方法，
+        \ : test2 [ last dup js: pop().vv=1111 ] literal js> pop().vv ;
     
     3. Use an existing code word to setup a call back function
     This example shows that the xt of a code word can be used as a call back function.
@@ -1862,481 +1862,679 @@
                                  |  |                   '------- TSR 回 test 的 return address, 被棄置。
                                  |  '--------------------------- bp0
                                  '------------------------------ test 的 return address
-	==> 如上，保護 TSR 所做的 0 >r ; 與正常 event 發生時 execute('show'), 'show'.xt 所 push 的 IP 都是
-		0 ，這個一致性很令人滿意。
+    ==> 如上，保護 TSR 所做的 0 >r ; 與正常 event 發生時 execute('show'), 'show'.xt 所 push 的 IP 都是
+        0 ，這個一致性很令人滿意。
 
 [ ] 3nd's jsc can not <backspace> <==== improve the console input method.
-[ ]	3nw's jsc can not <Enter> or <Esc>, must click <==== nw's Problem? Try Google.
+[ ] 3nw's jsc can not <Enter> or <Esc>, must click <==== nw's Problem? Try Google.
 [ ] Improve overall jsc's <up> <down> to support command history.
 [x] Node.js has a 'querystring' module, also 'util' module
-	querystring obj>keys .
-	unescapeBuffer,unescape,escape,encode,stringify,decode,parse
-	==> I think 'querystring' is a HTML POST parser.
-	==> 'util' was 'sys' that provides console I/O and object viewer.
-	
+    querystring obj>keys .
+    unescapeBuffer,unescape,escape,encode,stringify,decode,parse
+    ==> I think 'querystring' is a HTML POST parser.
+    ==> 'util' was 'sys' that provides console I/O and object viewer.
+    
 
 [x] Use full path for nw to require existing external module in Node.js folder
-	char c:\Users\8304018\Dropbox\learnings\JavaScript\node.js\node_modules\formidable >path/ js> require(pop())
-	constant formidable // ( -- module ) Node.js external module
-	==> It works. So 3nw can get Node.js' external modules without knowing how to setup nw correctly with all the
-		path or root settings.
+    char c:\Users\8304018\Dropbox\learnings\JavaScript\node.js\node_modules\formidable >path/ js> require(pop())
+    constant formidable // ( -- module ) Node.js external module
+    ==> It works. So 3nw can get Node.js' external modules without knowing how to setup nw correctly with all the
+        path or root settings.
 
 [ ] webserver.f can be run on jeforth.3nd and jeforth.3nw.
-	It is actually a copy from the original JavaScript source.
-	The beauty of jeforth is that I can bring out its internal variables to forth global variables for
-	debug or for fun. [ ] Report to FigTaiwan.
+    It is actually a copy from the original JavaScript source.
+    The beauty of jeforth is that I can bring out its internal variables to forth global variables for
+    debug or for fun. [ ] Report to FigTaiwan.
 
 [x] 3wsh can not use setTimeout() !! JScript does not have it. Try alternative solution.
-	3wsh self-test 不過就算了。用 3HTA 取代即可。
+    3wsh self-test 不過就算了。用 3HTA 取代即可。
 
 [ ] study ~\Dropbox\learnings\JavaScript\JScript\深入挖掘Windows腳本技術.rtf
-	Try set http=wscript.createobject("Microsoft.XMLHTTP")
-	<js> new ActiveXObject("Microsoft.XMLHTTP") </jsV> constant XMLHTTP // ( -- xmlhttp ) DOM object, old method
-	http://www.w3school.com.cn/xml/xml_http.asp
-	<js> new window.XMLHttpRequest()</jsV> constant XMLHTTP // ( -- xmlhttp ) DOM object, new method
-	XMLHTTP :: onreadystatechange=function(){execute("statusChanged")}
-	: statusChanged ( -- ) \ XMLHTTP status
-		." XMLHTTP readyState changed : " XMLHTTP :> readyState . cr
-		XMLHTTP :> readyState 4 = if
-			XMLHTTP :> status dup ." XMLHTTP :> status : " . cr
-			200 = if
-				XMLHTTP :> responseText .
-			else
-				." Problem retrieving XMLHTTP data:" XMLHTTP :> statusText . cr
-			then
-		then ;	
-	XMLHTTP :: open("GET","http://www.ibm.com",true);
-	XMLHTTP :: send(null);
-	\ XMLHTTP :> status .
-	\ XMLHTTP :> responseText .
-	XMLHTTP.readyState   http://www.cnblogs.com/fsjohnhuang/articles/2345653.html
-	0：请求未初始化（还没有调用 open()）。
-	1：请求已经建立，但是还没有发送（还没有调用 send()）。
-	2：请求已发送，正在处理中（通常现在可以从响应中获取内容头）。
-	3：请求在处理中；通常响应中已有部分数据可用了，但是服务器还没有完成响应的生成。
-	4：响应已完成；您可以获取并使用服务器的响应了。
-	[ ] 用 3HTA,3NW 都可以讀到 ibm.com 以及 apple 行情。但用 3WSH 只能讀到自己的 localhost:8888.
-		與 Webserver 是 Node.js or Python 無關。3htm, 3ND 沒有 window object 但有更好的 http module。
-		3WSH readyState 不會變，不知道怎麼回事。
-	[ ] 讀到的 responseText 是 raw data, 裡面有很多地方是要程式跑起來了才會有東西的地方。怎麼辦？
+    Try set http=wscript.createobject("Microsoft.XMLHTTP")
+    <js> new ActiveXObject("Microsoft.XMLHTTP") </jsV> constant XMLHTTP // ( -- xmlhttp ) DOM object, old method
+    http://www.w3school.com.cn/xml/xml_http.asp
+    <js> new window.XMLHttpRequest()</jsV> constant XMLHTTP // ( -- xmlhttp ) DOM object, new method
+    XMLHTTP :: onreadystatechange=function(){execute("statusChanged")}
+    : statusChanged ( -- ) \ XMLHTTP status
+        ." XMLHTTP readyState changed : " XMLHTTP :> readyState . cr
+        XMLHTTP :> readyState 4 = if
+            XMLHTTP :> status dup ." XMLHTTP :> status : " . cr
+            200 = if
+                XMLHTTP :> responseText .
+            else
+                ." Problem retrieving XMLHTTP data:" XMLHTTP :> statusText . cr
+            then
+        then ;  
+    XMLHTTP :: open("GET","http://www.ibm.com",true);
+    XMLHTTP :: send(null);
+    \ XMLHTTP :> status .
+    \ XMLHTTP :> responseText .
+    XMLHTTP.readyState   http://www.cnblogs.com/fsjohnhuang/articles/2345653.html
+    0：请求未初始化（还没有调用 open()）。
+    1：请求已经建立，但是还没有发送（还没有调用 send()）。
+    2：请求已发送，正在处理中（通常现在可以从响应中获取内容头）。
+    3：请求在处理中；通常响应中已有部分数据可用了，但是服务器还没有完成响应的生成。
+    4：响应已完成；您可以获取并使用服务器的响应了。
+    [ ] 用 3HTA,3NW 都可以讀到 ibm.com 以及 apple 行情。但用 3WSH 只能讀到自己的 localhost:8888.
+        與 Webserver 是 Node.js or Python 無關。3htm, 3ND 沒有 window object 但有更好的 http module。
+        3WSH readyState 不會變，不知道怎麼回事。
+    [ ] 讀到的 responseText 是 raw data, 裡面有很多地方是要程式跑起來了才會有東西的地方。怎麼辦？
 
-	[ ] 先看一個支持斷點續傳下載web資源的例子 (for jeforth.3wsh)
-	js> WScript.fullname.slice(-11)=="cscript.exe" [if] [else]
-		." Script host must be cscript.exe." cr bye
-	[then]
-	args :> named("url") ?dup [if] [else]
-		." Command line argument /url:<url> is missing." cr bye
-		." Usage: cscript jeforth.3wsh.bat /url:<url> /filename:<filename> include webdl.f" cr 
-		bye
-	[then]
-	js> kvm.fso constant fso // ( -- obj ) WSH Scripting.FileSystemObject
-	js> kvm.ado constant ado // ( -- obj ) WSH ADODB.Stream
-	<js> new ActiveXObject("Microsoft.XMLHTTP")</jsV> constant http // ( -- obj ) Microsoft.XMLHTTP object
-	args :> named("filename") ?dup [if] [else]
-		js> url.match(/.*\/(.*)/)[1] 
-	[then] constant filename // ( -- string ) Target filename
+    [ ] 先看一個支持斷點續傳下載web資源的例子 (for jeforth.3wsh)
+    js> WScript.fullname.slice(-11)=="cscript.exe" [if] [else]
+        ." Script host must be cscript.exe." cr bye
+    [then]
+    args :> named("url") ?dup [if] [else]
+        ." Command line argument /url:<url> is missing." cr bye
+        ." Usage: cscript jeforth.3wsh.bat /url:<url> /filename:<filename> include webdl.f" cr 
+        bye
+    [then]
+    js> kvm.fso constant fso // ( -- obj ) WSH Scripting.FileSystemObject
+    js> kvm.ado constant ado // ( -- obj ) WSH ADODB.Stream
+    <js> new ActiveXObject("Microsoft.XMLHTTP")</jsV> constant http // ( -- obj ) Microsoft.XMLHTTP object
+    args :> named("filename") ?dup [if] [else]
+        js> url.match(/.*\/(.*)/)[1] 
+    [then] constant filename // ( -- string ) Target filename
 
-	0 value start // ( -- int ) 文件寫入開始位置
-	filename fso :> fileexists(pop()) [if] 				\ 判斷要下載的文件是否已經存在
-		filename fso :> getfile(pop()).size to start   	\ 存在，以當前文件大小作為開始位置'
-	[else]
-		filename fso :> createtextfile(pop()).close     \ 新建該文件
-	[then]
+    0 value start // ( -- int ) 文件寫入開始位置
+    filename fso :> fileexists(pop()) [if]              \ 判斷要下載的文件是否已經存在
+        filename fso :> getfile(pop()).size to start    \ 存在，以當前文件大小作為開始位置'
+    [else]
+        filename fso :> createtextfile(pop()).close     \ 新建該文件
+    [then]
 
 [ ] webdl.f 斷點續傳 is not ok. Try 3hta first becaus 3wsh does not work well, don't know why.
-	I better try to improve kvm.breakpoint debugging 
-	n : next ip
-	g : free run
-	[x] 把 kvm.debug=1111 定為單步執行的設定 ==> 很成功！ on 3hta first.
-	
+    I better try to improve kvm.breakpoint debugging 
+    n : next ip
+    g : free run
+    [x] 把 kvm.debug=1111 定為單步執行的設定 ==> 很成功！ on 3hta first.
+    
 [ ] kvm.dictionary 可能不是真正的 dictionary! 因為 suspend-resume 中 dictionary 有經過
-	copy by value 的過程。
-	
+    copy by value 的過程。
+    
 [x] 把 jeforth.js kernel code 裡頭原來用 hash table 取代 switch(){...} 的寫法改回去用 switch().
-	經 吳政昌 指點，這個場合用 switch 比較好。 ==> Done, committed.
+    經 吳政昌 指點，這個場合用 switch 比較好。 ==> Done, committed.
 
 [ ] Thinking of how to improve the user experience on http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/,
-	I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
-	It's beautiful and it can help us to convert a picture into base64 embeded HTML code. Good for jeforth
-	to have embeded pictures.
-	[ ] Use contentBuilder.js' online editor to design what I want to show on jeforth.3htm online. Then pay
-		some money to find a front end designer to translate into HTML.
-		
-[x]	canvas.f self-test is annoying. Remove the confirming dialogs.
-	[x] 引用 kvm.cv 當 default canvas 可簡化 canvas commands. 但是要記住自己的 canvas ID, processing.js
-		alike event driven animation 上手時要把 kvm.cv 改成自己的，離開前要還原。 clock3.f 有做，很好。
-	[x]	p5.f 沒有做，有問題。做好了，但有點醜，進一步用 processing 本身來存放 cv & cvwas . . . done
+    I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
+    It's beautiful and it can help us to convert a picture into base64 embeded HTML code. Good for jeforth
+    to have embeded pictures.
+    [ ] Use contentBuilder.js' online editor to design what I want to show on jeforth.3htm online. Then pay
+        some money to find a front end designer to translate into HTML.
+        
+[x] canvas.f self-test is annoying. Remove the confirming dialogs.
+    [x] 引用 kvm.cv 當 default canvas 可簡化 canvas commands. 但是要記住自己的 canvas ID, processing.js
+        alike event driven animation 上手時要把 kvm.cv 改成自己的，離開前要還原。 clock3.f 有做，很好。
+    [x] p5.f 沒有做，有問題。做好了，但有點醜，進一步用 processing 本身來存放 cv & cvwas . . . done
 
 [x] create-does> words need an ending 'ret' for a better 'see' result.
-	[x] 由 does> 負責多 compile 一個 dmmy ret 
+    [x] 由 does> 負責多 compile 一個 dmmy ret 
  
 [x] Writing demo program 小算盤.f
-	[x] improve help message.
+    [x] improve help message.
 
 [x] for jsc debug, I need a jsc command to clear the debug message
-	[x] jeforth.3hta jsc has a 'clean' command already that erase the output box from the bottom.
-	[x] Same code but not work in jeforth.3htm yet,  why? ==> 檢查 inputbox 是否有東西的 
-		Boolean(inputbox.value) 在 HTA 是 false; 在 Chrome browser 是 true <=== Root cause
-		==> 查 inputbox.value.length -> 1, ==> inputbox.value.charCodeAt(0)->10 <== 先清掉
+    [x] jeforth.3hta jsc has a 'clean' command already that erase the output box from the bottom.
+    [x] Same code but not work in jeforth.3htm yet,  why? ==> 檢查 inputbox 是否有東西的 
+        Boolean(inputbox.value) 在 HTA 是 false; 在 Chrome browser 是 true <=== Root cause
+        ==> 查 inputbox.value.length -> 1, ==> inputbox.value.charCodeAt(0)->10 <== 先清掉
 [x] need a way to see or to save screen info when in jsc. 不行，整個 browser 都 block 住了！
 
 [x] Study how to use command-line in jeforth.3htm. 
-	see d:\hcchen\Dropbox\learnings\github\jeforth.3we\3htm\url.f 
-		\ URL Parameter Passing in Javascript, WWW web page URL argument 如何應用 HTML
-		\ https://www.evernote.com/shard/s22/nl/2472143/7f13ae42-668a-4af3-80df-18dc49b07f8a
-		js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
-		url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
-		rnurlterms=urlquery[1].split(",")
-		%20 is space
-		%22 is "
-		what else?
-		只要看到 % 就把後兩 charactor 拿來變成 0xCC 轉換成 String.fromCharCode(0xCC); 
-		cls%20.%22%20hello%20world%20!!%20%22%20cr
-		args :> split('%') --> cls,20.,22,20hello,20world,20!!,20,22,20cr OK 
-		第一個怎麼辦？ ==> 前面故意塞一個 %20 才好。 重來 ...
-		char %20 args + :> split('%') --> ,20cls,20.,22,20hello,20world,20!!,20,22,20cr --> 對了！
-		20aa OK js> "20aa".slice(2) .
-		aa OK js> "20aa".slice(0,2) .
-		20 OK 
-		中文出來變亂碼，英文可以了
-		js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
-		url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
-		char %20 args + :> split('%') <js>
-			for (var ss="",i=1; i<tos().length; i++){
-				ss += String.fromCharCode("0x"+tos()[i].slice(0,2)) + tos()[i].slice(2);
-			};ss
-		</jsV> to args
-	3htm\f\quit.f ... ok
+    see d:\hcchen\Dropbox\learnings\github\jeforth.3we\3htm\url.f 
+        \ URL Parameter Passing in Javascript, WWW web page URL argument 如何應用 HTML
+        \ https://www.evernote.com/shard/s22/nl/2472143/7f13ae42-668a-4af3-80df-18dc49b07f8a
+        js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
+        url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
+        rnurlterms=urlquery[1].split(",")
+        %20 is space
+        %22 is "
+        what else?
+        只要看到 % 就把後兩 charactor 拿來變成 0xCC 轉換成 String.fromCharCode(0xCC); 
+        cls%20.%22%20hello%20world%20!!%20%22%20cr
+        args :> split('%') --> cls,20.,22,20hello,20world,20!!,20,22,20cr OK 
+        第一個怎麼辦？ ==> 前面故意塞一個 %20 才好。 重來 ...
+        char %20 args + :> split('%') --> ,20cls,20.,22,20hello,20world,20!!,20,22,20cr --> 對了！
+        20aa OK js> "20aa".slice(2) .
+        aa OK js> "20aa".slice(0,2) .
+        20 OK 
+        中文出來變亂碼，英文可以了
+        js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
+        url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
+        char %20 args + :> split('%') <js>
+            for (var ss="",i=1; i<tos().length; i++){
+                ss += String.fromCharCode("0x"+tos()[i].slice(0,2)) + tos()[i].slice(2);
+            };ss
+        </jsV> to args
+    3htm\f\quit.f ... ok
 
 [x] 恢復 jeforth.3htm self-test which is now disabled to avoid annoying.
 [x] Improve help message for calc.f and html5_audio_demo.f 
 
 [x] for the alarm demo, trying embeded audio. see jeforth.3we/playground
-	[x] I already know how to play 228.mp3, see html5_audio_demo.f 
+    [x] I already know how to play 228.mp3, see html5_audio_demo.f 
 
 [/] Node-webkit 的 <audio> element 不 work！Licence 的問題。雖然可以解決，要改掉 .dll file，還是不
-	要好了。jeforth.3we 的 user 還得去安裝 Node-webkit 都已經夠累了，再讓他們去改 .dll 沒價值，乾脆
-	不 support 算了。
-	https://www.evernote.com/shard/s22/nl/2472143/29e7f8b3-b9e9-408c-87b0-ad4b63016d3e
+    要好了。jeforth.3we 的 user 還得去安裝 Node-webkit 都已經夠累了，再讓他們去改 .dll 沒價值，乾脆
+    不 support 算了。
+    https://www.evernote.com/shard/s22/nl/2472143/29e7f8b3-b9e9-408c-87b0-ad4b63016d3e
 
 [x] alarm.f almost ok, [x] embed music mp3 [x] Title Text-Area.
 
 [ ] 研究如何 communicate serial port? 
-	
-[x]	appname 不統一，HTML tag class 與 id 的使用原則想清楚。
-	id    最好是唯一的變數名。
-	class 是同質的一堆東西用在 CSS 調整。
-	name  是一堆同質東西的共同名，例如 merge2.f 裡的 input targetsheet.
-	當初不明白，亂填了一堆：
-	[x] 應該只留 id , name & class 都拿掉。
-		[x] index.html & jeforth.3htm.html
-		[x] jeforth.3nw.html
-		[x] jeforth.hta
-	
-	[x]	查 jeforth.3we 現有用到 class= 的 tag 只有三處，兩個 class=appname 一個 class=outputbox，都
-		有待探討！
-		[x] Web page tab title 上顯示的稱作 title 以 <title> tag 給值設定成 appname。
-			查所有 application 都只有一個 <title> tag 無誤。
-			用途： ce@ :> textContent="小鬧鐘"
-			js> $('title').html() . ==> jeforth.3hta 
-			js> $('title').html('hehehe') <=== modify
-			==> appname appears at two place (1)Web page title, (2)Greeting message. 
-				$('.appname').html(kvm.appname); // 一次填好所有 appname
-				So it's ok.
-				[x] index.html & jeforth.3htm.html
-				[x] jeforth.3nw.html
-				[x] jeforth.hta
+    
+[x] appname 不統一，HTML tag class 與 id 的使用原則想清楚。
+    id    最好是唯一的變數名。
+    class 是同質的一堆東西用在 CSS 調整。
+    name  是一堆同質東西的共同名，例如 merge2.f 裡的 input targetsheet.
+    當初不明白，亂填了一堆：
+    [x] 應該只留 id , name & class 都拿掉。
+        [x] index.html & jeforth.3htm.html
+        [x] jeforth.3nw.html
+        [x] jeforth.hta
+    
+    [x] 查 jeforth.3we 現有用到 class= 的 tag 只有三處，兩個 class=appname 一個 class=outputbox，都
+        有待探討！
+        [x] Web page tab title 上顯示的稱作 title 以 <title> tag 給值設定成 appname。
+            查所有 application 都只有一個 <title> tag 無誤。
+            用途： ce@ :> textContent="小鬧鐘"
+            js> $('title').html() . ==> jeforth.3hta 
+            js> $('title').html('hehehe') <=== modify
+            ==> appname appears at two place (1)Web page title, (2)Greeting message. 
+                $('.appname').html(kvm.appname); // 一次填好所有 appname
+                So it's ok.
+                [x] index.html & jeforth.3htm.html
+                [x] jeforth.3nw.html
+                [x] jeforth.hta
 
 [ ] 透過 CSS 可以讓所有的 node 對 hover 作反應，因此可以任意 delete 或 drag-drop!!
 
 [x] CSS selector 'element element' 可以 localize 設定，但碰到 input 好像就不行
-	了（行，只是後來被改了）。input 好像都是 global 的？非也，'element element' selector 對 input 有效。
-	但是 input 出現在 table class=alarm 裡面不等於 input 就會繼承 .alarm 的 style。<table class=alarm> 
-	只是讓這個 table 套用 .alarm 的 style, table 裡面只有 table 自己的東西 (th, tr, td 等) 套用到，現在
-	回頭看，的確是這個意思。若要讓本 table 裡的 input 套用 .alarm 的 style, 明確表達為 .alarm input {}
-	才對，也就是說，光 .alarm {} 且 <table class=alarm> 與 table 裡的 input 無關。
+    了（行，只是後來被改了）。input 好像都是 global 的？非也，'element element' selector 對 input 有效。
+    但是 input 出現在 table class=alarm 裡面不等於 input 就會繼承 .alarm 的 style。<table class=alarm> 
+    只是讓這個 table 套用 .alarm 的 style, table 裡面只有 table 自己的東西 (th, tr, td 等) 套用到，現在
+    回頭看，的確是這個意思。若要讓本 table 裡的 input 套用 .alarm 的 style, 明確表達為 .alarm input {}
+    才對，也就是說，光 .alarm {} 且 <table class=alarm> 與 table 裡的 input 無關。
 
-[ ]	A command set to manipulate HTML elements. ==> element.f
-	ce 列出 id class name 以及部分內容
-	[x] ce@ removeElement 之後可能斷鏈, ce 要有 default 值或保留 last ce.
-		讓 current-element 變成一個 stack, 所有造訪過的 ce 都 push 進去。
-		當發現 TOS 有異常就 drop 掉，改 pop 前一個讓來用。
-	[ ]	node/element 殺掉以後還會留在 ce-history.tos 但是已經斷線，留著沒意義。應該自動 ce< 回上一層。
-		
-[ ]	這個寫法是可以的，為何 element.f 裡還得傳 a[i] ?
-	<js>
-		var a=[], i=0;
-		init();
-		for(; i<10; i++){
-			inc();
-		}
-		push(a);
-		function init(){
-			for (var i=0; i<10; i++) a[i]=0;
-		}
-		function inc(){
-			a[i] += 1;
-		}
-	</js>
-	
+[ ] A command set to manipulate HTML elements. ==> element.f
+    ce 列出 id class name 以及部分內容
+    [x] ce@ removeElement 之後可能斷鏈, ce 要有 default 值或保留 last ce.
+        讓 current-element 變成一個 stack, 所有造訪過的 ce 都 push 進去。
+        當發現 TOS 有異常就 drop 掉，改 pop 前一個讓來用。
+    [ ] node/element 殺掉以後還會留在 ce-history.tos 但是已經斷線，留著沒意義。應該自動 ce< 回上一層。
+        
+[ ] 這個寫法是可以的，為何 element.f 裡還得傳 a[i] ?
+    <js>
+        var a=[], i=0;
+        init();
+        for(; i<10; i++){
+            inc();
+        }
+        push(a);
+        function init(){
+            for (var i=0; i<10; i++) a[i]=0;
+        }
+        function inc(){
+            a[i] += 1;
+        }
+    </js>
+    
 [x] Why <div id=endofinputbox style="position:absolute"></div> and scrollToElement($('#endofinputbox')); ?
-	Why not clicking a <a> tag programmatically?
-	[x] Yeah, scrollToElement() has now been removed,
-		// http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
-		// evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
-		// 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
+    Why not clicking a <a> tag programmatically?
+    [x] Yeah, scrollToElement() has now been removed,
+        // http://stackoverflow.com/questions/9757625/jquery-how-to-scroll-to-certain-anchor-div-on-page-load
+        // evernote:///view/2472143/s22/68f2501f-f702-4a9f-887e-d0d6d171e96f/68f2501f-f702-4a9f-887e-d0d6d171e96f/
+        // 黃嘉祥/104case https://www.evernote.com/shard/s22/nl/2472143/1e57cafd-1133-4eca-bda7-ef10818527e9
         // var scrollToElement = kvm.scrollToElement = function (ele) {
-        // 	$(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
+        //  $(window).scrollTop(ele.offset().top).scrollLeft(ele.offset().left);
         // }
-		==> replaced by : jump2endofinputbox.click(); inputbox.focus();
-	
+        ==> replaced by : jump2endofinputbox.click(); inputbox.focus();
+    
 [x] Is it a good idea to separate kvm.debug and kvm.breakpont?
-	A jsc p command to pass through. Only n next step is not enough.
-	==> Now global variable bp instead of kvm.breakpoint. 
-		jsc command s, p, r see help for details.
+    A jsc p command to pass through. Only n next step is not enough.
+    ==> Now global variable bp instead of kvm.breakpoint. 
+        jsc command s, p, r see help for details.
 
 [x] 3HTM, 3HTA, 3NW command history was 20 too small no reason. Changed to 10000.
-	"max:   10000, // maximum length of the command history"
-	[ ] A command to list the command history. As fancy as using a scrull bar to select one. 
-		Supports Up Down PgUp PgDn Home and End and even a Serach box.
-	[ ] 自動過濾 cls .s . er <enter> 等等這些常用的命令也許是個簡便的構想 <--- 本來就有在過濾了。
-		
+    "max:   10000, // maximum length of the command history"
+    [ ] A command to list the command history. As fancy as using a scrull bar to select one. 
+        Supports Up Down PgUp PgDn Home and End and even a Serach box.
+    [ ] 自動過濾 cls .s . er <enter> 等等這些常用的命令也許是個簡便的構想 <--- 本來就有在過濾了。
+        
 [x] 示範 element.f command 
-	清掉幾個 element 整理畫面 clean outputbox by removing some elements
-	ce 1 ce@ removeElement ce< 
-	ce 0 ce@ removeElement ce< 
-	er ce
+    清掉幾個 element 整理畫面 clean outputbox by removing some elements
+    ce 1 ce@ removeElement ce< 
+    ce 0 ce@ removeElement ce< 
+    er ce
 
 [/] Working on playground/playCSS.f 
-	The two articles are essential --> see Evernote tag:CSS
+    The two articles are essential --> see Evernote tag:CSS
 
-[x]	js> styleBase ce! ce@ dup se :> innerHTML . \ ==> 仔細看下列結果，這些設定合不合理。
-	==> Yea, textarea style inherits body's only border, background color, and width need specification.
-		[x] 3hta [x] 3htm [x] 3nw 
+[x] js> styleBase ce! ce@ dup se :> innerHTML . \ ==> 仔細看下列結果，這些設定合不合理。
+    ==> Yea, textarea style inherits body's only border, background color, and width need specification.
+        [x] 3hta [x] 3htm [x] 3nw 
 
-[x]	After my study on playCSS.f, learned that we should avoid using global CSS style settings, local
-	is better. jeforth.3we can be running many .f applications besides.
-	[x] alarm.f
-	[x] calc.f
-	[/] merge2.f
-	
+[x] After my study on playCSS.f, learned that we should avoid using global CSS style settings, local
+    is better. jeforth.3we can be running many .f applications besides.
+    [x] alarm.f
+    [x] calc.f
+    [/] merge2.f
+    
 [x] alarm.f 不能重複調用，應該可以。calc.f 禁止重複 inclcude 是合理的。
-	[x] forget it, bad idea. When it alarms it's hard enough to find the source.
-		Try to show the reminder message to the tab and title on browser. Change the tab color or something
-		more observable is preferred.
+    [x] forget it, bad idea. When it alarms it's hard enough to find the source.
+        Try to show the reminder message to the tab and title on browser. Change the tab color or something
+        more observable is preferred.
 
 [x] 很奇怪，alarm.f timeout 之後要改 table 的 border 竟然改不了，結果發現：Chrome 線寬要 12px 以上, 
-	而 IE11 則要 11px 以上才會生效！ 
-	<o> <style> #alarm { border: 12px solid red; }</style></o>
-	這樣看來是所有的 style 都生效了，而寬度不夠的被 (td 的是 10px) 遮住了！ canvas 畫圖似乎也有這種現象。
-	==> 讓設定 border 的 element 獨立，直接改它。
-		<o> <style> .alarm { border: 12px solid #f0f0f0; }</style></o> constant alarm-border // ( -- element ) use this to change color.
-		alarm-border <js> pop().innerHTML=".alarm { border: 12px solid pink; }"</js>
-		alarm-border <js> pop().innerHTML=".alarm { border: 12px solid #f0f0f0; }"</js>
+    而 IE11 則要 11px 以上才會生效！ 
+    <o> <style> #alarm { border: 12px solid red; }</style></o>
+    這樣看來是所有的 style 都生效了，而寬度不夠的被 (td 的是 10px) 遮住了！ canvas 畫圖似乎也有這種現象。
+    ==> 讓設定 border 的 element 獨立，直接改它。
+        <o> <style> .alarm { border: 12px solid #f0f0f0; }</style></o> constant alarm-border // ( -- element ) use this to change color.
+        alarm-border <js> pop().innerHTML=".alarm { border: 12px solid pink; }"</js>
+        alarm-border <js> pop().innerHTML=".alarm { border: 12px solid #f0f0f0; }"</js>
 
 [x] try to change web page title color <--------- No way!
-	<h> <title>test</title></h> constant title // ( -- element ) the document.title, must be in <head>
-		/// but it doesn't work. I guess only the first title element takes effect.
-	document.title='string'
-	js> $('title')[0]
-	js> $('title')[0] removeElement <---- 真的可以把用 document.title 改過的 title 變回 default 值。
-	try again the above <title> tag . . . B i n g o !!!
-	delete it again, try going fancy
-	<h> <title style="background-color:red;">test</title></h> constant title // ( -- element ) the document.title, must be in <head>
-	==> Shit, http://stackoverflow.com/questions/13579477/can-i-give-a-title-tag-a-color-and-different-font
-		只能用 JavaScript 做 blinking 不能 style。
-		也行了！
+    <h> <title>test</title></h> constant title // ( -- element ) the document.title, must be in <head>
+        /// but it doesn't work. I guess only the first title element takes effect.
+    document.title='string'
+    js> $('title')[0]
+    js> $('title')[0] removeElement <---- 真的可以把用 document.title 改過的 title 變回 default 值。
+    try again the above <title> tag . . . B i n g o !!!
+    delete it again, try going fancy
+    <h> <title style="background-color:red;">test</title></h> constant title // ( -- element ) the document.title, must be in <head>
+    ==> Shit, http://stackoverflow.com/questions/13579477/can-i-give-a-title-tag-a-color-and-different-font
+        只能用 JavaScript 做 blinking 不能 style。
+        也行了！
 
 [ ] jeforth.3htm 無法輸出東西到 file, 正規的方法是用 data URI
-	http://stackoverflow.com/questions/8693289/how-to-write-localstorage-data-to-a-text-file-in-chrome	
-	<js> window.location = "data:text/plain, My Data"</js> \ 即可，但是會取代現有的 jeforth Window.
-	<js> window.open("data:text/plain, My Data")</js> \ 開新 Window，這個比較好。
-	<js> window.location = " 直接放 string "</js> 導致 404 Not Found。
-	==> 改 calc.f & alarm.f 讓 view source code 更友善一點。
-		結果不理想 crlf 顯示不正確，
-		char data:text/plain, char calc.f readTextFileAuto + js: window.open(pop())
-	==> 實驗證實，crlf 真的無效！
-		<js> window.open("data:text/plain, My Data\r\n111\r\n222")</js> \ crlf 真的無效！都被吃掉
-	==> ha ha!
-		<js> window.open("data:text/plain, My Data%0d%0a111%0d%0a222")</js> \ 這樣才對！
-	==> Final
-		char calc.f readTextFileAuto \ 讀出 source code
-		<js> pop().replace(/\r/gm,"%0d").replace(/\n/gm,"%0a").replace(/\t/gm,"    ")</jsV> \ 顯示在網頁上需要美容
-		js: window.open("data:text/plain,"+pop()) \ 用 data URI 方式顯示在網頁上
-		
+    http://stackoverflow.com/questions/8693289/how-to-write-localstorage-data-to-a-text-file-in-chrome  
+    <js> window.location = "data:text/plain, My Data"</js> \ 即可，但是會取代現有的 jeforth Window.
+    <js> window.open("data:text/plain, My Data")</js> \ 開新 Window，這個比較好。
+    <js> window.location = " 直接放 string "</js> 導致 404 Not Found。
+    ==> 改 calc.f & alarm.f 讓 view source code 更友善一點。
+        結果不理想 crlf 顯示不正確，
+        char data:text/plain, char calc.f readTextFileAuto + js: window.open(pop())
+    ==> 實驗證實，crlf 真的無效！
+        <js> window.open("data:text/plain, My Data\r\n111\r\n222")</js> \ crlf 真的無效！都被吃掉
+    ==> ha ha!
+        <js> window.open("data:text/plain, My Data%0d%0a111%0d%0a222")</js> \ 這樣才對！
+    ==> Final
+        char calc.f readTextFileAuto \ 讀出 source code
+        <js> pop().replace(/\r/gm,"%0d").replace(/\n/gm,"%0a").replace(/\t/gm,"    ")</jsV> \ 顯示在網頁上需要美容
+        js: window.open("data:text/plain,"+pop()) \ 用 data URI 方式顯示在網頁上
+        
 [ ] jeforth.3nw bye 不了 --> window.close() 要改成 process.exit()。
-	==> 昨天在家裡不行，但現在於 DOH7 上又可以了！ Strange.
-	
+    ==> 昨天在家裡不行，但現在於 DOH7 上又可以了！ Strange.
+    
 [x] jeforth.3nd 的 jsc 用到 kvm.gets() backSpace 不正常，早想改進。jsc 裡必須用 kvm.gets() 因為它是個
-	blocking function, 難得阿！jsc 裡的 console 必須用 blcoking I/O。
-	[x] jeforth.3nd can use kvm.gets() to support multiple line input!      
-		==> ctrl-z is the way to end the inputbox.
-		: e ( -- ) \ Multiple line input mode, not 'edit mode' yet though. Ctrl-z to end.
-			js: kvm.gets.editMode=true 
-			js> kvm.gets()
-			js: kvm.gets.editMode=false
-			tib.insert ;
+    blocking function, 難得阿！jsc 裡的 console 必須用 blcoking I/O。
+    [x] jeforth.3nd can use kvm.gets() to support multiple line input!      
+        ==> ctrl-z is the way to end the inputbox.
+        : e ( -- ) \ Multiple line input mode, not 'edit mode' yet though. Ctrl-z to end.
+            js: kvm.gets.editMode=true 
+            js> kvm.gets()
+            js: kvm.gets.editMode=false
+            tib.insert ;
 
 [x] jeforth.3nd jsc 下 back-space 不work --> 治好了。
-	==> js: push(kvm.gets()) 故意敲 aaa<backspace><backspace><backspace><cr> 結果如下，
-		OK js> JSON.stringify(tos()) . ==> "aaa\b\b\b\r" OK	
-	==> 用同樣的方法，發現 方向鍵無效。==> 本來就有處理 \r 了，加上 \b (backSpace) 即可 ==> ok now!
-		雖然顯示方面還是不太好，但總算有 back-space 可用了。
+    ==> js: push(kvm.gets()) 故意敲 aaa<backspace><backspace><backspace><cr> 結果如下，
+        OK js> JSON.stringify(tos()) . ==> "aaa\b\b\b\r" OK 
+    ==> 用同樣的方法，發現 方向鍵無效。==> 本來就有處理 \r 了，加上 \b (backSpace) 即可 ==> ok now!
+        雖然顯示方面還是不太好，但總算有 back-space 可用了。
 [x] 沒事亂玩 jeforth.3nd, 翻看 node.js API document https://www.evernote.com/shard/s22/nl/2472143/1350d7a0-a2d9-4491-88d6-8e6c1de69ab8
-	OK js> require('os')
-	OK .s
-		  0: [object Object] (object)
-	OK constant os // ( -- obj ) The os object
-	os :> hostname() \ ==> WKS-38EN3477 (string)
-	os :> endianness() \ ==> LE (string)
-	os :> type() \ ==> Windows_NT (string)
-	os :> platform() \ ==> win32 (string)
-	os :> arch() \ ==> x64 (string)
-	os :> release() \ ==> 6.2.9200 (string)
-	os :> uptime() \ ==> 272946.0111274 (number)
-	OK os :> networkInterfaces() (see)
-	[object Object]
-	  Chenway :   [object Object]
-	  My Lenovo USB2.0 Ethernet Adapter :   [object Object],[object Object]
-	  VMware Network Adapter VMnet1 :   [object Object],[object Object]
-	  VMware Network Adapter VMnet8 :   [object Object],[object Object]
-	  Loopback Pseudo-Interface 1 :   [object Object],[object Object]
-	  Wi-Fi 2 :   [object Object],[object Object]
-	os :> EOL \ ==>
-	 (string) <----------------- 看不出啥東西
-	os :> EOL.length \ ==> 2 (number)
-	os :> EOL.charCodeAt(0) \ ==> 13 (number)
-	os :> EOL.charCodeAt(1) \ ==> 10 (number)
-	要玩，玩 HTML5 繪圖吧！這 node.js 萬底深坑，我自覺不會去設計 server side 的東西了。
-	雖然這樣想很不好。叫別人寫 Node.js 的文章來介紹它的用途，或者看 tutorial 當做樂趣，也比較好一點。
+    OK js> require('os')
+    OK .s
+          0: [object Object] (object)
+    OK constant os // ( -- obj ) The os object
+    os :> hostname() \ ==> WKS-38EN3477 (string)
+    os :> endianness() \ ==> LE (string)
+    os :> type() \ ==> Windows_NT (string)
+    os :> platform() \ ==> win32 (string)
+    os :> arch() \ ==> x64 (string)
+    os :> release() \ ==> 6.2.9200 (string)
+    os :> uptime() \ ==> 272946.0111274 (number)
+    OK os :> networkInterfaces() (see)
+    [object Object]
+      Chenway :   [object Object]
+      My Lenovo USB2.0 Ethernet Adapter :   [object Object],[object Object]
+      VMware Network Adapter VMnet1 :   [object Object],[object Object]
+      VMware Network Adapter VMnet8 :   [object Object],[object Object]
+      Loopback Pseudo-Interface 1 :   [object Object],[object Object]
+      Wi-Fi 2 :   [object Object],[object Object]
+    os :> EOL \ ==>
+     (string) <----------------- 看不出啥東西
+    os :> EOL.length \ ==> 2 (number)
+    os :> EOL.charCodeAt(0) \ ==> 13 (number)
+    os :> EOL.charCodeAt(1) \ ==> 10 (number)
+    要玩，玩 HTML5 繪圖吧！這 node.js 萬底深坑，我自覺不會去設計 server side 的東西了。
+    雖然這樣想很不好。叫別人寫 Node.js 的文章來介紹它的用途，或者看 tutorial 當做樂趣，也比較好一點。
 
 [x] 總覺得 alarm.f 不夠好，設定的時間應該要可以重複。把左邊的 [Reset] 大按鈕擴充成 [Reset/Clear]
-	toggle。Clear 才是都清除，但不管 message，Reset 是恢復最後設定的時間。
-	[Reset/Clear] toggle 所以不怕無法挽回。[Start/Pause] 也做成都顯示出來，比較好懂。
-		OK js> start_button :: setAttribute('style','color:black')
-		OK js> start_button :: setAttribute('style','color:gray')
-		OK js> start_button :: setAttribute('style','color:black')
-	CSS 連續的 <span> 如果都沒有設 color:green 則第一個 <span> 設了之後，以下全部變成, say, 綠色。
-	一時覺得奇怪，想想這個設計也有道理，否則得全部都去寫 style attribute 不是很笨？
-	
-[ ] html5.f 裡的東西，不常用的就覺得不該放裡面，但常用的，如 removeElement 與別人有何差別？
-	總之，整理一下，看要不要把 element.f 併進去。
-	
+    toggle。Clear 才是都清除，但不管 message，Reset 是恢復最後設定的時間。
+    [Reset/Clear] toggle 所以不怕無法挽回。[Start/Pause] 也做成都顯示出來，比較好懂。
+        OK js> start_button :: setAttribute('style','color:black')
+        OK js> start_button :: setAttribute('style','color:gray')
+        OK js> start_button :: setAttribute('style','color:black')
+    CSS 連續的 <span> 如果都沒有設 color:green 則第一個 <span> 設了之後，以下全部變成, say, 綠色。
+    一時覺得奇怪，想想這個設計也有道理，否則得全部都去寫 style attribute 不是很笨？
+    
+[x] html5.f 裡的東西，不常用的就覺得不該放裡面，但常用的，如 removeElement 與別人有何差別？
+    總之，整理一下，看要不要把 element.f 併進去。
+    ==> html5.f was in 3we/f/ now moved to 3we/3htm/f/
+    ==> Added into quit.f instead of html5.f, they are different.
+    
 [x] node.js 有提供 precise timer, HTA 需要 precise timer 時怎麼辦？VBS 已經有 Timer 直接可以用，
-	下面 demo 是個例子,
-	: precise-timer-demo 100 for <vb> kvm.push(Timer)</vb> . cr next ;
-	把它加進 mytools.f 裡去
-	: precise-timer <vb> kvm.push(Timer)</vb> ;
-	[x] 啊錯了！不該加在 mytools.f 裡面，HTA & WSH 專屬。
+    下面 demo 是個例子,
+    : precise-timer-demo 100 for <vb> kvm.push(Timer)</vb> . cr next ;
+    把它加進 mytools.f 裡去
+    : precise-timer <vb> kvm.push(Timer)</vb> ;
+    [x] 啊錯了！不該加在 mytools.f 裡面，HTA & WSH 專屬。
 
 [x] p5.f 的 FrameRate 不準，問題出在 frameInterval 的算法可能要動態調節才行。
-	\ FrameRate 60 時 delta 最小 12mS, 最大 140mS, 平均 26mS, frameInterval 1000/60=16.667mS 與實際平均值差太多，難怪不準。
-	\ FrameRate 15 時 delta 最小 35mS, 最大 203mS, 平均 78mS, frameInterval 1000/15=66.667mS 與實際平均值還是差很多。
-	\ 表示 FrameRate 到 frameInterval 的算法可能要改進才行，frameInterval 都打八折。。。
-	\ FrameRate 15 時 delta 最小 23mS, 最大 238mS, 平均 63mS, frameInterval 1000/15=66.667mS 與實際平均值相比，frameInterval 打八折調整過頭了。
-	\ frameInterval 取到 93% 結果還是岔不多。看來土土地打折效果有限，要乾脆動態調節才行。
-	觀察上列數據，interval 16ms 時也有 precise-timer delta 小到 12ms 的時候，所以速度夠。實際跑 
-	setTimeout() 時不要直接用 frameInterval 而用 t-t0=delta 當 delta 大於 frameInterval 時就要調節實際
-	設定值為 interval-1 , 而 interval 的初值為 frameInterval。
-	==> 這樣調整有效，但是誤差會累積。t0 記住，frameCount * frameInterval 與 t0 的距離用來調整 interval 
-		最直接，不會累積誤差。
-	==> 先研究 JavaScript 怎麼弄出個 static variable
-		<js> 
-			var a=0,b=0;
-			var dumy = {seta:function(x){a=x},setb:function(x){b=x},average:function(){return((a+b)/2)}};
-			dumy
-		</jsV> constant avg
-		avg js> tos().seta(11);tos().setb(22);pop().average() .
-	==> 調整太猛，變成 interval 一直震盪。舉個例子，開火車時每達 mile stone 就做一次加減速。這很好。我的情況是
-		連續看到幾次落後，就連續加速幾次，這樣當然會在追上進度之後，馬上又發現快過頭了，接著又要減速，達到調節
-		目標之後，又會發現太慢了。所以，調節的效果不要以當前位置與目標位置的差距正負值直接拿來當做加減速的依據
-		，改用差距的微分來看。當差距的幅度越來越小時，表示修正有效不必再修正，當差距的幅度越來越大時，表示要加
-		強修正力道。
-		把當前處境分成幾類 state 每個 state 有不同策略，a）穩定持航，b）太快要減速，c）太慢要加速。
-		連續觀察得到兩個點與理想時間的差距，即可得知差距擴大或縮小。成功！
-		See 構想筆記 https://www.evernote.com/shard/s22/nl/2472143/d59872ad-6153-450c-b237-e747ccc5d9df
-		<js>
-			// 直接用 frameInterval 誤差很大，要隨時修正才準。
-			var t0,interval,deltaA,deltaB; // static variable。開始時間，隨時修正的 interval 時間。
-			var dummy = {
-				init: function(now){ // Usage: precise-timer interval.init(pop())
-					// kvm.temp=[]; // <--- 研究電腦速度能到多少，結論是 frameRate 約 60 就已經快滿檔了。
-					// kvm.r=[]; // <-- 研究每個 tick 的 now 與理想時間 fc*fi + t0 之間的差距。
-					t0=now; 
-					fortheval('0 to frameCount frameInterval'); 
-					interval=pop();
-					deltaA = deltaB = 0; // 一開始假設時間都是準的。
-				}, 
-				value: function(){
-					execute('precise-timer'); var now = pop();
-					execute('frameInterval'); var frameInterval = pop(); // 可以動態被改所以要每次重抓。
-					execute('frameCount'); var frameCount = pop();
-					deltaA = deltaB;	
-					deltaB = frameInterval*frameCount/1000 + t0 - now ;
-					if(Math.abs(deltaB)>1) {execute('precise-timer');this.init(pop())} // 自動校正，防 debug 時被搞亂。
-					if (deltaA*deltaB <= 0 || Math.abs(deltaB) >= Math.abs(deltaA)) 
-						// 異號，表示過頭了，或者差距擴大時，都要修正。只有同號且差距縮小時不必修正。
-						if(deltaB>0) interval += 1; // 正的表示實際時間落後，表示跑太快了，interval 要加一點。
-						else interval = Math.max(interval-1,1);
-					// kvm.temp.push(interval); // study
-					// kvm.r.push(deltaB); // study
-					return(interval);
-				}
-			}; dummy
-		</jsV> constant interval // ( -- obj ) interval.init(now), interval.value(), precise floating interval time for setTimeout()
-	
-	==>	這個方法很好，很準，但是用到 precise-timer 受限於 VBS 只 3hta 有。而且，從 log 下來的資料看，
-		JavaScript 的時間本來就不準。要計較每個 tick 的精準本來就不切實際。
-		==> 改用普通時間 Date() 就已經很準了！ Shit ! 下面這行連續多做幾次看看，很準 <js> var date = new Date(); date.getTime() </js> . cr 
-			咦, 但這樣不行，時間不會變！ ==> <js> var date = new Date(); for (var i=0; i<1000; i++) print(date.getTime()+'\n') </js>
-			這個倒可以: <js> for (var i=0; i<1000; i++){ execute('precise-timer');print(pop()+'\n')} </js>
-		==>	終於好了！ <js> for(var i=0; i<100; i++) print((new Date()).getTime()+'\n') </js>
+    \ FrameRate 60 時 delta 最小 12mS, 最大 140mS, 平均 26mS, frameInterval 1000/60=16.667mS 與實際平均值差太多，難怪不準。
+    \ FrameRate 15 時 delta 最小 35mS, 最大 203mS, 平均 78mS, frameInterval 1000/15=66.667mS 與實際平均值還是差很多。
+    \ 表示 FrameRate 到 frameInterval 的算法可能要改進才行，frameInterval 都打八折。。。
+    \ FrameRate 15 時 delta 最小 23mS, 最大 238mS, 平均 63mS, frameInterval 1000/15=66.667mS 與實際平均值相比，frameInterval 打八折調整過頭了。
+    \ frameInterval 取到 93% 結果還是岔不多。看來土土地打折效果有限，要乾脆動態調節才行。
+    觀察上列數據，interval 16ms 時也有 precise-timer delta 小到 12ms 的時候，所以速度夠。實際跑 
+    setTimeout() 時不要直接用 frameInterval 而用 t-t0=delta 當 delta 大於 frameInterval 時就要調節實際
+    設定值為 interval-1 , 而 interval 的初值為 frameInterval。
+    ==> 這樣調整有效，但是誤差會累積。t0 記住，frameCount * frameInterval 與 t0 的距離用來調整 interval 
+        最直接，不會累積誤差。
+    ==> 先研究 JavaScript 怎麼弄出個 static variable
+        <js> 
+            var a=0,b=0;
+            var dumy = {seta:function(x){a=x},setb:function(x){b=x},average:function(){return((a+b)/2)}};
+            dumy
+        </jsV> constant avg
+        avg js> tos().seta(11);tos().setb(22);pop().average() .
+    ==> 調整太猛，變成 interval 一直震盪。舉個例子，開火車時每達 mile stone 就做一次加減速。這很好。我的情況是
+        連續看到幾次落後，就連續加速幾次，這樣當然會在追上進度之後，馬上又發現快過頭了，接著又要減速，達到調節
+        目標之後，又會發現太慢了。所以，調節的效果不要以當前位置與目標位置的差距正負值直接拿來當做加減速的依據
+        ，改用差距的微分來看。當差距的幅度越來越小時，表示修正有效不必再修正，當差距的幅度越來越大時，表示要加
+        強修正力道。
+        把當前處境分成幾類 state 每個 state 有不同策略，a）穩定持航，b）太快要減速，c）太慢要加速。
+        連續觀察得到兩個點與理想時間的差距，即可得知差距擴大或縮小。成功！
+        See 構想筆記 https://www.evernote.com/shard/s22/nl/2472143/d59872ad-6153-450c-b237-e747ccc5d9df
+        <js>
+            // 直接用 frameInterval 誤差很大，要隨時修正才準。
+            var t0,interval,deltaA,deltaB; // static variable。開始時間，隨時修正的 interval 時間。
+            var dummy = {
+                init: function(now){ // Usage: precise-timer interval.init(pop())
+                    // kvm.temp=[]; // <--- 研究電腦速度能到多少，結論是 frameRate 約 60 就已經快滿檔了。
+                    // kvm.r=[]; // <-- 研究每個 tick 的 now 與理想時間 fc*fi + t0 之間的差距。
+                    t0=now; 
+                    fortheval('0 to frameCount frameInterval'); 
+                    interval=pop();
+                    deltaA = deltaB = 0; // 一開始假設時間都是準的。
+                }, 
+                value: function(){
+                    execute('precise-timer'); var now = pop();
+                    execute('frameInterval'); var frameInterval = pop(); // 可以動態被改所以要每次重抓。
+                    execute('frameCount'); var frameCount = pop();
+                    deltaA = deltaB;    
+                    deltaB = frameInterval*frameCount/1000 + t0 - now ;
+                    if(Math.abs(deltaB)>1) {execute('precise-timer');this.init(pop())} // 自動校正，防 debug 時被搞亂。
+                    if (deltaA*deltaB <= 0 || Math.abs(deltaB) >= Math.abs(deltaA)) 
+                        // 異號，表示過頭了，或者差距擴大時，都要修正。只有同號且差距縮小時不必修正。
+                        if(deltaB>0) interval += 1; // 正的表示實際時間落後，表示跑太快了，interval 要加一點。
+                        else interval = Math.max(interval-1,1);
+                    // kvm.temp.push(interval); // study
+                    // kvm.r.push(deltaB); // study
+                    return(interval);
+                }
+            }; dummy
+        </jsV> constant interval // ( -- obj ) interval.init(now), interval.value(), precise floating interval time for setTimeout()
+    
+    ==> 這個方法很好，很準，但是用到 precise-timer 受限於 VBS 只 3hta 有。而且，從 log 下來的資料看，
+        JavaScript 的時間本來就不準。要計較每個 tick 的精準本來就不切實際。
+        ==> 改用普通時間 Date() 就已經很準了！ Shit ! 下面這行連續多做幾次看看，很準 <js> var date = new Date(); date.getTime() </js> . cr 
+            咦, 但這樣不行，時間不會變！ ==> <js> var date = new Date(); for (var i=0; i<1000; i++) print(date.getTime()+'\n') </js>
+            這個倒可以: <js> for (var i=0; i<1000; i++){ execute('precise-timer');print(pop()+'\n')} </js>
+        ==> 終於好了！ <js> for(var i=0; i<100; i++) print((new Date()).getTime()+'\n') </js>
 
 [x] re-write ret and exit, they become compiling immediate words.
 [x] find all ret and exit.
-	  
-[x]	phaseB() 裡 ip = w; // jump [x] 要改成 inner(w) 才對吧！ ==> No!  hcchen5600 2015/02/26 14:33:35 
+      
+[x] phaseB() 裡 ip = w; // jump [x] 要改成 inner(w) 才對吧！ ==> No!  hcchen5600 2015/02/26 14:33:35 
 
-[ ]	In recent console design, 3hta and 3htm when there's a lot of 'printing' to outputbox then inputbox 
-	become strange, type 'jsc' become csj so we have to type 'csj' instead! I guess this is because my 
-	previous modification has made kvm.print() to also clear the inputbox <=== Root cause?
-	==> 改成印 OK 之後 jump2endofinputbox.click(); inputbox.focus(); ==> 觀察一陣子看效果怎樣。。。。。
+[ ] In recent console design, 3hta and 3htm when there's a lot of 'printing' to outputbox then inputbox 
+    become strange, type 'jsc' become csj so we have to type 'csj' instead! I guess this is because my 
+    previous modification has made kvm.print() to also clear the inputbox <=== Root cause?
+    ==> 改成印 OK 之後 jump2endofinputbox.click(); inputbox.focus(); ==> 觀察一陣子看效果怎樣。。。。。
 
 [x] dump ( start length -- ) 碰到 null 就會停下來 <=== bug!!!
 [x] inner() 大翻修前先 save 一版上 github. hcchen5600 2015/02/26 16:28:31 
 [x] why now 'see sleep' hangup?, ' sleep (see) hangup too. --> see see hangup too. ==> see wants to end up at 'ret' but
-	there's no 'ret' now. ==> check all objRet
+    there's no 'ret' now. ==> check all objRet
 [x] 當 processing.f 裡要用到的 start-message, ending-message 不存在時，沒有警告直接結束！因為 execute('name')
-	有問題，當 name 不存在時沒有警告，直接結束。因為 execute(0) 會中斷整個 inner(), 因發 inner() 設計大翻修。
+    有問題，當 name 不存在時沒有警告，直接結束。因為 execute(0) 會中斷整個 inner(), 因發 inner() 設計大翻修。
 [x] char no-such-word execute <==== No errormessage! 應該要出個 panic 
-	execute(undefined) 自動執行 last 實在沒有用，一併考慮改善。
+    execute(undefined) 自動執行 last 實在沒有用，一併考慮改善。
 [x] 讓 execute(ip) 去執行某個 ip 它只執行該處的指令,但是附帶會破壞到 ip 值，值得再想一想。
-	==> 可能簡單不要改 ip 值，skip ip=entry 這行，可乎？ ==> 不行！
-	==> execute() 不能直接套用 phaseA(), 要改寫。
+    ==> 可能簡單不要改 ip 值，skip ip=entry 這行，可乎？ ==> 不行！
+    ==> execute() 不能直接套用 phaseA(), 要改寫。
     更重要的知識： 0 execute 並非不做事！而是半途終止當前的 colon word
-	: test 1 2 3 0 execute 4 5 6 ;
-	: test2 11 22 33 test 44 55 66 ;
-	這樣用與 inner(entry) 重複，決定取消。
+    : test 1 2 3 0 execute 4 5 6 ;
+    : test2 11 22 33 test 44 55 66 ;
+    這樣用與 inner(entry) 重複，決定取消。
 [x] abortexec is purposed on stopping both inner and outer loop. 
 [x] inner() overhaul, null=ret, ''=exit, 0=abortexec (also false, NaN and undefined).
-	==> re-write inner() ==> hcchen5600 2015/02/27 11:49:34 start debugging. Strange, why the first inner(entry)
-		always got a entry=0 after the first breakpoint in inner() ? Check 3nw call-stack, it's from outer(0) in
-		fortheval() that wants to resolve resumeing case. Not a problem, but probably needs improvement? [x]
-	==> compiling==true when executing 'test' <-- Because dictcompile(null) become infinit loop I guess <==== RI!!!	
-		[x] 'sleep' involves suspend-resume and that has a bug in inner(), the do-while loop needs special treatment .. done.
-	==> Ok now!
-	[x] objRet => RET=null, ret instruction code
-		objExit => EXIT="", exit instruction code
-	[x] remove 'endinner'
+    ==> re-write inner() ==> hcchen5600 2015/02/27 11:49:34 start debugging. Strange, why the first inner(entry)
+        always got a entry=0 after the first breakpoint in inner() ? Check 3nw call-stack, it's from outer(0) in
+        fortheval() that wants to resolve resumeing case. Not a problem, but probably needs improvement? [x]
+    ==> compiling==true when executing 'test' <-- Because dictcompile(null) become infinit loop I guess <==== RI!!! 
+        [x] 'sleep' involves suspend-resume and that has a bug in inner(), the do-while loop needs special treatment .. done.
+    ==> Ok now!
+    [x] objRet => RET=null, ret instruction code
+        objExit => EXIT="", exit instruction code
+    [x] remove 'endinner'
 
 [ ] now null is 'ret'. I can say, everything in dictionary are 'instructions'. While null is exactly 'ret' instruction.
-	As well as "" is the 'exit' instruction. (see) should make it clearer.
-	[ ] constants are literal instruction with a constant value, make it clearer too.
-	[ ] 0 is an instruction too, it's abortexec. So dictionary[0]=0; 
+    As well as "" is the 'exit' instruction. (see) should make it clearer.
+    [ ] constants are literal instruction with a constant value, make it clearer too.
+    [ ] 0 is an instruction too, it's abortexec. So dictionary[0]=0; 
 [ ] Very important performance improvement.
-	if everything in dictionary are instructions then why we still need phaseA? phaseA should have done
-	when in compiling time. So inner() should be as simple as while(w){ip++; w.xt(); w=dictionary[ip]}
-	nothing more!
-[ ] 保留 screenbuffer 在開發早期是很重要的辦法，但已經很久沒有用了。可以停用。
-	[x] 3htm [ ]3nd [ ]3wsh [ ]3nd [ ]3hta [ ]3nw
+    if everything in dictionary are instructions then why we still need phaseA? phaseA should have done
+    when in compiling time. So inner() should be as simple as while(w){ip++; w.xt(); w=dictionary[ip]}
+    nothing more!
+[ ] remove 'abortexec'  
+[x] 保留 screenbuffer 在開發期是很重要的辦法，但平時感覺累贅。
+    今設 kvm.screenbuffer=null 把它停掉; 反之 kvm.screenbuffer="" 恢復 logging。
+    [x] 在每個 quit.f 裡把它停掉。
+    ==> 'cls' should take care of the new logic,
+            kvm.screenbuffer = (kvm.screenbuffer==null) ? null : "";
+
+[ ] To move kvm.cv canvas up into the outputbox,
+        js> kvm.cv.canvas eleDisplay lastChild insertAfter
+
+[x] 用這行實驗，很容易發現 HTML5 canvas 的 x-y 座標有負值！左邊、上邊、左上角都會有 -1 -2 出現！
+    <js> kvm.cv.canvas.onmousemove=function(e){print(e.offsetX + "-" + e.offsetY + '  ')} </js>
+
+[x] Test the difference between fast-inner and debug-inner in performance. Speed-test.
+    : speed-test 
+        ." Start time " precise-time(mS) dup . cr ( start-time )
+        10000000 dup . ."  cycles" cr dup for next ( start-time count )
+        ." End time " precise-time(mS) dup . cr  ( start-time count end-time )
+        rot  ( count end-time start-time ) - ( count diff ) swap / .
+        ." (mS) is the average time of each cycle " cr
+        ." Start time " precise-time(mS) dup . cr ( start-time )
+        20000000 dup . ."  cycles" cr dup for next ( start-time count )
+        ." End time " precise-time(mS) dup . cr  ( start-time count end-time )
+        rot  ( count end-time start-time ) - ( count diff ) swap / .
+        ." (mS) is the average time of each cycle " cr ;
+        
+    [2(overhead + delta1) - 2(overhead + delta2)]/2
+    =(2*overhead + 2*delta1 - 2*overhead - 2*delata2)/2 
+    = delta1 - delta2
+    ==> debugInner on 3hta DOH7 ==> for-next 每圈約 0.34 uS
+        Start time 1425453797376
+        10000000 cycles
+        End time 1425453800751
+        0.0003375 is the average time of each cycle 
+        Start time 1425453800970
+        20000000 cycles
+        End time 1425453807740
+        0.0003385 is the average time of each cycle 
+    ==> fastInner on 3hta DOH7  ==> for-next 每圈約 0.23 uS
+        Start time 1425454862920
+        10000000 cycles
+        End time 1425454865226
+        0.0002306 is the average time of each cycle 
+        Start time 1425454865281
+        20000000 cycles
+        End time 1425454869912
+        0.00023155 is the average time of each cycle 
+
+[ ] 複習一遍 JavaScript 的 var 由 volatile 經 new 變成 static    
+    <js>
+        function Ball(axisx,axisy,radius){
+            var x=axisx,y=axisy,r=radius;
+            this.position = function(){return({x:x,y:y})}
+            this.move = function(h,v){x+=h;y+=v;}
+        }
+        push(new Ball(10,15,20))
+    </js> constant ball
+    ball :> position() (see)
+    ball :: move(1,1)
+    ball :> position() (see)
+    [object Object]
+      x :  10
+      y :  15
+    [object Object]
+      x :  11
+      y :  16   
+[ ] 可能用 instances[] 模仿 HTML client-server 的 call-server(request,response) 方式讓 forth words 既可以
+    針對個別 instance 工作，又可以與 javascript 共用 variables.例如，
+    \ instances[0] is the current instance
+    123 ivalue x // ( -- int )
+    456 ivalue y // ( -- int )
+    產生的 x,y 同時也是 instances[instances[0]].x, instances[instances[0]].y
+    每經
+    <instance>
+        67 ivalue x // ( -- int )
+        89 ivalue y // ( -- int )
+    </instance>
+    就產生新 instance, 故 x eq instances[instances[0]].x eq 67, y eq instances[instances[0]].y eq 89
+    其中 instances[0] is 1 now.
+    每個 event handler 要自己保留，且切換 instance: var iid=instances[0]; with(instances[iid]){ ..... }
+
+
+    code ivalue ( value <variable-name> -- ) \ instances[instances[0]].<variable-name>=data
+        var vname=nexttoken();
+        instances[instances[0]][vname] = pop();
+        end-code
+    123 to x  --> instances[instances[0]][x]=123 
+    
+    : to ( n <name> -- ) \ Assign n to <name> where <name> is a 'value' or 'ivalue' word.
+        ' ( name ) dup js> pop().type=='constant' if
+            compiling if [compile] literal compile doTo else doTo then then
+        ; immediate 
+        /// see 'value' command
+
+    code doTo   ( n Word -- ) \ Run time of 'to' command.
+                if(!tos()) panic("'to' command writing something to a NULL!\n",true);
+                else dictionary[pop().cfa+1]=pop();
+                end-code
+    
+[x] Word() property "creater : colon,(create) (array)" should simply 
+    be "type"={code,colon,colon-constant,colon-variable,marker,colon-vocabulary,alias...}
+    does> words 要靠自己在 create 之後填 last().type='colon-<name>' 
+    要有 colon 字樣 see 才會正確用 colon 方式顯示。
+    tool: list all words and their type
+        <js> for (var i in wordhash) print(wordhash[i].type + ':' + i +'  ')</js>
+    tool: list all types
+        <js> for (var i in wordhash) print(wordhash[i].type+'\n')</js>
+    tool: list all words of a certain type
+        <js> for (var i in wordhash) if(wordhash[i].type.indexOf('constant')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
+        <js> for (var i in wordhash) if(wordhash[i].type.indexOf('alias')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
+        <js> for (var i in wordhash) if(wordhash[i].type.indexOf('variable')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
+        <js> for (var i in wordhash) if(wordhash[i].type.indexOf('vocabulary')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
+        <js> for (var i in wordhash) if(wordhash[i].type.indexOf('marker')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
+[ ] why
+    0: textarea:focus { border: 0px solid; background:#FFE0E0; } (string)
+    1: [object Object] (object)
+    2: textarea:focus { border: 0px solid; background:#E0E0E0; } (string)
+
+[ ] need a tool addr>word ( addr -- Word ) 
+[ ] need a 'breath' compile-only command to suspend and resume immediately
+    To avoid suddenly print a lot of things. 問題是 jeforth 本身就是 event driven 不靠 1 sleep 
+    根本上不了手。---> 除非讓 sleep 單獨用另一組 suspend-resume 或者每一組 suspend-resume 都有自己的 call-back。
+	因為只有 single thread 沒有人會被 interrupt 中斷。所有的 handler 包括 forth interpreter 自己都
+	是從 idle 進來的，所以 handler、call-back 等也都一定回 idel 而非回到某個 process 的半途，甚至也
+	不是當初 suspend 的 process！ 這點很重要，不同於以前所學。都是從 idle 上手，故多重 suspend 根本
+	不存在，只要搞清楚 resume 怎麼上手、要回哪裡即可。
+    [x] JavaScript 永遠只有 single thread, 下圖希望我的觀念是對的。
+	[x]	Suspend-resume 的 context save-restore 只跟 ip, tib, ntib 有關。rstack 永遠要 balance 是每個人
+		的責任。自己管好 balance 比 save-restore rstack 要合理，作為 call-back 的 colon word 本身一定有
+		ret 意味 rstack 有一回返位址；但是當由 event triggered 進入時不會有 return address in the 
+		rstack 所以 call-back 不是， 
+			function(){execute('onEvent')} 
+		而是類似，
+			function(){inner(tick('onEvent').cfa+2)} 
+		這樣的東西。而前導指令就是 never 0 >r then 
+		[x]	add a new command 'never' equals to jump to then ==> 'ahead' is exactly 'never'
+			So : onEvent never 0 >r then . . . . ; is a call-back function
+			Usage: setTimeout(function(){inner(tick('onEvent').cfa+2)},100)
+
+				  .-------- Forth 由 Command Line 上手 --------.             Ball animation
+				  |                  |                         |             延遲到 forth
+				  v                  v                         v             忙完之後
+			Forth .-----.            .---------.               .-------------.
+				  |     |            |         |               |             |
+				  |     |            |         |               |             |
+			Idle ='====='.====.===.=.'========='.=.=.=.========'======*======'.=..===.======> time
+						 |    |   | |           | | | |               ^       | ||   |
+		 Ball animation  |    |   '-'           | | '-'         ...DEF^       '-'|   |      
+		 frame update    |    |      123456789ABCDEF^                            |   |
+						 |    |                 | |             時間到但         |   |
+			Print        '----'                 '-'             forth在忙        '---'
+						forth離開才馬上 print                                   print 也跟著被延後
+
+					
+				 .------ Command Line
+				 |
+                 v      *debug*                *debug*                       
+        Forth    .-----.suspend     .---------.suspend         .------------.
+                 |     |            |         |                |            |
+                 |     |            |         |                |            |
+        Idle ===='====='.====.===.=.'========='.=.=.=.======.=.'============'======> time
+                        |    |   | |           | | | |      | |
+        Debugging       '----'   '-'           '-' '-'      '-' 
+                                 q resume                   q resume
+        
+    : sleep ( mS -- ) \ Suspend to idle, resume after mS.
+		[ last ] literal ( mS me )
+		<js>
+			var tibwas=tib, ntibwas=ntib, ipwas=ip, me=pop(), delay=pop();
+			function resume() { 
+				if (!me.timeoutId) return; // 萬一想提前結束時其實已經 timeout 過了
+				tib = tibwas; ntib = ntibwas; me.timeoutId = null;
+				outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
+			}
+			function suspend() {
+				tibwas = tib;  ntibwas = ntib;  ipwas = ip; 
+				tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
+				me.timeoutId = setTimeout(resume,delay);
+			}
+			me.resume = resume; // So resume can be triggered from outside
+			suspend(); // go to system idle state
+		</js> ;
+	code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep command.
+		clearTimeout(tick('sleep').timeoutId);
+		tick('sleep').resume();
+		end-code
+	dropall 11 100000 sleep 22 .s stopSleeping
+
+[ ] sleep 可以 stopSleeping 所以不能多重 sleep. 另設 nap 可以多重 nap.
+
+[ ]	abortexec still there, remove them.
+
+[ ] 0 here dump 越跑越慢 on 3htm , why?
+	on 3hta is ok. ==> so how about 3nw? --> very good! It doesn't scroll so is fast.
+	scrolling may not be the root cause on 3htm because 3hta is fine. I am thinking that why
+	3nw doesn't scroll? The implementation is not 周延，各自有不同。
+	
+	
 

@@ -103,6 +103,7 @@
 
 	include voc.f			\ voc.f is basic of forth language
 	include html5.f			\ html5.f is basic of jeforth.3htm
+	include element.f		\ HTML element manipulation
 	include platform.f		
 	include mytools.f		
 
@@ -110,4 +111,5 @@
 	args tib.insert
 
 \ ------------ End of jeforth.f -------------------
+	js: kvm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.

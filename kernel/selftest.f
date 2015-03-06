@@ -20,6 +20,7 @@ O   四顆星的 **** 用在一次 test 好幾個 words 時，不用 wut 改用 
         marker -%-%-%-%-%-
         **** word1 word2 word3 descriptions ... \ [pass|failed] 會由 ==>judge 打上
         selftest-invisible \ 我想讓畫面整潔，self-test 的過程可以看 kvm.screenbuffer。
+		js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
         js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
         ( ------------ Start to do anything --------------- )
         ( ------------ done, start checking ---------------- )

@@ -56,14 +56,11 @@ var kvm = (function(){
 		var newhelp = ""; // new word's help message.
 		var colonxt = function(){}; // colon word's xt function is a constant
 		var compiling=false;
-		var abortexec=false; // abort outer loop
-		// var suspendContext = {tib:"", ntib:0, ip:0}; // Save-restore for Blocking I/O
-		// var recentcolonword={}; use "[ last ] literal" or " [ js> last().cfa ] literal" instead
-		// var debug = false; move to index.html for easier reachable when working with Chrome debugger.
 		var print = function(){}; // dummy 
-		// var global; 改用 kvm 了。
-		// Initialize KsanaVM
+		var instances = []; // forth 與 javascript 互通的 data structure. hcchen5600 2015/03/03 18:09:24 
+			instances[0]=1;instances[instances[0]]={};
 		vm.init = function () { 
+			// Initialize KsanaVM
 			print = kvm.print;
 		}
 		
@@ -338,12 +335,12 @@ var kvm = (function(){
 			else phaseB(w); 
 		}
 		vm.execute = execute;
-		
-		function inner(entry, resuming) {
+
+		function debugInner (entry, resuming) {
 			var w = phaseA(entry); // 翻譯成恰當的 w.
 			do{
 				while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-					if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+					/* 要debug時把comment點掉 */ if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
 					ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 					w = dictionary[ip];
@@ -352,6 +349,20 @@ var kvm = (function(){
 				if(resuming) w = dictionary[ip];
 			} while(ip && resuming); // ip==0 means resuming has done
 		}
+		function fastInner (entry, resuming) {
+			var w = phaseA(entry); // 翻譯成恰當的 w.
+			do{
+				while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
+					// /* 要debug時把comment點掉 */ if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+					ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
+					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
+					w = dictionary[ip];
+				}
+				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, ip==0 is abortexec
+				if(resuming) w = dictionary[ip];
+			} while(ip && resuming); // ip==0 means resuming has done
+		}
+		var inner = fastInner; // default performance first
 		// ### End of the inner loop ###
 
 		// -------------------------- the outer loop ----------------------------------------------------
@@ -481,7 +492,7 @@ var kvm = (function(){
 				docode,
 				"this.vid='forth'",
 				"this.wid=1",
-				"this.creater=['code']",
+				"this.type='code'",
 				"this.help=this.name+' ( <name> -- ) Start composing a code word.'",
 				"this.selftest='pass'"
 			]),
@@ -492,13 +503,13 @@ var kvm = (function(){
 					current_word_list().push(new Word([newname,newxt,"this.help=newhelp"]));
 					last().vid = current;
 					last().wid = current_word_list().length-1;
-					last().creater = ['code'];
+					last().type = 'code';
 					wordhash[last().name]=last();
 					compiling  = false;
 				},
 				"this.vid='forth'",
 				"this.wid=2",
-				"this.creater=['code']",
+				"this.type='code'",
 				"this.immediate=true",
 				"this.compileonly=true",
 				"this.help=this.name+' ( -- ) Wrap up the new code word.'"

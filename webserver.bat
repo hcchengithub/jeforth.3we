@@ -12,12 +12,12 @@ if a%COMPUTERNAME%==aWKS-38EN3477     path=%path%;c:\Users\8304018.WKSCN\Dropbox
 
 chcp 950
 
-if a%COMPUTERNAME%==aWKS-38EN3476     node64 jeforth.3nd.js include webserver.f
-if a%COMPUTERNAME%==aDP-20121028UGNO  node32 jeforth.3nd.js include webserver.f
-if a%COMPUTERNAME%==aWKS-38EN3477     node64 jeforth.3nd.js include webserver.f
+@rem if a%COMPUTERNAME%==aWKS-38EN3476     node64 jeforth.3nd.js include webserver.f
+@rem if a%COMPUTERNAME%==aDP-20121028UGNO  node32 jeforth.3nd.js include webserver.f
+@rem if a%COMPUTERNAME%==aWKS-38EN3477     node64 jeforth.3nd.js include webserver.f
 
 @rem Python is a good Web server oneliner, but something wrong with iframe so I drop it.
-@rem if a%COMPUTERNAME%==aWKS-38EN3476    python -m SimpleHTTPServer 8888
-@rem if a%COMPUTERNAME%==aWKS-38EN3477    python -m SimpleHTTPServer 8888
-@rem if a%COMPUTERNAME%==aDP-20121028UGNO python -m http.server 8888
+if a%COMPUTERNAME%==aWKS-38EN3476    python -m SimpleHTTPServer 8888
+if a%COMPUTERNAME%==aWKS-38EN3477    python -m SimpleHTTPServer 8888
+if a%COMPUTERNAME%==aDP-20121028UGNO python -m http.server 8888
 

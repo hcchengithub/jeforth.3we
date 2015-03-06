@@ -23,7 +23,7 @@
 			} catch(err) {
 				ss = Object.prototype.toString.apply(s);
 			}
-			kvm.screenbuffer += ss;
+			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 			$('#outputbox').append(plain(ss)); 
 			jump2endofinputbox.click(); inputbox.focus();
 		};
@@ -130,8 +130,7 @@
 			Program path <span id=location>location</span><br>
 			</div>
 		</div>
-	</div>
-	<div id="outputbox"></div>
+	</div><div id="outputbox"></div>
 	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><br id=endofinputbox>
 </body>
 </html>

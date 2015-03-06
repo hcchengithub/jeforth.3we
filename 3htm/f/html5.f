@@ -62,8 +62,7 @@ s" html5.f"		source-code-header
 				/// js> $('#outputbox')[0]==outputbox ==> true
 
 : doElement		( "html" "jqSelector" -- element ) \ Run time of <e>,<h> or the likes.
-				js> kvm.screenbuffer+=tos()+':'+tos(1);$(pop()).append(pop())[0]
-				lastChild ;
+				js> $(pop()).append(pop())[0] lastChild ;
 				/// Example: char #outputbox char <h1>Hello</h1> doElement
 				\ Must use jQuery append(), because HTMLelement.appendChild(node) is not suitable
 				

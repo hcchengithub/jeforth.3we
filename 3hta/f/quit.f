@@ -96,6 +96,7 @@
 
 	include voc.f		\ voc.f is basic of forth language
 	include html5.f		\ HTML5 is HTA's plateform feature
+	include element.f	\ HTML element manipulation
 	include platform.f 	\ Hotkey handlers and platform features
 	include vb.f		\ Being able to run VBS is what HTA is for.
 	include wsh.f		\ Windows Shell Host
@@ -119,4 +120,5 @@
 	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
 
 \ ------------ End of jeforth.f -------------------
+	js: kvm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.

@@ -9,7 +9,7 @@ s" ball.f" source-code-header
 
 \ messages
 	: starting-message ( -- ) ." Start bouncing . . ." cr ;
-	: ending-message ( -- ) ;
+	: ending-message ( -- ) ." Stop bouncing." cr ;
 
 \ setup
 	200 200		setCanvasSize	\ ( width height -- ) 

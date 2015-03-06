@@ -108,6 +108,10 @@ code intervals.clear	( n -- ) \ Clear older setInterval IDs leaving the last n o
 						/// 1 dime = 10 cent, 1 nickel = 5 cent
 : euro.cent>ntd			( cent -- NTD ) \ 歐元（分）換算成台幣（元）
 						100 / euro>ntd ; 
+						
+code precise-time(mS)	( -- mS ) \ Precise recent time in mini seconds
+						push((new Date()).getTime()) end-code
+
 <comment>
 	https://tw.knowledge.yahoo.com/question/question;_ylt=A3eg.oaZmchUwG0AsfHXrYlQ?qid=1513122703211
 	美金有；1分，5分，1角，2角5分，5角，1元。

@@ -25,6 +25,7 @@ s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
     <selftest>
 		***** Demo usage of BinaryFile() class, Wrte/Read binary file ........
 		marker -%-%-%-%-%-
+		js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
 		js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
 		( ------------ Start to do anything --------------- )
 			code data0-255 ( -- binary-string ) \ Create a binary string of 0-255
@@ -111,6 +112,7 @@ s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
 		<selftest>
 			***** Print binary numbers ........
 			marker -%-%-%-%-%-
+			js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stop working if it's null.
 			js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
 			selftest-invisible \ 我想讓畫面整潔，self-test 的過程可以看 kvm.screenbuffer。 
 			( ------------ Start to do anything --------------- )

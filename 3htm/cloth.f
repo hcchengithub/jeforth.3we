@@ -4,7 +4,7 @@
 
 include processing.f
 
-s" p5-cloth2.f"	source-code-header
+s" cloth.f"	source-code-header
 
 \ messages
 	: starting-message ( -- )

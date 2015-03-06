@@ -54,6 +54,7 @@ t/c getWMIService js: kvm.objWMIService=pop()
 				<selftest>
 					marker -%-%-%-%-%-
 					***** get WMI object, get NIC config, print IP addresses ...... 
+					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
 					\ Start to do anything ...
 					js> kvm.objWMIService js> typeof(pop()) \ "object" 

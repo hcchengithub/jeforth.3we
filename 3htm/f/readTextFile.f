@@ -25,7 +25,7 @@
 
 	\ Replace instead of redefine, because it has been used.
 	js: tick('readTextFile').cfa=tick('getTextFile').cfa
-	js: tick('readTextFile').creater=tick('getTextFile').creater
+	js: tick('readTextFile').type=tick('getTextFile').type
 	js: tick('readTextFile').xt=tick('getTextFile').xt
 
 	

@@ -1,7 +1,7 @@
 
     include canvas.f
     
-    s" clock3.f"    source-code-header
+    s" many-clocks.f"    source-code-header
 
 	\ createCanvas setWorkingCanvas  
 

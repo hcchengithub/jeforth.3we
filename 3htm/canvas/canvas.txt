@@ -1,0 +1,402 @@
+
+\ HTML5 canvas tutorial http://jo2.org/html5-canvas-tutorial-list/
+
+\ HTML5 canvas reference 
+\ 	http://www.w3schools.com/jsref/dom_obj_canvas.asp
+\	http://www.w3school.com.cn/tags/html_ref_canvas.asp
+
+<comment>
+OK js> kvm.cv obj>keys .
+	canvas,
+	fillStyle,
+	font,
+	globalAlpha,
+	globalCompositeOperation,
+	lineCap,
+	lineJoin,
+	lineWidth,
+	miterLimit,
+	shadowBlur,
+	shadowColor,
+	shadowOffsetX,
+	shadowOffsetY,
+	strokeStyle,
+	textAlign,
+	textBaseline,
+	arc,
+	arcTo,
+	beginPath,
+	bezierCurveTo,
+	clearRect,
+	clip,
+	closePath,
+	createImageData,
+	createLinearGradient,
+	createPattern,
+	createRadialGradient,
+	drawImage,
+	fill,
+	fillRect,
+	fillText,
+	getImageData,
+	isPointInPath,
+	lineTo,
+	measureText,
+	moveTo,
+	putImageData,
+	quadraticCurveTo,
+	rect,
+	restore,
+	rotate,
+	save,
+	scale,
+	setTransform,
+	stroke,
+	strokeRect,
+	strokeText,
+	transform,
+	translate
+
+OK js> kvm.cv.canvas obj>keys .
+	height,
+	width,
+	getContext,
+	toDataURL,
+	currentStyle,
+	runtimeStyle,
+	accessKey,
+	className,
+	contentEditable,
+	dir,
+	disabled,
+	id,
+	innerHTML,
+	isContentEditable,
+	lang,
+	offsetHeight,
+	offsetLeft,
+	offsetParent,
+	offsetTop,
+	offsetWidth,
+	onabort,
+	onblur,
+	oncanplay,
+	oncanplaythrough,
+	onchange,
+	onclick,
+	oncontextmenu,
+	ondblclick,
+	ondrag,
+	ondragend,
+	ondragenter,
+	ondragleave,
+	ondragover,
+	ondragstart,
+	ondrop,
+	ondurationchange,
+	onemptied,
+	onended,
+	onerror,
+	onfocus,
+	oninput,
+	onkeydown,
+	onkeypress,
+	onkeyup,
+	onload,
+	onloadeddata,
+	onloadedmetadata,
+	onloadstart,
+	onmousedown,
+	onmousemove,
+	onmouseout,
+	onmouseover,
+	onmouseup,
+	onmousewheel,
+	onpause,
+	onplay,
+	onplaying,
+	onprogress,
+	onratechange,
+	onreadystatechange,
+	onreset,
+	onscroll,
+	onseeked,
+	onseeking,
+	onselect,
+	onstalled,
+	onsubmit,
+	onsuspend,
+	ontimeupdate,
+	onvolumechange,
+	onwaiting,
+	outerHTML,
+	style,
+	tabIndex,
+	title,
+	all,
+	behaviorUrns,
+	canHaveChildren,
+	canHaveHTML,
+	children,
+	document,
+	filters,
+	hideFocus,
+	innerText,
+	isDisabled,
+	isMultiLine,
+	isTextEdit,
+	language,
+	onactivate,
+	onafterupdate,
+	onbeforeactivate,
+	onbeforecopy,
+	onbeforecut,
+	onbeforedeactivate,
+	onbeforeeditfocus,
+	onbeforepaste,
+	onbeforeupdate,
+	oncellchange,
+	oncontrolselect,
+	oncopy,
+	oncut,
+	ondataavailable,
+	ondatasetchanged,
+	ondatasetcomplete,
+	ondeactivate,
+	onerrorupdate,
+	onfilterchange,
+	onfocusin,
+	onfocusout,
+	onhelp,
+	onlayoutcomplete,
+	onlosecapture,
+	onmouseenter,
+	onmouseleave,
+	onmove,
+	onmoveend,
+	onmovestart,
+	onpaste,
+	onpropertychange,
+	onresize,
+	onresizeend,
+	onresizestart,
+	onrowenter,
+	onrowexit,
+	onrowsdelete,
+	onrowsinserted,
+	onselectstart,
+	outerText,
+	parentElement,
+	parentTextEdit,
+	readyState,
+	recordNumber,
+	scopeName,
+	sourceIndex,
+	tagUrn,
+	uniqueID,
+	uniqueNumber,
+	blur,
+	click,
+	focus,
+	getElementsByClassName,
+	insertAdjacentHTML,
+	scrollIntoView,
+	componentFromPoint,
+	doScroll,
+	attachEvent,
+	detachEvent,
+	addBehavior,
+	addFilter,
+	applyElement,
+	clearAttributes,
+	contains,
+	dragDrop,
+	getAdjacentText,
+	insertAdjacentElement,
+	insertAdjacentText,
+	mergeAttributes,
+	releaseCapture,
+	removeBehavior,
+	removeFilter,
+	replaceAdjacentText,
+	setActive,
+	setCapture,
+	createControlRange,
+	removeNode,
+	replaceNode,
+	swapNode,
+	clientHeight,
+	clientLeft,
+	clientTop,
+	clientWidth,
+	scrollHeight,
+	scrollLeft,
+	scrollTop,
+	scrollWidth,
+	tagName,
+	childElementCount,
+	firstElementChild,
+	lastElementChild,
+	nextElementSibling,
+	previousElementSibling,
+	getAttribute,
+	getAttributeNS,
+	getAttributeNode,
+	getAttributeNodeNS,
+	getBoundingClientRect,
+	getClientRects,
+	getElementsByTagName,
+	getElementsByTagNameNS,
+	hasAttribute,
+	hasAttributeNS,
+	removeAttribute,
+	removeAttributeNS,
+	removeAttributeNode,
+	setAttribute,
+	setAttributeNS,
+	setAttributeNode,
+	setAttributeNodeNS,
+	fireEvent,
+	msMatchesSelector,
+	querySelector,
+	querySelectorAll,
+	attributes,
+	childNodes,
+	firstChild,
+	lastChild,
+	localName,
+	namespaceURI,
+	nextSibling,
+	nodeName,
+	nodeType,
+	nodeValue,
+	ownerDocument,
+	parentNode,
+	prefix,
+	previousSibling,
+	textContent,
+	addEventListener,
+	dispatchEvent,
+	removeEventListener,
+	appendChild,
+	cloneNode,
+	compareDocumentPosition,
+	hasAttributes,
+	hasChildNodes,
+	insertBefore,
+	isDefaultNamespace,
+	isEqualNode,
+	isSameNode,
+	isSupported,
+	lookupNamespaceURI,
+	lookupPrefix,
+	normalize,
+	removeChild,
+	replaceChild,
+	ATTRIBUTE_NODE,
+	CDATA_SECTION_NODE,
+	COMMENT_NODE,
+	DOCUMENT_FRAGMENT_NODE,
+	DOCUMENT_NODE,
+	DOCUMENT_POSITION_CONTAINED_BY,
+	DOCUMENT_POSITION_CONTAINS,
+	DOCUMENT_POSITION_DISCONNECTED,
+	DOCUMENT_POSITION_FOLLOWING,
+	DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
+	DOCUMENT_POSITION_PRECEDING,
+	DOCUMENT_TYPE_NODE,
+	ELEMENT_NODE,
+	ENTITY_NODE,
+	ENTITY_REFERENCE_NODE,
+	NOTATION_NODE,
+	PROCESSING_INSTRUCTION_NODE,
+	TEXT_NODE OK 
+
+OK <js> kvm.cv.canvas.onmousedown=function(e){push(e)} </js> \ click anywhere in the canvas, get the event obj
+0: [object MouseEvent] (object) ==> constant mouse-event ==> mouse-event obj>keys .
+	mouse-event :> fromElement \ ==> null (null)
+	mouse-event :> layerX \ ==> 32 (number)
+	mouse-event :> layerY \ ==> 272 (number)
+	mouse-event :> toElement \ ==> null (null)
+	mouse-event :> which \ ==> 1 (number)
+	mouse-event :> altKey \ ==> false (boolean)
+	mouse-event :> button \ ==> 0 (number)
+	mouse-event :> buttons \ ==> 1 (number)
+	mouse-event :> clientX \ ==> 32 (number)
+	mouse-event :> clientY \ ==> 272 (number)
+	mouse-event :> ctrlKey \ ==> false (boolean)
+	mouse-event :> metaKey \ ==> false (boolean)
+	mouse-event :> offsetX \ ==> 2 (number)
+	mouse-event :> offsetY \ ==> 2 (number)
+	mouse-event :> pageX \ ==> 32 (number)
+	mouse-event :> pageY \ ==> 272 (number)
+	mouse-event :> relatedTarget \ ==> null (null)
+	mouse-event :> screenX \ ==> 32 (number)
+	mouse-event :> screenY \ ==> 301 (number)
+	mouse-event :> shiftKey \ ==> false (boolean)
+	mouse-event :> x \ ==> 32 (number)
+	mouse-event :> y \ ==> 272 (number)
+	mouse-event :> getModifierState \ ==> 
+					function getModifierState() {
+						[native code]
+					} (function)
+	mouse-event :> initMouseEvent \ ==> 
+					function initMouseEvent() {
+						[native code]
+					} (function)
+	mouse-event :> detail \ ==> 1 (number)
+	mouse-event :> view \ ==> [object Window] (object)
+	mouse-event :> initUIEvent \ ==> 
+					function initUIEvent() {
+						[native code]
+					} (function)
+	mouse-event :> bubbles \ ==> true (boolean)
+	mouse-event :> cancelable \ ==> true (boolean)
+	mouse-event :> currentTarget \ ==> null (null)
+	mouse-event :> defaultPrevented \ ==> false (boolean)
+	mouse-event :> eventPhase \ ==> 3 (number)
+	mouse-event :> isTrusted \ ==> true (boolean)
+	mouse-event :> target \ ==> [object HTMLCanvasElement] (object)
+	mouse-event :> timeStamp \ ==> 1425352133141 (number)
+	mouse-event :> type \ ==> mousedown (string)
+	mouse-event :> cancelBubble \ ==> false (boolean)
+	mouse-event :> srcElement \ ==> [object HTMLCanvasElement] (object)
+	mouse-event :> initEvent \ ==> 
+					function initEvent() {
+						[native code]
+					} (function)
+	mouse-event :> preventDefault \ ==> 
+					function preventDefault() {
+						[native code]
+					} (function)
+	mouse-event :> stopImmediatePropagation \ ==> 
+					function stopImmediatePropagation() {
+						[native code]
+					} (function)
+	mouse-event :> stopPropagation \ ==> 
+					function stopPropagation() {
+						[native code]
+					} (function)
+	mouse-event :> AT_TARGET \ ==> 2 (number)
+	mouse-event :> BUBBLING_PHASE \ ==> 3 (number)
+	mouse-event :> CAPTURING_PHASE \ ==> 1 (number)
+
+以下這些實驗證實 canvas mouse event 的用法很簡單，
+	<js> kvm.cv.canvas.onmouseup=function(e){print(e.offsetX + "<up>" + e.offsetY + '  ')} </js>
+	<js> kvm.cv.canvas.onmousedown=function(e){print(e.offsetX + "<down>" + e.offsetY + '  ')} </js>
+	<js> kvm.cv.canvas.onmousemove=function(e){print(e.offsetX + "<move>" + e.offsetY + '  ')} </js>
+	<js> kvm.cv.canvas.onmouseenter=function(e){print(e.offsetX + "<enter>" + e.offsetY + '  ')} </js>
+	<js> kvm.cv.canvas.onmouseleave=function(e){print(e.offsetX + "<leave>" + e.offsetY + '  ')} </js>
+	<js> kvm.cv.canvas.onmouseover=function(e){print(e.offsetX + "<over>" + e.offsetY + '  ')} </js>
+	<js> kvm.cv.canvas.onmouseout=function(e){print(e.offsetX + "<out>" + e.offsetY + '  ')} </js>
+	\ kvm.cv.canvas.onmousedown=function(e){} Click 一下進來一次，注意裡面 down 離開後 up，善用 onmouseelave
+	\ kvm.cv.canvas.onmouseup=function(e){} Click 一下進來一次，注意外面 down 進入後 up，善用 onmouseenter
+	\ kvm.cv.canvas.onmousemove=function(e){} 不斷進來更新座標
+	\ kvm.cv.canvas.onmouseout=function(e){} 離開前打一槍
+	\ kvm.cv.canvas.onmouseover=function(e){} 只進入時打一槍
+	\ kvm.cv.canvas.onmouseup=function(e){}
+	\ kvm.cv.canvas.onmousewheel=function(e){}
+	\ kvm.cv.canvas.onmouseenter=function(e){} 同 onmouseover 會有 -1 -2 -3? 出現
+	\ kvm.cv.canvas.onmouseleave=function(e){} 同 onmouseout 會有 width+n height+n 出現, n=1,2,3
+	
+</comment>

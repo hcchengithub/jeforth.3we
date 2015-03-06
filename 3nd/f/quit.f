@@ -33,5 +33,5 @@
 	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the jeforth.3nd.js pathname itself.
 
 \ ---------------- End of quit.f -----------------------------------------------
+	js: kvm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
-
