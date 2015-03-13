@@ -1,33 +1,27 @@
 ﻿/*  UTF-8
 
-	=== jeforth 簡介 ===
+	=== jeforth.3we 簡介 ===
 
     2011/12/23  jeforth initial version http://www.jeforth.com by FigTaiwan 爽哥 & Yap.
 	本來是用 WWW browser 執行的，以操作 HTML5 為範例，用來推廣 forth，非常簡潔優美。
+	Forth 天生是個管理大量命令的好工具，也是電腦語言中最簡單的。你要電腦做事，就用你自
+	己跟電腦約定的語言來溝通，這點是我認為 forth 最大的優點。
 
-	我把它 port 到 node-webkit 下執行，以便享有現代新程式的好處。 Forth 天生是個管理大量
-	命令的最佳工具，也是與電腦溝通的語法中最簡單的。我們要電腦做的事，本來只有兩句話，用
-	其他語言表達經常會變成一整頁。而 forth 的語法最自由，兩句話就是兩句話。
-
-
+	我把它移到其他 application (HTA, Node.js, Node-webkit, HTM, WSH) 執行，以便享有現代
+	新環境的好處。但全部共用同一套 kernel code (jeforth.js, jeforth.f, voc.f) 為了便於
+	區別，這套 jeforth 的實施例就稱為 jeforth.3we, 3WE 意指 3 words engine 包括 code,
+	end-code, 以及 0 組成 jeforth.f 一開始僅有的三個 words。
+	
 	=== Resources ===
 
-	o  jeforth for WSH source code http://fossilrepos.sourceforge.net/srv.fsl/0/jeforth
+	o  jeforth.3we source code http://github.com/hcchengithub/jeforth.3we
 
 	o  jeforth 前身為 http://tutor.ksana.tw/ksanavm 用 C 語言實現 forth 的方法之精彩教
 	   材「剎那極簡虛擬機」 by Yap
 
 	o  Yap 講解 jeforth 精彩課程 http://www.jeforth.com/demo.html 感謝 王建鋒 的網站
 
-	o  超精彩的 waterbear 圖形積木介面 jeforth http://jforthblocks.appspot.com/static/code/index_tw.html
-       by Jimmy的爸.
-
 	o  http://www.figtaiwan.org FigTaiwan 臺灣符式推廣協會
-
-	=== revision log ===
-	
-	hcchen5600 2013/08/31 12:25:42 r1 jeforth kernel that has only two words 'code' and 'end-code'.
-	hcchen5600 2013/10/03 15:19:26 r4 jQuery-terminal works fine now.
 	
 */
 "uses strict";
@@ -35,6 +29,7 @@ var kvm = (function(){
     function KsanaVm() {     
 		var vm = this; // "this" is very confusing to me. Now I am sure 'vm' is 'kvm'.
 		if(typeof(kvm)=="undefined"){var kvm=vm} // kvm defined in jeforth.hta is visible but not node.js index.js
+		var abortTIB = true; // Abort TIB
 		var ip=0; // forth VM instruction pointer
 		var stack = [] ;
 		var rstack = [];
@@ -57,10 +52,10 @@ var kvm = (function(){
 		var colonxt = function(){}; // colon word's xt function is a constant
 		var compiling=false;
 		var print = function(){}; // dummy 
-		var instances = []; // forth 與 javascript 互通的 data structure. hcchen5600 2015/03/03 18:09:24 
-			instances[0]=1;instances[instances[0]]={};
+		var g = {}; // forth 下所有的 name 本皆 global，應與 javascript 直接互通。 hcchen5600 2015/03/03 18:09:24 
+
 		vm.init = function () { 
-			// Initialize KsanaVM
+			// I/O 要靠個別 application 的主程式提供。
 			print = kvm.print;
 		}
 		
@@ -89,26 +84,6 @@ var kvm = (function(){
 		function context_word_list(){  // returns the word-list that is searched first.
 			return words[context];
 		}
-
-		// 這個 Constant() constructor 是所有 常數 共通的，等於傳統 doLit 的位置。
-		// doLit 廣用於 machine code 原生的 forth。 jeforth 直接放 constant object.
-		function Constant(n) {
-			this.value = n;
-		}
-		Constant.prototype.xt = function(){push(this.value)};
-		Constant.prototype.toString = function(){
-			var description;
-			switch (typeof(this.value)){
-				case "number":
-					description = this.value+"\t(literal)";
-					break
-				default:  // constant is either number or string
-					description = '"'+this.value+'"\t(literal)';
-					break
-			}
-			return (description);
-		};
-		
 		
 		// Reset the forth VM
 		function reset(){
@@ -119,18 +94,20 @@ var kvm = (function(){
 			ip=0; // forth VM instruction pointer
 			// tib = "\\s";  stop loading if is panic during an including
 			ntib = tib.length; // skip the remaining outer loop equals to stop including 
-			abortexec=true;  // 讓 forth 自己來清
+			abortTIB=true;  // 讓 forth 自己來清
 			debug = false;
+			if (g.setTimeout) g.setTimeout.clearAll();
+			if (g.setInterval)g.setInterval.clearAll();
 			print('-------------- Reset forth VM --------------\n');
 		}
-		// vm.reset = reset;
+		vm.reset = reset;
 		
 		function panic(msg,severity) {
 			var t='';
 			if(compiling) t += '\n------------- Panic! while compiling '+newname+' -------------\n';
 			else t +=          '\n------------------- P A N I C ! -------------------------\n';
 			t += msg;
-			t += "abortexec: " + abortexec +'\n';
+			t += "abortTIB: " + abortTIB +'\n';
 			t += "compiling: " + compiling +'\n';
 			t += "stack.length: " + stack.length +'\n';
 			t += "rstack.length: " + rstack.length +'\n';
@@ -252,7 +229,7 @@ var kvm = (function(){
 		
 		// 把所有不同版本的 call() dolist() execute() runcolon() 等等都整合成 execute(w)
 		// 或 inner(entry), 前者只執行一個 word, 後者沿著 ip 繼續跑. The w can be word
-		// object, word name, a function, or an dictionary entry。[panic for other inputs]
+		// object, word name, a function; while entry is an address。
 		
 		// execute() 類似 CPU instruction 的 single step, 而 inner() 類似 CPU 的 call 指令。
 		// 會用 到 inner() 的有 outer() 以及 colon word 的 xt(), 而 execute() 則到處有用。 
@@ -267,10 +244,10 @@ var kvm = (function(){
 		
 		// 最終極的 inner loop 是 while(w){ip++; w.xt(); w=dictionary[ip]}; ip=rstack.pop(); 只
 		// 要用具有 false 邏輯屬性的東西來當 ret 以及 exit 就可以滿足。 共有 null, '', false, 
-		// NaN and undefined 可供選擇(0 另有用途如下述)。jeforth.js 裡用 RET=null, EXIT="" 來指定。
+		// NaN and undefined 可供選擇(0 另有用途如下述)。jeforth.js 裡選定用 RET=null, EXIT=""。
 
 		// Suspend VM 時，要中止所有的 inner loop 但不 pop retuurn stack 以待 resume 時恢復執行。
-		// dictionary[0] 以及 words[<vid>][0] 都固定放 0, 就是要造成 w=0 來達到這個效果。從 outer 
+		// dictionary[0] 以及 words[<vid>][0] 都固定放 0, 就是要造成 ip=w=0 來達到這個效果。從 outer 
 		// loop 剛進入 inner loop 之時要先 push(0) 進 return stack 如此既 balance return stack 又
 		// 讓 0 來扮演這個特殊目的。
 
@@ -279,10 +256,10 @@ var kvm = (function(){
 		// inner() 未完成的工作又鑽一層下去，增加 inner() 的層數最後有可能爆掉 JavaScript interpreter。
 		// 這個過程要等到 ret 或 exit rstack.pop() 出 0 才會整個一起終了。這造成我稱為 deep inner 
 		// loop 的問題!! 我曾經引進 endinner flag 讓 ret, exit, doVar, does> 等這些東西自己發出 
-		// colon word 該結束了的明確信號。這等於是又倒回 Yap 原版用 abortexec的辦法，失去 w=0 的意義。
+		// colon word 該結束了的明確信號。這等於是又倒回 Yap 原版用 abortexec的辦法，ip=w=0 虛擲。
 		// 如今 RET=null, EXIT="" 的辦法終於圓滿。
 		
-		// ----------------------------- the inner loop -------------------------------------------------
+		// -------------------- ###### The inner loop ###### -------------------------------------
 		function phaseA (entry) { // 整理各種不同種類的 entry 翻譯成恰當的 w.
 			var w = 0; 
 			switch(typeof(entry)){
@@ -330,47 +307,36 @@ var kvm = (function(){
 		}
 
 		function execute(entry) { 
-			var w = phaseA(entry); 
-			if(typeof(w)=="number") panic("Error! don't know how to execute : "+entry+" ("+mytypeof(entry)+")\n","error");
-			else phaseB(w); 
+			var w; 
+			if (w = phaseA(entry)){
+				if(typeof(w)=="number") panic("Error! please use inner("+w+") instead of execute("+w+").\n","error");
+				else phaseB(w); 
+			}
 		}
 		vm.execute = execute;
 
-		function debugInner (entry, resuming) {
+		function inner (entry, resuming) {
 			var w = phaseA(entry); // 翻譯成恰當的 w.
 			do{
 				while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-					/* 要debug時把comment點掉 */ if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
 					ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 					w = dictionary[ip];
 				}
-				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, ip==0 is abortexec
+				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, abort inner but reserve rstack
 				if(resuming) w = dictionary[ip];
 			} while(ip && resuming); // ip==0 means resuming has done
 		}
-		function fastInner (entry, resuming) {
-			var w = phaseA(entry); // 翻譯成恰當的 w.
-			do{
-				while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-					// /* 要debug時把comment點掉 */ if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
-					ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
-					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
-					w = dictionary[ip];
-				}
-				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, ip==0 is abortexec
-				if(resuming) w = dictionary[ip];
-			} while(ip && resuming); // ip==0 means resuming has done
-		}
-		var inner = fastInner; // default performance first
 		// ### End of the inner loop ###
 
 		// -------------------------- the outer loop ----------------------------------------------------
-		// forth outer loop, evaluates the remaining tib/ntib string.
-		// if entry==0 then inner(0) does nothing, otherwise it resumes from the entry point.
+		// forth outer loop, 
+		// If entry is given then resume from the entry point by executing the remaining colon thread 
+		// from entry and then the tib/ntib string.
+		// 
 		function outer(entry) {
-			inner(entry, true); // resume from the breakpoint 
-			while(!abortexec) {
+			if (entry) inner(entry, true); // resume from the breakpoint 
+			while(!abortTIB) {
 				var token=nexttoken();
 				if (token==="") break;    // TIB 收完了， loop 出口在這裡。
 				outerExecute(token);
@@ -409,7 +375,7 @@ var kvm = (function(){
 				if(token.substr(0,2).toLowerCase()=="0x") var n = parseInt(token);
 				else  var n = parseFloat(token);
 				if (compiling) {
-					dictcompile(new Constant(n)); // 直接用 Constant object 省掉 doLit
+					push(n); execute("literal");
 				} else {
 					push(n);
 				}
@@ -481,7 +447,6 @@ var kvm = (function(){
 				panic("Error! expecting 'end-code'.\n");
 				reset();
 			}
-			
 		}
 		
 		words[current] = [
@@ -516,7 +481,7 @@ var kvm = (function(){
 			])
 		];
 		
-		// 伴隨 words[][] 的 hash table. 用 JavaScript 的十成功力來找 word 就是要利用這個。
+		// 用 JavaScript 的十成功力來找 word。
 		wordhash = {"code":current_word_list()[1], "end-code":current_word_list()[2]};
 		
 		// -------------------- main() ----------------------------------------
@@ -524,21 +489,17 @@ var kvm = (function(){
 		// Recursively evaluate one forth command line.
 		function fortheval(line){
 			var tibwas,ntibwas,ipwas;
-			arguments.callee.level += 1;
 			tibwas = tib;
 			ntibwas = ntib;
 			ipwas = ip;
 			tib = line;
 			ntib = 0;
-			abortexec = false; // abortexec 是給 outer loop 看的，這裡要先清除。
-			// ip=0;
-			outer(0); 
+			abortTIB = false; // abortTIB 是給 outer loop 看的，這裡要先清除。
+			outer();
 			tib = tibwas;
 			ntib = ntibwas;
 			ip = ipwas;
-			arguments.callee.level -= 1;
 		}
-		fortheval.level = -1; // 
 		vm.fortheval = fortheval; // export the function
 	
 		// -------------------- end of main() -----------------------------------------
@@ -599,27 +560,6 @@ var kvm = (function(){
 		}
 		vm.push = push;
 	
-		// This is a useful common tool. Compare two arrays.
-		function isSameArray(a,b) {
-			if (a.length != b.length) {
-				return false;
-			} else {
-				for (var i=0; i < a.length; i++){
-					var ta = typeof(a[i]);
-					var tb = typeof(b[i]);
-					if (ta == tb) {
-						if (ta == "number"){
-							if (isNaN(a[i]) && isNaN(b[i])) continue; // because (NaN == NaN) 的結果是 false 所以要特別處理。
-						}
-						if (ta == "object") {  // 怎麼比較 obj? v2.05 之後用 memberCount()
-							if (memberCount.call(a[i]) != memberCount.call(b[i])) return false;
-						} else if (a[i] != b[i]) return false;
-					} else if (a[i] != b[i]) return false;
-				}
-				return true;
-			}
-		}
-	
 		// typeof(array) and typeof(null) are "object"! So a tweak is needed.
 		function mytypeof(x){
 			var type = typeof x;
@@ -645,145 +585,9 @@ var kvm = (function(){
 		// js> Object.prototype.toString.apply({})           tib. \ ==> [object Object] (string)
 		// js> Object.prototype.toString.apply(null)         tib. \ ==> [object Null] (string)
 
-
-		// This is a useful common tool. Help to recursively see an object or forth Word.
-		// For forth Words, view the briefing. For other objects, try to see into it.
-		function see(obj,tab){
-			if (tab==undefined) tab = "  "; else tab += "  ";
-			switch(mytypeof(obj)){
-				case "object" :
-				case "array" :
-					if (obj.constructor != Word && obj.constructor != Constant ) {
-						if (obj&&obj.toString) 
-							print(obj.toString() + '\n');
-						else 
-							print(Object.prototype.toString.apply(obj) + '\n');
-						for(var i in obj) {
-							print(tab + i + " : ");  // Entire array already printed here.
-								if (obj[i]&&obj[i].toString) 
-									print(tab + obj[i].toString() + '\n');
-								else 
-									print(tab + Object.prototype.toString.apply(obj[i]) + '\n');
-						}
-						break;  // if is Word then do default
-					}
-				default : // Word(), Constant(), number, string, null, undefined
-					var ss = obj + ''; // Print-able test
-					print(ss + " (" + mytypeof(obj) + ")\n");
-			}
-		}
-		// vm.see = see;
-	
-		// JavaScript has no native way to copy an object to another object variable.
-		// I design mergeObj() and retrieveObj() to do the copy.
-
-		// mergeObj(to,from) 取聯集 (Object to) = (Object to) + (Object from); 
-		// existing (Object to) elements will be over written. If you want to make a copy of 
-		// (object from) then the correct way is var to={};mergeObj(to,from); you get a copy of 
-		// 'from' in 'to'.
-		function mergeObj(to,from){
-			for(var i in from) {
-				if (typeof(from[i])=="object") {
-					if (from[i].constructor == Array ){  // typeof(array) does not return "array" but "object" !!
-						to[i] = from[i].slice(0); // this is the way javascript copy array
-					} else {
-						mergeObj(to[i]={}, from[i]);
-					}
-				} else {
-					to[i] = from[i];
-				}
-			}
-		}
-	
-		// retrieveObj(to,from) 只挑自己有的 elements. (Object to) = (Object from); 
-		// Similar to mergeObj() but only retrieve elements existing in (Object to)
-		function retrieveObj(to,from){
-			for(var i in from) {
-				if (to[i] == undefined) continue;  // skip what is not exiting in the (Ojbect to)
-				if (typeof(from[i])=="object") {
-					mergeObj(to[i], from[i]);  // could be array or object
-				} else {
-					to[i] = from[i];
-				}
-			}
-		}
-	
-		// Get hash table's length or an object's member count.
-		// An array's length is array.length but there's no such thing of hash.length for hash{}.
-		// memberCount.call(object) gets the given object's member count which is also a hash table's length.
-		function memberCount() {
-			var i=0;
-			for(var members in this) i++;
-			return i;
-		}
-	
-		// Tool, check if the item exists in the array or is it a member in the hash keys.
-		function isMember(item, thing){
-			var result = {flag:false, keyvalue:0};
-			if (mytypeof(thing) == "array") {
-				for (var i in thing) {
-					if (item == thing[i]) {
-						result.flag = true;
-						result.keyvalue = parseInt(i); // array 被 JavaScript 當作 object 而 i 是個 string, 所以要轉換!
-						break;
-					}
-				}
-			} else { // if obj is not an array then assume it's an object
-				for (var i in thing) {
-					if (item == i) {
-						result.flag = true;
-						result.keyvalue = thing[i];
-						break;
-					}
-				}
-			}
-			return result; // {flag:boolean, value:(index of the array or value of the obj member)}
-		}
-	
-		// -------------- Save forth VM's context and pause the recent outer loop ------------------
-		// Use resumeForth() to resume. We need to suspend-resume forth VM for blocking words like 
-		// 'accept', '*debug*', and 'jsc', and probably more in the future. Event-driven 
-		// programming does not have sleep(). To wait for a blocking I/O, suspend-resume is my
-		// solution. But note! suspend within a code word will not stop it immediately. It actually
-		// suspend before the beginning of the next word. hcchen5600 2013/10/05 22:45:38 
-
-		// Forth words 'suspend' and 'resume' better be code words. Because colon words use return 
-		// stack that bothers the resuming. 'resume' must be called by terminal or some way that won't 
-		// change the return stack. If resume is in a colon word then the return stack will be changed
-		// by pushing a 0 before calling resumeForthVM() that will terminate the original outer loop
-		// unexpectedly.
-		
-		// I can't suspend JavaScript code anyway, therefore to support multiple level of forth VM 
-		// suspending does not help much. Only one pair of suspend-resume is allowed at a time.
-
-		function suspendForthVM(){
-			if(suspendForthVM.activated){ 
-				panic("Error! double suspend.\n", "error");
-				return; // can't double suspend.
-			}
-			arguments.callee.tib = tib; 
-			arguments.callee.ntib = ntib; 
-			arguments.callee.ip = ip; 
-			tib = "";      // tib="" terminates the forth VM outer() loop
-			ntib = ip = 0; // ip=0 terminates the forth VM inner() loop
-			arguments.callee.activated = true;
-		}
-		// vm.suspendForthVM = suspendForthVM;
-		
-		function resumeForthVM() {
-			if(!suspendForthVM.activated) {
-				panic("Error! nothing to resume.\n", "error");
-				return; // can't resume again.
-			}
-			suspendForthVM.activated = false;
-			tib = suspendForthVM.tib;
-			ntib = suspendForthVM.ntib;
-			outer(suspendForthVM.ip);
-		}
-
 		// vm.resumeForthVM = resumeForthVM;
-		vm.stack = stack; // debug easier
-		vm.rstack = rstack; // debug easier especially debugging TSR
+		vm.stack = function(){return(stack)}; // debug easier. stack 常被改，留在 kvm 裡可能是舊版，所以要隨時從肚子裡抓。
+		vm.rstack = function(){return(rstack)}; // debug easier especially debugging TSR
 		vm.words = words; // debug easier
 		vm.dictionary = dictionary; // debug easier
 	}

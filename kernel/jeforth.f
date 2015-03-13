@@ -1,3 +1,127 @@
+code init		( -- ) \ Initialize g.members that are moved out from jeforth.js which is thus kept pure.
+				// An array's length is array.length but there's no such thing of hash.length for hash{}.
+				// memberCount(object) gets the given object's member count which is also a hash table's length.
+				g.memberCount = function (obj) {
+					var i=0;
+					for(var members in obj) i++;
+					return i;
+				}
+				// This is a useful common tool. Compare two arrays.
+				g.isSameArray = function (a,b) {
+					if (a.length != b.length) {
+						return false;
+					} else {
+						for (var i=0; i < a.length; i++){
+							var ta = typeof(a[i]);
+							var tb = typeof(b[i]);
+							if (ta == tb) {
+								if (ta == "number"){
+									if (isNaN(a[i]) && isNaN(b[i])) continue; // because (NaN == NaN) 的結果是 false 所以要特別處理。
+								}
+								if (ta == "object") {  // 怎麼比較 obj? v2.05 之後用 memberCount()
+									if (g.memberCount(a[i]) != g.memberCount(b[i])) return false;
+								} else if (a[i] != b[i]) return false;
+							} else if (a[i] != b[i]) return false;
+						}
+						return true;
+					}
+				}
+				// Tool, check if the item exists in the array or is it a member in the hash.
+				// return {flag, key}
+				g.isMember = function (item, thing){
+					var result = {flag:false, key:0};
+					if (mytypeof(thing) == "array") {
+						for (var i in thing) {
+							if (item == thing[i]) {
+								result.flag = true;
+								result.key = parseInt(i); // array 被 JavaScript 當作 object 而 i 是個 string, 所以要轉換!
+								break;
+							}
+						}
+					} else { // if obj is not an array then assume it's an object
+						for (var i in thing) {
+							if (item == i) {
+								result.flag = true;
+								result.key = thing[i];
+								break;
+							}
+						}
+					}
+					return result; // {flag:boolean, value:(index of the array or value of the obj member)}
+				}
+				// How to clear all setInterval() and setTimeOut() without knowing their ID?
+				// http://stackoverflow.com/questions/8769598/how-to-clear-all-setinterval-and-settimeout-without-knowing-their-id
+				// 缺點是 g.setTimeout.registered() 會大量堆積，需 delete(g.setTimeout.registered()[id.toString()]) 既然還得記住
+				// timeoutId 使得 g.setTimeout() 的好處大打折扣。 查看： js> g.setTimeout.registered() (see)
+				// setInterval 比較不會大量堆積，最好還是要適時 delete。查看：js> g.setInterval.registered() (see)
+				g.setInterval = (function(){
+					var registered={};
+					f = function(a,b){
+						var id = setInterval(a,b);
+						registered[id.toString()] = id;
+						return id;
+					};
+					f.clearAll = function(){
+						for(var r in registered){clearInterval( registered[r] )}
+						registered={};
+					};
+					f.registered = function(){return(registered)};
+					return f;    
+				})();
+				g.setTimeout = (function(){
+					var registered={};
+					f = function(a,b){
+						var id = setTimeout(a,b);
+						registered[id.toString()] = id;
+						return id;
+					};
+					f.clearAll = function(){
+						for(var r in registered){clearTimeout( registered[r] )}
+						registered={};
+					};
+					f.registered = function(){return(registered)};
+					return f;    
+				})();
+				// This is a useful common tool. Help to recursively see an object or forth Word.
+				// For forth Words, view the briefing. For other objects, try to see into it.
+				g.see = function (obj,tab){
+					if (tab==undefined) tab = "  "; else tab += "  ";
+					switch(mytypeof(obj)){
+						case "object" :
+						case "array" :
+							if (obj.constructor != Word) {
+								if (obj&&obj.toString) 
+									print(obj.toString() + '\n');
+								else 
+									print(Object.prototype.toString.apply(obj) + '\n');
+								for(var i in obj) {
+									print(tab + i + " : ");  // Entire array already printed here.
+									if (obj[i] && obj[i].toString || obj[i]===0) 
+										print(tab + obj[i].toString() + '\n');
+									else
+										print(tab + Object.prototype.toString.apply(obj[i]) + '\n');
+								}
+								break;  // if is Word then do default
+							}
+						default : // Word(), Constant(), number, string, null, undefined
+							var ss = obj + ''; // Print-able test
+							print(ss + " (" + mytypeof(obj) + ")\n");
+					}
+				}
+				g.debugInner = function (entry, resuming) {
+					var w = phaseA(entry); // 翻譯成恰當的 w.
+					do{
+						while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
+							if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+							ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
+							phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
+							w = dictionary[ip];
+						}
+						if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, abort inner but reserve rstack
+						if(resuming) w = dictionary[ip];
+					} while(ip && resuming); // ip==0 means resuming has done
+				}
+				end-code init
 
 code version    ( -- revision ) \ print the greeting message and return the revision code
 				push(kvm.greeting()) end-code
@@ -43,7 +167,7 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 					用上〈selftest〉〈/selftest〉出現在每個 word 定義處，裡頭可以放心自由地使用尚未出
 					生的「未來 words」, 感覺很奇異，但對寫程式時的頭腦有很大的幫助。 </comment>
 					marker ~~selftest~~
-					include selftest.f \ self-test tools
+					include kernel/selftest.f
 					.( *** Start self-test ) cr
 					s" *** Data stack should be empty ... " .
 						depth not [if] .( pass) cr [else] .( failed!) cr \s [then]
@@ -338,12 +462,11 @@ code :          ( <name> -- ) \ Begin a forth colon definition.
 				last().xt = colonxt = function(){
 					rstack.push(ip);
 					inner(this.cfa);
-					endinner = false; // better safe than sorry
 				}
                 end-code
 
 code ;          ( -- ) \ End of the colon definition.
-                if (!isSameArray(stackwas,stack)) {
+                if (!g.isSameArray(stackwas,stack)) {
                     panic("Stack changed during colon definition, it must be a mistake!\n", "error");
 					words[current].pop();
                 } else {
@@ -356,82 +479,6 @@ code ;          ( -- ) \ End of the colon definition.
 				<selftest>
 					js: tick(':').selftest='pass'
 					js: tick(';').selftest='pass'
-				</selftest>
-
-code suspend	( -- ) \ Suspend the forth VM to wait for the I/O.
-				if(fortheval.level>0) {
-					panic("Suspending Error! fortheval.level is " + fortheval.level + ", < 0 expected.\n");
-					reset();
-				} else {
-					tib = tib.slice(ntib); // time to cut off used tib
-					ntib = 0;
-					suspendForthVM();
-				}
-				end-code
-				/// 'suspend' and 'resume' better be code words.
-				/// Colon words use return stack that bothers the resuming.
-				/// If the caller of the outer loop is terminal, then no problem.
-				/// If the caller of the outer loop is another outer loop, e.g. fortheval(),
-				/// then only the recent outer loop will be suspend then it skip to the higher
-				/// level and go on!
-
-code resume		( -- ) \ Resume the forth VM after a blocking I/O
-				resumeForthVM() end-code
-				/// 'suspend' and 'resume' better be code words. Colon words use return
-				/// stack that bothers the resuming.
-				/// 'resume' must be called by terminal all the way through only code words
-				/// because of the return stack must be as-is when suspend.
-
-				<selftest>
-					<text>
-					Forth VM suspend 之後無事可做，只好結束。以採用 jQuery-terminal 為例，等於是回到
-					terminal, 這正是 breakpoint 的效果。可以用 suspend-resume 來實現 forth VM 的 debug
-					console 真是意外驚喜！
-
-					suspend 出現在有人登記 blocking I/O 的 callback 之後停下來等 I/O。而 resume 的
-					動作只能在 I/O 完成後的 callback function 裡做，否則怎麼會 resume? 因此這種情況下
-					the word 'resume' 用不上，而是用 resumeForthVM() 當作 I/O 的 callback function。
-
-					以下這段測試程式頗特殊，
-
-					（1）它會讓 forth VM 停下來 100mS 之後 resume callback 繼續。
-					（2）另，jeforth.f 一開始不在 I/O 上花太多功夫。只用最簡單的辦法，使得 jQuery-terminal
-						 只在印 prompt 之前才會順便把 screenbuffer 都印出去。故 CPU 回到 terminal 之前，所
-						 有的 display 都暫時看不見。注意，一開始第一個 prompt 是 terminal 自己送的，故不會
-						 印 screenbuffer.
-
-					讓 selftest 整個做完之後，發個 $.terminal.active().echo(screenbuffer) 以為可不靠 prompt
-					印出 screenbuffer,
-
-						js: fortheval(tick('<selftest>').buffer)
-						js: $.terminal.active().echo(screenbuffer)
-
-					其實不然，因為 suspend-resume 只作用在本層 outer loop 裡（上一行）。上一行 Suspend 之後
-					還是會「馬上」來執行下一行，此時只印出 suspend 之前的 screenbuffer，然後就沒事做回到
-					Terminal。這時也好玩，因為 Terminal 認為它已經 prompt 過了，除非有 keyboard enter 觸發，
-					否則仍然不會有 prompt 來印出 screenbuffer。所以上面的第二行有必要，但不是擺這裡。要放到
-					被 suspend 的 outer loop 的最後才對，也就是 <sleftest> section 的最後才對。
-					</text> drop
-
-
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** suspend stop the forth VM. resume gets the VM back on running ...
-						js> kvm.appname char jeforth.3wsh != \ JScript does not have setTimeout()
-						[if]
-							marker ---
-							code I/O
-								setTimeout(resumeForthVM,10)
-								end-code
-							: test
-								I/O \ blocking I/O needs 100mS to accomplish
-								<js> new Date().getTime() </jsV> \ cr .s
-								suspend \ pause the forth VM so the next line will not run before the resume
-								<js> new Date().getTime() </jsV> \ cr .s
-								;
-							last execute
-							- 10 <= dup ==>judge drop [if] js: tick('resume').selftest='pass' [then]
-							---
-						[then]
 				</selftest>
 
 code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
@@ -705,7 +752,7 @@ code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The 
 						[if] <js> ['min'] </jsV> all-pass [then]
 				</selftest>
 
-code doVar      push(ip); ip=rstack.pop(); endinner=true; end-code compile-only // ( -- a ) 取隨後位址 a , runtime of created words
+code doVar      push(ip); ip=rstack.pop(); end-code compile-only // ( -- a ) 取隨後位址 a , runtime of created words
 code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code compile-only // ( ?? ) next's runtime.
 code ,          dictcompile(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
@@ -845,14 +892,17 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 				BL word (marker) ;
 code next       compilecode("doNext");dictionary[here++]=pop(); end-code immediate compile-only // ( -- ) for ... next (FigTaiwan SamSuanChen)
 
-code cr         print("\n") end-code // ( -- ) 到下一列繼續輸出 *** 20111224 sam
 code cls		( -- ) \ Clear jeforth console screen
 				kvm.screenbuffer = (kvm.screenbuffer==null) ? null : "";
 				kvm.clearScreen();
 				end-code
 code abort      reset() end-code // ( -- ) Reset the forth system.
 
-code literal    dictcompile(new Constant(pop())) end-code immediate compile-only // ( x -- ) Compile the TOS.
+code literal 	( n -- ) \ Compile TOS as an anonymous constant
+				var literal = pop();
+				var getLiteral = eval("var f;f=function(){push(literal)/*(" + mytypeof(literal) + ")" + literal.toString() + " */}");
+				dictcompile(getLiteral);
+				end-code
 code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 				var w = pop();
 				// To use the correct TIB, must use execute("word") instead of fortheval("word").
@@ -909,7 +959,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				</selftest>
 
 : [']			( <name> -- Word ) \ In colon definitions, compile next word object as a literal.
-				' [compile] literal ; immediate compile-only
+				' literal ; immediate compile-only
 
 				<selftest>
 					marker ---
@@ -1021,9 +1071,8 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				</selftest>
 
 : char          ( <str> -- str ) \ Get character(s).
-				BL word compiling if [compile] literal then ; immediate
+				BL word compiling if literal then ; immediate
 				/// "char abc" gets "abc", Note! ANS forth "char abc" gets only 'a'.
-				\ 本來 compiling 時的 [ char " ] literal word 改由 char support dual mode 如今只要 char " word 即可。
 
 : ?dup          dup if dup then ; // ( w -- w w | 0 ) Dup TOS if it is not 0|""|false.
 
@@ -1073,28 +1122,22 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 
 : .(            char \) word . BL word drop ; immediate // ( <str> -- ) Print following string down to ')' immediately.
 : ."			( <str> -- ) \ Print following string down to '"'.
-				char " word compiling if
-				[compile] literal compile .
+				char " word compiling if literal compile .
 				else . then BL word drop ; immediate
 				\ 本來是 compile-only, 改成都可以。 hcchen5600 2014/07/17 16:40:04
 : .'            ( <str> -- ) \ Print following string down to "'".
-				char ' word compiling if
-				[compile] literal compile .
+				char ' word compiling if literal compile .
 				else . then BL word drop ; immediate
 				\ 本來是 compile-only, 改成都可以。 hcchen5600 2014/07/17 16:40:04
 : s"  			( <str> -- str ) \ Get string down to the next delimiter.
-				char " word compiling if [compile] literal then BL word drop ; immediate
+				char " word compiling if literal then BL word drop ; immediate
 : s'  			( <str> -- str ) \ Get string down to the next delimiter.
-				char ' word compiling if [compile] literal then BL word drop ; immediate
+				char ' word compiling if literal then BL word drop ; immediate
 : s`  			( <str> -- str ) \ Get string down to the next delimiter.
-				char ` word compiling if [compile] literal then BL word drop ; immediate
+				char ` word compiling if literal then BL word drop ; immediate
 : does>         ( -- ) \ redirect the last new colon word.xt to after does>
 				[compile] ret \ dummy 'ret' mark for 'see' to know where is the end of a creat-does word
 				r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; 
-: constant      create , [ s" push(function(){last().type='colon-constant'})" jsEvalNo , ] does> r> @ ; // ( n <name> -- ) Create a constant.
-' constant alias value // ( n <name> -- ) \ Create a value-variable with the init value.
-				/// 123 value x x . ==> 123
-				/// 456 to x x . ==> 456
 
 				<selftest>
 					marker ---
@@ -1108,7 +1151,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					js> kvm.screenbuffer.slice(-10)=="aabbccddee" \ true
 					and
 					==>judge [if]
-					<js> ['(', '."', ".'", "s'", "s`", 's"', 'does>', 'constant'] </jsV> all-pass
+					<js> ['(', '."', ".'", "s'", "s`", 's"', 'does>'] </jsV> all-pass
 					[then]
 					---
 				</selftest>
@@ -1171,19 +1214,10 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				js> nextstring(/\(|\)/).str \ word 固定會吃掉第一個 character 故不適用。
 				drop js> tib[ntib++] \ 撞到停下來的字母非 '(' 即 ')' 要不就是行尾，都可以 skip 過去
 				char ( = if \ 剛才那個字母是啥？
-					[ last ] literal dup \ 取得本身
+					[ last literal ] dup \ 取得本身
 					execute \ recurse nested level
 					execute \ recurse 剩下來的部分
 				then ; immediate 
-
-code doTo		( n Word -- ) \ Run time of 'to' command.
-				if(!tos()) panic("'to' command writing something to a NULL!\n",true);
-				else dictionary[pop().cfa+1]=pop();
-				end-code
-				/// see 'value' command
-: to 			( n <name> -- ) \ Assign n to <name> where <name> is a 'value' word.
-				' compiling if [compile] literal compile doTo else doTo then ; immediate
-				/// see 'value' command
 
 				<selftest>
 					marker -%-%-%-%-%-
@@ -1192,42 +1226,23 @@ code doTo		( n Word -- ) \ Run time of 'to' command.
 					445566 to x x 445566 = \ true
 					: test 778899 to x ; test x 778899 = \ true
 					and and ==>judge [if] <js> [
-					'value','doTo','to'
+					'value','to'
 					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
 					-%-%-%-%-%-
 				</selftest>
 
-\ 下有新版取代 hcchen5600 2015/03/05 23:56:55 
-\ : sleep 		( mS -- ) \ Suspend the recent TIB stream or inner loop for mS of time
-\ 				[ last ] literal
-\ 				js> setTimeout(resumeForthVM,pop(1)) ( Word timeoutID )
-\ 				js: pop(1).timeoutID=pop()
-\ 				suspend ;
-\ 				/// No multiple sleep level. Only one sleep allowed.
-\ 				/// 'sleep' is actually a context switch to Forth console next command waiting state
-\ 				/// or actually KVM/DOM waiting state. Forth console is certainly still serving during
-\ 				/// 'sleeping' but if your new task occupied the KVM then the already timeout'ed 
-\ 				/// sleeping task will have to be waiting. Resuming will not happen until your task
-\ 				/// released and go back to KVM/DOM waiting state. So, it's possible that we can use 
-\ 				/// 'stopSleeping' command to terminate the sleep state.
-\ 
-\ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep command.
-\ 				clearTimeout(tick('sleep').timeoutID);
-\ 				resumeForthVM();
-\ 				end-code
-
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
-				cr js: panic(pop()+'\n') abort ;
+				js: panic('\n'+pop()+'\n') abort ;
 
 : abort"		( <msg>	-- ) \ Through an error message and abort the forth VM
-				char " word [compile] literal BL word drop compile "msg"abort ;
+				char " word literal BL word drop compile "msg"abort ;
 				immediate compile-only
 
 : "msg"?abort	( "errormsg" flag -- ) \ Conditional panic with error message and abort the forth VM
                 if "msg"abort else drop then ;
 
 : ?abort"       ( f <errormsg> -- ) \ Conditional abort with an error message.
-                char " word [compile] literal BL word drop
+                char " word literal BL word drop
 				compile swap compile "msg"?abort ;
 				immediate compile-only
 
@@ -1240,11 +1255,11 @@ code doTo		( n Word -- ) \ Run time of 'to' command.
 				char </text> word ; immediate
 
 : </text> 		( "text" -- ... ) \ Delimiter of <text>
-				compiling if [compile] literal then ; immediate
+				compiling if literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
 : <comment>		( <comemnt> -- ) \ Can be nested
-				[ last ] literal :: level+=1 char <comment>|</comment> word drop 
+				[ last literal ] :: level+=1 char <comment>|</comment> word drop 
 				; immediate last :: level=0
 
 : </comment>	( -- ) \ Can be nested
@@ -1267,16 +1282,51 @@ code doTo		( n Word -- ) \ Run time of 'to' command.
 
 : </jsN> 		( "statements" -- ) \ No return value
 				compiling if jsFuncNo , else jsEvalNo then ; immediate
+				/// 可以用來組合 JavaScript function
 				last alias </js>  immediate
 
 : </jsV> 		( "statements" -- ) \ Retrun the value of last statement
 				compiling if jsFunc , else jsEval then ; immediate
+				/// 可以用來組合 JavaScript function
+
+: constant 		( n <name> -- ) \ Create a 'constnat', Don't use " in <name>.
+				BL word (create) <js> 
+				last().type = "constant";
+				var s = 'var f;f=function(){push(g["' 
+						+ last().name 
+						+ '"])}';
+				last().xt = eval(s);
+				g[last().name] = pop();
+				</js> reveal ; 
+: value 		( n <name> -- ) \ Create a 'value' variable, Don't use " in <name>.
+				constant last :: type='value' ; 
+: to 			( n <value> -- ) \ Assign n to <value>.
+				' ( word ) <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
+				compiling if ( word ) 
+					<js> var s='var f;f=function(){/* to */ g["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+				else ( n word )
+					js: g[pop().name]=pop()
+				then ; immediate
+				
+				<selftest>
+					marker ---
+					*** constant value and to ... 
+					112233 constant x
+					x value y
+					x y = \ true
+					332211 to y x y = \ false
+					' x :> type=="constant" \ true
+					' y :> type=="value" \ true
+					and swap not and and ==>judge drop
+					---
+				</selftest>
 
 : sleep 		( mS -- ) \ Suspend to idle, resume after mS. Can be 'stopSleeping'.
-				[ last ] literal ( mS me )
+				[ last literal ] ( mS me )
 				<js>
 					function resume() { 
 						if (!me.timeoutId) return; // 萬一想提前結束時其實已經 timeout 過了則不做事。
+						delete(g.setTimeout.registered()[me.timeoutId.toString()]);
 						tib = tibwas; ntib = ntibwas; me.timeoutId = null;
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}
@@ -1286,7 +1336,7 @@ code doTo		( n Word -- ) \ Run time of 'to' command.
 						panic("Error! double 'sleep' not allowed, use 'nap' instead.\n",true)
 					} else {
 						tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-						me.timeoutId = setTimeout(resume,delay);
+						me.timeoutId = g.setTimeout(resume,delay);
 					}
 				</js> ;
 				/// 為了要能 stopSleeping 引入了 sleep.timeoutId 致使多重 sleeping 必須禁止。
@@ -1307,10 +1357,9 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}
 				</js> ;
+				/// nap 不用 g.setTimeout 故不能中止，也不會堆積在 g.setTimeout.registered() 裡。
 
-\ : </jsRaw> 		( "statements" -- {value,err,flag} ) \ Retrun {value,err,flag} of last statement.
-\ 				compiling if compile jsEvalRaw else jsEvalRaw then ; immediate
-\ 				/// Use this option to avoid errors, where err is from try{}catch{}.
+: cr         	js: print("\n") 1 nap ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
 
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
@@ -1465,7 +1514,7 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				push(String.fromCharCode(pop())) end-code
 				/// 65 ASCII>char tib. \ ==> A (string)
 : ASCII			( <str> -- ASCII ) \ Get a character's ASCII code.
-				BL word (ASCII) compiling if [compile] literal then
+				BL word (ASCII) compiling if literal then
 				; immediate
 
 				<selftest>
@@ -1705,6 +1754,15 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 				/// skip including if the module has been included.
 				/// setup the self-test module
 				/// initiate vocabulary for the including module
+
+code memberCount ( obj -- count ) \ Get hash table's length or an object's member count.
+				push(g.memberCount(pop()));
+				end-code
+
+code isSameArray ( a1 a2 -- T|F ) \ Compare two arrays.
+				push(g.isSameArray(pop(), pop()));
+				end-code
+
 code (?)        ( a -- ) \ print value of the variable consider ret and exit
 				var x = dictionary[pop()];
 				switch(x){
@@ -1712,12 +1770,13 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 					case "": print('EXIT');break;
 					default: print(x);
 				}; end-code
+
 : (dump)		( addr -- ) \ dump one cell of dictionary
 				decimal dup 5 .0r s" : " . dup (?) s"  (" . js> mytypeof(dictionary[pop()]) . s" )" . cr ;
 : dump          ( addr length -- addr' ) \ dump dictionary
-                for ( addr ) dup (dump) 1 nap 1+ next ;
+                for ( addr ) dup (dump) 1+ next ;
 : d        		( <addr> -- ) \ dump dictionary
-                [ last ] literal
+                [ last literal ]
                 BL word  					\ (me str)
                 count 0= 					\ (me str undef?) No start address?
                 if       					\ (me str)
@@ -1734,7 +1793,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
                 var w=pop();
 				var basewas = kvm.base; kvm.base = 10;
                 if (!(w instanceof Word)) {
-                    see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
+                    g.see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
                 }else{
                     for(var i in w){
                         if (typeof(w[i])=="function") continue;
@@ -1777,12 +1836,6 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 					---
 				</selftest>
 
-code isSameArray ( a1 a2 -- T|F ) \ Compare two arrays.
-				push(isSameArray(pop(), pop()));
-				end-code
-				/// isSameArray() defined in jeforth.js, make it a forth command
-				/// for wider usage.
-
 code notpass	( -- ) \ List words their sleftest flag are not 'pass'.
 				for (var j in words) { // all word-lists
 					for (var i in words[j]) {  // all words in a word-list
@@ -1802,18 +1855,27 @@ code notpass	( -- ) \ List words their sleftest flag are not 'pass'.
 
 \ -------------- Forth Debug Console -------------------------------------------------
 
-: (*debug*)		( "prompt" -- ) \ Forth debug console. 'q' to exit.
-				s" *debug* " swap + s"  " + js: kvm.prompt=pop() suspend ;
-
-: *debug*		( <prompt> -- ) \ Forth debug console. 'q' to exit.
-				BL word compiling
-				if [compile] literal compile (*debug*) else (*debug*) then
-				; immediate
-
-code q			( -- ) \ Exit from forth debug console.
-				kvm.prompt="OK";
-				resumeForthVM();
-				end-code
+js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
+code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'db' command.
+				bp = parseInt(nexttoken()); inner = g.debugInner; end-code
+				/// work with 'jsc' debug console, jsc is application dependent.
+code db			( -- ) \ Disable breakpoint, inner=fastInner. See also 'bp' command.
+				inner = g.fastInner end-code
+				/// work with 'jsc' debug console, jsc is application dependent.
+				
+: (*debug*) 	( msg -- resume ) \ Suspend to command prompt, execute resume() to quit debugging.
+				<js>
+					var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=kvm.prompt;
+					kvm.prompt = pop().toString();
+					push(resume); // The clue for resume
+					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
+					function resume(){tib=tibwas; ntib=ntibwas; kvm.prompt=promptwas;outer(ipwas);}
+				</js> ;
+				/// resume() 線索由 data stack 傳回，故可以多重 debug。但有何意義？
+				
+: *debug*		( <prompt> -- resume ) \ Forth debug console. Execute the resume() to quit debugging.
+				BL word compiling if literal compile (*debug*) 
+				else (*debug*) then ; immediate
 
 \ ----------------- play ground -------------------------------------
 

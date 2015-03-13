@@ -43,7 +43,7 @@
 
 	: (-- 			( <refs> -- ) \ Move input arguments to local variables in rstack
 					0 begin BL word js> pop()!="--)" while 1+ repeat 
-					[compile] literal compile doLocalize ; immediate compile-only
+					literal compile doLocalize ; immediate compile-only
 					/// 將來可以進一步把隨後所有的 token 都讀進來直到 ; （含）為止。然後把所有 token 
 					/// 當中有 local variable 或 to local variable 都置換成對應的 function(){} 
 					/// 清除 local variable 的 ret 程序,
@@ -83,7 +83,7 @@
 			
 
 		: tsr ( "msg" xx yy -- ) \ a tsr 
-			(-- bp+3 bp+2 bp+1 --) <js> setInterval(function(){execute('show')},1000) </js> 
+			(-- bp+3 bp+2 bp+1 --) <js> g.setInterval(function(){execute('show')},1000) </js> 
 			( 帶 data 的 TSR 根本就不該 return ) 0 >r ( 保留 return stack ) ;
 
 			\ 帶 local variable 的 ret 程序之保留 local variable 版 <== 這不是個好企圖，
@@ -117,7 +117,7 @@
 		但是，在下例 TSR 的情形下，execute() 當時的 ip 沒有意義，到底 ip 是何值？是零。kvm.breakpoint
 		設在 show entry 處，查 rstack 即知 ... 
 			: tsr ( "msg" xx yy -- ) \ a tsr 
-			(-- bp+3 bp+2 bp+1 --) <js> setInterval(function(){execute('show')},1000) </js> 
+			(-- bp+3 bp+2 bp+1 --) <js> g.setInterval(function(){execute('show')},1000) </js> 
 			( 保護 TSR 的 local data 留在 rstack 裡存活 ) 0 >r ;
 		==> ip=953 jsc> rstack ==> [ 0, 0, 22, 11, 'Hi!', 969, 0 ]
 									 ^  ^                   ^  ^

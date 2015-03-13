@@ -86,9 +86,27 @@ kvm.clearScreen = function(){console.log('\033c')} // '\033c' or '\033[2J' http:
 // kvm.BinaryFile
 // kvm.objWMIService
 // kvm.cv
+
+// There's no main loop, event driven call back function is this.
+kvm.forthConsoleHandler = function(cmd) {
+	var rlwas = kvm.rstack().length; // r)stack l)ength was
+	// print(cmd+'\n'); 3nd does not need this
+	kvm.fortheval(cmd);  // Pass the command line to KsanaVM
+	(function retry(){
+		// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+		// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+		// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+		if(kvm.rstack().length!=rlwas)
+			setTimeout(retry,100); 
+		else {
+			print(" " + kvm.prompt + " ");
+		}
+	})();
+}
  
 kvm.stdio = require('readline').createInterface({input: process.stdin,output: process.stdout});
-kvm.stdio.on('line', function (cmd){kvm.fortheval(cmd);kvm.print(' '+kvm.prompt+' ')});
+// kvm.stdio.on('line', function (cmd){kvm.fortheval(cmd);kvm.print(' '+kvm.prompt+' ')});
+kvm.stdio.on('line', kvm.forthConsoleHandler);
 kvm.stdio.setPrompt(' '+kvm.prompt+' ',4);
 kvm.init();
 kvm.fortheval(kvm.fso.readFileSync('kernel/jeforth.f','utf-8')+kvm.fso.readFileSync('3nd/f/quit.f','utf-8'));

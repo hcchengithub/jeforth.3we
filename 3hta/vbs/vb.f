@@ -63,7 +63,7 @@
 		
 	: <vb> 			( <vbs statements> -- "statements" ) \ Execute vbs statements
 					char </vb> word 
-					compiling if [compile] literal then ; immediate
+					compiling if literal then ; immediate
 	
 	: </vb> 		( "statements" -- ) \ No return value
 					compiling if compile vbExecute else vbExecute then ; immediate
@@ -74,11 +74,11 @@
 					\	</vb>
 
 	: vb: 			( <vbs statements> -- ) \ Execute a line of vbs statement
-					BL word compiling if [compile] literal compile vbExecute else vbExecute then  ; immediate
+					BL word compiling if literal compile vbExecute else vbExecute then  ; immediate
 					/// Same thing as "s' blablabla' vbExecute" but simpler.
 					
 	: vb> 			( <vbs statements> -- result ) \ Evaluate vbs statements
-					BL word compiling if [compile] literal compile vbEval else vbEval then  ; immediate
+					BL word compiling if literal compile vbEval else vbEval then  ; immediate
 					/// Same thing as "s' blablabla' vbEval" but simpler. Return the last statement's value.
 
 					\ Print ScriptEngine version

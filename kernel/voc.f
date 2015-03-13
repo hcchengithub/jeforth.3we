@@ -27,8 +27,8 @@ code obj>keys	( obj -- keys[] ) \ Get all keys of an object.
 
 code isMember 	( value group -- key|index T|F ) \ Return key or index if value exists.
 				var group = pop();
-				var result = isMember(pop(), group);
-				if (result.flag) {push(result.keyvalue); push(true)}
+				var result = g.isMember(pop(), group);
+				if (result.flag) {push(result.key); push(true)}
 				else push(false);
 				end-code
 				/// 'item' can be number, string, or object, anything that can be compared by the == operator.
@@ -212,7 +212,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					order.splice(0,order.length); 
 					for(var i=0; i<this.orderwas.length; i++) order[i] = this.orderwas[i]; // FigTaiwan 爽哥提醒; order[order.length-1] 就是 context 不必再 save-restore.
 					for(var vid in words) {
-						if(!isMember(vid, this.vocswas).flag) {
+						if(!g.isMember(vid, this.vocswas).flag) {
 							delete words[vid]; // if the word-list was not exist then delete it.
 						}
 					}

@@ -76,8 +76,8 @@ code excel.save     ( workbook -- ) \ Save workbook object to excel file
 					<selftest>
 						***** excel.save-as saves workbook to file ....
 						( ------------ Start to do anything --------------- )
-						char . full-path char _selftest_.xls + constant "selftest.xls" // ( -- pathname )
-						"selftest.xls" WORKBOOK excel.save-as \ true
+						char . full-path char _selftest_.xls + constant 'selftest.xls' // ( -- pathname )
+						'selftest.xls' WORKBOOK excel.save-as \ true
 						( ------------ done, start checking ---------------- )
 						js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
 						-->judge [if] <js> [
@@ -98,7 +98,7 @@ code excel.close	( workbook -- flag ) \ close the excel file without saving.
 						***** excel.close closes the workbook ....
 						( ------------ Start to do anything --------------- )
 						WORKBOOK excel.close \ true
-						"selftest.xls" open.xls constant WORKBOOK // ( -- obj ) excel workbook re-opened
+						'selftest.xls' open.xls constant WORKBOOK // ( -- obj ) excel workbook re-opened
 						( ------------ done, start checking ---------------- )
 						js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
 						-->judge [if] <js> [

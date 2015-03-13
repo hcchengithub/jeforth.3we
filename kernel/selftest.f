@@ -76,7 +76,7 @@ O   五顆星的 ***** 利用 HTML5.f 可以回頭打 pass/failed 適用於 self
 
     : ***           ( <name> <description down to '\n'> -- ) \ Start to test ONE word
                     BL word dup (') to wut char \n|\r word ( -- "name" "descriptions ..." )
-                    ." *** " swap . space 1 sleep \ desc
+                    ." *** " swap . space 1 nap \ desc
                     wut if . else drop ." unknown?" cr abort then
                     depth ?abort" *** Error! Data stack is not empty!" ;
                     /// Prepare the wut, check stack should be empty at beginning.

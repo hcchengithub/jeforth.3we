@@ -1840,12 +1840,10 @@
         
 [x] comment \ in selftest mode should print the line <--- bad idea
     
-[ ] Double suspend is not allowed so far, but why?  
-
 [ ] local.f try to find a way for forth to be able to associate a family structure to share local
     variables from parents and also down to children.
     
-[ ] kvm.bp works fine, go on to develop s command for single step.  
+[x] kvm.bp works fine, go on to develop s command for single step. ==> it's bp now. hcchen5600 2015/03/10 18:09:26 
 
 [ ] why execute(Word) does not *eat* rtos() at Word ret?
     因為 colon word 的 xt 自己有 push IP。TSR trigger 時的 IP 鐵定是 0 吧！？在工作中 event 被 queue
@@ -2056,14 +2054,14 @@
     回頭看，的確是這個意思。若要讓本 table 裡的 input 套用 .alarm 的 style, 明確表達為 .alarm input {}
     才對，也就是說，光 .alarm {} 且 <table class=alarm> 與 table 裡的 input 無關。
 
-[ ] A command set to manipulate HTML elements. ==> element.f
+[x] A command set to manipulate HTML elements. ==> element.f
     ce 列出 id class name 以及部分內容
     [x] ce@ removeElement 之後可能斷鏈, ce 要有 default 值或保留 last ce.
         讓 current-element 變成一個 stack, 所有造訪過的 ce 都 push 進去。
         當發現 TOS 有異常就 drop 掉，改 pop 前一個讓來用。
-    [ ] node/element 殺掉以後還會留在 ce-history.tos 但是已經斷線，留著沒意義。應該自動 ce< 回上一層。
+    [x] node/element 殺掉以後還會留在 ce-history.tos 但是已經斷線，留著沒意義。應該自動 ce< 回上一層。
         
-[ ] 這個寫法是可以的，為何 element.f 裡還得傳 a[i] ?
+[x] 這個寫法是可以的，為何 element.f 裡還得傳 a[i] ?
     <js>
         var a=[], i=0;
         init();
@@ -2078,6 +2076,7 @@
             a[i] += 1;
         }
     </js>
+	==> Don't remember what's the origianl question.
     
 [x] Why <div id=endofinputbox style="position:absolute"></div> and scrollToElement($('#endofinputbox')); ?
     Why not clicking a <a> tag programmatically?
@@ -2164,8 +2163,9 @@
         <js> pop().replace(/\r/gm,"%0d").replace(/\n/gm,"%0a").replace(/\t/gm,"    ")</jsV> \ 顯示在網頁上需要美容
         js: window.open("data:text/plain,"+pop()) \ 用 data URI 方式顯示在網頁上
         
-[ ] jeforth.3nw bye 不了 --> window.close() 要改成 process.exit()。
+[x] jeforth.3nw bye 不了 --> window.close() 要改成 process.exit()。
     ==> 昨天在家裡不行，但現在於 DOH7 上又可以了！ Strange.
+	==> 改用 process.exit() hcchen5600 2015/03/11 20:20:26 
     
 [x] jeforth.3nd 的 jsc 用到 kvm.gets() backSpace 不正常，早想改進。jsc 裡必須用 kvm.gets() 因為它是個
     blocking function, 難得阿！jsc 裡的 console 必須用 blcoking I/O。
@@ -2299,10 +2299,11 @@
       
 [x] phaseB() 裡 ip = w; // jump [x] 要改成 inner(w) 才對吧！ ==> No!  hcchen5600 2015/02/26 14:33:35 
 
-[ ] In recent console design, 3hta and 3htm when there's a lot of 'printing' to outputbox then inputbox 
+[x] In recent console design, 3hta and 3htm when there's a lot of 'printing' to outputbox then inputbox 
     become strange, type 'jsc' become csj so we have to type 'csj' instead! I guess this is because my 
     previous modification has made kvm.print() to also clear the inputbox <=== Root cause?
     ==> 改成印 OK 之後 jump2endofinputbox.click(); inputbox.focus(); ==> 觀察一陣子看效果怎樣。。。。。
+    ==> 改成印 OK 之後 jump2endofinputbox.click(); // inputbox.focus(); ==> 好了！
 
 [x] dump ( start length -- ) 碰到 null 就會停下來 <=== bug!!!
 [x] inner() 大翻修前先 save 一版上 github. hcchen5600 2015/02/26 16:28:31 
@@ -2331,23 +2332,25 @@
         objExit => EXIT="", exit instruction code
     [x] remove 'endinner'
 
-[ ] now null is 'ret'. I can say, everything in dictionary are 'instructions'. While null is exactly 'ret' instruction.
+[x] now null is 'ret'. I can say, everything in dictionary are 'instructions'. While null is exactly 'ret' instruction.
     As well as "" is the 'exit' instruction. (see) should make it clearer.
-    [ ] constants are literal instruction with a constant value, make it clearer too.
-    [ ] 0 is an instruction too, it's abortexec. So dictionary[0]=0; 
+    [x] 0 is an instruction too, it suspends the recent inner() loop. So dictionary[0]=0; 
 [ ] Very important performance improvement.
     if everything in dictionary are instructions then why we still need phaseA? phaseA should have done
     when in compiling time. So inner() should be as simple as while(w){ip++; w.xt(); w=dictionary[ip]}
     nothing more!
-[ ] remove 'abortexec'  
+
 [x] 保留 screenbuffer 在開發期是很重要的辦法，但平時感覺累贅。
     今設 kvm.screenbuffer=null 把它停掉; 反之 kvm.screenbuffer="" 恢復 logging。
     [x] 在每個 quit.f 裡把它停掉。
     ==> 'cls' should take care of the new logic,
             kvm.screenbuffer = (kvm.screenbuffer==null) ? null : "";
 
-[ ] To move kvm.cv canvas up into the outputbox,
+[x] To move kvm.cv canvas up into the outputbox,
         js> kvm.cv.canvas eleDisplay lastChild insertAfter
+	Or anything else,
+		eleBody lastChild eleDisplay lastChild insertAfter
+	===> move-cv-up-into-outputbox in canvas.f can do that.
 
 [x] 用這行實驗，很容易發現 HTML5 canvas 的 x-y 座標有負值！左邊、上邊、左上角都會有 -1 -2 出現！
     <js> kvm.cv.canvas.onmousemove=function(e){print(e.offsetX + "-" + e.offsetY + '  ')} </js>
@@ -2387,57 +2390,6 @@
         End time 1425454869912
         0.00023155 is the average time of each cycle 
 
-[ ] 複習一遍 JavaScript 的 var 由 volatile 經 new 變成 static    
-    <js>
-        function Ball(axisx,axisy,radius){
-            var x=axisx,y=axisy,r=radius;
-            this.position = function(){return({x:x,y:y})}
-            this.move = function(h,v){x+=h;y+=v;}
-        }
-        push(new Ball(10,15,20))
-    </js> constant ball
-    ball :> position() (see)
-    ball :: move(1,1)
-    ball :> position() (see)
-    [object Object]
-      x :  10
-      y :  15
-    [object Object]
-      x :  11
-      y :  16   
-[ ] 可能用 instances[] 模仿 HTML client-server 的 call-server(request,response) 方式讓 forth words 既可以
-    針對個別 instance 工作，又可以與 javascript 共用 variables.例如，
-    \ instances[0] is the current instance
-    123 ivalue x // ( -- int )
-    456 ivalue y // ( -- int )
-    產生的 x,y 同時也是 instances[instances[0]].x, instances[instances[0]].y
-    每經
-    <instance>
-        67 ivalue x // ( -- int )
-        89 ivalue y // ( -- int )
-    </instance>
-    就產生新 instance, 故 x eq instances[instances[0]].x eq 67, y eq instances[instances[0]].y eq 89
-    其中 instances[0] is 1 now.
-    每個 event handler 要自己保留，且切換 instance: var iid=instances[0]; with(instances[iid]){ ..... }
-
-
-    code ivalue ( value <variable-name> -- ) \ instances[instances[0]].<variable-name>=data
-        var vname=nexttoken();
-        instances[instances[0]][vname] = pop();
-        end-code
-    123 to x  --> instances[instances[0]][x]=123 
-    
-    : to ( n <name> -- ) \ Assign n to <name> where <name> is a 'value' or 'ivalue' word.
-        ' ( name ) dup js> pop().type=='constant' if
-            compiling if [compile] literal compile doTo else doTo then then
-        ; immediate 
-        /// see 'value' command
-
-    code doTo   ( n Word -- ) \ Run time of 'to' command.
-                if(!tos()) panic("'to' command writing something to a NULL!\n",true);
-                else dictionary[pop().cfa+1]=pop();
-                end-code
-    
 [x] Word() property "creater : colon,(create) (array)" should simply 
     be "type"={code,colon,colon-constant,colon-variable,marker,colon-vocabulary,alias...}
     does> words 要靠自己在 create 之後填 last().type='colon-<name>' 
@@ -2452,13 +2404,91 @@
         <js> for (var i in wordhash) if(wordhash[i].type.indexOf('variable')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
         <js> for (var i in wordhash) if(wordhash[i].type.indexOf('vocabulary')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
         <js> for (var i in wordhash) if(wordhash[i].type.indexOf('marker')==-1) print(wordhash[i].type + ':' + i +'\n')</js>
-[ ] why
+[x] why
     0: textarea:focus { border: 0px solid; background:#FFE0E0; } (string)
     1: [object Object] (object)
     2: textarea:focus { border: 0px solid; background:#E0E0E0; } (string)
+	===> in {F2}, used 'js>' when it should be 'js:'.
+[x] call 'cr' from {F2} eats TOS unexpectedly. Suspect calling 1 nap from a call-back
+	generates the problem.
+	--> set debugger; before the handler's return. 
+		TOS will be pop for the return value. Why still there?    B i n g o ! ! 
+		kvm.stack is not the stack , I believe that's because stack changed without update kvm.stack
+		---> kvm.stack=stack 不對，要改成 kvm.stack=function(){return(stack)} --> Done.
+		--> but RI is still the 1 nap in cr.
+	==> 化簡問題，不靠 {F2} 複製。從外面 trigger 一個 event 進來，可用 sleep 達成。上手後
+		弄好 stack 11 22 33 然後 cr 出來後查看 stack 看對不對
+		: h 11 22 ." ---> " . cr ;
+		js: setTimeout(function(){execute('h')},500)
+		--> can't repro 
+	--> try {F3} ---> Repro'ed !!
+		: {F3} ( -- false ) \ Hotkey handler, Toggle input box EditMode
+			11 22 33 . cr 44 55 66 false ;
+		33 printed but 22 eaten and the false appears ..... Ah ha!! that's what 1 nap does!
+		when 1 nap suspend returned to the {F3}'s caller, document.onkeydown, instead of the 
+		interpreter idle! 
+			document.onkeydown:
+			case 114: /* F3  */ if(kvm.tick('{F3}' )){kvm.execute('{F3}' );return(kvm.pop());} break;
+		the following pop gets 22 and that's why Browser behaviors the F3 search hotkey.
+		--> 可以看成：document.onkeydown 所 call 的 {F3} 在 cr 就已經結束了。但 rstack 都還在。
+			document.onkeydown 結束之後過了 1 mS 的 nap, timeout 從 idle 上手又回到 h 裡來完成
+			待續的部分，之後還是回到 idle。
+		討論：
+			    從 onkeydown 經 execute() 上手，有沒有 rstack.push(0) --> 有，每個 colon word 自己的
+			xt() 負責 rstack.push(ip) 故一定有。重點是此時的 ip 何值？應該是 0，沒錯。
+			用 code {F3} debugger end-code 證實，code word 上手時 rstack is [] 空的，沒錯。
+			==> 所以，不論 {F3} 是從哪裡（interpret state, colon word, onEvent）上手的 rstack.tos
+			都有回返位址，(0, ip, 0)。其中 onEvent 觸發的時間一定是 idle （javascript 特性）故 ip=0。
+			    1 nap 之後回到 {F3} 繼續未完成的工作，有意義嗎？有。從正常的 onEvent 進來，跟從
+			Timout 進來，沒啥差別。這是可以允許的。
+				最大的問題是，作者知不知道 cr 會造成一個 suspend-resume？ 對 {F3} 的 caller 而言 {F3} 就
+			是在 suspend 時回來的，就這樣而已。知道 cr 也罷，知不知道還有哪些 word 也會呼吸？不知。
+			所以要有 guide line。首先，不只是 onEventHandler 會有問題。目前因為 cr 會呼吸，隨便，
+				OK : test 10 for r@ . cr next ; test
+					10
+					 OK 9  <----- 就可以看到問題了, interpreter 以為 OK 跟 event handler 以為
+								  處理已經完成，是同樣的情況。並非 event handler 特別容易出問題。
+					... snip ...
+			指出 test 半路會結束回 interpret state, 這要是發生在 event handler 裡面，作者又不知道，那
+			才會出問題。再做一個實驗，應印出 11 cr 22 33 結果是 11 cr 33 22 因為 cr 終止 L1 而 L2 馬
+			上接手跑完。隨後 timeout 回來繼續 L1 未完成的部份。
+				: L1 11 . cr 22 . ; code L2 execute('L1');print('33') end-code last execute
+	==> {F2} 裡不用 cr 改用 js: print('\n') 即可。
+[x] 原來 1 sleep 的地方改成 1 nap <---- 只有一處，在 selftest *** 裡用來讓 print() 換氣的。
+[x]	若用 sleep 也行，但 g.setTimeout.registered().length 會很多，怎麼自動消？
+	js: push({a:1,b:2}) constant h js: delete(g.h.a) js> g.h (see) 確認可以殺 member 
+	--> 要不就讓 g.setTimeout.registered 改用 hash 方便殺。或看 array 能不能殺？
+	// How to clear all setInterval() and setTimeOut() without knowing their ID?
+	// http://stackoverflow.com/questions/8769598/how-to-clear-all-setinterval-and-settimeout-without-knowing-their-id
+	[*]	缺點是 g.setTimeout.registered() 會大量堆積，需 delete(g.setTimeout.registered()[id.toString()]) 既然還得記住
+		timeoutId 使得 g.setTimeout() 的好處大打折扣。 查看： js> g.setTimeout.registered() (see)
+		setInterval 比較不會大量堆積，最好還是要適時 delete。查看：js> g.setInterval.registered() (see)
+
+[x] cr 裡用了 1 nap 之後， suspend 期間會多打個 OK which is from kvm.forthConsoleHandler.
+	==> Can I use rstack to tell if forth is really OK? 
+			kvm.rstack().length==0
+		try try see ... B i n g o ! !
+	==> // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+		// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+		// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+		kvm.forthConsoleHandler = function(cmd) {
+			var rlwas = kvm.rstack().length; // r)stack l)ength was
+			print(cmd+'\n');
+			kvm.fortheval(cmd);  // Pass the command line to KsanaVM
+			(function retry(){
+				if(kvm.rstack().length!=rlwas)
+					setTimeout(retry,100); 
+				else {
+					print(" " + kvm.prompt + " ");
+					jump2endofinputbox.click(); inputbox.focus();
+				}
+			})();
+		}
+		==> 這段 code is from index.html of jeforth.3htm, all others should follow this solution
+		[x]3htm [x]3hta, [x]3nw, [x]3nd, 唯 3wsh 沒有 setTimeout 故無此必要。
 
 [ ] need a tool addr>word ( addr -- Word ) 
-[ ] need a 'breath' compile-only command to suspend and resume immediately
+[x] need a 'breath' compile-only command to suspend and resume immediately ===> 從 cr 下手，用 1 nap 達成。
     To avoid suddenly print a lot of things. 問題是 jeforth 本身就是 event driven 不靠 1 sleep 
     根本上不了手。---> 除非讓 sleep 單獨用另一組 suspend-resume 或者每一組 suspend-resume 都有自己的 call-back。
 	因為只有 single thread 沒有人會被 interrupt 中斷。所有的 handler 包括 forth interpreter 自己都
@@ -2526,15 +2556,549 @@
 		tick('sleep').resume();
 		end-code
 	dropall 11 100000 sleep 22 .s stopSleeping
+[x]	既然 sleep 可以憑空寫就 suspendForthVM(), resumeForthVM() are no longer needed.
+	==> sleep 改寫了，只剩 *debug* 有用到它們。
+	: (*debug*) 	( msg -- ) \ Suspend to command prompt, use q command to quit debugging.
+					[ last literal ] ( msg me )
+					<js>
+						var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=kvm.prompt , me=pop();
+						function resume() { 
+							tib=tibwas; ntib=ntibwas; kvm.prompt=promptwas;
+							// resume to the below ending 'ret' and then go through the TIB.
+							outer(ipwas); 
+						}
+						me.resume = resume; // So resume can be triggered from outside
+						kvm.prompt=pop().toString();
+						tib = ""; ntib = ip = 0; 
+						// ip = 0 reserve rstack, suspend the forth VM 
+					</js> ;
+	: *debug*		( <prompt> -- ) \ Forth debug console. 'q' to exit.
+					BL word compiling if literal compile (*debug*) 
+					else (*debug*) then ; immediate
+	code q  		( -- ) \ Resume from -debug-, go on running.
+					tick('(*debug*)').resume();
+					end-code
 
-[ ] sleep 可以 stopSleeping 所以不能多重 sleep. 另設 nap 可以多重 nap.
+[x] sleep 可以 stopSleeping 所以不能多重 sleep. 另設 nap 可以多重 nap.
 
-[ ]	abortexec still there, remove them.
+[x]	abortexec still there, remove them. ===> rename to abortTIB
 
 [ ] 0 here dump 越跑越慢 on 3htm , why?
 	on 3hta is ok. ==> so how about 3nw? --> very good! It doesn't scroll so is fast.
 	scrolling may not be the root cause on 3htm because 3hta is fine. I am thinking that why
-	3nw doesn't scroll? The implementation is not 周延，各自有不同。
+	3nw doesn't scroll? The implementation is not 周延，各自有不同。==> 猜對了！但即使 3nw print()
+	之後都帶 jump2endofinputbox.click(); inputbox.focus(); 試 0 here dump 也還是神速，且沒有問題。
+	==> 只有 3htm 在 chrome 有問題嗎？ --> on IE10 根本 run 不起來！readTextFile 有問題。f.state()
+		一直在 'pending' 
+	==> IE10 可以跑過 forth.f kernel , 足以試驗 0 here dump --> 沒問題！不像 Chrome 會在背後出問題。
+	[ ] 能不能簡化 Chrome 的問題？報 bug
 	
+[x] IE10 跑 jeforth.3we 在 readTextFile 出問題，因為 getTextFile.f 裡用到 $.get() 不靈光。
+	==> 參考 http://stackoverflow.com/questions/247483/http-get-request-in-javascript
+		直接用 http 會當! (webserver is the Python one-liner)
+		null value xmlHttp // ( -- obj ) an XMLHttpRequest instance
+		<js> push(new XMLHttpRequest()) </js> to xmlHttp
+		xmlHttp :: open("GET",'1',false) \ synchronous request-response handling (false) 
+		xmlHttp :: send(null) \ <----------- IE 整個當掉
+		xmlHttp :> responseText .
+	[x] this line works fine on IE10
+			js: $.get('1',function(data){push(data)})
+		so, getTextFile 要不要改簡單一點？或者研究改良
+	[x] 實驗 chrome, 結果 ok
+			js> $.get('1','text') \ ==> 0: [object Object] (object)
+			constant f // ( -- obj ) $.get() handle
+			f obj>keys . \ ==> readyState,getResponseHeader,getAllResponseHeaders,setRequestHeader,
+							overrideMimeType,statusCode,abort,state,always,then,promise,pipe,done,fail,
+							progress,complete,success,error,responseText,status,statusText OK 
+			f :> readyState ==> 4 
+			f :> state() ==> resolved
+	[x] study jQuery.get()  http://api.jquery.com/jQuery.get/ 果然找到了正確的辦法，同時也學到好多啟發。
+			<js> push(
+				$.get('filename', function(data){
+					push(data); // 成功，傳回讀到的檔案
+					alert( "success" );
+				}).done(function(){
+					alert( "second success" );
+				}).fail(function(){
+					push(""); // 失敗，傳回 ""
+					alert( "error" );
+				}).always(function() {
+					alert( "finished" );
+				})
+			) </js>	to data
+		==> IE10 第一次經 readTextFileAuto 會由 fail(call-back) 傳回 failed message,但第二次就沒消息了！
+		==> 目前用 jquery-1.10.2.js --> 改新版 jQuery jquery-1.11.2.js 看看 --> 沒幫助
+		==> IE10 行為異常，甚至會影響 Python server 間接連 Chrome 上跑 3htm 也跟著出問題 readTextFile 異常。
+			但 IE10 也有成功的時候，故等於說連 jQuery 也伺候不了 IE10。主要是 IE10 cache 很固執，
+			js: $.ajaxSetup({cache:false}) 也關不掉，因此 debug 超困難，因為新程式換不上去。
+		==> IE10 異常，連 failure alert() 也不出來，表示不單是 cache 固執而已，連 call-back 也有問題？
+			--> 多加 alert() 進去看看。。。根本沒有 call-back 回 always().
+	==> IE 請一邊涼快去吧！不管了。
+			
+[x]	setTimeout(), setInterval() changed to mySetTimeout(), mySetInterval()
+	reset() to mySetTimeout.clearAll() and mySetInterval.clearAll()
+[x] change 'run' to 'retry'
+	(function retry(){
+		if(not ready)
+			setTimeout(retry,100); 
+		else {
+			ready
+		}
+	})();
+
+[x] Study compiling words constant, value, and literal.
+	--------------------------------------------------------------------------------------------------------------
+	hcchen5600 2015/03/09 16:52:13 
 	
+	    研究如何用 literal 來做出 constant x 時，又遇到 forth 跨不同 phase 的程式設計很頭疼的問題。
+	先前已經有心得：應該從最終結果，如 see x 應當如何來反推 constant 該如何設計。這裡的新發明是：用
+	手動直接寫出 x 經過測試先證實手動組裝出來的 x 的確符合所求，然後可以充滿信心地去設計 constant。
+		這翻探討，引發深思：為何有些 word 要想破頭去分別設計 interpret state 跟 compile state 而有
+	些 word 單設計一種 state 就可以兩邊滿足？其實每個 word 都有兩個 state 但像 + - * / 等已經由 outer
+	loop 照顧好了。而我構想 x 該怎麼實現時出現：它該是個 code word 還是 colon word 的岔路。如果它是
+	code word 那簡單：
+		name:x
+		type:code
+		xt: function(){/* constant x */ push(constant)}
+	同時滿足 both states。如果是個 colon word 則如下的結果效率就差多了，會在 inner() 裡多花很多時間。
+		name:x
+		type:colon
+		cfa: 100
+		100: function(){/* constant x */ push(constant)}
+		101: RET
+	所以我想把它做成如下，因為是個 compile word 故必須 immediate <===== 謹記這句話！
+		name:x 
+		type:colon
+		immediate:true
+		cfa: 100
+		100: compiling
+		101: 0branch
+		102: 104
+		103: compile
+		104: function(){/* constant x */ push(literal)}
+		105: RET
+	以下是手動做出這個 x 的過程：
+		here [compile] + <--------------- 複習 [compile] 的用法，證實適合手動打造 word 應用。
+		OK .s
+			  ... snip ...
+			  6:        2528         9e0h (number) <--------- here was
+		OK d 2528
+		02528: + ( a b -- a+b) Add two numbers or concatenate two strings. (object)
+		02529: RET (null)
+		02530: undefined (undefined)
+		02531: undefined (undefined)
+
+		create x <--------------- 手工打造 word name
+		OK see x
+					name : x (string)
+					 vid : mytools.f (string)
+					 wid : 29 (number)
+					type : colon-create (string)
+					help : x ( ?? ) No help message. Use // to add one. (string)
+					 cfa : 2529 (number)
+		-------- Definition in dictionary --------
+		02529: doVar ( -- a ) 取隨後位址 a , runtime of created words (object)
+		02530: RET (null)
+		---------- End of the definition -----------
+		OK 2529 here! <---------- 調整好 here 
+		OK [compile] compiling 	<---- 手工打造 compiling
+		OK [compile] 0branch   	<---- 手工打造 
+		OK 112233 ,  			<---- 手工打造 dummy 0branch 地址
+		OK [compile] compile  	<---- 手工打造 compiling
+		OK <js> var f=function(){/* constant x */ push(1122)}; f</jsV> ,  <---- 手工打造 function 
+		OK see x <--------------------------- 查看目前結果，
+					name : x (string)
+					vid : mytools.f (string)
+					wid : 29 (number)
+					type : colon-create (string)
+					help : x ( ?? ) No help message. Use // to add one. (string)
+					cfa : 2529 (number)
+		-------- Definition in dictionary --------
+		02529: compiling ( -- boolean ) Get system state (object)
+		02530: 0branch ( n -- ) 若 n!==0 就將當前 ip 內數值當作 ip, 否則將 ip 進位 *** 20111224 sam (object)
+		02531: 112233 (number)
+		02532: compile ( -- ) Compile the next word at dictionary[ip] to dictionary[here]. (object)
+		02533: function(){/* constant x */ push(1122)} (function)
+		02534: !)%$%%#%
+		02535: ^$%^*^*^
+		---------- End of the definition -----------
+		OK help -N ! ==>  ! ( n a -- ) 將 n 存入位址 a
+		OK js> RET 2534 ! <--------------- 手工打造 RET
+		OK 2533 2531 ! <------------------ 手工填寫 0branch address
+
+		OK see x <---------------------------- 查看，差不多了，還差 immediate
+					name : x (string)
+					 vid : mytools.f (string)
+					 wid : 29 (number)
+					type : colon-create (string)
+					help : x ( ?? ) No help message. Use // to add one. (string)
+					 cfa : 2529 (number)
+
+		-------- Definition in dictionary --------
+		02529: compiling ( -- boolean ) Get system state (object)
+		02530: 0branch ( n -- ) 若 n!==0 就將當前 ip 內數值當作 ip, 否則將 ip 進位 *** 20111224 sam (object)
+		02531: 2533 (number)
+		02532: compile ( -- ) Compile the next word at dictionary[ip] to dictionary[here]. (object)
+		02533: function(){/* constant x */ push(1122)} (function)
+		02534: RET (null)
+		---------- End of the definition -----------
+
+		OK js: inner(2532) <------ 試驗看 compile function(){} 是否可行？可以！
+		OK d 2543 <---- here
+		02543: function(){/* constant x */ push(1122)} (function) <--- 果然有 compile 進去, Bingo!
+		02544: RET (null)
+		02545: undefined (undefined)
+		02546: undefined (undefined)
+		OK ' x :: immediate=true  <--------------- 手工設定 immediate
+	驗收 interpret state 的行為，OK!
+		OK x .  
+		1122
+	最終驗收 compile state 的行為，也 OK!
+		OK : try x 2 * . ; 
+		OK see try <------------------------- 沒錯 :-D
+					name : try (string)
+					 vid : mytools.f (string)
+					 wid : 31 (number)
+					type : colon (string)
+					help : try ( ?? ) No help message. Use // to add one. (string)
+					 cfa : 2544 (number)
+
+		-------- Definition in dictionary --------
+		02544: function(){/* constant x */ push(1122)} (function)
+		02545: 2        (literal) (object)
+		02546: * ( a b -- a*b ) Multiplex. (object)
+		02547: . ( sth -- ) Print number or string on TOS. (object)
+		02548: RET (null)
+		---------- End of the definition -----------
+		OK try 
+		2244 OK <--------------------- 大功告成！
+	心得：以後不怕跨 A B C phase 設計 forth 程式了！
+
+	我發現幾乎所有的 literal 都是以 [compile] literal 的形式出現，而不是以此形式出現的 literal 如下，
+		[ char </match>|<igm>|<flags> ] literal word
+	它根本可以省略，
+		char </match>|<igm>|<flags> word 
+
+	探討各種情況，看 literal 是否需要維持 immediate? （希望研究出雙方的替代對策 ==> 可以！）
+
+	== A == 當 literal 是 immediate 時 
+
+	（1）: test2 [ 120 3 + ] literal ; ( <--- 這兩個等效 ---> ) : test 123 ;
+		 我看這是 literal 最原始的目的，把 constant 在 compile time 處理掉。
+		 光憑這個理由不足以支持為何要 immediate, 因為 [ 120 3 + literal ] 即可。
+		 Yap 提過，他盡量不宣告 immediate 。
+		 
+		OK see test
+					name : test (string)
+					 vid : mytools.f (string)
+					 wid : 19 (number)
+					type : colon (string)
+					help : test ( ?? ) No help message. Use // to add one. (string)
+					 cfa : 1274 (number)
+
+		-------- Definition in dictionary --------
+		01274: 123        (literal) (object)
+		01275: RET (null)
+		---------- End of the definition -----------
+		 OK see test2
+					name : test2 (string)
+					 vid : mytools.f (string)
+					 wid : 20 (number)
+					type : colon (string)
+					help : test2 ( ?? ) No help message. Use // to add one. (string)
+					 cfa : 1276 (number)
+
+		-------- Definition in dictionary --------
+		01276: 123        (literal) (object)
+		01277: RET (null)
+		---------- End of the definition -----------
+
+	（2）: test3 123 [compile] literal ; ( <-- 不等效 --> ) : test4 123 , ;
+		OK see test3
+				name : test3 (string)
+				 vid : mytools.f (string)
+				 wid : 21 (number)
+				type : colon (string)
+				help : test3 ( ?? ) No help message. Use // to add one. (string)
+				 cfa : 1278 (number)
+		-------- Definition in dictionary --------
+		01278: 123        (literal) (object)
+		01279: literal ( x -- ) Compile the TOS. (object)
+		01280: RET (null)
+		---------- End of the definition -----------
+		OK see test4
+					name : test4 (string)
+					 vid : mytools.f (string)
+					 wid : 18 (number)
+					type : colon (string)
+					help : test4 ( ?? ) No help message. Use // to add one. (string)
+					 cfa : 1290 (number)
+		-------- Definition in dictionary --------
+		01290: 123        (literal) (object)
+		01291: , ( n -- ) Compile TOS to dictionary. (object)
+		01292: RET (null)
+		---------- End of the definition -----------		
+		
+		OK here 4 dump
+		01288: RET (null)
+		01289: undefined (undefined)
+		01290: undefined (undefined)
+		01291: undefined (undefined)
+		OK .s
+		empty
+		test3
+		test3
+		OK d 1288
+		01288: 123        (literal) (object)
+		01289: 123        (literal) (object) <---------------- (1)
+		01290: RET (null)
+		01291: undefined (undefined)
+		01292: undefined (undefined)
+		
+		OK : test4 123 , ;									
+		OK here . \ ==> 1293 								
+		OK test4											
+		OK d 1293											
+		01293: 123 (number) <------------------------- (2) 與以上 (1) 不同
+		01294: RET (null)
+		01295: undefined (undefined)
+		01296: undefined (undefined)
+		
+	（3）: test literal foo bar ; <----- 很難想像 literal 這樣用有何用途？
+
+	== B == 當 literal 非 immediate 時 
+
+	（1）: test2 [ 120 3 + ] literal ; ===> 改寫成 ===> (猜想是) : test2 [ 120 3 + literal ] ; 
+	（2）: test3 123 [compile] literal ; ===> 改寫成 ===> : test3 123 literal ;
+	（3）: test literal foo bar ;  ===> 改寫成 ===>  (猜想是) : test [ literal ] foo bar ;
+
+	code iliteral ( n -- ) \ Compile TOS as an anonymous constant
+			var literal = pop();
+			var getLiteral = eval("var f;f=function(){push(literal)/* " + literal.toString() + " (" + mytypeof(literal) + ") */}");
+			dictcompile(getLiteral);
+		end-code 
+
+	[x]	literal 根本無需是個 immediate！ ===> 但是要把 compile-only 也拿掉。
+	[x] literal 若是 immediate 用到幾乎全都是以 [compile] literal 型式出現。全改回單 literal. 
+	[x] literal 的用途是 [ js> Math.Pi 2 * ] literal 若是 immediate 則寫成 [ js> Math.Pi 2 * literal ] 
+		也等效。改成非 immediate 之後則一定要寫成後者的形式。
+	[x] 值得紀念的一刻，literal 取消 immediate hcchen5600 2015/03/10 11:55:48 
+	
+[x] 複習一遍 JavaScript 的 var 由 volatile 經 new 變成 static    
+    <js>
+        function Ball(axisx,axisy,radius){
+            var x=axisx,y=axisy,r=radius;
+            this.position = function(){return({x:x,y:y})}
+            this.move = function(h,v){x+=h;y+=v;}
+        }
+        push(new Ball(10,15,20))
+    </js> constant ball
+    ball :> position() (see)
+    ball :: move(1,1)
+    ball :> position() (see)
+    [object Object]
+      x :  10
+      y :  15
+    [object Object]
+      x :  11
+      y :  16   
+	------------ 以下這樣不行 -------------------------
+    <js>
+        function Ball (axisx,axisy,radius){ var x=axisx,y=axisy,r=radius; } // local static variables
+        Ball.position = function(){return({x:x,y:y})} // exported methods
+        Ball.move = function(h,v){x+=h;y+=v;}         // exported methods
+        push(new Ball(10,15,20))
+    </js> constant ball
+    ball :> position() (see)  <--------- ball 沒有 position 
+    ball :: move(1,1) <----------------- ball 也沒有 move
+    ball :> position() (see)  
+
+[x] 引入 global var g = {} 讓 forth words 可以與 javascript 共用 variables. 因為他們全都屬 global 變數。
+	例如，
+		123 ivalue x // ( -- int )
+		456 ivalue y // ( -- int )
+    產生的 x,y 同時也是 g.x, g.y
+    每經
+        67 ivalue x // ( -- int )
+        89 ivalue y // ( -- int )
+    會產生新 g.x g.y 蓋過原來的，因為 g 裡面的 members 同名只有一個。
+
+    [x] 改寫 value 以及 constant 一律用 g{}, Constant object 不必由 jeforth.js 提供。
+		<js> push(function(){/*comment*/push(112233)})</js> execute 得 tos()==112233
+		[x] ==> 'constant' 直接就是個 function() 用 /* constant name */ 在 see 裡顯示自己的 type.
+				---> bad idea. constant should be a g.name because it's a global.
+		[x] ==> 'to' 在 compile-time 允收 value, 不影響 run time 速度。
+			
+	: value ( n <name> -- ) \ Create a 'value', Don't use " in <name>.
+		BL word (create) <js> 
+		last().type = "value";
+		var s = 'var f;f=function(){push(g["' 
+				+ last().name 
+				+ '"])}';
+		last().xt = eval(s);
+		g[last().name] = pop();
+		</js> reveal ; interpret-only 
+	: constant ( n <name> -- ) \ Create a 'value' variable, Don't use " in <name>.
+		value last :: type='constant' ; interpret-only
+	: to ( n <value> -- ) \ Assign n to <value>.
+		' ( word ) <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
+		compiling if ( word ) 
+			<js> var s='var f;f=function(){/* to */ g["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+		else ( n word )
+			js: g[pop().name]=pop()
+		then ; immediate
+	
+	[x] 看來 constant 應該用 literal 實現才對，不是用 value 
+		==> 錯！ literal 真的是釘在 dictionary 裡
+		的常數，可以 compile 成一個 push(data) 的 function(), 而 constant 則是個 global variable 準備
+		佔用一個帶名字的 g[name] 格位，see? 兩者不同。
+	
+	: constant ( n <name> -- ) 
+		BL word (create) <js> 
+			var literal = pop();
+			var getLiteral = function(){/* constant last().name */ push(literal)}
+			last().type = "constant";
+			last().xt = function(){
+				if (compiling) dictcompile(getLiteral);
+				else getLiteral();
+			}
+			last().immediate = true;
+		</js> reveal ;
+	: constant ( n <name> -- ) 
+		BL word (create) [compile] literal RET , <js> 
+			var literal = pop();
+			var getLiteral = function(){/* constant last().name */ push(literal)}
+			last().type = "constant";
+			last().xt = function(){
+				if (compiling) dictcompile(getLiteral);
+				else getLiteral();
+			}
+			last().immediate = true;
+		</js> reveal ;
+	x 
+	0001 compiling
+	0002 0branch
+	0003 30
+	0004 compile
+	0030 function(){/* constant x */ push(literal)}
+	0040 RET
+
+	001: n
+	002: function(){/* constant */ push(constant)}
+
+[x]	「設計 compile word / postpone word / 跨時區命令保持頭腦清晰的步驟與技巧」
+	https://www.evernote.com/shard/s22/nl/2472143/8da1eb3d-2768-4603-8eda-eabd51c69227
+
+[x]	3hta, (see) 0 shows [object Number] ? why?
+	js> rstack (see)
+	0,621
+	  0 :  [object Number]
+	  1 :  621
+	js: see(rstack) <---- can repro, so see()'s problem, yes. RI , 
+	RI: 鑽進 rstack 之後 0 會被當成 （大概是）Object.toString.apply(0) 顯示。
+	[x] ==> 先用 ivalue 把 Constant() 置換掉， 之後 see() 的毛病也改好。
+
+[x] Double suspend is not allowed so far, but why?  
+	==> hcchen5600 2015/03/10 18:06:58 已經有可以多重 suspend 的 nap 命令。
+	==> 準備把 suspendForthVM() resumeForthVM() 都從 jeforth.js 移除。
+	==> hcchen5600 2015/03/11 20:16:04 現在的 *debug* 已經可以多重 suspend. 
+
+[x] remove some functions out of jeforth.js they are too personal
+	[x]	Constant()
+	[x]	isSameArray() <--- jeforth.f code ; 之前要定義好。
+	[x]	memberCount()
+	[x]	mergeObj()
+	[x]	retrieveObj()
+	[x]	isMember()
+	[x]	suspendForthVM()  *debug* msg>>> 改成傳回 resume() 因此可以多重進入 *debug* 但不知是否有用。
+	[x]	resumeForthVM()   只要把 resume() 找個 stack push 存放，即可輕鬆 pop execute 達到 resume 目的。
+	[x]	mySetInterval()
+	[x]	mySetTimeout()
+	[x]	see(obj,tab)
+
+[x] awk.f 裡有個 [compile] compiling 前置的 [compile] 是空包彈，應該拿掉。
+	如果 [compile] foo 而 foo 本來就不是 immediate 則在 colon definition 期間與單 foo 完全等效，前置 [compile] 等於無害的 redundent。
+	ANS forth SPEC 裡也是這麼說。
+	
+[x]	type 'jsc' 變成 'csj' ==> 不要 focus ==> jump2endofinputbox.click(); // inputbox.focus();
+	結果 ＿Bingo!!__
+	用這個測驗 ==> : test cls 1000 for r@ . ."  ------------------ " cr next ;
+ 
+[ ]	forth quote ==> 看能不能用來自動檢查，提供 warning 增進系統可靠度。
+	o	看這句話對不對：「會用到 compiling 的一定是 immediate word。」這一定對，不是 immediate word 就根本
+		看不到 compiling state 用到 compiling 沒有意義。
+	o	沒有用到 compiling 的 immediate word 可考慮把 immediate 屬性拿掉。需當 immediate word 用時以 [ , ] 包起來即可。
+	o	所有的 forth words 都有 interpret / compile 兩個 state，大部分 words 只寫 interpret state 是因為
+		compile state outer loop 會把整個 word 都拿去 compile。如果不能被直接 compile 的 word 就一定要自己
+		分別寫這兩個 state 的 code 因此一定是 immediate。如下：
+	o	有抓後面 token 的 word 要考慮是 immediate 或 interpret-only 兩者之一，否則可能設計不夠周延。
+		這不是絕對，像 tick ' , word 這樣兩者皆非的也有。
+	o	有 compile 東西進 dictionary 的一定是 immediate 所以 compile-only 一定是 immediate。
+	o	colon word 裡 last 或 js> last() 有三種可能意義，
+			a. [ last literal ] 取得該 colon word 本身。
+			b. create 之後 last 取得新 word。本 colon word 是個 class，新 word 是一個 instanse。
+			c. 單 last 取得 forth 系統最後一個 word。
+	o	在 <js> 之前，於 colon word 中插入 JavaScript function 的方法
+			[ s" push(function(){push(last().cfa)})" jsEvalNo , ] \ push 一個 function 然後把它 compile 進字典。
+		等效於，
+			s" push(last().cfa)" jsEvalNo
+		但執行效率高。公式，
+			s" 。。。" jsEvalNo ==> [ s" push(function(){。。。})" jsEvalNo , ]
+		
+		
+[x]	function 裡的 function 就跟 function 裡的 var 一樣，都是 volatile。
+	所以每次 function 上手，看到自己裡面的東西, 含 function, 都是新的。
+	------------ ex.1 ---------------------
+	: test <js> var f = function(){}; f </jsV> ; // ( -- function ) Create a function. 每次都傳回新的 function。
+	OK test test \ ==> Now we have two dummy functions in the stack,
+	OK .s
+      0: function(){} (function)  
+      1: function(){} (function)  <---- tos().x=123 , cehck tos(1).x , observe they are different.
+	OK = tib. \ ==> false      Are they identical? NO!!
+	--------- ex.2 有沒有 assign 給 f 無關。-------------
+	: test <js> function inner() {push(arguments.callee)} inner() </js> ;
+	test test .s
+	OK test test .s
+      0: function inner() {push(arguments.callee)} (function) 這兩個不同！！！
+      1: function inner() {push(arguments.callee)} (function)
+	OK = tib. \ ==> false
+	--------- ex.3 <js></js> 第一層是同一個 function -------------
+	: test <js> argument.callee </jsV> ; // ( -- function ) Return the same function 
+	OK .s
+      0: function(){push(arguments.callee)} (function)  這兩個是同一個
+      1: function(){push(arguments.callee)} (function)
+
+[x] 怎麼還有 endinner ？ 通通拿掉！
+
+[*]	用自己的 cfa 當 call back 不理想,簡單用 execute(name) 較好。
+
+	==>	出現在 processing.f 的例子，onFrameTick 
+		用自己的 cfa 當 call back, 沒有人做 rstack.push(0) 結束時 rstack 不平衡還得處理。花招太多。
+			[ s" push(function(){inner(" js> last().cfa + s" )})" + </js> literal ] ( -- callBack )
+		用 execute(name)，不會有 rstack unbalance 的問題，execute() 執行 colon word 的 xt 有 rstack.push(0)
+			[ s" push(function(){execute('" js> last().name + s" ')})" + </js> literal ] ( -- callBack )
+		缺點是萬一有 reDef 較不絕對，而已。
+		
+	==> 出現在 many-clocks.f 的例子，改寫時頭痛了一下子。有 forth quote 心得可寫。
+		colon word 裡 last 或 js> last() 有三種可能意義，
+		a. [ last literal ] 取得該 colon word 本身。
+		b. create 之後 last 取得新 word。本 colon word 是個 class，新 word 是一個 instanse。
+		c. 單 last 取得 forth 系統最後一個 word。
+
+		這兩行等效，屬以上 b. 類：（用在 create A does> B 的 A 段, 佈置 call-back function）
+			s" push(function(){inner(" js> last().cfa + s" )})" + jsEvalNo ,
+			s" push(function(){inner(" js> last().cfa + s" )})" + [compile] </js> ,
+		因為 call-back function 是 call-by-address 的，沒有人 rstack.push(0) 因此在 B 段 does> 
+		裡最後必須，
+ 			js> rstack.length if 0 >r then \ TSR 不要吃到別人 (in suspending) 的 rstack。重要！
+		這樣一來，機關太多。
+		
+		改成 call by name
+			s" push(function(){execute('" js> last().name + s" ')})" + jsEvalNo ,
+			s" push(function(){execute('" js> last().name + s" ')})" + [compile] </js> ,
+		就什麼都好了，簡單明瞭。execute() 執行到 colon word 時 colon word 自己的 xt 自會 
+		做 rstack.push(0) 的工作。
+
+[ ]	now come back to deal with pile.f ===> Done!
+	[ ] 內容盡量改成 forth 
 

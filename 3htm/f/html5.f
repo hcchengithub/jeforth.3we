@@ -31,7 +31,7 @@ s" html5.f"		source-code-header
 					js> pop().nextElementSibling
 					js: tos().parentElement.insertBefore(pop(1),pop()) 
 				else
-					js: pop().parentElement.insertBefore(pop(1))
+					js: pop().parentElement.appendChild(pop())
 				then
 				;
 				/// insertBefore() method see https://www.evernote.com/shard/s22/nl/2472143/9d97ceec-8374-4ac8-baab-f3f599ecfba4
@@ -68,29 +68,24 @@ s" html5.f"		source-code-header
 				
 : <e>			( "jQuery selector" <html> -- "html" ) \ HTML section header. Get HTML tags.
 				char \s*(</e>|</o>|</h>) word \ 前置空白會變成 [object Text] 必須消除。
-				compiling if [compile] literal then ; immediate
+				compiling if literal then ; immediate
 				last dup alias <o> immediate // ( <html> -- "html" ) Starting a HTML section append to output box.
 				alias <h> immediate // ( <html> -- "html" ) Starting a HTML section append to <HEAD>. 
 				/// Section ending can be </e> </o> or </h> which are element, outputbox, and header
 				/// respectively, so far. 分開寫也可以，併成一個只是圖方便。
 
 : </o>			( "html" -- element ) \ Delimiter of <o>, (O)utputbox.
-				char #outputbox
-				compiling if 
-				[compile] literal compile doElement else 
-				doElement 
-				then ; immediate
+				char #outputbox compiling 
+				if literal compile doElement 
+				else doElement then ; immediate
 
 : </h>			( "html" -- element ) \ Delimiter of <h>, (H)ead section.
-				char head
-				compiling if 
-				[compile] literal compile doElement else 
-				doElement 
-				then ; immediate
+				char head compiling 
+				if literal compile doElement 
+				else doElement then ; immediate
 
 : </e>			( "jQuery selector" "html" -- element ) \ Delimiter of <e>, general purpose.
-				compiling if 
-				compile swap compile doElement 
+				compiling if compile swap compile doElement 
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>
 

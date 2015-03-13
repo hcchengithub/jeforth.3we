@@ -142,3 +142,29 @@ s" canvas.f"	source-code-header
 	code font				( "font" -- ) \ Example: s" 20pt bold Arial" font
 							kvm.cv.font=pop() end-code
 
+	: move-cv-up-into-outputbox	( -- ) \ Move the last thing, expecting a canvas, up into the outputbox.
+							eleBody lastChild dup :> constructor==HTMLCanvasElement 
+							( ele Boolean ) if else ( ele )
+								s" Last thing's constructor is " ( ele "str" ) over 
+								( ele "str" ele ) :> constructor ( ele "string" ele.constructor )
+								+ s" , are you sure?" + ( ele "confirm" ) js> confirm(pop()) 
+								if else drop exit then 
+							then
+							( ele ) eleDisplay lastChild insertAfter ;
+
+							<selftest>
+							move-cv-up-into-outputbox
+							</selftest>
+
+
+
+
+
+
+
+
+
+
+
+
+

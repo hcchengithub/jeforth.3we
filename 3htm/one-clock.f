@@ -55,7 +55,7 @@
         hours   12 mod 5 * minutes 12 / +  畫時針
         minutes seconds 60 / + 畫分針
         seconds 畫秒針
-        js> setTimeout((function(){execute('畫鐘')}),1000) ( -- id ) drop
+        js> g.setTimeout((function(){execute('畫鐘')}),1000) ( -- id ) drop
     ;
 
     畫鐘

@@ -107,7 +107,7 @@
 	\ <title></title> 不 support style 故無法改醒目顏色，只好多費點功夫用以下 blinking 程式也許更好。
 	0 value blink.intervalId // ( -- id ) The id of setInterval() 
 	: blink ( -- ) \ Blinking the browser tab title indicates who alarms.
-		blink.intervalId if else js> setInterval(function(){execute('blink')},500) to blink.intervalId then
+		blink.intervalId if else js> g.setInterval(function(){execute('blink')},500) to blink.intervalId then
 		js> document.title!="!!時間到!!" if js: document.title="!!時間到!!"
 		else js: document.title=alarm_message.value then ;
 	: stopBlinking ( -- ) \ Stop the blinking browser tab title.
@@ -127,7 +127,7 @@
 		
     : alarmStart
         alarmPause if 
-            intervalId if else js> setInterval(function(){execute('doTimeTick')},1000) to intervalId then
+            intervalId if else js> g.setInterval(function(){execute('doTimeTick')},1000) to intervalId then
             false to alarmPause
             \ js: alarmStart.innerHTML="PAUSE";
 			js> pause_button :: setAttribute('style','color:black')

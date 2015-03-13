@@ -8,14 +8,14 @@
 
 	: <search> 	( "source" <RegEx> -- "source" "RegEx" "" ) \ Locate position of RegEx in "source" string. -1 not found
 		char </search>|<igm>|<flags> word
-		compiling if [compile] literal compile "" else "" then 
+		compiling if literal compile "" else "" then 
 		; immediate
 		/// s" source" <search> regex [<flags> igm] </search> ==> index or -1
 
 	: <igm> ( "source" <RegEx> "" -- "source" "RegEx" igm ) \ Get flags (i, g, m, ig, gm, im, igm) of RegEx
 		compiling if compile drop else drop then 
 		char </search>|</match>|<to> word 
-		compiling if [compile] literal then 
+		compiling if literal then 
 		; immediate
 		/// <igm> or <flags> alias.
 		/// s" source" <search> regex [<flags> igm] </search> ==> index or -1
@@ -53,14 +53,14 @@
 
 	: <indexof> ( "source" <substr> -- "source" "substr" 0 ) \ Position substring first occurs within String. -1 not found
 		char </indexof>|<start> word 
-		compiling if [compile] literal 0 [compile] literal else 0 then 
+		compiling if literal 0 literal else 0 then 
 		; immediate
 		/// Usage: "source" <indexof> "sub-string"[<start> n]</indexof> ( -- position|-1 ) -1 not found, or position of sub-string.
 
 	: <start> 	( "source" "substr" n -- "source" "substr" n' ) \ The index to begin searching within the string, default 0.
 		compiling if compile drop else drop then 
 		char </indexof>|</lastindexof> word 1 * 
-		compiling if [compile] literal then 
+		compiling if literal then 
 		; immediate
 		/// Usage: "source" <indexof> "sub-string"[<start> n]</indexof> ( -- position|-1 ) -1 not found, or position of sub-string.
 
@@ -93,7 +93,7 @@
 	: <lastindexof> 	( "source" <substr> -- "source" "substr" length ) \ Position substring last occurs within String. -1 not found
 		char </lastindexof>|<start> word 
 		compiling if 
-			[compile] literal compile over compile count compile swap compile drop 
+			literal compile over compile count compile swap compile drop 
 		else 
 			over count swap drop 
 		then 
@@ -127,8 +127,8 @@
 	\ -------------------------------------------------------------------------------------------------------------------
 
 	: <match> 	( "source" <RegEx> -- "source" "RegEx" "" ) \ Search "source" returns an object {["match",..],input,index}
-		[ char </match>|<igm>|<flags> ] literal word 
-		[compile] compiling if [compile] literal compile "" else "" then 
+		char </match>|<igm>|<flags> word 
+		compiling if literal compile "" else "" then 
 		; immediate
 		/// Usage: "source" <match> "regex"[<flags> "igm"]</match> ( -- ["match",..] ) 
 
@@ -164,7 +164,7 @@
 
 	: <replace> 	( "source" <RegEx> -- "source" "RegEx" "" ) \ Returns a new string with text replaced.
 		char <igm>|<flags>|<to> word 
-		compiling if [compile] literal compile "" else "" then 
+		compiling if literal compile "" else "" then 
 		; immediate
 		/// Usage: "source" <replace> "regex"[<flags> "igm"]<to> "replaceText"</replace> ( -- ["replace",..] ) 
 
@@ -182,7 +182,7 @@
 
 	: <to> 	( "source" <RegEx> -- "source" "RegEx" "" ) \ Get replace text of <replace> clause
 		char </replace> word literal>escape
-		compiling if [compile] literal then 
+		compiling if literal then 
 		; immediate
 		/// Usage: "source" <replace> "regex"[<flags> "igm"]<to> "replaceText"</replace> ( -- ["replace",..] ) 
 

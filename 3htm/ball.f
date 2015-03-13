@@ -17,7 +17,7 @@ s" ball.f" source-code-header
 	Infinity	setFrameCountLimit \ ( n -- ) None stop
 	1			lineWidth		\ ( n -- )
 	s" green" 	strokeStyle		\ ( '#RRGGBB'|'rgb(255,0,0)'|'rgba(255,0,0,0.5)'|'green'  -- ) 
-	s" blue"  	fillStyle 		\ ( " )
+	s" blue"  	fillStyle 		\ ( '#RRGGBB'|'rgb(255,0,0)'|'rgba(255,0,0,0.5)'|'green'  -- ) 
 	20 			value ball_radius // ( -- n )
 	js> kvm.cv.canvas.width/2 	value ball_x // ( -- n ) initial ball coordinates
 	ball_radius	value ball_y // ( -- n) initial ball coordinates
@@ -40,7 +40,7 @@ s" ball.f" source-code-header
 		</jsV> to ball_height 
 		clearCanvas beginPath
 		ball_height ( int ) to ball_y \ set the new ball y position
-		ball_x ball_y ball_radius 0 [ js> Math.PI*2 ] literal false 
+		ball_x ball_y ball_radius 0 [ js> Math.PI*2 literal ] false 
 		arc ( x y r sAngle eAngle !clockwise -- ) fill 
 	;
 

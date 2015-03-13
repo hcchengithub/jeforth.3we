@@ -10,7 +10,7 @@
 				background:#E0E0E0;
 			}
     </style>
-    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/jquery-1.11.2.js"></script>
 	<Script src="kernel/jeforth.js"></Script>
 	<script id=js>
 	(function(){
@@ -25,7 +25,7 @@
 			}
 			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 			$('#outputbox').append(plain(ss)); 
-			// jump2endofinputbox.click(); inputbox.focus();
+			jump2endofinputbox.click(); // inputbox.focus();
 		};
 		kvm.version = "1.00";
 		kvm.greeting = function(){
@@ -57,9 +57,9 @@
 				var kk = $.get(k,'text'); // callback only when success, not suitable, 
 				var rr = $.get(r,'text');
 				var qq = $.get(q,'text');
-				(function run(){
+				(function retry(){
 					if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
-						setTimeout(run,100); 
+						setTimeout(retry,100); 
 					else {
 						if (kk.status!=200) kvm.panic("Error! Failed to read " + k + '\n');
 						else if (rr.status!=200) kvm.panic("Error! Failed to read " + r + '\n');
@@ -130,8 +130,7 @@
 			Program path <span id=location>location</span><br>
 			</div>
 		</div>
-	</div>
-	<div id="outputbox"></div>
+	</div><div id="outputbox"></div>
 	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><br id=endofinputbox>
 </body>
 </html>

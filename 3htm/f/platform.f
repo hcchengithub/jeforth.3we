@@ -11,10 +11,11 @@ also forth definitions
 				/// Must intercept onkeydown event to avoid original function.
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
-				." Input box EditMode = " js> kvm.EditMode=Boolean(kvm.EditMode^true) dup . cr
+				." Input box EditMode = " 
+				js> kvm.EditMode=Boolean(kvm.EditMode^true) dup . js: print('\n')
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
-				then js> styleTextareaFocus.innerHTML=pop()                
+				then js: styleTextareaFocus.innerHTML=pop()                
 				js: jump2endofinputbox.click();inputbox.focus();
 				false ;
 				/// return a 'false' to stop the hotkey event handler chain.

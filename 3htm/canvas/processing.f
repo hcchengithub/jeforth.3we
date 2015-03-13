@@ -24,8 +24,8 @@ s" processing.f" source-code-header
 				// kvm.temp=[]; // <--- 研究電腦速度能到多少，結論是 frameRate 約 60 就已經快滿檔了。
 				// kvm.r=[]; // <-- 研究每個 tick 的 now 與理想時間 fc*fi + t0 之間的差距。
 				t0 = (new Date()).getTime(); // 單位是 mS JavaScript 既有的 timer 已經很準了
-				execute('timeOutId'); if(tos()) clearTimeout(tos());
-				fortheval('drop 0 to timeOutId 0 to frameCount frameRate'); 
+				execute('timeOutId'); if(tos()) clearTimeout(tos()); // 記得要 drop 
+				fortheval('drop 0 to timeOutId 0 to frameCount frameRate'); // ( -- frameRate )
 				interval=1000/pop();
 				deltaA = deltaB = 0; // 一開始假設時間都是準的。
 			}, 
@@ -54,20 +54,17 @@ s" processing.f" source-code-header
 		to frameCountLimit ;
 		
 	: onFrameTick ( -- ) \ Processing main loop
+		\ 如果是 timeout 進來的，把 g.setTimeout.registered()[id] delete 掉，以免大量堆積
+		timeOutId ?dup if js: delete(g.setTimeout.registered()[pop().toString()]) then
 		frameCount frameCountLimit >= if char ending-message execute 0 to timeOutId exit then
-		[ s" push(function(){inner(" js> last().cfa + s" )})" + </js> ] literal ( -- callBack ) \ 用自己的 cfa 當 call back
-		frameTickInterval :> value() ( -- callBack interval ) js> setTimeout(pop(1),pop()) to timeOutId
+		[ s" push(function(){execute('" js> last().name + s" ')})" + </js> literal ] ( -- callBack )
+		frameTickInterval :> value() ( -- callBack interval ) js> g.setTimeout(pop(1),pop()) to timeOutId
 		frameCount 1+ to frameCount 
-		[ last ] literal js: tos().cvwas=kvm.cv;kvm.cv=pop().cv \ save 人家的 cv 換成自己的 --- (1)
+		[ last literal ] js: tos().cvwas=kvm.cv;kvm.cv=pop().cv \ save 人家的 cv 換成自己的 --- (1)
 		char draw execute \ call by name 因為 draw 尚未出生
-		[ last ] literal js: kvm.cv=pop().cvwas \ restore 別人家的 cv ----- (2)
-		js> rstack.length 1 > if 0 >r then \ ----------- (4)
+		[ last literal ] js: kvm.cv=pop().cvwas \ restore 別人家的 cv ----- (2)
 		; interpret-only last :: cv=kvm.cv \ initial 自己的 cv ------ (3) 
 		/// onFrameTick command 本身是個 TSR 因此設定為 interpret-only。
-		/// This event is usually triggered by setTimeout() when waiting in interpreter state, rstack.length
-		/// is supposed to be 1. If triggered in suspending state then rstack.length>1, we have to avoid using the 
-		/// working rstack by pushing a dummy 0 into rstack so as to return to interpreter waiting state which is
-		/// where it was from. see (4) above, this is very important for any TSR. 
 
 	: processing ( -- ) \ 整個程式像新的一樣重跑。
 		char starting-message execute

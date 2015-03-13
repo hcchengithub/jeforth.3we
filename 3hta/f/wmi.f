@@ -498,7 +498,7 @@ code objEnumWin32_Battery
 					marker -%-%-%-%-%-
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
 					( ------------ Start to do anything --------------- )
-					objEnumWin32_Battery >r r@ js> pop().atEnd() [if] ." This computer has no battery." cr [else]
+					objEnumWin32_Battery js> tos().atEnd() [if] drop ." This computer has no battery." cr [else] >r
 					." Availability                  " r@ js> pop().item().Availability                . cr \ uint16  
 					." BatteryRechargeTime           " r@ js> pop().item().BatteryRechargeTime         . cr \ uint32  
 					." BatteryStatus                 " r@ js> pop().item().BatteryStatus               . cr \ uint16  

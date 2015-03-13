@@ -55,8 +55,9 @@
 						 , js: kvm.cv=pop() \ restore recent cv
 			( 3 buffer ) 0 , \ original canvas buffer
 			( 4 name   ) js> last().name ,
-			( 5 callbk ) s" push(function(){inner(" js> last().cfa + s" )})" + jsEvalNo dup ,
-						 js: setTimeout(pop(),100) \ 直接啟動，此時 does> 尚未宣告完成，所以要等一下。 
+		\	( 5 callbk ) s" push(function(){inner(" js> last().cfa + s" )})" + jsEvalNo dup ,
+			( 5 callbk ) s" push(function(){execute('" js> last().name + s" ')})" + [compile] </js> dup ,
+						 js: g.setTimeout(pop(),100) \ 直接啟動，此時 does> 尚未宣告完成，所以要等一下。 
 		does> 
 			js> kvm.cv r@ 3 + ! \ save original cv 
 			r@ 1+ @ js: kvm.cv=pop() \ activate the cv of the clock
@@ -66,20 +67,20 @@
 			js> tos().getMinutes()+tos().getSeconds()/60 畫分針 
 			js> pop().getSeconds() 畫秒針 
 			r@ 3 + @ js: kvm.cv=pop() \ restore original cv
-			r> 5 + @ js: setTimeout(pop(),1000)
-			js> rstack.length if 0 >r then \ TSR 不要吃到別人 (in suspending) 的 rstack。重要！
+			r> 5 + @ js: g.setTimeout(pop(),1000)
+		\	js> rstack.length if 0 >r then \ TSR 不要吃到別人 (in suspending) 的 rstack。重要！
 	; interpret-only
-
-	0	時鐘 台北 
-	1	時鐘 東京 
-	-6	時鐘 巴黎 
-	-7	時鐘 倫敦 
-	-15	時鐘 洛杉磯 
-	-12	時鐘 紐約 
-	-4	時鐘 杜拜 
-
-	
-
+\
+\	0	時鐘 台北 
+\	1	時鐘 東京 
+\	-6	時鐘 巴黎 
+\	-7	時鐘 倫敦 
+\	-15	時鐘 洛杉磯 
+\	-12	時鐘 紐約 
+\	-4	時鐘 杜拜 
+\
+\	
+\
 
 
 
