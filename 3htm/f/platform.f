@@ -122,6 +122,9 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				/// types, use Ctrl-{backSpace}. To erase faster, use Shift-{backSpace} or
 				/// Shift-Ctrl-{backSpace}. To erase top down, use Alt key.
 
+: {ctrl-break}	( -- boolean ) \ Inputbox keydown handler, stop outer loop
+				."  {ctrl-break} " stop false ;
+
 : help			( [<patthern>] -- )  \ Print help message of screened words
                 char \n|\r word js> tos().length if (help) else
 					<text>
@@ -134,6 +137,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 						Enter : Focus on the input box
 						Ctrl+ : Bigger font size
 						Ctrl- : Smaller font size
+						Ctrl-Break : Stop console event handler or outer loop
 						Backspace : Refer to "help -N {backSpace}" for details
 
 						help <pattern> : Refer to "help -N (help)" for details
@@ -219,6 +223,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 			case 121: /* F10 */ if(kvm.tick('{F10}')){kvm.execute('{F10}');return(kvm.pop());} break;
 			case 122: /* F11 */ if(kvm.tick('{F11}')){kvm.execute('{F11}');return(kvm.pop());} break;
 			case 123: /* F12 */ if(kvm.tick('{F12}')){kvm.execute('{F12}');return(kvm.pop());} break;
+			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}'  )){kvm.execute('{ctrl-break}'  );return(kvm.pop());} break;
 		}
 		return (true); // pass down to following handlers
 	}

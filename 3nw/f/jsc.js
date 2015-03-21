@@ -12,7 +12,7 @@
 			case "s" : bp=-1; return; // 
 			case "p" : bp=ip+1; return;
 			case "r" : bp=rstack[rstack.length-1]; return;
-			case "erase" : for(var i=0; i<4; i++){execute('{backSpace}');pop();} break;
+			case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
 			case "exit" : case "q" : case "quit": bp=0; return;
 			case "bye"  : execute("bye"); break;
 			case "help" : print(kvm.jsc.help); break;

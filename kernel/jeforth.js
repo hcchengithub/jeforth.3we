@@ -29,7 +29,7 @@ var kvm = (function(){
     function KsanaVm() {     
 		var vm = this; // "this" is very confusing to me. Now I am sure 'vm' is 'kvm'.
 		if(typeof(kvm)=="undefined"){var kvm=vm} // kvm defined in jeforth.hta is visible but not node.js index.js
-		var abortTIB = true; // Abort TIB
+		var stop = true; // Abort TIB
 		var ip=0; // forth VM instruction pointer
 		var stack = [] ;
 		var rstack = [];
@@ -94,7 +94,7 @@ var kvm = (function(){
 			ip=0; // forth VM instruction pointer
 			// tib = "\\s";  stop loading if is panic during an including
 			ntib = tib.length; // skip the remaining outer loop equals to stop including 
-			abortTIB=true;  // 讓 forth 自己來清
+			stop=true;  // 讓 forth 自己來清
 			debug = false;
 			if (g.setTimeout) g.setTimeout.clearAll();
 			if (g.setInterval)g.setInterval.clearAll();
@@ -107,7 +107,7 @@ var kvm = (function(){
 			if(compiling) t += '\n------------- Panic! while compiling '+newname+' -------------\n';
 			else t +=          '\n------------------- P A N I C ! -------------------------\n';
 			t += msg;
-			t += "abortTIB: " + abortTIB +'\n';
+			t += "stop: " + stop +'\n';
 			t += "compiling: " + compiling +'\n';
 			t += "stack.length: " + stack.length +'\n';
 			t += "rstack.length: " + rstack.length +'\n';
@@ -323,8 +323,9 @@ var kvm = (function(){
 					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 					w = dictionary[ip];
 				}
-				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, abort inner but reserve rstack
-				if(resuming) w = dictionary[ip];
+				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, abort inner but reserve rstack.
+				if(resuming) w = dictionary[ip]; // 正常的上層 inner() 都已經被 suspend 結束掉了，resume 要
+				// 自己補位。當初造成 deep inner loop 的機制，變成如今完成 resuming 的關鍵技術！
 			} while(ip && resuming); // ip==0 means resuming has done
 		}
 		// ### End of the inner loop ###
@@ -336,7 +337,7 @@ var kvm = (function(){
 		// 
 		function outer(entry) {
 			if (entry) inner(entry, true); // resume from the breakpoint 
-			while(!abortTIB) {
+			while(!stop) {
 				var token=nexttoken();
 				if (token==="") break;    // TIB 收完了， loop 出口在這裡。
 				outerExecute(token);
@@ -488,13 +489,10 @@ var kvm = (function(){
 
 		// Recursively evaluate one forth command line.
 		function fortheval(line){
-			var tibwas,ntibwas,ipwas;
-			tibwas = tib;
-			ntibwas = ntib;
-			ipwas = ip;
-			tib = line;
+			var tibwas=tib, ntibwas=ntib, ipwas=ip;
+			tib = line; 
 			ntib = 0;
-			abortTIB = false; // abortTIB 是給 outer loop 看的，這裡要先清除。
+			stop = false; // stop 是給 outer loop 看的，這裡要先清除。
 			outer();
 			tib = tibwas;
 			ntib = ntibwas;

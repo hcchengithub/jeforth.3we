@@ -62,10 +62,10 @@
 					case "s" : bp=-1; return; // 
 					case "p" : bp=ip+1; return;
 					case "r" : bp=rstack[rstack.length-1]; return;
-					case "erase" : for(var i=0; i<5; i++){execute('{backSpace}');pop();} break;
+					case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
 					case "bye"  : execute("bye"); break;
 					case "help" : if(!confirm(kvm.jsc.help)) return; break;
-					default : try { // �ۤv�B�z JScript errors �H�K�ʤ��ʴN�Q�ϥX�h
+					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
 						_result_ = eval(_cmd_);
 						// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";
 						// else _ss_ += _result_ + "  (" + mytypeof(_result_) + ")\n";
@@ -81,6 +81,8 @@
 			}
 		})()
 	</text> js: kvm.jsc.xt=pop()
+
+: cr         	js: print("\n") 1 nap js: jump2endofinputbox.click() ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
 
 \ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is

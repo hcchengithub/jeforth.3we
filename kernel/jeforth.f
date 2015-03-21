@@ -241,15 +241,16 @@ code \          ( <comment> -- ) \ Comment down to the next '\n'.
 						(forget)
 				</selftest>
 
-code \s         ( -- ) \ Stop loading forth source files.
-                ntib=tib.length;
+code \s         ( -- ) \ Stop outer loop which may be loading forth source files.
+				stop=true; 
+                ntib=tib.length; // 可能沒用，雙重保險。
                 end-code
-
+				
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** \s should ignore the remaining TIB ...
-						<js> fortheval("123 \\s 324 32  ... ignore every thing !!!!"); </jsN>
-						depth + 124 = ==>judge drop
+					\ depth [if] .( Data stack should be empty! ) cr \s [then]
+					\ *** \s should ignore the remaining TIB ...
+					\ 	<js> fortheval("123 \\s 324 32  ... ignore every thing !!!!"); </jsN>
+					\ 	depth + 124 = ==>judge drop
 				</selftest>
 
 code compile-only  ( -- ) \ Make the last new word a compile-only.
@@ -927,6 +928,7 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 \ ------------------ eforth colon words ---------------------------
 
 ' != alias <>	// ( a b -- f ) 比較 a 是否不等於 b, alias of !=.
+' \s alias stop // ( -- ) Samething as \s, stop outer loop hopefully stop everything.
 code nip		pop(1) end-code // ( a b -- b ) 
 code rot		push(pop(2)) end-code // ( w1 w2 w3 -- w2 w3 w1 ) 
 				/// see rot -rot roll pick
@@ -1351,16 +1353,28 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				<js>
 					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-					setTimeout(resume,delay);
+					// setTimeout(resume,delay);
+					var timeoutId = g.setTimeout(resume,delay);
 					function resume() { 
+						delete(g.setTimeout.registered()[timeoutId.toString()]);
 						tib = tibwas; ntib = ntibwas;
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}
 				</js> ;
 				/// nap 不用 g.setTimeout 故不能中止，也不會堆積在 g.setTimeout.registered() 裡。
 
-: cr         	js: print("\n") 1 nap ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
+: cr         	js: print("\n") ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
+				\ 個別 quit.f 裡重定義成 : cr js: print("\n") 1 nap js: jump2endofinputbox.click() ;
 
+code cut		( -- ) \ Cut off used TIB.
+				tib=tib.slice(ntib);ntib=0 end-code
+				/// cut . . rewind TIB 不斷重複, 'stop' to break it.
+
+code rewind		( -- ) \ Rewind TIB so as to repeat it. 
+				ntib=0 end-code
+				/// cut . . rewind TIB 不斷重複, 'stop' to break it.
+				/// Did you know that TIB is a forth event handler?
+				
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
 \ kvm.jsc.xt has been moved to quit.f of each application for propritary treatments.

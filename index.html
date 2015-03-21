@@ -25,7 +25,7 @@
 			}
 			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 			$('#outputbox').append(plain(ss)); 
-			jump2endofinputbox.click(); // inputbox.focus();
+			// jump2endofinputbox.click(); // inputbox.focus();
 		};
 		kvm.version = "1.00";
 		kvm.greeting = function(){
@@ -141,7 +141,7 @@
 			</div>
 		</div>
 	</div><div id="outputbox"></div>
-	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><br id=endofinputbox>
+	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div>
 </body>
 </html>
 

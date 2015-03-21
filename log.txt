@@ -3022,7 +3022,26 @@
 	
 [x]	type 'jsc' 變成 'csj' ==> 不要 focus ==> jump2endofinputbox.click(); // inputbox.focus();
 	結果 ＿Bingo!!__
-	用這個測驗 ==> : test cls 1000 for r@ . ."  ------------------ " cr next ;
+	用這個測驗 ==> 
+		: test cls 1000 for r@ . ."  ------------------ " cr next ; \ inner loop
+		or
+		js> Math.random() . cr rewind \ outer loop
+	[x]	print() does, 
+			jump2endofinputbox.click(); // inputbox.focus(); 
+		is an overkill, only cr does so would be enough. But not! then cr will be application dependent
+		and thus need to be moved from jeforth.f into quit.f
+		[x]3hta [x]3htm [x]3nw [x]3nd
+[x] 當 cr 很多時 inputbox's focus 會不斷被拉開，因此 inputbox 會變灰。直到 console event 完成了才會由
+	kvm.forthConsoleHandler() 偵測到工作完全結束才 focus 回到 inputbox。這真是一大進步。
+	** ==>	但是產生 stop 想下達無法下達的窘況。 hcchen5600 2015/03/15 13:41:33   
+		[x]	但 3nw 沒有這個現象，用
+				." 往上滾到看不見 inputbox 為止。" 5000 nap js: jump2endofinputbox.click() ." 看到我表示有效。 " 10000 nap ." 看到 OK 表示完成 "
+			試驗，3hta 3htm inputbox 都會灰掉，就是 3nw 不會。3nw 滾上去之後隨便 click 一下才會灰掉。
+			node-webkit 這點算是它的好處吧！
+	==> 需要一個 break key 類似 ctrl-break 來下 stop ----> {ctrl-break} 有專屬的 keyCode 3, 簡單好用。
+	*	inner loop 即使有用到 cr 者（有 1 nap）也只會印出 {ctrl-break} 斷不了; 沒有 1 nap 者 {ctrl-break}
+		都被 queue 起來了，根本沒機會。這也好。
+	[x]3htm [x]3hta [x]3nw [/]3nd 不用。
  
 [ ]	forth quote ==> 看能不能用來自動檢查，提供 warning 增進系統可靠度。
 	o	看這句話對不對：「會用到 compiling 的一定是 immediate word。」這一定對，不是 immediate word 就根本
@@ -3101,4 +3120,69 @@
 
 [ ]	now come back to deal with pile.f ===> Done!
 	[ ] 內容盡量改成 forth 
+
+[x] 發現 forth console event 的獨立性，覺悟到 abortexec, abortTIB 都太小看它。應改稱
+	簡單的 stop 並且加上 rewind 命令，用來 rewind TIB. also hotkey {ctrl-break} to stop TIB.
+	[ ] rewind 要改良，自動往前查看有沒有 nap 命令，沒有就放棄，並建議替代方法 js: ntib=0 亦可。
+
+[x] 研究發現 forth console event 之所以不會在 TIB/nTIB 上栽跟斗是因為 nap, sleep 等這些
+	suspend 程式做好了 context save-restore 的準備，而非原先猜想的 fortheval() 可能多此
+	一舉的 save-restore 之功。----> fortheval() 的 save-restore 是為了經常被 JavaScript 
+	code 用來引用 forth word, 因此不能省。
+
+[x] 發現 h2o.f 十分奇妙。發表。
+
+	用 jeforth 來玩 HTML5 繪圖時，「湧現」奇妙的現象。
+	http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?include%20h2o.f
+
+	我本來只是想模仿地心引力，讓平面球體彈跳、碰撞，逗樂孩子們。（彷彿）成功之後，宣稱
+	咱們可以做個太陽系、模擬行星軌道來玩。原來只是胡亂模仿的動畫，這下就得講究物理定律
+	。以碰撞為例，前後「動量守恆」第一個被拿出來驗算，結果發現（當然）不對。因為我本來
+	是亂寫的，沒有講究那麼多。於是複習高中向量數學，老實模擬。沒想到電腦照物理學（希望
+	我的理解沒錯）跑出來的結果卻無法維持兩球碰撞前後的「動量守恆」。研究在三，至今未解
+	。結果是小球球們叮叮咚咚，要嘛最後都停了下來，動量不知憑空消失到哪去了；要嘛越跑越
+	快，最後亂飛一通，也不知哪來的動量。只知道每次碰撞動量都不守恆，既不能胡亂自創物理
+	學，又搞不懂電腦算的怎麼會有差額，故解不了。
+
+	於是，憑研究過程觀察到差額最多是 0.41xxxxxx，我心生一計：不處理差額過大時的碰撞，讓
+	兩球擦身而過，只處理動量差額在限度內的碰撞，以為是個辦法可以讓小球球在遵守物理定律
+	的條件下永續經營。每想到此「不做事」之法，竟然「湧現」奇妙的現象：首先生出「黏性」，
+	因為有黏性而使小球結成團體，而團體成員個別的碰撞又拖著整個團體「旋轉」、「膨脹、縮
+	小、顫抖」、「大球包小球，小球在其內旋轉」、「雙節棍」、等行為，天哪，我哪懂這些？
+	程式裡壓根兒沒這些東西，一下全蹦了出來！
+	
+[x] Facebook changes space to + in URL, so 3htm supports _ to replace space in URL.
+
+[ ] 開始著手行星軌道模擬。然後做塞車波。然後用 physics engine 做12球的天平。
+	畫圖，畫二維、三維的點、線、圓等
+
+[ ] Formulas
+	F = m1.a = G(m1.m2)/r^2
+	a = G.m2/r^2 = gravity/r^2
+	r = |(rx,ry)| // (rx,ry) 是 planet 指向 the sun 的向量
+	  = |(sun.x,sun.y)-(p.x,p.y)|  // p is a planet
+	  = |rx=sun.x-p.x, ry=sun.y-p.y|
+	  = Math.sqrt(rx*rx,ry*ry)
+	(ex,ey) = (rx,ry)/r // 由 planet 指向 the sun 的 unit vector
+	a(ex,ey) // 行星朝向太陽的重力加速度
+	  = (gravity/r^2)(rx/r,ry/r)
+	aex = gravity*rx/r^3
+	aey = gravity*ry/r^3
+	
+	p.vx += aex  // 行星的瞬時速度
+	p.vy += aey
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
 

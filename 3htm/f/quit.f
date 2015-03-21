@@ -60,9 +60,7 @@
 					case "r" : bp=rstack[rstack.length-1]; return;
 					case "bye"  : execute("bye"); break;
 					case "help" : if(!confirm(kvm.jsc.help)) return; break;
-					case "erase" : 
-						inputbox.value = "";
-						for(var i=0; i<5; i++){execute('{backSpace}');pop();} break;
+					case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
 						_result_ = eval(_cmd_);
 						// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";
@@ -80,14 +78,19 @@
 		})()
 	</text> js: kvm.jsc.xt=pop()
 
+	: cr         	js: print("\n") 1 nap js: jump2endofinputbox.click() ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
+
 \ ------------------ Get args from URL -------------------------------------------------------
 	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
 	url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
 	args [if] char %20 args + :> split('%') <js>
 		for (var ss="",i=1; i<tos().length; i++){
+			// %20 is space and also many others need to be translated 
 			ss += String.fromCharCode("0x"+tos()[i].slice(0,2)) + tos()[i].slice(2);
 		};ss
 	</jsV> nip to args [then]
+	// Facebook always turn space to + that we need to support _ as space. 
+	args ?dup [if] <js> pop().replace(/_/g," ") </jsV> to args [then]
 
 \ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is

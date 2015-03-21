@@ -15,12 +15,13 @@ marker ~~~
 		." Done!" cr ;
 	
 \ setup
-
+	0.01 value speed
+	15	value interval		// ( -- f ) slow motion or fast motion
 	15  value numBalls      // ( -- int ) number of Balls
-	0.5 value spring 	    // ( -- f ) bounce back force
-	0.9 value gravity       // ( -- f ) falling force
-	0.6 value wallBounce    // ( -- f ) 四周圍牆的材質。超過一變成超強力彈性牆。零就是超級海綿完全吸收任何撞擊。
-	0.06 value friction      // ( -- f ) 摩擦係數
+	0.4 speed * value spring 	    // ( -- f ) bounce back force
+	1	speed * value gravity       // ( -- f ) falling force
+	0.4 speed * value wallBounce    // ( -- f ) 四周圍牆的材質。超過一變成超強力彈性牆。零就是超級海綿完全吸收任何撞擊。
+	-0.02 value friction      // ( -- f ) 摩擦係數
 	50  value maxvx         // ( -- n ) 最高速度如果不加限制，惡搞之下有時候會整個失控變成無限高速亂飛一團。
 	50  value maxvy         // ( -- n ) 最高速度如果不加限制，惡搞之下有時候會整個失控變成無限高速亂飛一團。
 	[]  value balls        // ( -- [] ) 所有的球 is an array。
@@ -77,7 +78,6 @@ marker ~~~
 				vy = Math.abs(vy) < g.friction? 0 : vy ;
 				vx = Math.abs(vx) > g.maxvx? g.maxvx*vx/Math.abs(vx) : vx ; // 這啥？ [ ]
 				vy = Math.abs(vy) > g.maxvy? g.maxvy*vy/Math.abs(vy) : vy ;
-				
 				x += vx;  
 				y += vy;  
 				// 如果不考慮牆面，以上就是 move() 了！
@@ -176,10 +176,17 @@ marker ~~~
 	: runOne ( n count -- ) \ balls[n] drawOne count times
 		for dup drawOne 20 nap next drop ;
 	: run ( count -- ) \ draw count times
-		for draw 20 nap next ;
-		
+		for draw speed nap next ;
+	: trigger ( -- ) \ move all balls up 
+		numBalls for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+			balls :: [pop()].move(0,0)
+		next ;
+			
+	
 \ start to run
+	setup  
 	js: tib=tib.slice(ntib);ntib=0
-	setup 500 run js: ntib=0
+	draw interval nap js: ntib=0
 
+	
 
