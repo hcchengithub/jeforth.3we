@@ -2,7 +2,8 @@
 \ solar-system.f for jeforth.3we
 
 <comment>
-	F = m1.a = G(m1.m2)/r^2  // m1 is planet's mass, G=9.81, m2 is the sun's mass. 
+	＝＝ 物理定律、公式 ＝＝
+	F = m1.a = G(m1.m2)/r^2  // m1 is planet's mass, G=9.81, m2 is the sun's mass. a 是太陽施加於行星的「重力加速度」。
 	a = G.m2/r^2 = gravity/r^2  // G and m2 are both constants therefore merged into gravity.
 	r = |(rx,ry)| // (rx,ry) is a vector from the planet to the sun
 	  = |(sun.x,sun.y)-(p.x,p.y)|  // p is a planet
@@ -11,12 +12,21 @@
 	(ex,ey) = (rx,ry)/r // 由 planet 指向 the sun 的 unit vector
 	a(ex,ey) // 行星朝向太陽的重力加速度向量
 	  = (gravity/r^2)(rx/r,ry/r)
-	aex = gravity*rx/r^3
-	aey = gravity*ry/r^3
-	
-	p.vx += aex  // 行星的瞬時速度
-	p.vy += aey
-	
+	aex = gravity*rx/r^3  // a(ex,ey) 在 x 座標上的分量
+	aey = gravity*ry/r^3  // a(ex,ey) 在 y 座標上的分量
+	p.vx += aex  // 行星的瞬時速度：每 frame 都加上「重力加速度」, x 分量
+	p.vy += aey  // 行星的瞬時速度：每 frame 都加上「重力加速度」, y 分量
+
+	＝＝ 可以下的命令 ＝＝
+	balls :> [1].r 100 < [if]  ." 一號行星接近太陽了" stop [then] 10 nap rewind \ 監視器。一號行星接近時系統暫停以便觀察數據。
+	balls :> [1].r balls :> [1].radius balls :> [0].radius + < [if] ." 一號行星撞上太陽了" stop [then] 10 nap rewind \ 監視器。
+	balls :> [1].r . \ ==> 55.00161016347886 查看與太陽的球心距離
+	balls :> [1].vx . space balls :> [1].vy . cr ==> 62.05511125127198 22.80213651293407 \ 查看一號行星速度向量。
+	balls :> [1].x . space balls :> [1].y . cr ==> 62.05511125127198 22.80213651293407 \ 查看一號行星位置。
+	( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=g.balls[0].x+=e js> h>=(kvm.cv.canvas.width-kvm.cv.canvas.height/2) [if] js: e=-d [then] js> h<=kvm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind
+	balls :: [1].vx=3 \ 往右輕推一號行星一把，故意擾動它的路線。
+	balls :: [1].color='red' \ 改一號行星的顏色。
+	balls :: [1].radius=10 \ 改一號行星的大小。
 </comment>
 
 include processing.f
@@ -27,10 +37,10 @@ marker ~~~
 	
 \ setup
 	20	value interval		// ( -- f ) 調整 frame speed 
-	5000 value gravity       // ( -- f ) falling force, increment of y downward distance every frame.
+	2000 value gravity       // ( -- f ) falling force, increment of y downward distance every frame.
 	0	value friction		// ( -- f ) 負的摩擦力好像有「加溫」的效果。
 	[]	value balls 		// ( -- [] ) 所有的球 is an array。第 0 個不用，因為純 for .. next 不含零。
-	1200 600	setCanvasSize	\ ( width height -- ) 
+	1200 400	setCanvasSize	\ ( width height -- ) 
 	0 lineWidth \ processing.js noStroke() means no outline (balls)
 	
 	code newBall ( -- ) \ Create a Ball object and add into balls[]
@@ -75,17 +85,17 @@ marker ~~~
 				// 如果不考慮牆面，以上就是 move() 了！
 				if (x - radius > kvm.cv.canvas.width) {  // 整個行星都超過 canvas 右邊
 					// x = -radius;  // 從左邊出現。
-					vx /= 100; // 跑出視野的就偷偷把它減速
+					vx /= 10; // 跑出視野的就偷偷把它減速
 				} else if (x + radius < 0) {   // 超過 canvas 左邊
 					// x = radius + kvm.cv.canvas.width;  
-					vx /= 100; // 跑出視野的就偷偷把它減速
+					vx /= 10; // 跑出視野的就偷偷把它減速
 				}  
 				if (y - radius > kvm.cv.canvas.height) {  // 撞上地板
 					// y = -radius;  
-					vy /= 100; // 跑出視野的就偷偷把它減速
+					vy /= 10; // 跑出視野的就偷偷把它減速
 				} else if (y + radius < 0) {  // 超過 canvas 上邊
 					// y = radius + kvm.cv.canvas.height;  
-					vy /= 100; // 跑出視野的就偷偷把它減速
+					vy /= 10; // 跑出視野的就偷偷把它減速
 				}  
 			}
 			this.display = function(){
@@ -102,7 +112,7 @@ marker ~~~
 			Math.random()*5-2.5, // vx
 			Math.random()*5-2.5, // vy
 			Math.random()*(30-10)+10,			// radius=[10~30]
-			(function(){
+			(function(){ // color
 				var r=60,g=60,b=80,range=50,c="rgba(";
 				c += parseInt(Math.random()*r) + ',';
 				c += parseInt(Math.random()*g) + ',';
@@ -133,37 +143,23 @@ marker ~~~
 		next
 		balls :: [0].see()
 	;
-	: total-motivation ( -- f ) \ All |(vx,vy)| summation
+	: total-momentum ( -- f ) \ All |(vx,vy)| summation
 		0 ( sum )
 		js> g.balls.length-1 for r@ ( -- sum id ) \ where id = numBalls,...,3,2,1 
 			balls :> [tos()].vx balls :> [pop(1)].vy dup * swap dup * + 
 			js> Math.sqrt(pop()) ( -- sum Mid ) +
 		next ;
-		/// total-motivation int dup . space 130 > [if] friction 0.001 + [then] to friction 500 nap rewind
-		/// total-motivation int dup . space 100 < [if] friction 0.001 - [then] to friction 500 nap rewind
+		/// total-momentum int dup . space 130 > [if] friction 0.001 + [then] to friction 500 nap rewind
+		/// total-momentum int dup . space 100 < [if] friction 0.001 - [then] to friction 500 nap rewind
 		/// cr 10000 nap rewind
 	
 \ start to run
 	newBall newBall newBall newBall newBall newBall \ 太陽 行星
-	balls :: [0].radius=40
-	0 to friction \ 去掉摩擦力
-	4000 to gravity \ 重力隨便猜
-	1200 400 setCanvasSize	\ ( width height -- ) 
+	balls :: [0].radius=40 \ the Sun
 	js: g.balls[0].vx=0;g.balls[0].vy=0; \ 太陽靜止
-	js: g.balls[0].x=200;g.balls[0].y=200
-	js: g.balls[0].color="rgba(255,166,47,0.6)";g.balls[0].display()
+	js: g.balls[0].x=200;g.balls[0].y=200 \ 太陽放在左邊、中央。
+	js: g.balls[0].color="rgba(255,166,47,0.6)";g.balls[0].display() \ 太陽的顏色，金色 http://www.computerhope.com/htmcolor.htm
 	cls .( 一度孤獨的太陽在太空中慢慢捕獲它的五顆行星，過 ) cr
 	    .( 程可能要半小時，期間很多都撞進太陽裡湮滅了。。。。 ) cr
 	cut draw 20 nap rewind
 	
-<comment>
-balls :> [1].r 150 < [if]  ." 接近太陽了" stop [then] 10 nap rewind
-balls :> [1].r balls :> [1].radius balls :> [0].radius + < [if] ." 進入太陽了" stop [then] 10 nap rewind
-balls :> [1].r balls :> [1].radius balls :> [0].radius + < [if] ." 撞進太陽了，修改初始條件吧！" stop [then]	
-進入太陽了 balls :> [1].r . ==> 55.00161016347886 
-balls :> [1].vx . space balls :> [1].vy . cr ==> 62.05511125127198 22.80213651293407
-balls :> [1].x . space balls :> [1].y . cr ==> 62.05511125127198 22.80213651293407
-速度增加飛快，衝破
-js: g.balls[0].x+=0.1 50 nap rewind \ 讓太陽移動
-	
-</comment>

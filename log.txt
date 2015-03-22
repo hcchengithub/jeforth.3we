@@ -3172,7 +3172,10 @@
 	p.vx += aex  // 行星的瞬時速度
 	p.vy += aey
 	
-	
+[ ]	js> f=0.1 cut js> f+=0.1;f . space 500 nap rewind
+	The result is a little surprisingly big distortion. Is it normal? And why?
+
+
 
 
 
