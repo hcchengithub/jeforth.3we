@@ -3063,6 +3063,9 @@
 			s" push(last().cfa)" jsEvalNo
 		但執行效率高。公式，
 			s" 。。。" jsEvalNo ==> [ s" push(function(){。。。})" jsEvalNo , ]
+	o	使用 immediate 的理由
+		把 vocabulary words 都弄成 immediate 所以不必以 [ forth ] 形式在 colon definition 種使用，
+		因此可以從裡面分辨 state , 只有當 compiling state 時 rescan-word-hash 才 skip last().
 		
 		
 [x]	function 裡的 function 就跟 function 裡的 var 一樣，都是 volatile。
@@ -3156,7 +3159,7 @@
 [ ] 開始著手行星軌道模擬。然後做塞車波。然後用 physics engine 做12球的天平。
 	畫圖，畫二維、三維的點、線、圓等
 
-[ ] Formulas
+[x] Formulas
 	F = m1.a = G(m1.m2)/r^2
 	a = G.m2/r^2 = gravity/r^2
 	r = |(rx,ry)| // (rx,ry) 是 planet 指向 the sun 的向量
@@ -3172,19 +3175,68 @@
 	p.vx += aex  // 行星的瞬時速度
 	p.vy += aey
 	
-[ ]	js> f=0.1 cut js> f+=0.1;f . space 500 nap rewind
+[x]	js> f=0.1 cut js> f+=0.1;f . space 500 nap rewind
 	The result is a little surprisingly big distortion. Is it normal? And why?
+	JavaScript 的誤差，很奇怪。不過跨平台都是這樣, HTA, Node.js, Chrome HTM.
 
+[x] improve solar-system.f for more forth less closure. ==> 成功了！
+	[] value stars // ( -- [] ) The stars array  這是一定的，沒猜錯。
+	0 value istar // ( -- index ) The current star of the solar system. 這個 global variable 也是必須的。
+	: property ( n <name> -- ) \ Create a property of a star 這個 property 就有趣了！
+		create ... does> ... ;
+		/// 它用來製造 g.stars[g.istar]{} 裡的 property 如 x y vx vy 等，根據 istar 指標來工作。
+	因此 access 這些 properties 變得很方便容易。
+	Note! istar 指標有用到的人都得自己做 save-restore, 此法的重點。
+	[ ]	==>	有了這個方法，似乎拿 3nd/3nw 來當 server 有希望了。
+	[x] x y vx vy 等這些 properties 不是 value 但也是用 'to' 命令來寫入，這個 'to' 的重新定義以及
+		使用是否方便之疑慮 --> 試用再說 [ ] 目前是改寫 'to' 使認得 star.property type，有點雜湊笨拙。
+		vocabulary words 都不是 immediate 使用在 colon definitions 裡想必是用來指定隨後的 word 要用
+		哪一個 'to' ? 則應以 [ vocabulary ] 的形式出現。--> 改好 solar-system.f 運行正常。似乎切 vocabulary
+		的方式有理。注意，切換的動作是在 compiling state 時完成的，目的在明指哪個 'to'。至於 run time
+		時的 vocabulary 則另屬 interpret state 時的控制，莫混淆。我覺得此時到底用哪個 to 還真不一定！
+		但 istar 是 value 而 radius 則是 star.property 不難分辨。
+	[x]	看得見以上辦法是有點麻煩。最好讓 to 在 compiling 時自動根據隨後的 <name> 根據其 type 自動
+		compile 對應的 'to'，這也是可以考慮的辦法。==> 結果發現重要問題！ [x] 答案 see solar-system.f 典範。
+		[x] vocabulary 應該是 immediate 用來在 colon definition 中切換 word-list
+		[x] 切過任何 vocabulary 都會使在 definiton 中途的 colon word 被 reveal!!
+			colon definition 當中 ; 之前，本 word 被意外 revealed 一般看不出問題，在引用同名舊 word 時
+			就不行，會引用到自己。
+			--> (create) 好像已經不做 reveal 的動作，constant 好像是靠 rescan-word-hash 來做 reveal 的？
+				No, constant uses 'reveal'.
+			--> 改 vocabulary 或改 rescan-word-hash 讓過 last(), 看對不對。用到 rescan 的地方都討論一下，
+				--> 不行！ rescan-word-hash 時漏掉 last() 就漏掉了，與 reveal 無關。等於切換 vocabulary
+					都會漏掉 last() 使系統不認得它或錯用舊版。
+			--> 把 vocabulary words 都弄成 immediate 所以不必以 [ forth ] 形式在 colon definition 裡使用，
+				因此可以從裡面分辨 state , 只有當 compiling state 時 rescan-word-hash 才 skip last().
+				這是個使用 immediate 的理由！
+		
+[x] jeforth.3htm 裡動態 include Box2dWeb 成功，靠，太棒了！
+	c:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\js\box2dweb\Box2dWeb-2.1.a.3.min.js 
+	<h> <script type="text/javascript" src="js/box2dweb/Box2dWeb-2.1.a.3.min.js"></script></h>
+	js> window obj>keys . \ ==> 果然有 ... Box2D,Vector,Vector_a2j_Number, ... 
 
+[x] 在 jeforth.3we 中操作 object 以 solar-system.f 為典範，有了突破。
+	1、透過 istar 讓 property 既是 forth 的 global 又可以 access 各自的 object instance 不亂。
+	2、Function Overloading 在 to 命令上的嘗試，成功。 See solar-system.f
+	
+[ ]	現在有了 er 不妨在 outputbox 設定上限，超過就把最上面得 text br 刪掉一部分，免得太長 browser 受不了。
 
+[ ] 爽哥遇到兩個問題 1）jeforth.3nd.bat 路徑沒改，run 不起來。 2）jeforth.3hta 因為 Same origin policy 
+	run 不起來。為了降低 user 遇到挫折的機會，[ ] 要防呆。為了要幫助 user 抓出問題，或當場有事做可以幫忙抓
+	問題，[ ] 要提供 safe mode。
+	
+[ ]	為保持 jeforth.js 中性，去掉 jeforth.js 裡 help 相關的東西。 或乾脆直接開始攻 jsforth ?
 
+	jsforth.js 	架構 包含的 words 只有 code end-code 如何使用 wordhash words dictionary ip stack 
+				rstack tos pop push tip ntip overhauling protocal 共筆機制 版本週期
+	jsforth.f
+	inner loop
+	outer loop
+	word
+	
+[ ]	爽哥的 https://github.com/samsuanchen/multitaskjavascripteforth 應該盡量多引用。先看他的 inner loop
 
-
-
-
-
-
-
+	
 
 
 

@@ -213,7 +213,7 @@ code interpret-only  ( -- ) \ Make the last new word an interpret-only.
 
 code immediate  ( -- ) \ Make the last new word an immediate.
                 last().immediate=true
-                end-code interpret-only
+                end-code
 
 				<selftest>
 					depth [if] .( Data stack should be empty! ) cr \s [then]
@@ -279,6 +279,8 @@ code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added 
 
 code reveal		( -- ) \ Add the last word into wordhash
 				wordhash[last().name]=last() end-code
+				\ We don't want the last word to be seen during its colon definition.
+				\ So reveal is done in ';' command.
 
 				<selftest>
 					depth [if] .( Data stack should be empty! ) cr \s [then]
@@ -426,6 +428,7 @@ code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild w
 				wordhash = {};
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越高
 					for (var i=1; i<words[order[j]].length; i++){  // 從舊到新，以新蓋舊,重建 wordhash{} hash table.
+						if (compiling) if (last()==words[order[j]][i]) continue; // skip the last() avoid of an unexpected 'reveal'.
 						wordhash[words[order[j]][i].name] = words[order[j]][i];
 					}
 				}
@@ -495,6 +498,9 @@ code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Wor
 						' dummy js> pop().name char dummy = ==>judge [if] js> ["(')"] all-pass [then]
 						(forget)
 				</selftest>
+
+code 			#tib push(ntib) end-code // ( -- n ) Get ntib
+code 			#tib! ntib = pop() end-code // ( n -- ) Set ntib
 
 \ ------------------ eforth code words ----------------------------------------------------------------------
 
@@ -1885,11 +1891,12 @@ code db			( -- ) \ Disable breakpoint, inner=fastInner. See also 'bp' command.
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
 					function resume(){tib=tibwas; ntib=ntibwas; kvm.prompt=promptwas;outer(ipwas);}
 				</js> ;
-				/// resume() 線索由 data stack 傳回，故可以多重 debug。但有何意義？
+				/// resume() 線索由 data stack 傳回，故可以多重 debug。但有何用途？
 				
 : *debug*		( <prompt> -- resume ) \ Forth debug console. Execute the resume() to quit debugging.
 				BL word compiling if literal compile (*debug*) 
 				else (*debug*) then ; immediate
+				/// resume() 線索由 data stack 傳回，故可以多重 debug。但有何用途？
 
 \ ----------------- play ground -------------------------------------
 

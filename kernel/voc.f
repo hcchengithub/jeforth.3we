@@ -86,7 +86,8 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				0 , \ dummy cfa, we need to do this because "(create)" doesn't drop the doVar like "create" does.
 				, \ pfa is the "name"
 				dup js: words[pop()]=[];words[pop()].push(0) ( empty ) \ words[][0] = 0 是源自 jeforth.WSH 的設計。
-				js: last().type='colon-vocabulary'
+				js: last().type='colon-vocabulary' 
+				immediate \ 要在 colon definition 裡切換 word-list 所以是 immediate。 
 				does> r> @ set-context rescan-word-hash ;
 				
 : vocabulary	( <name> -- ) \ create a new word list.
@@ -96,6 +97,8 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				js: order=order.slice(0,1) rescan-word-hash ;
 
 				<selftest>
+					\ search: forth,vvv,vvv000
+					\ define: vvv
 					*** only leaves 'forth' along ... 
 					get-context char forth = \ false
 					only
@@ -108,7 +111,8 @@ code also       order.push(order[order.length-1]) end-code // ( -- ) vocabulary 
 code previous   if(order.length>1){order.pop();fortheval("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
 
 : forth 		( -- ) \ Make forth-wordlist be searched first, which is to set context="forth".
-				js> order.length>1 if forth-wordlist set-context then ; \ order[0] is always 'forth'.
+				js> order.length>1 if forth-wordlist set-context then ; immediate
+				/// order[0] is always 'forth'.
 ' get-current alias current // ( -- "vid" ) current is alias of get-current, get the compilation word list's vid name.
 
 \ 如果照 ANS 標準，get-order 應該如下定義。但是 jeforth 有 JavaScript 當靠山，TOS 可以直接操作 array，實在無需如此委屈。
@@ -135,8 +139,11 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 : vocs       	." vocs: " get-vocs . cr ; // ( -- ) List all vocabulary names.
 
 				<selftest>
+					\ search: forth
+					\ define: vvv
 					*** also current order vocs ... 
 					selftest-invisible
+					also vvv
 					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
 					cr only forth also vvv also vvv000 definitions current char vvv000 = \ true
