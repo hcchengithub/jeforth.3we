@@ -302,5 +302,11 @@ marker ~~~
 	</text> .
 
 	\ the main loop
-	cut draw 20 nap rewind
-	
+	<task> draw 20 nap rewind </task>
+	<task>
+		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=g.stars[0].x+=e 
+		js> h>=(kvm.cv.canvas.width-kvm.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=kvm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
+		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
+		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
+	</task>

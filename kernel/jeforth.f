@@ -1376,10 +1376,15 @@ code cut		( -- ) \ Cut off used TIB.
 				tib=tib.slice(ntib);ntib=0 end-code
 				/// cut . . rewind TIB 不斷重複, 'stop' to break it.
 
-code rewind		( -- ) \ Rewind TIB so as to repeat it. 
-				ntib=0 end-code
-				/// cut . . rewind TIB 不斷重複, 'stop' to break it.
-				/// Did you know that TIB is a forth event handler?
+: -word 		( -- array[] ) \ Get TIB used tokens.
+				<js> var a=('h '+tib.substr(0,ntib)+' t').split(/\s+/); // 加上 dummy 頭尾再 split 以統一所有狀況。
+				a.pop(); a.shift(); /* 丟掉 dummy 頭尾巴 */ a</jsV> ;
+				/// 跟 word 有點相反的味道，故以 -word 為名。
+
+: rewind		( -- ) \ Rewind TIB so as to repeat it. 
+				-word <js> var a=pop(),flag=false; for(var i in a) flag = flag || a[i]=='nap'; flag </jsV>
+				not ?abort" Warning! no 'nap' in command line, suspecious of infinit loop." js: ntib=0 ;
+				/// cut ~ rewind TIB 不斷重複, 'stop' to break it.
 				
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
@@ -1546,6 +1551,12 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 					and and ==>judge [if] <js> ['(ASCII)', 'ASCII>char'] </jsV> all-pass [then]
 					---
 				</selftest>
+
+: <task>		( <tokens> -- "task" ) \ Run an outer loop.
+				char </task> word ; immediate
+: </task>		( "task" -- ... ) \ Delimiter of <task>
+				compiling if literal js: push(function(){fortheval(pop())}) , 
+				else js: fortheval(pop()) then ; immediate
 
 code .s         ( ... -- ... ) \ Dump the data stack.
 				var count=stack.length, basewas=kvm.base;

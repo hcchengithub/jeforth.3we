@@ -82,8 +82,8 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				false then ;
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
-				js> inputbox.value if 
-					true \ inputbox is not empty do the norm.
+				js> inputbox.focus();inputbox.value if 
+					true \ inputbox is not empty still don't do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
 					js> event==null||event.altKey \ So as to allow calling {backSpace} programmatically	
 					if \ erase top down
@@ -223,7 +223,8 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 			case 121: /* F10 */ if(kvm.tick('{F10}')){kvm.execute('{F10}');return(kvm.pop());} break;
 			case 122: /* F11 */ if(kvm.tick('{F11}')){kvm.execute('{F11}');return(kvm.pop());} break;
 			case 123: /* F12 */ if(kvm.tick('{F12}')){kvm.execute('{F12}');return(kvm.pop());} break;
-			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}'  )){kvm.execute('{ctrl-break}'  );return(kvm.pop());} break;
+			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}')){kvm.execute('{ctrl-break}');return(kvm.pop());} break;
+			case   8: /* Back space */ if(kvm.tick('{backSpace}' )){kvm.execute('{backSpace}' );return(kvm.pop());} break; // disable the [switch previous page] function
 		}
 		return (true); // pass down to following handlers
 	}

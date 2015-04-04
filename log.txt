@@ -2011,6 +2011,7 @@
 
 [x] for the alarm demo, trying embeded audio. see jeforth.3we/playground
     [x] I already know how to play 228.mp3, see html5_audio_demo.f 
+	[ ] Beep.f introduced how to play wave file too, it works on 3HTA so how about 3nw?
 
 [/] Node-webkit 的 <audio> element 不 work！Licence 的問題。雖然可以解決，要改掉 .dll file，還是不
     要好了。jeforth.3we 的 user 還得去安裝 Node-webkit 都已經夠累了，再讓他們去改 .dll 沒價值，乾脆
@@ -3225,10 +3226,9 @@
 	run 不起來。為了降低 user 遇到挫折的機會，[ ] 要防呆。為了要幫助 user 抓出問題，或當場有事做可以幫忙抓
 	問題，[ ] 要提供 safe mode。
 	
-[ ]	為保持 jeforth.js 中性，去掉 jeforth.js 裡 help 相關的東西。 或乾脆直接開始攻 jsforth ?
-
-	jsforth.js 	架構 包含的 words 只有 code end-code 如何使用 wordhash words dictionary ip stack 
-				rstack tos pop push tip ntip overhauling protocal 共筆機制 版本週期
+[ ]	最精簡的 jsforth.js 包含的 words 只有 
+	code end-code 如何使用 wordhash words dictionary ip stack 
+	rstack tos pop push tip ntip overhauling protocal 共筆機制 版本週期
 	jsforth.f
 	inner loop
 	outer loop
@@ -3236,8 +3236,54 @@
 	
 [ ]	爽哥的 https://github.com/samsuanchen/multitaskjavascripteforth 應該盡量多引用。先看他的 inner loop
 
+[x] jeforth.js 要再簡化，只留必要的東西。所以 help 相關的都要移除。 ( ) \ 可以改良，在 TIB 中回朔到
+	同一行中有 last().name 就知道自己是 stack diagram 以及 help message, 故不必放在 kernel 裡也可以
+	做得到。
+	錯！能移出來早就移出來了。為了 code word 也能有 help message 只好繼續保留。
+
+[ ] 仿 jsForth 把 print() 改成 printLine() printChar() 或 sprint() 避開與 window.print() 相撞的機會。
+
+[ ]	function dictcompile(n), function compilecode(word) 這兩個在 jeforth.js 裡的 function 很累贅。改
+	成 comma() 一個就好了。原 compilecode(word) 用 comma(tick('wordName')) 就可以了，不必多一個 function()
+
+[ ] 利用 solar-system.f 開發出來的方法來管理 canvas 也可以有多個 canvas。或者用個 icanvas 來指定某一個
+	，因此有修改到 icanvas 的人都得 save-restore icanvas。
+	如果規定 value cv 當做默認的 canvas 就不必用 kvm.cv 了，但這樣會使 canvas.f 經常因為 cv 是 undefined
+	而出錯。
+
+[x]	I need a new js function : previoustoken() for 'rewind' to idiot-proof there's a nap in front of it.
+[x] <js> ("h" + " aa bb cc dd    " + " ").split(/\s+/).slice(0,-1) </jsV> // An array, 這麼麻煩是為了要自動把行尾的 white spaces 去掉。
+	<js> ("h" + " aa bb cc dd    " + " t").split(/\s+/).slice(0,-1) </jsV>
+	split the TIB at ntib , the previous is just used, the next is what 'word' will return.
+	so the previous returns an array of tokens
+	: -word ( -- token[] ) \ Get used tokens in the TIB.
+		<js> var a=('h '+tib.substr(0,ntib)+' t').split(/\s+/); // 加上 dummy 頭尾再 split 以統一所有狀況。
+		a.pop(); a.shift(); /* 丟掉 dummy 頭尾巴 */ a</jsV> ;
 	
+[x]	need a jeforth new word to launch multiple TIB tasks
+	s' ." * " 100 nap rewind' js: fortheval(pop()) 
+	s' ." $ " 150 nap rewind' js: fortheval(pop())
+	==> <task> ." * " 100 nap rewind</task> <task> ." $ " 100 nap rewind</task> 
+
+[x] jeforth.3htm press {backSpace} become changing the web page to previous. Avoid that!
+	hcchen5600 2015/04/03 21:47:24 Done!
 
 
+[ ] pull down menu for command history and words auto completion
+	See jQuery 'Popup selections - Tryit Editor v2.3' @ http://www.w3schools.com/jquerymobile/tryit.asp?filename=tryjqmob_forms_select_popup
+		<o>
+		<select>
+		<option>Mondayfsdfsdfs df sdf sdf sdf sf sdf sdf sd fsd fs df sdf sd fsd fs dfs df sdf sdf sdf sd fsd</option>
+		<option>Tuesday</option>
+		<option>Wednesday</option>
+		<option>Thursday</option>
+		<option>Friday</option>
+		<option>Saturday</option>
+		<option>Sunday</option>
+		</select>
+		</o>
 
+[ ] Webserver.f 顯得很笨了，現在 variables 直接可以在 forth 與 js 之間共用。
+
+[ ] use jeforth to try Youtube "Animoo: Make and Do - Animated Optical illusions"
 

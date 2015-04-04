@@ -70,7 +70,7 @@ s" canvas.f"	source-code-header
 								100.5 100.5 lineTo	\ ctx.lineTo(200.5,100.5);
 								closePath		\ ctx.closePath();
 								1 lineWidth		\ ctx.lineWidth = 1;
-								s' rgba(255,0,0,0.5'
+								s' rgba(255,0,0,0.5)'
 								strokeStyle		\ ctx.strokeStyle = 'rgba(255,0,0,0.5)';
 								stroke			\ ctx.stroke();
 							</selftest>

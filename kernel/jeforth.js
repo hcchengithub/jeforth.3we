@@ -323,10 +323,11 @@ var kvm = (function(){
 					phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 					w = dictionary[ip];
 				}
-				if(w===0) break; else ip = rstack.pop(); // w==0 is suspend, abort inner but reserve rstack.
+				if(w===0) break; // w==0 is suspend, abort inner but reserve rstack.
+				else ip = rstack.pop(); // w is ret(NULL) or exit(""). Can be also NaN, false, and undefined, but they are not used so far.
 				if(resuming) w = dictionary[ip]; // 正常的上層 inner() 都已經被 suspend 結束掉了，resume 要
-				// 自己補位。當初造成 deep inner loop 的機制，變成如今完成 resuming 的關鍵技術！
-			} while(ip && resuming); // ip==0 means resuming has done
+				// 自己補位。當初造成 deep inner loop 的原因，變成如今完成 resuming 的關鍵！
+			} while(ip && resuming); // ip==0 means resuming has done 否則既非 resuming 就是正在 suspending。
 		}
 		// ### End of the inner loop ###
 
@@ -388,12 +389,12 @@ var kvm = (function(){
 		// 不行。因為 code word 整個丟給 javascript 執行，不認得 '(' 與 '\'。寫成 packhelp() 可以供 code end-code
 		// 以及 : ... ; 使用。把 help message 打包好放進 help.stackdiagram, help.introduction 裡。離開時 ntib
 		// 只吃掉與 help 有關的 substring. 傳回值是本 definition 的 help message string.
-		
 		// Note! 別忘了有這個功能。
 		// 讓每個 word 天生就具有 help message 好處太大了。目前這個 function 被用在 docode(), create, : 的定義裡。
 		// 我在寫 ( ... ) 的定義時，忘了有這個自動抓 help message 的功能。在應用 ( 時，寫成
 		// : test ( foo baa ) bla bla bla ; 結果 ( foo baa ) 一開始就被 packhelp() 收走了我還以為是 ( 有 bug, 抓得
-		// 莫名其妙，後來才終於想到是這個原因。
+		// 莫名其妙，後來才終於想到是這個原因。我有幾次想把這個移出 jeforth.js 到 jeforth.f 的 init 裡去，保持
+		// kernel 精簡、沒有特色。colon word 簡單，但是 code word 要帶說明，還是只好如此。
 		function packhelp() { // (...) to help.stackdiagram and \... to help.introduction
 			var help = {stackdiagram:"", introduction:"", flag:false};
 			var tempntib = ntib;
@@ -434,11 +435,12 @@ var kvm = (function(){
 		// keyboard input is difficult to me on an event-driven or a non-blocking 
 		// environment like Node-webkit.
 		function docode() {
+			// 將來所有的 code words 都會認得當初這裡的 local variables 所以這裡面要避免用到任何 local variable。 
 			compiling = 11; // 11: code word
 			newname = nexttoken();
 			if(isReDef(newname)) print("reDef "+newname+"\n"); 	// 若用 tick(newname) 就錯了
 			newhelp = newname + " " + packhelp(); // help messages packed
-			push(nextstring("end-code")); // 將來所有的 code words 都會認得當初這裡的 local variables 所以要避免。 
+			push(nextstring("end-code")); 
 			if(tos().flag){
 				eval(
 					'newxt=function(){ /* ' + newname + ' */\n' + 
