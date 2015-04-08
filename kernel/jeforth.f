@@ -1240,7 +1240,7 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				</selftest>
 
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
-				js: panic('\n'+pop()+'\n') abort ;
+				js: panic(pop()+'\n') abort ;
 
 : abort"		( <msg>	-- ) \ Through an error message and abort the forth VM
 				char " word literal BL word drop compile "msg"abort ;

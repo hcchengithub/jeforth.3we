@@ -614,6 +614,64 @@ code objEnumWin32_Process
 				///     s" where name = 'ExCeL.ExE'" list-them
 				///     s" where name like 'chrom%'" list-them 
 
+: see-process ( s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" -- obj ) \ See into a process 
+				0 swap objEnumWin32_Process >r  ( 0 | obj )
+				begin
+					r@  ( 0 obj | obj)
+					js> !pop().atEnd() ( 0 NotAtEnd? )
+				while ( count | obj )
+					1+ 
+					."  string   Name;                       " r@ :> item().Name;                        . cr
+					."  uint32   ProcessId;                  " r@ :> item().ProcessId;                   . cr
+					."  string   Caption;                    " r@ :> item().Caption;                     . cr
+					."  string   CommandLine;                " r@ :> item().CommandLine;                 . cr
+					."  string   CreationClassName;          " r@ :> item().CreationClassName;           . cr
+					."  datetime CreationDate;               " r@ :> item().CreationDate;                . cr
+					."  string   CSCreationClassName;        " r@ :> item().CSCreationClassName;         . cr
+					."  string   CSName;                     " r@ :> item().CSName;                      . cr
+					."  string   Description;                " r@ :> item().Description;                 . cr
+					."  string   ExecutablePath;             " r@ :> item().ExecutablePath;              . cr
+					."  uint16   ExecutionState;             " r@ :> item().ExecutionState;              . cr
+					."  string   Handle;                     " r@ :> item().Handle;                      . cr
+					."  uint32   HandleCount;                " r@ :> item().HandleCount;                 . cr
+					."  datetime InstallDate;                " r@ :> item().InstallDate;                 . cr
+					."  uint64   KernelModeTime;             " r@ :> item().KernelModeTime;              . cr
+					."  uint32   MaximumWorkingSetSize;      " r@ :> item().MaximumWorkingSetSize;       . cr
+					."  uint32   MinimumWorkingSetSize;      " r@ :> item().MinimumWorkingSetSize;       . cr
+					."  string   OSCreationClassName;        " r@ :> item().OSCreationClassName;         . cr
+					."  string   OSName;                     " r@ :> item().OSName;                      . cr
+					."  uint64   OtherOperationCount;        " r@ :> item().OtherOperationCount;         . cr
+					."  uint64   OtherTransferCount;         " r@ :> item().OtherTransferCount;          . cr
+					."  uint32   PageFaults;                 " r@ :> item().PageFaults;                  . cr
+					."  uint32   PageFileUsage;              " r@ :> item().PageFileUsage;               . cr
+					."  uint32   ParentProcessId;            " r@ :> item().ParentProcessId;             . cr
+					."  uint32   PeakPageFileUsage;          " r@ :> item().PeakPageFileUsage;           . cr
+					."  uint64   PeakVirtualSize;            " r@ :> item().PeakVirtualSize;             . cr
+					."  uint32   PeakWorkingSetSize;         " r@ :> item().PeakWorkingSetSize;          . cr
+					."  uint32   Priority = NULL;            " r@ :> item().Priority;             		 . cr
+					."  uint64   PrivatePageCount;           " r@ :> item().PrivatePageCount;            . cr
+					."  uint32   QuotaNonPagedPoolUsage;     " r@ :> item().QuotaNonPagedPoolUsage;      . cr
+					."  uint32   QuotaPagedPoolUsage;        " r@ :> item().QuotaPagedPoolUsage;         . cr
+					."  uint32   QuotaPeakNonPagedPoolUsage; " r@ :> item().QuotaPeakNonPagedPoolUsage;  . cr
+					."  uint32   QuotaPeakPagedPoolUsage;    " r@ :> item().QuotaPeakPagedPoolUsage;     . cr
+					."  uint64   ReadOperationCount;         " r@ :> item().ReadOperationCount;          . cr
+					."  uint64   ReadTransferCount;          " r@ :> item().ReadTransferCount;           . cr
+					."  uint32   SessionId;                  " r@ :> item().SessionId;                   . cr
+					."  string   Status;                     " r@ :> item().Status;                      . cr
+					."  datetime TerminationDate;            " r@ :> item().TerminationDate;             . cr
+					."  uint32   ThreadCount;                " r@ :> item().ThreadCount;                 . cr
+					."  uint64   UserModeTime;               " r@ :> item().UserModeTime;                . cr
+					."  uint64   VirtualSize;                " r@ :> item().VirtualSize;                 . cr
+					."  string   WindowsVersion;             " r@ :> item().WindowsVersion;              . cr
+					."  uint64   WorkingSetSize;             " r@ :> item().WorkingSetSize;              . cr
+					."  uint64   WriteOperationCount;        " r@ :> item().WriteOperationCount;         . cr
+					."  uint64   WriteTransferCount;         " r@ :> item().WriteTransferCount;          . cr
+				r@ js: pop().moveNext() repeat 
+				r> drop ;
+				/// Usage: Don't forget the where-clause, Case insensitive
+				///     s" where name = 'ExCeL.ExE'" list-them
+				///     s" where name like 'chrom%'" list-them 
+
 : get-them		( "where-clause" -- [objWin32_Process,..] ) \ Get processes.
 				objEnumWin32_Process >r  [] ( [] | Enum )
 				begin

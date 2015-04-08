@@ -27,7 +27,7 @@
 "uses strict";
 var kvm = (function(){
     function KsanaVm() {     
-		var vm = this; // "this" is very confusing to me. Now I am sure 'vm' is 'kvm'.
+		var kvm = this; // "this" is very confusing to me. Now I am sure 'vm' is 'kvm'.
 		if(typeof(kvm)=="undefined"){var kvm=vm} // kvm defined in jeforth.hta is visible but not node.js index.js
 		var stop = true; // Abort TIB
 		var ip=0; // forth VM instruction pointer
@@ -54,7 +54,7 @@ var kvm = (function(){
 		var print = function(){}; // dummy 
 		var g = {}; // forth 下所有的 name 本皆 global，應與 javascript 直接互通。 hcchen5600 2015/03/03 18:09:24 
 
-		vm.init = function () { 
+		kvm.init = function () { 
 			// I/O 要靠個別 application 的主程式提供。
 			print = kvm.print;
 		}
@@ -100,7 +100,7 @@ var kvm = (function(){
 			if (g.setInterval)g.setInterval.clearAll();
 			print('-------------- Reset forth VM --------------\n');
 		}
-		vm.reset = reset;
+		kvm.reset = reset;
 		
 		function panic(msg,severity) {
 			var t='';
@@ -128,7 +128,7 @@ var kvm = (function(){
 					else fortheval("jsc");
 				}
 		}
-		vm.panic = panic;
+		kvm.panic = panic;
 
 		// Get string from recent ntib down to, but not including, the next delimiter.
 		// 若 delimiter 沒找到，就把剩下的 TIB (可跨行！) 都收下來傳回 result.str。
@@ -187,7 +187,7 @@ var kvm = (function(){
 		function tick(name) {
 			return (wordhash[name]) ? wordhash[name] : 0;  // 0 means 'not found'
 		}
-		vm.tick = tick;
+		kvm.tick = tick;
 		
 		// Return a boolean.
 		// Is the new word reDef depends on only the words[current] word-list, not all 
@@ -313,7 +313,7 @@ var kvm = (function(){
 				else phaseB(w); 
 			}
 		}
-		vm.execute = execute;
+		kvm.execute = execute;
 
 		function inner (entry, resuming) {
 			var w = phaseA(entry); // 翻譯成恰當的 w.
@@ -500,7 +500,7 @@ var kvm = (function(){
 			ntib = ntibwas;
 			ip = ipwas;
 		}
-		vm.fortheval = fortheval; // export the function
+		kvm.fortheval = fortheval; // export the function
 	
 		// -------------------- end of main() -----------------------------------------
 	
@@ -517,7 +517,7 @@ var kvm = (function(){
 					return(data); 
 			}
 		}
-		vm.tos = tos;
+		kvm.tos = tos;
 	
 		// Top of return Stack access easier. ( rtos(2) rtos(1) rtos(void|0) -- ditto )
 		// rtos(i,new) returns rtos(i) and by the way change rtos(i) to new value this is good
@@ -532,7 +532,7 @@ var kvm = (function(){
 					return(data); 
 			}
 		}
-		// vm.rtos = rtos;
+		// kvm.rtos = rtos;
 	
 		// Stack access easier. e.g. pop(1) gets tos(1) and leaves ( tos(2) tos(1) tos(void|0) -- tos(2) tos(void|0) )
 		function pop(index) {	
@@ -541,7 +541,7 @@ var kvm = (function(){
 				default : return stack.splice(stack.length-1-index, 1)[0];
 			}
 		}
-		vm.pop = pop;
+		kvm.pop = pop;
 	
 		// Stack access easier. e.g. push(data,1) inserts data to tos(1), ( tos2 tos1 tos -- tos2 tos1 data tos )
 		function push(data, index) { 
@@ -558,7 +558,7 @@ var kvm = (function(){
 							}
 			}
 		}
-		vm.push = push;
+		kvm.push = push;
 	
 		// typeof(array) and typeof(null) are "object"! So a tweak is needed.
 		function mytypeof(x){
@@ -571,7 +571,7 @@ var kvm = (function(){
 			}
 			return type;
 		}
-		vm.mytypeof = mytypeof;
+		kvm.mytypeof = mytypeof;
 		// js> mytypeof([])           tib.  \ ==> array (string)
 		// js> mytypeof(1)            tib.  \ ==> number (string)
 		// js> mytypeof('a')          tib.  \ ==> string (string)
@@ -585,11 +585,11 @@ var kvm = (function(){
 		// js> Object.prototype.toString.apply({})           tib. \ ==> [object Object] (string)
 		// js> Object.prototype.toString.apply(null)         tib. \ ==> [object Null] (string)
 
-		// vm.resumeForthVM = resumeForthVM;
-		vm.stack = function(){return(stack)}; // debug easier. stack 常被改，留在 kvm 裡可能是舊版，所以要隨時從肚子裡抓。
-		vm.rstack = function(){return(rstack)}; // debug easier especially debugging TSR
-		vm.words = words; // debug easier
-		vm.dictionary = dictionary; // debug easier
+		// kvm.resumeForthVM = resumeForthVM;
+		kvm.stack = function(){return(stack)}; // debug easier. stack 常被改，留在 kvm 裡可能是舊版，所以要隨時從肚子裡抓。
+		kvm.rstack = function(){return(rstack)}; // debug easier especially debugging TSR
+		kvm.words = words; // debug easier
+		kvm.dictionary = dictionary; // debug easier
 	}
     return new KsanaVm();
 })();

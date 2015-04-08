@@ -3287,3 +3287,39 @@
 
 [ ] use jeforth to try Youtube "Animoo: Make and Do - Animated Optical illusions"
 
+[ ] 用 jeforth.hta 來管理 github
+	先複習怎樣由 jeforth.hta 來下 dos box command . . . 
+	1. use Github for Windows to open the dos shell through the [setting] button at the upper right corner.
+	2. title demo <-- change the dos box title
+	3. <vb> WshShell.AppActivate "demo" </vb> \ activate the dos box
+	   <vb> WshShell.SendKeys "dir{enter}" </vb>
+
+	js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
+	js: clipboardData.setData("text","1+2=*3=")
+	<vb> WshShell.SendKeys "^c" </vb>             100 sleep \ Ctrl-c 
+	<vb> WshShell.SendKeys "%{F4}" </vb>          100 sleep \ Alt-f4
+	js> clipboardData.getData("text")
+	js: clipboardData.setData("text",pop(1))  \ save-RESTORE
+	9 = ==>judge [if] <js> ['ActiveXObject','WshShell'] </jsV> all-pass [then]
+	<vb> WshShell.SendKeys "%" </vb> \ Release Alt key, some how other wise it got locked.
+	<comment>
+	\ 改用 clipboard 已經成功，不怕中文輸入模式。以下留作紀念。
+	\ js: document.body.style.imeMode='disabled'; \ [x] 懸案，想要避免中文輸入法干擾，無效！
+	\ <vb> WshShell.SendKeys "1{+}" </vb>           100 sleep \ Pad plus
+	\ js: document.body.style.imeMode='auto'; 
+	</comment>
+[ ] jsc interface changed, see hta's guit.f
+	1. jump2endofinptbox.click() every time.
+	2. remove the jsc> prompt in the confirm box.
+[ ] words and help to support a new switch "-V vocabulary-name" to show only the specified vocabulary
+	words or help -V- to disable
+
+[ ] 成功了， forthtranspiler 可以直接在 jeforth.3we 底下加掛！
+	<h> <script src='../forthtranspiler/jefvm.v3.js'></script></h>
+	<h> <script src='../forthtranspiler/jefvm.v3_ext.js'></script></h>
+	==> 把唯一的 console.log 改成 print 即可。
+
+[ ] 為了 forthtranspiler 自稱 vm 怕混淆 jeforth.3we 還是自稱 kvm 好了。
+	
+
+	

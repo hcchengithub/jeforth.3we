@@ -29,7 +29,7 @@ WshShell js: window.WshShell=pop() \ Make it a global object.
 				<selftest> 
 					*** WshShell use SendKeys to manipulate Calculator ... 
 					<vb> WshShell.Run "calc" </vb>               2800 sleep \ This is a fork. 
-					<vb> WshShell.AppActivate "Calculator" </vb> 1800 sleep
+					<vb> WshShell.AppActivate "Calculator" </vb> 1800 sleep \ Use title or processID
 					js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
 					js: clipboardData.setData("text","1+2=*3=")
 					<vb> WshShell.SendKeys "^v" </vb>             100 sleep \ Ctrl-v

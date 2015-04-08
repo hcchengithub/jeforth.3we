@@ -5,7 +5,8 @@
 	for(;;) {
 		var _ss_, _result_; _ss_ = _result_ = "";
 		inputbox.value = ""; // 防治 3nw jsc 下怪病：inputbox.value 留有 0x0A 致使 erase 無效。
-		_cmd_ = prompt("JavaScript debug console\n"+kvm.jsc.prompt, _cmd_?_cmd_:"");
+		jump2endofinputbox.click();
+		_cmd_ = prompt("JavaScript debug console\n", _cmd_?_cmd_:"");
 		_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
 		print(kvm.jsc.prompt + " jsc>" + _cmd_ + "\n");
 		switch(_cmd_){

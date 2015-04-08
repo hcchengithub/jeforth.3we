@@ -54,7 +54,8 @@
 			var _cmd_ = "";
 			for(;;) {
 				var _ss_, _result_; _ss_ = _result_ = "";
-				_cmd_ = prompt("JavaScript debug console\nBreak point:"+kvm.jsc.prompt, _cmd_?_cmd_:"");
+				jump2endofinputbox.click();
+				_cmd_ = prompt("JavaScript debug console", _cmd_?_cmd_:"");
 				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
 				print(kvm.jsc.prompt + ' ' + _cmd_ + "\n");
 				switch(_cmd_){
