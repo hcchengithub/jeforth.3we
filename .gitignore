@@ -216,3 +216,5 @@ pip-log.txt
 playground/228.mp3
 playground/DoTheRightThing.mp3
 kernel/kernel.js
+js/jefvm.v3.js
+*.js

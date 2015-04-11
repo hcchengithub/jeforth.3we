@@ -1,4 +1,13 @@
 
+\
+\ git.f 利用 forth 的自由語法，簡化 GitHub 使用上的困難。
+\
+\     GitHub 功能強大，而且一邊用它還會一邊給你很多建議。已經仁盡義至了，但是根本記不住。
+\ 今利用 jeforth 來管理這些命令跟建議。平時也可以簡化指令、做筆記、為每組命令添加 help 
+\ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
+\
+
+js> kvm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
 s" git.f"	source-code-header
 
@@ -9,8 +18,14 @@ s" git.f"	source-code-header
 	\		設定的麻煩。
 
 	s" forthtranspiler" value project-name // ( -- str ) The github repository name (project title)
-	( Desktop@home ) s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" value git-shell-path // ( -- str ) Command line to launch Git Shell.
-	( WKS-38EN3477 ) s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" value git-shell-path // ( -- str ) Command line to launch Git Shell.
+	( WKS-38EN3477 ) char COMPUTERNAME proc-env@ char WKS-38EN3477 = [if]
+		s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
+		value git-shell-path // ( -- str ) Command line to launch Git Shell.
+	[then]
+	( DP-20121028UGNO ) char COMPUTERNAME proc-env@ char DP-20121028UGNO = [if]
+		s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
+		value git-shell-path // ( -- str ) Command line to launch Git Shell.
+	[then]
 	s" https://github.com/figtaiwan/forthtranspiler" value uri(origin/master) // ( -- str ) URI of figtaiwan/forthtranspiler
 
 	: shellId (  -- processID ) \ Get Git Shell processID, only one allowed.
@@ -47,12 +62,13 @@ s" git.f"	source-code-header
 		
 	: git-shell ( -- ) \ Run or activate Git Shell
 		shellId if activate-shell else git-shell-path (fork) 
-		begin 100 nap shellId until \ launch powershell takes a long time
-		1000 nap <shell> subst x: .</shell> <shell> x:</shell>
+		begin 500 nap shellId until 100 nap activate-shell 100 nap <shell> subst x: /d </shell> 
+		100 nap <shell> subst x: .</shell> 100 nap <shell> x:</shell>  
 		s" cd " project-name + </shell> then ; 
 
 	: check-shell ( -- boolean ) \ Is Git Shell running?
 		shellId not ?abort" Error! Git Shell is not running. Try 'git-shell' again." ;
+		
 	: init ( -- ) \ Create a new git repository at the current directory
 		check-shell <shell> git init</shell> ;
 		/// Don't worry about re-init a git again. It's idiot-proof, it
@@ -85,15 +101,20 @@ s" git.f"	source-code-header
 	\ 	warning: You appear to have cloned an empty repository.
 	\ 	done.
 
-	: clone ( 'URI' -- ) \ Get repository from URI to under the current folder
-		check-shell s" git clone " swap + </shell> ;
-		///     Example: 
-		/// powershell @ github/ , char https://github.com/figtaiwan/forthtranspiler clone
+	: clone ( <'URI'> -- ) \ New a repository, which is from URI, at the current folder
+		check-shell s" git clone " char \n|\r word + </shell> ;
+		///     git clone 將遠端儲存庫複製到本地，並建立工作目錄與本地儲存庫，
+		/// 也就是 .git 資料夾。
+		///     Example: clone https://github.com/figtaiwan/forthtranspiler
 		/// clone 下來是在 current directory 之下自動 md project folder 而非以
 		/// current directory 當作 project folder。本地的就是一個 "branch"。
 		///     如果 github/forthtranspiler 不是空的, 則：
-		/// fatal: destination path 'forthtranspiler' already exists and is not an empty directory.
-		/// 已經有東西的就要用 pull 的。參「第8天」。
+		/// fatal: destination path 'forthtranspiler' already exists and is 
+		/// not an empty directory.
+		/// Local 已經有東西的就要用 pull 的。參「第8天」。
+		///     如果你用 git clone https://balbal.git 複製一個 「沒有版本」的
+		/// 空白 Git 儲存庫，將會得到一個 warning: You appear to have cloned 
+		/// an empty repository. 警告訊息，不過這不影響你上傳本地的變更。
 
 	: help ( -- ) \ Git help
 		js> tib.length>ntib if help else 
@@ -209,16 +230,25 @@ s" git.f"	source-code-header
 		check-shell <shell> git log </shell> ;
 		/// "git log -10" to see only the recent 10 commits
 
-	: 還原 ( <filename1 filename2 ...> -- ) \ 把檔案從最後的 commit 裡還原回來
-		check-shell char \n|\r word s" git checkout -- " swap + </shell> ;
+	: 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從最後的 commit 裡還原回來
+		check-shell s" git checkout -- " char \n|\r word + </shell> ;
 		/// 另一種寫法還原其中一個被改壞的檔案: git checkout master Gruntfile.js
 
 	: 徹底還原 ( -- ) \ 把所有改過的都重新 checkout 回來，小心！連新加的檔案也都殺掉。
 		check-shell <shell> git reset --hard </shell> ;
+		/// 做錯了？沒關係，只要執行 git reset --hard ORIG_HEAD 就可
+		/// 以回復到上一版，然後再重新合併一次引發相同的衝突。
 
-	: ls ( -- ) \ Same as 'dir', like dir of DOS, list all files of the repository.
-		check-shell <shell> git ls-files</shell> ;
+	: ls ( <[-u or other options]> -- ) \ Same as 'dir', like dir of DOS, list all files of the repository.
+		check-shell s" git ls-files " char \n|\r word + </shell> ;
+		/// "ls -u" to list conflict files then use "diff [filepath]" to see the details.
 		last alias dir
+
+	: ls-remote ( -- ) \  'ls' but regarding the remote repo.
+		check-shell s" git ls-remote " char \n|\r word + </shell> ;
+		/// ls-remote 顯示特定 remote repo 的 reference 名稱。包含
+		/// remote branchs 與 remote tags.
+
 
 	\ 第 05 天：了解儲存庫、工作目錄、物件與索引之間的關係。<----------- 應該先閱讀這一章！
 	\ 	使用 Git 版本控管時，會遭遇到很多分支的狀況
@@ -241,9 +271,10 @@ s" git.f"	source-code-header
 
 	\ 第 08 天：關於分支的基本觀念與使用方式
 
-	: list-branch ( -- ) \ List all branches. Other commands work *in* a branch.
-		check-shell <shell> git branch </shell> ;
-
+	: branch ( [<...>] -- ) \ List all branches. Other commands work *in* a branch.
+		check-shell s" git branch " char \n|\r word + </shell> ;
+		last alias list-branches // ( -- ) List local branches.
+		
 	: create-branch ( <branch name> -- ) \ Create a new branch.
 		check-shell s" git branch " BL word + </shell> ;
 		/// 不必先 commit，故可以 commit 到新 branch 去。
@@ -251,16 +282,29 @@ s" git.f"	source-code-header
 	: delete-branch ( <branch name> -- ) \ Delete an existing branch.
 		check-shell s" git branch -d " BL word + </shell> ;
 		/// 你不能刪除目前工作的分支，必須先切換到其他分支後，再刪除之。
+		/// 沒有執行過「合併」的分支，都不能用本指令進行刪除，必須改用
+		/// git branch -D feature （大寫的 -D）才能刪除該分支。
 
+	: list-all-branch ( -- ) \ List all local and remote branches.
+		check-shell <shell> git branch -a </shell> ;
+		/// git branch -a 顯示出所有「本地分支」與「遠端追蹤分支」。
+		///     本地分支 : 在透過 git branch 指令執行時所顯示的分支，這
+		/// 些分支存在於本地端，而這些分支又常被稱為 主題分支 (Topic 
+		/// Branch) 或 開發分支 (Development Branch)，就是因為這些分支
+		/// 預設不會被推送到遠端儲存庫，主要用來做開發用途。
+		///     遠端分支：顧名思義，遠端分支就是在遠端儲存庫中的分支，
+		/// 如此而已。你用 GitHub 是無法存取遠端分支的。
+		
 	: branch-branch ( <branch name> -- ) \ New a branch and switch over.
 		check-shell s" git checkout -b " BL word + </shell> ;
 		/// 不必先 commit，故可以 commit 到新 branch 去。
 		
 	: switch-branch ( <branch name> -- ) \ Switch to another branch.
-		check-shell s" git checkout " BL word + </shell> ;
+		check-shell s" git checkout " char \n|\r word + </shell> ;
 		/// "switch branch" and "switch commit" are the same command.
 		/// 不必先 commit，故可以 commit 到別的 branch 去。
-		
+	last alias checkout // ( <...> -- ) "git checkout" general 
+		/// Switch HEAD to another commit, recall a file, .. etc.
 	last alias switch-commit // ( <commit ID> -- ) Switch to another commit.
 		/// "switch branch" and "switch commit" are the same command.
 		/// Use "git log" to see commit ID's
@@ -270,6 +314,7 @@ s" git.f"	source-code-header
 		/// 執行 git commit 的話，就會導致這個新版本無法被追蹤變更，所以建議不
 		/// 要這麼做。若你要在 detached HEAD 狀態建立一個可被追蹤的版本，那麼正
 		/// 確的方法則是透過「建立分支」的方式。
+
 
 	\ 第 09 天：比對檔案與版本差異
 
@@ -281,6 +326,11 @@ s" git.f"	source-code-header
 		/// diff --cached      => 索引     vs HEAD
 		/// diff HEAD^ HEAD    => HEAD^    vs HEAD
 		/// diff commit1 commit2 => commit1 vs commit2
+		/// 執行 git diff 自動比對出 merge 之後到底哪些檔案的哪幾行發生衝突了。
+		/// 從 <<<<<<< HEAD 到 ======= 的內容，代表 HEAD （當前 master 分支的最
+		/// 新版）裡發生衝突的內容。從 ======= 到 >>>>>>> hotfixes 的內容，代表
+		/// hotfixes 分支裡發生衝突的內容
+
 
 	\ 第 10 天：認識 Git 物件的絕對名稱
 
@@ -288,6 +338,7 @@ s" git.f"	source-code-header
 		check-shell <shell> git log --pretty=oneline --abbrev-commit </shell> ;
 		
 	\ 第 11 天：認識 Git 物件的一般參照與符號參照
+	
 	\ 	HEAD, branch name, --cached are all references
 	\	在 Git 工具中，預設會維護一些特別的符號參照，方便我們快速取得常用的 commit 
 	\	物件，且這些物件預設都會儲存在 .git/ 目錄下。這些符號參考有以下四個：
@@ -303,6 +354,8 @@ s" git.f"	source-code-header
 	\ MERGE_HEAD
 	\	當你執行合併工作時 (關於合併的議題會在日後的文章中會提到)，「合併來源｣的 commit 
 	\	物件絕對名稱會被記錄在 MERGE_HEAD 這個符號參照中。
+	\ 心得：常見的 'origin' 就是一個 reference, 指到 GitHub。這個 origin 名稱是在 Git 版
+	\   本控管中慣用的預設遠端分支的參照名稱，主要目的是用來代表一個遠端儲存庫的 URL 位址。
 		
 	: reference ( "reference" <pathname> -- ) \ Create or change a reference that points to a GitHub object. 
 		check-shell BL word ( "reference" "ref-name" ) s" git update-ref " swap + s"  " + swap + </shell> ;
@@ -319,8 +372,124 @@ s" git.f"	source-code-header
 
 	\ 第 12 天：認識 Git 物件的相對名稱
 	
+	\ 第 17 天：關於合併的基本觀念與使用方式
+	\     當你在工作目錄下建立分支時，可以讓你的系統依據不同的需求分別進行開發，又不互相影響。例如
+	\ 你原本穩定的系統可以放在 master 分支中進行開發，而當要修正錯誤時則額外建立一個 bugfix 分支來改
+	\ 正軟體錯誤，等 Bugs 修正後，在透過「合併」的方式將 bugfix 分支上的變更重新套用到 master 上面，
+	\ 這就是一種主要的使用情境。事實上，執行「合併」動作時，是將另一個分支合併回目前分支，然後再手動
+	\ 將另一個分支給移除，這樣才符合「兩個分支合併成一個」的概念。
+	\     在 Git 使用合併時，有一個重要的觀念是【合併的動作必須發生在同一個儲存庫中】。請回想一下，
+	\ 在任何一個 Git 儲存庫中，都必須存在一個 Initial Commit 物件(初始版本)，而所有其他版本都會跟這
+	\ 個版本有關係，這個關係我們稱為「在分支線上的可追蹤物件」(the tracked object on the branch heads)
+	\ ，所以你不能將一個儲存庫的特定分支合併到另一個毫不相干的儲存庫的某個分支裡。
+	\     合併的時候，如果兩個分支當中有修改到相同的檔案，但只要修改的行數不一樣，Git 就會自動幫你套
+	\ 用/合併這兩個變更。但如果就這麼剛好，你在兩個分支裡面改到「同一個檔案」的「同一行」，那麼在合
+	\ 併的時候就會引發衝突事件。當合併衝突發生時，Git 並不會幫你決定任何事情，而是將「解決衝突」的工
+	\ 作交給「你」來負責，且這些發生衝突的檔案也都會被標示為 unmerged 狀態，合併衝突後你可以用 git 
+	\ status 指令看到這些狀態。
+	\     Git 指令找出衝突的檔案：執行 git status 或執行 git ls-files -u
+	\ 找到之後再用 git diff [filepath] 就可以僅比對其中一個檔案了：
 
+	: merge ( <from commit> -- ) \ Merge the commit(s) into the recent HEAD
+		check-shell s" git merge " char \n|\r word + </shell> ;
+	
+	\ 第 24 天：使用 GitHub 遠端儲存庫 - 入門篇
+	
+	\ Github 端一定要去建立一個 repo 才行，不能憑空就弄上去。用網頁上的功能取得 project URI。
+	\ Case A.	在 GitHub 建立一個「沒有版本」的空白 Git 儲存庫，
+	\			然後透過 git clone 取得遠端儲存庫，
+	\			再建立版本後上傳
+	\ Case C. 	在 GitHub 建立一個「有初始化版本」的 Git 儲存庫，
+	\			然後透過 git clone 取得遠端儲存庫，
+	\			再建立版本後上傳
+	\ 最簡單的方法就是利用 GitHub for Windows 工具。你只要點擊 Clone in Desktop 按鈕，(see
+	\ https://www.evernote.com/shard/s22/nl/2472143/371b041f-787f-4dad-9075-98ebc870ba8b)
+	\ 即可自動啟動 GitHub for Windows 工具幫你下載 Git 專案。clone 是在 local 建「新」repo.
+	\ 之後就要用 pull 的從 remote 下來。
 
+	: push.default ( -- ) \ git push 會出現一段提示，告訴你要設定 push.default 這個選項.
+		check-shell <shell> git config --global push.default simple</shell> ;
+		/// 要設定 push.default 這個選項，因為這種簡寫的 git push 方法的預設行為將會
+		/// 在 Git 2.0 之後發生改變，建議你透過設定 push.default 選項的方式明確指定 
+		/// push 的方法。詳細說明請參見 git help config 的說明文件，搜尋 push.default 
+		/// 即可找到相關說明。我建議各位設定成 simple，以利跟日後的 Git 指令列工具的預
+		/// 設值相同。
+	
+	: push ( [<options>] -- ) \ Upload local repo up to the remote repo
+		check-shell s" git push " char \n|\r word + </shell> ;
+		///     假設本地是 GitHub 上 clone 下來的，第一次 upload 所用的命令
+		/// 是：git push origin master 。當你第二次建立版本時，直接執行 git push 
+		/// 就會自動上傳成功。
+		///     git push 將本地儲存庫中目前分支的所有相關物件推送到遠端儲存
+		/// 庫中。這個 origin 名稱是在 Git 版本控管中慣用的預設遠端分支的參
+		/// 照名稱，主要目的是用來代表一個遠端儲存庫的 URL 位址。
+		<comment>
+			X:\forthtranspiler [jeforth.3hta]> git push
+			fatal: The current branch jeforth.3hta has no upstream branch.
+			To push the current branch and set the remote as upstream, use
+		
+				git push --set-upstream origin jeforth.3hta
+		
+			X:\forthtranspiler [jeforth.3hta]>
+		</comment>
+
+	: push到「空」遠端 ( -- ) \ 當 GitHub 上的 repo 是空的，upload 本地成果上去必須用這個。
+		check-shell <shell> git push -u origin master</shell> ;
+		/// 在 GitHub 上新建的 repo 是空的，連預設的 master 分支都沒有。此時
+		/// 下達 git push 指令時必須加上 -u 參數，才能成功地把本地儲存庫上傳
+		/// 到 GitHub 上的遠端儲存庫，其指令是 git push -u origin master
+	
+	\ Github 端一定要去建立一個 repo 才行，不能憑空就弄上去。用網頁上的功能取得 project URI。
+	\ Case B. 在 GitHub 建立一個「沒有版本」的空白 Git 儲存庫，
+	\         然後直接將現有的本地 Git 儲存庫上傳到指定的 GitHub 專案
+	\ Case D. 在 GitHub 建立一個「有初始化版本」的 Git 儲存庫，
+	\         然後直接將現有的本地 Git 儲存庫上傳到指定的 GitHub 專案
+
+	: remote ( <...> -- ) \ 對 GitHub 操作
+		check-shell s" git remote " char \n|\r word + </shell> ;
+		///     本地若非 clone 下來的，就必須告訴本地 Git 遠端儲存庫在哪。而如
+		/// 果 GitHub 上的 repo 又是空的，這時我們可以輸入:
+		///     git remote add origin https://bla/bla/bla.git
+		/// 建立一個名為 origin 的 reference 名稱，並指向 URI 位址，也就是我們
+		/// 在 GitHub 上的遠端儲存庫位址。接著就可以 push origin master。
+		///     但如果 GitHub 上的 repo 不是空的，解決的方法很簡單，只要把遠端
+		/// 儲存庫的 master 分支，成功合併回我本地的分支，即可建立兩個不同版本
+		/// 庫之間的關聯，這樣你就可以把本地的 master 分支推送到 GitHub 上遠端
+		/// 儲存庫的 master 分支了。「合併回我本地」用 pull or fetch + merge。
+		/// [ ] 疑問：怎麼不直接 merge 下來？
+		/// 這個 origin 名稱是在 Git 版本控管中慣用的預設遠端分支的參照名稱，
+		/// 主要目的是用來代表一個遠端儲存庫的 URL 位址。
+
+	: pull ( <...> -- ) \ Get repo from GitHub and merge to local.
+		check-shell s" git pull " char \n|\r word + </shell> ;
+		/// 將遠端儲存庫的 master 分支取回，並合併到本地儲存庫的 master 分支:
+		///	使用 git pull origin master 指令
+		/// git pull 將遠端儲存庫的最新版下載回來，下載的內容包含完整的物件儲
+		/// 存庫(object storage)。並且將遠端分支合併到本地分支。(將 origin/master 
+		/// 遠端分支合併到 master 本地分支) 所以一個 git pull 動作，完全相等
+		/// 於以下兩段指令：
+		///     git fetch
+		///     git merge origin/master
+		
+	: fetch  ( <...> -- ) \ Get repo from GitHub w/o merge.
+		check-shell s" git fetch " char \n|\r word + </shell> ;
+		/// 將遠端儲存庫的 master 分支取回，並合併到本地儲存庫的 master 分支:
+		///	使用 git fetch 指令後再執行 git merge origin/master 合併動作。
+		///     git fetch 將遠端儲存庫的最新版下載回來，下載的內容包含完整的
+		/// 物件儲存庫(object storage)。 這個命令不包含「合併」分支的動作。
+
+	\ 第 25 天：使用 GitHub 遠端儲存庫 - 觀念篇
+	
+	: 手動加入一個「遠端儲存庫」 ( <tagName> <URI> -- )
+		check-shell s" git remote add " char \n|\r word + </shell> ;
+		/// 事實上你可以在你的工作目錄中，建立多個遠端儲存庫的參照位址。
+		/// 看不太懂。see 第 25 天：使用 GitHub 遠端儲存庫 - 觀念篇
+	
+	: list-uri ( -- ) \ List associated URIs on GitHub.com
+		check-shell <shell> git remote -v </shell> ;
+		
+	\ 第 26 天：多人在同一個遠端儲存庫中進行版控	
+		
 
 
 

@@ -154,6 +154,24 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				/// Modified by platform.f for hotkey helps. The previous version is voc.f.
 				/// Pattern matches name, help and comments.
 
+code {Tab} 		( -- ) \ Inputbox auto-complete
+				with(this){
+					if(index == 0){
+						var a=('h '+inputbox.value+' t').split(/\s+/);
+						a.pop(); a.shift();
+						this.hint = a.pop(); // the partial word to be autocompleted
+						this.cmdLine = inputbox.value.slice(0,inputbox.value.lastIndexOf(hint));
+						this.candidate = []; 
+						for(var key in wordhash) {
+							if(key.indexOf(hint)==0) candidate.push(key); 
+						}
+					}
+					if(index >= candidate.length) index = 0;
+					inputbox.value = cmdLine + candidate[index++];
+				}
+				push(false);
+				end-code
+
 <js>
 	kvm.cmdhistory = {
 		max:   10000, // maximum length of the command history
@@ -201,12 +219,12 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 			case 27: /* Esc  */ if(kvm.tick('{esc}'  )){kvm.execute('{esc}'  );return(kvm.pop());} break;
 			case 38: /* Up   */ if(kvm.tick('{up}'   )){kvm.execute('{up}'   );return(kvm.pop());} break;
 			case 40: /* Down */ if(kvm.tick('{down}' )){kvm.execute('{down}' );return(kvm.pop());} break;
-			case  8: /* Back space */ if(kvm.tick('{backSpace}' )){kvm.execute('{backSpace}' );return(kvm.pop());} break; 
 		}
 		return (true); // pass down to following handlers
 	}
 
 	document.onkeydown = function (e) {
+		if(kvm.tick('{Tab}')){if(e.keyCode!=9)kvm.tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(e.keyCode) {
 			case 13:
 				if (!kvm.EditMode || event.ctrlKey) { // CtrlKeyDown
@@ -231,7 +249,9 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 			case 121: /* F10 */ if(kvm.tick('{F10}')){kvm.execute('{F10}');return(kvm.pop());} break;
 			case 122: /* F11 */ if(kvm.tick('{F11}')){kvm.execute('{F11}');return(kvm.pop());} break;
 			case 123: /* F12 */ if(kvm.tick('{F12}')){kvm.execute('{F12}');return(kvm.pop());} break;
+			case   9: /* Tab */ if(kvm.tick('{Tab}')){kvm.execute('{Tab}');return(kvm.pop());} break;
 			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}'  )){kvm.execute('{ctrl-break}'  );return(kvm.pop());} break;
+			case   8: /* Back space */ if(kvm.tick('{backSpace}'   )){kvm.execute('{backSpace}'   );return(kvm.pop());} break; 
 		}
 		return (true); // pass down to following handlers
 	}
