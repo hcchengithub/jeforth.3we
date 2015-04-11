@@ -247,20 +247,24 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				</selftest>
 
 code words      ( [<spec>] -- ) \ List all words or words screened by spec.
-				var pattern="", spec = pattern = nexttoken("\\r|\\n");
-				var vocSpec = spec.match(/\s*(-v)\s+(\S+)(.*)/); // vocSpec[1]:"-v", vocSpec[2]:"vocname.f", vocSpec[3]="...." 
-				if(vocSpec && vocSpec[1]=="-v") {
+				var pattern="", spec = pattern = nexttoken("\\r|\\n"); // spec 是 -v -V -n -N 這些東西帶頭的 string
+				var vocSpec = spec.match(/\s*(-[vV])\s+(\S+)(.*)/); // vocSpec[1]:"-v", vocSpec[2]:"vocname.f", vocSpec[3]="...." 
+				if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) {  // 如果缺 vocSpec[2] 整個 vocSpec 也都不會成立，變成 nuull
 					if (vocSpec[3]) {
 						spec = vocSpec[3].match(/\s*(\S?.*\S)\s*/); // remove 前後 white spaces
 						pattern = spec = spec ? spec[1] : ""; // match result can be NULL
 					} else pattern = spec = ""; 
 				}
-				var NSpec = spec.match(/\s*(-N)\s+(\S+)/); // NSpec[1]:-v NSpec[2]:"Name"
+				if(vocSpec && vocSpec[1]=="-V") this.vocSpec = vocSpec;
+				if(!vocSpec && spec == "-V-") this.vocSpec = null;
+				if(this.vocSpec) vocSpec = this.vocSpec;
+				var NSpec = spec.match(/\s*(-N)\s+(\S+)/); // NSpec[1]:-N NSpec[2]:"Name"
 				if(NSpec && NSpec[1]=="-N") pattern = NSpec[2];
-				var nSpec = spec.match(/\s*(-n)\s+(\S+)/); // nSpec[1]:-v nSpec[2]:"name" 
+				var nSpec = spec.match(/\s*(-n)\s+(\S+)/); // nSpec[1]:-n nSpec[2]:"name" 
 				if(nSpec && nSpec[1]=="-n") pattern = nSpec[2];
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(vocSpec && vocSpec[1]=="-v") if (order[j].toLowerCase().indexOf(vocSpec[2].toLowerCase()) == -1) continue;
+					if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) 
+						if (order[j].toLowerCase().indexOf(vocSpec[2].toLowerCase()) == -1) continue;
 					var voc = "\n-------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) --------\n";
 					var ss = "";
 					if(nSpec) push("-n"); else if (NSpec) push ("-N"); else push(""); 
@@ -272,7 +276,9 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 				}
                 end-code interpret-only
 				/// Modified by voc.f to support vocabulary
+				/// Pattern matches name, help and comments.
 				///	-v for matching vocabulary, case insensitive. Must be the first option.
+				///	-V -v and lock, -V- to unlock.
 				///	-n for matching only name pattern, case insensitive.
 				///	-N for exactly name only, case sensitive.
 
@@ -291,19 +297,23 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 
 code (help)		( "pattern" -- )  \ Print help message of screened words
 				var pattern, spec = pattern = pop();
-				var vocSpec = spec.match(/\s*(-v)\s+(\S+)(.*)/); // vocSpec[1]:"-v", vocSpec[2]:"vocname.f", vocSpec[3]="...." 
-				if(vocSpec && vocSpec[1]=="-v") {
+				var vocSpec = spec.match(/\s*(-[vV])\s+(\S+)(.*)/); // vocSpec[1]:"-v", vocSpec[2]:"vocname.f", vocSpec[3]="...." 
+				if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) {
 					if (vocSpec[3]) {
 						spec = vocSpec[3].match(/\s*(\S?.*\S)\s*/); // remove 前後 white spaces
 						pattern = spec = spec ? spec[1] : ""; // match result can be NULL
 					} else pattern = spec = ""; 
 				}
+				if(vocSpec && vocSpec[1]=="-V") this.vocSpec = vocSpec;
+				if(!vocSpec && spec == "-V-") this.vocSpec = null;
+				if(this.vocSpec) vocSpec = this.vocSpec;
 				var NSpec = spec.match(/\s*(-N)\s+(\S+)/); // NSpec[1]:-v NSpec[2]:"Name"
 				if(NSpec && NSpec[1]=="-N") pattern = NSpec[2];
 				var nSpec = spec.match(/\s*(-n)\s+(\S+)/); // nSpec[1]:-v nSpec[2]:"name" 
 				if(nSpec && nSpec[1]=="-n") pattern = nSpec[2];
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(vocSpec && vocSpec[1]=="-v") if (order[j].toLowerCase().indexOf(vocSpec[2].toLowerCase()) == -1) continue;
+					if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) 
+						if (order[j].toLowerCase().indexOf(vocSpec[2].toLowerCase()) == -1) continue;
 					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
 					var ss = "";
 					if(nSpec) push("-n"); else if (NSpec) push ("-N"); else push(""); 
@@ -319,6 +329,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				/// Modified by voc.f to support vocabulary
 				/// Pattern matches name, help and comments.
 				///	-v for matching vocabulary, case insensitive. Must be the first option.
+				///	-V -v and lock, -V- to unlock.
 				///	-n for matching only name pattern, case insensitive.
 				///	-N for exactly name only, case sensitive.
 				

@@ -79,7 +79,8 @@
 		})()
 	</text> js: kvm.jsc.xt=pop()
 
-	: cr         	js: print("\n") 1 nap js: jump2endofinputbox.click() ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
+: cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
+				js: print("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
 
 \ ------------------ Get args from URL -------------------------------------------------------
 	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 

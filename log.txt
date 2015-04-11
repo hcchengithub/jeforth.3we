@@ -3311,16 +3311,16 @@
 [ ] jsc interface changed, see hta's guit.f
 	1. jump2endofinptbox.click() every time.
 	2. remove the jsc> prompt in the confirm box.
-[ ] words and help to support a new switch "-V vocabulary-name" to show only the specified vocabulary
+[x] words and help to support a new switch "-V vocabulary-name" to show only the specified vocabulary
 	words or help -V- to disable
 
 [x] 為了 forthtranspiler 自稱 vm 怕混淆 jeforth.3we 還是自稱 kvm 好了。
-[ ] 成功了， forthtranspiler 可以直接在 jeforth.3we 底下加掛！
+[x] 成功了， forthtranspiler 可以直接在 jeforth.3we 底下加掛！
 	<h> <script src='../forthtranspiler/jefvm.v3.js'></script></h>
 	<h> <script src='../forthtranspiler/jefvm.v3_ext.js'></script></h>
 	==> 把唯一的 console.log 改成 print 即可。
 
-[ ] HTML5 textarea (inputbox) 有 autocomplete, autofocus 等功能！
+[ ] HTML5 textarea (inputbox) 有 autocomplete, autofocus(對咱無效) 等功能！
 	
 [x] TAB autocomplete 
 

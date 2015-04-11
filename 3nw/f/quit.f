@@ -5,7 +5,8 @@
 \ applications. quit.f is the good place to define propritary features of each application.
 \  
 
-: cr         	js: print("\n") 1 nap js: jump2endofinputbox.click() ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
+: cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
+				js: print("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
 
 \ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
