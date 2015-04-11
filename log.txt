@@ -3280,14 +3280,45 @@
 		<option>Friday</option>
 		<option>Saturday</option>
 		<option>Sunday</option>
-		</select>
-		</o>
+		</select></o>
+	: h ( -- ) \ Popup command history for selection
+		<o> <select size=32></select></o> ( select )
+		<js> 
+			tos().focus();
+			tos().size = Math.min(16,kvm.cmdhistory.array.length);
+			for (var i=0; i<kvm.cmdhistory.array.length; i++){
+				var option = document.createElement("option");
+				option.text = kvm.cmdhistory.array[i];
+				js: tos().add(option);
+			}
+			tos().selectedIndex=tos().length-1;
+			var select = tos().onclick = function(){
+				inputbox.value=tos().value;
+				execute("removeElement");
+				inputbox.focus();
+			}
+			tos().onkeydown = function(e){
+				switch(e.keyCode) {
+					case 27: /* Esc  */ execute("removeElement"); inputbox.focus(); break;
+					case 38: /* Up   */ tos().selectedIndex = Math.max(0,tos().selectedIndex-1); break;
+					case 40: /* Down */ tos().selectedIndex = Math.min(tos().length-1,tos().selectedIndex+1); break;
+					case 13: /* Enter*/ select(); break;
+				}
+				return (false);
+			}
+		</js>
+	;
+
+js> document.createElement("option")  ( str option )
+js: tos().text=pop(1) ( option )
+myselect :: add(pop())
+		
 
 [ ] Webserver.f 顯得很笨了，現在 variables 直接可以在 forth 與 js 之間共用。
 
 [ ] use jeforth to try Youtube "Animoo: Make and Do - Animated Optical illusions"
 
-[ ] 用 jeforth.hta 來管理 github
+[x] 用 jeforth.hta 來管理 github
 	先複習怎樣由 jeforth.hta 來下 dos box command . . . 
 	1. use Github for Windows to open the dos shell through the [setting] button at the upper right corner.
 	2. title demo <-- change the dos box title
@@ -3308,7 +3339,7 @@
 	\ <vb> WshShell.SendKeys "1{+}" </vb>           100 sleep \ Pad plus
 	\ js: document.body.style.imeMode='auto'; 
 	</comment>
-[ ] jsc interface changed, see hta's guit.f
+[x] jsc interface changed, see hta's guit.f
 	1. jump2endofinptbox.click() every time.
 	2. remove the jsc> prompt in the confirm box.
 [x] words and help to support a new switch "-V vocabulary-name" to show only the specified vocabulary
@@ -3320,7 +3351,7 @@
 	<h> <script src='../forthtranspiler/jefvm.v3_ext.js'></script></h>
 	==> 把唯一的 console.log 改成 print 即可。
 
-[ ] HTML5 textarea (inputbox) 有 autocomplete, autofocus(對咱無效) 等功能！
+[/] HTML5 textarea (inputbox) 有 autocomplete, autofocus(對咱無效) 等功能！
 	
 [x] TAB autocomplete 
 

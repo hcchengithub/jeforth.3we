@@ -1374,17 +1374,19 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 
 code cut		( -- ) \ Cut off used TIB.
 				tib=tib.slice(ntib);ntib=0 end-code
-				/// cut . . rewind TIB 不斷重複, 'stop' to break it.
+				/// "cut ~ 10 nap rewind" repeat running the TIB.
+				/// See also <task>
 
 : -word 		( -- array[] ) \ Get TIB used tokens.
 				<js> var a=('h '+tib.substr(0,ntib)+' t').split(/\s+/); // 加上 dummy 頭尾再 split 以統一所有狀況。
 				a.pop(); a.shift(); /* 丟掉 dummy 頭尾巴 */ a</jsV> ;
 				/// 跟 word 有點相反的味道，故以 -word 為名。
 
-: rewind		( -- ) \ Rewind TIB so as to repeat it. 
+: rewind		( -- ) \ Rewind TIB so as to repeat it. 'stop' to terminate.
 				-word <js> var a=pop(),flag=false; for(var i in a) flag = flag || a[i]=='nap'; flag </jsV>
 				not ?abort" Warning! no 'nap' in command line, suspecious of infinit loop." js: ntib=0 ;
-				/// cut ~ rewind TIB 不斷重複, 'stop' to break it.
+				/// "cut ~ 10 nap rewind" repeat running the TIB.
+				/// See also <task>
 				
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
@@ -1552,11 +1554,14 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 					---
 				</selftest>
 
-: <task>		( <tokens> -- "task" ) \ Run an outer loop.
+: <task>		( <tokens> -- "task" ) \ Run an outer loop. 'stop' to terminate.
 				char </task> word ; immediate
+				/// See alternative method for command line by 'cut' and 'rewind'.
+
 : </task>		( "task" -- ... ) \ Delimiter of <task>
 				compiling if literal js: push(function(){fortheval(pop())}) , 
 				else js: fortheval(pop()) then ; immediate
+				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
 				var count=stack.length, basewas=kvm.base;

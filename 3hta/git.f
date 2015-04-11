@@ -479,6 +479,39 @@ s" git.f"	source-code-header
 		/// 物件儲存庫(object storage)。 這個命令不包含「合併」分支的動作。
 
 	\ 第 25 天：使用 GitHub 遠端儲存庫 - 觀念篇
+
+	<comment>
+	Q: 	依您附圖，紅色部分都是 remotes .... 怎麼會是「本地追蹤分支」？
+		https://github.com/doggy8088/Learn-Git-in-30-days/issues/8#issuecomment-91797074
+	A: 	2015-04-11 17:12 GMT+08:00 Yue Lin Ho <notifications@github.com>:
+		More note: it is on day 25.
+
+		Pro Git 3.5
+
+		Remote Branches
+		Remote branches are references (pointers) to the state of branches in your remote repositories. 
+		They’re local branches that ...
+		中文版 Pro Git 3.5
+
+		遠端分支
+		遠端分支（remote branch）是對遠端倉庫中的分支的索引。
+		它們是一些無法移動的本地分支...
+		重點在於: 雖然是用 remotes 字眼做 prefix, 但它們存在於 本地(實際上是一種 local branches)
+		它的特性是要標示遠端的版本庫有一個本地分支, 你可以這樣子想它:
+		remotes/origin/master -> 遠端(remotes)版本庫(給它取名叫origin)有一個master分支
+
+		假設, 遠端版本庫有一個本地分支叫 abc
+		你clone時,
+		本地版本庫為了記錄遠端版本庫有個 abc 指到某個 commit 上,
+		會在本地版本庫會產生一個 remotes/origin/abc, 並同時也指向那個 commit 上
+		當你在本地版本庫的這個 commit 上, 或者 remotes/origin/abc 上產生一個本地分支 abc 時,
+		本地版本庫的本地分支 abc 和 remotes/origin/abc 之間會自動產生一個 "追蹤" 闗係
+
+		更詳盡的 "跟蹤" 的概念, 請參考 這裡
+		當一個本地分支(master)與遠端分支(remotes/origin/master)之間有 "跟蹤" 關係時, 才會用這個詞
+		—
+		Reply to this email directly or view it on GitHub.
+	</comment>
 	
 	: 手動加入一個「遠端儲存庫」 ( <tagName> <URI> -- )
 		check-shell s" git remote add " char \n|\r word + </shell> ;

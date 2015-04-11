@@ -1,4 +1,5 @@
 
+\ platform.f for jeforth.3htm, jeforth.3hta, and jeforth.3nw
 \ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 
 s" platform.f"		source-code-header
@@ -71,10 +72,39 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				js: document.getElementById("inputbox").value=""
 				false ;
 
+: history-selector ( -- ) \ Popup command history for selection
+				<o> <br><select style="width:800px;padding-left:2px;font-size:16px;"></select></o> ( select )
+				<js> 
+					tos().size = Math.min(16,kvm.cmdhistory.array.length);
+					for (var i=0; i<kvm.cmdhistory.array.length; i++){
+						var option = document.createElement("option");
+						option.text = kvm.cmdhistory.array[i];
+						js: tos().add(option);
+					}
+					tos().selectedIndex=tos().length-1;
+					jump2endofinputbox.click();tos().focus();
+					var select = tos().onclick = function(){
+						inputbox.value = tos().value;
+						execute("removeElement");
+						inputbox.focus();
+						return (false);
+					}
+					tos().onkeydown = function(e){
+						switch(e.keyCode) {
+							case 27: /* Esc  */ execute("removeElement"); inputbox.focus(); break;
+							case 38: /* Up   */ tos().selectedIndex = Math.max(0,tos().selectedIndex-1); break;
+							case 40: /* Down */ tos().selectedIndex = Math.min(tos().length-1,tos().selectedIndex+1); break;
+							case 13: /* Enter*/ setTimeout(select,1); break;
+						}
+						return (false);
+					}
+				</js> ;
+
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
+				<js> event.altKey </jsV> if history-selector false else
 				<js> kvm.EditMode && !event.ctrlKey </jsV> if true else
 				js: document.getElementById("inputbox").value=kvm.cmdhistory.up();
-				false then ;
+				false then then ;
 
 : {down}		( -- boolean ) \ Inputbox keydown handler, get next command history.
 				<js> kvm.EditMode && !event.ctrlKey </jsV> if true else
@@ -146,20 +176,24 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 : help			( [<patthern>] -- )  \ Print help message of screened words
                 char \n|\r word js> tos().length if (help) else
 					<text>
-						F2    : Toggle input box EditMode
-						F4    : Copy marked string to input box
-						F5    : Restart jeforth
-						F9    : Smaller input box
-						F10   : Bigger input box
-						Esc   : Clear the input box
-						Enter : Focus on the input box
-						Ctrl+ : Bigger font size
-						Ctrl- : Smaller font size
+						F2     : Toggle input box EditMode
+						F4     : Copy marked string to input box
+						F5     : Restart jeforth
+						F9     : Smaller input box
+						F10    : Bigger input box
+						Esc    : Clear the input box
+						Tab    : Forth word auto-complete
+						Enter  : Focus on the input box
+						Up     : Command line history
+						Down   : Command line history 
+						Alt-Up : Command line history
+						Ctrl+  : Bigger font size
+						Ctrl-  : Smaller font size
 						Ctrl-Break : Stop console event handler or outer loop
-						Backspace : Refer to "help -N {backSpace}" for details
+						Backspace  : Refer to "help -N {backSpace}" for details
 
+						see <word>     : See definitions of the word
 						help <pattern> : Refer to "help -N (help)" for details
-						see <word>     : See details of the word
 						jsc            : JavaScript console
 					</text> <js> pop().replace(/^[ \t]*/gm,'\t')</jsV> . cr
 				then ;
@@ -176,7 +210,9 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 				cmd = cmd.replace(/^\s*/gm,''); // remove leading white spaces
 				cmd = cmd.replace(/\s*$/gm,'');  // remove tailing white spaces
 				if(cmd.search(/\S/)==-1) return; // skip blank lines
-				if(cmd!=this.array[this.array.length-1]) this.array.push(cmd); // skip repeating command
+				this.array.push(cmd);
+				for(var i=this.array.length-2; i>=0; i--)
+					if(cmd==this.array[i]) this.array.splice(i,1);
 				if (this.array.length > this.max ) this.array.shift();
 				this.index = this.array.length;
 			},
@@ -229,6 +265,8 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					return(false);
 				}
 				return(true); // In EditMode
+			case 109: /* -   */ if(kvm.tick('{-}'  )){kvm.execute('{-}'  );return(kvm.pop());} break;
+			case 107: /* +   */ if(kvm.tick('{+}'  )){kvm.execute('{+}'  );return(kvm.pop());} break;
 			case 112: /* F1  */ if(kvm.tick('{F1}' )){kvm.execute('{F1}' );return(kvm.pop());} break;
 			case 113: /* F2  */ if(kvm.tick('{F2}' )){kvm.execute('{F2}' );return(kvm.pop());} break;
 			case 114: /* F3  */ if(kvm.tick('{F3}' )){kvm.execute('{F3}' );return(kvm.pop());} break;
