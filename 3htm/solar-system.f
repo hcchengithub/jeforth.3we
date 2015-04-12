@@ -81,7 +81,7 @@
 
 include processing.f
 
-s" solar-system.f" source-code-header
+vocabulary solar-system.f also solar-system.f definitions
 
 marker ~~~
 	
@@ -107,7 +107,7 @@ marker ~~~
 		then ; immediate
 		/// 以下要用 Function Overloading 的手法把專為 'star.property' 寫就的這個 'to' command 加
 		/// 回原 'to' 使它能處理多種 type。
-	also
+
 	: to ( n <Var> -- ) \ Function Overloadingly assign n to a 'value' or a 'star.property' variable.
 		#tib ' ( #tib word ) \ 在 compiling 時先偷看下一個 word,
 		js> tos().type=="value" if ( #tib word ) \ 判斷它的 type 
@@ -260,6 +260,7 @@ marker ~~~
 \ start to run
 
 	newStar newStar newStar newStar newStar newStar \ 太陽 行星
+
 	\ the Sun
 		0 to istar 40 to radius 0 to vx 0 to vy 200 to x 200 to y 
 		char rgba(255,166,47,0.6) to color display \ 太陽的顏色，金色 http://www.computerhope.com/htmcolor.htm
@@ -302,7 +303,9 @@ marker ~~~
 	</text> .
 
 	\ the main loop
-	<task> draw 20 nap rewind </task>
+	<task> 
+		draw 20 nap rewind 
+	</task>
 	<task>
 		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=g.stars[0].x+=e 
 		js> h>=(kvm.cv.canvas.width-kvm.cv.canvas.height/2) [if] js: e=-d [then] 
@@ -310,3 +313,5 @@ marker ~~~
 		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
 		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
 	</task>
+
+
