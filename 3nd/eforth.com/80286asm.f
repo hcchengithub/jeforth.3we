@@ -328,7 +328,7 @@
 	( 0x11b )		LookForward 16,
 
 					0x100 dump(t)
-					.( 在這裡設斷點，停下來檢查以上結果是否如下？ 'q' 繼續。 ) cr
+					.( Compare by your eyes to check if the above code is generated correctly. ) cr
 					.( 00100   11 12 09 21 06 00 31 0c - 01 41 42 43 51 52 53 0c) cr
 					.( 00110   01 63 08 0c 01 04 00 0c - 01 1b 01 91 92 93 1b 01) cr
 					.( 00120   ?? ?? ?? ?? ?? ?? ?? ?? - ?? ?? ?? ?? ?? ?? ?? ??) cr

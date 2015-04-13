@@ -9,12 +9,17 @@ Play now
  - [Solar system](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_solar-system.f)
  - [H2O](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_h2o.f)
  - [Alarm clock](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_alarm.f_er)
-
+ - [Box2Dweb Physics Engine demo - Arrows](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_box2dweb-arrow.f)
+ - [Chipmunk Physics Engine demo - Pyramid Stack](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_chipmunk-js-pyramidstack.f)
+ 
 Get source code and help
 -----------------------------------
-Source code : *http://github.com/hcchengithub/jeforth.3we* 
-FigTaiwan : *http://figtaiwan.org*
-Contact : *H.C. Chen by email hcchen5600@gmail.com*
+
+| Item | Address |
+----------------|----------------------------------------------
+| Source code | *http://github.com/hcchengithub/jeforth.3we* |
+| FigTaiwan | *http://figtaiwan.org* |
+| Contact | hcchen5600@gmail.com |
 
 Presentation videos
 -----------------------
@@ -91,7 +96,7 @@ More demo programs
 Use jeforth.3nd, 3 words engine jeforth for Node.js, to compile eforth.com ( eforth executable for 16 bits DOS)
 
  1. Working directory at jeforth.3we/. Setup the path to your Node.js executable node.exe 32 bits or 64 bits. Refer to jeforth.3we/jeforth.3nd.bat if you need an example.
- 2. Run: node.exe jeforth.3nd.js 86ef202.f bye
+ 2. Run: node.exe jeforth.3nd.js include 86ef202.f bye
  3. You got jeforth.3we/eforth.com
  4. My windows 8 is 32bits, so I can run eforth.com directly. If your Windows system has been 64 bits, you'll need a DOS virtual machine like vmware, virtual box, or I recommend DOSBox.
 
@@ -106,6 +111,6 @@ jeforth.hta include merge2.f
 
 ####The End
 
-
+Best online editor : *http://stackedit.io*
 
 

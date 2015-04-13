@@ -1,4 +1,6 @@
 
+excel.app [if] [else] ." Fatal error from merge2.f: This computer does not have excel." stop [then]
+
 s" merge2.f" source-code-header
 
 \  拼接 excel 表的欄位
