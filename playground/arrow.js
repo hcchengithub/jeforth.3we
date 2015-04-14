@@ -39,7 +39,7 @@ function init() {
         var evt = e||window.event;
         // createArrow(e.clientX-canvasPosition.x,e.clientY-canvasPosition.y);
         createArrow(e.offsetX,e.offsetY);
-if(kvm.debug){kvm.jsc.prompt='222>>>';eval(kvm.jsc.xt)}
+		if(kvm.debug){kvm.jsc.prompt='222>>>';eval(kvm.jsc.xt)}
     }
 
     function createArrow(pX,pY) {
