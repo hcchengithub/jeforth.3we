@@ -17,7 +17,6 @@ s" git.f"	source-code-header
 	\		PowerShell window. 一開始還沒有 git-demo 所以先從我現有的 repository 啟動 git shell 借力省掉 path
 	\		設定的麻煩。
 
-	s" forthtranspiler" value project-name // ( -- str ) The github repository name (project title)
 	( WKS-38EN3477 ) char COMPUTERNAME proc-env@ char WKS-38EN3477 = [if]
 		s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
@@ -26,7 +25,10 @@ s" git.f"	source-code-header
 		s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
 	[then]
-	s" https://github.com/figtaiwan/forthtranspiler" value uri(origin/master) // ( -- str ) URI of figtaiwan/forthtranspiler
+	\ s" forthtranspiler" value project-name // ( -- str ) The github repository name (project title)
+	s" jeforth.3we" value project-name // ( -- str ) The github repository name (project title)
+	\ s" https://github.com/figtaiwan/forthtranspiler" value uri(origin/master) // ( -- str ) URI of figtaiwan/forthtranspiler
+	s" https://github.com/hcchengithub/" project-name + value uri(origin/master) // ( -- str ) URI of figtaiwan/forthtranspiler
 
 	: shellId (  -- processID ) \ Get Git Shell processID, only one allowed.
 		0 s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" objEnumWin32_Process >r  ( 0 | obj )
@@ -60,9 +62,12 @@ s" git.f"	source-code-header
 			s' WshShell.SendKeys "' swap + s' {enter}"' + </vb> activate-jeforth
 		then ; immediate
 		
-	: git-shell ( -- ) \ Run or activate Git Shell
-		shellId if activate-shell else git-shell-path (fork) 
-		begin 500 nap shellId until 100 nap activate-shell 100 nap <shell> subst x: /d </shell> 
+	: launch-git-shell ( -- ) \ Run or activate Git Shell
+		shellId if activate-shell else git-shell-path (fork) then
+		begin 500 nap shellId until 100 nap activate-shell ;
+		
+	: autoexec ( -- ) \ Mimic autoexec.bat
+		100 nap <shell> subst x: /d </shell> 
 		100 nap <shell> subst x: .</shell> 100 nap <shell> x:</shell>  
 		s" cd " project-name + </shell> then ; 
 
@@ -230,10 +235,13 @@ s" git.f"	source-code-header
 		check-shell <shell> git log </shell> ;
 		/// "git log -10" to see only the recent 10 commits
 
-	: 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從最後的 commit 裡還原回來
+	: 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從最後的 commit 裡恢復回來
 		check-shell s" git checkout -- " char \n|\r word + </shell> ;
-		/// 另一種寫法還原其中一個被改壞的檔案: git checkout master Gruntfile.js
-
+		/// 另一種寫法還原其中一個被改壞的檔案: 
+		/// git checkout <master|commitId> path/Gruntfile.js
+		last alias retrieve // ( <filename1 filename2 ...> -- ) 還原檔案
+		last alias recall // ( <filename1 filename2 ...> -- ) 還原檔案
+		
 	: 徹底還原 ( -- ) \ 把所有改過的都重新 checkout 回來，小心！連新加的檔案也都殺掉。
 		check-shell <shell> git reset --hard </shell> ;
 		/// 做錯了？沒關係，只要執行 git reset --hard ORIG_HEAD 就可

@@ -749,7 +749,8 @@
     ==> int hwnd = (int)Process.GetProcessById(excelId).MainWindowHandle    http://stackoverflow.com/questions/770173/how-to-get-excel-instance-or-excel-instance-clsid-using-the-process-id
         This is for .NET not JavaScript.
 
-[ ] Tab auto-complete
+[x] Tab auto-complete
+[ ] Tab auto-complete don't be case sensitive
     
 [X] F2  toggle EditMode
     F9  shrink input box
@@ -3318,5 +3319,11 @@
     而出錯。
 
 [ ] jeforth.3we README.md 改良
+
+[ ] How to play with arrow.js
+	1.	add one line only to arrow.js 
+		push(world); // [ ]
+
+
 
 

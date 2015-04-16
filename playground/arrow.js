@@ -20,6 +20,7 @@ function init() {
     var dragConstant=0.05;
     var dampingConstant = 2;
     var world = new b2World(new b2Vec2(0, 10),true);
+	kvm.push(world); // [ ]
     
     // document.addEventListener("mousedown",onMouseDown);
 	canvas.onmousedown = onMouseDown;
@@ -74,6 +75,7 @@ function init() {
         body.SetLinearVelocity(new b2Vec2(20*Math.cos(angle), 20*Math.sin(angle)));
         body.SetAngle(angle);
         body.SetAngularDamping(dampingConstant);
+		kvm.push(body); // [ ]
     }
 
     function createBox(width,height,pX,pY,type,data) {
@@ -165,4 +167,4 @@ function init() {
     }
 
 };
-
+init();

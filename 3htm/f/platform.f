@@ -161,7 +161,7 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 						this.cmdLine = inputbox.value.slice(0,inputbox.value.lastIndexOf(hint));
 						this.candidate = []; 
 						for(var key in wordhash) {
-							if(key.indexOf(hint)==0) candidate.push(key); 
+							if(key.toLowerCase().indexOf(hint.toLowerCase())==0) candidate.push(key); 
 						}
 					}
 					if(index >= candidate.length) index = 0;
