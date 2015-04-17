@@ -3330,3 +3330,4 @@
 [ ] echo command line 要先 cr 一下，除非沒有東西。
 	[ ]index.htm 
 
+[x] alias' help should show the correct word name

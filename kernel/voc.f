@@ -1,5 +1,4 @@
 
-
 .( Including voc.f ) cr
 
 marker --voc.f-- 
@@ -246,9 +245,9 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					XOR ==>judge [if] <js> ['(marker)','marker'] </jsV> all-pass [then]
 				</selftest>
 				
-code parser(words,help) ( "string" -- { v:vocname, vlock:boolean, n:boolean, N:boolean, pattern:"string"} ) \ parser for 'words' and '(help)'.
+code parser(words,help) ( "string" -- { v:vocname, vlock:boolean, sw:[nNtT], pattern:"string"} ) \ parser for 'words' and '(help)'.
 				if(!this.option) this.option={v:"",vlock:false};
-				this.option.pattern = ""; this.option.n = this.option.N = false;
+				this.option.pattern = ""; this.option.sw = "";
 				if(!this.option.vlock) this.option.v = "";
 				var spec = ' ' + pop() + ' '; // 我心裡想的 spec 是 -v -V -n -N 這些 option 一開始是整個 string
 				var vocSpec = spec.match(/(.*?)\s+(-[vV])\s+(\S+)(.*)/); 
@@ -270,28 +269,20 @@ code parser(words,help) ( "string" -- { v:vocname, vlock:boolean, n:boolean, N:b
 					spec = unlock[1] + " " + unlock[3]; // 去除已經處理過的部分
 				}
 				
-				var NSpec = spec.match(/\s+(-N)\s+(\S+)/); 
-				// NSpec[1]:-N, NSpec[2]:"Name", 如果缺 NSpec[2] 整個 NSpec 也都不會成立，變成 nuull
-				if(NSpec) {
-					// 如果有 -N 到此結束
-					this.option.N = true;
-					this.option.pattern = NSpec[2];
+				var sw = spec.match(/\s+(-[nNtT])\s+(\S+)/); 
+				// sw[1]:-[nNtT], sw[2]:"Name", 如果缺 sw[2] 整個 sw 也都不會成立，變成 nuull
+				if(sw) {
+					// 如果有 -[nNtT] 到此結束，不收別的 pattern 了（配合(words)的設計）
+					this.option.sw = sw[1];
+					this.option.pattern = sw[2];
 				} else {
-					var nSpec = spec.match(/\s+(-n)\s+(\S+)/); 
-					// nSpec[1]:-n, nSpec[2]:"name", 如果缺 nSpec[2] 整個 nSpec 也都不會成立，變成 nuull 
-					if(nSpec){ 
-						// 如果有 -n 也到此結束
-						this.option.n = true;
-						this.option.pattern = nSpec[2];
-					} else {
-						// 剩下的整個都是 pattern
-						this.option.pattern = spec.replace(/(^\s*)|(\s*$)/g,'');
-					}
+					// 剩下的整個都是 pattern
+					this.option.pattern = spec.replace(/(^\s*)|(\s*$)/g,'');
 				}
 				push(this.option);
 				end-code
 				\ 如果有 -v 或 -V 就取得 vocabulary 的 spec 加一層限制。
-				\ 如果有 -n 或 -N 就對 pattern 加一層限定
+				\ 其他分離出 (sw,pattern) 或單 pattern 丟給 (words) 
 
 code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 				push(nexttoken("\\r|\\n")); execute("parser(words,help)"); var option = pop();
@@ -300,7 +291,7 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
 					var voc = "\n-------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) --------\n";
 					var ss = "";
-					if(option.n) push("-n"); else if (option.N) push ("-N"); else push(""); 
+					if(option.sw) push(option.sw); else push(""); 
 					push(order[j]); push(option.pattern); execute("(words)");
 					var word_list = pop();
 					for (var i=0; i<word_list.length; i++) ss += word_list[i].name+" ";
@@ -308,11 +299,17 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 				}
                 end-code interpret-only
 				/// Modified by voc.f to support vocabulary
-				/// Pattern matches name, help and comments.
+				/// Vocabulary selector works alone or with other switches.
 				///	-v for matching partial vocabulary name, case insensitive.
-				///	-V -v and lock, -V- to unlock. Sync'ed with 'help'.
-				///	-n for matching only name pattern, case insensitive.
-				///	-N for exactly name only, case sensitive.
+				///	-V is -v and lock, -V- to unlock. Sync'ed with 'help'.
+				/// One of the following switches
+				///	-n matches only name pattern, case insensitive.
+				///	-N matches exact name, case sensitive.
+				/// -t matches type pattern, case insensitive.
+				/// -T matches exact type, case sensitive.
+				/// If none of the above switches is given then pattern matches 
+				/// any one of name, help and comments.
+				/// Example: words -V excel.f -n app
 				
 				<selftest>
 					marker ---
@@ -334,7 +331,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
 					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
 					var ss = "";
-					if(option.n) push("-n"); else if (option.N) push ("-N"); else push(""); 
+					if(option.sw) push(option.sw); else push(""); 
 					push(order[j]); push(option.pattern); execute("(words)");
 					var word_list = pop();
 					for (var i=0; i<word_list.length; i++) {
@@ -345,11 +342,17 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				} 
 				end-code
 				/// Modified by voc.f to support vocabulary
-				/// Pattern matches name, help and comments.
+				/// Vocabulary selector works alone or with other switches.
 				///	-v for matching partial vocabulary name, case insensitive.
-				///	-V -v and lock, -V- to unlock. Sync'ed with 'words'.
-				///	-n for matching only name pattern, case insensitive.
-				///	-N for exactly name only, case sensitive.
+				///	-V is -v and lock, -V- to unlock. Sync'ed with 'words'.
+				/// One of the following switches
+				///	-n matches only name pattern, case insensitive.
+				///	-N matches exact name, case sensitive.
+				/// -t matches type pattern, case insensitive.
+				/// -T matches exact type, case sensitive.
+				/// If none of the above switches is given then pattern matches 
+				/// any one of name, help and comments.
+				/// Example: help -V excel.f -n app
 				
 : help			( [<pattern>] -- )  \ Print help message of screened words
                 char \n|\r word (help) ;

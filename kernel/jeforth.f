@@ -919,6 +919,7 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 				last().predecessor = last().name;
                 last().name = newname;
 				last().type = "alias";
+				last().help = last().name + last().help.match(/\S+\s*(\s.*)/)[1];
                 end-code
 
 				<selftest>
@@ -1599,7 +1600,18 @@ code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of w
 				var result = [];
                 for(var i=1;i<word_list.length;i++) {
 					if (!pattern) { result.push(word_list[i]); continue; }
-					switch(option){
+					switch(option){ 
+						// 這樣寫表示這些 option 都是唯一的。
+						case "-t": // -t for matching type pattern, case insensitive.
+							if (word_list[i].type.toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) {
+								result.push(word_list[i]);
+							}
+							break;
+						case "-T": // -T for matching type pattern exactly.
+							if (word_list[i].type==pattern) {
+								result.push(word_list[i]);
+							}
+							break;
 						case "-n": // -n for matching only name pattern, case insensitive.
 							if (word_list[i].name.toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) {
 								result.push(word_list[i]);
