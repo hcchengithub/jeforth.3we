@@ -3324,6 +3324,9 @@
 	1.	add one line only to arrow.js 
 		push(world); // [ ]
 
-
-
+[x] sync words -V vocabulary-name and help -V vocabulary-name also -V-
+    改寫，合併、簡化
+	
+[ ] echo command line 要先 cr 一下，除非沒有東西。
+	[ ]index.htm 
 

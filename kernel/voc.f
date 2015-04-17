@@ -245,31 +245,63 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					' marker-test-dummy boolean \ false
 					XOR ==>judge [if] <js> ['(marker)','marker'] </jsV> all-pass [then]
 				</selftest>
+				
+code parser(words,help) ( "string" -- { v:vocname, vlock:boolean, n:boolean, N:boolean, pattern:"string"} ) \ parser for 'words' and '(help)'.
+				if(!this.option) this.option={v:"",vlock:false};
+				this.option.pattern = ""; this.option.n = this.option.N = false;
+				if(!this.option.vlock) this.option.v = "";
+				var spec = ' ' + pop() + ' '; // 我心裡想的 spec 是 -v -V -n -N 這些 option 一開始是整個 string
+				var vocSpec = spec.match(/(.*?)\s+(-[vV])\s+(\S+)(.*)/); 
+				// vocSpec[0]=全部, [1]:之前, [2]="-[vV]", [3]:"vocname.f", [4]=之後
+				// 如果缺 vocSpec[3] 整個 vocSpec 也都不會成立，變成 nuull
+				// 如果有多組 -[vV] vocname 取第一組。
+				if(vocSpec) {  
+					this.option.v = vocSpec[3];
+					this.option.vlock = vocSpec[2]=="-V";
+					spec = vocSpec[1]+vocSpec[4]; // 去除已經處理過的部分
+				}
+				var unlock = spec.match(/(.*?)\s(-V-)\s(.*)/);
+				if(unlock) {
+					// unlock[0]=全部, [1]:之前, [2]="-V-", [3]:之後
+					// 如果缺 -V- 整個都不會成立，變成 nuull
+					// 如果有多組 -V- 取第一組。
+					this.option.vlock = false;
+					this.option.v = "";
+					spec = unlock[1] + " " + unlock[3]; // 去除已經處理過的部分
+				}
+				
+				var NSpec = spec.match(/\s+(-N)\s+(\S+)/); 
+				// NSpec[1]:-N, NSpec[2]:"Name", 如果缺 NSpec[2] 整個 NSpec 也都不會成立，變成 nuull
+				if(NSpec) {
+					// 如果有 -N 到此結束
+					this.option.N = true;
+					this.option.pattern = NSpec[2];
+				} else {
+					var nSpec = spec.match(/\s+(-n)\s+(\S+)/); 
+					// nSpec[1]:-n, nSpec[2]:"name", 如果缺 nSpec[2] 整個 nSpec 也都不會成立，變成 nuull 
+					if(nSpec){ 
+						// 如果有 -n 也到此結束
+						this.option.n = true;
+						this.option.pattern = nSpec[2];
+					} else {
+						// 剩下的整個都是 pattern
+						this.option.pattern = spec.replace(/(^\s*)|(\s*$)/g,'');
+					}
+				}
+				push(this.option);
+				end-code
+				\ 如果有 -v 或 -V 就取得 vocabulary 的 spec 加一層限制。
+				\ 如果有 -n 或 -N 就對 pattern 加一層限定
 
 code words      ( [<spec>] -- ) \ List all words or words screened by spec.
-				var pattern="", spec = pattern = nexttoken("\\r|\\n"); // spec 是 -v -V -n -N 這些東西帶頭的 string
-				var vocSpec = spec.match(/\s*(-[vV])\s+(\S+)(.*)/); // vocSpec[1]:"-v", vocSpec[2]:"vocname.f", vocSpec[3]="...." 
-				if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) {  // 如果缺 vocSpec[2] 整個 vocSpec 也都不會成立，變成 nuull
-					if (vocSpec[3]) {
-						spec = vocSpec[3].match(/\s*(\S?.*\S)\s*/); // remove 前後 white spaces
-						pattern = spec = spec ? spec[1] : ""; // match result can be NULL
-					} else pattern = spec = ""; 
-				}
-				if(vocSpec && vocSpec[1]=="-V") this.vocSpec = vocSpec;
-				if(!vocSpec && spec == "-V-") this.vocSpec = null;
-				if(this.vocSpec) vocSpec = this.vocSpec;
-				var NSpec = spec.match(/\s*(-N)\s+(\S+)/); // NSpec[1]:-N NSpec[2]:"Name"
-				if(NSpec && NSpec[1]=="-N") pattern = NSpec[2];
-				var nSpec = spec.match(/\s*(-n)\s+(\S+)/); // nSpec[1]:-n nSpec[2]:"name" 
-				if(nSpec && nSpec[1]=="-n") pattern = nSpec[2];
+				push(nexttoken("\\r|\\n")); execute("parser(words,help)"); var option = pop();
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) 
-						if (order[j].toLowerCase().indexOf(vocSpec[2].toLowerCase()) == -1) continue;
+					if(option.v) 
+						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
 					var voc = "\n-------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) --------\n";
 					var ss = "";
-					if(nSpec) push("-n"); else if (NSpec) push ("-N"); else push(""); 
-					push(order[j]); push(pattern); 
-					execute("(words)");
+					if(option.n) push("-n"); else if (option.N) push ("-N"); else push(""); 
+					push(order[j]); push(option.pattern); execute("(words)");
 					var word_list = pop();
 					for (var i=0; i<word_list.length; i++) ss += word_list[i].name+" ";
 					if (i) { print(voc); print(ss); }
@@ -277,11 +309,11 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
                 end-code interpret-only
 				/// Modified by voc.f to support vocabulary
 				/// Pattern matches name, help and comments.
-				///	-v for matching vocabulary, case insensitive. Must be the first option.
-				///	-V -v and lock, -V- to unlock.
+				///	-v for matching partial vocabulary name, case insensitive.
+				///	-V -v and lock, -V- to unlock. Sync'ed with 'help'.
 				///	-n for matching only name pattern, case insensitive.
 				///	-N for exactly name only, case sensitive.
-
+				
 				<selftest>
 					marker ---
 					*** words modified for volcabulary ... 
@@ -296,28 +328,14 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 				</selftest>
 
 code (help)		( "pattern" -- )  \ Print help message of screened words
-				var pattern, spec = pattern = pop();
-				var vocSpec = spec.match(/\s*(-[vV])\s+(\S+)(.*)/); // vocSpec[1]:"-v", vocSpec[2]:"vocname.f", vocSpec[3]="...." 
-				if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) {
-					if (vocSpec[3]) {
-						spec = vocSpec[3].match(/\s*(\S?.*\S)\s*/); // remove 前後 white spaces
-						pattern = spec = spec ? spec[1] : ""; // match result can be NULL
-					} else pattern = spec = ""; 
-				}
-				if(vocSpec && vocSpec[1]=="-V") this.vocSpec = vocSpec;
-				if(!vocSpec && spec == "-V-") this.vocSpec = null;
-				if(this.vocSpec) vocSpec = this.vocSpec;
-				var NSpec = spec.match(/\s*(-N)\s+(\S+)/); // NSpec[1]:-v NSpec[2]:"Name"
-				if(NSpec && NSpec[1]=="-N") pattern = NSpec[2];
-				var nSpec = spec.match(/\s*(-n)\s+(\S+)/); // nSpec[1]:-v nSpec[2]:"name" 
-				if(nSpec && nSpec[1]=="-n") pattern = nSpec[2];
+				execute("parser(words,help)"); var option = pop();
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(vocSpec && (vocSpec[1]=="-v"|| vocSpec[1]=="-V")) 
-						if (order[j].toLowerCase().indexOf(vocSpec[2].toLowerCase()) == -1) continue;
+					if(option.v) 
+						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
 					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
 					var ss = "";
-					if(nSpec) push("-n"); else if (NSpec) push ("-N"); else push(""); 
-					push(order[j]); push(pattern); execute("(words)");
+					if(option.n) push("-n"); else if (option.N) push ("-N"); else push(""); 
+					push(order[j]); push(option.pattern); execute("(words)");
 					var word_list = pop();
 					for (var i=0; i<word_list.length; i++) {
 						ss += word_list[i]+"\n";
@@ -328,8 +346,8 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				end-code
 				/// Modified by voc.f to support vocabulary
 				/// Pattern matches name, help and comments.
-				///	-v for matching vocabulary, case insensitive. Must be the first option.
-				///	-V -v and lock, -V- to unlock.
+				///	-v for matching partial vocabulary name, case insensitive.
+				///	-V -v and lock, -V- to unlock. Sync'ed with 'words'.
 				///	-n for matching only name pattern, case insensitive.
 				///	-N for exactly name only, case sensitive.
 				
@@ -337,6 +355,10 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
                 char \n|\r word (help) ;
 				/// Modified by voc.f to support vocabulary
 				/// Pattern matches name, help and comments.
+				///	-v for matching partial vocabulary name, case insensitive.
+				///	-V -v and lock, -V- to unlock. Sync'ed with 'words'.
+				///	-n for matching only name pattern, case insensitive.
+				///	-N for exactly name only, case sensitive.
 
 : ?skip2		( "name.f" <EOF> -- "name.f" |empty ) \ skip to <EOF> to avoid double including
 				dup (') 			( name.f exist? )

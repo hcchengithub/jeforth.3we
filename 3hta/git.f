@@ -121,8 +121,7 @@ s" git.f"	source-code-header
 		/// 空白 Git 儲存庫，將會得到一個 warning: You appear to have cloned 
 		/// an empty repository. 警告訊息，不過這不影響你上傳本地的變更。
 
-	: help ( -- ) \ Git help
-		js> tib.length>ntib if help else 
+	: git-help ( -- ) \ Git help
 		<text>
 	usage: git [--version] [--help] [-C <path>] [-c name=value]
 			   [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
@@ -156,20 +155,28 @@ s" git.f"	source-code-header
 	'git help -a' and 'git help -g' lists available subcommands and some
 	concept guides. See 'git help <command>' or 'git help <concept>'
 	to read about a specific subcommand or concept.
-		</text> . then ;
+		</text> . ;
 
 	\ 第 04 天：常用的 Git 版本控管指令
 	\ 	master 代表目前工作目錄是 master 分支，也是 Git 的預設分支名稱。
-	\ 	「紅色」的數字都代表 Untracked (未追蹤) 的檔案，也就是這些變更都不會進入版本控管。
+	\ 	「紅色」的數字都代表 Untracked (未追蹤) 的檔案，也就是這些變更都不會進入版本控管(commit)。
 	\ 	+10 代表有 10 個「新增」的檔案
 	\ 	~0 代表有 0 個「修改」的檔案
 	\ 	-0 代表有 0 個「刪除」的檔案
-	\	「綠色」的數字都代表 Staged (準備好) 的檔案，也就是這些變更才會進入版本控管。
+	\	「綠色」的數字都代表 Staged (準備好) 的檔案，也就是這些變更才會進入版本控管(commit)。
 	\	+23 代表有 23 個「新增」的檔案將被建立一個版本
 	\	~0 代表有 0 個「修改」的檔案將被建立一個版本
 	\	-0 代表有 0 個「刪除」的檔案將被建立一個版本
-		
-	\ git add . 不用學, use GitHub for Windows
+
+	: add ( <...> -- ) \ Add file(s) into the cache of the repo (the project)
+		check-shell s" git add " char \n|\r word + </shell> ;
+		/// 注意，pathname 有分大小寫，靠，弄錯了沒有 warning 等你自己慢慢發現！
+		/// Usage: add pathname1 pathname2 ...
+		/// 'add' 把檔案加進 cache 準備 commit。原本是 tracked 或 untracked 都
+		/// 得經過 add 才會進 cache。別以為只有新檔才需要 add 因為即使是已經 
+		/// tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到。
+	
+	\ 注意！ pathname 有分大小寫，弄錯了不會有 warning, 靠。
 	\ 	github\forthtranspiler [master +1 ~1 -0 !]> git add readme.md <------ 應該是 README.md 大小寫有分，但不會有任何警告！
 	\ 	github\forthtranspiler [master +1 ~1 -0 !]> git add readme.mdddd <--- 檔案真的不存在才會有 error
 	\ 	fatal: pathspec 'readme.mdddd' did not match any files
@@ -274,8 +281,9 @@ s" git.f"	source-code-header
 
 	: add-modified ( -- ) \ 忽略 untracked 僅 cache "modified" and "deleted" files.
 		check-shell <shell> git add -u </shell> ;
-		/// 'add' 是把檔案加進 cache 準備提交，原本是 tracked 或 untracked 
-		/// 皆然，不只是用來加新檔進 tracked。
+		/// 'add' 把檔案加進 cache 準備 commit。原本是 tracked 或 untracked 都
+		/// 得經過 add 才會進 cache。別以為只有新檔才需要 add 因為即使是已經 
+		/// tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到。
 
 	\ 第 08 天：關於分支的基本觀念與使用方式
 
