@@ -21,7 +21,7 @@ also forth definitions
 				false ;
 				/// return a 'false' to stop the hotkey event handler chain.
 
-code {F9}		( -- false ) \ Hotkey handler, Smaller the input box.
+code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				var r = inputbox.rows;
 				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
 				inputbox.rows = Math.max(r,1);
@@ -30,6 +30,8 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the input box.
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
+				last alias {F6} // ( -- flase ) Hotkey handler, Smaller the input box
+								/// Duplicated to recover PowerCam conflict.
 
 code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				$("#inputbox").show()
@@ -41,6 +43,8 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				end-code
 				/// return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
+				last alias {F7} // ( -- flase ) Hotkey handler, Bigger the input box
+								/// Duplicated to recover PowerCam conflict.
 
 code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				var selection = getSelection();
