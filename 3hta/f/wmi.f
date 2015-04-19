@@ -621,6 +621,7 @@ code objEnumWin32_Process
 					js> !pop().atEnd() ( 0 NotAtEnd? )
 				while ( count | obj )
 					1+ 
+					cr <o> <hr style="border-width:3px;margin-left:1em;margin-right:1em;border-style:solid;"></o> drop
 					."  string   Name;                       " r@ :> item().Name;                        . cr
 					."  uint32   ProcessId;                  " r@ :> item().ProcessId;                   . cr
 					."  string   Caption;                    " r@ :> item().Caption;                     . cr
@@ -669,8 +670,8 @@ code objEnumWin32_Process
 				r@ js: pop().moveNext() repeat 
 				r> drop ;
 				/// Usage: Don't forget the where-clause, Case insensitive
-				///     s" where name = 'ExCeL.ExE'" list-them
-				///     s" where name like 'chrom%'" list-them 
+				///     s" where name = 'ExCeL.ExE'" see-process
+				///     s" where name like 'chrom%'" see-process
 
 : get-them		( "where-clause" -- [objWin32_Process,..] ) \ Get processes.
 				objEnumWin32_Process >r  [] ( [] | Enum )

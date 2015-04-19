@@ -6,6 +6,15 @@
 \ 今利用 jeforth 來管理這些命令跟建議。平時也可以簡化指令、做筆記、為每組命令添加 help 
 \ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
 \
+	<comment>
+	hcchen5600 2015/04/17 21:23:33 
+		昨天家裡電腦又 GitHub repository 大亂。可能是 GFW 干擾 Dropbox 同步所造成。也可能是 GitHub 
+		for Windows 上沒有先 commit 乾淨就按下 [Sync] button 的後果。一時心慌十分挫折。幸好公司電腦
+		的 Dropbox folder 還是先前的正常狀況，回公司 commit 上 GitHub 先修復 remote。
+		家裡的 .git 已經大亂，size 竟有 47M 正常的才 19M。修復過程： 先 md 一個暫時的 folder, 然後
+		從 GitHub 上 clone 下來。檢查 local jeforth.3we 裡 ignored 的檔案先 copy 到 temp folder，最
+		後 copy temp 過來蓋掉 local。結果 local size 變成 60M 只好這樣。裡面的垃圾以後再看怎麼清。
+	</comment>
 
 js> kvm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
@@ -17,6 +26,7 @@ s" git.f"	source-code-header
 	\		PowerShell window. 一開始還沒有 git-demo 所以先從我現有的 repository 啟動 git shell 借力省掉 path
 	\		設定的麻煩。
 
+	\ Setup git-shell-path so we know how to run Git Shell.
 	( WKS-38EN3477 ) char COMPUTERNAME proc-env@ char WKS-38EN3477 = [if]
 		s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
@@ -25,6 +35,11 @@ s" git.f"	source-code-header
 		s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
 	[then]
+	/// Something like this:
+	/// C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell
+	/// which is from right-click the 'Git Shell' icon on the Desktop.
+
+	\ You need to setup 'project-name' and 'uri(origin/master)' manually.
 	\ s" forthtranspiler" value project-name // ( -- str ) The github repository name (project title)
 	s" jeforth.3we" value project-name // ( -- str ) The github repository name (project title)
 	\ s" https://github.com/figtaiwan/forthtranspiler" value uri(origin/master) // ( -- str ) URI of figtaiwan/forthtranspiler
@@ -42,19 +57,20 @@ s" git.f"	source-code-header
 		r> drop 1 = if else 0 then ;
 		
 	: activate-shell ( -- ) \ Active Git Shell (Git Shell's powershell.exe)
-		200 nap shellId ?dup if ( processID )
+		500 nap shellId ?dup if ( processID )
 			s' WshShell.AppActivate ' swap + </vb> 
-		then 200 nap ; /// assume it's powershell
+		then 500 nap ; /// assume it's powershell
 	: activate-jeforth ( -- ) \ Come back to jeforth.3hta
-		200 nap s" WshShell.AppActivate " kvm.process :> processID + </vb> 200 nap ;
+		1000 nap s" WshShell.AppActivate " kvm.process :> processID + </vb> 500 nap ;
 		
-	: <shell> ( <command line> -- ) \ Command line to the shell
+	: <shell> ( <command line> -- ) \ Command line to the Git Shell
 		char {enter}{enter} char </shell> word + compiling if literal then ; immediate
-	: </shell> ( "command line" -- ) \ Send command line to the shell
+
+	: </shell> ( "command line" -- ) \ Send command line to the Git Shell
 		compiling if 
 			\ '^' and '~' 是 sendkey 的 special character 要改成 "{^}" and "{~}"
 			js: push(function(){push(pop().replace(/\^/g,"{^}").replace(/~/g,"{~}"))}) 
-			, compile activate-shell
+			, compile activate-shell 
 			s' WshShell.SendKeys "' literal compile swap compile + s' {enter}"' literal 
 			compile + [compile] </vb> compile activate-jeforth
 		else 
@@ -64,15 +80,26 @@ s" git.f"	source-code-header
 		
 	: launch-git-shell ( -- ) \ Run or activate Git Shell
 		shellId if activate-shell else git-shell-path (fork) then
-		begin 500 nap shellId until 100 nap activate-shell ;
+		begin 500 nap shellId until 500 nap activate-shell ;
 		
 	: autoexec ( -- ) \ Mimic autoexec.bat
-		100 nap <shell> subst x: /d </shell> 
-		100 nap <shell> subst x: .</shell> 100 nap <shell> x:</shell>  
+		<shell> subst x: /d </shell> 
+		<shell> subst x: .</shell> <shell> x:</shell>  
 		s" cd " project-name + </shell> then ; 
 
 	: check-shell ( -- boolean ) \ Is Git Shell running?
-		shellId not ?abort" Error! Git Shell is not running. Try 'git-shell' again." ;
+		shellId not ?abort" Error! Git Shell is not running. Try 'launch-git-shell' command again." ;
+		
+	: cd ( <...> -- ) \ The DOS command 'change directory'.
+		check-shell s" cd " char \n|\r word + </shell> ;
+		
+	: cls ( <...> -- ) \ The DOS command 'Clear screen', also clear jeforth output box.
+		check-shell <shell> cls </shell> cls ;
+		/// 'er' to erase only the jeforth output box.
+
+	: dir ( <...> -- ) \ The DOS command 'View directory'.
+		check-shell s" dir " char \n|\r word + </shell> ;
+		/// 'ls' to list repository.
 		
 	: init ( -- ) \ Create a new git repository at the current directory
 		check-shell <shell> git init</shell> ;
@@ -175,7 +202,16 @@ s" git.f"	source-code-header
 		/// 'add' 把檔案加進 cache 準備 commit。原本是 tracked 或 untracked 都
 		/// 得經過 add 才會進 cache。別以為只有新檔才需要 add 因為即使是已經 
 		/// tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到。
-	
+
+	: commit ( <...> -- ) \ Save the cache into the repository.
+		check-shell s" git commit " char \n|\r word + </shell> ;
+		/// Usage: commit -m "Descriptions"
+		/// 先用 'add' 把檔案加進 cache 才 commit 得到它。原本是 tracked 或
+		/// untracked 都得經過 add 才會進 cache。別以為只有新檔才需要 add 因
+		/// 為即使是已經 tracked 的檔案也不會自動進 cache 故也不會自動被 
+		/// commit 到。
+
+		
 	\ 注意！ pathname 有分大小寫，弄錯了不會有 warning, 靠。
 	\ 	github\forthtranspiler [master +1 ~1 -0 !]> git add readme.md <------ 應該是 README.md 大小寫有分，但不會有任何警告！
 	\ 	github\forthtranspiler [master +1 ~1 -0 !]> git add readme.mdddd <--- 檔案真的不存在才會有 error
@@ -254,10 +290,9 @@ s" git.f"	source-code-header
 		/// 做錯了？沒關係，只要執行 git reset --hard ORIG_HEAD 就可
 		/// 以回復到上一版，然後再重新合併一次引發相同的衝突。
 
-	: ls ( <[-u or other options]> -- ) \ Same as 'dir', like dir of DOS, list all files of the repository.
+	: ls ( <[-u or other options]> -- ) \ Like dir of DOS, list all files of the repository.
 		check-shell s" git ls-files " char \n|\r word + </shell> ;
 		/// "ls -u" to list conflict files then use "diff [filepath]" to see the details.
-		last alias dir
 
 	: ls-remote ( -- ) \  'ls' but regarding the remote repo.
 		check-shell s" git ls-remote " char \n|\r word + </shell> ;
@@ -376,7 +411,7 @@ s" git.f"	source-code-header
 	: reference ( "reference" <pathname> -- ) \ Create or change a reference that points to a GitHub object. 
 		check-shell BL word ( "reference" "ref-name" ) s" git update-ref " swap + s"  " + swap + </shell> ;
 		/// Example of a pathname : refs\refName
-		/// GitHb object is usually a comment. Can also be a tree 
+		/// GitHub object is usually a commit. Can also be a tree 
 		/// or something else that you can find in the .git folder.
 
 	: symbol ( "reference-pathname" <pathname> -- ) \ Create (and change?) a symbolic reference.

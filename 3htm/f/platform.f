@@ -177,32 +177,187 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 : {ctrl-break}	( -- boolean ) \ Inputbox keydown handler, stop outer loop
 				."  {ctrl-break} " stop false ;
 
+: help(word) 	( word -- ) \ Show help messages of a word in a HTML table
+				js> typeof(help_words)=='object' if else
+						<o> <style id=help_words>
+							.help_words table, .help_words td , .help_words th, .help_words caption {
+								padding:8px;
+								border-collapse: collapse;
+								border: 2px solid #F0F0F0;
+							}
+							.help_words tr {background: #E8E8FF}
+							.help_words tr:nth-child(1) {background: #D0D0FF}
+						</style></o> drop
+				then
+				<text>
+					<table class=help_words style="width:90%">
+					<tr>
+					  <td style="width:200px"><b>_name_</b></td><td colspan=4><b>_help_</b>
+					  [_type_][_vid_][_immediate_][_compile_]</td>
+					</tr>
+					_comment_
+					</table>
+				</text> ( word html )
+				js> pop().replace(/_name_/,kvm.plain(tos().name))
+				js> pop().replace(/_help_/,kvm.plain(tos().help.match(/^\S+\s*(.*?)\s*$/)[1]))
+				js>	pop().replace(/_type_/,kvm.plain(tos().type))
+				js>	pop().replace(/_vid_/,kvm.plain(tos().vid))
+				( word html ) <js> 
+					if (tos(1).comment) {
+						push(pop().replace(
+							/_comment_/,
+							"<tr><td colspan=5>"+kvm.plain(tos().comment)+"</td></tr>"
+						))
+					} else push(pop().replace(/_comment_/,""))
+					if (tos(1).immediate)  
+						 push(pop().replace(/_immediate_/,"IMMEDIATE")); 
+					else push(pop().replace(/_immediate_/,""));
+					if (tos(1).compileonly) 
+						 push(pop().replace(/_compile_/,"COMPILE-ONLY")); 
+					else push(pop().replace(/_compile_/,""));
+				</js> 
+				</o> 2drop ;
+
+code (help)		( "pattern" -- )  \ Print help message of screened words
+				execute("parser(words,help)"); var option = pop();
+				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
+					if(option.v) 
+						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
+					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
+					// 取得範圍內的 words into word_list
+					if(option.sw) push(option.sw); else push(""); 
+					push(order[j]); push(option.pattern); execute("(words)");
+					var word_list = pop();
+					// 印出
+					if (word_list.length) print(voc);
+					for (var i=0; i<word_list.length; i++) {
+						push(word_list[i]); execute('help(word)')
+					}
+				} 
+				end-code
+				/// Modified by platform.f for HTML table.
+				/// Usage: help ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
+				/// None or one of the vocabulary selector:
+				///	  -v for matching partial vocabulary name, case insensitive.
+				///	  -V is -v and lock, -V- to unlock.
+				/// None or one of the following switches:
+				///	  -n matches only name pattern, case insensitive.
+				///	  -N matches exact name, case sensitive.
+				///   -t matches type pattern, case insensitive.
+				///   -T matches exact type, case sensitive.
+				/// If none of the aboves is given then pattern matches 
+				/// all names, helps and comments.
+				/// Example: help -V excel.f -n app
+				/// Example: help - (Show all words)
+
 : help			( [<patthern>] -- )  \ Print help message of screened words
                 char \n|\r word js> tos().length if (help) else
-					<text>
-						F2     : Toggle input box EditMode
-						F4     : Copy marked string to input box
-						F5     : Restart jeforth
-						F9     : Smaller input box
-						F10    : Bigger input box
-						Esc    : Clear the input box
-						Tab    : Forth word auto-complete
-						Enter  : Focus on the input box
-						Up     : Command line history
-						Down   : Command line history 
-						Alt-Up : Command line history
-						Ctrl+  : Bigger font size
-						Ctrl-  : Smaller font size
-						Ctrl-Break : Stop console event handler or outer loop
-						Backspace  : Refer to "help -N {backSpace}" for details
-
-						see <word>     : See definitions of the word
-						help <pattern> : Refer to "help -N (help)" for details
-						jsc            : JavaScript console
-					</text> <js> pop().replace(/^[ \t]*/gm,'\t')</jsV> . cr
+					drop js> typeof(help3we)=='object' if else
+						<o> <style id=help3we>
+							.help3we table, .help3we td , .help3we th, .help3we caption {
+								padding:8px;
+								font-size:18px;
+								font-family: cursive;
+								border-collapse: collapse;
+								border: 2px solid #F0F0F0;
+							}
+							.help3we tr:nth-child(odd)  {background: #D0D0FF}
+							.help3we tr:nth-child(even) {background: #E0E0FF}
+							.help3we td {min-width: 200px}
+						</style></o> drop
+					then
+					<o>
+						<table class=help3we style="width:80%;">
+						<caption><h3>jeforth.3we for HTM, HTA, and Node-webkit basic usages</h3></caption>
+						<tr>
+						  <td><b>Topic</b></td>
+						  <td><b>Descriptions</b> (watch video)</td>
+						</tr>
+						<tr>
+						  <td>Introduction</td>
+						  <td>jeforth.3we is an implementation of the Forth programming 
+						  language written in JavaScript and runs on HTA, HTM, Node.js, and Node-webkit. 
+						  Watch <a href="http://www.camdemy.com/media/19253">video</a>.</td>
+						</tr>
+						<tr>
+						  <td>How to</td>
+						  <td><a href="http://www.camdemy.com/media/19254">Run the HTML version online</a>. Click <a href="http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html">here</a> to run.</td>
+						</tr>
+						<tr>
+						  <td>How to</td>
+						  <td><a href="http://www.camdemy.com/media/19255">Run the HTML version on local computer</a></td>
+						</tr>
+						<tr>
+						  <td>How to</td>
+						  <td><a href="http://www.camdemy.com/media/19256">Run the HTA version</a></td>
+						</tr>
+						<tr>
+						  <td>How to</td>
+						  <td><a href="http://www.camdemy.com/media/19257">Run Node.js and Node-Webkit version</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey F2</td>
+						  <td><a href="http://www.camdemy.com/media/19258">Toggle input box EditMode</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey F4</td>
+						  <td><a href="http://www.camdemy.com/media/19259">Copy marked string to inputbox</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey F5</td>
+						  <td><a href="http://www.camdemy.com/media/19260">Restart the jeforth system</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey F9/F10</td>
+						  <td><a href="http://www.camdemy.com/media/19261">Bigger/Smaller input box</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Esc</td>
+						  <td><a href="http://www.camdemy.com/media/19262">Clear input box</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Tab</td>
+						  <td><a href="http://www.camdemy.com/media/19263">Forth word auto-complete</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Enter</td>
+						  <td><a href="http://www.camdemy.com/media/19264">Jump into the input box</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Up/Down</td>
+						  <td><a href="http://www.camdemy.com/media/19265">Recall command history</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Alt-Up</td>
+						  <td><a href="http://www.camdemy.com/media/19266">List command history</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Crtl+/Ctrl-</td>
+						  <td><a href="http://www.camdemy.com/media/19267">Zoom in/ Zoom out</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Ctrl-Break</td>
+						  <td><a href="http://www.camdemy.com/media/19268">Stop all parallel running tasks</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey BackSpace</td>
+						  <td><a href="http://www.camdemy.com/media/19269">Trims the output box</a></td>
+						</tr>
+						<tr>
+						  <td>help [pattern]</td>
+						  <td>You are reading me. 'help' is also an useful command, "help -N help" to read more.
+						  <a href="http://www.camdemy.com/media/19270">Video: Help is helpful</a>.
+						  </td>
+						</tr>
+						<tr>
+						  <td>jsc</td>
+						  <td><a href="http://www.camdemy.com/media/19271">JavaScript Console</a></td>
+						</tr>
+						</table>
+					</o> drop
 				then ;
-				/// Modified by platform.f for hotkey helps. The previous version is voc.f.
-				/// Pattern matches name, help and comments.
+				' (help) last :: comment=pop().comment
+				/// Example: help (Show basic usages)
 
 <js>
 	kvm.cmdhistory = {

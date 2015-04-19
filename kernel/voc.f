@@ -85,7 +85,10 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				0 , \ dummy cfa, we need to do this because "(create)" doesn't drop the doVar like "create" does.
 				, \ pfa is the "name"
 				dup js: words[pop()]=[];words[pop()].push(0) ( empty ) \ words[][0] = 0 是源自 jeforth.WSH 的設計。
-				js: last().type='colon-vocabulary' 
+				<js> 
+					last().type='colon-vocabulary';
+					last().help = newname + " " + "( -- ) I am a vocabulary. I switch word-list.";
+				</js>
 				immediate \ 要在 colon definition 裡切換 word-list 所以是 immediate。 
 				does> r> @ set-context rescan-word-hash ;
 				
@@ -208,7 +211,9 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				last().type='marker'
                 last().herewas = here;
                 last().lengthwas = lengthwas; // dynamic variable array 的 reference 給了別人之後就不會蒸發掉了。
-				last().help =newname + " " + packhelp(); // help messages packed
+				var h = packhelp(); // help messages packed
+				if(h.indexOf("No help message")!=-1) h = "( -- ) I am a marker.";
+				last().help =newname + " " + h;
 				fortheval("get-vocs"); last().vocswas = pop(); 
 				last().orderwas = orderwas;  // FigTaiwan 爽哥提醒 // dynamic variable array 的 reference 給了別人之後就不會蒸發掉了。
 				// --------------------- the restore phase ----------------------------------
@@ -298,17 +303,18 @@ code words      ( [<spec>] -- ) \ List all words or words screened by spec.
 					if (i) { print(voc); print(ss); }
 				}
                 end-code interpret-only
-				/// Modified by voc.f to support vocabulary
-				/// Vocabulary selector works alone or with other switches.
-				///	-v for matching partial vocabulary name, case insensitive.
-				///	-V is -v and lock, -V- to unlock. Sync'ed with 'help'.
-				/// One of the following switches
-				///	-n matches only name pattern, case insensitive.
-				///	-N matches exact name, case sensitive.
-				/// -t matches type pattern, case insensitive.
-				/// -T matches exact type, case sensitive.
-				/// If none of the above switches is given then pattern matches 
-				/// any one of name, help and comments.
+				/// Modified by voc.f.
+				/// Usage: words ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
+				/// None or one of the vocabulary selector:
+				///	  -v for matching partial vocabulary name, case insensitive.
+				///	  -V is -v and lock, -V- to unlock.
+				/// None or one of the following switches:
+				///	  -n matches only name pattern, case insensitive.
+				///	  -N matches exact name, case sensitive.
+				///   -t matches type pattern, case insensitive.
+				///   -T matches exact type, case sensitive.
+				/// If none of the aboves is given then pattern matches 
+				/// all names, helps and comments.
 				/// Example: words -V excel.f -n app
 				
 				<selftest>
@@ -342,26 +348,23 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				} 
 				end-code
 				/// Modified by voc.f to support vocabulary
-				/// Vocabulary selector works alone or with other switches.
-				///	-v for matching partial vocabulary name, case insensitive.
-				///	-V is -v and lock, -V- to unlock. Sync'ed with 'words'.
-				/// One of the following switches
-				///	-n matches only name pattern, case insensitive.
-				///	-N matches exact name, case sensitive.
-				/// -t matches type pattern, case insensitive.
-				/// -T matches exact type, case sensitive.
-				/// If none of the above switches is given then pattern matches 
-				/// any one of name, help and comments.
-				/// Example: help -V excel.f -n app
+				/// Usage: help ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
+				/// None or one of the vocabulary selector:
+				///	  -v for matching partial vocabulary name, case insensitive.
+				///	  -V is -v and lock, -V- to unlock.
+				/// None or one of the following switches:
+				///	  -n matches only name pattern, case insensitive.
+				///	  -N matches exact name, case sensitive.
+				///   -t matches type pattern, case insensitive.
+				///   -T matches exact type, case sensitive.
+				/// If none of the aboves is given then pattern matches 
+				/// all names, helps and comments.
 				
 : help			( [<pattern>] -- )  \ Print help message of screened words
                 char \n|\r word (help) ;
-				/// Modified by voc.f to support vocabulary
-				/// Pattern matches name, help and comments.
-				///	-v for matching partial vocabulary name, case insensitive.
-				///	-V -v and lock, -V- to unlock. Sync'ed with 'words'.
-				///	-n for matching only name pattern, case insensitive.
-				///	-N for exactly name only, case sensitive.
+				' (help) last :: comment=pop().comment
+				/// Example: help -V excel.f -n app
+				/// Example: help - (Show all words)
 
 : ?skip2		( "name.f" <EOF> -- "name.f" |empty ) \ skip to <EOF> to avoid double including
 				dup (') 			( name.f exist? )

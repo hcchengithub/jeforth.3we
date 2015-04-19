@@ -760,7 +760,7 @@ code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The 
 				</selftest>
 
 code doVar      push(ip); ip=rstack.pop(); end-code compile-only // ( -- a ) 取隨後位址 a , runtime of created words
-code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code compile-only // ( ?? ) next's runtime.
+code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code compile-only // ( -- ) next's runtime.
 code ,          dictcompile(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
 				<selftest>
@@ -882,7 +882,9 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 				last().type = "marker";
                 last().herewas = here;
                 last().lengthwas = lengthwas; // [x] 引進 vocabulary 之後，此 marker 在只有 forth-wordlist 時使用。有了多個 word-list 之後要改寫。
-				last().help = newname + " " + packhelp(); // help messages packed
+				var h = packhelp(); // help messages packed
+				if(h.indexOf("No help message")!=-1) h = "( -- ) I am a marker. I forget everything after me.";
+				last().help =newname + " " + h;
                 last().xt = function(){ // marker's xt restores the saved context
                     here = this.herewas;
 					order = [current = context = "forth"]; // 萬一此 marker 在引入 vocabulary 之後被 call 到。
@@ -1004,7 +1006,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				
 : begin         ( -- a ) \ begin..again, begin..until, begin..while..until..then, begin..while..repeat
 				here ; immediate compile-only
-: until         ( a -- ) \ begin..unitl
+: until         ( a -- ) \ begin..until, begin..while..until..then,
 				compile 0branch , ; immediate compile-only
 : again         ( a -- ) \ begin..again,
 				compile  branch , ; immediate compile-only
@@ -1041,20 +1043,20 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					---
 				</selftest>
 
-: if            ( -- a ) \ if..then..else
+: if            ( -- a ) \ if..else..then, if..then
 				compile 0branch here 0 , ; immediate compile-only
 : ahead         ( -- a ) \ aft internal use
 				compile branch here 0 , ; immediate compile-only
 ' ahead alias never immediate compile-only // ( -- a ) never ... then for call-back entry inner(word.cfa+n) 
 : repeat        ( a a -- ) \ begin..while..repeat
 				[compile] again here swap ! ; immediate compile-only
-: then          ( a -- ) \ if..then..else
+: then          ( a -- ) \ if....else..then, for aft...then next, begin..while..until..then
 				here swap ! ; immediate compile-only
 : aft           ( a -- a a ) \ for aft ... then next
 				drop [compile] ahead [compile] begin swap ; immediate compile-only
-: else          ( a -- a ) \ if..then..else
+: else          ( a -- a ) \ if..else..then
 				[compile] ahead swap [compile] then ; immediate compile-only
-: while         ( a -- a a ) \ begin..while..repeat
+: while         ( a -- a a ) \ begin..while..repeat, begin..while..until..then
 				[compile] if swap ; immediate compile-only
 
 				<selftest>

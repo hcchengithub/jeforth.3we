@@ -3,9 +3,9 @@
 
 s" env.f"	source-code-header 
 
-js> WshShell.Environment("SYSTEM")  constant WshSysEnv
-js> WshShell.Environment("PROCESS") constant WshProcEnv
-js> WshShell.Environment("USER")    constant WshUserEnv
+js> WshShell.Environment("SYSTEM")  constant WshSysEnv // ( -- obj ) WSH system environment variables
+js> WshShell.Environment("PROCESS") constant WshProcEnv // ( -- obj ) WSH process environment variables
+js> WshShell.Environment("USER")    constant WshUserEnv // ( -- obj ) WSH user environment variables
 .( WshSysEnv.length  = ) WshSysEnv  js> pop().length . cr
 .( WshProcEnv.length = ) WshProcEnv js> pop().length . cr
 .( WshUserEnv.length = ) WshUserEnv js> pop().length . cr

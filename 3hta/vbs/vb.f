@@ -4,14 +4,15 @@
 	s" vb.f"		source-code-header
 
 					\ include basic.vbs
+					\ 這行無效不知何故 <h> <script id=vbsBasic type="text/vbscript" src="3hta/vbs/basic.vbs"></script></h> drop
 					\ 添加 VBScript tag into head section, 裡應外合才認得 VBScript.
-					char script createElement constant vbsBasic
+					char script createElement constant vbsBasic // ( -- element ) The vbs script tag element
 					vbsBasic char type char text/vbscript setAttribute
 					vbsBasic char id   char vbsBasic      setAttribute
 					vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
 					eleHead vbsBasic appendChild
 				
-					\ 不用 global 因為 Note-webkit 已經有用到，改用 kvm 最保險。 
+					\ 不用 global 因為 Node-webkit 已經有用到，改用 kvm 最保險。 
 					\ 讓 VBScript 認得 global. global object 含有 jeforth.3hta 所有的 global variables.
 					\ js> global <text>
 					\ 	Dim global

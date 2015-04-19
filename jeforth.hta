@@ -109,7 +109,7 @@
 		kvm.clearScreen = function(){$('#outputbox').empty()}
 		var plain = kvm.plain = function (s) {
 			var ss = s + ""; // avoid numbers to fail at s.replace()
-			ss = ss.replace(/\t/g,' &nbsp; &nbsp; &nbsp; &nbsp;');
+			ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
 			ss = ss.replace(/  /g,' &nbsp;');
 			ss = ss.replace(/</g,'&lt;');
 			ss = ss.replace(/>/g,'&gt;');
