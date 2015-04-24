@@ -30,6 +30,7 @@ s" git.f"	source-code-header
 	( WKS-38EN3477 ) char COMPUTERNAME proc-env@ char WKS-38EN3477 = [if]
 		s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
+		s" c:\Users\8304018.WKSCN\Downloads" value downloads-path // ( -- 'path' ) 
 	[then]
 	( DP-20121028UGNO ) char COMPUTERNAME proc-env@ char DP-20121028UGNO = [if]
 		s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
@@ -56,24 +57,29 @@ s" git.f"	source-code-header
 		r@ js: pop().moveNext() repeat ( ... count | obj )
 		r> drop 1 = if else 0 then ;
 		
+	: check-shell ( -- ) \ Abort if Shell is not running.
+		shellId not ?abort" Error! Git Shell is not running. Try 'launch-git-shell' command again." ;
+		
 	: activate-shell ( -- ) \ Active Git Shell (Git Shell's powershell.exe)
 		500 nap shellId ?dup if ( processID )
 			s' WshShell.AppActivate ' swap + </vb> 
 		then 500 nap ; /// assume it's powershell
 	: activate-jeforth ( -- ) \ Come back to jeforth.3hta
 		1000 nap s" WshShell.AppActivate " kvm.process :> processID + </vb> 500 nap ;
-		
+
 	: <shell> ( <command line> -- ) \ Command line to the Git Shell
 		char {enter}{enter} char </shell> word + compiling if literal then ; immediate
 
 	: </shell> ( "command line" -- ) \ Send command line to the Git Shell
 		compiling if 
+			compile check-shell 
 			\ '^' and '~' 是 sendkey 的 special character 要改成 "{^}" and "{~}"
 			js: push(function(){push(pop().replace(/\^/g,"{^}").replace(/~/g,"{~}"))}) 
 			, compile activate-shell 
 			s' WshShell.SendKeys "' literal compile swap compile + s' {enter}"' literal 
 			compile + [compile] </vb> compile activate-jeforth
 		else 
+			check-shell
 			js> pop().replace(/\^/m,"{^}").replace(/~/g,"{~}") activate-shell
 			s' WshShell.SendKeys "' swap + s' {enter}"' + </vb> activate-jeforth
 		then ; immediate
@@ -87,28 +93,28 @@ s" git.f"	source-code-header
 		<shell> subst x: .</shell> <shell> x:</shell>  
 		s" cd " project-name + </shell> then ; 
 
-	: check-shell ( -- boolean ) \ Is Git Shell running?
-		shellId not ?abort" Error! Git Shell is not running. Try 'launch-git-shell' command again." ;
-		
 	: cd ( <...> -- ) \ The DOS command 'change directory'.
-		check-shell s" cd " char \n|\r word + </shell> ;
+		s" cd " char \n|\r word + </shell> ;
+		
+	: (cd) ( "..." -- ) \ The DOS command 'change directory'.
+		s" cd " swap + </shell> ;
 		
 	: cls ( <...> -- ) \ The DOS command 'Clear screen', also clear jeforth output box.
-		check-shell <shell> cls </shell> cls ;
+		<shell> cls </shell> cls ;
 		/// 'er' to erase only the jeforth output box.
 
 	: dir ( <...> -- ) \ The DOS command 'View directory'.
-		check-shell s" dir " char \n|\r word + </shell> ;
+		s" dir " char \n|\r word + </shell> ;
 		/// 'ls' to list repository.
 		
 	: init ( -- ) \ Create a new git repository at the current directory
-		check-shell <shell> git init</shell> ;
+		<shell> git init</shell> ;
 		/// Don't worry about re-init a git again. It's idiot-proof, it
 		/// responses something like:
 		/// Reinitialized existing Git repository in D:/hcchen/Dropbox/learnings/github/demo/.git/
 		
 	: status ( -- ) \ Git status of the repository
-		check-shell <shell> git status</shell> ;
+		<shell> git status</shell> ;
 
 	\ 先手動建立 shared-repository
 	\ ~\git-demo [master]> md .\shared-repository
@@ -134,7 +140,7 @@ s" git.f"	source-code-header
 	\ 	done.
 
 	: clone ( <'URI'> -- ) \ New a repository, which is from URI, at the current folder
-		check-shell s" git clone " char \n|\r word + </shell> ;
+		s" git clone " char \n|\r word + </shell> ;
 		///     git clone 將遠端儲存庫複製到本地，並建立工作目錄與本地儲存庫，
 		/// 也就是 .git 資料夾。
 		///     Example: clone https://github.com/figtaiwan/forthtranspiler
@@ -196,7 +202,7 @@ s" git.f"	source-code-header
 	\	-0 代表有 0 個「刪除」的檔案將被建立一個版本
 
 	: add ( <...> -- ) \ Add file(s) into the cache of the repo (the project)
-		check-shell s" git add " char \n|\r word + </shell> ;
+		s" git add " char \n|\r word + </shell> ;
 		/// 注意，pathname 有分大小寫，靠，弄錯了沒有 warning 等你自己慢慢發現！
 		/// Usage: add pathname1 pathname2 ...
 		/// 'add' 把檔案加進 cache 準備 commit。原本是 tracked 或 untracked 都
@@ -204,7 +210,7 @@ s" git.f"	source-code-header
 		/// tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到。
 
 	: commit ( <...> -- ) \ Save the cache into the repository.
-		check-shell s" git commit " char \n|\r word + </shell> ;
+		s" git commit " char \n|\r word + </shell> ;
 		/// Usage: commit -m "Descriptions"
 		/// 先用 'add' 把檔案加進 cache 才 commit 得到它。原本是 tracked 或
 		/// untracked 都得經過 add 才會進 cache。別以為只有新檔才需要 add 因
@@ -275,27 +281,27 @@ s" git.f"	source-code-header
 	\ git log 很有用！
 
 	: log-verbose ( -- ) \ Read the commit log, 'q' to stop.
-		check-shell <shell> git log </shell> ;
+		<shell> git log </shell> ;
 		/// "git log -10" to see only the recent 10 commits
 
 	: 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從最後的 commit 裡恢復回來
-		check-shell s" git checkout -- " char \n|\r word + </shell> ;
+		s" git checkout -- " char \n|\r word + </shell> ;
 		/// 另一種寫法還原其中一個被改壞的檔案: 
 		/// git checkout <master|commitId> path/Gruntfile.js
 		last alias retrieve // ( <filename1 filename2 ...> -- ) 還原檔案
 		last alias recall // ( <filename1 filename2 ...> -- ) 還原檔案
 		
 	: 徹底還原 ( -- ) \ 把所有改過的都重新 checkout 回來，小心！連新加的檔案也都殺掉。
-		check-shell <shell> git reset --hard </shell> ;
+		<shell> git reset --hard </shell> ;
 		/// 做錯了？沒關係，只要執行 git reset --hard ORIG_HEAD 就可
 		/// 以回復到上一版，然後再重新合併一次引發相同的衝突。
 
 	: ls ( <[-u or other options]> -- ) \ Like dir of DOS, list all files of the repository.
-		check-shell s" git ls-files " char \n|\r word + </shell> ;
+		s" git ls-files " char \n|\r word + </shell> ;
 		/// "ls -u" to list conflict files then use "diff [filepath]" to see the details.
 
 	: ls-remote ( -- ) \  'ls' but regarding the remote repo.
-		check-shell s" git ls-remote " char \n|\r word + </shell> ;
+		s" git ls-remote " char \n|\r word + </shell> ;
 		/// ls-remote 顯示特定 remote repo 的 reference 名稱。包含
 		/// remote branchs 與 remote tags.
 
@@ -310,12 +316,12 @@ s" git.f"	source-code-header
 	\ 第 06 天：解析 Git 資料結構 - 物件結構
 		
 	: file-system-check ( -- ) \ check repository file system integity
-		check-shell <shell> git fsck</shell> ;
+		<shell> git fsck</shell> ;
 
 	\ 第 07 天：解析 Git 資料結構 - 索引結構 <----------- 了解 tracked/untracked, modified/unmodified, staged/unstaged 必讀。
 
 	: add-modified ( -- ) \ 忽略 untracked 僅 cache "modified" and "deleted" files.
-		check-shell <shell> git add -u </shell> ;
+		<shell> git add -u </shell> ;
 		/// 'add' 把檔案加進 cache 準備 commit。原本是 tracked 或 untracked 都
 		/// 得經過 add 才會進 cache。別以為只有新檔才需要 add 因為即使是已經 
 		/// tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到。
@@ -323,21 +329,21 @@ s" git.f"	source-code-header
 	\ 第 08 天：關於分支的基本觀念與使用方式
 
 	: branch ( [<...>] -- ) \ List all branches. Other commands work *in* a branch.
-		check-shell s" git branch " char \n|\r word + </shell> ;
+		s" git branch " char \n|\r word + </shell> ;
 		last alias list-branches // ( -- ) List local branches.
 		
 	: create-branch ( <branch name> -- ) \ Create a new branch.
-		check-shell s" git branch " BL word + </shell> ;
+		s" git branch " BL word + </shell> ;
 		/// 不必先 commit，故可以 commit 到新 branch 去。
 
 	: delete-branch ( <branch name> -- ) \ Delete an existing branch.
-		check-shell s" git branch -d " BL word + </shell> ;
+		s" git branch -d " BL word + </shell> ;
 		/// 你不能刪除目前工作的分支，必須先切換到其他分支後，再刪除之。
 		/// 沒有執行過「合併」的分支，都不能用本指令進行刪除，必須改用
 		/// git branch -D feature （大寫的 -D）才能刪除該分支。
 
 	: list-all-branch ( -- ) \ List all local and remote branches.
-		check-shell <shell> git branch -a </shell> ;
+		<shell> git branch -a </shell> ;
 		/// git branch -a 顯示出所有「本地分支」與「遠端追蹤分支」。
 		///     本地分支 : 在透過 git branch 指令執行時所顯示的分支，這
 		/// 些分支存在於本地端，而這些分支又常被稱為 主題分支 (Topic 
@@ -347,11 +353,11 @@ s" git.f"	source-code-header
 		/// 如此而已。你用 GitHub 是無法存取遠端分支的。
 		
 	: branch-branch ( <branch name> -- ) \ New a branch and switch over.
-		check-shell s" git checkout -b " BL word + </shell> ;
+		s" git checkout -b " BL word + </shell> ;
 		/// 不必先 commit，故可以 commit 到新 branch 去。
 		
 	: switch-branch ( <branch name> -- ) \ Switch to another branch.
-		check-shell s" git checkout " char \n|\r word + </shell> ;
+		s" git checkout " char \n|\r word + </shell> ;
 		/// "switch branch" and "switch commit" are the same command.
 		/// 不必先 commit，故可以 commit 到別的 branch 去。
 	last alias checkout // ( <...> -- ) "git checkout" general 
@@ -370,7 +376,7 @@ s" git.f"	source-code-header
 	\ 第 09 天：比對檔案與版本差異
 
 	: diff ( <[id1] [--cached] [id2]> -- ) \ List differences between comments.
-		check-shell s" git diff " char \n|\r word + </shell> ;
+		s" git diff " char \n|\r word + </shell> ;
 		/// diff               => 工作目錄 vs 索引
 		/// diff HEAD          => 工作目錄 vs HEAD (代表最新版本 or commit)
 		/// diff --cached HEAD => 索引     vs HEAD
@@ -386,7 +392,7 @@ s" git.f"	source-code-header
 	\ 第 10 天：認識 Git 物件的絕對名稱
 
 	: log ( -- ) \ Read the simplified commit log, 'q' to stop. Also 'log-verbose'.
-		check-shell <shell> git log --pretty=oneline --abbrev-commit </shell> ;
+		<shell> git log --pretty=oneline --abbrev-commit </shell> ;
 		
 	\ 第 11 天：認識 Git 物件的一般參照與符號參照
 	
@@ -409,17 +415,17 @@ s" git.f"	source-code-header
 	\   本控管中慣用的預設遠端分支的參照名稱，主要目的是用來代表一個遠端儲存庫的 URL 位址。
 		
 	: reference ( "reference" <pathname> -- ) \ Create or change a reference that points to a GitHub object. 
-		check-shell BL word ( "reference" "ref-name" ) s" git update-ref " swap + s"  " + swap + </shell> ;
+		BL word ( "reference" "ref-name" ) s" git update-ref " swap + s"  " + swap + </shell> ;
 		/// Example of a pathname : refs\refName
 		/// GitHub object is usually a commit. Can also be a tree 
 		/// or something else that you can find in the .git folder.
 
 	: symbol ( "reference-pathname" <pathname> -- ) \ Create (and change?) a symbolic reference.
-		check-shell BL word ( "reference-pathname" "symbol-name" ) s" git symbolic-ref " swap + s"  " + swap + </shell> ;
+		BL word ( "reference-pathname" "symbol-name" ) s" git symbolic-ref " swap + s"  " + swap + </shell> ;
 		/// Example of a pathname : refs\symName
 
 	: show-ref ( -- ) \ List all references include symbols.
-		check-shell <shell> git show-ref</shell> ;
+		<shell> git show-ref</shell> ;
 
 	\ 第 12 天：認識 Git 物件的相對名稱
 	
@@ -442,7 +448,7 @@ s" git.f"	source-code-header
 	\ 找到之後再用 git diff [filepath] 就可以僅比對其中一個檔案了：
 
 	: merge ( <from commit> -- ) \ Merge the commit(s) into the recent HEAD
-		check-shell s" git merge " char \n|\r word + </shell> ;
+		s" git merge " char \n|\r word + </shell> ;
 	
 	\ 第 24 天：使用 GitHub 遠端儲存庫 - 入門篇
 	
@@ -459,7 +465,7 @@ s" git.f"	source-code-header
 	\ 之後就要用 pull 的從 remote 下來。
 
 	: push.default ( -- ) \ git push 會出現一段提示，告訴你要設定 push.default 這個選項.
-		check-shell <shell> git config --global push.default simple</shell> ;
+		<shell> git config --global push.default simple</shell> ;
 		/// 要設定 push.default 這個選項，因為這種簡寫的 git push 方法的預設行為將會
 		/// 在 Git 2.0 之後發生改變，建議你透過設定 push.default 選項的方式明確指定 
 		/// push 的方法。詳細說明請參見 git help config 的說明文件，搜尋 push.default 
@@ -467,7 +473,7 @@ s" git.f"	source-code-header
 		/// 設值相同。
 	
 	: push ( [<options>] -- ) \ Upload local repo up to the remote repo
-		check-shell s" git push " char \n|\r word + </shell> ;
+		s" git push " char \n|\r word + </shell> ;
 		///     假設本地是 GitHub 上 clone 下來的，第一次 upload 所用的命令
 		/// 是：git push origin master 。當你第二次建立版本時，直接執行 git push 
 		/// 就會自動上傳成功。
@@ -485,7 +491,7 @@ s" git.f"	source-code-header
 		</comment>
 
 	: push到「空」遠端 ( -- ) \ 當 GitHub 上的 repo 是空的，upload 本地成果上去必須用這個。
-		check-shell <shell> git push -u origin master</shell> ;
+		<shell> git push -u origin master</shell> ;
 		/// 在 GitHub 上新建的 repo 是空的，連預設的 master 分支都沒有。此時
 		/// 下達 git push 指令時必須加上 -u 參數，才能成功地把本地儲存庫上傳
 		/// 到 GitHub 上的遠端儲存庫，其指令是 git push -u origin master
@@ -497,7 +503,7 @@ s" git.f"	source-code-header
 	\         然後直接將現有的本地 Git 儲存庫上傳到指定的 GitHub 專案
 
 	: remote ( <...> -- ) \ 對 GitHub 操作
-		check-shell s" git remote " char \n|\r word + </shell> ;
+		s" git remote " char \n|\r word + </shell> ;
 		///     本地若非 clone 下來的，就必須告訴本地 Git 遠端儲存庫在哪。而如
 		/// 果 GitHub 上的 repo 又是空的，這時我們可以輸入:
 		///     git remote add origin https://bla/bla/bla.git
@@ -512,7 +518,7 @@ s" git.f"	source-code-header
 		/// 主要目的是用來代表一個遠端儲存庫的 URL 位址。
 
 	: pull ( <...> -- ) \ Get repo from GitHub and merge to local.
-		check-shell s" git pull " char \n|\r word + </shell> ;
+		s" git pull " char \n|\r word + </shell> ;
 		/// 將遠端儲存庫的 master 分支取回，並合併到本地儲存庫的 master 分支:
 		///	使用 git pull origin master 指令
 		/// git pull 將遠端儲存庫的最新版下載回來，下載的內容包含完整的物件儲
@@ -523,7 +529,7 @@ s" git.f"	source-code-header
 		///     git merge origin/master
 		
 	: fetch  ( <...> -- ) \ Get repo from GitHub w/o merge.
-		check-shell s" git fetch " char \n|\r word + </shell> ;
+		s" git fetch " char \n|\r word + </shell> ;
 		/// 將遠端儲存庫的 master 分支取回，並合併到本地儲存庫的 master 分支:
 		///	使用 git fetch 指令後再執行 git merge origin/master 合併動作。
 		///     git fetch 將遠端儲存庫的最新版下載回來，下載的內容包含完整的
@@ -565,12 +571,12 @@ s" git.f"	source-code-header
 	</comment>
 	
 	: 手動加入一個「遠端儲存庫」 ( <tagName> <URI> -- )
-		check-shell s" git remote add " char \n|\r word + </shell> ;
+		s" git remote add " char \n|\r word + </shell> ;
 		/// 事實上你可以在你的工作目錄中，建立多個遠端儲存庫的參照位址。
 		/// 看不太懂。see 第 25 天：使用 GitHub 遠端儲存庫 - 觀念篇
 	
 	: list-uri ( -- ) \ List associated URIs on GitHub.com
-		check-shell <shell> git remote -v </shell> ;
+		<shell> git remote -v </shell> ;
 		
 	\ 第 26 天：多人在同一個遠端儲存庫中進行版控	
 		
@@ -579,6 +585,26 @@ s" git.f"	source-code-header
 
 
 
+: ver ( -- ) \ Git version
+	<shell> git --version</shell> ;
+	/// 請確定你的 git 版本是在 1.7.10以上。
+	/// http://jlord.us/git-it/challenges-zhtw/get_git.html
+
+: config ( -- ) \ The 'git config' general
+	s" git config " char \n|\r word + </shell> ;
+
+: list-config ( -- ) \ List the entire configuarations
+	<shell> git config -l</shell> ;
+
+: 設定你的名字 ( -- ) \ Setup the user name
+	s" git config --global user.name " BL word + </shell> ;
+	/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
+	
+: 設定你的電子信箱 ( -- ) \ Setup the user's email address
+	s" git config --global user.email " BL word + </shell> ;
+	/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
+	
+	
 
 
 

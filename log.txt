@@ -3335,36 +3335,9 @@
 [ ] Tab change to 4 spaces
 	[x]jeforth.hta [ ]index.html [ ]jeforth.3nw.html
 
-: help(word) ( word -- ) \ Show help messages of a word in a HTML table
-	js> typeof(help_words)=='object' if else
-			<o> <style id=help_words>
-				.help_words table, .help_words td , .help_words th, .help_words caption {
-					padding:8px;
-					border-collapse: collapse;
-					border: 2px solid #F0F0F0;
-				}
-				.help_words tr {background: #E8E8FF}
-				.help_words tr:nth-child(1) {background: #D0D0FF}
-			</style></o> drop
-	then
-	<text>
-		<table class=help_words style="width:90%">
-		<tr>
-		  <td style="width:200px"><b>_name_</b></td><td colspan=4><b>_help_</b></td>
-		</tr>
-		_comment_
-		</table>
-	</text> ( word html )
-	js> pop().replace(/_name_/,kvm.plain(tos().name))  ( word html )
-	js> pop().replace(/_help_/,kvm.plain(tos().help.match(/^\S+\s*(.*?)\s*$/)[1]))  ( word html )
-	<js>
-		if (tos(1).comment) {
-			push(pop().replace(
-				/_comment_/,
-				"<tr><td colspan=5>"+kvm.plain(tos().comment)+"</td></tr>"
-			))
-		}
-	</js> </o>
-;
+[ ] <enter> key doesn't work when in EditMode !!! Bug.
 
+[ ] Tab-autocomplete don't let it return 'undefind'
+
+[ ] <shell> should do the check-shell itself.
 
