@@ -165,8 +165,9 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 						this.cmdLine = inputbox.value.slice(0,inputbox.value.lastIndexOf(hint));
 						this.candidate = []; 
 						for(var key in wordhash) {
-							if(key.toLowerCase().indexOf(hint.toLowerCase())==0) candidate.push(key); 
+							if(key.toLowerCase().indexOf(hint.toLowerCase())!=-1) candidate.push(key); 
 						}
+						candidate.push(hint);
 					}
 					if(index >= candidate.length) index = 0;
 					inputbox.value = cmdLine + candidate[index++];

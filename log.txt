@@ -3339,5 +3339,9 @@
 
 [ ] Tab-autocomplete don't let it return 'undefind'
 
-[ ] <shell> should do the check-shell itself.
+[x] </shell> should do the check-shell itself.
+
+[ ] Separate git.f and shell.f
+
+
 
