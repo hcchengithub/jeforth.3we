@@ -72,9 +72,11 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				/// return a false to stop the hotkey event handler chain.
 				/// The selection must be made from start to end.
 
-: {esc}			( -- false ) \ Inputbox keydown handler, clean inputbox
-				js: document.getElementById("inputbox").value=""
-				false ;
+code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
+				inputbox.value="";
+				jump2endofinputbox.click(); inputbox.focus();
+				push(true); // 別的 handler 還可以收得到 Esc key。
+				end-code
 
 : history-selector ( -- ) \ Popup command history for selection
 				<o> <br><select style="width:800px;padding-left:2px;font-size:16px;"></select></o> ( select )
@@ -158,22 +160,29 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 
 code {Tab} 		( -- ) \ Inputbox auto-complete
 				with(this){
-					if(index == 0){
+					if(index == 0){ // index 初值來自 document.onkeydown event, 這是剛按下 Tab 的線索。
 						var a=('h '+inputbox.value+' t').split(/\s+/);
 						a.pop(); a.shift();
-						this.hint = a.pop(); // the partial word to be autocompleted
-						this.cmdLine = inputbox.value.slice(0,inputbox.value.lastIndexOf(hint));
+						this.hint = a.pop()||""; // the partial word to be autocompleted
+						this.cmdLine = inputbox.value.slice(0,inputbox.value.lastIndexOf(hint))||"";
 						this.candidate = []; 
-						for(var key in wordhash) {
-							if(key.toLowerCase().indexOf(hint.toLowerCase())!=-1) candidate.push(key); 
+						if(hint){
+							for(var key in wordhash) {
+								if(key.toLowerCase().indexOf(hint.toLowerCase())!=-1) candidate.push(key); 
+							}
+							candidate.push(hint);
 						}
-						candidate.push(hint);
 					}
-					if(index >= candidate.length) index = 0;
-					inputbox.value = cmdLine + candidate[index++];
+					if(hint){
+						if(index >= candidate.length) index = 0;
+						inputbox.value = cmdLine + candidate[index++];
+						push(false); // 吃掉這個 Tab key。
+					} else {
+						push(true); // 不吃掉這個 Tab key，給別人處理。
+					}
 				}
-				push(false);
 				end-code
+				last :: index=0
 
 : {ctrl-break}	( -- boolean ) \ Inputbox keydown handler, stop outer loop
 				."  {ctrl-break} " stop false ;
@@ -406,9 +415,9 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 
 	$("#inputbox")[0].onkeydown = function(e){
 		switch(e.keyCode) {
-			case 27: /* Esc  */ if(kvm.tick('{esc}'  )){kvm.execute('{esc}'  );return(kvm.pop());} break;
-			case 38: /* Up   */ if(kvm.tick('{up}'   )){kvm.execute('{up}'   );return(kvm.pop());} break;
-			case 40: /* Down */ if(kvm.tick('{down}' )){kvm.execute('{down}' );return(kvm.pop());} break;
+			case   9: /* Tab  */ if(kvm.tick('{Tab}' )){kvm.execute('{Tab}' );return(kvm.pop());} break;
+			case  38: /* Up   */ if(kvm.tick('{up}'  )){kvm.execute('{up}'  );return(kvm.pop());} break;
+			case  40: /* Down */ if(kvm.tick('{down}')){kvm.execute('{down}');return(kvm.pop());} break;
 		}
 		return (true); // pass down to following handlers
 	}
@@ -425,6 +434,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					return(false);
 				}
 				return(true); // In EditMode
+			case  27: /* Esc */ if(kvm.tick('{esc}')){kvm.execute('{esc}');return(kvm.pop());} break;
 			case 109: /* -   */ if(kvm.tick('{-}'  )){kvm.execute('{-}'  );return(kvm.pop());} break;
 			case 107: /* +   */ if(kvm.tick('{+}'  )){kvm.execute('{+}'  );return(kvm.pop());} break;
 			case 112: /* F1  */ if(kvm.tick('{F1}' )){kvm.execute('{F1}' );return(kvm.pop());} break;
@@ -439,7 +449,6 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 			case 121: /* F10 */ if(kvm.tick('{F10}')){kvm.execute('{F10}');return(kvm.pop());} break;
 			case 122: /* F11 */ if(kvm.tick('{F11}')){kvm.execute('{F11}');return(kvm.pop());} break;
 			case 123: /* F12 */ if(kvm.tick('{F12}')){kvm.execute('{F12}');return(kvm.pop());} break;
-			case   9: /* Tab */ if(kvm.tick('{Tab}')){kvm.execute('{Tab}');return(kvm.pop());} break;
 			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}')){kvm.execute('{ctrl-break}');return(kvm.pop());} break;
 			case   8: /* Back space */ if(kvm.tick('{backSpace}' )){kvm.execute('{backSpace}' );return(kvm.pop());} break; // disable the [switch previous page] function
 		}

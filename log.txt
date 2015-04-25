@@ -3318,30 +3318,36 @@
     如果規定 value cv 當做默認的 canvas 就不必用 kvm.cv 了，但這樣會使 canvas.f 經常因為 cv 是 undefined
     而出錯。
 
-[ ] jeforth.3we README.md 改良
+[x] jeforth.3we README.md 改良
 
 [ ] How to play with arrow.js
-	1.	add one line only to arrow.js 
+	1.	add three lines only to arrow.js 
 		push(world); // [ ]
 
 [x] sync words -V vocabulary-name and help -V vocabulary-name also -V-
     改寫，合併、簡化
 	
-[ ] echo command line 要先 cr 一下，除非沒有東西。
-	[ ]index.htm 
+[x] echo command line 要先 cr 一下，除非沒有東西。
+	[x]index.htm [x]index.html [x]jeforth.hta [ ]jeforth.3nd.js
 
 [x] alias' help should show the correct word name
 
-[ ] Tab change to 4 spaces
-	[x]jeforth.hta [ ]index.html [ ]jeforth.3nw.html
+[x] Tab change to 4 spaces
+	[x]jeforth.hta [x]index.html [x]jeforth.3nw.html
 
-[ ] <enter> key doesn't work when in EditMode !!! Bug.
+[x] <enter> key doesn't work when in EditMode !!! Bug.
+	==> EditMode 當中 enter 不適合用來跳進 inputbox, 會嚴重干擾 editing。
+		但是有 Esc, Tab, F4 等替代辦法。
 
-[ ] Tab-autocomplete don't let it return 'undefind'
+[x] Tab-autocomplete don't let it return 'undefind'
 
 [x] </shell> should do the check-shell itself.
 
 [ ] Separate git.f and shell.f
 
+[ ] inputbox 之前放個 prompt 很重要
+	[ ]3hta, [ ]3htm, [ ]3nw
+	
+[ ] 把文章都整理進 jeforth.3we/Wiki 
 
 
