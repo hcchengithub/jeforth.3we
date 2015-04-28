@@ -108,14 +108,18 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
 				<js> event.altKey </jsV> if history-selector false else
-				<js> kvm.EditMode && !event.ctrlKey </jsV> if true else
-				js: document.getElementById("inputbox").value=kvm.cmdhistory.up();
-				false then then ;
+				<js> event.ctrlKey </jsV> if js: inputbox.value=kvm.cmdhistory.up()
+				false else true then then ;
+				/// Alt-Up pops up history-selector menu.
+				/// Ctrl-Up/Ctrl-Down recall command line history.
+				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {down}		( -- boolean ) \ Inputbox keydown handler, get next command history.
-				<js> kvm.EditMode && !event.ctrlKey </jsV> if true else
-				js: document.getElementById("inputbox").value=kvm.cmdhistory.down();
-				false then ;
+				<js> event.ctrlKey </jsV> if js: inputbox.value=kvm.cmdhistory.down();
+				false else true then ;
+				/// Alt-Up pops up history-selector menu.
+				/// Ctrl-Up/Ctrl-Down recall command line history.
+				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
 				js> inputbox.focus();inputbox.value if 
@@ -334,8 +338,12 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 						  <td><a href="http://www.camdemy.com/media/19264">Jump into the input box</a></td>
 						</tr>
 						<tr>
-						  <td>Hotkey Up/Down</td>
-						  <td><a href="http://www.camdemy.com/media/19265">Recall command history</a></td>
+						  <td>Hotkey Ctrl-Up/Ctrl-Down</td>
+						  <td><a href="http://www.camdemy.com/media/19265">Recall command history</a>
+						  Were only Up/Down without the 'Ctrl' key. I found using Up/Down key for editing
+						  is more often than to recall the command history. BTW, use Ctrl-M instead of 
+						  'Enter' when you want a 'Carriage Return'.
+						  </td>
 						</tr>
 						<tr>
 						  <td>Hotkey Alt-Up</td>
@@ -418,6 +426,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 			case   9: /* Tab  */ if(kvm.tick('{Tab}' )){kvm.execute('{Tab}' );return(kvm.pop());} break;
 			case  38: /* Up   */ if(kvm.tick('{up}'  )){kvm.execute('{up}'  );return(kvm.pop());} break;
 			case  40: /* Down */ if(kvm.tick('{down}')){kvm.execute('{down}');return(kvm.pop());} break;
+		 // case  77: /* M    */ if(kvm.tick('{M}'   )){kvm.execute('{M}'   );return(kvm.pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
 		}
 		return (true); // pass down to following handlers
 	}
