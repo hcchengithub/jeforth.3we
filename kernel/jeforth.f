@@ -352,7 +352,7 @@ code CR 		push("\n") end-code // ( -- '\n' ) NewLine is ASCII 10(0x0A)
 						CR js> String.fromCharCode(10) = ==>judge drop
 				</selftest>
 
-code jsEval 	( <string> -- result ) \ Evaluate the given JavaScript statements, return the last statement's value.
+code jsEval 	( "js code" -- result ) \ Evaluate the given JavaScript statements, return the last statement's value.
                 try {
                   push(eval(pop()));
                 } catch(err) {
@@ -365,7 +365,7 @@ code jsEval 	( <string> -- result ) \ Evaluate the given JavaScript statements, 
 						char 123 jsEval 123 ( .s ) = ==>judge drop
 				</selftest>
 
-code jsEvalNo 	( <string> -- ) \ Evaluate the given JavaScript statements, w/o return value.
+code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o return value.
                 try {
                   eval(pop());
                 } catch(err) {
@@ -379,7 +379,7 @@ code jsEvalNo 	( <string> -- ) \ Evaluate the given JavaScript statements, w/o r
 						456 char 123 jsEvalNo 456 ( .s ) = ==>judge drop
 				</selftest>
 
-code jsFunc		( "statements" -- function ) \ Compile JavaScript to a function() that returns last statement
+code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
 				var ss=pop();
 				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/gm,''); // remove 頭尾 white spaces
 				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
@@ -394,7 +394,7 @@ code jsFunc		( "statements" -- function ) \ Compile JavaScript to a function() t
 				}
 				end-code
 				
-code jsFuncNo	( "statements" -- function ) \ Compile JavaScript to a function()
+code jsFuncNo	( "js code" -- function ) \ Compile JavaScript to a function()
 				eval("push(function(){" + pop() + "})"); 
 				end-code
 
@@ -499,8 +499,8 @@ code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Wor
 						(forget)
 				</selftest>
 
-code 			#tib push(ntib) end-code // ( -- n ) Get ntib
-code 			#tib! ntib = pop() end-code // ( n -- ) Set ntib
+code #tib 		push(ntib) end-code // ( -- n ) Get ntib
+code #tib! 		ntib = pop() end-code // ( n -- ) Set ntib
 
 \ ------------------ eforth code words ----------------------------------------------------------------------
 

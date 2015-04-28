@@ -3349,5 +3349,7 @@
 	[ ]3hta, [ ]3htm, [ ]3nw
 	
 [ ] 把文章都整理進 jeforth.3we/Wiki 
-
+	o jeforth for WSH 也可以拿來玩 tiny forth / tiny assembly-disassembly
+	
+[x] 改成 up/down 不要直接 recall command line history ，只有 Ctrl-up/Ctrl-down do that。	
 
