@@ -379,7 +379,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 
 <js>
 	kvm.cmdhistory = {
-		max:   10000, // maximum length of the command history
+		max:   1000, // maximum length of the command history
 		index: -1,
 		array: [],
 		push:

@@ -3353,3 +3353,11 @@
 	
 [x] 改成 up/down 不要直接 recall command line history ，只有 Ctrl-up/Ctrl-down do that。	
 
+[ ] Sam Suan Chen's definition is interesting. code function x() { .... } end-code defines
+	vm.x() function. I wish this is the way to add variables and functions into KVM. But, don't know
+	if it's a good idea.
+	
+[ ] 比較 jeforth.3we 與 。。。 的速度
+	: speed-test 0 swap for 1+ next ;	
+	// ( count -- sount ) 1 + 1 + ... count times 
+	code precise-time function(){dStk.push((new Date()).getTime())} end-code

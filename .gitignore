@@ -219,3 +219,4 @@ kernel/kernel.js
 js/jefvm.v3.js
 *.js
 _selftest_.xls
+playground/multitaskjavascripteforth
