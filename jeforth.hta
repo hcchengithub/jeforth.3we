@@ -77,7 +77,7 @@
 		// There's no main loop, event driven call back function is this.
 		kvm.forthConsoleHandler = function(cmd) {
 			var rlwas = kvm.rstack().length; // r)stack l)ength was
-			print((cmd?'\n':"")+cmd+'\n');
+            print((cmd?'\n> ':"")+cmd+'\n');
 			kvm.fortheval(cmd);  // Pass the command line to KsanaVM
 			(function retry(){
 				// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
