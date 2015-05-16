@@ -318,7 +318,9 @@ s" git.f"	source-code-header
 	: file-system-check ( -- ) \ check repository file system integity
 		<shell> git fsck</shell> ;
 
-	\ 第 07 天：解析 Git 資料結構 - 索引結構 <----------- 了解 tracked/untracked, modified/unmodified, staged/unstaged 必讀。
+	\ 第 07 天：解析 Git 資料結構 - 索引結構 
+	\ 了解 tracked/untracked, modified/unmodified, staged/unstaged 必讀。
+	\ 那張重要的 State diagram 狀態圖 好像在這裡。
 
 	: add-modified ( -- ) \ 忽略 untracked 僅 cache "modified" and "deleted" files.
 		<shell> git add -u </shell> ;
@@ -590,23 +592,37 @@ s" git.f"	source-code-header
 	/// 請確定你的 git 版本是在 1.7.10以上。
 	/// http://jlord.us/git-it/challenges-zhtw/get_git.html
 
-: config ( -- ) \ The 'git config' general
+: config ( <[...]> -- ) \ The 'git config' general
 	s" git config " char \n|\r word + </shell> ;
 
 : list-config ( -- ) \ List the entire configuarations
 	<shell> git config -l</shell> ;
 
-: 設定你的名字 ( -- ) \ Setup the user name
+: 設定你的名字 ( "useer-name" -- ) \ Setup the user name
 	s" git config --global user.name " BL word + </shell> ;
 	/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
 	
-: 設定你的電子信箱 ( -- ) \ Setup the user's email address
+: 設定你的電子信箱 ( "email-address" -- ) \ Setup the user's email address
 	s" git config --global user.email " BL word + </shell> ;
 	/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
 	
+: untrack ( filename -- ) \ Untrack, remove a file from repo w/o deleting it
+	s" git rm --cached " char \n|\r word + </shell> ;
+	/// 當初是 add 命令 track 進去的，用 git rm --cached filename 脫離。
+	
+: untrack-folder ( pathname -- ) \ Untrack, remove a directory from repo w/o deleting it
+	s" git rm --cached -r " char \n|\r word + </shell> ;
+	/// 當初是 add 命令 track 進去的，用 git rm --cached -r pathname 脫離。
 
 <comment>
-	新 project 在 github.com 上建立之後會出現下列指引：
+[ ]	Remove a file from a Git repository without deleting it from the local filesystem
+	http://stackoverflow.com/questions/1143796/remove-a-file-from-a-git-repository-without-deleting-it-from-the-local-filesyste
+	git rm --cached mylogfile.log
+	For a directory:
+	git rm --cached -r mydirectory
+
+
+[ ]	新 project 在 github.com 上建立之後會出現下列指引：
 	
 	…or create a new repository on the command line
 	echo # wiki >> README.md
