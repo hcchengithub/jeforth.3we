@@ -30,10 +30,13 @@ s" git.f"	source-code-header
 	( WKS-38EN3477 ) char COMPUTERNAME proc-env@ char WKS-38EN3477 = [if]
 		s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
-		s" c:\Users\8304018.WKSCN\Downloads" value downloads-path // ( -- 'path' ) 
 	[then]
 	( DP-20121028UGNO ) char COMPUTERNAME proc-env@ char DP-20121028UGNO = [if]
 		s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
+		value git-shell-path // ( -- str ) Command line to launch Git Shell.
+	[then]
+	( WKS-38EN3476  ) char COMPUTERNAME proc-env@ char WKS-38EN3476 = [if]
+		s" C:\Users\8304018\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
 		value git-shell-path // ( -- str ) Command line to launch Git Shell.
 	[then]
 	/// Something like this:

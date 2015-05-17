@@ -3357,7 +3357,16 @@
 	vm.x() function. I wish this is the way to add variables and functions into KVM. But, don't know
 	if it's a good idea.
 	
-[ ] 比較 jeforth.3we 與 。。。 的速度
+[x] 比較 jeforth.3we 與 。。。 的速度
 	: speed-test 0 swap for 1+ next ;	
 	// ( count -- sount ) 1 + 1 + ... count times 
 	code precise-time function(){dStk.push((new Date()).getTime())} end-code
+[ ] hcchen5600 2015/05/17 07:15:30 
+	改用 project-k 的 jeforth.js 有幾個問題，
+	[ ] 原來的 forth vocabulary 改成 root 大地震！
+	[ ] kvm 不要動或也改名。
+[ ] Branch project-k 來改吧！
+	
+	
+
+
