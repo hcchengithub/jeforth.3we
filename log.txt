@@ -3367,6 +3367,29 @@
 	[ ] kvm 不要動或也改名。
 [ ] Branch project-k 來改吧！
 	
-	
+[ ] Working on Dropbox\Stock2015.xls need to automation
+	Excel data from Fubon e01 is already dynamic <-------- Bingo! everything rely on it.
+	[ ] Then I'd like to add stock to the excel file with formula that gets the data dynamically.
+	[ ] Then I'd like to read data from Web page directly http://www.yuanta.com.tw/pages/content/Frame.aspx?Node=47f739da-b7c5-4d16-accc-7175d8dcf583
+		to update and check new info.
+	[/] I have opened many excel file, use "list-processes" or "see-process" can see 
+		how many excel process are running. There can be many excel processes.
+		Use "list-workbooks" command can list all excel files under the application
+		object. 想要 study "how to get Application object using process id" and "How 
+		To Get Excel Object From Process?", "how to get excel object through processID 
+		through javascript", "Attaching to Running Instance of Office Application"
+		還是放棄了。
+	[x]	最簡單的方法是，透過 jeforth.3we 把 excel run 起來，然後用 excel 去 open 要
+		工作的 excel files。讓 jeforth.3we 透過選單來指定哪個 file 是哪個 file。
+	[x] 用 notepad++ 把	"2062橋椿" --> "2062 橋椿":
+		Replace "(\d)(\D)" to "\1 \2"
+		==> 用不著。 money.f 寫好了，自動轉換 formula 而已。搭配元大的除息表看，漏的、新的
+			很清楚。
+		這張表從 http://www.yuanta.com.tw/pages/content/Frame.aspx?Node=47f739da-b7c5-4d16-accc-7175d8dcf583 copy 來的
+[ ]	改用 project-k 的 kernel 有幾個問題要討論。
+	1. Virtual machine 的 instance 之命名
+	2. Virtual machine 裡的 with(){} default name space.
+	3. global variable 要不要加 _ prefix? 避免撞名。或者用一個 function 來管理 新增、刪除?
 
-
+		
+		

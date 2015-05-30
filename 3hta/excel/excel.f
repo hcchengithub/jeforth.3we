@@ -1,4 +1,4 @@
-\ GB2312
+\ utf-8
 \ excel.f  Microsoft Office Excel automation by jeforth.3hta
 \ VBA Language Reference @ http://msdn.microsoft.com/en-us/library/bb190882(v=office.11).aspx
 \ Microsoft Excel Visual Basic Reference @ http://msdn.microsoft.com/en-us/library/aa272254(v=office.11).aspx
@@ -53,7 +53,7 @@ excel.app [if]
 						***** new.xls gets workbook file object ....
 						( ------------ Start to do anything --------------- )
 						new.xls constant WORKBOOK // ( -- obj ) excel workbook
-						WORKBOOK js> typeof(pop().name) \ something like »îí“²¾1 or Workbook1
+						WORKBOOK js> typeof(pop().name) \ something like æ´»é ç°¿1 or Workbook1
 						( ------------ done, start checking ---------------- )
 						js> stack.slice(0) <js> ['string'] </jsV> isSameArray >r dropall r>
 						-->judge [if] <js> [
@@ -252,38 +252,38 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \ 3. GetObject("file1.xls"), GetObject("file2.xls"), and double click file3.xls are all using the
 \    same "Excel.Application" handler. Excel must be in memory before using GetObject("file1.xls").
 \
-\ Open excel file ÓĞƒÉ·N·½Ê½£¬
+\ Open excel file æœ‰å…©ç¨®æ–¹å¼ï¼Œ
 \
-\   1¡£ s' new ActiveXObject("Excel.application")' js constant excel.app // ( -- excel.app ) Get excel application object
+\   1ã€‚ s' new ActiveXObject("Excel.application")' js constant excel.app // ( -- excel.app ) Get excel application object
 \       fortheval("excel.app"); push(pop().Workbooks.open("x:\\cooked.xls");
 \
-\   2¡£ js> GetObject("","Excel.application") constant excel.app // ·Ç±ØÒª£¬Ö»ÊÇÈ¡µÃ excel.app ÒÔ¼°´_±£ excel.exe ÓĞÔÚ¡£
+\   2ã€‚ js> GetObject("","Excel.application") constant excel.app // éå¿…è¦ï¼Œåªæ˜¯å–å¾— excel.app ä»¥åŠç¢ºä¿ excel.exe æœ‰åœ¨ã€‚
 \       js> GetObject("x:\\raw.xls") constant raw.xls
 \       js> GetObject("x:\\cooked.xls") constant cooked.xls
 \
-\ Ç°ÕßµÄ excel.app ªšÁ¢ì¶ëŠÄXƒÈÆäËû "Excel.application" instances£¬ÖØÑ} open Í¬Ò»‚€™n°¸µÄ†–î}ºÜ
-\ ëy½â›Q¡£Internet ÉÏÓĞºÜ¶àÈËÔÚ†–£¬†–²»³öºÃ´ğ°¸¡£ÒòéÒªËÑ³öËùÓĞµÄ "Excel.application" instances
-\ íÌÀí£¬ÒÑ½›ëyß^î^ÁË¡£ËùÒÔÒªÓÃááÕß²ÅºÃ£¬ÖØÑ} open •r excel ×Ô¼º•şÌø³öí½ûÖ¹¡£Òòé automation
-\ Œ¦ excel file ËùÓÃµÄ Excel.Application Åc double click open excel file ÊÇÍ¬Ò» handler. ×CÃ÷Èç
-\ ÏÂ,
+\ å‰è€…çš„ excel.app ç¨ç«‹æ–¼é›»è…¦å…§å…¶ä»– "Excel.application" instancesï¼Œé‡è¤‡ open åŒä¸€å€‹æª”æ¡ˆçš„å•é¡Œå¾ˆ
+\ é›£è§£æ±ºã€‚Internet ä¸Šæœ‰å¾ˆå¤šäººåœ¨å•ï¼Œå•ä¸å‡ºå¥½ç­”æ¡ˆã€‚å› ç‚ºè¦æœå‡ºæ‰€æœ‰çš„ "Excel.application" instances
+\ ä¾†è™•ç†ï¼Œå·²ç¶“é›£éé ­äº†ã€‚æ‰€ä»¥è¦ç”¨å¾Œè€…æ‰å¥½ï¼Œé‡è¤‡ open æ™‚ excel è‡ªå·±æœƒè·³å‡ºä¾†ç¦æ­¢ã€‚å› ç‚º automation
+\ å° excel file æ‰€ç”¨çš„ Excel.Application èˆ‡ double click open excel file æ˜¯åŒä¸€ handler. è­‰æ˜å¦‚
+\ ä¸‹,
 \
 \    raw.xls js> pop().application.workbooks.count tib. \ ==> 1 (number)  Good, it's raw.xls
 \    Now open a.xls manually by double click it, and check again workbooks.count,
 \    raw.xls js> pop().application.workbooks.count tib. \ ==> 2 (number)  Shoooo!!! Bin Bin Bingo!!!!
 \    raw.xls js> pop().application.workbooks(2).name tib. \ ==> A.XLS (string)
 \
-\ GetObject() µÄÈ±ücÊÇ£¬®” Excel ²»´æÔÚ memory Ñe•r•ş³ö error "JScript error : Automation ·şÎñÆ÷²»
-\ ÄÜ´´½¨¶ÔÏó". ËùÒÔÖÁÉÙÒªÏÈ°Ñ excel run Æğí¡£ÎÒÒ»•rÒ²›]°l¬Fß@‚€†–î}£¬Òòé Excel.app handler ¼´Ê¹ÔÚ
-\ excel.app js> pop().quit() Ö®áá¶¼ß€•şÁôÔÚ memory Ñe£¬Òòé GetObject() connect ß^ÒÔáá›]ÓĞ”àé_µÄŞk·¨
-\ £¬¹ÊËü•şÒ»Ö±Éú´æ£¬³ı·ÇÓÃ Task Manager °ÑËüêPµô¡£¸ü‡ÀÖØµÄÊÇ excel.app js> pop().quit() Ö®ááÔÙ double
-\ click open µÄ excel file ËÆºõ•ş×ƒ³ÉÈ¥ÓÃÁíÒ»‚€ excel.application instance£¬ß@¾ÍÎÉyÁË¡£¹Ê²»ÒªÊ¹ÓÃ
-\ excel.app js> pop().quit(), í”¶àÓÃ workbook.close ¾ÍºÃ¡£
+\ GetObject() çš„ç¼ºé»æ˜¯ï¼Œç•¶ Excel ä¸å­˜åœ¨ memory è£¡æ™‚æœƒå‡º error "JScript error : Automation æœåŠ¡å™¨ä¸
+\ èƒ½åˆ›å»ºå¯¹è±¡". æ‰€ä»¥è‡³å°‘è¦å…ˆæŠŠ excel run èµ·ä¾†ã€‚æˆ‘ä¸€æ™‚ä¹Ÿæ²’ç™¼ç¾é€™å€‹å•é¡Œï¼Œå› ç‚º Excel.app handler å³ä½¿åœ¨
+\ excel.app js> pop().quit() ä¹‹å¾Œéƒ½é‚„æœƒç•™åœ¨ memory è£¡ï¼Œå› ç‚º GetObject() connect éä»¥å¾Œæ²’æœ‰æ–·é–‹çš„è¾¦æ³•
+\ ï¼Œæ•…å®ƒæœƒä¸€ç›´ç”Ÿå­˜ï¼Œé™¤éç”¨ Task Manager æŠŠå®ƒé—œæ‰ã€‚æ›´åš´é‡çš„æ˜¯ excel.app js> pop().quit() ä¹‹å¾Œå† double
+\ click open çš„ excel file ä¼¼ä¹æœƒè®Šæˆå»ç”¨å¦ä¸€å€‹ excel.application instanceï¼Œé€™å°±ç´Šäº‚äº†ã€‚æ•…ä¸è¦ä½¿ç”¨
+\ excel.app js> pop().quit(), é ‚å¤šç”¨ workbook.close å°±å¥½ã€‚
 \
 \ ====================== path delimiter is always a problem ===============================
 \
-\ path delimiter ÓÃß€ÊÇÓÃ ¿´íÒªÒ•½oÕl¶ø¶¨£¡ Excel 2010 µÄ save-as ÒªµÄÊÇ Microsoft µÄ \ ¶øÇÒ²»ÄÜÓÃ
-\ \\ Ò²²»ÄÜÓÃ /£¬ Excel 2003 ¿ÉÒÔ½ÓÊÜÓÃ / »ò \\£¬¶ø GetObject() ÒªµÄÊÇ \\ ¶øÇÒ²»ÄÜÓÃ \£¬ß@ÕæÊÇ»ìy£¡
-\ ËùÒÔÖ»ºÃœÊ‚ä >path/ >path\ >path\\ íßm‘ª¸÷·NÇé›r¡£
+\ path delimiter ç”¨é‚„æ˜¯ç”¨ çœ‹ä¾†è¦è¦–çµ¦èª°è€Œå®šï¼ Excel 2010 çš„ save-as è¦çš„æ˜¯ Microsoft çš„ \ è€Œä¸”ä¸èƒ½ç”¨
+\ \\ ä¹Ÿä¸èƒ½ç”¨ /ï¼Œ Excel 2003 å¯ä»¥æ¥å—ç”¨ / æˆ– \\ï¼Œè€Œ GetObject() è¦çš„æ˜¯ \\ è€Œä¸”ä¸èƒ½ç”¨ \ï¼Œé€™çœŸæ˜¯æ··äº‚ï¼
+\ æ‰€ä»¥åªå¥½æº–å‚™ >path/ >path\ >path\\ ä¾†é©æ‡‰å„ç¨®æƒ…æ³ã€‚
 \
 \ workbook.save-as accepts only only \ as its path delimiter.
 \
@@ -301,12 +301,12 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \     cooked-file raw.xls save-as tib.
 \
 \         ------------------- P A N I C ! -------------------------
-\         JScript error on word save-as next IP is 0 : Microsoft Excel Ÿo·¨´æÈ¡™n°¸ 'C:\//Users/8304018/Docume
-\         nts/Dropbox/learnings/Forth/jeforth/JScript/5EEE0F10'¡£¿ÉÄÜÔ­ÒòÈçÏÂ:
+\         JScript error on word save-as next IP is 0 : Microsoft Excel ç„¡æ³•å­˜å–æª”æ¡ˆ 'C:\//Users/8304018/Docume
+\         nts/Dropbox/learnings/Forth/jeforth/JScript/5EEE0F10'ã€‚å¯èƒ½åŸå› å¦‚ä¸‹:
 \
-\         ? ™n°¸µÄÃû·Q»òÂ·½²»´æÔÚ¡£
-\         ? ÆäËû³ÌÊ½ÕıÔÚÊ¹ÓÃ™n°¸¡£
-\         ? Äú‡LÔ‡ƒ¦´æµÄ»îí“²¾Ãû·QÅcÄ¿Ç°é_†¢µÄ»îí“²¾Ãû·QÏàÍ¬¡£
+\         ? æª”æ¡ˆçš„åç¨±æˆ–è·¯å¾‘ä¸å­˜åœ¨ã€‚
+\         ? å…¶ä»–ç¨‹å¼æ­£åœ¨ä½¿ç”¨æª”æ¡ˆã€‚
+\         ? æ‚¨å˜—è©¦å„²å­˜çš„æ´»é ç°¿åç¨±èˆ‡ç›®å‰é–‹å•Ÿçš„æ´»é ç°¿åç¨±ç›¸åŒã€‚
 \         TIB:cooked-file raw.xls save-as tib.
 \
 \         Abort at TIB position 27
@@ -319,12 +319,12 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \     cooked-file raw.xls save-as tib.
 \
 \         ------------------- P A N I C ! -------------------------
-\         JScript error on word save-as next IP is 0 : ™n°¸Ÿo·¨´æÈ¡¡£Õˆ´_¶¨ÏÂÁĞ×¼şÊÂÊÇ·ñÕı´_:
+\         JScript error on word save-as next IP is 0 : æª”æ¡ˆç„¡æ³•å­˜å–ã€‚è«‹ç¢ºå®šä¸‹åˆ—å¹¾ä»¶äº‹æ˜¯å¦æ­£ç¢º:
 \
-\         ? ´_¶¨ËùÖ¸¶¨µÄ™n°¸ŠAÊÇ·ñ´æÔÚ¡£
-\         ? ´_¶¨™n°¸ŠA²»ÊÇÎ¨×x¡£
-\         ? ´_¶¨™n°¸Ãû·Q²»°üº¬ÏÂÁĞ×ÖÔª:  <  >  ?  [  ]  :  |  »ò  *¡£
-\         ? ´_¶¨™n°¸¼°Â·½Ãû·Q²»³¬ß^ 218 ‚€Î»Ôª½M¡£
+\         ? ç¢ºå®šæ‰€æŒ‡å®šçš„æª”æ¡ˆå¤¾æ˜¯å¦å­˜åœ¨ã€‚
+\         ? ç¢ºå®šæª”æ¡ˆå¤¾ä¸æ˜¯å”¯è®€ã€‚
+\         ? ç¢ºå®šæª”æ¡ˆåç¨±ä¸åŒ…å«ä¸‹åˆ—å­—å…ƒ:  <  >  ?  [  ]  :  |  æˆ–  *ã€‚
+\         ? ç¢ºå®šæª”æ¡ˆåŠè·¯å¾‘åç¨±ä¸è¶…é 218 å€‹ä½å…ƒçµ„ã€‚
 \         TIB:cooked-file raw.xls save-as tib.
 \
 \         Abort at TIB position 27
@@ -337,20 +337,20 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \
 \ ================== Access excel worksheet programmatically =====================
 \
-\ Excel automation Ñe×îÖØÒªµÄ object ÊÇ Range. ÆäËû Cells, Rows, Columns µÈ¶¼‚÷»ØÔ“ Range µÄ¸÷·N
-\ sub-range¡£®” sub-range Ö»ÓĞÒ»¸ñ•r, ¼´ range.count == 1 •r, ¿É®”×÷ scalar Ê¹ÓÃ£¬ëmÈ»Ëü
-\ ÈÔé Range object. ÒÔÏÂ TARGET ÊÇ‚€ worksheet ¹©ŒòÓÃ£¬
+\ Excel automation è£¡æœ€é‡è¦çš„ object æ˜¯ Range. å…¶ä»– Cells, Rows, Columns ç­‰éƒ½å‚³å›è©² Range çš„å„ç¨®
+\ sub-rangeã€‚ç•¶ sub-range åªæœ‰ä¸€æ ¼æ™‚, å³ range.count == 1 æ™‚, å¯ç•¶ä½œ scalar ä½¿ç”¨ï¼Œé›–ç„¶å®ƒ
+\ ä»ç‚º Range object. ä»¥ä¸‹ TARGET æ˜¯å€‹ worksheet ä¾›å¯¦é©—ç”¨ï¼Œ
 \
 \     TARGET char pop().range("AB2")          js tib. ==> 11 (object)
 \     TARGET char pop().range("AB2").cells    js tib. ==> 11 (object)
 \     TARGET char pop().range("AB2").columns  js tib. ==> 11 (object)
 \     TARGET char pop().range("AB2").rows     js tib. ==> 11 (object)
 \
-\ ÓÉì¶ Item ÊÇ Range Îï¼şµÄ default property Òò´Ë¿ÉÒÔ¾o½ÓÖøÔÚ Range() »ò sub-range ááÃæÖ¸¶¨ (index), (
-\ row,column) µÈ¡£ ËùÒÔ cells(index) cells(row,column) columns(index) rows(index) µÈ£¬ÆäŒÊÇ cells.
-\ item(index) cells.item(row,column) µÈµÈµÄº†Œ‘¡£¶øÇÒ index, row, column ÔÚ excel ¶¼ÊÇ 1 based (¶ø·Ç
-\ 0 based, ß@Œ¦ forth µÄ for...next ÓĞÒæ¡£). Range().Item() ÓÖ‚÷»Ø Range£¬¹ÌÈ»ÊÇÒòé item() ¿ÉÄÜÊÇ
-\ rows, columns µÈ range£¬¼´Ê¹ÊÇÒ»¸ñÒ²ÈÔÈ»ÊÇ range object.
+\ ç”±æ–¼ Item æ˜¯ Range ç‰©ä»¶çš„ default property å› æ­¤å¯ä»¥ç·Šæ¥è‘—åœ¨ Range() æˆ– sub-range å¾Œé¢æŒ‡å®š (index), (
+\ row,column) ç­‰ã€‚ æ‰€ä»¥ cells(index) cells(row,column) columns(index) rows(index) ç­‰ï¼Œå…¶å¯¦æ˜¯ cells.
+\ item(index) cells.item(row,column) ç­‰ç­‰çš„ç°¡å¯«ã€‚è€Œä¸” index, row, column åœ¨ excel éƒ½æ˜¯ 1 based (è€Œé
+\ 0 based, é€™å° forth çš„ for...next æœ‰ç›Šã€‚). Range().Item() åˆå‚³å› Rangeï¼Œå›ºç„¶æ˜¯å› ç‚º item() å¯èƒ½æ˜¯
+\ rows, columns ç­‰ rangeï¼Œå³ä½¿æ˜¯ä¸€æ ¼ä¹Ÿä»ç„¶æ˜¯ range object.
 \
 \     TARGET char pop().range("AB2")(2)           js tib. ==> 21 (object)
 \     TARGET char pop().range("AB2").cells(2)     js tib. ==> 21 (object)
@@ -358,18 +358,18 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \     TARGET char pop().range("AB2").rows(2)      js tib. ==> 21 (object)
 \
 \
-\ ÒÔÏÂÇ°ÈıÕßÊÇÒ»˜ÓµÄ–|Î÷£¬×îááÒ»ÀıÍ¸ß^ value property È¡µÃÍ¬Ò»‚€Öµ£¬ÒÔÏÂñRÉÏ•şÌáµ½¡£
+\ ä»¥ä¸‹å‰ä¸‰è€…æ˜¯ä¸€æ¨£çš„æ±è¥¿ï¼Œæœ€å¾Œä¸€ä¾‹é€é value property å–å¾—åŒä¸€å€‹å€¼ï¼Œä»¥ä¸‹é¦¬ä¸Šæœƒæåˆ°ã€‚
 \
 \     TARGET char pop().range("AC3")                js tib. ==> 22 (object)
 \     TARGET char pop().range("AC3")(1)             js tib. ==> 22 (object)
 \     TARGET char pop().range("AC3").item(1)        js tib. ==> 22 (object)
 \     TARGET char pop().range("AC3").item(1).value  js tib. ==> 22 (number)
 \
-\ ÒÔÏÂÊÇ Range ²»Ö»Ò»¸ñµÄÇéĞÎ (range.count != 1)£¬ Range object ±¾Éí›]ÓĞ¿ÉÖ±½Ó¿´µ½µÄ–|Î÷ÁË¡£
+\ ä»¥ä¸‹æ˜¯ Range ä¸åªä¸€æ ¼çš„æƒ…å½¢ (range.count != 1)ï¼Œ Range object æœ¬èº«æ²’æœ‰å¯ç›´æ¥çœ‹åˆ°çš„æ±è¥¿äº†ã€‚
 \
 \     TARGET char pop().range("AC3:AD4")            js tib. ==>  (object)
 \
-\ index row column µÈ£¬½o Item() µÄ input arguments ²»ÊÜ Range().count µÄÏŞÖÆ£¬ß@˜Ó²ÅºÃÓÃ¡£
+\ index row column ç­‰ï¼Œçµ¦ Item() çš„ input arguments ä¸å— Range().count çš„é™åˆ¶ï¼Œé€™æ¨£æ‰å¥½ç”¨ã€‚
 \
 \     TARGET char pop().range("AC3:AD4")(0)         js tib. ==> 21 (object)
 \     TARGET char pop().range("AC3:AD4").cells(0)   js tib. ==> 21 (object)
@@ -380,31 +380,31 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \     TARGET char pop().range("AC3:AD4")(-1)        js tib. ==> 12 (object)
 \     TARGET char pop().range("AC3:AD4").cells(-1)  js tib. ==> 12 (object)
 \
-\ expression.value ‚÷»Ø»òÔO¶¨Ö¸¶¨¹ ‡úµÄÖµ¡£¿É×xŒ‘µÄ Variant (VBScript) ÙYÁÏĞÍ‘B¡£ Èç¹ûÖ¸¶¨µÄ Range Îï¼ş
-\ ÊÇ¿ÕµÄ£¬„téîAÔOÖµ£¬‚÷»Ø Empty Öµ (VBScript IsEmpty, JavaScript „té null)¡£Èç¹û Range Îï¼ş°üº¬¶à‚€ƒ¦
-\ ´æ¸ñ£¬„t•ş‚÷»ØµÄÒ»‚€ VBArray ”µÖµê‡ÁĞ (Ê¹ÓÃ VBScript IsArray º¯”µ¿É™zœy£¬ JScript „té unknown type)¡£
-\ ËùÒÔ value ‚÷»ØµÄ²»Ò»¶¨ÊÇÒ»‚€Öµ£¬³ıÁËÕıÒµØÓÃ range.count ÅĞ”àÒÔÍâ£¬¿´µ½ type ÊÇ unknown •r¿É”à¶¨ËüÊÇ
-\ ‚€ VBArray¡£JScript can access VBArray through these methods :dimensions(), getItem(i), lbound(),
+\ expression.value å‚³å›æˆ–è¨­å®šæŒ‡å®šç¯„åœçš„å€¼ã€‚å¯è®€å¯«çš„ Variant (VBScript) è³‡æ–™å‹æ…‹ã€‚ å¦‚æœæŒ‡å®šçš„ Range ç‰©ä»¶
+\ æ˜¯ç©ºçš„ï¼Œå‰‡ç‚ºé è¨­å€¼ï¼Œå‚³å› Empty å€¼ (VBScript IsEmpty, JavaScript å‰‡ç‚º null)ã€‚å¦‚æœ Range ç‰©ä»¶åŒ…å«å¤šå€‹å„²
+\ å­˜æ ¼ï¼Œå‰‡æœƒå‚³å›çš„ä¸€å€‹ VBArray æ•¸å€¼é™£åˆ— (ä½¿ç”¨ VBScript IsArray å‡½æ•¸å¯æª¢æ¸¬ï¼Œ JScript å‰‡ç‚º unknown type)ã€‚
+\ æ‰€ä»¥ value å‚³å›çš„ä¸ä¸€å®šæ˜¯ä¸€å€‹å€¼ï¼Œé™¤äº†æ­£è¦åœ°ç”¨ range.count åˆ¤æ–·ä»¥å¤–ï¼Œçœ‹åˆ° type æ˜¯ unknown æ™‚å¯æ–·å®šå®ƒæ˜¯
+\ å€‹ VBArrayã€‚JScript can access VBArray through these methods :dimensions(), getItem(i), lbound(),
 \ ubound(), and toArray(), where toArray() makes it a JavaScript array.
 \
 \   TARGET char pop().range("AB2:AC4").value.toArray() js tib. ==> 11,21,31,12,22,32 (array)
 \
-\ ß@ƒÉĞĞµÈĞ§£¬
+\ é€™å…©è¡Œç­‰æ•ˆï¼Œ
 \
 \   TARGET char pop().range("AC3:AD4").value.toArray() js tib.       ==> 22,32,, (array)
 \   TARGET char pop().range("AC3:AD4").cells.value.toArray() js tib. ==> 22,32,, (array)
 \
-\ ÓÃ range.count ™z²éÊÇ·ñÒ»¸ñ£¬
+\ ç”¨ range.count æª¢æŸ¥æ˜¯å¦ä¸€æ ¼ï¼Œ
 \
 \   TARGET char pop().range("AC3:AD4").cells(-1).count js tib. ==> 1 (number)
 \   TARGET char pop().range("AC3:AD4").count js tib.           ==> 4 (number)
 \
-\ †ÎÒ»¸ñ•rµÄ value ÊÇ scalar ¶ø›]ÓĞ toArray() ¿ÉÓÃ£¬
+\ å–®ä¸€æ ¼æ™‚çš„ value æ˜¯ scalar è€Œæ²’æœ‰ toArray() å¯ç”¨ï¼Œ
 \
 \   TARGET char pop().range("AC3:AD4").cells(-1).value.toArray() js tib.
 \
 \     ------------------- P A N I C ! -------------------------
-\     JScript error : Îï¼ş²»Ö§Ô®´ËŒÙĞÔ»ò·½·¨
+\     JScript error : ç‰©ä»¶ä¸æ”¯æ´æ­¤å±¬æ€§æˆ–æ–¹æ³•
 \     TIB:TARGET char pop().range("AC3:AD4").cells(-1).value.toArray() js tib.
 \     Abort at TIB position 63
 \     -------  [Yes] go on  [No] js console [Cancel] Terminate  -------
@@ -418,7 +418,7 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \   xlShiftToRight =-4161 ( xlShiftToRight )
 \   xlShiftToLeft  =-4159 ( xlShiftToLeft  )
 \   xlShiftUp      =-4162 ( xlShiftUp      )
-\   xlExcel9795    =0x2b  ( 43 xlExcel9795 )      see workbook.fileformat , Office 2012 : Ÿo·¨È¡µÃî„e Workbook µÄ SaveAs ŒÙĞÔ
+\   xlExcel9795    =0x2b  ( 43 xlExcel9795 )      see workbook.fileformat , Office 2012 : ç„¡æ³•å–å¾—é¡åˆ¥ Workbook çš„ SaveAs å±¬æ€§
 \   xlWorkbookNormal =-4143 ( xlWorkbookNormal )  see workbook.fileformat
 \
 \ -------------- Background Color of a range -----------------------------
@@ -433,10 +433,10 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \ Returned value of the statement is : -4142  (number)
 \
 
-\ -------------- ÌæÈËÊÂÙYÁÏ excel ±í¼ÓÉÏ²¿éT™ÚÎ» ----------------------------------------------------
+\ -------------- æ›¿äººäº‹è³‡æ–™ excel è¡¨åŠ ä¸Šéƒ¨é–€æ¬„ä½ ----------------------------------------------------
 
 ' wksrdcode [if]
-	cr .( ====== ÌæÈËÊÂÙYÁÏ excel ±í¼ÓÉÏ²¿éT™ÚÎ» by jeforth.js, H.C. Chen ==== ) cr
+	cr .( ====== æ›¿äººäº‹è³‡æ–™ excel è¡¨åŠ ä¸Šéƒ¨é–€æ¬„ä½ by jeforth.js, H.C. Chen ==== ) cr
 	char . full-path char target.xls path+name constant target-file target-file tib.
 	char . full-path char WKSRDCODE.xls path+name constant WKSRDCODE-file WKSRDCODE-file tib.
 	target-file open.xls constant target.xls target.xls char pop().name js tib.
@@ -444,7 +444,7 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 	char CODE WKSRDCODE.xls get-sheet constant CODE CODE char pop().name js tib.
 	1 target.xls get-sheet constant TARGET TARGET char pop().name js tib.
 	CODE char B char D init-hash constant hash hash member-count tib.
-	.( ÌæÈËÊÂÙYÁÏ±í¼ÓÉÏ²¿éT™ÚÎ» . . . ) hash TARGET char B char G 1 hash-translate .( Job done!! ) cr
+	.( æ›¿äººäº‹è³‡æ–™è¡¨åŠ ä¸Šéƒ¨é–€æ¬„ä½ . . . ) hash TARGET char B char G 1 hash-translate .( Job done!! ) cr
 	target.xls save tib.
 	\ target.xls close tib.
 	\ WKSRDCODE.xls close tib.
@@ -452,7 +452,7 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 	bye
 [then]
 
-\ -------------- ŒòÊÒé_éT -------------------------------------------------------------------------
+\ -------------- å¯¦é©—å®¤é–‹é–€ -------------------------------------------------------------------------
 
 ' mylab [if]
   char . full-path char target.xls path+name constant target-file // ( -- string ) full path name
@@ -502,34 +502,34 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
   char tos().range("AB2:AC4")(6) js tib.
 [then]
 
-  ------------------ ÒÔÏÂ try Range().name property  --------------------
+  ------------------ ä»¥ä¸‹ try Range().name property  --------------------
 
     TARGET s' pop().range("ab2:ac3")' js constant ab2:ac3
 
-    ab2:ac3 char pop().name          js tib. \ ==> "JScript error : È±ÉÙ ';'"
-    \ åeÕ`ÓÏ¢±¾í¾Í³£³£²»œÊ¡£Èô¹ÊÒâ‡LÔ‡È¥ print ²»´æÔÚµÄ property ¾Í•şÕı´_µØÕfÊÇ undefined.
+    ab2:ac3 char pop().name          js tib. \ ==> "JScript error : ç¼ºå°‘ ';'"
+    \ éŒ¯èª¤è¨Šæ¯æœ¬ä¾†å°±å¸¸å¸¸ä¸æº–ã€‚è‹¥æ•…æ„å˜—è©¦å» print ä¸å­˜åœ¨çš„ property å°±æœƒæ­£ç¢ºåœ°èªªæ˜¯ undefined.
 
     ab2:ac3 char pop().count         js tib. \ ==> 4 (number)
     ab2:ac3 char pop().name="ab2ac3" js tib. \ ==> ab2ac3 (string)
-    ab2:ac3 char pop().name          js tib. \ ==> =ÃûƒÔ!$AB$2:$AC$3 (object) ×¢Òâ£¡.name ÊÇ‚€ object.
-    js>tos().range("rangeb2c3").name  ==> =ÃûƒÔ!$B$2:$C$3  (object)  ×¢Òâ£¡.name ÊÇ‚€ object.
-    js>tos().range("rangeb2c3").name.name ==> rangeb2c3  (string) , .name.name ²ÅÊÇËù½oµÄ name
-    js>tos().range("rangeb2c3").name.value ==> =ÃûƒÔ!$B$2:$C$3  (string) ß@‚€ value ®”×ö .name µÄ default ºÜŒÓÃ¡£
+    ab2:ac3 char pop().name          js tib. \ ==> =åå†Š!$AB$2:$AC$3 (object) æ³¨æ„ï¼.name æ˜¯å€‹ object.
+    js>tos().range("rangeb2c3").name  ==> =åå†Š!$B$2:$C$3  (object)  æ³¨æ„ï¼.name æ˜¯å€‹ object.
+    js>tos().range("rangeb2c3").name.name ==> rangeb2c3  (string) , .name.name æ‰æ˜¯æ‰€çµ¦çš„ name
+    js>tos().range("rangeb2c3").name.value ==> =åå†Š!$B$2:$C$3  (string) é€™å€‹ value ç•¶åš .name çš„ default å¾ˆå¯¦ç”¨ã€‚
     js>tos().range("rangeb2c3").count ==> 4  (number)
     js>tos().range("rangeb2c3").value.toArray() ==> 77,88,99,21,12,22  (array)
 
-    js>b2c3.value ==> Oooops! ĞÍ‘B²»·ûºÏ , here .value is a VBArray. systemtype() ²»ÕJµÃ VBArray¡£
-    js>var b2c3 = stack[0].range("b2:c3") \ ==> undefined, ÓĞ•r²»Òª¹Ü jsc µÄ»Ø¸²¡£b2c3 ÊÇ‚€ Range() object, jsc ²»ÕJµÃ¡£
-    js>var xx = b2c3 ==>  undefined. ÖØÑ}ÓÃ b2c3 ÙxÖµÅc var xx •r jsc Ò²ÊÇ»Ø¸² undefined. ß@‚€¿ÉÒÔ²»ÓèÀí•ş¡£
-    js>xx = b2c3     ==>  Oooops! ÀàĞÍ²»Æ¥Åä , Òòé js>systemtype(b2c3) ==> Oooops! ÀàĞÍ²»Æ¥Åä
-    js>xx.count      ==> 4  (number)  ·ÅĞÄ£¡ Ğ§¹û›]†–î}
-    js>var yy; yy = xx = b2c3 ==> Oooops! ÀàĞÍ²»Æ¥Åä , ¸úÉÏÃæÒ»˜Ó
-    js>var yy = xx = b2c3     ==> undefined. , ¸úÉÏÃæÒ»˜Ó, ·´Õı systemtype() µÄ½Y¹û¾ÍÊÇß@˜Ó¡£
-    js>yy.address           ==> $B$2:$C$3  (string)  ¿ÉÒŠÆäŒĞ§¹û›]åe¡£
+    js>b2c3.value ==> Oooops! å‹æ…‹ä¸ç¬¦åˆ , here .value is a VBArray. systemtype() ä¸èªå¾— VBArrayã€‚
+    js>var b2c3 = stack[0].range("b2:c3") \ ==> undefined, æœ‰æ™‚ä¸è¦ç®¡ jsc çš„å›è¦†ã€‚b2c3 æ˜¯å€‹ Range() object, jsc ä¸èªå¾—ã€‚
+    js>var xx = b2c3 ==>  undefined. é‡è¤‡ç”¨ b2c3 è³¦å€¼èˆ‡ var xx æ™‚ jsc ä¹Ÿæ˜¯å›è¦† undefined. é€™å€‹å¯ä»¥ä¸äºˆç†æœƒã€‚
+    js>xx = b2c3     ==>  Oooops! ç±»å‹ä¸åŒ¹é… , å› ç‚º js>systemtype(b2c3) ==> Oooops! ç±»å‹ä¸åŒ¹é…
+    js>xx.count      ==> 4  (number)  æ”¾å¿ƒï¼ æ•ˆæœæ²’å•é¡Œ
+    js>var yy; yy = xx = b2c3 ==> Oooops! ç±»å‹ä¸åŒ¹é… , è·Ÿä¸Šé¢ä¸€æ¨£
+    js>var yy = xx = b2c3     ==> undefined. , è·Ÿä¸Šé¢ä¸€æ¨£, åæ­£ systemtype() çš„çµæœå°±æ˜¯é€™æ¨£ã€‚
+    js>yy.address           ==> $B$2:$C$3  (string)  å¯è¦‹å…¶å¯¦æ•ˆæœæ²’éŒ¯ã€‚
 
 --------------------------------------------------------------------------------------------------------
 
-    mysheet s' tos().Range("A5:E10").printout' js . cr            ==> ®aÉú filename.jnt Journal file
+    mysheet s' tos().Range("A5:E10").printout' js . cr            ==> ç”¢ç”Ÿ filename.jnt Journal file
     mysheet s' tos().Range("A5:E10").printpreview' js . cr        ==> Hang up !!
     TARGET s' tos().Range("A5:E10").Address' js . cr              ==> $A$5:$E$10
 
@@ -546,15 +546,15 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 
     Sheet  Range or Cells   Ragne operations      Result and comments
     ------ ---------------- ----------------      -------------
-    TARGET char tos().cells.count js tib. ==> 16777216 (number) £¬"cells" °Ñ Sheet() ŞD³É Range() ÊÇ±ØíšµÄ¡£
-    TARGET char tos().cells.find('SÌ') js tib. ==> SÌ (object)
-    TARGET char tos().cells.find('SÌ').address js tib. ==> $A$5 (string)
-    TARGET char tos().cells.find('†T¹¤´úÌ–') js tib. ==> †T¹¤´úÌ– (object)
-    TARGET char tos().cells.find('†T¹¤´úÌ–').address js tib. ==> $C$5 (string)
+    TARGET char tos().cells.count js tib. ==> 16777216 (number) ï¼Œ"cells" æŠŠ Sheet() è½‰æˆ Range() æ˜¯å¿…é ˆçš„ã€‚
+    TARGET char tos().cells.find('å» è™•') js tib. ==> å» è™• (object)
+    TARGET char tos().cells.find('å» è™•').address js tib. ==> $A$5 (string)
+    TARGET char tos().cells.find('å“¡å·¥ä»£è™Ÿ') js tib. ==> å“¡å·¥ä»£è™Ÿ (object)
+    TARGET char tos().cells.find('å“¡å·¥ä»£è™Ÿ').address js tib. ==> $C$5 (string)
     TARGET char tos().cells.find('K0711').address js tib. ==> $C$21 (string) , find first
     TARGET char tos().cells.find('K0711').find('K0711').address js tib. ==> $C$257 (string) , find next
-    TARGET char tos().cells.find('K0711').address js tib. ==> $C$21 (string) , Äî^é_Ê¼ÖØĞÂ find
-    TARGET char tos().cells.find('K0711').find('K0711').address js tib. ==> $C$257 (string) £¬ÖØÑ}½Y¹û
+    TARGET char tos().cells.find('K0711').address js tib. ==> $C$21 (string) , å¾é ­é–‹å§‹é‡æ–° find
+    TARGET char tos().cells.find('K0711').find('K0711').address js tib. ==> $C$257 (string) ï¼Œé‡è¤‡çµæœ
 
     code find-upper-left-ok ( sheet key -- range T|F ) \ Find the target position if it exists
         var key = pop();
@@ -571,7 +571,7 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
         }
         end-code
         /// tos(1).row tos(1).column is the found position
-    TARGET s" SÌ" find-upper-left-ok .s
+    TARGET s" å» è™•" find-upper-left-ok .s
     s" tos(1).row   " js . cr
     s" tos(1).column" js . cr
 
@@ -594,7 +594,7 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
         end-code
         /// tos(1).row tos(1).column is the found position
 
-    TARGET s" SÌ" find-upper-left .s
+    TARGET s" å» è™•" find-upper-left .s
     s" tos(1).row   " js . cr
     s" tos(1).column" js . cr
 
@@ -602,7 +602,7 @@ code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
 \ -----------------  10 ways to reference Excel workbooks and sheets using VBA  -------------------------
 \ evernote:///view/2472143/s22/a9dbdd6e-d71c-4b5b-b607-9a75afb9a065/a9dbdd6e-d71c-4b5b-b607-9a75afb9a065/
 
-\ ActiveWorkbook : takes place without additional information, such as the workbook¡¯s name, path, and so on.
+\ ActiveWorkbook : takes place without additional information, such as the workbookâ€™s name, path, and so on.
 excel.app js> pop().name tib. \ ==> Microsoft Excel (string)
 excel.app js> pop().ActiveWorkbook.path tib. \ ==> X: (string)
 excel.app js> pop().ActiveWorkbook.name tib. \ ==> WKSRDCODE.xls (string)
@@ -613,9 +613,9 @@ excel.app js> pop().Workbooks.Close tib. \ ==> true (boolean) close all workbook
 
 \ ActiveSheet, sheet.name, and sheet._codename
 excel.app js> pop().ActiveSheet.name tib. \ ==> CODE (string)
-excel.app js> pop().ActiveSheet._CodeName="WKSRDCODE" tib. \ ==> Microsoft Excel (object) JScript error : È±ÉÙ ';'
-excel.app js> pop().ActiveSheet._CodeName tib. \ ==>  (string) sheet._CodeName Ö»ÄÜÍ¸ß^ VBA IDE ßMÈ¥¸Ä property.
-excel.app js> pop().ActiveSheet._CodeName tib. \ ==> WKSRDCODE (string) ¸Ä³É¹¦ÁË
+excel.app js> pop().ActiveSheet._CodeName="WKSRDCODE" tib. \ ==> Microsoft Excel (object) JScript error : ç¼ºå°‘ ';'
+excel.app js> pop().ActiveSheet._CodeName tib. \ ==>  (string) sheet._CodeName åªèƒ½é€é VBA IDE é€²å»æ”¹ property.
+excel.app js> pop().ActiveSheet._CodeName tib. \ ==> WKSRDCODE (string) æ”¹æˆåŠŸäº†
 excel.app js> pop().ActiveSheet._codename tib. \ ==> Sheet2 (string)
 excel.app js> pop().ActiveSheet.name tib. \ ==> CODE backup (string)
 excel.app js> pop().sheets(1).name tib. \ ==> CODE (string)
@@ -629,15 +629,15 @@ CODE js> pop().range("I156").formula='=CONCATENATE(B156,"==",C156)' tib. \ ==> =
 CODE js> pop().range("I156").formula tib. \ ==> =G156 (string)
 
 \ ----------------------------------- Play with copy paste ------------------------------------
-\ ´Ë¹ ÀıŒ¢ Sheet1 ÖĞ A1:D4 ƒ¦´æ¸ñµÄ¹«Ê½Ñ}Ñuµ½ Sheet2 ÖĞ E5:H8 ƒ¦´æ¸ñÖĞ¡£
-\ Worksheets("Sheet1").Range("A1:D4").Copy destination:=Worksheets("Sheet2").Range("E5") ==> destination:= ÓÃ JavaScript ²»ÖªÈçºÎ±íß_
+\ æ­¤ç¯„ä¾‹å°‡ Sheet1 ä¸­ A1:D4 å„²å­˜æ ¼çš„å…¬å¼è¤‡è£½åˆ° Sheet2 ä¸­ E5:H8 å„²å­˜æ ¼ä¸­ã€‚
+\ Worksheets("Sheet1").Range("A1:D4").Copy destination:=Worksheets("Sheet2").Range("E5") ==> destination:= ç”¨ JavaScript ä¸çŸ¥å¦‚ä½•è¡¨é”
 
-CODE js> pop().range("G160").copy(destination:pop().range("I160")) tib. ==>JScript error : È±ÉÙ ')' destination:= ÓÃ JavaScript ²»ÖªÈçºÎ±íß_
-CODE js> pop().range("G160").copy           tib. \ ==> true (boolean) ÏÈ°Ñ–|Î÷×¥ßM clipboard
-CODE js> pop().range("A166").select         tib. \ ==> true (boolean) ÓÃ range ×öºÃßx“ñ
-CODE js> pop().range("I160:C168").select    tib. \ ==> true (boolean) ÓÃ range ×öºÃßx“ñ
-CODE js> pop().range("I160").paste          tib. \ ==> undefined (undefined) ß@˜ÓŒ‘²»Œ¦£¡Ö±½ÓÓÃ sheet.paste ÏÂß_¡£
-CODE js> pop().paste                        tib. \ ==> true (boolean) ÓÉ sheet ŒÓÃæÏÂß_ paste ÃüÁî¡£
+CODE js> pop().range("G160").copy(destination:pop().range("I160")) tib. ==>JScript error : ç¼ºå°‘ ')' destination:= ç”¨ JavaScript ä¸çŸ¥å¦‚ä½•è¡¨é”
+CODE js> pop().range("G160").copy           tib. \ ==> true (boolean) å…ˆæŠŠæ±è¥¿æŠ“é€² clipboard
+CODE js> pop().range("A166").select         tib. \ ==> true (boolean) ç”¨ range åšå¥½é¸æ“‡
+CODE js> pop().range("I160:C168").select    tib. \ ==> true (boolean) ç”¨ range åšå¥½é¸æ“‡
+CODE js> pop().range("I160").paste          tib. \ ==> undefined (undefined) é€™æ¨£å¯«ä¸å°ï¼ç›´æ¥ç”¨ sheet.paste ä¸‹é”ã€‚
+CODE js> pop().paste                        tib. \ ==> true (boolean) ç”± sheet å±¤é¢ä¸‹é” paste å‘½ä»¤ã€‚
 
 --------------------------------------------------
 
@@ -662,7 +662,7 @@ TARGET char pop().columns(1).cells(1) js tib. ==> origin (object)
 empty  OK TARGET char pop().range("AA9:AC11).columns(1).address js tib.
 
 ------------------- P A N I C ! -------------------------
-JScript error : Î´½áÊøµÄ×Ö·û´®³£Á¿
+JScript error : æœªç»“æŸçš„å­—ç¬¦ä¸²å¸¸é‡
 TIB:TARGET char pop().range("AA9:AC11).columns(1).address js tib.
 Abort at TIB position 56
 -------  [Yes] go on  [No] js console [Cancel] Terminate  -------
@@ -677,14 +677,14 @@ TARGET char pop().range("AA9:AC11").cells.count js tib. ==> 9 (number)
 TARGET char pop().range("AA9:AC11").columns.count js tib. ==> 3 (number)
  OK TARGET char pop().range("AA9:AC11").columns.count js tib.
 
- OK   TARGET char tos().name js . cr                        ==> ÃûƒÔ
- OK TARGET s' pop().Areas.count' js . cr                ==> JScript error : 'pop().Areas.count' Îª null »ò²»ÊÇ¶ÔÏó
- OK TARGET s' pop().Areas' js .s                        ==> 0:  undefined (undefined) , ÒªÓĞ Range ²ÅÓĞ Areas
- OK TARGET s' pop().Range("A1").Areas' js .s            ==> 0:  (object) , ÒªÓĞ Range ²ÅÓĞ Areas
+ OK   TARGET char tos().name js . cr                        ==> åå†Š
+ OK TARGET s' pop().Areas.count' js . cr                ==> JScript error : 'pop().Areas.count' ä¸º null æˆ–ä¸æ˜¯å¯¹è±¡
+ OK TARGET s' pop().Areas' js .s                        ==> 0:  undefined (undefined) , è¦æœ‰ Range æ‰æœ‰ Areas
+ OK TARGET s' pop().Range("A1").Areas' js .s            ==> 0:  (object) , è¦æœ‰ Range æ‰æœ‰ Areas
  OK TARGET s' pop().Range("A1").Areas.count' js .s  ==> 0:  1 (number)
  OK TARGET s' pop().Range("A1").Columns(1)' js .s       ==> 5:  undefined (object) , A1 is undefined so far.
  OK TARGET s' pop().Range("A1").item(1)' js .s      ==> 2:  undefined (object) , A1
- OK s' tos().item(1).value = 123' js .s                     ==> stack ÑeµÄ–|Î÷¶¼ï@Ê¾ A1 Ö®Öµ£¬°lÉúÓĞÈ¤µÄ¬FÏó£¡
+ OK s' tos().item(1).value = 123' js .s                     ==> stack è£¡çš„æ±è¥¿éƒ½é¡¯ç¤º A1 ä¹‹å€¼ï¼Œç™¼ç”Ÿæœ‰è¶£çš„ç¾è±¡ï¼
       0:        123 (object)
       1:        123 (object)
       2:        123 (object)
@@ -699,13 +699,13 @@ TARGET char pop().range("AA9:AC11").columns.count js tib. ==> 3 (number)
  OK TARGET s' pop().Cells(2,1)' js . cr             ==> 321
 
  OK TARGET s' pop().Range("A1").Columns(1)' js .s           ==> 1: 123 (object)
- OK TARGET s' pop().Range("A1").Columns(2)' js .s           ==> 2: undefined (object) , ÓÒß…Ò»ĞĞ
+ OK TARGET s' pop().Range("A1").Columns(2)' js .s           ==> 2: undefined (object) , å³é‚Šä¸€è¡Œ
  OK TARGET s' pop().Range("A1").Columns(1).item(1)' js .s   ==> 3: 123 (object)
- OK TARGET s' pop().Range("A1").Columns(1).item(2)' js .s   ==> 4: undefined (object) , ÓÒß…Ò»ĞĞ
- OK TARGET s' pop().Range("A1").Columns(1).item(2,1)' js .s ==> 5: JScript error : È±ÉÙ ';'
+ OK TARGET s' pop().Range("A1").Columns(1).item(2)' js .s   ==> 4: undefined (object) , å³é‚Šä¸€è¡Œ
+ OK TARGET s' pop().Range("A1").Columns(1).item(2,1)' js .s ==> 5: JScript error : ç¼ºå°‘ ';'
  OK TARGET s' pop().Range("A1").Columns(1).item(2).row' js .s ==> 6:        1 (number)
  OK TARGET s' pop().Range("A1").Columns(1).item(2).column' js .s ==> 7:        2 (number)
- OK TARGET s' pop().Range("A1").Columns(0).item(2).column' js .s ==> JScript error : È±ÉÙ ';'
+ OK TARGET s' pop().Range("A1").Columns(0).item(2).column' js .s ==> JScript error : ç¼ºå°‘ ';'
  OK TARGET s' pop().Range("A1").Columns(1).item(1).column' js .s ==> 8:        1 (number)
  OK TARGET s' pop().Range("A1").Columns(1).item(1).row' js .s    ==> 9:        1 (number)
  OK TARGET s' pop().Range("A1").Columns(1).item(2).row' js .s    => 10:        1 (number)
@@ -718,15 +718,15 @@ TARGET char pop().range("AA9:AC11").columns.count js tib. ==> 3 (number)
  OK TARGET s' pop().Range("A1:B2").Columns(2).row' js .s       ==> 3:        1 (number)
  OK TARGET s' pop().Range("A1:B2").Columns(2).column' js .s  ==> 2:        2 (number)
  OK TARGET s' pop().Range("A1:B2").Columns(2).count' js .s   ==> 6:        1 (number)
- OK TARGET s' pop().Range("A1:B2").Columns(2).value' js .s   ==> 4:         (unknown) ÓĞ–|Î÷£¬µ«²»ÖªÊÇÉ¶–|Î÷
- ==> ‚÷»Ø»òÔO¶¨Ö¸¶¨¹ ‡úµÄÖµ¡£¿É×xŒ‘µÄ Variant ÙYÁÏĞÍ‘B¡£expression.Value(RangeValueDataType)
-     xlRangeValueDefault   Èç¹ûÖ¸¶¨µÄ Range Îï¼şÊÇ¿ÕµÄ£¬„téîAÔOÖµ£¬‚÷»Ø Empty Öµ (¿ÉÓÃ IsEmpty º¯”µ™zœyß@·NÇé›r)¡£Èç
-     ¹û Range Îï¼ş°üº¬¶à‚€ƒ¦´æ¸ñ£¬„t•ş‚÷»ØµÄÒ»‚€”µÖµê‡ÁĞ (Ê¹ÓÃ IsArray º¯”µ¿É™zœyµ½ß@·NÇé›r)¡£¿É×x/Œ‘µÄ Variant ÙYÁÏĞÍ‘B¡£
- ==> ËùÒÔ value ‚÷»ØµÄ²»Ò»¶¨ÊÇÒ»‚€Öµ£¬¿´µ½ type ÊÇ unknown •r£¬¿ÉÄÜÊÇÒòéËüÊÇ‚€ VBArray Ö®¹Ê¡£
+ OK TARGET s' pop().Range("A1:B2").Columns(2).value' js .s   ==> 4:         (unknown) æœ‰æ±è¥¿ï¼Œä½†ä¸çŸ¥æ˜¯å•¥æ±è¥¿
+ ==> å‚³å›æˆ–è¨­å®šæŒ‡å®šç¯„åœçš„å€¼ã€‚å¯è®€å¯«çš„ Variant è³‡æ–™å‹æ…‹ã€‚expression.Value(RangeValueDataType)
+     xlRangeValueDefault   å¦‚æœæŒ‡å®šçš„ Range ç‰©ä»¶æ˜¯ç©ºçš„ï¼Œå‰‡ç‚ºé è¨­å€¼ï¼Œå‚³å› Empty å€¼ (å¯ç”¨ IsEmpty å‡½æ•¸æª¢æ¸¬é€™ç¨®æƒ…æ³)ã€‚å¦‚
+     æœ Range ç‰©ä»¶åŒ…å«å¤šå€‹å„²å­˜æ ¼ï¼Œå‰‡æœƒå‚³å›çš„ä¸€å€‹æ•¸å€¼é™£åˆ— (ä½¿ç”¨ IsArray å‡½æ•¸å¯æª¢æ¸¬åˆ°é€™ç¨®æƒ…æ³)ã€‚å¯è®€/å¯«çš„ Variant è³‡æ–™å‹æ…‹ã€‚
+ ==> æ‰€ä»¥ value å‚³å›çš„ä¸ä¸€å®šæ˜¯ä¸€å€‹å€¼ï¼Œçœ‹åˆ° type æ˜¯ unknown æ™‚ï¼Œå¯èƒ½æ˜¯å› ç‚ºå®ƒæ˜¯å€‹ VBArray ä¹‹æ•…ã€‚
 
- OK TARGET s' pop().Range("A1:B2").Columns(2).item(1)' js .s ==> 0:         (object) Item ŒÙĞÔ‚÷»Ø Range Îï¼ş
+ OK TARGET s' pop().Range("A1:B2").Columns(2).item(1)' js .s ==> 0:         (object) Item å±¬æ€§å‚³å› Range ç‰©ä»¶
 
- OK TARGET s' pop().Range("A1:B2").Columns(2)' js .s           ==> 1:         (object) ‚÷»ØÒ»‚€ Range Îï¼ş£¬´ËÎï¼ş´ú±íÖ¸¶¨¹ ‡úÖĞµÄ™Ú¡£Î¨×x¡£
+ OK TARGET s' pop().Range("A1:B2").Columns(2)' js .s           ==> 1:         (object) å‚³å›ä¸€å€‹ Range ç‰©ä»¶ï¼Œæ­¤ç‰©ä»¶ä»£è¡¨æŒ‡å®šç¯„åœä¸­çš„æ¬„ã€‚å”¯è®€ã€‚
  OK TARGET s' pop().Range("A1:B2").Columns(2).item(1)' js .s ==> 7:         (object)
  OK TARGET s' pop().Range("A1:B2").Columns(2).item(4)' js .s ==> 8:         (object)
  OK TARGET s' pop().Range("A1:B2").Columns(2).item(2)' js .s ==> 4:         (object)
@@ -757,7 +757,7 @@ bort at TIB position 5
 ------  [Yes] go on  [No] js console [Cancel] Terminate  -------
 
 ------------------ P A N I C ! -------------------------
-Script error : 'pop()' Îª null »ò²»ÊÇ¶ÔÏó
+Script error : 'pop()' ä¸º null æˆ–ä¸æ˜¯å¯¹è±¡
 IB:ARGET s' pop().Range("A1:B2").Columns(2).item(1)' js . cr
 bort at TIB position 58
 ------  [Yes] go on  [No] js console [Cancel] Terminate  -------
@@ -765,7 +765,7 @@ ndefined
 OK TARGET s' pop().Range("A1:B2").Columns(2).item(1)' js . cr
 
 ------------------ P A N I C ! -------------------------
-Script error on word . next IP is 0 : ÀàĞÍ²»Æ¥Åä
+Script error on word . next IP is 0 : ç±»å‹ä¸åŒ¹é…
 IB:TARGET s' pop().Range("A1:B2").Columns(2).item(1)' js . cr
 
 bort at TIB position 61
@@ -774,7 +774,7 @@ bort at TIB position 61
 OK TARGET s' pop().Range("A1:B2").Columns(2)' js . cr
 
 ------------------ P A N I C ! -------------------------
-Script error on word . next IP is 0 : ÀàĞÍ²»Æ¥Åä
+Script error on word . next IP is 0 : ç±»å‹ä¸åŒ¹é…
 IB:TARGET s' pop().Range("A1:B2").Columns(2)' js . cr
 
 bort at TIB position 53
@@ -783,7 +783,7 @@ bort at TIB position 53
 OK TARGET s' pop().Range("A1:B2").Columns(1)' js . cr
 
 ------------------ P A N I C ! -------------------------
-Script error on word . next IP is 0 : ÀàĞÍ²»Æ¥Åä
+Script error on word . next IP is 0 : ç±»å‹ä¸åŒ¹é…
 IB:TARGET s' pop().Range("A1:B2").Columns(1)' js . cr
 
 bort at TIB position 53
@@ -805,33 +805,33 @@ OK TARGET s' pop().Range("A1:B2").Columns(2).item(1)' js .s dropall
 OK
 
 hcchen5600 2013/03/27 19:09:31
- OK TARGET char tos().columns(1).value="col1" js . cr .s    ==> ¿ÉÒÔÕûĞĞ¶¼ÌîÒ»‚€Öµ
+ OK TARGET char tos().columns(1).value="col1" js . cr .s    ==> å¯ä»¥æ•´è¡Œéƒ½å¡«ä¸€å€‹å€¼
       0:         (object)
       1:        "col1" (string)
- OK TARGET char pop().columns(1).value js . cr .s           ==> JScript error : ĞÍ‘B²»·ûºÏ
- OK TARGET char pop().columns(1).value js .s                ==> 0: (unknown) , ËüÊÇ‚€Ê²üN£¿Type unknown.
+ OK TARGET char pop().columns(1).value js . cr .s           ==> JScript error : å‹æ…‹ä¸ç¬¦åˆ
+ OK TARGET char pop().columns(1).value js .s                ==> 0: (unknown) , å®ƒæ˜¯å€‹ä»€éº¼ï¼ŸType unknown.
 
  OK TARGET char pop().cells(10000,1).value js .s drop   ==> 0:        "col1" (string)
  OK TARGET char pop().cells(65536,1).value js .s drop   ==> 0:        "col1" (string)
- OK TARGET char pop().cells(65537,1).value js .s drop   ==> JScript error : ±ØíšÒªÓĞ ';'
+ OK TARGET char pop().cells(65537,1).value js .s drop   ==> JScript error : å¿…é ˆè¦æœ‰ ';'
 
- OK TARGET char pop().columns(1).count js . cr .s       ==> 1 , ËûÕf columns(1) µÄĞĞ”µÊÇ 1
- OK TARGET char pop().columns.count js . cr .s          ==> 256 , ËûÕfß@ˆ worksheet µÄĞĞ”µÊÇ 256
+ OK TARGET char pop().columns(1).count js . cr .s       ==> 1 , ä»–èªª columns(1) çš„è¡Œæ•¸æ˜¯ 1
+ OK TARGET char pop().columns.count js . cr .s          ==> 256 , ä»–èªªé€™å¼µ worksheet çš„è¡Œæ•¸æ˜¯ 256
 
  OK TARGET s' pop().Range("B2:C3").Columns(2).value' js .s   ==> 4:         (unknown) VBArray
- ==> ‚÷»Ø»òÔO¶¨Ö¸¶¨¹ ‡úµÄÖµ¡£¿É×xŒ‘µÄ Variant ÙYÁÏĞÍ‘B¡£expression.Value(RangeValueDataType)
-     xlRangeValueDefault   Èç¹ûÖ¸¶¨µÄ Range Îï¼şÊÇ¿ÕµÄ£¬„téîAÔOÖµ£¬‚÷»Ø Empty Öµ (¿ÉÓÃ IsEmpty º¯”µ™zœyß@·NÇé›r)¡£Èç
-     ¹û Range Îï¼ş°üº¬¶à‚€ƒ¦´æ¸ñ£¬„t•ş‚÷»ØµÄÒ»‚€”µÖµê‡ÁĞ (Ê¹ÓÃ IsArray º¯”µ¿É™zœyµ½ß@·NÇé›r)¡£¿É×x/Œ‘µÄ Variant ÙYÁÏĞÍ‘B¡£
- ==> ËùÒÔ value ‚÷»ØµÄ²»Ò»¶¨ÊÇÒ»‚€Öµ£¬¿´µ½ type ÊÇ unknown •r£¬¿ÉÄÜÊÇÒòéËüÊÇ‚€ VBArray Ö®¹Ê¡£Yes!!!
+ ==> å‚³å›æˆ–è¨­å®šæŒ‡å®šç¯„åœçš„å€¼ã€‚å¯è®€å¯«çš„ Variant è³‡æ–™å‹æ…‹ã€‚expression.Value(RangeValueDataType)
+     xlRangeValueDefault   å¦‚æœæŒ‡å®šçš„ Range ç‰©ä»¶æ˜¯ç©ºçš„ï¼Œå‰‡ç‚ºé è¨­å€¼ï¼Œå‚³å› Empty å€¼ (å¯ç”¨ IsEmpty å‡½æ•¸æª¢æ¸¬é€™ç¨®æƒ…æ³)ã€‚å¦‚
+     æœ Range ç‰©ä»¶åŒ…å«å¤šå€‹å„²å­˜æ ¼ï¼Œå‰‡æœƒå‚³å›çš„ä¸€å€‹æ•¸å€¼é™£åˆ— (ä½¿ç”¨ IsArray å‡½æ•¸å¯æª¢æ¸¬åˆ°é€™ç¨®æƒ…æ³)ã€‚å¯è®€/å¯«çš„ Variant è³‡æ–™å‹æ…‹ã€‚
+ ==> æ‰€ä»¥ value å‚³å›çš„ä¸ä¸€å®šæ˜¯ä¸€å€‹å€¼ï¼Œçœ‹åˆ° type æ˜¯ unknown æ™‚ï¼Œå¯èƒ½æ˜¯å› ç‚ºå®ƒæ˜¯å€‹ VBArray ä¹‹æ•…ã€‚Yes!!!
  OK TARGET s' pop().Range("B2:C3").Columns(2).value' js VBArray char pop().toArray() js . ==> 12,22 OK
 
  OK TARGET s' pop().Range("B2:C3").value' js VBArray s' pop().toArray()' js . ==> 11,21,12,22 OK
  OK TARGET s' VBArray(pop().range("B2:C3").value).toArray()' js . ==> 11,21,12,22 OK
 
 \s --------------------- older study ---------------------------------------------------------------
-\ s" pop().worksheets(pop()).select()" js drop <=== ½Y¹ûÊÇ Class Worksheet µÄ Select ·½·¨Ê§”¡¡£ÎÒ²ÂÊÇÒòé automation µÄÇé›rÏÂ select() ›]ÓĞÒâÁx¡£
-\ s" pop().ActiveSheet" js <== ¼ÈÈ» select() ›]ÓĞÒâÁx£¬Active Ò²²»±ØÁË
-\ hcchen5600 2013/03/26 11:03:00 ááÀm°l¬F£¬
+\ s" pop().worksheets(pop()).select()" js drop <=== çµæœæ˜¯ Class Worksheet çš„ Select æ–¹æ³•å¤±æ•—ã€‚æˆ‘çŒœæ˜¯å› ç‚º automation çš„æƒ…æ³ä¸‹ select() æ²’æœ‰æ„ç¾©ã€‚
+\ s" pop().ActiveSheet" js <== æ—¢ç„¶ select() æ²’æœ‰æ„ç¾©ï¼ŒActive ä¹Ÿä¸å¿…äº†
+\ hcchen5600 2013/03/26 11:03:00 å¾ŒçºŒç™¼ç¾ï¼Œ
 \ Visual Basic for Applications
 \ Worksheets("Sheet1").Activate
 \   'Can't select unless the sheet is active
@@ -986,7 +986,7 @@ sheet.range("b:b").rows(65536).end(-4162).address
 \ -----------------  10 ways to reference Excel workbooks and sheets using VBA  -------------------------
 \ evernote:///view/2472143/s22/a9dbdd6e-d71c-4b5b-b607-9a75afb9a065/a9dbdd6e-d71c-4b5b-b607-9a75afb9a065/
 
-\ ActiveWorkbook : takes place without additional information, such as the workbook¡¯s name, path, and so on.
+\ ActiveWorkbook : takes place without additional information, such as the workbookâ€™s name, path, and so on.
 excel.app js> pop().name tib. \ ==> Microsoft Excel (string)
 excel.app js> pop().ActiveWorkbook.path tib. \ ==> X: (string)
 excel.app js> pop().ActiveWorkbook.name tib. \ ==> WKSRDCODE.xls (string)
@@ -997,9 +997,9 @@ excel.app js> pop().Workbooks.Close tib. \ ==> true (boolean) close all workbook
 
 \ ActiveSheet, sheet.name, and sheet._codename
 excel.app js> pop().ActiveSheet.name tib. \ ==> CODE (string)
-excel.app js> pop().ActiveSheet._CodeName="WKSRDCODE" tib. \ ==> Microsoft Excel (object) JScript error : È±ÉÙ ';'
-excel.app js> pop().ActiveSheet._CodeName tib. \ ==>  (string) sheet._CodeName Ö»ÄÜÍ¸ß^ VBA IDE ßMÈ¥¸Ä property.
-excel.app js> pop().ActiveSheet._CodeName tib. \ ==> WKSRDCODE (string) ¸Ä³É¹¦ÁË
+excel.app js> pop().ActiveSheet._CodeName="WKSRDCODE" tib. \ ==> Microsoft Excel (object) JScript error : ç¼ºå°‘ ';'
+excel.app js> pop().ActiveSheet._CodeName tib. \ ==>  (string) sheet._CodeName åªèƒ½é€é VBA IDE é€²å»æ”¹ property.
+excel.app js> pop().ActiveSheet._CodeName tib. \ ==> WKSRDCODE (string) æ”¹æˆåŠŸäº†
 excel.app js> pop().ActiveSheet._codename tib. \ ==> Sheet2 (string)
 excel.app js> pop().ActiveSheet.name tib. \ ==> CODE backup (string)
 excel.app js> pop().sheets(1).name tib. \ ==> CODE (string)
@@ -1013,15 +1013,15 @@ CODE js> pop().range("I156").formula='=CONCATENATE(B156,"==",C156)' tib. \ ==> =
 CODE js> pop().range("I156").formula tib. \ ==> =G156 (string)
 
 \ ----------------------------------- Play with copy paste ------------------------------------
-\ ´Ë¹ ÀıŒ¢ Sheet1 ÖĞ A1:D4 ƒ¦´æ¸ñµÄ¹«Ê½Ñ}Ñuµ½ Sheet2 ÖĞ E5:H8 ƒ¦´æ¸ñÖĞ¡£
-\ Worksheets("Sheet1").Range("A1:D4").Copy destination:=Worksheets("Sheet2").Range("E5") ==> destination:= ÓÃ JavaScript ²»ÖªÈçºÎ±íß_
+\ æ­¤ç¯„ä¾‹å°‡ Sheet1 ä¸­ A1:D4 å„²å­˜æ ¼çš„å…¬å¼è¤‡è£½åˆ° Sheet2 ä¸­ E5:H8 å„²å­˜æ ¼ä¸­ã€‚
+\ Worksheets("Sheet1").Range("A1:D4").Copy destination:=Worksheets("Sheet2").Range("E5") ==> destination:= ç”¨ JavaScript ä¸çŸ¥å¦‚ä½•è¡¨é”
 
-CODE js> pop().range("G160").copy(destination:pop().range("I160")) tib. ==>JScript error : È±ÉÙ ')' destination:= ÓÃ JavaScript ²»ÖªÈçºÎ±íß_
-CODE js> pop().range("G160").copy           tib. \ ==> true (boolean) ÏÈ°Ñ–|Î÷×¥ßM clipboard
-CODE js> pop().range("A166").select         tib. \ ==> true (boolean) ÓÃ range ×öºÃßx“ñ
-CODE js> pop().range("I160:C168").select    tib. \ ==> true (boolean) ÓÃ range ×öºÃßx“ñ
-CODE js> pop().range("I160").paste          tib. \ ==> undefined (undefined) ß@˜ÓŒ‘²»Œ¦£¡Ö±½ÓÓÃ sheet.paste ÏÂß_¡£
-CODE js> pop().paste                        tib. \ ==> true (boolean) ÓÉ sheet ŒÓÃæÏÂß_ paste ÃüÁî¡£
+CODE js> pop().range("G160").copy(destination:pop().range("I160")) tib. ==>JScript error : ç¼ºå°‘ ')' destination:= ç”¨ JavaScript ä¸çŸ¥å¦‚ä½•è¡¨é”
+CODE js> pop().range("G160").copy           tib. \ ==> true (boolean) å…ˆæŠŠæ±è¥¿æŠ“é€² clipboard
+CODE js> pop().range("A166").select         tib. \ ==> true (boolean) ç”¨ range åšå¥½é¸æ“‡
+CODE js> pop().range("I160:C168").select    tib. \ ==> true (boolean) ç”¨ range åšå¥½é¸æ“‡
+CODE js> pop().range("I160").paste          tib. \ ==> undefined (undefined) é€™æ¨£å¯«ä¸å°ï¼ç›´æ¥ç”¨ sheet.paste ä¸‹é”ã€‚
+CODE js> pop().paste                        tib. \ ==> true (boolean) ç”± sheet å±¤é¢ä¸‹é” paste å‘½ä»¤ã€‚
 
 
  char .\cooked raw.xls save-as tib.
@@ -1069,7 +1069,7 @@ So, I don't need to afraid of re-opening an excel file now. Simply use GetObject
 
 
 
-    js> GetObject("raw.xls") constant raw.xls tib. ==========> Excel error box popup, says "ÕÒ²»µ½ 'raw.xls'¡£Õˆ™z²é™nÃûÊÇ·ñÓĞÆ´åe£¬»òÊÇ™n°¸Î»ÖÃÊÇ·ñÕı´_¡£", should be x:/raw.xls I guess.
+    js> GetObject("raw.xls") constant raw.xls tib. ==========> Excel error box popup, says "æ‰¾ä¸åˆ° 'raw.xls'ã€‚è«‹æª¢æŸ¥æª”åæ˜¯å¦æœ‰æ‹¼éŒ¯ï¼Œæˆ–æ˜¯æª”æ¡ˆä½ç½®æ˜¯å¦æ­£ç¢ºã€‚", should be x:/raw.xls I guess.
     ------------------- P A N I C ! -------------------------
     JScript error :
     TIB:js> GetObject("raw.xls") constant raw.xls tib.
@@ -1083,7 +1083,7 @@ raw.xls js> pop().path tib. \ ==> D:\hcchen (string)
  OK
 
 
-š¢µô excel in task manager, if exists, then do it again and again, results are same. Simply x:/raw.xls is needed.
+æ®ºæ‰ excel in task manager, if exists, then do it again and again, results are same. Simply x:/raw.xls is needed.
 
 Retry with "x:\raw.xls" ......
 
@@ -1157,12 +1157,12 @@ raw.xls js> pop().path tib. \ ==> D:\hcchen (string)
 
 
 ------------------- P A N I C ! -------------------------
-JScript error on word save-as next IP is 0 : Microsoft Excel Ÿo·¨´æÈ¡™n°¸ 'C:\//Users/8304018/Docume
-nts/Dropbox/learnings/Forth/jeforth/JScript/5EEE0F10'¡£¿ÉÄÜÔ­ÒòÈçÏÂ:
+JScript error on word save-as next IP is 0 : Microsoft Excel ç„¡æ³•å­˜å–æª”æ¡ˆ 'C:\//Users/8304018/Docume
+nts/Dropbox/learnings/Forth/jeforth/JScript/5EEE0F10'ã€‚å¯èƒ½åŸå› å¦‚ä¸‹:
 
-? ™n°¸µÄÃû·Q»òÂ·½²»´æÔÚ¡£
-? ÆäËû³ÌÊ½ÕıÔÚÊ¹ÓÃ™n°¸¡£
-? Äú‡LÔ‡ƒ¦´æµÄ»îí“²¾Ãû·QÅcÄ¿Ç°é_†¢µÄ»îí“²¾Ãû·QÏàÍ¬¡£
+? æª”æ¡ˆçš„åç¨±æˆ–è·¯å¾‘ä¸å­˜åœ¨ã€‚
+? å…¶ä»–ç¨‹å¼æ­£åœ¨ä½¿ç”¨æª”æ¡ˆã€‚
+? æ‚¨å˜—è©¦å„²å­˜çš„æ´»é ç°¿åç¨±èˆ‡ç›®å‰é–‹å•Ÿçš„æ´»é ç°¿åç¨±ç›¸åŒã€‚
 TIB:cooked-file raw.xls save-as tib.
 
 Abort at TIB position 27
@@ -1184,7 +1184,7 @@ c. Done! You don't need to do this again until wistron.xls has a newer version.
 To Cook :
 1. Open the Asus BOM excel file which is to be resolved. Make it the *only* excel file or the program refuse working.
 2. Press Win+r, type in c:\myjob\resolveasusbom\cook.bat and <enter> key to start cooking.
-   If you see error message like "JScript error : Automation ËÅ·ş³ÌÊ½Ÿo·¨®aÉúÎï¼ş" you forgot to open
+   If you see error message like "JScript error : Automation ä¼ºæœç¨‹å¼ç„¡æ³•ç”¢ç”Ÿç‰©ä»¶" you forgot to open
    the Asus BOM excel file first.
 3. If everything fine, a new excel file with the name frefix 'cooked-' to your Asus BOM excel file
    will be created at the same folder as the raw.
@@ -1201,9 +1201,22 @@ excel.app js> pop().SheetsInNewWorkbook=1 tib. \ ==> 1 (number
 excel.app js> pop().SheetsInNewWorkbook tib. \ ==> 1 (number)
 
 
-\ Œ¢ boyce.xls µÄ sheet(1) copy µ½ emc.xls µÄ sheet(1) Ö®Ç°
+\ å°‡ boyce.xls çš„ sheet(1) copy åˆ° emc.xls çš„ sheet(1) ä¹‹å‰
 emc.xls boyce.xls js> pop().sheets(1).copy(pop().sheets(1))
 emc.xls boyce.xls js> pop().sheets(1).copy(pop().sheets(1))
+
+> excel.app :> name tib. \ ==> Microsoft Excel (string)
+> excel.app :> width tib. \ ==> 971 (number)
+> excel.app :> height tib. \ ==> 523 (number)
+
+
+> excel.app :> DisplayFullScreen \ ==> false (boolean)
+> excel.app :: DisplayFullScreen=true
+> excel.app :> DisplayFullScreen \ ==> true (boolean)  æŒ‰ä¸€ä¸‹ Esc key æ¢å¾©æ­£å¸¸ã€‚
+
+è·³å‡º Open file diaglog é¸ file å‚³å› pathname
+> excel.app <js> pop().GetOpenFilename()</jsV> \ ==> "C:\Users\8304018\Downloads\æ”¶æ”¯æ˜ç´°.xlsx" (string)
+
 </comment>
 
 

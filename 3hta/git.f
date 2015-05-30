@@ -1,44 +1,96 @@
 
 \
 \ git.f 利用 forth 的自由語法，簡化 GitHub 使用上的困難。
+\ http://github.com/hcchengithub/jeforth.3we/wiki/jeforth.3hta-GitHub-helper----git.f
+\ Video on Camdemy.com http://www.camdemy.com/media/19404
 \
 \     GitHub 功能強大，而且一邊用它還會一邊給你很多建議。已經仁盡義至了，但是根本記不住。
 \ 今利用 jeforth 來管理這些命令跟建議。平時也可以簡化指令、做筆記、為每組命令添加 help 
 \ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
 \
-	<comment>
-	hcchen5600 2015/04/17 21:23:33 
-		昨天家裡電腦又 GitHub repository 大亂。可能是 GFW 干擾 Dropbox 同步所造成。也可能是 GitHub 
-		for Windows 上沒有先 commit 乾淨就按下 [Sync] button 的後果。一時心慌十分挫折。幸好公司電腦
-		的 Dropbox folder 還是先前的正常狀況，回公司 commit 上 GitHub 先修復 remote。
-		家裡的 .git 已經大亂，size 竟有 47M 正常的才 19M。修復過程： 先 md 一個暫時的 folder, 然後
-		從 GitHub 上 clone 下來。檢查 local jeforth.3we 裡 ignored 的檔案先 copy 到 temp folder，最
-		後 copy temp 過來蓋掉 local。結果 local size 變成 60M 只好這樣。裡面的垃圾以後再看怎麼清。
-	</comment>
 
 js> kvm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
 s" git.f"	source-code-header
 
+	\ 	簡介
+	\	====
+	\	Git 是一套分散式版本控管系統(DVCS; Distributed Version Control System)。
+	\	支援本地操作 [x] yeah sure it is.
+	\	備份容易 [x] simply copy the entire folder.
+	\	功能強大且彈性的分支與合併等等 [x] help branch
+	\	完整的 Git 版控支援、
+	\	議題追蹤與管理 [x] The 'issues' on GitHub web.
+	\	線上 Wiki 文件管理 [x] The 'wiki' on GitHub web.
+	\	友善的原始碼審核(Code Review)介面。 [x] Click on the commit code on GitHub web to see the 'diff'.
+	\	How to run git shell
+	\	--------------------
+	\	use Github for Windows to open the git shell through the [setting] button 
+	\	at the upper right corner. We can change default shell to dos, powershell, or linux.
+	\ 	中英名詞
+	\	========
+	\	「版本」= commit 
+	\	 版本控管 = tracked
+	\	【索引】或【快取】= index cache
+	\	Git 版本庫 = repository 
+	\	cached = Staged (準備好 to commit)
+	\	
+	
+	\	第 01 天：認識 Git 版本控管
+	\	===========================
+	\	「Git 的指令與參數非常多，完全超出大腦能記憶的範圍，除非每天使用，否則哪有可能一天到晚打指令進
+	\	行版控」── 哈哈！用 jeforth.3hta 可以輕鬆掌握。因為 word name 可以用中文，又有 help、comment 很方便。
+	\	「要合併多人的版本，你只要有存取共用儲存庫(shared repository)的權限或管道即可。 例如：在同一台伺服器上
+	\	可以透過資料夾權限進行共用，或透過 SSH 遠端存取另一台伺服器的 Git 儲存庫，也可以透過 Web 伺服器等方
+	\	式來共用 Git 儲存庫。」
+	\	「我覺得要寫「認識 Git 版本控管」比教大家怎麼用還難許多」。
+	
+	\	第 02 天：在 Windows 平台必裝的三套 Git 工具
+	\	============================================
+	\	第 1 套：Git for Windows <---- the shell tools set
+	\	第 2 套：GitHub for Windows <---- 很爛，常出問題
+	\	第 3 套：SourceTree
+	\	第 4 套：TortoiseGit
+	
 	\	第 03 天：建立儲存庫 https://github.com/hcchengithub/Learn-Git-in-30-days
-	\	0. 	use Github for Windows to open the shell through the [setting] button at the upper right corner.
-	\		We can change default shell to dos, powershell, or linux. GitHub for Window always open the same
-	\		PowerShell window. 一開始還沒有 git-demo 所以先從我現有的 repository 啟動 git shell 借力省掉 path
-	\		設定的麻煩。
+	\	====================
+	\	There are three kind of repo's
+	\	1.	在本機建立本地的儲存庫 (local repository) [x] "git init" at the repo folder
+	\	2.	在本機建立一個共用的儲存庫 (shared repository) [x] "git init --bare" at the shared repo
+	\		==> For Linux , Windows users seem don't need this.	
+	\	3.	在 GitHub 或其他 Git 平台建立遠端的儲存庫 (remote repository)
+	\	The best way is to create on GitHub.com then clone it back to local computer
+	\	through the "GitHub for Windows" or "Git Shell" clone command. See 'clone' command.
+	
+	\	手動建立 shared-repository
+	\	----------------------------
+	\	~\git-demo [master]> md .\shared-repository
+	\	cd shared-repository
+	\	然後當場執行 git init --bare
+	\	他會在當前目錄建立所有 Git 儲存庫的相關檔案與資料夾，你必須特別注意，這個資料夾不能直
+	\	接拿來做開發用途，只能用來儲存 Git 的相關資訊，大多數情況下，你都不應該手動編輯這個資
+	\	料夾的任何檔案，最好透過 git 指令進行操作
+	\	這是一個「沒有工作目錄的純儲存庫」 -- bare repository.
+	\	再次強調，Git 屬於「分散式版本控管」，每個人都有一份完整的儲存庫(Repository)。也就是說，
+	\	當你想要建立一個「工作目錄」時，必須先取得這個「裸儲存庫」的內容回來，這時你必須使用 
+	\	git clone [REPO_URI] 指令「複製」(clone)一份回來才行，而透過 git clone 的過程，不但會自動
+	\	建立工作目錄，還會直接把這個「裸儲存庫」完整的複製回來。這個複製的過程，就如同「完整備份」
+	\	一樣，是把所有 Git 儲存庫中的所有版本紀錄、所有版本的檔案、...等等，所有資料全部複製回來。
+	\	手動建立工作用的 workspace
+	\	--------------------------
+	\	github\git-demo [master +1 ~0 -0 !]> md git-workspaces
+	\	github\git-demo [master +1 ~0 -0 !]> cd .\git-workspaces
+	\	然後把 "shared repository" clone 過來
+	\	github\git-demo\git-workspaces [master +1 ~0 -0 !]> git clone ..\shared-repository
+	\		Cloning into 'shared-repository'...
+	\		warning: You appear to have cloned an empty repository.
+	\		done.
 
 	\ Setup git-shell-path so we know how to run Git Shell.
-	( WKS-38EN3477 ) char COMPUTERNAME proc-env@ char WKS-38EN3477 = [if]
-		s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
-		value git-shell-path // ( -- str ) Command line to launch Git Shell.
-	[then]
-	( DP-20121028UGNO ) char COMPUTERNAME proc-env@ char DP-20121028UGNO = [if]
-		s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
-		value git-shell-path // ( -- str ) Command line to launch Git Shell.
-	[then]
-	( WKS-38EN3476  ) char COMPUTERNAME proc-env@ char WKS-38EN3476 = [if]
-		s" C:\Users\8304018\AppData\Local\GitHub\GitHub.appref-ms --open-shell" 
-		value git-shell-path // ( -- str ) Command line to launch Git Shell.
-	[then]
+	char WKS-38EN3477    char COMPUTERNAME proc-env@ = [if] s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+	char DP-20121028UGNO char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+	char WKS-38EN3476    char COMPUTERNAME proc-env@ = [if] s" C:\Users\8304018\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+	value git-shell-path // ( -- str ) Command line to launch Git Shell.
 	/// Something like this:
 	/// C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell
 	/// which is from right-click the 'Git Shell' icon on the Desktop.
@@ -112,35 +164,25 @@ s" git.f"	source-code-header
 		
 	: init ( -- ) \ Create a new git repository at the current directory
 		<shell> git init</shell> ;
-		/// Don't worry about re-init a git again. It's idiot-proof, it
-		/// responses something like:
-		/// Reinitialized existing Git repository in D:/hcchen/Dropbox/learnings/github/demo/.git/
+		/// Don't worry about re-init a git again. It's idiot-proof, it responses something like:
+		/// Reinitialized existing Git repository in D:/hcchen/Dropbox/learnings/github/...
 		
 	: status ( -- ) \ Git status of the repository
 		<shell> git status</shell> ;
 
-	\ 先手動建立 shared-repository
-	\ ~\git-demo [master]> md .\shared-repository
-	\ cd shared-repository
-	\ 然後當場執行 git init --bare
-	\ 他會在當前目錄建立所有 Git 儲存庫的相關檔案與資料夾，你必須特別注意，這個資料夾不能直
-	\ 接拿來做開發用途，只能用來儲存 Git 的相關資訊，大多數情況下，你都不應該手動編輯這個資
-	\ 料夾的任何檔案，最好透過 git 指令進行操作
-	\ 這是一個「沒有工作目錄的純儲存庫」 -- bare repository.
-	\ 再次強調，Git 屬於「分散式版本控管」，每個人都有一份完整的儲存庫(Repository)。也就是說，
-	\ 當你想要建立一個「工作目錄」時，必須先取得這個「裸儲存庫」的內容回來，這時你必須使用 
-	\ git clone [REPO_URI] 指令「複製」(clone)一份回來才行，而透過 git clone 的過程，不但會自動
-	\ 建立工作目錄，還會直接把這個「裸儲存庫」完整的複製回來。這個複製的過程，就如同「完整備份」
-	\ 一樣，是把所有 Git 儲存庫中的所有版本紀錄、所有版本的檔案、...等等，所有資料全部複製回來。
+	: 垃圾回收 ( -- ) \ Clean garbage 清理殘留在檔案系統中的無用檔案。
+		<shell>  git gc --prune </shell> ;
+		/// Git 的垃圾回收機制，其實就是那些殘留在檔案系統中的無用檔案，這
+		/// 個垃圾回收機制只會在這些無用的物件累積一段時間後自動執行，或你
+		/// 也可以自行下達指令清空它。例如: git gc --prune
 
-	\ 手動建立工作用的 workspace
-	\ github\git-demo [master +1 ~0 -0 !]> md git-workspaces
-	\ github\git-demo [master +1 ~0 -0 !]> cd .\git-workspaces
-	\ 然後把 shared repository clone 過來
-	\ github\git-demo\git-workspaces [master +1 ~0 -0 !]> git clone ..\shared-repository
-	\ 	Cloning into 'shared-repository'...
-	\ 	warning: You appear to have cloned an empty repository.
-	\ 	done.
+	: 重新封裝 ( -- ) \ Archive 老舊的 objects (files) 封裝進一個封裝檔 packfile 中。
+		<shell>  git gc </shell> ;
+		/// 當一個專案越來越大、版本越來越多時，這個物件(file)會越來越多，過多的
+		/// 檔案還是會檔案存取變得越來越沒效率。因此 Git 的設計有個機制可以將一群
+		/// 老舊的 "物件" 自動封裝進一個封裝檔(packfile)中，以改善檔案存取效率。
+		/// 重新封裝(repacking) 照理說 Git 會自動執行重新封裝等動作，但你依然可以自
+		/// 行下達指令執行。例如: git gc
 
 	: clone ( <'URI'> -- ) \ New a repository, which is from URI, at the current folder
 		s" git clone " char \n|\r word + </shell> ;
@@ -149,13 +191,16 @@ s" git.f"	source-code-header
 		///     Example: clone https://github.com/figtaiwan/forthtranspiler
 		/// clone 下來是在 current directory 之下自動 md project folder 而非以
 		/// current directory 當作 project folder。本地的就是一個 "branch"。
-		///     如果 github/forthtranspiler 不是空的, 則：
+		///     如果本地的 github/forthtranspiler 不是空的, 則：
 		/// fatal: destination path 'forthtranspiler' already exists and is 
-		/// not an empty directory.
-		/// Local 已經有東西的就要用 pull 的。參「第8天」。
-		///     如果你用 git clone https://balbal.git 複製一個 「沒有版本」的
+		/// not an empty directory. Local 已經有東西的就要用 pull 的, 參「第8天」。
+		///     如果你用 git clone https://balbal.git 去複製的是一個 「沒有版本」的
 		/// 空白 Git 儲存庫，將會得到一個 warning: You appear to have cloned 
 		/// an empty repository. 警告訊息，不過這不影響你上傳本地的變更。
+		///     The best way to create a new project is doing it on GitHub.com 
+		/// then clone it back to local computer through the "GitHub for Windows" 
+		/// or clone command.
+
 
 	: git-help ( -- ) \ Git help
 		<text>
@@ -207,19 +252,20 @@ s" git.f"	source-code-header
 	: add ( <...> -- ) \ Add file(s) into the cache of the repo (the project)
 		s" git add " char \n|\r word + </shell> ;
 		/// 注意，pathname 有分大小寫，靠，弄錯了沒有 warning 等你自己慢慢發現！
-		/// Usage: add pathname1 pathname2 ...
-		/// 'add' 把檔案加進 cache 準備 commit。原本是 tracked 或 untracked 都
-		/// 得經過 add 才會進 cache。別以為只有新檔才需要 add 因為即使是已經 
-		/// tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到。
+		/// Usage: add name1 name2 ... , wild card '*', '?' and '.' supported.
+		/// 'add' 把檔案加進 tracked 且進 cache 準備 commit。原本是 tracked 或
+		/// untracked 都得經過 add 才會進 cache。別以為只有新檔才需要 add 因為
+		/// 即使是已經 tracked 的檔案也不會自動進 cache 故也不會自動被 commit 到
+		/// 但的確 add 過的檔案從此就變成 tracked 了。
+		/// "git add ." 會將所有檔案(含子目錄)加入到 working directory 的索引中。
 
-	: commit ( <...> -- ) \ Save the cache into the repository.
+	: commit ( <...> -- ) \ Save the cache into the repository. 把 tracked files 都 commit 進 repository.
 		s" git commit " char \n|\r word + </shell> ;
-		/// Usage: commit -m "Descriptions"
+		/// Usage: commit [-m "Descriptions"]
 		/// 先用 'add' 把檔案加進 cache 才 commit 得到它。原本是 tracked 或
 		/// untracked 都得經過 add 才會進 cache。別以為只有新檔才需要 add 因
 		/// 為即使是已經 tracked 的檔案也不會自動進 cache 故也不會自動被 
-		/// commit 到。
-
+		/// commit 到。以前 commit 好像叫做 checkin?
 		
 	\ 注意！ pathname 有分大小寫，弄錯了不會有 warning, 靠。
 	\ 	github\forthtranspiler [master +1 ~1 -0 !]> git add readme.md <------ 應該是 README.md 大小寫有分，但不會有任何警告！
@@ -263,8 +309,9 @@ s" git.f"	source-code-header
 	\	D:\hcchen\Dropbox\learnings\github\forthtranspiler [master +1 ~0 -0 !]> git status
 	\	On branch master
 	\	Your branch is ahead of 'origin/master' by 1 commit.
-	\	  (use "git push" to publish your local commits) <------ 實在有夠貼心，被罵夠了。揣摩，要先 commit 然後 push 才會上網。
-    \															 上哪個網？自己的，還是原來的？
+	\	  (use "git push" to publish your local commits) <------ 實在有夠貼心，被罵夠了。
+	\														揣摩，要先 commit 然後 push 才會上網。
+    \														上哪個網？自己的，還是原來的？ See ^111
 	\	Untracked files:
 	\	  (use "git add <file>..." to include in what will be committed)
     \
@@ -272,14 +319,9 @@ s" git.f"	source-code-header
     \
 	\	nothing added to commit but untracked files present (use "git add" to track)
 	\	D:\hcchen\Dropbox\learnings\github\forthtranspiler [master +1 ~0 -0 !]>
-
-
-	\ git rm 相對於 add 但還會真的把檔案殺掉。別用！ Use GitHub for Windows instead
-	\ git reset 就是把 tracking 全抹掉，要重新 add。 Use GitHub for Windows
-
-	\ git commit -m "版本紀錄的說明文字"
-	\ 就是把 tracked files 都 commit 進 repository
-	\ Then Git Shell 的 prompt 就只剩下 [master] 字樣了，代表目前已經沒有任何要被建立版本的索引或快取。
+	
+	\ git rm 相對於 add 但還會真的把檔案殺掉，別用。請用咱的 untrack 、 untrack-folder 讚！
+	\ git reset 就是把 tracking 全抹掉，要重新 add。
 
 	\ git log 很有用！
 
@@ -287,12 +329,12 @@ s" git.f"	source-code-header
 		<shell> git log </shell> ;
 		/// "git log -10" to see only the recent 10 commits
 
-	: 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從最後的 commit 裡恢復回來
+	: 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從「最後的 commit」裡恢復回來。
 		s" git checkout -- " char \n|\r word + </shell> ;
-		/// 另一種寫法還原其中一個被改壞的檔案: 
+		/// 若要把檔案退回到指定的版本則用另一種寫法: 
 		/// git checkout <master|commitId> path/Gruntfile.js
-		last alias retrieve // ( <filename1 filename2 ...> -- ) 還原檔案
-		last alias recall // ( <filename1 filename2 ...> -- ) 還原檔案
+		last alias retrieve
+		last alias recall
 		
 	: 徹底還原 ( -- ) \ 把所有改過的都重新 checkout 回來，小心！連新加的檔案也都殺掉。
 		<shell> git reset --hard </shell> ;
@@ -320,6 +362,9 @@ s" git.f"	source-code-header
 		
 	: file-system-check ( -- ) \ check repository file system integity
 		<shell> git fsck</shell> ;
+		/// 檢查 Git 維護的檔案系統是否完整。我上回搞亂整個 repo 之後再
+		/// clone 回來成功，但 fsck 看到一些 dangling commit, 如下者數行：
+		/// dangling commit 0b8054b68a13d6e3effad469070d9535583e248c
 
 	\ 第 07 天：解析 Git 資料結構 - 索引結構 
 	\ 了解 tracked/untracked, modified/unmodified, staged/unstaged 必讀。
@@ -340,6 +385,10 @@ s" git.f"	source-code-header
 	: create-branch ( <branch name> -- ) \ Create a new branch.
 		s" git branch " BL word + </shell> ;
 		/// 不必先 commit，故可以 commit 到新 branch 去。
+		
+	: branch-branch ( <branch name> -- ) \ New a branch and switch over.
+		s" git checkout -b " BL word + </shell> ;
+		/// [ ] 不必先 commit，故可以 commit 到新 branch 去。
 
 	: delete-branch ( <branch name> -- ) \ Delete an existing branch.
 		s" git branch -d " BL word + </shell> ;
@@ -357,25 +406,22 @@ s" git.f"	source-code-header
 		///     遠端分支：顧名思義，遠端分支就是在遠端儲存庫中的分支，
 		/// 如此而已。你用 GitHub 是無法存取遠端分支的。
 		
-	: branch-branch ( <branch name> -- ) \ New a branch and switch over.
-		s" git checkout -b " BL word + </shell> ;
-		/// 不必先 commit，故可以 commit 到新 branch 去。
-		
-	: switch-branch ( <branch name> -- ) \ Switch to another branch.
+	: switch-branch ( <branch name> -- ) \ Switch to another branch which is existing.
 		s" git checkout " char \n|\r word + </shell> ;
-		/// "switch branch" and "switch commit" are the same command.
-		/// 不必先 commit，故可以 commit 到別的 branch 去。
-	last alias checkout // ( <...> -- ) "git checkout" general 
-		/// Switch HEAD to another commit, recall a file, .. etc.
-	last alias switch-commit // ( <commit ID> -- ) Switch to another commit.
-		/// "switch branch" and "switch commit" are the same command.
-		/// Use "git log" to see commit ID's
+		/// "switch branch" and "switch commit" and "checkout" are the same.
+		/// [ ] 不必先 commit，故現有的 cache 可以 commit 到別的 branch 去。其實
+		/// 就是 checkout 某個 commit。
 		/// Switch commit 到舊版，即進入了所謂的 detached HEAD 狀態，這是一種
 		/// 「目前工作目錄不在最新版」的提示，你可以隨時切換到 Git 儲存庫的任
 		/// 意版本，但是由於這個版本已經有「下一版」，所以如果你在目前的「舊版」
 		/// 執行 git commit 的話，就會導致這個新版本無法被追蹤變更，所以建議不
 		/// 要這麼做。若你要在 detached HEAD 狀態建立一個可被追蹤的版本，那麼正
 		/// 確的方法則是透過「建立分支」的方式。
+		/// Use "git log" to see commit ID's
+		/// Use "branch-branch" to switch to a new branch.
+	last alias switch-commit // ( <commit ID> -- ) Switch to another commit.
+	last alias checkout // ( <...> -- ) "git checkout" general form
+		/// Switch HEAD to another commit, recall a file, .. etc.
 
 
 	\ 第 09 天：比對檔案與版本差異
@@ -543,36 +589,36 @@ s" git.f"	source-code-header
 	\ 第 25 天：使用 GitHub 遠端儲存庫 - 觀念篇
 
 	<comment>
-	Q: 	依您附圖，紅色部分都是 remotes .... 怎麼會是「本地追蹤分支」？
-		https://github.com/doggy8088/Learn-Git-in-30-days/issues/8#issuecomment-91797074
-	A: 	2015-04-11 17:12 GMT+08:00 Yue Lin Ho <notifications@github.com>:
-		More note: it is on day 25.
+		Q: 	依您附圖，紅色部分都是 remotes .... 怎麼會是「本地追蹤分支」？
+			https://github.com/doggy8088/Learn-Git-in-30-days/issues/8#issuecomment-91797074
+		A: 	2015-04-11 17:12 GMT+08:00 Yue Lin Ho <notifications@github.com>:
+			More note: it is on day 25.
 
-		Pro Git 3.5
+			Pro Git 3.5
 
-		Remote Branches
-		Remote branches are references (pointers) to the state of branches in your remote repositories. 
-		They’re local branches that ...
-		中文版 Pro Git 3.5
+			Remote Branches
+			Remote branches are references (pointers) to the state of branches in your remote repositories. 
+			They’re local branches that ...
+			中文版 Pro Git 3.5
 
-		遠端分支
-		遠端分支（remote branch）是對遠端倉庫中的分支的索引。
-		它們是一些無法移動的本地分支...
-		重點在於: 雖然是用 remotes 字眼做 prefix, 但它們存在於 本地(實際上是一種 local branches)
-		它的特性是要標示遠端的版本庫有一個本地分支, 你可以這樣子想它:
-		remotes/origin/master -> 遠端(remotes)版本庫(給它取名叫origin)有一個master分支
+			遠端分支
+			遠端分支（remote branch）是對遠端倉庫中的分支的索引。
+			它們是一些無法移動的本地分支...
+			重點在於: 雖然是用 remotes 字眼做 prefix, 但它們存在於 本地(實際上是一種 local branches)
+			它的特性是要標示遠端的版本庫有一個本地分支, 你可以這樣子想它:
+			remotes/origin/master -> 遠端(remotes)版本庫(給它取名叫origin)有一個master分支
 
-		假設, 遠端版本庫有一個本地分支叫 abc
-		你clone時,
-		本地版本庫為了記錄遠端版本庫有個 abc 指到某個 commit 上,
-		會在本地版本庫會產生一個 remotes/origin/abc, 並同時也指向那個 commit 上
-		當你在本地版本庫的這個 commit 上, 或者 remotes/origin/abc 上產生一個本地分支 abc 時,
-		本地版本庫的本地分支 abc 和 remotes/origin/abc 之間會自動產生一個 "追蹤" 闗係
+			假設, 遠端版本庫有一個本地分支叫 abc
+			你clone時,
+			本地版本庫為了記錄遠端版本庫有個 abc 指到某個 commit 上,
+			會在本地版本庫會產生一個 remotes/origin/abc, 並同時也指向那個 commit 上
+			當你在本地版本庫的這個 commit 上, 或者 remotes/origin/abc 上產生一個本地分支 abc 時,
+			本地版本庫的本地分支 abc 和 remotes/origin/abc 之間會自動產生一個 "追蹤" 闗係
 
-		更詳盡的 "跟蹤" 的概念, 請參考 這裡
-		當一個本地分支(master)與遠端分支(remotes/origin/master)之間有 "跟蹤" 關係時, 才會用這個詞
-		—
-		Reply to this email directly or view it on GitHub.
+			更詳盡的 "跟蹤" 的概念, 請參考 這裡
+			當一個本地分支(master)與遠端分支(remotes/origin/master)之間有 "跟蹤" 關係時, 才會用這個詞
+			—
+			Reply to this email directly or view it on GitHub.
 	</comment>
 	
 	: 手動加入一個「遠端儲存庫」 ( <tagName> <URI> -- )
@@ -584,46 +630,63 @@ s" git.f"	source-code-header
 		<shell> git remote -v </shell> ;
 		
 	\ 第 26 天：多人在同一個遠端儲存庫中進行版控	
+
+
+	: ver ( -- ) \ Git version
+		<shell> git --version</shell> ;
+		/// 請確定你的 git 版本是在 1.7.10以上。
+		/// http://jlord.us/git-it/challenges-zhtw/get_git.html
+
+	: config ( <[...]> -- ) \ The 'git config' general
+		s" git config " char \n|\r word + </shell> ;
+
+	: list-config ( -- ) \ List the entire configuarations
+		<shell> git config -l</shell> ; 
+		/// ( ^111 ) 從這裡面可以看出本 project 的 remote.origin.url
+		/// 以 jeforth.3we 為例 https://github.com/hcchengithub/jeforth.3we.git
+		/// 以 project-k   為例 https://github.com/hcchengithub/project-k
+		/// 還可以看到好多 alias 、 diff.tool 、 merge.tool 等可以進一步探討。
+
+	: 設定你的名字 ( "useer-name" -- ) \ Setup the user name
+		s" git config --global user.name " BL word + </shell> ;
+		/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
+		/// 這個用不著，灌 "GitHub for Windows" 的過程已經搞定。
 		
-
-
-
-
-
-: ver ( -- ) \ Git version
-	<shell> git --version</shell> ;
-	/// 請確定你的 git 版本是在 1.7.10以上。
-	/// http://jlord.us/git-it/challenges-zhtw/get_git.html
-
-: config ( <[...]> -- ) \ The 'git config' general
-	s" git config " char \n|\r word + </shell> ;
-
-: list-config ( -- ) \ List the entire configuarations
-	<shell> git config -l</shell> ;
-
-: 設定你的名字 ( "useer-name" -- ) \ Setup the user name
-	s" git config --global user.name " BL word + </shell> ;
-	/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
-	
-: 設定你的電子信箱 ( "email-address" -- ) \ Setup the user's email address
-	s" git config --global user.email " BL word + </shell> ;
-	/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
-	
-: untrack ( filename -- ) \ Untrack, remove a file from repo w/o deleting it
-	s" git rm --cached " char \n|\r word + </shell> ;
-	/// 當初是 add 命令 track 進去的，用 git rm --cached filename 脫離。
-	
-: untrack-folder ( pathname -- ) \ Untrack, remove a directory from repo w/o deleting it
-	s" git rm --cached -r " char \n|\r word + </shell> ;
-	/// 當初是 add 命令 track 進去的，用 git rm --cached -r pathname 脫離。
+	: 設定你的電子信箱 ( "email-address" -- ) \ Setup the user's email address
+		s" git config --global user.email " BL word + </shell> ;
+		/// 讓 Git 知道這台電腦所做的修改該連結到什麼使用者
+		/// 這個用不著，灌 "GitHub for Windows" 的過程已經搞定。
+		
+	: untrack ( <file>... -- ) \ Untrack, remove a file from repo w/o deleting it
+		s" git rm --cached " char \n|\r word + </shell> ;
+		last alias unstage
+		/// 當初是 add 命令 track 進去的，用 git rm --cached filename 脫離。
+		
+	: untrack-folder ( <name>... -- ) \ Untrack, remove a directory from repo w/o deleting it
+		s" git rm --cached -r " char \n|\r word + </shell> ;
+		last alias unstage-folder
+		/// 當初是 add 命令 track 進去的，用 git rm --cached -r pathname 脫離。
 
 <comment>
-[ ]	Remove a file from a Git repository without deleting it from the local filesystem
+	hcchen5600 2015/04/17 21:23:33 
+	昨天家裡電腦又 GitHub repository 大亂。可能是 GFW 干擾 Dropbox 同步所造成。也可能是 GitHub 
+	for Windows 上沒有先 commit 乾淨就按下 [Sync] button 的後果。一時心慌十分挫折。幸好公司電腦
+	的 Dropbox folder 還是先前的正常狀況，回公司 commit 上 GitHub 先修復 remote。
+	家裡的 .git 已經大亂，size 竟有 47M 正常的才 19M。修復過程： 先 md 一個暫時的 folder, 然後
+	從 GitHub 上 clone 下來。檢查 local jeforth.3we 裡 ignored 的檔案先 copy 到 temp folder，最
+	後 copy temp 過來蓋掉 local。結果 local size 變成 60M 只好這樣。裡面的垃圾以後再看怎麼清。
+	==> After「垃圾回收」command, only 27M now.
+</comment>
+
+<comment>
+
+[x]	Remove a file from a Git repository without deleting it from the local filesystem
 	http://stackoverflow.com/questions/1143796/remove-a-file-from-a-git-repository-without-deleting-it-from-the-local-filesyste
 	git rm --cached mylogfile.log
+	==> untrack ( filename -- ) \ Untrack, remove a file from repo w/o deleting it
 	For a directory:
 	git rm --cached -r mydirectory
-
+	==> untrack-folder ( pathname -- ) \ Untrack, remove a directory from repo w/o deleting it
 
 [ ]	新 project 在 github.com 上建立之後會出現下列指引：
 	
@@ -644,7 +707,6 @@ s" git.f"	source-code-header
 
 	Import code
 </comment>		
-
 
 
 
