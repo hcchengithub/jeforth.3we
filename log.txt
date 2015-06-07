@@ -3391,5 +3391,28 @@
 	2. Virtual machine 裡的 with(){} default name space.
 	3. global variable 要不要加 _ prefix? 避免撞名。或者用一個 function 來管理 新增、刪除?
 
-		
+[ ] 研究 3hta 的 localStorage 看能不能用來存 excel 的 application object (或 workbook object 也可以)
+	==>	js> window.localStorage \ ==> undefined (undefined)
+	==> HTA 只 support 到 IE7 幹！ 沒有 localStorage。
+		http://note.youdao.com/share/?id=a3be4afcc542a1f5d106528f1f3ae5ab&type=note
+	==>	嘗試用 excel 的一格來存放 myWorkbook object 也不行。
+		activeCell :: value=g.myWorkbook ==> -- P A N I C ! -- JavaScript error : Expected ';'
+[ ]	WSH 的 sendkeys 不太靈光，對 excel、有道云笔记，都無效。
+		char 有道云笔记 activate 
+		js: clipboardData.setData("text","abc")
+		char ^v{TAB} sendkeys
+	[ ] 有空用 excel 的 sendkeys 試試。
+	
+[ ]	使用 jQuery 的結果在 Win7 之下跑不起來了。因為 jQuery + JScript + HTA 版本的關係。
+	==> 首先要把 jQuery(document).ready() 改成用 document.onload = function(){} 或者
+		用 <body onload="init();"> 更簡單。
+	==> 當初用 jquery 的原因是它的 .append("test string or HTML tag") 很好用，而我當時也搞不懂
+		.appendChild(obj) 裡的 obj 怎麼來。其實很簡單:
+			outputbox.appendChild(document.createTextNode("string"))
+		這樣就可以了。
+	==> 在舊的 jeforth.3hta 上改了一半,可以不靠 jQuery 跑起來了。--> 把現在的 3we commit 起來,開
+		始直接在上面修改。	
+		--> 靠！當前的 3we 是 [namespace-test +1 ~8 -1 !] branch，忘了本來是在幹嘛了! 還改了一堆
+			excel 的東西。先用 GitHub for Windows 瞧瞧. . . . 可以合併回 marker so just do it . . .
+			
 		

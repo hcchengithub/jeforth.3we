@@ -1423,8 +1423,8 @@ code cut		( -- ) \ Cut off used TIB.
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
-: int 			( float -- integer )
-				js> parseInt(pop()) ;
+code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
+code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
 
 				<selftest>
 					*** int 3.14 is 3, 12.34AB is 12 ...

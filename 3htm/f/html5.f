@@ -105,15 +105,16 @@ s" html5.f"		source-code-header
 				\ 浙江淘?网?有限公司
 				</comment>
 
-: pickFile		( -- "pathname" ) \ Pick a file through IE's GUI
+: pickFile		( -- "pathname" ) \ Pick a file through web browser's GUI
 				char input createElement \ ele
 				dup char type char file setAttribute \ ele
 				js: $(tos()).hide() eleBody over appendChild \ 要 append 才行，是有點奇怪。
 				js> tos().click();tos().value
 				swap removeElement ;
+				/// Works fine on HTA. The dialog works on 3htm but returns Null string. 
 				/// Through excel app's GetOpenFilename method can do the same thing:
 				///     excel.app js> pop().GETopenFILENAME <== with or w/o () both fine
-				/// GetSaveAsFilename method too.
+				/// Excel's GetSaveAsFilename method too.
 
 : input.file	( -- element ) \ Place a file input HTMLelement
 				<o> <input type=file></o> ;

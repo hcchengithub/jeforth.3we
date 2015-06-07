@@ -1,4 +1,4 @@
-\ Big5
+\ utf-8
 
 include vb.f
 
@@ -40,13 +40,48 @@ WshShell js: window.WshShell=pop() \ Make it a global object.
 					9 = ==>judge [if] <js> ['ActiveXObject','WshShell'] </jsV> all-pass [then]
 					<vb> WshShell.SendKeys "%" </vb> \ Release Alt key, some how other wise it got locked.
 					<comment>
-					\ ��� clipboard �w�g���\�A���Ȥ����J�Ҧ��C�H�U�d�@�����C
-					\ js: document.body.style.imeMode='disabled'; \ [x] �a�סA�Q�n�קK�����J�k�z�Z�A�L�ġI
+					\ 改用 clipboard 已經成功，不怕中文輸入模式。以下留作紀念。
+					\ js: document.body.style.imeMode='disabled'; \ [x] 懸案，想要避免中文輸入法干擾，無效！
 					\ <vb> WshShell.SendKeys "1{+}" </vb>           100 sleep \ Pad plus
 					\ js: document.body.style.imeMode='auto'; 
 					</comment>
 				</selftest>
-
+				
+: activate		( ProcessID|"^title" -- ) \ Activate an application
+				WshShell :: AppActivate(pop()) ;
+				/// "title" is the leading 3 or more characters, case don't care.
+				
+: sendkeys		( "keys" -- ) \ Send keys to the recent activated application
+				[ last literal ] :> wait ( -- "keys" wait ) 
+				WshShell :: sendkeys(pop(1),pop()) ;
+				/// == ' sendkeys :> wait ==
+				/// False: (or omitted) continue running without waiting for the keys to be processed.
+				/// True : wait for the keys to be processed before returning control. 
+				/// 不 wait 時，可以一邊手動切 app 一邊看到（大量的）key buffer dump 過來 dump 過去。
+				/// 要 wait 時，則一開始倒就無法切換。
+				/// 
+				/// == Usage Tip ==
+				/// This method places keystrokes in a key buffer. In some cases, you must call this 
+				/// method before you call the method that will use the keystrokes. For example, to 
+				/// send a password to a dialog box, you must call the SendKeys method before you 
+				/// display the dialog box. 
+				/// 注意！JavaScript 把控制權交出去之前，這些 key 都在 buffer 裡。故應該先 sendkeys 
+				/// 切往 target application 然後 nap 一會兒讓 target application 工作。
+				/// 
+				/// == Special keys ==
+				/// +Shift ^Ctrl %Alt {BACKSPACE}or{BS},{BREAK},{CAPSLOCK},{CLEAR},{DELETE} or {DEL},
+				/// {DOWN},{END},{ENTER},{ESCAPE} or {ESC},{F1}{F15},{HELP},{HOME},{INSERT},{LEFT},
+				/// {NUMLOCK},{PGDN},{PGUP},{RETURN},{RIGHT},{SCROLLLOCK},{TAB},{UP},~(Enter)
+				///
+				/// == Example ==
+				/// 先弄出個很大的 string :
+				/// <js> var ss="112233"; for(var i=0; i<10000; i++) ss += "ab"; ss += "<end>"</jsV> value ss
+				/// Notepad 有先跑起來。做下面實驗，其中 1 nap 讓 notepad 上手必要， 10000 nap 時間不夠
+				/// 讓 keys 倒完，結果前半段倒往 notepad 後半段倒往 jeforth.3hta 的 inputbox,
+				/// char untitled ( notepad ) activate 1 nap ss sendkeys 10000 nap
+				/// 不論 wait 是 true/false 都一樣。
+				
+				
 : (run)			( "command-line" -- errorlevel ) \ Run anything like Win-R does and wait for the return.
 				<js> WshShell.run(pop(),5,true) </jsV> ;
 
@@ -147,7 +182,7 @@ code subFolders ( objFolder -- [objFolder,...] ) \ Get subfolder paths
 				push(a);
 				end-code
 
-\ �����F�C���ئ۰� search file ���p readTextFileAuto ���w�q�u�����ǡC�ӥB wsh.f �ۮe�ʤ]���n�C
+\ 取消了。盲目自動 search file 不如 readTextFileAuto 有定義優先順序。而且 wsh.f 相容性也不好。
 \ also forth definitions \ redefine sinclude/include in the forth word-list
 \ 
 \ : sinclude		( "[path]name" -- ... ) \ Auto search and lodad forth source file.
@@ -296,7 +331,7 @@ code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of
 					*** GetParentFolderName is a string operation ... 
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
 					GetParentFolderName \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github (string)
-					drop \ demo only, ���������P�_
+					drop \ demo only, 不拿它做判斷
 					js> window.location.toString().replace(/#endofinputbox/,"") \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we/jeforth.hta (string)
 					GetParentFolderName \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we (string)
 					GetFileName \ jeforth.3we

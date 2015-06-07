@@ -26,7 +26,7 @@
 */
 "uses strict";
 var kvm = (function(){
-    function KsanaVm() {     
+    function KsanaVm() { 
 		var kvm = this; // "this" is very confusing to me. Now I am sure 'vm' is 'kvm'.
 		if(typeof(kvm)=="undefined"){var kvm=vm} // kvm defined in jeforth.hta is visible but not node.js index.js
 		var stop = true; // Abort TIB
@@ -62,15 +62,17 @@ var kvm = (function(){
 		// 這個 Word() constructor 是所有 forth word 共通的，中間的 extra statements 
 		// 使個別的 word 可以自由擴充零件。
 		function Word(a) {
-			this.name = a.shift();  // name and xt are mandatory
-			this.xt = a.shift();
-		
-			// extra statements
-			var statement;
-			while(statement=a.shift()) {  // extra arguments are statement strings
-				eval(statement);
+			with(kvm){
+				this.name = a.shift();  // name and xt are mandatory
+				this.xt = a.shift();
+			
+				// extra statements
+				var statement;
+				while(statement=a.shift()) {  // extra arguments are statement strings
+					eval(statement);
+				}
+				// wordhash[this.name] = this;  // hash table, quickly finds word. 不該在這裡做--hcchen5600 2014/10/05 10:53:06 
 			}
-			// wordhash[this.name] = this;  // hash table, quickly finds word. 不該在這裡做--hcchen5600 2014/10/05 10:53:06 
 		}
 		Word.prototype.toString = function(){return this.help}; // 簡單這樣一行，每個 word 都會自我介紹了
 		
@@ -544,6 +546,7 @@ var kvm = (function(){
 		kvm.pop = pop;
 	
 		// Stack access easier. e.g. push(data,1) inserts data to tos(1), ( tos2 tos1 tos -- tos2 tos1 data tos )
+		// push(formula(pop(i)),i-1) manipulate the tos(i) directly, usually when i is the index of a loop.
 		function push(data, index) { 
 			switch (arguments.length) {
 				case 0  : 	panic(" push() what?\n");
