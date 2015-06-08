@@ -1,22 +1,48 @@
 
 s" html5.f"		source-code-header
 
+<comment>
+	<!-- script src="js/jquery-1.10.2.js"></script -->
+
+	<h> 
+	<script type="text/javascript" src="js/box2dweb/Box2dWeb-2.1.a.3.min.js"></script> 
+	</h> constant Box2dWeb // ( -- obj ) The Box2dWeb.js script element
+	
+	char script createElement constant vbsBasic // ( -- element ) The vbs script tag element
+	vbsBasic char type char text/vbscript setAttribute
+	vbsBasic char id   char vbsBasic      setAttribute
+	vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
+	eleHead vbsBasic appendChild
+
+	char script createElement ( -- eleScript )
+	dup char src char js/jquery-1.10.2.js setAttribute ( -- eleScript )
+	js> head swap ( -- eleHead eleScript ) appendChild
+	
+	
+</comment>
+
+
 : createElement	( <element> -- element ) \ Create an HTML element w/o instance yet
 				js> document.createElement(pop()) ; 
-				
-: getElementById
-				( "id" -- element ) \ Get element object by ID
-				js> document.getElementById(pop()) ;
 				
 : setAttribute  ( oElement "attr" "value" -- ) \ Set an attribute to an element
 				js: pop(2).setAttribute(pop(1),pop()) ;
 
-: getAttribute  ( oElement "attr" -- ) \ Get an attribute value of an element
-				js> pop(1).getAttribute(pop()) ;
-
 : appendChild	( parent element -- ) \ Append an element to the parent element
 				js: pop(1).appendChild(pop()) ;
 				/// element.parentElement gets parent so we can *move* 
+
+\ include jQuery
+	char script createElement ( -- eleScript )
+	dup char src char js/jquery-1.10.2.js setAttribute ( -- eleScript )
+	js> head swap ( -- eleHead eleScript ) appendChild
+
+: getElementById
+				( "id" -- element ) \ Get element object by ID
+				js> document.getElementById(pop()) ;
+				
+: getAttribute  ( oElement "attr" -- ) \ Get an attribute value of an element
+				js> pop(1).getAttribute(pop()) ;
 
 : replaceNode	( Node targetNode -- ) \ Replace a HTML node
 				js: tos().parentElement.replaceChild(pop(1),pop()) ;

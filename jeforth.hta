@@ -8,7 +8,7 @@
 	<HTA:APPLICATION 
 		ID="hta"
 		APPLICATIONNAME="jeforth.3hta"
-		VERSION="1.00" 
+		VERSION="1.1" 
 		/>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" type="text/css" href="common.css">
@@ -18,143 +18,18 @@
 				background:#E0E0E0;
 			}
     </style>
-    <script src="js/jquery-1.10.2.js"></script>
-	<Script src="kernel/jeforth.js"></Script>
-	<script id=js>
-	(function(){
-		kvm.appname = hta.applicationName;
-		kvm.host = window;
-		kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3htm", "3hta/f", "3hta/vbs", "3hta/excel", "3hta", "playground"];
-		kvm.version = "1.00";
-		kvm.greeting = function(){
-			var revision = hta.version;
-			print("j e f o r t h . 3 h t a -- r"+revision+'\n');
-			print(jsengine.innerText+'\n');
-			print("source code http://github.com/hcchengithub/jeforth.3we\n");
-			print("Root " + window.location.toString()+'\n');
-			print("argv " + hta.commandLine+'\n');
-			return(parseFloat(revision));
-		}
-		kvm.debug = false;
-		kvm.jsc = {xt:'print("Sorry, jsc is not available yet.")',prompt:"jsc>"};
-		kvm.screenbuffer = ""; // print() to screenbuffer before I/O ready
-		kvm.inputbox = "";
-		kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
- 		kvm.prompt = "OK";
-		kvm.ado = new ActiveXObject("ADODB.Stream");
-		kvm.argv = (hta.commandLine + " ").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
-		var print = kvm.print = function (s) { 
-			try {
-				var ss = s + ''; // Print-able test
-			} catch(err) {
-				ss = Object.prototype.toString.apply(s);
-			}
-			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-			$('#outputbox').append(plain(ss)); 
-			// jump2endofinputbox.click(); // inputbox.focus();
-		};
-		kvm.bye = function(){window.close()}; // vb.f will improve it
-		
-		// System initialization
-		jQuery(document).ready(function($) {  
-			// jQuery convention, learned from W3School, make sure web page is ready.
-			$('#rev').html(hta.version); // also .commandLine, .applicationName, ...
-			$('#location').html(window.location.toString()); // it's built-in in DOM
-			$('#jsengine').html(  
-					// http://stackoverflow.com/questions/19567887/javascript-version-in-hta
-					ScriptEngine() + ' v' + 
-					ScriptEngineMajorVersion() + '.' + 
-					ScriptEngineMinorVersion() + '.' +
-					ScriptEngineBuildVersion()
-				);
-			$('.appname').html(kvm.appname);
-			document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-			kvm.init();  // setup platform related I/O
-			kvm.fortheval(kvm.readTextFile("kernel/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 
-			// fortheval() 之後不能再有任何東西，否則因為有 sleep/suspend/resume 之故，會被意外執行到。
-		});
-
-		// There's no main loop, event driven call back function is this.
-		kvm.forthConsoleHandler = function(cmd) {
-			var rlwas = kvm.rstack().length; // r)stack l)ength was
-            print((cmd?'\n> ':"")+cmd+'\n');
-			kvm.fortheval(cmd);  // Pass the command line to KsanaVM
-			(function retry(){
-				// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-				// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-				// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-				if(kvm.rstack().length!=rlwas)
-					setTimeout(retry,100); 
-				else {
-					print(" " + kvm.prompt + " ");
-					jump2endofinputbox.click(); inputbox.focus();
-				}
-			})();
-		}
-
-		// onkeydown,onkeypress,onkeyup
-		// event.shiftKey event.ctrlKey event.altKey event.metaKey
-		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
-		function hotKeyHandler(e) {
-			switch(e.keyCode) {
-				case 13: /* Enter */
-					kvm.inputbox = document.getElementById("inputbox").value; // w/o the '\n' character ($10). 
-					document.getElementById("inputbox").value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.forthConsoleHandler(kvm.inputbox);
-					return(false); 
-			}
-			return (true); // pass down to following handlers 
-		}
-		
-		kvm.clearScreen = function(){$('#outputbox').empty()}
-		var plain = kvm.plain = function (s) {
-			var ss = s + ""; // avoid numbers to fail at s.replace()
-			ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
-			ss = ss.replace(/  /g,' &nbsp;');
-			ss = ss.replace(/</g,'&lt;');
-			ss = ss.replace(/>/g,'&gt;');
-			ss = ss.replace(/\n/g,'<br>');
-			return ss;
-		}
-		
-		// When used in forth words, inner() handles the try{}catch{} thing.
-		// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
-		kvm.writeTextFile = function(pathname,data) { // Write string to text file.
-			var objStream = kvm.ado;
-			try{objStream.Close()}catch(err){}
-			objStream.CharSet="utf-8"
-			objStream.Open();
-			objStream.WriteText(data); // option: adWriteChar=0(default), adWriteLine=1(\r\n)
-			objStream.SaveToFile(pathname,2) // adSaveCreateOverWrite=2, adSaveCreateNotExist=1(can't overwite)
-			objStream.Close()
-		}
-
-		// When used in forth words, inner() handles the try{}catch{} thing.
-		// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
-		kvm.readTextFile = function(pathname) {
-			var strData, objStream = kvm.ado;
-			try{objStream.Close()}catch(err){}
-			objStream.CharSet = "utf-8";
-			objStream.Open();
-			objStream.LoadFromFile(pathname);
-			strData = objStream.ReadText();
-			objStream.Close();
-			return(strData);
-		}
-	})();
-	</script>
 </head>
-<body id=body>
+<body id=body onload="init();">
 	<div id=header>
-	<div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
-	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div>
+	<!-- div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
+	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div-->
 	<div style="font-family:verdana;">
 	<b><div class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
 	<div style="color:#40B3DF;">
 	Revision <span id=rev style="background-color:#B4009E;color:#ffffff;">rev</span><br>
 	Top on <span id=jsengine>jsengine</span><br>
 	Source code http://github.com/hcchengithub/jeforth.3we<br>
-	Program path <span id=location>location</span><br>
+	Program path <span id=loc>location</span><br>
 	</div>
 	</div>
 	</div>
@@ -162,5 +37,134 @@
 	<div id="outputbox"></div>
 	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div>
 </body>
+<!-- moved to html5.f script src="js/jquery-1.10.2.js"></script -->
+<Script src="kernel/jeforth.js"></Script>
+<script id=js>
+	kvm.appname = hta.applicationName;
+	kvm.host = window;
+	kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3htm", "3hta/f", "3hta/vbs", "3hta/excel", "3hta", "playground"];
+	kvm.version = "1.00";
+	kvm.greeting = function(){
+		var revision = hta.version;
+		kvm.print("j e f o r t h . 3 h t a -- r"+revision+'\n');
+		kvm.print(jsengine.innerText+'\n');
+		kvm.print("source code http://github.com/hcchengithub/jeforth.3we\n");
+		kvm.print("Root " + window.location.toString()+'\n');
+		kvm.print("argv " + hta.commandLine+'\n');
+		return(parseFloat(revision));
+	}
+	kvm.debug = false;
+	kvm.jsc = {xt:'kvm.print("Sorry, jsc is not available yet.")',prompt:"jsc>"};
+	kvm.screenbuffer = ""; // print() to screenbuffer before I/O ready
+	kvm.inputbox = "";
+	kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
+	kvm.prompt = "OK";
+	kvm.ado = new ActiveXObject("ADODB.Stream");
+	kvm.argv = (hta.commandLine + " ").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
+	kvm.print = function (s) { 
+		try {
+			var ss = s + ''; // Print-able test
+		} catch(err) {
+			ss = Object.prototype.toString.apply(s);
+		}
+		if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
+		// was: $('#outputbox').append(plain(ss)); 
+		var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
+		for(i=0; i<aa.length-1; i++){
+			outputbox.appendChild(document.createTextNode(aa[i]));
+			outputbox.appendChild(document.createElement("br"));
+		}
+		if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
+	};
+	kvm.bye = function(){window.close()}; // vb.f will improve it
+
+	// There's no main loop, event driven call back function is this.
+	kvm.forthConsoleHandler = function (cmd) {
+		var rlwas = kvm.rstack().length; // r)stack l)ength was
+		kvm.print((cmd?'\n> ':"")+cmd+'\n');
+		kvm.fortheval(cmd);  // Pass the command line to KsanaVM
+		(function retry(){
+			// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+			// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+			// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+			if(kvm.rstack().length!=rlwas)
+				setTimeout(retry,100); 
+			else {
+				kvm.print(" " + kvm.prompt + " ");
+				jump2endofinputbox.click(); inputbox.focus();
+			}
+		})();
+	}
+	kvm.clearScreen = function(){outputbox.innerHTML=""}
+	kvm.plain = function (s) {
+		var ss = s + ""; // avoid numbers to fail at s.replace()
+		ss = ss.replace(/\t/g,'\u00a0\u00a0\u00a0\u00a0');
+		ss = ss.replace(/ /g,'\u00a0'); // utf-8 space ce@ :: textContent="a\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0b"
+		// ss = ss.replace(/</g,'&lt;');
+		// ss = ss.replace(/>/g,'&gt;');
+		ss = ss.replace(/\r?\n\r?/g,'\n');
+		return ss;
+	}
+	
+	// When used in forth words, inner() handles the try{}catch{} thing.
+	// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
+	kvm.writeTextFile = function(pathname,data) { // Write string to text file.
+		var objStream = kvm.ado;
+		try{objStream.Close()}catch(err){}
+		objStream.CharSet="utf-8"
+		objStream.Open();
+		objStream.WriteText(data); // option: adWriteChar=0(default), adWriteLine=1(\r\n)
+		objStream.SaveToFile(pathname,2) // adSaveCreateOverWrite=2, adSaveCreateNotExist=1(can't overwite)
+		objStream.Close()
+	}
+
+	// When used in forth words, inner() handles the try{}catch{} thing.
+	// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
+	kvm.readTextFile = function(pathname) {
+		var strData, objStream = kvm.ado;
+		try{objStream.Close()}catch(err){}
+		objStream.CharSet = "utf-8";
+		objStream.Open();
+		objStream.LoadFromFile(pathname);
+		strData = objStream.ReadText();
+		objStream.Close();
+		return(strData);
+	}
+
+	// onkeydown,onkeypress,onkeyup
+	// event.shiftKey event.ctrlKey event.altKey event.metaKey
+	// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
+	function hotKeyHandler(e) {
+		e = (e) ? e : event;
+		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		switch(keycode) {
+			case 13: /* Enter */
+				kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
+				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+				forthConsoleHandler(kvm.inputbox);
+				return(false); 
+		}
+		return (true); // pass down to following handlers 
+	}
+	
+	// System initialization
+	function init() { // jQuery(document).ready(function($) {  
+		rev.innerHTML = hta.version; // also .commandLine, .applicationName, ...
+		loc.innerHTML = window.location.toString(); // it's built-in in DOM
+		jsengine.innerHTML = (  
+				// http://stackoverflow.com/questions/19567887/javascript-version-in-hta
+				ScriptEngine() + ' v' + 
+				ScriptEngineMajorVersion() + '.' + 
+				ScriptEngineMinorVersion() + '.' +
+				ScriptEngineBuildVersion()
+			);
+		document.getElementsByClassName('appname')[0].innerHTML=kvm.appname;
+		document.getElementsByClassName('appname')[1].innerHTML=kvm.appname;
+		document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
+		kvm.init();  // setup platform related I/O
+		kvm.fortheval(kvm.readTextFile("kernel/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 
+		// fortheval() 之後不能再有任何東西，否則因為有 sleep/suspend/resume 之故，會被意外執行到。
+	};	
+</script>
 </html>
 

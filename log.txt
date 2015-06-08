@@ -3406,13 +3406,43 @@
 [ ]	使用 jQuery 的結果在 Win7 之下跑不起來了。因為 jQuery + JScript + HTA 版本的關係。
 	==> 首先要把 jQuery(document).ready() 改成用 document.onload = function(){} 或者
 		用 <body onload="init();"> 更簡單。
-	==> 當初用 jquery 的原因是它的 .append("test string or HTML tag") 很好用，而我當時也搞不懂
-		.appendChild(obj) 裡的 obj 怎麼來。其實很簡單:
-			outputbox.appendChild(document.createTextNode("string"))
-		這樣就可以了。
 	==> 在舊的 jeforth.3hta 上改了一半,可以不靠 jQuery 跑起來了。--> 把現在的 3we commit 起來,開
 		始直接在上面修改。	
 		--> 靠！當前的 3we 是 [namespace-test +1 ~8 -1 !] branch，忘了本來是在幹嘛了! 還改了一堆
 			excel 的東西。先用 GitHub for Windows 瞧瞧. . . . 可以合併回 marker so just do it . . .
-			
+		--> git merge namespace-test ... 成功! 平生第一次做 merge。
+		--> 現在回到 master 了, 
+	[x]	Microsoft JScript runtime error: 'keyCode' is null or not an object
+		--> Windows 7, Top on JScript v5.8.16385 而且是 IE8 結果他的 document.onkeydown 收到的不是 
+			handler(e) 而是 handler(void)! keyCode 要另外從 event.keyCode 取得.
+		--> 所以網友建議的 pattern 是:	
+		function alertKeycode(e) {
+		   e = (e) ? e : event;
+		   var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		   alert(keycode)
+		}
+		=> OK!
+	[ ]	Win7 的 IE 是 IE8 而 HTA 裡的這的一行設定:
+			<meta http-equiv="x-ua-compatible" content="ie=9" />
+		顯得令人擔憂。
+	[ ]	當初用 jquery 的原因是它的 .append("test string or HTML tag") 很好用，而我當時也搞不懂
+		.appendChild(obj) 裡的 obj 怎麼來。其實很簡單:
+			outputbox.appendChild(document.createTextNode("string"))
+		這樣就可以了。
+		[ ]	still a challenge, <br> needs special treatment.
+		var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
+		for(i=0; i<aa.length-1; i++){
+			outputbox.appendChild(document.createTextNode(aa[i]));
+			outputbox.appendChild(document.createElement("br"));
+		}
+		if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
+		else outputbox.appendChild(document.createElement("br"));
+		
+		OK js> "aaa\nbbb\n" .
+aaa
+bbb
+ OK js> "aaa\nbbb\n" :> split('\n') .
+aaa,bbb, OK js> "aaa\nbbb\n"+"\n" :> split('\n') .
+aaa,bbb,, OK js> "aaa\nbbb\n"+"\n" :> split('\n') :> pop()=="" .
+true OK 	
 		
