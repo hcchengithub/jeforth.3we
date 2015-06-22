@@ -249,7 +249,7 @@ code objEnumWin32_PnPEntity
 					10 > \ true
 					( ------------ done, start checking ---------------- ) 
 					start-here <js> kvm.screenbuffer.indexOf("PCI",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("Motherboard resources",pop())!=-1 </jsV> \ true
+					start-here <js> kvm.screenbuffer.indexOf("ACPI",pop())!=-1 </jsV> \ true
 					start-here <js> kvm.screenbuffer.indexOf("HID-compliant",pop())!=-1 </jsV> \ true
 					js> stack.slice(0) <js> [true,true,true,true] </jsV> isSameArray >r dropall r>
 					-->judge [if] <js> [

@@ -3425,24 +3425,126 @@
 	[ ]	Win7 的 IE 是 IE8 而 HTA 裡的這的一行設定:
 			<meta http-equiv="x-ua-compatible" content="ie=9" />
 		顯得令人擔憂。
-	[ ]	當初用 jquery 的原因是它的 .append("test string or HTML tag") 很好用，而我當時也搞不懂
+	[x]	當初用 jquery 的原因是它的 .append("test string or HTML tag") 很好用，而我當時也搞不懂
 		.appendChild(obj) 裡的 obj 怎麼來。其實很簡單:
 			outputbox.appendChild(document.createTextNode("string"))
-		這樣就可以了。
-		[ ]	still a challenge, <br> needs special treatment.
-		var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
-		for(i=0; i<aa.length-1; i++){
-			outputbox.appendChild(document.createTextNode(aa[i]));
-			outputbox.appendChild(document.createElement("br"));
-		}
-		if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
-		else outputbox.appendChild(document.createElement("br"));
+		這樣就可以了：
+			var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
+			for(i=0; i<aa.length-1; i++){
+				outputbox.appendChild(document.createTextNode(aa[i]));
+				outputbox.appendChild(document.createElement("br"));
+			}
+			if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
+		[x]	still a challenge <e> <o> 都靠 jQuery 才好做。所以還是在 html5.f 裡把 jquery 給抓進來了。
+	[ ] 目前的 cr 好像不 work?
+	[ ]	HTML 一類的 greeting 上有 Program path file:///C:/.../jeforth.3we/jeforth.hta#endofinputbox
+		尾巴上的 #endofinputbox 應該想辦法把它拿掉。
 		
-		OK js> "aaa\nbbb\n" .
-aaa
-bbb
- OK js> "aaa\nbbb\n" :> split('\n') .
-aaa,bbb, OK js> "aaa\nbbb\n"+"\n" :> split('\n') .
-aaa,bbb,, OK js> "aaa\nbbb\n"+"\n" :> split('\n') :> pop()=="" .
-true OK 	
+	[ ]	想通了 jQuery 還是要把它 include 進來。適當時機是 html5.f, Win7 經過 windows upgrade 之後
+		JScript 也到了 v11 了, Winxp 放棄或晚點再看看。
 		
+	[x] Try AutoItX3
+		<js> push(new ActiveXObject("AutoItX3.Control"))</js> constant au3 // ( -- AutoItX3 ) Get AutoItX3 object
+		au3 :: run("notepad.exe")
+		==> Bingo!!
+	[ ] So, let's go for the autoit.f	
+
+	[x] https://msdn.microsoft.com/en-us/library/office/gg251785(v=office.15).aspx
+		If the pathname argument is omitted, GetObject returns a currently active object of the specified type. 
+		If no object of the specified type exists, an error occurs. <== 這就是 jeforth.3hta 裡 excel.f 該用的辦
+		法了! 先用 see-excel 查看有幾個 excel 在 running? 如果是一個就用它, 如果超過一個就警告, 如果沒有就開一個。
+		<vb> Set xl=GetObject(,"excel.application"):kvm.push(xl)</vb>
+		it works!!
+		==>	終於解決 multiple Excel.Application object 的問題了!
+	[ ] ?abort" error message " 能不能弄成 dual state 通用?
+		
+	[ ] 開始研究透過 AutoIt 抓網頁 data 
+		研究 ie.au3 很可能跟 excel 依樣發現又是 GetObject() 就能解決?
+		--> 果然發現 IE Window Object, _IEAttach()'s return value.
+		--> 原來他是透過 shell.application access windows object, 其實 windows 就是 IE 的 tab 頁面。
+		[ ]	shell.application 應改簡化成 shell.app 類似 excel.app
+			https://msdn.microsoft.com/en-us/library/windows/desktop/bb774063(v=vs.85).aspx
+		shell.application :> windows() constant ShellWindows // ( -- obj ) shell.application windows object
+		/// ShellWindows object https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974(v=vs.85).aspx
+		ShellWindows :> count \ ==> 3 (number) 根本就是看 IE 開了幾個 tab 亦即 windows。
+		ShellWindows :> item(0) \ ==> Windows Internet Explorer (object) https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
+		ShellWindows :> item(3) \ ==> null (null) 超過了就變成 null。
+		ShellWindows :> item(0) :> LocationName \ ==> 星巴克华东 (string) Bingo!!! 真的碰到了!
+		ShellWindows :> item(0) :> LoCaTiOnUrL \ ==> http://www.president-starbucks.com.cn/index.html (string)
+		ShellWindows :> item(0) :> application \ ==> Windows Internet Explorer (object) 就是 item(0) 自己。
+	[x]	其實 IE object 也可以這樣直接取得:
+		<vb> Set IE = CreateObject("InternetExplorer.Application"):kvm.push(IE)</vb> constant IE // ( -- obj ) Internet Explorer object
+		然後透過 IE :> parent 應該也是回到 ShellWindows --> [ ] try try see .... 非也, 這個 IE.parent 還是它
+		自己。
+	[x]	同上,改用 GetObject 看看,	
+		<vb> Set ie = GetObject(,"InternetExplorer.Application"):kvm.push(ie)</vb> constant ie // ( -- obj ) Internet Explorer object
+		--> VBscript error : ActiveX component can't create object: 'GetObject'
+		--> 這是因為 IE 應該是個 single-instance object 
+	[ ] 同上,改用 GetObject 的另一方式看看,	
+		<vb> Set ie = GetObject("","InternetExplorer.Application"):kvm.push(ie)</vb> constant ie // ( -- obj ) Internet Explorer object
+		--> 成功了! 但它的 parent 還是自己。
+		--> 每多開一個 tab 用 s" where name = 'iexplore.exe'" see-process . 來看就會多一個 process.
+	[x] 被 stop 停掉的 TIB 應該馬上 stop=false 以便只 stop 本 <Task>.
+		-->	改了 outer() 若無誤,記得連 project-k 也要修正。
+		--> 錯! stop 必須 stop 全部工作。後續還有工作的情形用 ?rewind。
+	[x] Need a ?rewind command	
+		
+	[x]	Have many bugs now. On excel.f and on ie.f/money.f. This bug happens on S7 when starting 
+		ieforth.3we. First time said there are multiple excel and stoped including excel. So I close
+		visible excel workbooks. F5 reload and the below error happened. Retry can't fix it. Close
+		jeforth.3we and run again, still same problem.
+		------------------- P A N I C ! -------------------------
+		VBscript error : ActiveX component can't create object: 'GetObject'
+		stop: false
+		compiling: false
+		stack.length: 0
+		rstack.length: 1
+		ip: 1286
+		ntib: 279
+		tib.length: 65609
+		tib: (,"excel.application"):kvm.push(xl)</vb><ntib> 
+		[else] char Excel.Application ActiveXObject [then] to (excel.app) 
+		==> I guess this is again the "single-instance object" issue ... 
+		==> Bingo!! 不要用 ActiveXObject(), 用 CreateObject() or GetObject()。
+			而且 IE and Excel 都是 "single-instance object" 只要看到有多個 application object
+			就可以當作是問題。
+
+	[ ] ie.f ok now, money.f 需要改寫 with new knowledge of ie.f. 
+	[x] 如何取得 the active IE window? ==> 讓 user 自己從 list-ie-winsows 裡選。
+	
+[ ]	如何 用 jquery 去 query 用 ie.f attach 到的 web pabe?		
+		
+[ ] 改 hotkey.au3, 增加功能每周三中午前把 router 切好位置。		
+
+[ ] ie(i) 的 alias ie 有問題, run 不起來。
+	ieWindow 也一樣問題。
+	
+[ ]	JavaScript "Table to JSON" http://lightswitch05.github.io/table-to-json/
+	works fine. 
+	<h> <script src="js/jquery.tabletojson.js"></script></h> drop
+	"table HTML" </o> constant table table er
+	js> JSON.stringify(g.table)
+
+	Computer name : ASRock-P8H61 is my desktop at home.
+	
+[ ] 希望能把整個網頁都抓進來 jquery 搜尋/控制 其中的東西
+	http://stackoverflow.com/questions/18145273/how-to-load-an-external-webpage-into-a-div-of-a-html-page
+	<o> <div> 
+    <object type="text/html" data="http://validator.w3.org/" width="800px" height="600px" style="overflow:auto;border:5px ridge blue">
+    </object>
+	</div></o>
+	真的可以 open 小網頁! 
+	<o> <div> 
+    <object type="text/html" data="http://ibm.com/" width="800px" height="600px" style="overflow:auto;border:5px ridge blue">
+    </object>
+	</div></o>
+
+[x] My Asus desktop rolled back to IE8 意外發現 (er) was not defined well.
+	==> fixed. 分辨 HTML Tag 要用 ce@ :> nodeName 不是用 '[object Text]' 不可靠。
+		其實當時我就覺得用 elementObject.toString()=='[object Text]' 有點太過神奇。
+[ ] autoit.f 不必寫甚麼在包裝過一層的命令, 給 au3 的使用例子就好了。
+	直接查 autoitx.hlp 看其他命令。多半是 keyboard / mouse 的命令。
+[ ] 寫 S7 方便改 keyboard registry 的命令。	
+
+
+

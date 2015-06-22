@@ -60,7 +60,7 @@
 	kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
 	kvm.prompt = "OK";
 	kvm.ado = new ActiveXObject("ADODB.Stream");
-	kvm.argv = (hta.commandLine + " ").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
+	kvm.argv = (hta.commandLine + " dummy").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
 	kvm.print = function (s) { 
 		try {
 			var ss = s + ''; // Print-able test
@@ -77,30 +77,12 @@
 		if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
 	};
 	kvm.bye = function(){window.close()}; // vb.f will improve it
-
-	// There's no main loop, event driven call back function is this.
-	kvm.forthConsoleHandler = function (cmd) {
-		var rlwas = kvm.rstack().length; // r)stack l)ength was
-		kvm.print((cmd?'\n> ':"")+cmd+'\n');
-		kvm.fortheval(cmd);  // Pass the command line to KsanaVM
-		(function retry(){
-			// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-			// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-			// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-			if(kvm.rstack().length!=rlwas)
-				setTimeout(retry,100); 
-			else {
-				kvm.print(" " + kvm.prompt + " ");
-				jump2endofinputbox.click(); inputbox.focus();
-			}
-		})();
-	}
-	kvm.clearScreen = function(){outputbox.innerHTML=""}
+	kvm.clearScreen = function(){outputbox.innerHTML=""};
 	kvm.plain = function (s) {
 		var ss = s + ""; // avoid numbers to fail at s.replace()
 		ss = ss.replace(/\t/g,'\u00a0\u00a0\u00a0\u00a0');
 		ss = ss.replace(/ /g,'\u00a0'); // utf-8 space ce@ :: textContent="a\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0b"
-		// ss = ss.replace(/</g,'&lt;');
+		// ss = ss.replace(/</g,'&lt;'); 不用 jQuery 的 append() 就不需要。
 		// ss = ss.replace(/>/g,'&gt;');
 		ss = ss.replace(/\r?\n\r?/g,'\n');
 		return ss;
@@ -131,17 +113,34 @@
 		return(strData);
 	}
 
+	// There's no main loop, event driven call back function is this.
+	kvm.forthConsoleHandler = function (cmd) {
+		var rlwas = kvm.rstack().length; // r)stack l)ength was
+		kvm.print((cmd?'\n> ':"")+cmd+'\n');
+		kvm.fortheval(cmd);  // Pass the command line to KsanaVM
+		(function retry(){
+			// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+			// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+			// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+			if(kvm.rstack().length!=rlwas)
+				setTimeout(retry,100); 
+			else {
+				kvm.print(" " + kvm.prompt + " ");
+				jump2endofinputbox.click(); inputbox.focus();
+			}
+		})();
+	}
+
 	// onkeydown,onkeypress,onkeyup
 	// event.shiftKey event.ctrlKey event.altKey event.metaKey
 	// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 	function hotKeyHandler(e) {
-		e = (e) ? e : event;
-		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
 			case 13: /* Enter */
 				kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
 				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-				forthConsoleHandler(kvm.inputbox);
+				kvm.forthConsoleHandler(kvm.inputbox);
 				return(false); 
 		}
 		return (true); // pass down to following handlers 
@@ -158,8 +157,12 @@
 				ScriptEngineMinorVersion() + '.' +
 				ScriptEngineBuildVersion()
 			);
-		document.getElementsByClassName('appname')[0].innerHTML=kvm.appname;
-		document.getElementsByClassName('appname')[1].innerHTML=kvm.appname;
+		if(document.getElementsByClassName){
+			document.getElementsByClassName('appname')[0].innerHTML=kvm.appname;
+			document.getElementsByClassName('appname')[1].innerHTML=kvm.appname;
+		} else{
+			alert("Warning: Your system is old, IE10 or newer preferred. Try Windows upgrade.");
+		}
 		document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
 		kvm.init();  // setup platform related I/O
 		kvm.fortheval(kvm.readTextFile("kernel/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 

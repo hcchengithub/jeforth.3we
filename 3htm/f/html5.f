@@ -2,8 +2,6 @@
 s" html5.f"		source-code-header
 
 <comment>
-	<!-- script src="js/jquery-1.10.2.js"></script -->
-
 	<h> 
 	<script type="text/javascript" src="js/box2dweb/Box2dWeb-2.1.a.3.min.js"></script> 
 	</h> constant Box2dWeb // ( -- obj ) The Box2dWeb.js script element
@@ -13,12 +11,6 @@ s" html5.f"		source-code-header
 	vbsBasic char id   char vbsBasic      setAttribute
 	vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
 	eleHead vbsBasic appendChild
-
-	char script createElement ( -- eleScript )
-	dup char src char js/jquery-1.10.2.js setAttribute ( -- eleScript )
-	js> head swap ( -- eleHead eleScript ) appendChild
-	
-	
 </comment>
 
 
@@ -37,6 +29,29 @@ s" html5.f"		source-code-header
 	dup char src char js/jquery-1.10.2.js setAttribute ( -- eleScript )
 	js> head swap ( -- eleHead eleScript ) appendChild
 
+code redefine-print_plain_for_jQuery ( -- ) \ 
+				print = kvm.print = function (s) { 
+					try {
+						var ss = s + ''; // Print-able test
+					} catch(err) {
+						ss = Object.prototype.toString.apply(s);
+					}
+					if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
+					$('#outputbox').append(plain(ss)); 
+					// jump2endofinputbox.click(); // inputbox.focus();
+				};
+				plain = kvm.plain = function (s) {
+					var ss = s + ""; // avoid numbers to fail at s.replace()
+					ss = ss.replace(/\t/g,' &nbsp; &nbsp; &nbsp; &nbsp;');
+					ss = ss.replace(/  /g,' &nbsp;');
+					ss = ss.replace(/</g,'&lt;');
+					ss = ss.replace(/>/g,'&gt;');
+					ss = ss.replace(/\n/g,'<br>');
+					return ss;
+				}
+				end-code
+				last execute (forget)
+	
 : getElementById
 				( "id" -- element ) \ Get element object by ID
 				js> document.getElementById(pop()) ;
@@ -206,6 +221,21 @@ s" html5.f"		source-code-header
 				drop ;
 				/// Example: dropall js> outputbox 10 children[] <== get an array 
 				///          of ending 10 child nodes to TOS.
+
+: remove-script	( "HTML" -- "HTML'" ) \ Remove scripts and other things
+				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
+				:> replace(/<script.*?script>/g,"")		\ remove all <script>
+				:> replace(/{_cr_}/g,"\n") ;
+				
+: remove-select	( "HTML" -- "HTML'" ) \ Remove scripts and other things
+				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
+				:> replace(/<select.*?select>/g,"")		\ remove all <select>
+				:> replace(/{_cr_}/g,"\n") ;
+				
+: remove-onmouse ( "HTML" -- "HTML'" ) \ Remove onmouseXX="dothis"  onmouseXX=dothat onmouseXX='dowhat' listenings.
+				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
+				<js> pop().replace(/\s+onmouse.+?=\s?\S+/g,"")</jsV> 
+				:> replace(/{_cr_}/g,"\n") ;
 				
 <comment>
 

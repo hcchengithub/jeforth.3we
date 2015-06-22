@@ -112,7 +112,7 @@ code init		( -- ) \ Initialize g.members that are moved out from jeforth.js whic
 					var w = phaseA(entry); // 翻譯成恰當的 w.
 					do{
 						while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-							if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+							if(bp<0||bp==ip){kvm.jsc.prompt='ip='+ip+" jsc>";eval(kvm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
 							ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 							phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 							w = dictionary[ip];
@@ -1000,7 +1000,8 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				/// for aft ... then next (count-1 ... 2,1) but do nothing if count <= 1.
 				/// : test 5 for r@ . space next ; test ==> 5 4 3 2 1
 				/// : test 5 for 5 r@ - . space next ; test ==> 0 1 2 3 4 
-				/// : test dup for dup r@ - . space next drop ; 5 test ==> 0 1 2 3 4 
+				/// : test dup for dup r@ - ( count i ) . space next drop ; 5 test ==> 0 1 2 3 4 
+				/// : test js: push(tos()+1,0) for dup r@ - ( count+1 i ) . space next drop ; 5 test ==> 1 2 3 4 5
 				/// : test 10 for 10 r@ - dup . space 5 >= if r> drop 0 >r then next ; test
 				/// ==> 0 1 2 3 4 5 , "r> drop 0 >r" is leave/exit/terminate of for..next loop
 				
@@ -1084,7 +1085,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : char          ( <str> -- str ) \ Get character(s).
 				BL word compiling if literal then ; immediate
 				/// "char abc" gets "abc", Note! ANS forth "char abc" gets only 'a'.
-
+: ?stop			if stop then ; // ( flag -- ) Stop TIB task if flag is true.
 : ?dup          dup if dup then ; // ( w -- w w | 0 ) Dup TOS if it is not 0|""|false.
 
 				<selftest>
@@ -1391,6 +1392,9 @@ code cut		( -- ) \ Cut off used TIB.
 				/// "cut ~ 10 nap rewind" repeat running the TIB.
 				/// See also <task>
 				
+: ?rewind		( boolean -- ) \ Conditional rewind TIB so as to repeat it. 'stop' to terminate.
+				if rewind then ;
+				
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
 \ kvm.jsc.xt has been moved to quit.f of each application for propritary treatments.
@@ -1557,9 +1561,13 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 					---
 				</selftest>
 
-: <task>		( <tokens> -- "task" ) \ Run an outer loop. 'stop' to terminate.
+: <task>		( <forth words> -- "task" ) \ Invoke a fortheval() to run the words.
 				char </task> word ; immediate
-				/// See alternative method for command line by 'cut' and 'rewind'.
+				///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
+				///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
+				///	個則用 cut ... rewind 即可。
+				/// Ex. 
+				///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
 
 : </task>		( "task" -- ... ) \ Delimiter of <task>
 				compiling if literal js: push(function(){fortheval(pop())}) , 

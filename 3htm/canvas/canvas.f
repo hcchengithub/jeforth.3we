@@ -2,6 +2,8 @@
 \ HTML5 canvas tutorial http://jo2.org/html5-canvas-tutorial-list/
 \ HTML5 canvas reference http://www.w3schools.com/jsref/dom_obj_canvas.asp
 
+js> window.HTMLCanvasElement [if]
+
 s" canvas.f"	source-code-header
 
 \ ---------------- Canvas initialization commands -----------------------------------------------
@@ -155,7 +157,7 @@ s" canvas.f"	source-code-header
 							<selftest>
 							move-cv-up-into-outputbox
 							</selftest>
-
+[then] ( window.HTMLCanvasElement [if] )
 
 
 

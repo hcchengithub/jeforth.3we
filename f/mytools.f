@@ -53,12 +53,6 @@ code t.year 	( Time -- year ) \ Get year number
 				r@ t.minute 2 .0r char : .
 				r@ t.second 2 .0r ;
 
-: member-count	( obj|hash|array -- count ) \ Get member count of an obj or hash table
-				js> memberCount.call(pop()) ;
-				/// Get hash table's length
-				/// An array's length is array.length but there's no such thing of hash.length for hash{}.
-				/// memberCount.call(object) gets the given object's member count which is also a hash table's length.
-
 code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do anything.
 				var ms=pop();
 				var startTime = new Date().getTime();
@@ -80,6 +74,14 @@ code .longwords ( length -- ) \ print long words. I designed this word for fun t
 code precise-time(mS)	( -- mS ) \ Precise recent time in mini seconds
 						push((new Date()).getTime()) end-code
 
+: stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
+				/// Example:
+				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
+				/// stringify char pathname.json writeTextFile ( Convert to JSON save to file )
+: parse			js> JSON.parse(pop()) ; // ( "json" -- obj ) Convert the "json" string to an object.
+				/// Example:
+				/// char pathname.json readTextFile ( Read JSON text )
+				/// parse value MyHashTable ( convert JSON text to hash table object )
 <comment>
 \ 已經有更好的方法： mySetTimeout() mySetInterval()
 \ setTimout timers & setInterval timers. Idea was from Sam Suan Chen's jeforth HTML5 clock demo.

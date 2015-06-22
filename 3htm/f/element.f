@@ -98,7 +98,8 @@
 	: (er) ( element -- ) \ Erase children of [object Text]
 		children ( -- array ) <js> 
 			for(var a=pop(),i=a.length-1; i>=0; i--) {
-				if (a[i].toString()=='[object Text]'||a[i].toString()=='[object HTMLBRElement]') {
+				// if (a[i].toString()=='[object Text]'||a[i].toString()=='[object HTMLBRElement]') {
+				if (a[i].nodeName=='#text'||a[i].nodeName=='BR') {
 					push(a[i]);
 					execute('removeElement');
 				}

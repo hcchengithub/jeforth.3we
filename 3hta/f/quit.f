@@ -57,7 +57,7 @@
 				jump2endofinputbox.click();
 				_cmd_ = prompt("JavaScript debug console", _cmd_?_cmd_:"");
 				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
-				print(kvm.jsc.prompt + ' ' + _cmd_ + "\n");
+				kvm.print(kvm.jsc.prompt + ' ' + _cmd_ + "\n");
 				switch(_cmd_){
 					case "exit" : case "g" : case "q" : case "quit": bp=0; return;
 					case "s" : bp=-1; return; // 
@@ -69,13 +69,13 @@
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
 						_result_ = eval(_cmd_);
 						// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";
-						// else _ss_ += _result_ + "  (" + mytypeof(_result_) + ")\n";
-						print(_result_);
-						print(" (" + mytypeof(_result_) + ")\n");
+						// else _ss_ += _result_ + "  (" + kvm.mytypeof(_result_) + ")\n";
+						kvm.print(_result_);
+						kvm.print(" (" + kvm.mytypeof(_result_) + ")\n");
 						// if(!confirm(_ss_ + "\nGo on debugging?")) return;
 					} catch(err) {
 						_ss_ = "Oooops! " + err.message + "\n";
-						print(_ss_)
+						kvm.print(_ss_)
 						// alert(_ss_);
 					}
 				}
@@ -90,14 +90,12 @@
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
 	\ application dependent. 
 	\
-	
 	js> kvm.argv.length 1 > \ Do we have jobs from command line?
 	[if] \ We have jobs from command line to do. Disable self-test.
 		js: tick('<selftest>').enabled=false
 	[else] \ We don't have jobs from command line to do. So we do the self-test.
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
-
 	include voc.f		\ voc.f is basic of forth language
 	include html5.f		\ HTML5 is HTA's plateform feature
 	include element.f	\ HTML element manipulation
@@ -111,6 +109,7 @@
 	include wmi.f
 	include excel.f
 	include canvas.f
+	include ie.f
 	include mytools.f
 	
 \ ----------------- save selftest.log -------------------------------------

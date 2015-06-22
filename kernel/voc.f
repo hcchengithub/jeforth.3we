@@ -19,7 +19,7 @@ code obj>keys	( obj -- keys[] ) \ Get all keys of an object.
 					' + obj>keys js> pop().join(",")
 					js> tos().indexOf('name')!=-1 \ [...] true
 					js> tos(1).indexOf('selftest')!=-1 \ [...] true true
-					js> tos(2).indexOf('toString')!=-1 \ [...] true true true
+					js> tos(2).indexOf('vid')!=-1 \ [...] true true true
 					js> pop(3).indexOf('cfa')==-1 \ true true true true
 					and and and ==>judge [if] <js> [] </jsV> all-pass [then]
 				</selftest>

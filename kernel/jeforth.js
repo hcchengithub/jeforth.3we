@@ -27,8 +27,7 @@
 "uses strict";
 var kvm = (function(){
     function KsanaVm() { 
-		var kvm = this; // "this" is very confusing to me. Now I am sure 'vm' is 'kvm'.
-		if(typeof(kvm)=="undefined"){var kvm=vm} // kvm defined in jeforth.hta is visible but not node.js index.js
+		var kvm = this; // "this" is very confusing to me.
 		var stop = true; // Abort TIB
 		var ip=0; // forth VM instruction pointer
 		var stack = [] ;

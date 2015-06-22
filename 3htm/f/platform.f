@@ -96,7 +96,8 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 						return (false);
 					}
 					tos().onkeydown = function(e){
-						switch(e.keyCode) {
+						e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+						switch(keycode) {
 							case 27: /* Esc  */ execute("removeElement"); inputbox.focus(); break;
 							case 38: /* Up   */ tos().selectedIndex = Math.max(0,tos().selectedIndex-1); break;
 							case 40: /* Down */ tos().selectedIndex = Math.min(tos().length-1,tos().selectedIndex+1); break;
@@ -422,7 +423,8 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 	};
 
 	$("#inputbox")[0].onkeydown = function(e){
-		switch(e.keyCode) {
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		switch(keycode) {
 			case   9: /* Tab  */ if(kvm.tick('{Tab}' )){kvm.execute('{Tab}' );return(kvm.pop());} break;
 			case  38: /* Up   */ if(kvm.tick('{up}'  )){kvm.execute('{up}'  );return(kvm.pop());} break;
 			case  40: /* Down */ if(kvm.tick('{down}')){kvm.execute('{down}');return(kvm.pop());} break;
@@ -432,8 +434,9 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 	}
 
 	document.onkeydown = function (e) {
-		if(kvm.tick('{Tab}')){if(e.keyCode!=9)kvm.tick('{Tab}').index=0} // 按過別的 key 就重來
-		switch(e.keyCode) {
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		if(kvm.tick('{Tab}')){if(keycode!=9)kvm.tick('{Tab}').index=0} // 按過別的 key 就重來
+		switch(keycode) {
 			case 13:
 				if (!kvm.EditMode || event.ctrlKey) { // CtrlKeyDown
 					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10).

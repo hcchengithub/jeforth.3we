@@ -2,8 +2,10 @@
 	\ utf-8
 	\ excel.f  Microsoft Office Excel automation by jeforth.3hta
 	\ Excel 2013 developer reference           http://msdn.microsoft.com/en-us/library/office/ee861528.aspx
+	\ "Application Object (Excel)"             http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
 	\ VBA Language Reference                   http://msdn.microsoft.com/en-us/library/bb190882(v=office.11).aspx
 	\ Microsoft Excel Visual Basic Reference   http://msdn.microsoft.com/en-us/library/aa272254(v=office.11).aspx
+	\ Excel constants, e.g. xlUp = -4162, can be found in AutoIt UDF source code excel.au3.
 	
 	include wsh.f
 
@@ -11,13 +13,25 @@
 	
 	: see-excel 		( -- n ) \ List all excel.exe processes
 						s" where name = 'ExCeL.ExE'" see-process ;
-
-	{} value (excel.app) // ( -- {} ) Place holder of the Excel application object
-	: excel.app 		( -- excel.application ) \ Get Excel.Application COM object.
-						(excel.app) <js> try{push(pop().name=="Microsoft Excel");}catch(e){push(false);}</js> ( -- flag)
-						if else char Excel.Application ActiveXObject to (excel.app) then (excel.app) ;
-						/// See "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
-						/// [ ] what if the computer does not have excel?
+	: kill-excel 		( -- n ) \ Kill all excel.exe processes
+						s" where name = 'ExCeL.ExE'" kill-them ;
+						
+	\ 先查有幾個 excel.application 在 running? 通常應該只有一個，如果是一個就用它, 如果超過一個
+	\ 就警告, 如果沒有就開一個。 [x] 如果 excel 沒有 install 的情形要跳過。
+	
+	{} value excel.app 	// ( -- obj ) The Excel.Application object or undefined if no excel exists.
+						see-excel ( count ) 
+						js> tos()>1 [if] 
+							." Warning: Multiple Excel.Application are running." *debug* Multiple-Excel-error>>> 
+						[then]
+						( count ) [if] 
+							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):kvm.push(xl)</vb> 會開出新 Excel.Application。
+							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):kvm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
+						[else]
+							<vb> On Error Resume Next:Set xl=CreateObject("excel.application"):kvm.push(xl)</vb>						
+						[then] to excel.app \ 如果 excel 沒有 install 會是 undefined。
+						
+	excel.app [if] \ excel existing
 
 	: activeCell		excel.app :> ActiveCell ; // ( -- obj ) Get the ActiveCell object
 						/// activeCell :> offset(0,1).formula tib.
@@ -27,8 +41,8 @@
 						/// activeWorkbook :> name tib.	
 	: selection 		excel.app :> selection ; // ( -- obj ) Get the selected object ( a range object )
 						/// selection :> count tib.
+						/// selection :: item(123).value="hello" 
 	
-	excel.app [if] \ Only if excel exists
 						<selftest>
 							***** excel.app is like a constant it gets you the app object ........
 							( ------------ Start to do anything --------------- )
@@ -163,7 +177,85 @@
 	: cell				( x y -- object ) \ Get cell object by (x,y) of the activeSheet
 						excel.app :> activeSheet :> cells(pop(),pop()) ;
 						///  Ex. 1 3 cell :> value .
-	
+						
+	: goto				( x y -- ) \ The activated cell jump to (x,y)
+						cell :: activate() ;
+
+	: up 				0 -1 offset :: activate ; // ( -- ) Move the activeCell up.
+	: down 				0  1 offset :: activate ; // ( -- ) Move the activeCell down.
+	: left 			   -1  0 offset :: activate ; // ( -- ) Move the activeCell left.
+	: right				1  0 offset :: activate ; // ( -- ) Move the activeCell right.
+	: column			activeCell :> column ; // ( -- column ) Get column number of the activeCell.
+	: row				activeCell :> row ; // ( -- row ) Get row number of the activeCell.
+	: address 			activeCell :> address ; // ( -- "address" ) Get $A$1 address of the activeCell.
+	: formula			activeCell :> formula ; // ( -- "formula" ) Get formula of the activeCell.
+	: cell@				activeCell :> value ; // ( -- value ) Read value of the activeCell.
+	: cell!          	activeCell :: value=pop() ; // ( value -- ) Write value to the activeCell.
+	: up@ 				0 -1 offset :> value ; // ( -- value ) Read the cell up to the activeCell.
+	: down@ 			0  1 offset :> value ; // ( -- value ) Read the cell down to the activeCell.
+	: left@ 		   -1  0 offset :> value ; // ( -- value ) Read the cell left to the activeCell.
+	: right@			1  0 offset :> value ; // ( -- value ) Read the cell right to the activeCell.
+	: empty?			formula boolean not ; // ( -- boolean ) Is the activeCell empty?
+	: non-value?		( -- boolean ) \ Doesn't the activeCell have a normal value?
+						activeCell :> value
+						js> typeof(tos())=="unknown" 
+						js> typeof(pop(1))=="undefined" 
+						or ;
+						/// activeCell :> value 的 typeof() 如果是 "unknown" 者是非標準的 object 不一定
+						/// 是問題但我把它當成是; 如果是 "undefined" 則屬 空格 #N/A #DIV/0 #VALUE! 等。
+						
+	: ?cell@			( -- value T/F ) \ Read value of the activeCell with flag idicates it's not empty #N/A #DIV/0 .. etc.
+						empty? if false exit then non-value? if false else activeCell :> value true then ;
+						/// 本命令是帶有成敗判斷的取值命令。
+
+	\ 這裡提供的 excel iteration 由【判斷】,【執行】,【移動】加上 cut..rewind 或 <task>..</tasK> 所構成。
+	\ 以下是【判斷】的部分需要定義的命令：
+	: @?stop 			?cell@ if drop else stop then ; // ( -- ) Stop if the activeCell is not value
+						/// Example, 一路往下只要【當格】有值就把它抄到右邊去:
+						/// @?stop ( 判斷 )
+						/// activeCell 1 0 offset :: value=pop() ( do )
+						/// down ( 移位 ) 1 nap rewind ( 重複 )
+						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
+						/// 要用 i?stop 用 selection 或用 empty? ?stop。
+	: ^?stop 			up ?cell@ down if drop else stop then ; // ( -- ) Stop if the up Cell is not value
+						/// Example, 只要【上面】一列有值就把他抄下來:
+						/// ^?stop ( 判斷 )
+						/// 0 -1 offset cell! ( do )
+						/// right ( 移位 ) 1 nap rewind ( 重複 )
+						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
+						/// 要用 i?stop 用 selection 或用 empty? ?stop。
+	: <?stop 			left ?cell@ right if drop else stop then ; // ( -- ) Stop if the left Cell is not value
+						/// Example, 只要【左邊】一行有值就把他抄過來:
+						/// <?stop ( 判斷 ) 
+						/// -1 0 offset cell! ( do )
+						/// down ( 移位 ) 1 nap rewind ( 重複 )
+						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
+						/// 要用 i?stop 用 selection 或用 empty? ?stop。
+	: >?stop 			right ?cell@ left if drop else stop then ; // ( -- ) Stop if the right Cell is not value
+						/// Example, 只要【右邊】一行有值就把他抄過來:
+						/// >?stop ( 判斷 )
+						/// 1 0 offset cell! ( do ) 
+						/// down ( 移位 ) 1 nap rewind ( 重複 )
+						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
+						/// 要用 i?stop 用 selection。
+	: v?stop 			down ?cell@ up if drop else stop then ; // ( -- ) Stop if the down Cell is not value
+						/// Example, 只要【下面】一列有值就把他抄上來:
+						/// v?stop ( 判斷 )
+						/// 0 1 offset cell! ( do )
+						/// right ( 移位 ) 1 nap rewind ( 重複 )
+						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
+						/// 要用 i?stop 用 selection 或用 empty? ?stop。
+	: i?stop 			( 0 -- 1,2,... ) \ Activate next cell or Stop and drop the i at the end.
+						1+ dup selection :> count > if drop stop 
+						else selection :: item(tos()).activate() then ; 
+						/// Example, print selected cells:
+						/// 0 cut ( 前置準備 ) 
+						/// i?stop ( 【判斷】兼【移位】,留下 i ) 
+						/// cell@ . space ( do )
+						/// 1 nap rewind ( 重複 )
+						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
+						/// 要用 i?stop 用 selection。
+						
 	code get-sheet      ( sheet#|"sheet" workbook -- sheet ) \ Get Excel worksheet object where sheet# is either sheet number or name
 						push(pop().worksheets(pop())) // accept both sheet# or sheet name
 						end-code
@@ -174,10 +266,10 @@
 							( ------------ Start to do anything --------------- )
 								1 WORKBOOK get-sheet constant SHEET // ( -- sheet ) playground worksheet object
 											   SHEET js> typeof(pop().name)
-								2 WORKBOOK get-sheet js> typeof(pop().name)
-								3 WORKBOOK get-sheet js> typeof(pop().name)
+								// 2 WORKBOOK get-sheet js> typeof(pop().name)
+								// 3 WORKBOOK get-sheet js> typeof(pop().name)
 							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> ['string','string','string'] </jsV> isSameArray >r dropall r>
+							js> stack.slice(0) <js> ['string'] </jsV> isSameArray >r dropall r>
 							-->judge [if] <js> [
 								'get-sheet'
 							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
@@ -215,31 +307,6 @@
 							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
 						</selftest>
 
-	code cell@          ( column row range -- value ) \ read a cell
-						push(pop()(pop(),pop()).value)
-						end-code
-
-	code cell!          ( value column row ragne -- ) \ write a cell
-						pop()(pop(),pop()).value = pop()
-						end-code
-
-						<selftest>
-							***** cell@ cell! ....
-							( ------------ Start to do anything --------------- )
-							11 1 1 RANGE cell! 21 2 1 RANGE cell! 31 3 1 RANGE cell!
-							12 1 2 RANGE cell! 22 2 2 RANGE cell! 32 3 2 RANGE cell!
-							13 1 3 RANGE cell! 23 2 3 RANGE cell! 33 3 3 RANGE cell!
-							CELL js> pop().value
-							2 3 RANGE cell@
-							WORKBOOK excel.close
-							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> [11,23,true] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'cell!',
-								'cell@'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
-						</selftest>
-
 	code bottom         ( Column -- row# ) \ Get the bottom row# of the column
 						push(pop().rows(65535).end(-4162).row) // xlUp = -4162
 						end-code
@@ -259,7 +326,13 @@
 						}
 						push(hash);
 						end-code
-						/// example: MySheet char B char D init-hash (see)
+						/// 應用: 
+						/// 先到 Data Sheet 取得 key-value hash table:
+						///     activeSheet char b ( index ) char e ( data ) 
+						///     init-hash ( hashDataTable )
+						/// 然後到 target Sheet 把資料貼上去:
+						///     ( hashDataTable ) activeSheet char b ( index ) char z 
+						///     ( target ) 4 ( top row# ) hash>column
 
 	code hash>column	( Hash Sheet "colKey" "colValue" top-row# -- ) \ Fill out the colValue by look up hash with colKey
 						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
@@ -271,8 +344,13 @@
 							val(i).value = hash[key(i).value];
 						}
 						end-code
-						/// Hash was from the source sheet through 'init-hash'.
-						/// hash sheet char B char G top-row# hash>column
+						/// 應用: 
+						/// 先到 Data Sheet 取得 key-value hash table:
+						///     activeSheet char b ( index ) char e ( data ) 
+						///     init-hash ( hashDataTable )
+						/// 然後到 target Sheet 把資料貼上去:
+						///     ( hashDataTable ) activeSheet char b ( index ) char z 
+						///     ( target ) 4 ( top row# ) hash>column
 
 	code workbook>sheets
 						( workbook -- array ) \ Get array of all sheet names in a workbook
@@ -302,19 +380,22 @@
 	\ Key points of automation Excel file accessing ,
 	\ 1. Excel's working directory is user\document, not the DOS box working directory.
 	\ 2. The path string delimiter \ must be \\ or it will be failed sometimes.
-	\ 3. WScript's GetObject("file.xls") is not available for HTA. However, GetObject("file2.xls"), 
-	\	 and double click file.xls are all using the same "Excel.Application" handler. Excel must 
+	\ 3. VBscript's GetObject("file.xls") is also available for HTA. GetObject("file2.xls"), 
+	\	 and double click file.xls are all using the *active* "Excel.Application" object. Excel must 
 	\	 be in memory before using GetObject().
 	\
 	\ Open excel file 有兩種方式，
 	\
-	\   1。 s' new ActiveXObject("Excel.application")' js constant excel.app // ( -- excel.app ) Get excel application object
-	\       fortheval("excel.app"); push(pop().Workbooks.open("x:\\cooked.xls");
+	\   1。 Create a new Excel.Application object
+	\		<js> push(new ActiveXObject("Excel.application")) </js> constant excel.app 
+	\		<vb> set kvm.excel.app = CreateObject(...)' </vb>
+	\       excel.app :> Workbooks.open("x:\\cooked.xls");
 	\
-	\   2。 WScript's GetObject("file.xls") is not available for HTA. However,
-	\		js> GetObject("","Excel.application") constant excel.app // 非必要，只是取得 excel.app 以及確保 excel.exe 有在。
-	\       js> GetObject("x:\\raw.xls") constant raw.xls
-	\       js> GetObject("x:\\cooked.xls") constant cooked.xls
+	\   2。 Use the existing instance of Excel.Application object
+	\		<vb> set kvm.excel.app = GetObject(,"Excel.Application") </vb> 
+	\		<vb> set kvm.excel.app = GetObject("file.xls") </vb>
+	\       <vb> set kvm.excel.app = GetObject("x:\\raw.xls") </vb>
+	\       <vb> set kvm.excel.app = GetObject("x:\\cooked.xls") </vb>
 	\
 	\ 前者的 excel.app 獨立於電腦內其他 "Excel.application" instances，重複 open 同一個檔案的問題很
 	\ 難解決。Internet 上有很多人在問，問不出好答案。因為要搜出所有的 "Excel.application" instances
@@ -327,12 +408,11 @@
 	\    raw.xls js> pop().application.workbooks.count tib. \ ==> 2 (number)  Shoooo!!! Bin Bin Bingo!!!!
 	\    raw.xls js> pop().application.workbooks(2).name tib. \ ==> A.XLS (string)
 	\
-	\ GetObject() 的缺點是，當 Excel 不存在 memory 裡時會出 error "JScript error : Automation 服务器不
-	\ 能创建对象". 所以至少要先把 excel run 起來。我一時也沒發現這個問題，因為 Excel.app handler 即使在
-	\ excel.app js> pop().quit() 之後都還會留在 memory 裡，因為 GetObject() connect 過以後沒有斷開的辦法
-	\ ，故它會一直生存，除非用 Task Manager 把它關掉。更嚴重的是 excel.app js> pop().quit() 之後再 double
-	\ click open 的 excel file 似乎會變成去用另一個 excel.application instance，這就紊亂了。故不要使用
-	\ excel.app js> pop().quit(), 頂多用 workbook.close 就好。
+	\ [ ]	GetObject() 的缺點是，當 Excel 不存在 memory 裡時會出 error:
+	\		"JScript error : Automation 服务器不能创建对象" 這可以用 On Error Resume Next 來避免
+	\		error 此時取得的是 undefined 十分完美。
+	\ [ ]	excel.app js> pop().quit() 之後再 double click open 的 excel file 似乎會變成去
+	\		用另一個 excel.application instance?
 	\
 	\ ====================== path delimiter is always a problem ===============================
 	\
