@@ -1000,7 +1000,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				/// for aft ... then next (count-1 ... 2,1) but do nothing if count <= 1.
 				/// : test 5 for r@ . space next ; test ==> 5 4 3 2 1
 				/// : test 5 for 5 r@ - . space next ; test ==> 0 1 2 3 4 
-				/// : test dup for dup r@ - ( count i ) . space next drop ; 5 test ==> 0 1 2 3 4 
+				/// : test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ; 5 test ==> 0 1 2 3 4 
 				/// : test js: push(tos()+1,0) for dup r@ - ( count+1 i ) . space next drop ; 5 test ==> 1 2 3 4 5
 				/// : test 10 for 10 r@ - dup . space 5 >= if r> drop 0 >r then next ; test
 				/// ==> 0 1 2 3 4 5 , "r> drop 0 >r" is leave/exit/terminate of for..next loop
@@ -1427,6 +1427,8 @@ code cut		( -- ) \ Cut off used TIB.
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
+: remove-leading-ending-white-spaces ( string -- string' ) \ On one line.
+				dup if :> toString().replace(/^\s*|\s*$/g,'') then ;
 code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
 

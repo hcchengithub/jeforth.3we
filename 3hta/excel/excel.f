@@ -180,6 +180,11 @@
 						
 	: goto				( x y -- ) \ The activated cell jump to (x,y)
 						cell :: activate() ;
+						/// Refer to "jump" command that jumps to "A1".
+						
+	: jump 				( "A1" -- ) \ The activated cell goto the "A1" style position
+						activeSheet :: range(pop()).activate() ;
+						/// Refer to "goto" command that goes to cell (x,y).
 
 	: up 				0 -1 offset :: activate ; // ( -- ) Move the activeCell up.
 	: down 				0  1 offset :: activate ; // ( -- ) Move the activeCell down.
@@ -210,6 +215,18 @@
 
 	\ 這裡提供的 excel iteration 由【判斷】,【執行】,【移動】加上 cut..rewind 或 <task>..</tasK> 所構成。
 	\ 以下是【判斷】的部分需要定義的命令：
+	: i?stop 			( 0 -- 1,2,... ) \ Activate next cell or Stop and drop the i at the end.
+						1+ dup selection :> count > if drop stop 
+						else selection :: item(tos()).activate() then ; 
+						/// 這組工具:上,下,左,右,當格,的【判斷】都依賴這些 cell 有
+						/// 值，若不然時就要用本命令 i?stop 透過 selection 來完成。
+						/// \ Example, 選中的格子都去掉頭尾空白。
+						/// manual 0 cut ( 前置準備 ) 
+						/// i?stop ( 【判斷】兼【移位】,留下 i ) 
+						/// cell@ remove-leading-ending-white-spaces cell! ( do 把當格前後空白都刪掉 )
+						/// 1 nap rewind ( 重複 )
+						/// auto ( 收尾 )						
+						
 	: @?stop 			?cell@ if drop else stop then ; // ( -- ) Stop if the activeCell is not value
 						/// Example, 一路往下只要【當格】有值就把它抄到右邊去:
 						/// @?stop ( 判斷 )
@@ -217,6 +234,7 @@
 						/// down ( 移位 ) 1 nap rewind ( 重複 )
 						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
 						/// 要用 i?stop 用 selection 或用 empty? ?stop。
+						
 	: ^?stop 			up ?cell@ down if drop else stop then ; // ( -- ) Stop if the up Cell is not value
 						/// Example, 只要【上面】一列有值就把他抄下來:
 						/// ^?stop ( 判斷 )
@@ -245,16 +263,6 @@
 						/// right ( 移位 ) 1 nap rewind ( 重複 )
 						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
 						/// 要用 i?stop 用 selection 或用 empty? ?stop。
-	: i?stop 			( 0 -- 1,2,... ) \ Activate next cell or Stop and drop the i at the end.
-						1+ dup selection :> count > if drop stop 
-						else selection :: item(tos()).activate() then ; 
-						/// Example, print selected cells:
-						/// 0 cut ( 前置準備 ) 
-						/// i?stop ( 【判斷】兼【移位】,留下 i ) 
-						/// cell@ . space ( do )
-						/// 1 nap rewind ( 重複 )
-						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
-						/// 要用 i?stop 用 selection。
 						
 	code get-sheet      ( sheet#|"sheet" workbook -- sheet ) \ Get Excel worksheet object where sheet# is either sheet number or name
 						push(pop().worksheets(pop())) // accept both sheet# or sheet name
@@ -334,6 +342,73 @@
 						///     ( hashDataTable ) activeSheet char b ( index ) char z 
 						///     ( target ) 4 ( top row# ) hash>column
 
+	: init-hash2		( offset# -- objHash ) \ 放左上角 index(0) 欄上，讀取右邊 offset#(1,2..) 欄一整組 key:value parirs
+						\ 當格在左上角一定是第一個 key
+						0 0 offset :> address >r \ save origin position
+						{} begin ( offset# hash )
+							cell@ ?dup  ( offset# hash key key|hash false )
+						while \ on going . . .  ( offset# hash key )
+							remove-leading-ending-white-spaces ( offset# hash key )
+							js> tos(2) ( x ) 0 ( y ) offset ( offset# hash key cell )
+							js: tos(2)[pop(1)]=pop().value ( offset# hash )
+							down 1 nap 
+						repeat ( offset# hash ) nip 
+						r> jump \ restore origin position
+						;
+						/// 原始資料在 excel 裡有多欄，最左邊是 key 右邊各欄是 value。
+						/// 把 focus 放在左上角的 key 頂，指定 offset# column 執行，產生 hash table object。
+						/// 存成 JSON 檔: oHash stringify char filename.json writeTextFile 
+						/// 讀取 JSON 檔: char filename.json readTextFileAuto constant oHash
+						/// \ 實際應用來建立【部門代碼資料庫】
+						/// 1 init-hash2 constant BG
+						/// 2 init-hash2 constant DEPT // 大部門
+						/// 3 init-hash2 constant DEPT2 // 部門細分
+						/// 4 init-hash2 constant JamesYu // 是否在 JamesYu 組織下
+						/// 5 init-hash2 constant Payroll
+						/// 6 init-hash2 constant Site
+						/// 7 init-hash2 constant Boss
+						/// 8 init-hash2 constant Assistant
+						/// <js>
+						/// var hash = {BG:{},DEPT:{},DEPT2:{},JamesYu:{},Payroll:{},Site:{},Boss:{},Assistant:{}};
+						/// for ( var i in g.DEPT ){
+						/// 	hash.BG[i] = g.BG[i];
+						/// 	hash.DEPT[i] = g.DEPT[i];
+						/// 	hash.DEPT2[i] = g.DEPT2[i];
+						/// 	hash.JamesYu[i] = g.JamesYu[i];
+						/// 	hash.Payroll[i] = g.Payroll[i];
+						/// 	hash.Site[i] = g.Site[i];
+						/// 	hash.Boss[i] = g.Boss[i];
+						/// 	hash.Assistant[i] = g.Assistant[i];
+						/// }
+						/// push(hash);
+						/// </js> stringify char departmentcode.json writeTextFile \ Save the hash table
+						/// char departmentcode.json readTextFileAuto parse constant hash \ Read the hash table
+						/// \ Usage : 配合 hash>column 使用時,取得各種 key:value pair hash table。
+						/// hash :> DEPT (see) \ see the DEPT hash
+						/// hash :> DEPT2 (see) \ see the DEPT2 hash
+						/// hash :> Payroll (see) \ see the Payroll hash
+						/// hash :> DEPT      activeSheet char c char k 2 hash>column2 \ 實際應用
+						/// hash :> DEPT2     activeSheet char c char l 2 hash>column2 \ 實際應用
+						/// hash :> BG        activeSheet char c char m 2 hash>column2 \ 實際應用
+						/// hash :> JamesYu   activeSheet char c char n 2 hash>column2 \ 實際應用
+						/// hash :> Payroll   activeSheet char c char o 2 hash>column2 \ 實際應用
+						/// hash :> Site      activeSheet char c char p 2 hash>column2 \ 實際應用
+						
+	: init-hash3		( -- objHash ) \ 放左上角，讀取一整組 key:value parirs，最簡版。
+						\ 當格在左上角一定是第一個 key
+						{} begin ( hash )
+							cell@ ?dup  ( hash key key|hash false )
+						while \ on going . . .  ( hash key )
+							remove-leading-ending-white-spaces ( hash key )
+							right@ ( hash key value )
+							js: tos(2)[pop(1)]=pop() ( hash )
+							down 
+						repeat ( hash ) ;
+						/// 原始資料在 excel 裡有兩欄，左邊是 key 右邊是 value。
+						/// 把 focus 放在左上角，執行，產生 hash table object。
+						/// 存成 JSON 檔: oHash stringify char filename.json writeTextFile 
+						/// 讀取 JSON 檔: char filename.json readTextFileAuto constant oHash
+
 	code hash>column	( Hash Sheet "colKey" "colValue" top-row# -- ) \ Fill out the colValue by look up hash with colKey
 						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
 						var key = sheet.range(colKey  +":"+colKey);
@@ -342,6 +417,35 @@
 						for (var i=top; i<=bottom; i++) {
 							if (key(i).value == undefined ) continue;
 							val(i).value = hash[key(i).value];
+						}
+						end-code
+						/// 應用: 
+						/// 先到 Data Sheet 取得 key-value hash table:
+						///     activeSheet char b ( index ) char e ( data ) 
+						///     init-hash ( hashDataTable )
+						/// 然後到 target Sheet 把資料貼上去:
+						///     ( hashDataTable ) activeSheet char b ( index ) char z 
+						///     ( target ) 4 ( top row# ) hash>column
+
+	code hash>column2	( Hash sheet "colKey" "colValue" top-row# -- ) \ 類似 hash>column 但 key 嘗試比對 leading characters。
+						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
+						var key = sheet.range(colKey  +":"+colKey);
+						var val = sheet.range(colValue+":"+colValue);
+						push(key); fortheval("bottom"); var bottom = pop();
+						for (var i=top; i<=bottom; i++) {
+							if (key(i).value == undefined ) continue;
+							if (lookup(key(i).value)== undefined) continue;
+							val(i).value = lookup(key(i).value);
+						}
+						// key(i).value 就是本表的 key 或 index 值, 要查 hash 表, 得重複嘗試。
+						// 如果失敗就從最後少一個字母再試，直到兩個字母也失敗為止才放棄。
+						// 失敗時傳回 undefined 正好。這個 function 稱為 lookup 即可。
+						function lookup(index){ // return hash[index] or undefined
+							for(var i=index; i.length>=2; i=i.slice(0,-1)){
+								var v = hash[i];
+								if(typeof(v)!="undefined") break;
+							}
+							return v;
 						}
 						end-code
 						/// 應用: 
@@ -372,8 +476,48 @@
 						push(count);
 						end-code
 						/// run list-workbooks any time to see recent excel.app's workbooks.
+						
+	\ Copy-Paste text data 進 Excel 有時候很挫折。
+	\ 有時候 excel 會自己分欄，分地好好的。
+	\ 有時候它不自動分欄，變成一整 column 的 text 手動用 excel 的 "Text to columns" 亦可。
+	\ 最令人哭笑不得者，他堅持要自動分欄，卻篤定地分錯了! 
+	\ 當 Excel 堅持要自動分欄，卻做不好時，下面這段程式讀進 text file 把它一行一行地從上
+	\ 往下寫進 excel 裡，讓它徹底不分欄。以便隨後手動自己分。
+	: lines-to-column 	( "text" -- ) \ Write text to Excel but avoid stupid text-to-columns
+						:> split('\n') ( a ) dup :> length
+						?dup if dup for dup r@ - ( a COUNT i )
+						js> tos(2)[pop()] cell! down 
+						( a COUNT ) next 2drop then ;
+						/// \ Example : Excel focus at the target position,
+						/// <text>
+						/// 11 22 33
+						/// 44 55 66
+						/// 77 88 99
+						/// </text> lines-to-column
+						
+	: value-it ( -- ) \ Convert the recent cell from formula to value
+		?cell@ if activeCell ( -- value cell ) js> tos().formula!=tos(1) if
+		js> tos().address . space :: value=pop() else 2drop then then ;
+		///	這個命令用來把當 cell 的 formula 改成 value。除了可以省時間，還
+		///	可以由列印出來的 address 看出哪些地方有新的值出現，例如除權除息表。
+		/// cell 若無 value 就不去動它。這個命令適合用 selection 的方式整批
+		/// 處理。先 mark 想要處裡的區域，然後執行： 
+		/// ( 都有值 ) manual @?stop value-it down 1 nap rewind auto
+		/// ( 含#NA! ) manual 0 cut i?stop value-it 1 nap rewind auto
+		/// 把有日期的都由參考公式轉成 value 並取得所有新格子的座標，接著
+		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把新格子都塗上顏色。
+		
+	: printDateTime ( time -- ) \ print date time from excel like 2015-05-04 08:29 02
+		vb> Year(kvm.tos())    . char - .
+		vb> Month(kvm.tos())   2 .0r char - .
+		vb> Day(kvm.tos())     2 .0r space   
+		vb> Hour(kvm.tos())    2 .0r char : .
+		vb> Minute(kvm.tos())  2 .0r space
+		vb> WeekDay(kvm.pop()) 2 .0r cr ;
+
 	[then] \ excel.app exists
 
+	\ -- end of source code --
 	<comment>
 	\ ================ How to open an Excel file ============================================
 	\

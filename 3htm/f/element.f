@@ -108,6 +108,13 @@
 
 	: er ce@ (er) ; // ( -- ) Erase current element text node and br
 
+	: list-links ( element -- ) \ List HTML links under the element
+		:> links ?dup if dup :> length ?dup if ( links length ) 
+		dup for dup r@ - ( links length i ) 
+		dup . space js> tos(2)[pop()].innerHTML </o> drop cr
+		next drop then then ;
+	\ 這裡面的 on???="..." 這些 attributes 都要先刪掉。如何取得?
+		
 <comment>
 	page js> tos()[tos().length-1].toString() .s
 	

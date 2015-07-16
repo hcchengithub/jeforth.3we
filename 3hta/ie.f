@@ -19,7 +19,8 @@
 						/// 這個 collection 就是所有的 IE windows. ShellWindows :> count 就是 IE 頁面
 						/// 的總數。ShellWindows :> item(0,1,2,3...) 即 IE objects 與 DOM window 不同。
 						/// ShellWindows 整合所有的 IE 頁面，但 ShellWindows 本身沒有開啟 IE 頁面的功
-						/// 能。
+						/// 能。我本來以為 ShellWindows :> count >= 1 時 ShellWindows :> item(0) 可以
+						/// 當作 defauult IE object 來操作。可是 item(0) 常常是 null! 
 						
 	\ IE run 起來有幾種方式
 	\ 1. s" iexplore ibm.com" (fork) 當 ShellWindows.count==0 時要用這個，還不如都用這個。
@@ -33,12 +34,17 @@
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
 						/// 一個 window 關掉: 0 ie() :> document.parentWindow :: close() 
 						/// 也會把 IE process 關掉,當然 0 ie(i) 也是 null。
+	
+	0 value theIE // ( -- i ) Make ShellWindows.item(i) the default IE object
 						
-	: ie 				( -- ie|null ) \ Get the ShellWindows.item(0) IE object
-						js> g.ShellWindows.item(0) ;
+	: ie 				( -- ie|null ) \ Get the ShellWindows.item(theIE) IE object
+						\ js> g.ShellWindows.item(g.theIE) [ ] 不能直接用變數,很奇怪,是個 bug 吧!
+						theIE s" g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
 						/// 一個 window 關掉: ie :> document.parentWindow :: close() 
-						/// 也會把 IE process 關掉,當然 ie 也是 null。
+						/// 也會把 IE process 關掉,當然 ie 也是 null。但 ie(0) 有時候是 null
+						/// 即使 ie(1) 有東西，故需要用 theIE 來指定 active IE object。
+						
 	last alias available? // ( -- objIe|null ) Is the ShellWindows.item(0) IE object available?
 						/// ie 可能是存在的, 但沒有 connect 任何網址, 此時 ReadyState 也是 4, 
 						/// 也有 document, 但是 document 裡 innerHTML 是 undefined。 這樣就
@@ -73,16 +79,19 @@
 						isIe? if else drop abort" Error! Need an IE object (from ShellWindows)." then ;
 
 	: list-ie-windows	( -- count ) \ List all IE windows' locationName and URL
-		0 begin dup ie(i) ( count IE ) dup while ( count IE ) 
-		over . space dup :> LocationName . space :> LocationURL . cr ( count )
-		1+ repeat ( count IE ) drop ;
-		/// 有時候存在沒有內容的空 ie(i)。
+		\ 0 begin dup ie(i) ( count IE ) dup while ( count IE ) 
+		\ over . space dup :> LocationName . space :> LocationURL . cr ( count )
+		\ 1+ repeat ( count IE ) drop ;
+		ShellWindows :> count ?dup if dup for dup r@ - ( COUNT i )
+		dup . space ( COUNT i ) ie(i) ?dup if dup :> LocationName . space :> LocationURL . else ." Null" then cr
+		next drop then ;
+		/// 有時候存在沒有內容的空 ie(i) 連 ie(0) 都有可能。
 		last alias list
 
-	\ 無法知道哪個 IE window 是 activate
-	\ 以下命令固定用 ShellWindows.item(0) 來做 automation。
+	\ 我不知道哪個 IE window 是 activated
+	\ 以下命令固定用 ShellWindows.item(theIE) 來做 automation。
 						
-	: ready				( -- ) \ Wait ShellWindows.item(0) to become ready
+	: ready				( -- ) \ Wait ShellWindows.item(theIE) to become ready
 						ie ?dup if 
 							dup :> ReadyState if ( ie )
 								begin dup :> ReadyState==4 if drop space exit else char . . then 200 nap again
@@ -100,21 +109,21 @@
 						200 nap again ;
 						/// Wait ready first it checks IE object existence.
 						
-	: document			( -- obj ) \ Get ShellWindows.item(0).document object
-						js> g.ShellWindows.item(0).document ;
-	: locationName		( -- "name" ) \ Get ShellWindows.item(0).locationName string
-						js> g.ShellWindows.item(0).locationName ;
-	: locationUrl		( -- obj ) \ Get ShellWindows.item(0).locatonUrl string
-						js> g.ShellWindows.item(0).locationUrl ;
-	: visible			( -- ) \ Make ShellWindows.item(0) visible
-						js: g.ShellWindows.item(0).visible=true ;
-	: visible?			( -- flag ) \ Get ShellWindows.item(0).visible setting
-						js> g.ShellWindows.item(0).visible ;
-	: (navigate)		( "url" -- ) \ ShellWindows.item(0) to visit the URL
-						js: g.ShellWindows.item(0).navigate(pop(),"_top") ;
-	: navigate			( <url> -- ) \ ShellWindows.item(0) to visit the URL
-						BL word js: g.ShellWindows.item(0).navigate(pop(),"_top") ;
-	: source 			( -- "HTML" ) \ Get source code of the ShellWindows.item(0) page
+	: document			( -- obj ) \ Get ShellWindows.item(theIE).document object
+						ie :> document ;
+	: locationName		( -- "name" ) \ Get ShellWindows.item(theIE).locationName string
+						ie :> locationName ;
+	: locationUrl		( -- obj ) \ Get ShellWindows.item(theIE).locatonUrl string
+						ie :> locationUrl ;
+	: visible			( -- ) \ Make ShellWindows.item(theIE) visible
+						js: g.ShellWindows.item(theIE).visible=true ;
+	: visible?			( -- flag ) \ Get ShellWindows.item(theIE).visible setting
+						ie :> visible ;
+	: (navigate)		( "url" -- ) \ ShellWindows.item(theIE) to visit the URL
+						ie :: navigate(pop(),"_top") ;
+	: navigate			( <url> -- ) \ ShellWindows.item(theIE) to visit the URL
+						BL word ie :: navigate(pop(),"_top") ;
+	: source 			( -- "HTML" ) \ Get source code of the ShellWindows.item(theIE) page
 						ready not-busy document :> body.innerHTML ;
 	
 	<comment>	

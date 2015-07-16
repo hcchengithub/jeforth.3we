@@ -82,6 +82,7 @@ code precise-time(mS)	( -- mS ) \ Precise recent time in mini seconds
 				/// Example:
 				/// char pathname.json readTextFile ( Read JSON text )
 				/// parse value MyHashTable ( convert JSON text to hash table object )
+				
 <comment>
 \ 已經有更好的方法： mySetTimeout() mySetInterval()
 \ setTimout timers & setInterval timers. Idea was from Sam Suan Chen's jeforth HTML5 clock demo.
