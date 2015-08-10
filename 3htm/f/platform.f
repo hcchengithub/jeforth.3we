@@ -372,7 +372,15 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 						  <td>jsc</td>
 						  <td><a href="http://www.camdemy.com/media/19271">JavaScript Console</a></td>
 						</tr>
+						<tr>
+						  <td>More information</td>
+						  <td>
+						  1. <a href="http://www.camdemy.com/folder/8691">Video presentation web site</a> <br> 
+						  2. <a href="https://github.com/hcchengithub/jeforth.3we/wiki">jeforth.3we GitHub Wiki.</a>
+						  </td>
+						</tr>
 						</table>
+						
 					</o> drop
 				then ;
 				' (help) last :: comment=pop().comment

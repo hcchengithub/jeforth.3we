@@ -5,8 +5,9 @@ s" shell.application.f"	source-code-header
 \ I think it would be suitable for a stand alone shellapplication.f 
 \ [ ] see evernote for related articles.
 
-: shell.application ( -- obj ) \ Get shell.application COM object
-				char Shell.Application ActiveXObject ;
+\ : shell.application ( -- obj ) \ Get shell.application COM object
+\ 				char Shell.Application ActiveXObject ;
+char Shell.Application ActiveXObject constant shell.application // ( -- obj ) shell.application COM object
 
 : ShutdownWindows ( -- ) \ Pops up the dialog for Log out, Power off, Reboot, Sleep, or Hibernation
 				shell.application js> pop().ShutdownWindows() ;

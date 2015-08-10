@@ -23,15 +23,15 @@
 						see-excel ( count ) 
 						js> tos()>1 [if] 
 							." Warning: Multiple Excel.Application are running." *debug* Multiple-Excel-error>>> 
-						[then]
-						( count ) [if] 
+						[then] value excel.app.count // ( -- count ) excel.exe instance count, I can only handle 1. 
+						excel.app.count [if] 
 							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):kvm.push(xl)</vb> 會開出新 Excel.Application。
 							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):kvm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
 						[else]
 							<vb> On Error Resume Next:Set xl=CreateObject("excel.application"):kvm.push(xl)</vb>						
 						[then] to excel.app \ 如果 excel 沒有 install 會是 undefined。
-						
-	excel.app [if] \ excel existing
+					
+	excel.app [if] \ excel.app exists
 
 	: activeCell		excel.app :> ActiveCell ; // ( -- obj ) Get the ActiveCell object
 						/// activeCell :> offset(0,1).formula tib.
@@ -263,57 +263,6 @@
 						/// right ( 移位 ) 1 nap rewind ( 重複 )
 						/// 上下左右當格的【判斷】都依賴這些 cell 有值，不然就
 						/// 要用 i?stop 用 selection 或用 empty? ?stop。
-						
-	code get-sheet      ( sheet#|"sheet" workbook -- sheet ) \ Get Excel worksheet object where sheet# is either sheet number or name
-						push(pop().worksheets(pop())) // accept both sheet# or sheet name
-						end-code
-						/// Worksheets("Sheet1").Activate
-
-						<selftest>
-							***** get-sheet gets worksheet object ....
-							( ------------ Start to do anything --------------- )
-								1 WORKBOOK get-sheet constant SHEET // ( -- sheet ) playground worksheet object
-											   SHEET js> typeof(pop().name)
-								// 2 WORKBOOK get-sheet js> typeof(pop().name)
-								// 3 WORKBOOK get-sheet js> typeof(pop().name)
-							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> ['string'] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'get-sheet'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
-						</selftest>
-
-	code get-range      ( "a1:b2" worksheet -- range ) \ get a range
-						push(pop().range(pop()));
-						end-code
-
-						<selftest>
-							***** get-sheet gets worksheet object ....
-							( ------------ Start to do anything --------------- )
-								char a1:c3 SHEET get-range constant RANGE // ( -- range ) a range in worksheet
-								RANGE js> pop().count
-							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> [9] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'get-range'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
-						</selftest>
-
-	code get-cell       ( column row sheet -- cell ) \ Get cell object
-						push(pop().Cells(pop(),pop()))
-						end-code
-						
-						<selftest>
-							***** get-cell gets cell object ....
-							( ------------ Start to do anything --------------- )
-								1 1 SHEET get-cell constant CELL // ( -- cell ) excel cell A1 object
-								CELL js> pop().count
-							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> [1] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'get-cell'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
-						</selftest>
 
 	code bottom         ( Column -- row# ) \ Get the bottom row# of the column
 						push(pop().rows(65535).end(-4162).row) // xlUp = -4162
@@ -359,40 +308,7 @@
 						/// 把 focus 放在左上角的 key 頂，指定 offset# column 執行，產生 hash table object。
 						/// 存成 JSON 檔: oHash stringify char filename.json writeTextFile 
 						/// 讀取 JSON 檔: char filename.json readTextFileAuto constant oHash
-						/// \ 實際應用來建立【部門代碼資料庫】
-						/// 1 init-hash2 constant BG
-						/// 2 init-hash2 constant DEPT // 大部門
-						/// 3 init-hash2 constant DEPT2 // 部門細分
-						/// 4 init-hash2 constant JamesYu // 是否在 JamesYu 組織下
-						/// 5 init-hash2 constant Payroll
-						/// 6 init-hash2 constant Site
-						/// 7 init-hash2 constant Boss
-						/// 8 init-hash2 constant Assistant
-						/// <js>
-						/// var hash = {BG:{},DEPT:{},DEPT2:{},JamesYu:{},Payroll:{},Site:{},Boss:{},Assistant:{}};
-						/// for ( var i in g.DEPT ){
-						/// 	hash.BG[i] = g.BG[i];
-						/// 	hash.DEPT[i] = g.DEPT[i];
-						/// 	hash.DEPT2[i] = g.DEPT2[i];
-						/// 	hash.JamesYu[i] = g.JamesYu[i];
-						/// 	hash.Payroll[i] = g.Payroll[i];
-						/// 	hash.Site[i] = g.Site[i];
-						/// 	hash.Boss[i] = g.Boss[i];
-						/// 	hash.Assistant[i] = g.Assistant[i];
-						/// }
-						/// push(hash);
-						/// </js> stringify char departmentcode.json writeTextFile \ Save the hash table
-						/// char departmentcode.json readTextFileAuto parse constant hash \ Read the hash table
-						/// \ Usage : 配合 hash>column 使用時,取得各種 key:value pair hash table。
-						/// hash :> DEPT (see) \ see the DEPT hash
-						/// hash :> DEPT2 (see) \ see the DEPT2 hash
-						/// hash :> Payroll (see) \ see the Payroll hash
-						/// hash :> DEPT      activeSheet char c char k 2 hash>column2 \ 實際應用
-						/// hash :> DEPT2     activeSheet char c char l 2 hash>column2 \ 實際應用
-						/// hash :> BG        activeSheet char c char m 2 hash>column2 \ 實際應用
-						/// hash :> JamesYu   activeSheet char c char n 2 hash>column2 \ 實際應用
-						/// hash :> Payroll   activeSheet char c char o 2 hash>column2 \ 實際應用
-						/// hash :> Site      activeSheet char c char p 2 hash>column2 \ 實際應用
+						/// 實際應用來建立【部門代碼資料庫】, see work.f.
 						
 	: init-hash3		( -- objHash ) \ 放左上角，讀取一整組 key:value parirs，最簡版。
 						\ 當格在左上角一定是第一個 key
@@ -495,26 +411,28 @@
 						/// 77 88 99
 						/// </text> lines-to-column
 						
-	: value-it ( -- ) \ Convert the recent cell from formula to value
+	: formula>value ( -- ) \ Convert the recent cell from formula to value
 		?cell@ if activeCell ( -- value cell ) js> tos().formula!=tos(1) if
 		js> tos().address . space :: value=pop() else 2drop then then ;
 		///	這個命令用來把當 cell 的 formula 改成 value。除了可以省時間，還
 		///	可以由列印出來的 address 看出哪些地方有新的值出現，例如除權除息表。
-		/// cell 若無 value 就不去動它。這個命令適合用 selection 的方式整批
-		/// 處理。先 mark 想要處裡的區域，然後執行： 
-		/// ( 都有值 ) manual @?stop value-it down 1 nap rewind auto
-		/// ( 含#NA! ) manual 0 cut i?stop value-it 1 nap rewind auto
-		/// 把有日期的都由參考公式轉成 value 並取得所有新格子的座標，接著
-		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把新格子都塗上顏色。
+		/// cell 若無 value 就不去動它。這個命令適合搭配 selection 整批處理。
+		/// 先 mark 想要處裡的區域，然後執行： 
+		/// ( 都有值 ) manual cut @?stop formula>value down 1 nap rewind auto
+		/// ( 含#NA! ) manual 0 cut i?stop formula>value 1 nap rewind auto
+		/// 把有值的格子都由參考公式轉成 value 並取得這些格子的座標，接著
+		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把這些格子都塗上顏色。
 		
-	: printDateTime ( time -- ) \ print date time from excel like 2015-05-04 08:29 02
+	: printDateTime ( time -- ) \ Print an excel Date-time value. Result like "2015-05-04 08:29 Mon".
 		vb> Year(kvm.tos())    . char - .
 		vb> Month(kvm.tos())   2 .0r char - .
 		vb> Day(kvm.tos())     2 .0r space   
 		vb> Hour(kvm.tos())    2 .0r char : .
 		vb> Minute(kvm.tos())  2 .0r space
-		vb> WeekDay(kvm.pop()) 2 .0r cr ;
-
+		vb> WeekDay(kvm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
+		;
+	[else]
+		excel.app.count [if] ." The excel.exe running in this system does not response to COM requests. Try fix it by the kill-excel command." [then]
 	[then] \ excel.app exists
 
 	\ -- end of source code --
@@ -1502,6 +1420,60 @@
 	
 	</comment>
 
+<comment>						
+	\ 有了 activeSheet activeCell activeWorkBook 之後, 這些應該都沒有用了。
+	
+	code get-sheet      ( sheet#|"sheet" workbook -- sheet ) \ Get Excel worksheet object where sheet# is either sheet number or name
+						push(pop().worksheets(pop())) // accept both sheet# or sheet name
+						end-code
+						/// Worksheets("Sheet1").Activate
+
+						<selftest>
+							***** get-sheet gets worksheet object ....
+							( ------------ Start to do anything --------------- )
+								1 WORKBOOK get-sheet constant SHEET // ( -- sheet ) playground worksheet object
+											   SHEET js> typeof(pop().name)
+								// 2 WORKBOOK get-sheet js> typeof(pop().name)
+								// 3 WORKBOOK get-sheet js> typeof(pop().name)
+							( ------------ done, start checking ---------------- )
+							js> stack.slice(0) <js> ['string'] </jsV> isSameArray >r dropall r>
+							-->judge [if] <js> [
+								'get-sheet'
+							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+						</selftest>
+
+	code get-range      ( "a1:b2" worksheet -- range ) \ get a range
+						push(pop().range(pop()));
+						end-code
+
+						<selftest>
+							***** get-sheet gets worksheet object ....
+							( ------------ Start to do anything --------------- )
+								char a1:c3 SHEET get-range constant RANGE // ( -- range ) a range in worksheet
+								RANGE js> pop().count
+							( ------------ done, start checking ---------------- )
+							js> stack.slice(0) <js> [9] </jsV> isSameArray >r dropall r>
+							-->judge [if] <js> [
+								'get-range'
+							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+						</selftest>
+
+	code get-cell       ( column row sheet -- cell ) \ Get cell object
+						push(pop().Cells(pop(),pop()))
+						end-code
+						
+						<selftest>
+							***** get-cell gets cell object ....
+							( ------------ Start to do anything --------------- )
+								1 1 SHEET get-cell constant CELL // ( -- cell ) excel cell A1 object
+								CELL js> pop().count
+							( ------------ done, start checking ---------------- )
+							js> stack.slice(0) <js> [1] </jsV> isSameArray >r dropall r>
+							-->judge [if] <js> [
+								'get-cell'
+							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+						</selftest>
+</comment>
 
 
 

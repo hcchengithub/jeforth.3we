@@ -1,7 +1,9 @@
 	
 	\ ShellWindows object https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974(v=vs.85).aspx
 	\ Windows Internet Explorer object https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
-
+	\ shell.application :> windows() 即 ShellWindows. ShellWindows 有可能是 File Explorer 或 Windows Internet Explorer,
+	\ 也許還不只？用 ie :> application . 察看即知。
+	
 	s" ie.f"	source-code-header
 
 	: see-ie 			( -- count ) \ List all IE processes and return the count
@@ -176,6 +178,308 @@
 		/// Gets the user type name of the contained document object.
 		Visible
 		/// Sets or gets a value that indicates whether the object is visible or hidden.
+	</comment>	
+	<comment>	
+	[ ] 在 ie.f theIE 網頁上加上程式先讓 click 打 alert 看看。
+		--> 複習一下, 不久前才搞懂的 jQuery 2nd argument, the 'context'。
+			document js> $("div",pop()) constant page.jq \ 取得 jQuery object, 只限 <DIV>
+			document js> $("*",pop()) constant page.jq \ 取得 jQuery object, 整個網頁
+			page.jq :> [0].outerHTML </o> \ 在 jeforth.3hta outputbox 上顯示
+			page.jq :> length . \ ==> 1 看有沒有東西
+			page.jq :> [0] ce! ce \ ==> 用 jeforth.3hta element.f 來直接操作這個 IE 上的網頁。
+		--> 這樣真的可以為某 element 加紅框了,但不知如何去除?
+			\ myh2 :: setAttribute('style',"background-color:white;border: 1px ridge")
+			\ style="background-color:red;border: 1px ridge"
+			\ clearAttributes() \ remove all attributes
+			\ myh2 :: clearAttributes()
+			myh2 <js> pop().setAttribute('style',"background-color:white;border: 2px ridge red")</js>	
+		--> 給全部 <DIV> 加上紅框
+			document js> $("div",pop())[0] <js> pop().setAttribute('style',"background-color:white;border: 2px ridge red")</js>	
+			document <js> $("div",pop()).css("border","2px ridge red")</js>
+		--> remove it : document <js> $("div",pop())[0].removeAttribute('style')</js>
+	[ ] http://api.jquery.com/css/ 抄到這段 example 
+		<script>
+		$( "div" ).click(function() {
+		  var html = [ "The clicked div has the following styles:" ];
+		 
+		  var styleProps = $( this ).css([
+			"width", "height", "color", "background-color"
+		  ]);
+		  $.each( styleProps, function( prop, value ) {
+			html.push( prop + ": " + value );
+		  });
+		 
+		  $( "#result" ).html( html.join( "<br>" ) );
+		});
+		</script>
+		改寫成 click 任何東西都把它 hide , <ESC> 或 Ctrl-Z toggle 回來。
+		document <js> 
+		$("*",pop()).click(function(){
+			$(this)
+			.css("border","2px ridge red")
+			.addClass("_selected_");
+		});
+		</js>
+		document <js> $("*",pop()).toArray() </jsV> constant a
+		a :> length tib.
+		a :> [0] a :> [9] js> $(pop(),pop()).first().click(function(){alert("abc")}) \ works
+		a :> [0] a :> [9] js> $(pop(),pop()).removeAttr('style') \ it works
+		a :> [0] a :> [9] js> $(pop(),pop()).css("background-color","yellow") \ works
+		a :> [0] a :> [9] js> $(pop(),pop()).hide() \ JavaScript error : Unspecified error.
+		document <js> $("*",pop()).css("background","yellow") </js>
+		照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都被一一執行到。
+		document <js> 
+		$("*",pop()).click(function(){
+			if(g.flag) return;
+			$(this)
+			.css("border","2px ridge red")
+			.addClass("_selected_");
+			g.flag = true;
+		});
+		</js>
+		除了紅框, 印出來看也證實。
+		document <js> $("._selected_",pop()).each(function(){
+			print("-------------------------\n");
+			print($(this).html());
+			print("\n");
+		});
+		</js>		
+		調查整串都被 click 到的順序...由內而外。
+		document <js> 
+		$("*",pop()).click(function(){
+			print(this.toString());
+		});
+		</js>
+		[object HTMLParagraphElement] 由最內直接 click 到的 element 先 trigger。
+		[object HTMLDivElement]
+		[object HTMLBodyElement]
+		[object HTMLHtmlElement] 最後一個 document 可以當作結尾。
+
+		所以只要看到 flag 舉起來了就不執行即可。 ---> 成功!
+		
+		\ 過一會兒就把 flag 清掉, 以便連續選擇。
+		document <js> 
+		$("*",pop()).click(function(){
+			if(kvm.flag) {
+				g.setTimeout("kvm.flag=false",500);
+				return;
+			}
+			kvm.flag = true;
+			if($(this).hasClass("_selected_")){
+				$(this)
+				.removeClass("_selected_")
+				.removeAttr('style');
+				return;
+			}
+			$(this)
+			.css("border","4px dashed red")
+			.addClass("_selected_");
+		});
+		</js>
+		
+		\ 顯示選中的有幾個
+		document js> $("._selected_",pop()).length .
+		
+		\ 把選中的都轉到 outputbox 來顯示。速度會很慢
+		document <js> $("._selected_",pop()).each(function(){
+			push($(this).html());
+			execute("</o>");
+		});
+		</js>		
+		
+		\ 刪除所有選中的東西
+		document <js> $("._selected_",pop()).each(function(){
+			push(this);
+			execute("removeElement");
+		});
+		</js>		
+		
+		\ 刪除所有【選中以外】的東西
+		"" value selected 
+		document <js> 
+		var doc=pop();
+		$("._selected_",doc).each(function(){
+			g.selected += $(this)[0].outerHTML;
+		});
+		doc.body.innerHTML = g.selected;
+		</js>		
+
+		\ 想要把重複的 track item 都刪掉，但本程式會當，好像變成無窮迴路。
+		<js>
+			for (var i=0; i<g.track.length; i++){
+				for (var j=i+1; i<g.track.length; j++) {
+					if (g.track[i]==g.track[j]) g.track.splice(j,1);
+				}
+			}
+		</js>
+		
+		\ 改用 mouseenter mouseleave 取代會冒泡的 click。有效,但 parent 沒有 leave 就不會消失。
+		document <js> var doc=pop();
+		$("*",doc).mouseenter(function(){
+			$(this).css("border","4px dashed red");
+		});
+		$("*",doc).mouseleave(function(){
+			$(this).removeAttr('style');
+		});
+		</js>
+		
+		\ 改用 mouseenter mouseleave 取代會冒泡的 click。有效,但 parent 沒有 leave 就不會消失。
+		\ 用 lastThing 記住收到 event 的 this, mouseenter 時一律清除 lastThing
+		0 value theElement // ( -- element ) The recent hovered DOM element.
+		document <js> var doc=pop();
+			$("*",doc).mouseenter(function(){
+				print("mouse enter "+ this); execute("cr");
+				$(g.theElement).removeAttr('style'); // 無須防呆
+				$(this).css("border","4px dashed red");
+				g.theElement = this;
+			});
+			$("*",doc).mouseleave(function(){
+				print("mouse leave"+ this); execute("cr");
+				$(this).removeAttr('style');
+			});
+		</js>
+		
+		\ 想讀取 attached 網頁的 css 失敗
+		js> $("#inputbox").css("background-Color") .s 成功
+		js> $("div",g.doc).css("background-Color") .s 失敗 JavaScript error : Unspecified error.
+		js> $("div",g.doc)[0].getAttribute("style") . 成功 所以是 jQuery 的問題 "border: 4px dashed yellow; background-color: yellow;" 
+		
+		\ 如果快速把 mouse 移到某 div 收到的 event 順序如下, 不照順序! 所以利用 lastThing 或 theElement 
+		\ 去清前一個也不靈。
+		\	mouse enter [object HTMLBodyElement]
+		\	mouse enter [object HTMLHtmlElement]
+		\	mouse enter [object HTMLDivElement]
+		\ [x] 如果忽略 Body 跟 Html 也許就好了
+		
+		\ Push the recent node to private track array.
+		\ [f]reeze command (70) to stop receiving mouseenter mouseleave, toggle.
+		\ [<] [>] command (188,190) to move around hovered nodes.
+		$(doc).keydown(function(e){
+			e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+			switch(keycode) {
+				case 70: /* f */
+					print('f ');
+					return(false); 
+				case 188: /* < ,*/
+					print('< ');
+					return(false); 
+				case 190: /* > . */
+					print('> ');
+					return(false); 
+			}
+			return (true); // pass down to following handlers 
+		})
+		
+		
+		\ -------------------------------------
+		[] value track // ( -- [node,..] ) The history track array of visited DOM nodes
+		0 value itrack // ( -- int ) index of the track array
+		document <js> var doc=pop();
+			$(doc).keydown(function(e){
+				e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+				switch(keycode) {
+					case 70: /* [f]reeze */
+						print('f ');
+						return(false); 
+					case 83: /* [s]elect */
+						print('f ');
+						return(false); 
+					case 188: /* < ,*/
+						print('< ');
+						return(false); 
+					case 190: /* > . */
+						print('> ');
+						return(false); 
+				}
+				return (true); // pass down to following handlers 
+			})
+			$("*",doc).mouseenter(function(){
+				print("Enter " + this.nodeName + ". ");
+				$(g.track[g.track.length-1]).removeAttr('style'); // 無須防呆
+				$(this).css("border","4px dashed red");
+				g.track.push(this);
+				g.itrack = g.track.length-1;
+			});
+			$("*",doc).mouseleave(function(){
+				print("Leave " + this.nodeName + ". ");
+				$(this).removeAttr('style');
+			});
+		</js>
+		
+		\ -------------------------------------
+		
+		\ 完整功能 Hover 打紅框, Freeze, Select, Delete, Unselect, View, Clear
+		\ 能用 [<][>] 倒退前進就不怕 event 順序不靈的問題。
+		--- marker ---
+		[] value track // ( -- [node,..] ) The history track array of visited DOM nodes
+		0 value itrack // ( -- int ) index of the track array
+		0 value freeze // ( -- boolean ) The freezing flag
+		document <js> var doc=pop();
+			var GoOn=false;
+			$(doc).keydown(function(e){
+				e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+				switch(keycode) {
+					case 67: /* [c]lear */
+						for(var i=0; i<g.track.length; i++){
+							$(g.track[i])
+							.removeAttr('style')
+							.removeClass("_selected_");
+						}
+						return(!GoOn); 
+					case 68: /* [d]elete the highlighted node */
+						push(g.track[g.itrack]);
+						execute("removeElement");
+						return(!GoOn); 
+					case 70: /* [f]reeze */
+						g.freeze = !g.freeze;
+						print("The freezing flag : " + g.freeze); execute("cr");
+						return(!GoOn); 
+					case 83: /* [s]elect */
+						$(g.track[g.itrack])
+						.removeAttr('style')
+						.css("border","2px solid lime")
+						.addClass("_selected_");
+						return(!GoOn); 
+					case 85: /* [u]nselect */
+						$(g.track[g.itrack])
+						.removeAttr('style')
+						.removeClass("_selected_");
+						return(!GoOn); 
+					case 86: /* [v]iew selected nodes */
+						for(var i=0; i<g.track.length; i++){
+							$(g.track[i]).removeAttr('style');
+							if($(g.track[i]).hasClass("_selected_"))
+								$(g.track[i]).css("border","2px solid lime");
+						}
+						return(!GoOn); 
+					case 188: /* < , */
+						$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
+						g.itrack = Math.max(0,g.itrack-1);
+						$(g.track[g.itrack]).css("border","4px dashed red");						
+						return(!GoOn); 
+					case 190: /* > . */
+						$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
+						g.itrack = Math.min(g.track.length-1,g.itrack+1);
+						$(g.track[g.itrack]).css("border","4px dashed red");						
+						return(!GoOn); 
+				}
+				return (!GoOn);
+			});
+			$("*",doc).mouseenter(function(){
+				print("Enter " + this.nodeName + ". ");
+				if (g.freeze) return;
+				$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
+				if (g.track[g.track.length-1]!=this) g.track.push(this);
+				g.itrack = g.track.length-1;
+				$(g.track[g.itrack]).css("border","4px dashed red");						
+			});
+			$("*",doc).mouseleave(function(){
+				print("Leave " + this.nodeName + ". ");
+				if (g.freeze) return;
+				$(this).removeAttr('style'); // 無須防呆
+			});
+		</js>
+	
 	</comment>	
 		
 		
