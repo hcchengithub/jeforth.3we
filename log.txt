@@ -3655,7 +3655,7 @@
 [ ] Win7, jeforth.3we inputbox 怪怪的, back-space 倒不回去。
 [ ] Win7, jeforth.3we Alt-Up 之後, 上下鍵一跳兩行!
 
-[ ] excel.f or work.f 寫個 query 命令來查部門詳情。
+[x] excel.f or work.f 寫個 query 命令來查部門詳情。 ==> see-departments 1s1k
 
 [x] Excel 的時間 相容於 vb> CDate("2015/1/1 1:23:45") 與 JavaScript 的時間不相容。
 [x] 大驚奇! excel time 值屬 (Date) type 其 boolean 有可能是 false !!
@@ -3666,7 +3666,7 @@
 	to trim them up.
 	===> moved to ie.f
 	
-[ ] 用部門代碼查表 departmentcode.json
+[x] 用部門代碼查表 departmentcode.json
 	// key(i).value 就是本表的 key 或 index 值, 要查 hash 表, 得重複嘗試。
 	// 如果失敗就從最後少一個字母再試，直到兩個字母也失敗為止才放棄。
 	// 失敗時傳回 undefined 正好。這個 function 稱為 lookup 即可。
@@ -3702,4 +3702,22 @@
 		我猜這個 excel process 是有問題了。把它 kill 掉看看 --> 果然好了。
 	==> 加上這種情形的警告。	
 		
+[x] Improve see-dept <code> , list all possible departments
+	hash 的 key 有很多是部門代碼的開頭幾個字母, lookup 會自動把 i 縮短來嘗試。
+	原來的 lookup 是用 v = hash[i]; 查表, 所以 i 怎麼縮必須是 hash 有的 key。 
+	如果 i 已經比 hash 的 key 短, 就查不到了。
+	==> 如果 input 很長, 沒有 hash 吻合。把 i 截短 重試, 直到有吻合的為止。--> 現有的 algorithm, 精確。
+	==> 如果以上失敗，就拿所有的 key 來跟 i 比。比 i 短的就不對了，
+		 比 i 長的 key 截短來比 --> 結果可以一 key 多 value 都列出來。
+	==> 做成另一組 lookup2 跟 see-dept2 吧
+	==> see-departments 1s1k
+	
+[x] hcchen5600 2015/08/21 17:40:12 
+	完成 [begin][again] [begin][until] [for][next] interpret mode 的重要 flow control 命令
+	以後不用 cut .. rewind 了。
+	
+	
+	 
+
+
 

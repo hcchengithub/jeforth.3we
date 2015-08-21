@@ -15,7 +15,7 @@
 	char departmentcode.json readTextFileAuto parse constant departmentcode // ( -- departmentcode ) The hash table.
 
 	\ 用部門代碼查部門
-		code lookup ( hash key -- ) \ Lookup the hash table that has partial keys with the full key
+		code lookup ( hash key -- value ) \ Lookup the hash table that has partial keys with the full key
 			(function(hash,index){ // 查表 return hash[index] or undefined
 				for(var i=index.toUpperCase(); i.length>=2; i=i.slice(0,-1)){
 					var v = hash[i];
@@ -23,9 +23,11 @@
 				}
 				push(v);
 			})(pop(1),pop()); end-code
+			/// see-departments' building block.
+			/// see-departments 1mm
 			
-		: see-dept ( <deptCode> -- ) \ See the department info
-			BL word
+		: (see-dept) ( "deptCode" -- ) \ See the department info 用部門代碼查出某一部門
+		    dup . cr
 			char DEPT      dup . char : . space js> g.departmentcode[pop()] over lookup . cr
 			char DEPT2     dup . char : . space js> g.departmentcode[pop()] over lookup . cr
 			char Boss      dup . char : . space js> g.departmentcode[pop()] over lookup . cr
@@ -36,10 +38,40 @@
 			char WKSRD     dup . char : . space js> g.departmentcode[pop()] over lookup . cr
 			char JamesYu   dup . char : . space js> g.departmentcode[pop()] over lookup . cr
 			char Payroll   dup . char : . space js> g.departmentcode[pop()] over lookup . cr
-			2drop ;
+			drop ;
 			/// Usage: 
-			/// 	see-dept 1s0k00
-	
+			/// 	char 1s0k00 (see-dept) \ See the specified department.
+			///     see-departments 1s \ See all similar departments.
+			
+			
+		[] value lookup2_results // ( -- array ) lookup2's result, an array of matched keys.
+		: lookup2 ( hash key -- ) \ Get all possible keys to lookup2_results
+			[] to lookup2_results
+			over obj>keys ( hash key keys )
+			dup :> length ?dup if dup for dup r@ - ( hash key keys length i )
+				<js>
+					if(tos(2)[tos()].length >= tos(3).length) {
+						if(tos(2)[tos()].slice(0,tos(3).length).toUpperCase()==tos(3).toUpperCase()) 
+							g.lookup2_results.push(tos(2)[tos()]);
+					}
+				</js>
+				drop
+			( hash key keys length ) next drop then 
+			( hash key keys ) 3 drops ;
+			/// departmentcode :> DEPT2 char mb lookup2	
+			
+		: see-departments ( <deptCode> -- ) \ See all possible department info 用部門代碼查部門
+			BL word ( key ) departmentcode :> DEPT swap ( hash key ) lookup2
+			lookup2_results dup :> length ( array length )
+			?dup if dup for dup r@ - ( array length i ) 
+				dup . char : . cr
+				js> tos(2)[pop()] (see-dept) cr
+			( array length ) next drop then drop ;
+			/// Usage: 
+			/// 	char 1s0k00 (see-dept) \ See the specified department.
+			///     see-departments 1s \ See all similar departments.
+			
+			
 	<comment>	
 	\ 讀取 excel index(key)-value paris 當成 database 存成 .json 檔。(建立 departmentcode.json)
 	\ 原始 database 資料 departments.xlsx 有多欄，最左邊是 key 右邊各欄是 value。
