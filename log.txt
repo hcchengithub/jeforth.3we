@@ -3655,161 +3655,69 @@
 [ ] Win7, jeforth.3we inputbox 怪怪的, back-space 倒不回去。
 [ ] Win7, jeforth.3we Alt-Up 之後, 上下鍵一跳兩行!
 
-[ ] excel.f or work.f 寫個 query 命令來查部門詳情。
+[x] excel.f or work.f 寫個 query 命令來查部門詳情。 ==> see-departments 1s1k
 
 [x] Excel 的時間 相容於 vb> CDate("2015/1/1 1:23:45") 與 JavaScript 的時間不相容。
 [x] 大驚奇! excel time 值屬 (Date) type 其 boolean 有可能是 false !!
 	See work.f hcchen5600 2015/07/15 15:49:42 
 
-[ ] jeforth.3we element.f or ie.f hover mouse cursor on the page turns objects with red frame 
+[x] jeforth.3we element.f or ie.f hover mouse cursor on the page turns objects with red frame 
 	line. So I can copy its outer or inner HTML to jeforth.hta outputbox and then use element.f 
 	to trim them up.
-	[ ] 在 ie.f theIE 網頁上加上程式先讓 click 打 alert 看看。
-		--> 複習一下, 不久前才搞懂的 jQuery 2nd argument, the 'context'。
-			document js> $("div",pop()) constant page.jq \ 取得 jQuery object, 只限 <DIV>
-			document js> $("*",pop()) constant page.jq \ 取得 jQuery object, 整個網頁
-			page.jq :> [0].outerHTML </o> \ 在 jeforth.3hta outputbox 上顯示
-			page.jq :> length . \ ==> 1 看有沒有東西
-			page.jq :> [0] ce! ce \ ==> 用 jeforth.3hta element.f 來直接操作這個 IE 上的網頁。
-		--> 這樣真的可以為某 element 加紅框了,但不知如何去除?
-			\ myh2 :: setAttribute('style',"background-color:white;border: 1px ridge")
-			\ style="background-color:red;border: 1px ridge"
-			\ clearAttributes() \ remove all attributes
-			\ myh2 :: clearAttributes()
-			myh2 <js> pop().setAttribute('style',"background-color:white;border: 2px ridge red")</js>	
-		--> 給全部 <DIV> 加上紅框
-			document js> $("div",pop())[0] <js> pop().setAttribute('style',"background-color:white;border: 2px ridge red")</js>	
-			docuemnt <js> $("div",pop()).css("border","2px ridge red")</js>
-		--> remove it : document <js> $("div",pop())[0].removeAttribute('style')</js>
-	[ ] http://api.jquery.com/css/ 抄到這段 example 
-		<script>
-		$( "div" ).click(function() {
-		  var html = [ "The clicked div has the following styles:" ];
-		 
-		  var styleProps = $( this ).css([
-			"width", "height", "color", "background-color"
-		  ]);
-		  $.each( styleProps, function( prop, value ) {
-			html.push( prop + ": " + value );
-		  });
-		 
-		  $( "#result" ).html( html.join( "<br>" ) );
-		});
-		</script>
-		改寫成 click 任何東西都把它 hide , <ESC> 或 Ctrl-Z toggle 回來。
-		document <js> 
-		$("*",pop()).click(function(){
-			$(this)
-			.css("border","2px ridge red")
-			.addClass("_selected_");
-		});
-		</js>
-		document <js> $("*",pop()).toArray() </jsV> constant a
-		a :> length tib.
-		a :> [0] a :> [9] js> $(pop(),pop()).first().click(function(){alert("abc")}) \ works
-		a :> [0] a :> [9] js> $(pop(),pop()).removeAttr('style') \ it works
-		a :> [0] a :> [9] js> $(pop(),pop()).css("background-color","yellow") \ works
-		a :> [0] a :> [9] js> $(pop(),pop()).hide() \ JavaScript error : Unspecified error.
-		document <js> $("*",pop()).css("background","yellow") </js>
-		照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都被一一執行到。
-		document <js> 
-		$("*",pop()).click(function(){
-			if(g.flag) return;
-			$(this)
-			.css("border","2px ridge red")
-			.addClass("_selected_");
-			g.flag = true;
-		});
-		</js>
-		除了紅框, 印出來看也證實。
-		document <js> $("._selected_",pop()).each(function(){
-			print("-------------------------\n");
-			print($(this).html());
-			print("\n");
-		});
-		</js>		
-		調查整串都被 click 到的順序...由內而外。
-		document <js> 
-		$("*",pop()).click(function(){
-			print(this.toString());
-		});
-		</js>
-		[object HTMLParagraphElement] 由最內直接 click 到的 element 先 trigger。
-		[object HTMLDivElement]
-		[object HTMLBodyElement]
-		[object HTMLHtmlElement] 最後一個 document 可以當作結尾。
+	===> moved to ie.f
+	
+[x] 用部門代碼查表 departmentcode.json
+	// key(i).value 就是本表的 key 或 index 值, 要查 hash 表, 得重複嘗試。
+	// 如果失敗就從最後少一個字母再試，直到兩個字母也失敗為止才放棄。
+	// 失敗時傳回 undefined 正好。這個 function 稱為 lookup 即可。
+	code lookup ( hash key -- ) \ Lookup the hash table that has partial keys with the full key
+		(function(hash,index){ // 查表 return hash[index] or undefined
+			for(var i=index; i.length>=2; i=i.slice(0,-1)){
+				var v = hash[i];
+				if(typeof(v)!="undefined") break;
+			}
+			push(v);
+		})(pop(1),pop()); end-code
+	: query-dept ( hash dept -- ) \ See the department info
+		char BG        dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char BD        dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char DEPT      dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char DEPT2     dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char JamesYu   dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char Payroll   dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char Site      dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char Boss      dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char Assistant dup . char : . space js> tos(2)[pop()] over lookup . cr
+		char WKSRD     dup . char : . space js> tos(2)[pop()] over lookup . cr
+		2drop ;
 
-		所以只要看到 flag 舉起來了就不執行即可。 ---> 成功!
+[x] excel.f 在有 excel 的 S7 OA 上也被跳過了, 原因是下面這段 code 出乎意料地傳回 'undefined' ,
+		<vb>
+		On Error Resume Next
+		Set xl=GetObject(,"excel.application")
+		kvm.push(xl)
+		</vb>
+	--> 去掉 "On Error Resume Next" 後即見原因:
+		VBscript error : ActiveX component can't create object: 'GetObject'
+		我猜這個 excel process 是有問題了。把它 kill 掉看看 --> 果然好了。
+	==> 加上這種情形的警告。	
 		
-		\ 過一會兒就把 flag 清掉, 以便連續選擇。
-		document <js> 
-		$("*",pop()).click(function(){
-			if(kvm.flag) {
-				g.setTimeout("kvm.flag=false",500);
-				return;
-			}
-			kvm.flag = true;
-			if($(this).hasClass("_selected_")){
-				$(this)
-				.removeClass("_selected_")
-				.removeAttr('style');
-				return;
-			}
-			$(this)
-			.css("border","4px dashed red")
-			.addClass("_selected_");
-		});
-		</js>
-		
-		\ 把選中的都轉到 outputbox 來顯示。速度會很慢
-		document <js> $("._selected_",pop()).each(function(){
-			push($(this).html());
-			execute("</o>");
-		});
-		</js>		
-		
-		\ 刪除所有選中的東西
-		document <js> $("._selected_",pop()).each(function(){
-			push(this);
-			execute("removeElement");
-		});
-		</js>		
-		
-		\ 改用 mouseenter mouseleave 取代會冒泡的 click。有效,但 parent 沒有 leave 就不會消失。
-		document <js> var doc=pop();
-		$("*",doc).mouseenter(function(){
-			$(this).css("border","4px dashed red");
-		});
-		$("*",doc).mouseleave(function(){
-			$(this).removeAttr('style');
-		});
-		</js>
-		
-		\ 改用 mouseenter mouseleave 取代會冒泡的 click。有效,但 parent 沒有 leave 就不會消失。
-		\ 用 lastThing 記住收到 event 的 this, mouseenter 時一律清除 lastThing
-		0 value theElement // ( -- element ) The recent hovered DOM element.
-		document <js> var doc=pop();
-		$("*",doc).mouseenter(function(){
-			print("mouse enter "+ this +"\n");
-			$(g.theElement).removeAttr('style'); // 無須防呆
-			$(this).css("border","4px dashed red");
-			g.theElement = this;
-		});
-		$("*",doc).mouseleave(function(){
-			print("mouse leave"+ this +"\n");
-			$(this).removeAttr('style');
-		});
-		</js>
-		
-		\ 快點把 mouse 移到某 div 收到的 event 順序如下, 不理想,不照順序! 所以利用 lastThing 或 theElement 
-		\ 去清前一個也不靈。
-			mouse enter [object HTMLBodyElement]
-			mouse enter [object HTMLHtmlElement]
-			mouse enter [object HTMLDivElement]
-		\ [ ] 如果忽略 Body 跟 Html 也許就好了
-		
-		\ 想讀取 attached 網頁的 css 失敗
-		js> $("#inputbox").css("background-Color") .s 成功
-		js> $("div",g.doc).css("background-Color") .s 失敗 JavaScript error : Unspecified error.
-		js> $("div",g.doc)[0].getAttribute("style") . 成功 所以是 jQuery 的問題 "border: 4px dashed yellow; background-color: yellow;" 
+[x] Improve see-dept <code> , list all possible departments
+	hash 的 key 有很多是部門代碼的開頭幾個字母, lookup 會自動把 i 縮短來嘗試。
+	原來的 lookup 是用 v = hash[i]; 查表, 所以 i 怎麼縮必須是 hash 有的 key。 
+	如果 i 已經比 hash 的 key 短, 就查不到了。
+	==> 如果 input 很長, 沒有 hash 吻合。把 i 截短 重試, 直到有吻合的為止。--> 現有的 algorithm, 精確。
+	==> 如果以上失敗，就拿所有的 key 來跟 i 比。比 i 短的就不對了，
+		 比 i 長的 key 截短來比 --> 結果可以一 key 多 value 都列出來。
+	==> 做成另一組 lookup2 跟 see-dept2 吧
+	==> see-departments 1s1k
+	
+[x] hcchen5600 2015/08/21 17:40:12 
+	完成 [begin][again] [begin][until] [for][next] interpret mode 的重要 flow control 命令
+	以後不用 cut .. rewind 了。
+	
+	
+	 
+
+
 

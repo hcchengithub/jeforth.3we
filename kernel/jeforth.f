@@ -998,12 +998,21 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				compile >r here ; immediate compile-only
 				/// for ... next (count ... 2,1) but when count <= 0 still do once!!
 				/// for aft ... then next (count-1 ... 2,1) but do nothing if count <= 1.
-				/// : test 5 for r@ . space next ; test ==> 5 4 3 2 1
-				/// : test 5 for 5 r@ - . space next ; test ==> 0 1 2 3 4 
-				/// : test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ; 5 test ==> 0 1 2 3 4 
-				/// : test js: push(tos()+1,0) for dup r@ - ( count+1 i ) . space next drop ; 5 test ==> 1 2 3 4 5
-				/// : test 10 for 10 r@ - dup . space 5 >= if r> drop 0 >r then next ; test
-				/// ==> 0 1 2 3 4 5 , "r> drop 0 >r" is leave/exit/terminate of for..next loop
+				/// Pattern : The normalized for-loop pattern. 0 based.
+				///   : test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ; 
+				///   5 test ==> 0 1 2 3 4 
+				/// Pattern : Normalized for-loop pattern but n based.
+				///   : test js: push(tos()+3,0) for dup r@ - ( count+n i ) . space next drop ; 
+				///   5 test ==> 3 4 5 6 7
+				/// Pattern : Simplest, fixed times.
+				///   : test 5 for r@ . space next ; 
+				///   test ==> 5 4 3 2 1
+				/// Pattern : fixed times and 0 based index
+				///   : test 5 for 5 r@ - . space next ; 
+				///   test ==> 0 1 2 3 4 
+				/// Pattern of break : "r> drop 0 >r" or "js: rstack[rstack.length-1]=0"
+				///   : test 10 for 10 r@ - dup . space 5 >= if r> drop 0 >r then next ; 
+				///   test ==> 0 1 2 3 4 5 
 				
 : begin         ( -- a ) \ begin..again, begin..until, begin..while..until..then, begin..while..repeat
 				here ; immediate compile-only
@@ -1182,34 +1191,43 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 : refill        ( -- flag ) \ Reload TIB from stdin. return 0 means no input or EOF
 				accept if [ s" push(function(){tib=pop();ntib=0})" jsEvalNo , ] 1 else 0 then ;
 
-: [else] ( -- ) \ 考慮中間的 nested 結構，把下一個 [then] 之前的東西都丟掉。
-				1
+: [else] ( -- ) \ 丟掉以下 TIB 到 "[else]" or "[then]" 為止，考慮了中間的 nested 結構。
+				1 \ ( [if] structure nested level )
 				begin \ level
-					begin \ level
-						BL word count \ (level $word len ) 吃掉下一個 word
-					while \ (level $word) 查看這個被吃掉的 word
-						dup s" [if]" = if \ level $word
-							drop 1+ \ level' 如果這個 word 是 [if] 就要多出現一個 [then] 之後才結束
-						else \ level $word
-							dup s" [else]" = if \ (level)
-								drop 1- dup if 1+ then \ (level') 這個看不太懂，似乎是如果最外層多出一個 [else] 就把它當 [then] 用。
-							else \ level $word
+					begin \ ( level )
+						BL word count \ (level $word len ) 取出 [if] 之後 word 下一個 
+					while \ (level $word) 查看這個每個要丟掉的 word 做 nested 處裡。
+						dup s" [if]" = if \ ( level $word )
+							drop 1+ \ ( level' ) 如果這個 word 是 [if] 就把它丟掉，再進一層
+						else \ ( level $word ) 不是 [if] 那麼是否 [else]
+							dup s" [else]" = if \ (level $word)
+								drop \ ( level ) 丟掉 "[else]"
+								1- dup if 1+ then \ (level') level==1 時把它變成 0 準備走出 [if] 結構，
+								\ 其他 level 值則不變，繼續處理剩下的 [if] 結構。
+							else \ level $word, 不是 [else] 那麼是否 [then]
 								s" [then]" = if \ (level)
 									1- \ level' \ (level') 如果這個 word 是 [then] 就剝掉一層
-								then \ (level') 其他 word 吃掉就算了
+								then \ (level')
 							then \ level'
 						then \ level'
-						?dup if else exit then \ (level') 這個 [then] 是最外層就整個結束，否則繼續吃掉下一個 word.
-					repeat \ (level) or (level $word)
-					drop   \ (level)
-				refill not until \ level
-				drop
+						\ 整個結構的正常出口在這裡
+						?dup if else exit then 
+						\ 已經到最外層就離手走出 [if] 結構，否則繼續看下一個 word.
+					repeat \ (level) 回頭重來,看 TIB 裡下一個 word。
+					drop   \ (level) TIB 空了，把 null string 丟掉，留下 level。
+				refill not until \ reload TIB 然後繼續
+				\ level, TIB 斷尾了，可能是 ^z ^d 之類，做不下去了。
+				drop \ 把 TIB 斷尾中止後剩下的 level 丟掉。
 				; immediate
+				
 : [if] 			( flag -- ) \ Conditional compilation [if] [else] [then]
 				if else [compile] [else] then \ skip everything down to [else] or [then] when flag is not true.
 				; immediate
+				/// [if] 用來把 iTIB 視條件跳到這個 [if] 之後或 [else] 之後。
+
 : [then] 		( -- ) \ Conditional compilation [if] [else] [then]
 				; immediate
+				
 : js>  			( <expression> -- value ) \ Evaluate JavaScript <expression> which has no white space within.
 				BL word compiling if jsFunc , else jsEval then  ; immediate
 				/// Same thing as "s' blablabla' jsEval" but simpler. Return the last statement's value.
@@ -1394,6 +1412,56 @@ code cut		( -- ) \ Cut off used TIB.
 				
 : ?rewind		( boolean -- ) \ Conditional rewind TIB so as to repeat it. 'stop' to terminate.
 				if rewind then ;
+
+code [begin]	( -- ) \ [begin]..[again], [begin].. flag [until]
+				rstack.push(ntib) end-code immediate
+				/// Don't forget some nap.
+				/// 'stop' command or {Ctrl-Break} hotkey to abort.
+				/// ex. [begin] .s js> rstack . cr 1000 nap [again]
+				
+code [again]	( -- ) \ [begin]..[again]
+				ntib=rtos() end-code immediate
+				/// Don't forget some nap.
+				/// 'stop' command or {Ctrl-Break} hotkey to abort.
+
+
+code [until]	( flag -- ) \ [begin].. flag [until]
+				if(pop()) rstack.pop(); else  ntib=rtos(); end-code immediate
+				/// Don't forget some nap.
+				/// 'stop' command or {Ctrl-Break} hotkey to abort.
+				/// ex. [begin] now t.second dup . space 5 mod not 100 nap [until]
+
+code [for]		( count -- , R: -- #tib count ) \ [for]..[next] 
+				rstack.push(ntib); rstack.push(pop()); end-code immediate
+				/// Pattern : The normalized for-loop pattern. 0 based.
+				///   5 ?dup [if] dup [for] dup r@ - ( COUNT i ) . space ( COUNT ) [next] drop [then]
+				///   ==> 0 1 2 3 4
+				/// Pattern : Normalized for-loop pattern but n(66) based.
+				///   5 js: push(tos()+66,0) [for] dup r@ - ( count+n i ) . space [next] drop
+				///   ==> 66 67 68 69 70  OK 		
+				/// Pattern : Simplest, fixed times.
+				///   5 [for] r@ . space [next]
+				///   ==> 5 4 3 2 1
+				/// Pattern : fixed times and 0 based index
+				///   5 [for] 5 r@ - . space [next]
+				///   ==> 0 1 2 3 4
+				/// Pattern of break : "r> drop 0 >r" or "js: rstack[rstack.length-1]=0"
+				///   10 [for] 10 r@ - dup . space 5 >= [if] r> drop 0 >r [then] [next]
+				///   ==> 0 1 2 3 4 5
+				/// Don't forget some nap.
+				/// 'stop' command or {Ctrl-Break} hotkey to abort.
+
+code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
+				rstack[rstack.length-1] -= 1;
+				if(rtos()>0){
+					ntib=rtos(1);
+				} else {
+					rstack.pop(); // drop the count
+					rstack.pop(); // drop the #tib rewind position
+				}
+				end-code immediate
+				/// Don't forget some nap.
+				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 				
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 

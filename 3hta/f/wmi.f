@@ -600,6 +600,7 @@ code objEnumWin32_Process
 				/// Usage: Don't forget the where-clause, Case insensitive
 				///     s" where name = 'ExCeL.ExE'" kill-them
 				///     s" where name like 'chrom%'" kill-them 
+				///     s" where name = 'youdaonote.ExE'" kill-them
 				/// Also refer to the "see-process" command
 				///     s" where name = 'ExCeL.ExE'" see-process
 				///     s" where name like 'chrom%'" see-process
