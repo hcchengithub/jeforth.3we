@@ -90,6 +90,8 @@ s" git.f"	source-code-header
 	char WKS-38EN3477 char COMPUTERNAME proc-env@ = [if] s" C:\Users\8304018.WKSCN\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
 	char ASROCK-P8H61 char COMPUTERNAME proc-env@ = [if] s" C:\Users\hchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
 	char WKS-38EN3476 char COMPUTERNAME proc-env@ = [if] s" C:\Users\8304018\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+	char DESKTOP-Q94AC8A char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcche\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+	
 	value git-shell-path // ( -- str ) Command line to launch Git Shell.
 	/// Something like this:
 	/// C:\Users\hcchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell

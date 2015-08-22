@@ -27,24 +27,26 @@ char wscript.shell ActiveXObject constant WshShell // ( -- obj ) WshShell object
 WshShell js: window.WshShell=pop() \ Make it a global object.
 
 				<selftest> 
-					*** WshShell use SendKeys to manipulate Calculator ... 
-					<vb> WshShell.Run "calc" </vb>               2800 sleep \ This is a fork. 
-					<vb> WshShell.AppActivate "Calculator" </vb> 1800 sleep \ Use title or processID
-					js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
-					js: clipboardData.setData("text","1+2=*3=")
-					<vb> WshShell.SendKeys "^v" </vb>             100 sleep \ Ctrl-v
-					<vb> WshShell.SendKeys "^c" </vb>             100 sleep \ Ctrl-c 
-					<vb> WshShell.SendKeys "%{F4}" </vb>          100 sleep \ Alt-f4
-					js> clipboardData.getData("text")
-					js: clipboardData.setData("text",pop(1))  \ save-RESTORE
-					9 = ==>judge [if] <js> ['ActiveXObject','WshShell'] </jsV> all-pass [then]
-					<vb> WshShell.SendKeys "%" </vb> \ Release Alt key, some how other wise it got locked.
-					<comment>
-					\ 改用 clipboard 已經成功，不怕中文輸入模式。以下留作紀念。
-					\ js: document.body.style.imeMode='disabled'; \ [x] 懸案，想要避免中文輸入法干擾，無效！
-					\ <vb> WshShell.SendKeys "1{+}" </vb>           100 sleep \ Pad plus
-					\ js: document.body.style.imeMode='auto'; 
-					</comment>
+				\	Windows 10 小計算機的行為變了
+				\	*** WshShell use SendKeys to manipulate Calculator ... 
+				\	<vb> WshShell.Run "calc" </vb>               2800 sleep \ This is a fork. 
+				\	<vb> WshShell.AppActivate "Calculator" </vb> 1800 sleep \ Use title or processID
+				\	js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
+				\	\ js: clipboardData.setData("text","1+2=*3=")
+				\	js: clipboardData.setData("text","1+2")
+				\	<vb> WshShell.SendKeys "^v{enter}" </vb>             100 sleep \ Ctrl-v
+				\	<vb> WshShell.SendKeys "^c" </vb>             100 sleep \ Ctrl-c 
+				\	<vb> WshShell.SendKeys "%{F4}" </vb>          100 sleep \ Alt-f4
+				\	js> clipboardData.getData("text")
+				\	js: clipboardData.setData("text",pop(1))  \ save-RESTORE
+				\	9 = ==>judge [if] <js> ['ActiveXObject','WshShell'] </jsV> all-pass [then]
+				\	<vb> WshShell.SendKeys "%" </vb> \ Release Alt key, some how other wise it got locked.
+				\	<comment>
+				\	\ 改用 clipboard 已經成功，不怕中文輸入模式。以下留作紀念。
+				\	\ js: document.body.style.imeMode='disabled'; \ [x] 懸案，想要避免中文輸入法干擾，無效！
+				\	\ <vb> WshShell.SendKeys "1{+}" </vb>           100 sleep \ Pad plus
+				\	\ js: document.body.style.imeMode='auto'; 
+				\	</comment>
 				</selftest>
 				
 : activate		( ProcessID|"^title" -- ) \ Activate an application
