@@ -18,8 +18,8 @@
 	</h>
 
 	\ Computer dependent constants
-	( ASRock desktop @ home ) char ASROCK-P8H61 char %computername% env@ = [if]
-		char c:\Users\hchen\Documents\Dropbox\learnings\Stock\ [then]
+	( ASRock desktop @ home ) char DESKTOP-Q94AC8A char %computername% env@ = [if]
+		char c:\Users\hcche\Documents\stock\ [then]
 	( DOH7 ) char WKS-38EN3477 char %computername% env@ = [if]
 		char c:\Users\8304018.WKSCN\Dropbox\learnings\Stock\ [then]
 	( S7 ) char WKS-38EN3476 char %computername% env@ = [if]
