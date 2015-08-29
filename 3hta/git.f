@@ -355,8 +355,8 @@ s" git.f"   source-code-header
 
     \ 第 05 天：了解儲存庫、工作目錄、物件與索引之間的關係。<----------- 應該先閱讀這一章！
     \   使用 Git 版本控管時，會遭遇到很多分支的狀況
-    \   使用 git checkout 切換到不同分支會將你工作目錄下的目錄與檔案都改成與要切換過去的分支下的目錄
-    \   與檔案一樣。所以，適時的保持工作目錄的乾淨，是版本控管過程中的一個基本原則。
+    \   使用 git checkout 切換到不同分支會將你工作目錄下的目錄與檔案都改成與要切換過去的分支
+	\   下的目錄與檔案一樣。所以，適時的保持工作目錄的乾淨，是版本控管過程中的一個基本原則。
     \ object 「物件」用來保存版本庫中所有檔案與版本紀錄
     \ index 「索引」則是用來保存當下要進版本庫之前的目錄狀態。
     
@@ -407,6 +407,7 @@ s" git.f"   source-code-header
         /// 預設不會被推送到遠端儲存庫，主要用來做開發用途。
         ///     遠端分支：顧名思義，遠端分支就是在遠端儲存庫中的分支，
         /// 如此而已。你用 GitHub 是無法存取遠端分支的。
+
         
     : switch-branch ( <branch name> -- ) \ Switch to another branch which is existing.
         s" git checkout " char \n|\r word + </shell> ;
@@ -421,6 +422,13 @@ s" git.f"   source-code-header
         /// 確的方法則是透過「建立分支」的方式。
         /// Use "git log" to see commit ID's
         /// Use "branch-branch" to switch to a new branch.
+		/// 不允許改過檔案後,馬上 switch-branch 故意不管改過的檔案, error message
+		/// 如下：
+		/// error: Your local changes to the following files would be overwritten 
+		///        by checkout: bbt.html
+		/// Please, commit your changes or stash them before you can switch branches.
+		/// [ ] 不知道 *stash* 啥意思？ 好像把改過的檔案保存在 repository 之外的地方。 
+		
     last alias switch-commit // ( <commit ID> -- ) Switch to another commit.
     last alias checkout // ( <...> -- ) "git checkout" general form
         /// Switch HEAD to another commit, recall a file, .. etc.

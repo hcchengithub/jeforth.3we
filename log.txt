@@ -3715,9 +3715,24 @@
 [x] hcchen5600 2015/08/21 17:40:12 
 	完成 [begin][again] [begin][until] [for][next] interpret mode 的重要 flow control 命令
 	以後不用 cut .. rewind 了。
+    
+[x] Use this line to setup Fubon e01 association in excel 	
+    ==> [begin] DDE-formula down @?stop 10 nap [again]
+[ ] study meney.f against the recent decline.
+[ ] work on project-k jeforth.f
+[ ]	新增 private folder 放 work.f money.f departmentcode.json 等。
+	--> 看怎麼把 project-k-kernel merge 回 master?
+[ ] 把 jeforth.3we 的 kernel 換成 project-k. project-k 的 cub.html 已經成功把
+	pack-help 獨立出來, vm/kvm 的問題也搞懂了. 應該從 jeforth.f 改好就好了。
+	jeforth.3we 還是可以自稱 kvm 噓~~~ ===> 不要直接改, 先用 cub.html debug。
+	或者用帶入新 vm 的手法直接在 jeforth.3we 裡 debug。
+[ ] cub.f 直接在 jeforth.3we 裡試驗 project-k-kernel 很成功。一下就把 cub.f
+	run 起來了。cub.f 沒有 selftest 所以不可靠, jeforth.3we 穩是基本要求。準備
+	改用 3we/kernel/jeforth.f 
 	
 	
-	 
-
-
-
+	
+	
+	
+	  
+	
