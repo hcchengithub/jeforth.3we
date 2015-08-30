@@ -31,6 +31,8 @@
 	0 value filename
 	0 value err
 	0 value file
+	0 value path
+	0 value fs
 	
 	<js>
 	var http = require("http"),
@@ -38,14 +40,17 @@
 		path = require("path"),
 		fs = require("fs")
 		port = process.argv[3] || 8888; // for jeforth.3nd it's argv[3]
+
+	push(path); fortheval("to path");
+	push(fs); fortheval("to fs");
 	 
 	http.createServer(function(request, response) {
 		push(response); fortheval("to response"); push(request); fortheval("to request");
-		var uri = url.parse(request.url).pathname
-		, filename = path.join(process.cwd(), uri);
+		var uri = url.parse(request.url).pathname, 
+		    filename = path.join(process.cwd(), uri);
 		push(uri); fortheval("to uri"); push(filename); fortheval("to filename");
 	  
-		path.exists(filename, function(exists) {
+		fs.exists(filename, function(exists) {
 			if(!exists) {
 				response.writeHead(404, {"Content-Type": "text/plain"});
 				response.write("404 Not Found\n");

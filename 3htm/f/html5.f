@@ -27,7 +27,7 @@ s" html5.f"		source-code-header
 \ include jQuery
 	char script createElement ( -- eleScript )
 	dup char src char js/jquery-1.10.2.js setAttribute ( -- eleScript )
-	js> head swap ( -- eleHead eleScript ) appendChild
+	js> document.getElementsByTagName('head')[0] swap ( -- eleHead eleScript ) appendChild
 
 code redefine-print_plain_for_jQuery ( -- ) \ 
 				print = kvm.print = function (s) { 

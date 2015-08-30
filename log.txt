@@ -3729,7 +3729,14 @@
 [ ] cub.f 直接在 jeforth.3we 裡試驗 project-k-kernel 很成功。一下就把 cub.f
 	run 起來了。cub.f 沒有 selftest 所以不可靠, jeforth.3we 穩是基本要求。準備
 	改用 3we/kernel/jeforth.f 
-	
+[x] 用了很久的 packhelp() 傳回 "( foo ) bar" 或者 "( ?? ) No help message. Use // to add one."
+	等於是從 tib 抽 help 出來。用新的 "parse-help" 取代，方法如下：
+
+		push(nexttoken('\n|\r')); // rest of the first line
+		execute("parse-help"); // ( "helpmsg" "rests" )
+		tib = pop() + " " + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
+		newhelp = pop();
+[ ] cub.f 好了,攻 selftest, 改良。
 	
 	
 	

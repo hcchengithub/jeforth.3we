@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title class=appname>jeforth baby</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="common.css">
+    <style id=styleTextareaFocus type="text/css">
+            textarea:focus {
+                background:#E0E0E0;
+            }
+    </style>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>	
+    <Script src="jeforth.js"></Script>
+    <script id=js>
+    window.vm = new jeForth();
+    // vm is now the jeforth virtual machine object. It has no idea about the outside world
+    // that can be variant applications: HTML, HTA, Node.js, Node-webkit, .. etc.
+    // We need to help it a little as the following example:
+    
+    (function(){
+        // I/O  
+        // Forth vm doesn't know how to 'type'. We need teach it by defining the vm.type().
+        // vm.type() is the only mandatory I/O jeforth VM needs to know. 
+        var type = vm.type = function (s) {
+            try {
+                var ss = s + ''; // Print-able test
+            } catch(err) {
+                ss = Object.prototype.toString.apply(s);
+            }
+            $('#outputbox').append(plain(ss));
+        };
+        
+        // The Forth traditional prompt 'OK' is defined and used in this application main program.
+        // Forth vm has no idea about vm.prompt but your program may want to know.
+        // In that case, as an example, use vm property to store the vm global variables and functions.
+        vm.prompt = "OK";
+
+        // The Forth vm has no idea how to clear the display. We know that we will want to 
+        // clear the display so we define vm.clearScreen() here in the application main program.
+        // This is the good place to define application dependent functions. Use the same function 
+        // name for all different applications so your forth.f source code doesn't need to change.
+        function clearScreen(){
+            outputbox.innerHTML="";
+        }
+        vm.clearScreen = clearScreen;
+
+        // System initialization
+        jQuery(document).ready(
+            function() {
+                document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
+                vm.init(type); // Introduce I/O to Forth VM
+                // vm.dictate() is the only Forth command interface.
+                // Send a command line string, or an entire source code file into the Forth VM through
+                // this interface.
+                vm.dictate(source_code.value); 
+                
+            }
+        );
+
+        function forthConsoleHandler(cmd) {
+            type((cmd?'\n> ':"")+cmd+'\n');
+            vm.dictate(cmd);  // Pass the command line to jeForth VM
+            type(" " + vm.prompt + " ");
+            jump2endofinputbox.click(); inputbox.focus();
+        }
+
+        // onkeydown,onkeypress,onkeyup
+        // event.shiftKey event.ctrlKey event.altKey event.metaKey
+        // KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
+        function hotKeyHandler(e) {
+            switch(e.keyCode) {
+                case 13: /* Enter */
+                    if(event.ctrlKey) {
+                        vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
+                        inputbox.value = ""; // To avoid repeating the last command line when long press 'enter'.
+                        forthConsoleHandler(vm.inputbox);
+                        return(false);
+                    }
+            }
+            return (true); // pass down to following handlers
+        }
+
+		// Take care of HTML special characters
+        var plain = vm.plain = function (s) {
+            var ss = s + ""; // avoid numbers to fail at s.replace()
+            ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
+            ss = ss.replace(/ /g,'&nbsp;');
+            ss = ss.replace(/</g,'&lt;');
+            ss = ss.replace(/>/g,'&gt;');
+            ss = ss.replace(/\n/g,'<br>');
+            return ss;
+        }
+    })();
+    </script>
+</head>
+<body>
+    <div><b>jeForth sample code baby.html -- FigTaiwan H.C.Chen 2015</b></div><hr>
+    <div id="outputbox"><i>Output area, 'cls' command to clear</i>
+	<div id="source_box">Forth source code. Just a few demo, scroll to view all of them. This area is deposable because definitions are read already.<textarea id="source_code" cols=100 rows=10>
+code //     var s = nexttoken('\n|\r'); last().help = s; end-code 
+            // ( <comment> -- ) Give help message to the last word.
+code cls    vm.clearScreen() end-code // ( -- ) Clear output area
+code words  for(var i=1; i<words.root.length; i++) type(words.root[i].name+" ") end-code 
+            // ( -- ) List all words
+code help   for(var i=1; i<words.root.length; i++) 
+            type(words.root[i].name+" "+words.root[i].help+'\n') 
+            end-code // ( -- ) List all words' help message
+code hide   $("#source_box").hide() end-code // ( -- ) Hide the source code box by jQuery.
+code show   $("#source_box").show() end-code // ( -- ) Show the source code box by jQuery.
+code hi     type("Hello World!\n") end-code // ( -- ) Print hello world
+code .      type(pop()) end-code // ( n -- ) Print the TOS top of the Forth data stack.
+code +      push(pop(1)+pop()) end-code // ( a b -- a+b ) Add two numbers or strings
+code .s     for(var i=0; i<stack.length; i++) type(i + ": " + stack[i] + '\n') end-code // ( -- ) Dump data stack
+code s"     push(nexttoken('"'));nexttoken() end-code // ( <string> -- "string" ) String
+    </textarea></div></div><hr>
+    <div><i>Input box -- Ctrl-Enter to execute. Try 'help' command.</i><textarea id="inputbox" cols=100 rows=4></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div></div>
+</body>
+</html>
+

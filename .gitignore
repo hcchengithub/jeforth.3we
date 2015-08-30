@@ -1,3 +1,4 @@
 playground/*.mp3
 _selftest_.*
 private/*
+selftest.log
