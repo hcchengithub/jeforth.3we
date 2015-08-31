@@ -1,4 +1,10 @@
-playground/*.mp3
-_selftest_.*
+js/box2dweb/*
+js/chipmunk.js/*
+js/bootstrap*
+js/jquery*
+js/jefvm.v3.js
 private/*
+playground/multitaskjavascripteforth
+*.mp3
+_selftest_.xls
 selftest.log
