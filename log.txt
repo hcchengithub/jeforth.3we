@@ -3715,9 +3715,11 @@
 [x] hcchen5600 2015/08/21 17:40:12 
 	完成 [begin][again] [begin][until] [for][next] interpret mode 的重要 flow control 命令
 	以後不用 cut .. rewind 了。
-	
-	
-	 
 
+[x] Use this line to setup Fubon e01 association in excel 	
+    ==> [begin] DDE-formula down @?stop 10 nap [again]
 
+[ ] study meney.f against the recent decline.
+
+[ ] work on project-k jeforth.f
 
