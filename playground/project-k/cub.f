@@ -1,23 +1,29 @@
-dropall cls
-\ 取得 project-k 的 kernel 得到 constructor jeForth()
-js> typeof(jeForth)=="undefined"
-[if]
+
+' --projectk-- [if] --projectk-- [else] marker --projectk-- [then] dropall cls 
+js> typeof(jeForth)=="undefined" [if]
+	\ 取得 project-k 的 kernel 得到 constructor jeForth()
 	<h> <Script src="playground/project-k/jeforth.js"></Script></h> drop
-	: <kernel> ( <text> -- "text" ) \ Get multiple-line string
-		char </kernel> word ; immediate
-	: </kernel> ( "text" -- ... ) \ Delimiter of <text>
-		compiling if literal then ; immediate
-		/// Usage: <kernel> word of multiple lines </kernel>
 [then]
 <js> (new jeForth())</jsV> constant k // ( -- obj ) the project-k object
-k :: init(print)
+k :: screenbuffer=""
+k :: clearScreen=function(){execute("cls")}
 <js> g.k.dictate("code hi type('hello world, says cub.f') end-code")</js>
+k :: init(function(s){g.k.screenbuffer+=s;print(s);}) 
 k :: dictate("hi")
+<js> g.k.greeting = function(){
+	var v="01";
+	print("j e f o r t h  with project-k kernel -- r" + v + "\n");
+	print("source code http://github.com/hcchengithub/jeforth.3we\n");
+	return(parseFloat(v));
+}</js>
+
+: <kernel> ( <text> -- "text" ) \ Get multiple-line string
+	char </kernel> word ; immediate
+: </kernel> ( "text" -- ... ) \ Delimiter of <text>
+	compiling if literal then ; immediate
+	/// Usage: <kernel> word of multiple lines </kernel>
 <kernel>
-code //         // var s = nexttoken('\n|\r');
-                // last().help = newname + " " + s;
-                last().help = nexttoken('\n|\r');
-                end-code
+code //         last().help = nexttoken('\n|\r'); end-code
 				// ( <comment> -- ) Give help message to the new word.
 code stop       stop=true end-code // ( -- ) Stop the TIB loop
 code parse-help var ss = " " + pop() + " ", comment = "";
@@ -169,7 +175,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					var w = phaseA(entry); // 翻譯成恰當的 w.
 					do{
 						while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-							if(bp<0||bp==ip){kvm.jsc.prompt='ip='+ip+" jsc>";eval(kvm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+							if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
 							ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 							phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 							w = dictionary[ip];
@@ -181,7 +187,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 				end-code init
 
 code version    ( -- revision ) \ print the greeting message and return the revision code
-				push(kvm.greeting()) end-code
+				push(vm.greeting()) end-code
 
 code <selftest>	( <statements> -- ) \ Collect self-test statements. interpret-only
 				push(nexttoken("</selftest>"));
@@ -222,47 +228,73 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 					[r r] : check return stack, return true/false
 					[d d] : end of a selftest section, check data stack, 
 							complete the description, stop if failed.
+					[p p] : if test-result then these words' selftest are pass
 					</comment>
 					marker ~~selftest~~ // ( -- ) marker, clean entire selftest things.
 					"" value description // ( -- "text" ) description of a selftest section
+					[] value expected_rstack // ( -- [..] ) an array to compare rstack
+					[] value expected_stack // ( -- [..] ) an array to compare data stack
+					0  value test-result // ( -- boolean ) selftest result from [d .. d] 
+					[] value [all-pass] // ( -- ["words"] ) array of words for all-pass.
 					: *** ( <description> -- ) \ Start a selftest section
 						char \n|\r word 
 						<js> pop().replace(/(^( |\t)*)|(( |\t)*$)/g,'') </jsV> \ remove 頭尾 white spaces
 						<js> "*** " + pop() + " ... " </jsV> to description
 						depth if 
-							description . ." *** Error! Data stack is not empty!\n" 
-							abort
+							description . ." aborted" cr 
+							." *** Warning, Data stack is not empty." cr
+							stop
 						then ;
-					
-					include kernel/selftest.f
+					code all-pass ( ["name",...] -- ) \ Pass-mark all these word's selftest flag
+						var a=pop();
+						for (var i in a) {
+							var w = tick(a[i]);
+							if(!w) panic("Error! " + a[i] + "?\n");
+							else w.selftest='pass';
+						}
+						end-code
+					: [r ( <"text"> -- ) \ Prepare an array of data to compare with rstack.
+						char r] word js> eval("["+pop()+"]") to expected_rstack ;
+					: r] ( -- boolean ) \ compare rstack and expected_rstack
+						js> vm.g.isSameArray(rstack,vm.g.expected_rstack) ;
+					: [d ( <"text"> -- ) \ Prepare an array to compare with data stack. End of a selftest section.
+						char d] word js> eval("["+pop()+"]") to expected_stack ;
+						/// Data stack will be clean after check
+					: d] ( -- boolean ) \ compare data stack and expected_stack
+						js> vm.g.isSameArray(stack,vm.g.expected_stack) to test-result 
+						description . test-result if ." pass" cr dropall
+						else ." fail" cr stop then ;
+						/// Data stack will be clean after check
+					: [p ( <"text"> -- ) \ Prepare an array ([all-pass]) of words for all-pass if test-result
+						char p] word js> eval("["+pop()+"]") to [all-pass] ;
+					: p] ( -- boolean ) \ all-pass if test-result
+						test-result if [all-pass] all-pass then ;
+
 					.( *** Start self-test ) cr
-					s" *** Data stack should be empty ... " .
-						depth not [if] .( pass) cr [else] .( failed!) cr \s [then]
-					.( *** Rreturn stack should have less than 2 cells ... )
-						js> rstack.length dup . space 2 <= [if] .( pass) cr [else] .( failed!) cr \s [then]
-					*** version should return a number . . .
-						selftest-invisible
-						version
-						selftest-visible
-						js> typeof(pop())=="number" ==>judge
-					[if] <js> [
-					',', '.', '."', '.(', '//', ':', ';', '</'+'text>', '<=', '<text>', '@',
-					'[else]', '[if]', '[then]', '\\', '\\s', 'code', 'cr', 'depth', 'drop',
-					'dup', 'else', 'end-code', 'if', 'js:', 'js>', 'marker', 'not', 'space',
-					'then', 'variable', '<selftest>', '</self'+'test>', '(marker)', 'variable',
-					'word', '<js>', '</'+'jsV>'
-					] </jsV> all-pass [then]
+					*** Data stack should be empty
+						depth [d 0 d] 
+						[p 'code','end-code','.', '."', '.(', ':', ';', 'if', 'else', 'then', 
+						'js>', 'parse-help','cr','depth','<selftest>','</self'+'test>','word',
+						'<js>', '</'+'jsV>' p]
+					*** Rreturn stack should have less than 2 cells
+						description . 
+						js> rstack.length dup . space 2 <= [if] .( pass) cr [else] .( failed!) cr stop [then]
+						[p 'dup','<=','[if]', '[else]', '[then]' p]
+					*** // adds help to the last word
+						' // :> help.indexOf("message")!=-1 [d true d] [p "//", ":>", "'" p]
+					*** version should return a number
+						version js> typeof(pop())=="number" [d true d]
+						[p 'version' p]
 				</selftest>
 
 code execute    ( Word|"name"|address|empty -- ... ) \ Execute the given word or the last() if stack is empty.
 				execute(pop()); end-code
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** execute "drop" should drop the TOS ...
-						123 s" drop" execute
-						456 ' drop execute
-						depth 0= ==>judge drop
+					*** "drop" drops the TOS
+						321 123 s" drop" execute \ 321
+						654 456 ' drop execute \ 321 654
+						[d 321,654 d] [p 'drop', "'", "execute", '\\' p]
 				</selftest>
 
 code interpret-only  ( -- ) \ Make the last new word an interpret-only.
@@ -270,46 +302,37 @@ code interpret-only  ( -- ) \ Make the last new word an interpret-only.
                 end-code interpret-only
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** interpret-only makes dummy interpret-only ...
-						: dummy ; interpret-only
-						' dummy js> pop().interpretonly ==>judge drop
-						(forget)
+					*** interpret-only marks the last word as an interpret-only word
+						' execute :> interpretonly==true ( false ) 
+						' interpret-only :> interpretonly==true ( true )
+						[d false,true d] [p "interpret-only" p]
 				</selftest>
 
-</kernel>
-<js> g.k.dictate(pop())</js>
-k :> words.root .
-cr
-.s
-<kernel>
 code immediate  ( -- ) \ Make the last new word an immediate.
                 last().immediate=true
                 end-code
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** immediate makes dummy immediate ...
-						: dummy ; immediate
-						' dummy js> pop().immediate ==>judge drop
-						(forget)
+					*** immediate marks the last word as an immediate word
+						' execute :> immediate==true ( false ) 
+						' \ :> immediate==true ( true )
+						[d false,true d] [p "immediate" p]
 				</selftest>
 
-code .((		( <str> -- ) \ Print following string down to '))' immediately.
+code .((		( <str> -- ) \ Print string that has ')' in it down to '))' immediately.
 				type(nexttoken('\\)\\)'));ntib+=2; end-code immediate
 
 code \          ( <comment> -- ) \ Comment down to the next '\n'.
                 nexttoken('\n') end-code immediate
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** \ tib line after \ should be ignored ...
+					*** TIB lines after \ should be ignored
 						111 \ 222
 						: dummy
-							222
+							999
 							\ 333 444 555
 						;
-						last execute + depth + 334 = ==>judge drop
+						last execute [d 111,999 d] [p '\\' p]
 						(forget)
 				</selftest>
 
@@ -317,24 +340,16 @@ code \s         ( -- ) \ Stop outer loop which may be loading forth source files
 				stop=true; 
                 ntib=tib.length; // 可能沒用，雙重保險。
                 end-code
-				
-				<selftest>
-					\ depth [if] .( Data stack should be empty! ) cr \s [then]
-					\ *** \s should ignore the remaining TIB ...
-					\ 	<js> fortheval("123 \\s 324 32  ... ignore every thing !!!!"); </jsN>
-					\ 	depth + 124 = ==>judge drop
-				</selftest>
 
 code compile-only  ( -- ) \ Make the last new word a compile-only.
                 last().compileonly=true
                 end-code interpret-only
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** compile-only makes dummy compile-only ...
-						: dummy ; compile-only
-						' dummy js> pop().compileonly ==>judge drop
-						(forget)
+					*** compile-only marks last word as a compile-only word
+						' execute :> compileonly==true ( false ) 
+						' if :> compileonly==true ( true )
+						[d false,true d] [p "compile-only" p]
 				</selftest>
 
 \ ------------------ Fundamental words ------------------------------------------------------
@@ -359,24 +374,10 @@ code reveal		( -- ) \ Add the last word into wordhash
 				\ So reveal is done in ';' command.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** (create) should create a new word ...
+					*** (create) creates a new word
 						char ~(create)~ (create)
-						js> last().name char ~(create)~ = ==>judge [if]
-						<js> ['char', '</j'+'sV>', '(create)'] </jsV> all-pass
-						[then]
-						(forget)
+						js> last().name [d "~(create)~" d] [p "(create)","char" p]
 				</selftest>
-
-				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** // should add help message to the last word ...
-						1234 constant x // test!test!
-						js> last().help.indexOf("test!test!") -1 != ==>judge drop
-						\ see x
-						(forget)
-				</selftest>
-
 
 code ///        ( <comment> -- ) \ Add comment to the new word, it appears in 'see'.
                 var ss = nexttoken('\n|\r');
@@ -387,40 +388,30 @@ code ///        ( <comment> -- ) \ Add comment to the new word, it appears in 's
                 end-code interpret-only
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** /// should add comment to the last word ...
+					*** /// adds comment to the last word
 						1234 constant x
-						/// comment line 111
-						/// comment line 222
-						\ see x
-						<js> last().comment.indexOf("comment line 111") </jsV> -1 !=
-						<js> last().comment.indexOf("comment line 222") </jsV> -1 !=
-						and ==>judge drop
+						/// comment-line-111
+						/// comment-line-222
+						js> last().comment.indexOf("comment-line-111")==-1
+						js> last().comment.indexOf("comment-line-222")==-1
+						x [d false,false,1234 d] [p "///","constant" p]
 						(forget)
 				</selftest>
 
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
-
-				<selftest>
-					*** (space) puts a 0x20 on TOS ...
-						(space) js> String.fromCharCode(32) = ==>judge drop
-				</selftest>
-
 code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space.
-
-				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** BL should return the string '\s' literally ...
-						BL char \s = ==>judge drop
-				</selftest>
-
 code CR 		push("\n") end-code // ( -- '\n' ) NewLine is ASCII 10(0x0A)
 				/// Also String.fromCharCode(10) in JavaScript
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** CR should return a new line character ...
-						CR js> String.fromCharCode(10) = ==>judge drop
+					*** (space) puts a 0x20 on TOS
+						(space) js> String.fromCharCode(32) =
+						[d true d] [p "(space)","=" p]
+					*** BL should return the string '\s' literally
+						BL [d "\\s" d] [p "BL" p]
+					*** CR should return a new line character
+						CR js> String.fromCharCode(10) = 
+						[d true d] [p "CR","=" p]						
 				</selftest>
 
 code jsEval 	( "js code" -- result ) \ Evaluate the given JavaScript statements, return the last statement's value.
@@ -430,10 +421,10 @@ code jsEval 	( "js code" -- result ) \ Evaluate the given JavaScript statements,
                   panic("JavaScript error : "+err.message+"\n", "error");
                 };
 				end-code
+				
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** jsEval should eval(tos) and return the last statement's value ...
-						char 123 jsEval 123 ( .s ) = ==>judge drop
+					*** jsEval should eval(tos) and return the last statement's value
+						456 char pop()+1 jsEval [d 457 d] [p "jsEval" p]
 				</selftest>
 
 code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o return value.
@@ -445,9 +436,8 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
                 end-code
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** jsEvalNo should eval(tos) but won't return any value ...
-						456 char 123 jsEvalNo 456 ( .s ) = ==>judge drop
+					*** jsEvalNo should eval(tos) but won't return any value
+						456 char 123 jsEvalNo [d 456 d] [p "jsEvalNo" p]
 				</selftest>
 
 code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
@@ -475,9 +465,9 @@ code compiling  push(compiling) end-code // ( -- boolean ) Get system state
 code last 		push(last()) end-code // ( -- word ) Get the word that was last defined.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** last should return the recent forth VM state ...
-						: dummy ; last js> pop().name char dummy = ==>judge drop
+					*** last should return the last word
+						0 constant xxx
+						last :> name [d "xxx" d] [p "last" p]
 						(forget)
 				</selftest>
 
@@ -485,10 +475,9 @@ code exit       ( -- ) \ Exit this colon word.
 				comma(EXIT) end-code immediate compile-only
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** exit should stop a colon word ...
+					*** exit should stop a colon word
 						: dummy 123 exit 456 ;
-						last execute 123 = ==>judge drop
+						last execute [d 123 d] [p "exit" p]
 						(forget)
 				</selftest>
 
@@ -513,16 +502,10 @@ code (forget) 	( -- ) \ Forget the last word
 				end-code
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** (forget) should forget the last word ...
-						: dummy ; (forget)
-						last js> pop().name char dummy !=
-					==>judge [if]
-						<js> tick('rescan-word-hash').selftest='pass' </js> \ test /js
-						<js> push(tick('rescan-word-hash').selftest=='pass') </jsN> \ test jsN  true
-						<js> push(pop()==true) </jsN> \ test jsn  true
-						[if] <js> ['</'+'js>', '</'+'jsN>'] </jsV> all-pass [then]
-					[then]
+					*** (forget) should forget the last word
+						: remember-me ; (forget)
+						last :> name=="remember-me" [d false d] 
+						[p "(forget)","rescan-word-hash" p]
 				</selftest>
 
 code :          ( <name> -- ) \ Begin a forth colon definition.
@@ -554,11 +537,6 @@ code ;          ( -- ) \ End of the colon definition.
 				execute('reveal');
                 end-code immediate compile-only
 
-				<selftest>
-					js: tick(':').selftest='pass'
-					js: tick(';').selftest='pass'
-				</selftest>
-
 code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
 				push(tick(pop())) end-code
 
@@ -566,11 +544,9 @@ code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Wor
 				push(tick(nexttoken())) end-code
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** ' tick should return the word object ...
-						: dummy ;
-						' dummy js> pop().name char dummy = ==>judge [if] js> ["(')"] all-pass [then]
-						(forget)
+					*** ' tick and (') should return a word object
+						' code :> name char end-code (') :> name
+						[d "code","end-code" d] [p "'","(')" p]
 				</selftest>
 
 code #tib 		push(ntib) end-code // ( -- n ) Get ntib
@@ -581,14 +557,11 @@ code #tib! 		ntib = pop() end-code // ( n -- ) Set ntib
 code branch     ip=dictionary[ip] end-code compile-only // ( -- ) 將當前 ip 內數值當作 ip *** 20111224 sam
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
+					*** branch should jump to run hello
 					marker ---
-					*** branch should jump to run hello ...
 						: sum 0 1 begin 2dup + -rot nip 1+ dup 10 > if drop exit then again ;
 						: test sum 55 = ;
-						test ==>judge
-					[if] <js> ['2dup', '-rot', 'nip', '1+', '>', '0branch'] </jsV> all-pass [then]
-					\ cr see sum cr
+						test [d true d] [p '2dup', '-rot', 'nip', '1+', '>', '0branch' p]
 					---
 				</selftest>
 
@@ -605,9 +578,8 @@ code over       push(stack[stack.length-2]); end-code // ( a b -- a b a ) Stack 
 code 0<         push(pop()<0) end-code // ( a -- f ) 比較 a 是否小於 0
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
+					*** ! @ >r r> r@ drop dup swap over 0<
 					marker ---
-					*** ! @ >r r> r@ drop dup swap over 0< ...
 					variable x 123 x ! x @ 123 = \ true
 					111 dup >r r@ r> + swap 2 * = and \ true
 					333 444 drop 333 = and \ true
@@ -616,10 +588,8 @@ code 0<         push(pop()<0) end-code // ( a -- f ) 比較 a 是否小於 0
 					0< not and \ true
 					-1 0< and \ true
 					false over \ true
-					==>judge
-					[if] <js> ['!', '@', '>r', 'r>', 'r@', 'swap', 'drop',
-					'dup', 'over', '0<', '2drop'] </jsV> all-pass [then]
-					2drop
+					[d true, false, true d] [p '!', '@', '>r', 'r>', 'r@', 'swap', 'drop',
+					'dup', 'over', '0<', '2drop','marker' p]
 					---
 				</selftest>
 
@@ -627,18 +597,17 @@ code here!      here=pop() end-code // ( a -- ) 設定系統 dictionary 編碼�
 code here       push(here) end-code // ( -- a ) 系統 dictionary 編碼位址 a
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
+					*** here! here, forth dictionary pointer
 					marker ~~~
-					*** here! here ...
 						marker ---
-							10000 here!
-							here 10000 = \ true
-							: dummy ; ' dummy js> pop().cfa 10000 >= and \ true
+						10000 here! here ( 10000 )
+						: dummy ; ' dummy js> pop().cfa 10000 >= ( true )
+						(forget)
 						---
-						: dummy ; ' dummy js> pop().cfa 888 < and \ true
-						==>judge
-						[if] <js> ['here', 'here!'] </jsV> all-pass [then]
-					~~~
+						: dummy ; ' dummy js> pop().cfa 888 < ( true )
+						[d 10000,true,true d] [p 'here', 'here!', ">=", "<" p]
+						(forget)
+					~~~	
 				</selftest>
 
 \ JavaScript logical operations can be confusing
@@ -667,8 +636,7 @@ code null		push(null) end-code // ( -- null ) Get a null value.
 				/// 'Null' can be used in functions to check whether an argument is given.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** boolean and or && || not AND OR NOT XOR ...
+					*** boolean and or && || not AND OR NOT XOR
 					undefined not \ true
 					"" boolean \ true false
 					and \ false
@@ -691,10 +659,8 @@ code null		push(null) end-code // ( -- null ) Get a null value.
 					0 XOR 3 = \ true true true
 					and and \ true
 					<js> function test(x){ return x }; test() </jsV> null = \ true true
-					and ==>judge
-					[if] <js> ['and', 'or', 'not', '||', '&&', 'AND', 'OR', 'NOT', 'XOR',
-						  'true', 'false', '""', '[]', '{}', 'undefined', 'boolean', 'null'
-					] </jsV> all-pass [then]
+					[d true,true d] [p 'and', 'or', 'not', '||', '&&', 'AND', 'OR', 'NOT', 'XOR',
+					'true', 'false', '""', '[]', '{}', 'undefined', 'boolean', 'null' p] 
 				</selftest>
 
 \ Not eforth code words
@@ -710,21 +676,19 @@ code 1-         push(pop()-1) end-code // ( a -- a-1 ) TOS - 1
 code 2-         push(pop()-2) end-code // ( a -- a-2 ) TOS - 2
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** + * - / 1+ 2+ 1- 2- ...
-					1 1 + 2 * 1 - 3 / 1+ 2+ 1- 2- 1 = ==>judge
-					[if] <js> ['+', '*', '-', '/', '1+', '2+', '1-', '2-'] </jsV> all-pass [then]
+					*** + * - / 1+ 2+ 1- 2-
+					1 1 + 2 * 1 - 3 / 1+ 2+ 1- 2- 1 = [d true d]
+					[p '+', '*', '-', '/', '1+', '2+', '1-', '2-' p]
 				</selftest>
 
 code mod        push(pop(1)%pop()) end-code // ( a b -- c ) 計算 a 與 b 兩數相除的餘 c
 code div        var b=pop();var a=pop();push((a-(a%b))/b) end-code // ( a b -- c ) 計算 a 與 b 兩數相除的整數商 c
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** mod 7 mod 3 is 1 ...
-						7 3 mod 1 = ==>judge drop
-					*** div 7 div 3 is 2 ...
-						7 3 div 2 = ==>judge drop
+					*** mod 7 mod 3 is 1
+						7 3 mod [d 1 d] [p "mod" p]
+					*** div 7 div 3 is 2
+						7 3 div [d 2 d] [p "div" p]
 				</selftest>
 
 code >>         var n=pop();push(pop()>>n) end-code // ( data n -- data>>n ) Singed right shift
@@ -732,15 +696,14 @@ code <<         var n=pop();push(pop()<<n) end-code // ( data n -- data<<n ) Sin
 code >>>        var n=pop();push(pop()>>>n) end-code // ( data n -- data>>>n ) Unsinged right shift. Note! There's no <<<.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** >> -1 signed right shift n times will be still -1 ...
-						-1 9 >> -1 = ==>judge drop
-					*** >> -4 signed right shift becomes -2 ...
-						-4 1 >> -2 = ==>judge drop
-					*** << -1 signed left shift 63 times become the smallest int number ...
-						-1 63 << 0x80000000 -1 * = ==>judge drop
-					*** >>> -1 >>> 1 become 7fffffff ...
-						-1 1 >>> 0x7fffffff = ==>judge drop
+					*** >> -1 signed right shift n times will be still -1
+						-1 9 >> [d -1 d] [p ">>" p]
+					*** >> -4 signed right shift becomes -2
+						-4 1 >> [d -2 d] [p ">>" p]
+					*** << -1 signed left shift 63 times become the smallest int number
+						-1 63 << 0x80000000 -1 * = [d true d] [p "<<" p]
+					*** >>> -1 >>> 1 become 7fffffff
+						-1 1 >>> 0x7fffffff = [d true d] [p ">>>" p]
 				</selftest>
 
 code 0=         push(pop()==0) end-code // ( a -- f ) 比較 a 是否等於 0
@@ -751,8 +714,7 @@ code 0>=        push(pop()>=0) end-code // ( a -- f ) 比較 a 是否大於等�
 code =          push(pop()==pop()) end-code // ( a b -- a=b ) 經轉換後比較 a 是否等於 b, "123" = 123.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** 0= 0> 0<> 0 <= 0>= ...
+					*** 0= 0> 0<> 0 <= 0>=
 						"" 0= \ true
 						undefined 0= \ true false
 						1 0> \ true false true
@@ -769,8 +731,8 @@ code =          push(pop()==pop()) end-code // ( a b -- a=b ) 經轉換後比較
 						-1 0<= \ true true
 						1 0>= \ true true true
 						s" 123" 123 = \ \ true true true true
-						&& && && ==>judge
-					[if] <js> ['0=', '0>', '0<>', '0<=', '0>=', '='] </jsV> all-pass [then]
+						[d true,true,true,true d]
+						[p '0=', '0>', '0<>', '0<=', '0>=', '=' p]
 				</selftest>
 
 code ==         push(Boolean(pop())==Boolean(pop())) end-code // ( a b -- f ) 比較 a 與 b 的邏輯
@@ -784,22 +746,22 @@ code <=         var b=pop();push(pop()<=b) end-code // ( a b -- f ) 比較 a 是
 
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** == compares after booleanized ...
+					*** == compares after booleanized
 						{} [] == \ true
 						"" null == \ true
 						"" undefined == \ true
 						s" 123" 123 == \ true
-						&& && && ==>judge drop
-					*** === compares the type also ...
+						[d true,true,true,true d] [p "==",'""',"null", "undefined" p]
+					*** === compares the type also
 						"" 0 = \ true
 						"" 0 == \ true
 						"" 0 === \ false
 						s" 123" 123 = \ true
 						s" 123" 123 == \ true
 						s" 123" 123 === \ false
-						XOR and XOR and and ==>judge drop
-					*** > < >= <= != !== <> ...
+						[d true,true,false,true,true,false d]
+						[p "===" p]
+					*** > < >= <= != !== <>
 						1 2 > \ false
 						1 1 > \ false
 						2 1 > \ true
@@ -814,8 +776,8 @@ code <=         var b=pop();push(pop()<=b) end-code // ( a b -- f ) 比較 a 是
 						2 1 <= \ fasle
 						1 1 <> \ false
 						0 1 <> \ true
-						XOR AND XOR and and and XOR XOR XOR and and XOR XOR ==>judge
-						[if] <js> ['<', '>=', '<=', '!=', '!==', '<>'] </jsV> all-pass [then]
+						[d false,false,true,true,false,false,false,true,true,true,true,false,false,true d]
+						[p '<', '>=', '<=', '!=', '!==', '<>' p]
 				</selftest>
 
 code abs        push(Math.abs(pop())) end-code // ( n -- |n| ) Absolute value of n.
@@ -823,14 +785,12 @@ code max        push(Math.max(pop(),pop())) end-code // ( a b -- max(a,b) ) The 
 code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The minimum.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** abs makes negative positive ...
-						1 63 << abs 0x80000000 = ==>judge drop
-					*** max min ...
-						1 -2 3 max max 3 = \ true
-						1 -2 3 min min -2 = \ true
-						and ==>judge
-						[if] <js> ['min'] </jsV> all-pass [then]
+					*** abs makes negative positive
+						1 63 << abs [d 0x80000000 d] [p "abs" p]
+					*** max min
+						1 -2 3 max max (  3 )
+						1 -2 3 min min ( -2 )
+						[d 3,-2 d] [p "max","min" p]
 				</selftest>
 
 code doVar      push(ip); ip=rstack.pop(); end-code compile-only // ( -- a ) 取隨後位址 a , runtime of created words
@@ -838,39 +798,35 @@ code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}
 code ,          comma(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
+					*** doVar doNext
 					marker ---
-					*** doVar doNext ...
 						variable x
 						: tt for x @ . x @ 1+ x ! next ;
-						10 tt space x @ 10 = ==>judge [if]
-						<js> ['doNext','space', ',', 'colon-word', 'create',
-						'for', 'next'] </jsV> all-pass
-						[then]
+						10 tt space x @ [d 10 d]
+						[p 'doNext','space', ',', 'colon-word', 'create',
+						'for', 'next' p]
 					---
 				</selftest>
 
 \ 目前 Base 切換只影響 .r .0r 的輸出結果。
 \ JavaScript 輸入用外顯的 0xFFFF 形式，用不著 hex decimal 切換。
 
-code hex        kvm.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
-code decimal    kvm.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
-code base@      push(kvm.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
-code base!      kvm.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
-10 base!        // 沒有經過宣告的 variable base 就是 kvm.base
+code hex        vm.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
+code decimal    vm.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
+code base@      push(vm.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
+code base!      vm.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
+10 base!        // 沒有經過宣告的 variable base 就是 vm.base
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** hex decimal base@ base! ...
+					*** hex decimal base@ base!
 						decimal base@ 0x0A = \ true
 						10 0x10 = \ false
 						hex base@ 0x10 = \ true
 						10 0x10 = \ false !!!! JavaScript 輸入用外顯的表達 10 就是十不會變，這好！
 						0x0A base!
 						base@ 10 = \ true
-						XOR and XOR and ==>judge [if]
-						<js> ['decimal','base@', 'base!'] </jsV> all-pass
-						[then]
+						[d true,false,true,false,true d]
+						[p 'decimal','base@', 'base!' p]
 				</selftest>
 
 code depth      ( -- depth ) \ Data stack depth
@@ -883,24 +839,19 @@ code roll       ( ... n3 n2 n1 n0 3 -- ... n2 n1 n0 n3 )
 				/// see rot -rot roll pick
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
-					*** pick 2 from 1 2 3 gets 1 2 3 1 ...
-					1 2 3 0 pick 3 = depth 4 = and >r 3 drops \ true
-					1 2 3 1 pick 2 = depth 4 = and >r 3 drops \ true
-					1 2 3 2 pick 1 = depth 4 = and >r 3 drops \ true
-					r> r> r> and and ==>judge drop
-					*** roll 2 from 1 2 3 gets 2 3 1 ...
-					1 2 3 0 roll 3 = depth 3 = and >r 2 drops \ true
-					1 2 3 1 roll 2 = depth 3 = and >r 2 drops \ true
-					1 2 3 2 roll 1 = depth 3 = and >r 2 drops \ true
-					r> r> r> and and ==>judge drop
+					*** pick 2 from 1 2 3 gets 1 2 3 1
+						1 2 3 0 pick 3 = depth 4 = and >r 3 drops \ true
+						1 2 3 1 pick 2 = depth 4 = and >r 3 drops \ true
+						1 2 3 2 pick 1 = depth 4 = and >r 3 drops \ true
+						r> r> r> [d true,true,true d] [p "pick",">r","r>" p]
+					*** roll 2 from 1 2 3 gets 2 3 1
+						1 2 3 0 roll 3 = depth 3 = and >r 2 drops \ true
+						1 2 3 1 roll 2 = depth 3 = and >r 2 drops \ true
+						1 2 3 2 roll 1 = depth 3 = and >r 2 drops \ true
+						r> r> r> [d true,true,true d] [p "roll" p]
 				</selftest>
-code .          ( sth -- ) \ Print number or string on TOS.
-				type(pop());
-				end-code
-
+code .          type(pop()); end-code // ( sth -- ) Print number or string on TOS.
 : space      	(space) . ; // ( -- ) Print a space.
-
 code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from TIB.
 				push(nexttoken(pop())) end-code
 				/// First character after 'word' will always be skipped first, token separator.
@@ -909,8 +860,8 @@ code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from T
 				/// If delimiter not found then return the entire remaining TIB (can be multiple lines!).
 
 				<selftest>
+					*** word reads "string" from TIB
 					marker ---
-					*** word reads "string" from TIB ...
 					char \s word    111    222 222 === >r s" 111" === r> and \ true , whitespace 會切掉
 					char  2 word    111    222 222 === >r s"    111    " === r> and \ true , whitespace 照收
 					: </div> ;
@@ -918,7 +869,7 @@ code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from T
 								前都被收進，可
 								以跨行！ come-find-me-!!
 					</div> js> pop().indexOf("come-find-me-!!")!=-1 \ true
-					and and ==>judge drop
+					[d true,true,true d] [p "word" p]
 					---
 				</selftest>
 
@@ -929,15 +880,14 @@ code word       ( "delimiter" -- "token" <delimiter> ) \ Get next "token" from T
 				r> dup @ , 1+ >r ; compile-only 
 
 				<selftest>
+					*** [compile] compile [ ]
 					marker ---
-					*** [compile] compile [ ] ...
 					: iii ; immediate
 					: jjj ;
 					: test [compile] iii compile jjj ; \ 正常執行 iii，把 jjj 放進 dictionary
 					: use [ test ] ; \ 如果 jjj 是 immediate 就可以不要 [ ... ]
-					' use js> pop().cfa @ ' jjj = ==>judge [if]
-						<js> ['compile', '[', ']'] </jsV> all-pass
-					[then]
+					' use js> pop().cfa @ ' jjj = [d true d]
+					[p "[compile]",'compile', '[', ']' p]
 					---
 				</selftest>
 
@@ -965,8 +915,8 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 				last().help = /* newname + " " + */ h;
                 last().xt = function(){ // marker's xt restores the saved context
                     here = this.herewas;
-					order = [current = context = "forth"]; // 萬一此 marker 在引入 vocabulary 之後被 call 到。
-					for(var vid in words) if(vid != current) delete words[vid]; // "forth" is the only one, clean up other word-lists.
+					order = [current = context = "root"]; // 萬一此 marker 在引入 vocabulary 之後被 call 到。
+					for(var vid in words) if(vid != current) delete words[vid]; // "root" is the only one, clean up other word-lists.
                     words[current] = current_word_list().slice(0, this.lengthwas);
                     dictionary = dictionary.slice(0,here);
 					wordhash = {};
@@ -980,8 +930,8 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 code next       comma(tick("doNext"));dictionary[here++]=pop(); end-code immediate compile-only // ( -- ) for ... next (FigTaiwan SamSuanChen)
 
 code cls		( -- ) \ Clear jeforth console screen
-				kvm.screenbuffer = (kvm.screenbuffer==null) ? null : "";
-				kvm.clearScreen();
+				vm.screenbuffer = (vm.screenbuffer==null) ? null : "";
+				vm.clearScreen();
 				end-code
 code abort      reset() end-code // ( -- ) Reset the forth system.
 
@@ -992,23 +942,20 @@ code literal 	( n -- ) \ Compile TOS as an anonymous constant
 				end-code
 code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 				var w = pop();
-				// To use the correct TIB, must use execute("word") instead of fortheval("word").
+				// To use the correct TIB, must use execute("word") instead of dictate("word").
 				execute("BL"); execute("word"); execute("(create)");execute("reveal");
                 // mergeObj(last(), w); // copy everything by value from the predecessor includes arrays and objects.
 				for(var i in w) last()[i] = w[i]; // copy from predecessor but arrays and objects are by reference
 				last().predecessor = last().name;
                 last().name = newname;
 				last().type = "alias";
-				last().help = last().name + last().help.match(/\S+\s*(\s.*)/)[1];
                 end-code
 
 				<selftest>
-					depth [if] .( Data stack should be empty! ) cr \s [then]
+					*** alias should create a new word that acts same
 					marker ---
-					*** alias should create a new word that acts same ...
 						1234 constant x ' x alias y
-						y 1234 = ==>judge drop
-						\ see x cr see y
+						y [d 1234 d] [p "alias" p] 
 					---
 				</selftest>
 
@@ -1028,7 +975,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : within         ( n low high -- within? ) -rot over max -rot min = ;
 
 				<selftest>
-					*** nip rot -rot 2drop 2dup invert negate within ...
+					*** nip rot -rot 2drop 2dup invert negate within
 					1 2 3 4 nip \ 1 2 4
 					-rot \ 4 1 2
 					2drop \ 4
@@ -1041,34 +988,32 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					-2 -4 -1 within \ true true false false true
 					0 -4 -1 within \ true true false false true false
 					-5 -4 -1 within \ true true false false true false false
-					XOR XOR XOR XOR XOR XOR
-					==>judge [if]
-						<js> ['rot', '-rot', '2drop', '2dup', 'negate', 'invert', 'within'] </jsV> all-pass
-					[then]
+					[d true,true,false,false,true,false,false d]
+					[p 'rot', '-rot', '2drop', '2dup', 'negate', 'invert', 'within' p]
 				</selftest>
 
 : [']			( <name> -- Word ) \ In colon definitions, compile next word object as a literal.
 				' literal ; immediate compile-only
 
 				<selftest>
+					*** ['] tick next word immediately
 					marker ---
-					*** ['] tick next word immediately ...
 					: x ;
 					: test ['] x ;
-					test ' x = ==>judge drop
+					test ' x = [d true d] [p "[']" p]
 					---
 				</selftest>
 
 : allot         here + here! ; // ( n -- ) 增加 n cells 擴充 memory 區塊
 
 				<selftest>
-					marker ---
 					*** allot should consume some dictionary cells ...
-					: a ; : b ; ' b js> pop().cfa ' a js> pop().cfa - \ normal distance
+					marker ---
+					: a ; : b ; ' b :> cfa ' a :> cfa - \ normal distance
 					: aa ;
 					10 allot
-					: bb ; ' bb js> pop().cfa ' aa js> pop().cfa - \ 10 more expected
-					- abs 10 = ==>judge drop
+					: bb ; ' bb :> cfa ' aa :> cfa - \ 10 more expected
+					- abs [d 10 d] [p "allot" p]
 					---
 				</selftest>
 
@@ -1100,8 +1045,8 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				compile  branch , ; immediate compile-only
 
 				<selftest>
+					*** begin again , begin until
 					marker ---
-					*** begin again , begin until ...
 					: tt
 						1 0 \ index sum
 						begin \ index sum
@@ -1125,9 +1070,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 						over 10 > until \ index' sum'
 						nip
 					; last execute 55 = \ true
-					and ==>judge [if]
-					<js> ['again', 'until', 'over', 'swap', 'dup', 'exit', 'nip'] </jsV> all-pass
-					[then]
+					[d true,true d] [p 'again', 'until', 'over', 'swap', 'dup', 'exit', 'nip' p]
 					---
 				</selftest>
 
@@ -1148,8 +1091,8 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				[compile] if swap ; immediate compile-only
 
 				<selftest>
+					*** aft for then next ahead begin while repeat
 					marker ---
-					*** aft for then next ahead begin while repeat ...
 					: tt 5 for r@ next ; last execute + + + + 15 = \ true
 					: ttt 5 for aft r@ then next ; last execute + + + 10 = \ true true
 					depth 2 = \ T T T
@@ -1163,9 +1106,8 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 						repeat \ idx sum
 						nip
 					; last execute 55 = \ T T T T
-					and and and ==>judge [if]
-					<js> ['for', 'then', 'next', 'ahead', 'begin', 'while', 'repeat'] </jsV> all-pass
-					[then]
+					[d true,true,true,true d]
+					[p 'for', 'then', 'next', 'ahead', 'begin', 'while', 'repeat' p]
 					---
 				</selftest>
 
@@ -1176,10 +1118,10 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : ?dup          dup if dup then ; // ( w -- w w | 0 ) Dup TOS if it is not 0|""|false.
 
 				<selftest>
-					*** ?dup dup only when it's true ...
+					*** ?dup dup only when it's true
 					1 0 ?dup \ 1 0
-					drop ?dup \ 1 1
-					+ 2 = ==>judge drop
+					2 ?dup \ 1 0 2 2 
+					[d 1,0,2,2 d] [p "?dup" p]
 				</selftest>
 
 : variable      ( <string> -- ) \ Create a variable.
@@ -1190,14 +1132,11 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 : ?             @ . ; // ( a -- ) print value of the variable.
 
 				<selftest>
+					*** +! variable
 					marker ---
-					*** +! ? variable ...
 					variable x 10 x !
-					5 x +! x @ 15 = \ true
-					x ? space <js> kvm.screenbuffer.slice(-3)=='15 '</jsV> \ true true
-					and ==>judge [if]
-					<js> ['variable', 'marker', '?', 'space'] </jsV> all-pass
-					[then]
+					5 x +! x @ ( 15 )
+					[d 15 d] [p 'variable', 'marker', '+!', '@', '!', '(' p]
 					---
 				</selftest>
 
@@ -1208,15 +1147,14 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				(space) chars ;
 
 				<selftest>
+					*** spaces chars
 					marker ---
-					*** spaces chars ...
 					: test 3 spaces ;
 					test
-					<js> kvm.screenbuffer.slice(-3)=='   '</jsV>
-					==>judge [if]
-					<js> ['chars'] </jsV> all-pass
-					[then]
+					<js> vm.screenbuffer.slice(-3)=='   '</jsV>
+					[d true d] [p 'chars',"spaces","(space)" p]
 					---
+stop
 				</selftest>
 
 : .(            char \) word . BL word drop ; immediate // ( <str> -- ) Print following string down to ')' immediately.
@@ -1242,12 +1180,12 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					marker ---
 					*** .( ( ." .' s" s' s` ...
 					selftest-invisible
-					.( aa) ( now kvm.screenbuffer should be 'aa' )
-					js> kvm.screenbuffer.slice(-2)=="aa" \ true
+					.( aa) ( now vm.screenbuffer should be 'aa' )
+					js> vm.screenbuffer.slice(-2)=="aa" \ true
 					: test ." aa" .' bb' s' cc' . s` dd` . s" ee" . ;
 					test
 					selftest-visible
-					js> kvm.screenbuffer.slice(-10)=="aabbccddee" \ true
+					js> vm.screenbuffer.slice(-10)=="aabbccddee" \ true
 					and
 					==>judge [if]
 					<js> ['(', '."', ".'", "s'", "s`", 's"', 'does>'] </jsV> all-pass
@@ -1543,13 +1481,13 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 				
 \ ------------------ jsc JavaScript console debugger  --------------------------------------------
 \ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
-\ kvm.jsc.xt has been moved to quit.f of each application for propritary treatments.
+\ vm.jsc.xt has been moved to quit.f of each application for propritary treatments.
 \ The initial module of each application, e.g. jeforth.hta and jeforth.htm, should provide a dummy 
-\ kvm.jsc.xt before quit.f being available.
+\ vm.jsc.xt before quit.f being available.
 \
 \ Usage:
 \   Put this line,
-\     if(kvm.debug){kvm.jsc.prompt="msg";eval(kvm.jsc.xt)}
+\     if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
 \   among JavaScript code as a break point. The "msg" shows you which break point is triggered.
 \
 \	Example:
@@ -1559,16 +1497,16 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 \		function test (input) {
 \			var aa = 11;
 \			var bb = 22;
-\	if(1){kvm.jsc.prompt="bp1>>>";eval(kvm.jsc.xt)}
+\	if(1){vm.jsc.prompt="bp1>>>";eval(vm.jsc.xt)}
 \		}
 \		test(33);
 \	</js>
 \
 
-: jsc			( -- ) \ JavaScript console usage: js: kvm.jsc.prompt="111>>>";eval(kvm.jsc.xt)
+: jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
 				cr ." J a v a S c r i p t   C o n s o l e" cr
-				." Usage: js: if(kvm.debug){kvm.jsc.prompt='msg';eval(kvm.jsc.xt)}" cr
-				js: if(1){kvm.jsc.prompt="jsc>";eval(kvm.jsc.xt)}
+				." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
+				js: if(1){vm.jsc.prompt="jsc>";eval(vm.jsc.xt)}
 				;
 
 \ ------------------ Tools  ----------------------------------------------------------------------
@@ -1627,10 +1565,10 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 code .r         ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
                 var n=pop(); var i=pop();
 				if(typeof i == 'number') {
-					if(kvm.base == 10){
-						i=i.toString(kvm.base);
+					if(vm.base == 10){
+						i=i.toString(vm.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(kvm.base) + (i & 0xffff).toString(kvm.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.base) + (i & 0xffff).toString(vm.base);
 					}
 				}
                 n=n-i.length;
@@ -1645,11 +1583,11 @@ code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters 
                 var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
-					if(kvm.base == 10){
+					if(vm.base == 10){
 						if (i<0) minus = '-';
-						i=Math.abs(i).toString(kvm.base);
+						i=Math.abs(i).toString(vm.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(kvm.base) + (i & 0xffff).toString(kvm.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.base) + (i & 0xffff).toString(vm.base);
 					}
 				}
                 n=n-i.length - (minus?1:0);
@@ -1672,12 +1610,12 @@ code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters 
 
 					*** .r .0r can print hex-decimal ...
 					selftest-invisible
-					decimal  -1 10  .r <js> kvm.screenbuffer.slice(-10)=='        -1'</jsV> \ true
-					hex      -1 10  .r <js> kvm.screenbuffer.slice(-10)=='  ffffffff'</jsV> \ true
-					decimal  56 10 .0r <js> kvm.screenbuffer.slice(-10)=='0000000056'</jsV> \ true
-					hex      56 10 .0r <js> kvm.screenbuffer.slice(-10)=='0000000038'</jsV> \ true
-					decimal -78 10 .0r <js> kvm.screenbuffer.slice(-10)=='-000000078'</jsV> \ true
-					hex     -78 10 .0r <js> kvm.screenbuffer.slice(-10)=='00ffffffb2'</jsV> \ true
+					decimal  -1 10  .r <js> vm.screenbuffer.slice(-10)=='        -1'</jsV> \ true
+					hex      -1 10  .r <js> vm.screenbuffer.slice(-10)=='  ffffffff'</jsV> \ true
+					decimal  56 10 .0r <js> vm.screenbuffer.slice(-10)=='0000000056'</jsV> \ true
+					hex      56 10 .0r <js> vm.screenbuffer.slice(-10)=='0000000038'</jsV> \ true
+					decimal -78 10 .0r <js> vm.screenbuffer.slice(-10)=='-000000078'</jsV> \ true
+					hex     -78 10 .0r <js> vm.screenbuffer.slice(-10)=='00ffffffb2'</jsV> \ true
 					selftest-visible
 					XOR XOR XOR XOR and space
 					==>judge [if] <js> ['decimal', 'hex', '.0r'] </jsV> all-pass [then]
@@ -1709,7 +1647,7 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 					---
 				</selftest>
 
-: <task>		( <forth words> -- "task" ) \ Invoke a fortheval() to run the words.
+: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
 				char </task> word ; immediate
 				///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
 				///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
@@ -1718,21 +1656,21 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
 
 : </task>		( "task" -- ... ) \ Delimiter of <task>
-				compiling if literal js: push(function(){fortheval(pop())}) , 
-				else js: fortheval(pop()) then ; immediate
+				compiling if literal js: push(function(){dictate(pop())}) , 
+				else js: dictate(pop()) then ; immediate
 				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
-				var count=stack.length, basewas=kvm.base;
+				var count=stack.length, basewas=vm.base;
                 if(count>0) for(var i=0;i<count;i++){
 					if (typeof(stack[i])=="number") {
-						push(stack[i]); push(i); fortheval("decimal 7 .r char : . space dup decimal 11 .r space hex 11 .r char h .");
+						push(stack[i]); push(i); dictate("decimal 7 .r char : . space dup decimal 11 .r space hex 11 .r char h .");
 					} else {
-						push(stack[i]); push(i); fortheval("decimal 7 .r char : . space .");
+						push(stack[i]); push(i); dictate("decimal 7 .r char : . space .");
 					}
 					type(" ("+mytypeof(stack[i])+")\n");
                 } else type("empty\n");
-				kvm.base = basewas;
+				vm.base = basewas;
                 end-code
 
 				<selftest>
@@ -1741,11 +1679,11 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					selftest-invisible
 					32424 -24324 .s
 					selftest-visible
-					<js> kvm.screenbuffer.indexOf('32424')    !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('7ea8h')    !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('-24324')   !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('ffffa0fch')!=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('2:')       ==-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('32424')    !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('7ea8h')    !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('-24324')   !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('ffffa0fch')!=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('2:')       ==-1 </jsV> \ true
 					and and and and ==>judge 3 drops
 					---
 				</selftest>
@@ -1794,7 +1732,7 @@ code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of w
 				/// option: -n name , -N name
 
 : words			( [<pattern>] -- ) \ List words of name/help/comments screened by pattern.
-                "" char forth char \n|\r word (words) <js>
+                "" char root char \n|\r word (words) <js>
 					var word_list = pop();
 					var w = "";
 					for (var i=0; i<word_list.length; i++) w += word_list[i].name + " ";
@@ -1804,7 +1742,7 @@ code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of w
 
 : (help)		( "patther" -- ) \ Print help message of screened words
 				js> tos().length if
-					char forth swap "" -rot (words) <js>
+					char root swap "" -rot (words) <js>
 						var word_list = pop();
 						for (var i=0; i<word_list.length; i++) {
 							type(word_list[i]+"\n");
@@ -1840,26 +1778,26 @@ code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of w
 					/// 9247329474 comment
 					selftest-invisible
 					help test
-					<js> kvm.screenbuffer.indexOf('32974974') !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('9247329474') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('32974974') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('9247329474') !=-1 </jsV> \ true
 					words 9247329474
-					<js> kvm.screenbuffer.indexOf('test') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('test') !=-1 </jsV> \ true
 					words test
 					selftest-visible
-					<js> kvm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
 					and and and and ==>judge [if] <js> ['(words)', 'words'] </jsV> all-pass [then]
 					---
 				</selftest>
 
 code bye        ( ERRORLEVEL -- ) \ Exit to shell with TOS as the ERRORLEVEL.
                 // 這些都無效，最後靠 WMI 達成傳回 errorlevel // var errorlevel = pop(); window.errorlevel = typeof(errorlevel)=='number' ? errorlevel : 0; 
-                kvm.bye();
+                vm.bye();
                 end-code
 
 code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 				try {
-					var data = kvm.readTextFile(pop()); 
+					var data = vm.readTextFile(pop()); 
 				} catch (err) {
 					data = "";
 				}
@@ -1867,7 +1805,7 @@ code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 				end-code
 
 : readTextFileAuto ( "pathname" -- string ) \ Search and read, panic if failed.
-				js> kvm.path.slice(0) \ this is the way javascript copy array by value
+				js> vm.path.slice(0) \ this is the way javascript copy array by value
 				over readTextFile js> tos()!="" if nip nip exit then drop
 				js> tos().length for aft ( -- fname [path] )
 					js> tos().pop()+'/'+tos(1) 
@@ -1879,18 +1817,18 @@ code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 				drop "" swap <js> panic("Error! File " + pop() + " not found!\n",true) </js> ;
 
 code writeTextFile ( string "pathname" -- ) \ Write string to file. Panic if failed.
-				kvm.writeTextFile(pop(),pop())
+				vm.writeTextFile(pop(),pop())
 				end-code
 
 \ code tib.append	( "string" -- ) \ Append the "string" to TIB
 \ 				tib += " " + (pop()||""); end-code
-\ 				/// KVM suspend-resume doesn't allow multiple levels of fortheval() so
+\ 				/// VM suspend-resume doesn't allow multiple levels of dictate() so
 \ 				/// we need tib.append or tib.insert.
 
 code tib.append	( "string" -- ) \ Append the "string" to TIB
 				tib = tib.slice(ntib); ntib = 0;
 				tib += " " + (pop()||""); end-code
-				/// KVM suspend-resume doesn't allow multiple levels of fortheval() so
+				/// VM suspend-resume doesn't allow multiple levels of dictate() so
 				/// we need tib.append or tib.insert.
 
 				<comment>
@@ -1905,18 +1843,14 @@ code tib.append	( "string" -- ) \ Append the "string" to TIB
 \ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 \ 				var before = tib.slice(0,ntib), after = tib.slice(ntib);
 \ 				tib = before + " " + (pop()||"") + " " + after; end-code
-\ 				/// KVM suspend-resume doesn't allow multiple levels of fortheval() so
+\ 				/// VM suspend-resume doesn't allow multiple levels of dictate() so
 \ 				/// we need tib.append or tib.insert.
 
 code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 				tib = tib.slice(ntib); ntib = 0;
 				tib = (pop()||"") + " " + tib; end-code
-				/// KVM suspend-resume doesn't allow multiple levels of fortheval() so
+				/// VM suspend-resume doesn't allow multiple levels of dictate() so
 				/// we need tib.append or tib.insert.
-</kernel>
-<js> g.k.dictate(pop())</js>
-
-<kernel>
 : sinclude.js	( "pathname" -- ) \ Include JavaScript source file
 				readTextFile js: eval(pop()) ;
 : include.js	( <pathname> -- ) \ Include JavaScript source file
@@ -1951,7 +1885,7 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 					?skip2 --EOF-- \ skip it if already included
 					dup .( Including ) . cr char -- over over + +
 					js: tick('<selftest>').masterMarker=tos()+"selftest--";
-					also forth definitions (marker) (vocabulary)
+					also root definitions (marker) (vocabulary)
 					last execute definitions
 					<selftest>
 						js> tick('<selftest>').masterMarker (marker)
@@ -1999,14 +1933,14 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 
 code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
                 var w=pop();
-				var basewas = kvm.base; kvm.base = 10;
+				var basewas = vm.base; vm.base = 10;
                 if (!(w instanceof Word)) {
                     vm.g.see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
                 }else{
                     for(var i in w){
                         if (typeof(w[i])=="function") continue;
                         if (i=="comment") continue;
-                        push(i); fortheval("16 .r s'  : ' .");
+                        push(i); dictate("16 .r s'  : ' .");
                         type(w[i]+" ("+mytypeof(w[i])+")\n");
                     }
                     if (w.type.indexOf("colon")!=-1){
@@ -2020,13 +1954,13 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
                         for(var i in w){
                             if (typeof(w[i])!="function") continue;
                             // if (i=="selfTest") continue;
-                            push(i); fortheval("16 .r s'  :\n' .");
+                            push(i); dictate("16 .r s'  :\n' .");
                             type(w[i]+"\n");
                         }
                     }
                     if (w.comment != undefined) type("\ncomment:\n"+w.comment+"\n");
                 }
-				kvm.base = basewas;
+				vm.base = basewas;
                 end-code
 : see           ' (see) ; // ( <name> -- ) See definition of the word
 
@@ -2037,9 +1971,9 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 					selftest-invisible
 					see test
 					selftest-visible
-					<js> kvm.screenbuffer.indexOf('test.test.test') !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('cfa') !=-1 </jsV> \ true
-					<js> kvm.screenbuffer.indexOf('colon') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('test.test.test') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('cfa') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('colon') !=-1 </jsV> \ true
 					and and ==>judge [if] <js> ['(see)'] </jsV> all-pass [then]
 					---
 				</selftest>
@@ -2051,13 +1985,20 @@ code notpass	( -- ) \ List words their sleftest flag are not 'pass'.
 					}
 				}
 				end-code
+code passed		( -- ) \ List words their sleftest flag are 'pass'.
+				for (var j in words) { // all word-lists
+					for (var i in words[j]) {  // all words in a word-list
+						if(i!=0 && words[j][i].selftest == 'pass') type(words[j][i].name+" ");
+					}
+				}
+				end-code
 
 				<selftest>
 					*** d dump ...
 					selftest-invisible
 					d 0
 					selftest-visible
-					<js> kvm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
 					==>judge [if] <js> ['dump', 'd'] </jsV> all-pass [then]
 				</selftest>
 
@@ -2073,11 +2014,11 @@ code db			( -- ) \ Disable breakpoint, inner=fastInner. See also 'bp' command.
 				
 : (*debug*) 	( msg -- resume ) \ Suspend to command prompt, execute resume() to quit debugging.
 				<js>
-					var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=kvm.prompt;
-					kvm.prompt = pop().toString();
+					var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=vm.prompt;
+					vm.prompt = pop().toString();
 					push(resume); // The clue for resume
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-					function resume(){tib=tibwas; ntib=ntibwas; kvm.prompt=promptwas;outer(ipwas);}
+					function resume(){tib=tibwas; ntib=ntibwas; vm.prompt=promptwas;outer(ipwas);}
 				</js> ;
 				/// resume() 線索由 data stack 傳回，故可以多重 debug。但有何用途？
 				
@@ -2094,18 +2035,25 @@ code db			( -- ) \ Disable breakpoint, inner=fastInner. See also 'bp' command.
 	<js> ['accept', 'refill', 'wut', '==>judge', 'all-pass', '***',
 		  '~~selftest~~', '.((', 'sleep'
 	] </jsV> all-pass
-	~~selftest~~ \ forget self-test temporary words
+	\ ~~selftest~~ \ forget self-test temporary words
 </selftest>
 
 \ jeforth.f kernel code is now common for different application. I/O may not ready enough to read 
 \ selftest.f at this moment, so the below code has been moved to quit.f of each applications.
 	\ Do the jeforth.f self-test only when there's no command line
-	\	js> kvm.argv.length 1 > \ Do we have jobs from command line?
+	\	js> vm.argv.length 1 > \ Do we have jobs from command line?
 	\	[if] \ We have jobs from command line to do. Disable self-test.
 	\		js: tick('<selftest>').enabled=false
 	\	[else] \ We don't have jobs from command line to do. So we do the self-test.
-	\		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
+			js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	\	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 </kernel>
 <js> g.k.dictate(pop())</js>
 
+code {F8} ( "command line" -- ) \ Let project-k VM to run the inputbox
+	var cmd = inputbox.value;
+	inputbox.value=""; 
+	g.k.dictate(cmd) ;
+	jump2endofinputbox.click();
+	inputbox.focus();
+	end-code

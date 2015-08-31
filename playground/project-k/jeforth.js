@@ -54,14 +54,15 @@ function jeForth() {
 		dictionary[0]=0; // dictionary[0]=0 reserved for inner() as its terminator
 		compiling=false;
 		ip=0; // forth VM instruction pointer
-		stop = true; // ntib = tib.length; // reserve tib and ntib for debug
+		stop = true; 
+		ntib = tib.length;
 		type('-------------- Reset forth VM --------------\n');
 	}
 	
 	function panic(msg,severe) {
 		var t='';
 		if(compiling) t += '\n------------- Panic! while compiling '+newname+' -------------\n';
-		else t +=          '\n------------------- P A N I C ! -------------------------\n';
+		else t +=          '\n------------------- P A N I C ! (project-k) -------------\n';
 		t += msg;
 		t += "stop: " + stop +'\n';
 		t += "compiling: " + compiling +'\n';
@@ -348,8 +349,7 @@ function jeForth() {
 			"this.vid='root'",
 			"this.wid=1",
 			"this.type='code'",
-			"this.help='( <name> -- ) Start composing a code word.'",
-			"this.selftest='pass'"
+			"this.help='( <name> -- ) Start composing a code word.'"
 		]),
 		new Word([
 			"end-code",

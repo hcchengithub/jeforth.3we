@@ -3731,14 +3731,23 @@
 	改用 3we/kernel/jeforth.f 
 [x] 用了很久的 packhelp() 傳回 "( foo ) bar" 或者 "( ?? ) No help message. Use // to add one."
 	等於是從 tib 抽 help 出來。用新的 "parse-help" 取代，方法如下：
-
 		push(nexttoken('\n|\r')); // rest of the first line
 		execute("parse-help"); // ( "helpmsg" "rests" )
 		tib = pop() + " " + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
 		newhelp = pop();
+[ ] project-k 的 panic 要表明身分,否則搞搞不清楚.
+		
+[ ] 從 jeforth.3we 下命令給 project-k VM 用 hotkey f8：
+		code {F8} ( "command line" -- ) \ Let project-k VM to run the inputbox
+			var cmd = inputbox.value;
+			inputbox.value=""; 
+			g.k.dictate(cmd) ;
+			jump2endofinputbox.click();
+			inputbox.focus();
+			end-code
+
 [ ] cub.f 好了,攻 selftest, 改良。
-	
-	
+
 	
 	
 	  
