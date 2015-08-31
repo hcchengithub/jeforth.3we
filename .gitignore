@@ -2,6 +2,7 @@ js/box2dweb/*
 js/chipmunk.js/*
 js/bootstrap*
 js/jquery*
+private/*
 *.mp3
 kernel/kernel.js
 js/jefvm.v3.js
