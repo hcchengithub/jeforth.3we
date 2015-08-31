@@ -1154,7 +1154,6 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					<js> vm.screenbuffer.slice(-3)=='   '</jsV>
 					[d true d] [p 'chars',"spaces","(space)" p]
 					---
-stop
 				</selftest>
 
 : .(            char \) word . BL word drop ; immediate // ( <str> -- ) Print following string down to ')' immediately.
@@ -1177,19 +1176,13 @@ stop
 				r> [ s" push(function(){push(last().cfa)})" jsEvalNo , ] ! ; 
 
 				<selftest>
+					*** .( ( ." .' s" s' s`
 					marker ---
-					*** .( ( ." .' s" s' s` ...
-					selftest-invisible
-					.( aa) ( now vm.screenbuffer should be 'aa' )
-					js> vm.screenbuffer.slice(-2)=="aa" \ true
+					.( ff) ( now vm.screenbuffer should be 'ff' )
+					js> vm.screenbuffer.slice(-2)=="ff" \ true
 					: test ." aa" .' bb' s' cc' . s` dd` . s" ee" . ;
-					test
-					selftest-visible
-					js> vm.screenbuffer.slice(-10)=="aabbccddee" \ true
-					and
-					==>judge [if]
-					<js> ['(', '."', ".'", "s'", "s`", 's"', 'does>'] </jsV> all-pass
-					[then]
+					test js> vm.screenbuffer.slice(-10)=="aabbccddee" \ true
+					[d true,true d] [p '(', '."', ".'", "s'", "s`", 's"' p]
 					---
 				</selftest>
 
@@ -1197,10 +1190,9 @@ stop
 				[ s" push(function(){push(tos().length)})" jsEvalNo , ] ;
 
 				<selftest>
-					*** count ...
-						s" abc" count 3 = swap \ true "abc"
-						depth 2 = \ true "abc" true
-						and and ==>judge drop
+					*** count
+						s" abc" count depth
+						[d "abc",3,2 d] [p "count" p]
 				</selftest>
 
 code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A fake before I/O ready.
@@ -1266,15 +1258,13 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				then ; immediate 
 
 				<selftest>
+					*** value and to work together
 					marker -%-%-%-%-%-
-					**** value and to work together ...
 					112233 value x x 112233 = \ true
 					445566 to x x 445566 = \ true
 					: test 778899 to x ; test x 778899 = \ true
-					and and ==>judge [if] <js> [
-					'value','to'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
 					-%-%-%-%-%-
+					[d true,true,true d] [p 'value','to' p]
 				</selftest>
 
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
@@ -1314,13 +1304,12 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				( -- flag ) if [compile] <comment> then ; immediate 
 
 				<selftest>
-					**** <comment>...</comment> can be nested now ... 
+					*** <comment>...</comment> can be nested now
 					<comment> 
 						aaaa <comment> bbbbbb </comment> cccccc 
 					</comment> 
 					111 222 <comment> 333 </comment> 444
-					444 = swap 222 = and swap 111 = and ==>judge [if] 
-					<js> ['<comment>', '</comment>', '::'] </jsV> all-pass [then]
+					[d 111,222,444 d] [p '<comment>', '</comment>', '::' p]
 				</selftest>
 				
 : <js> 			( <js statements> -- "statements" ) \ Evaluate JavaScript statements
@@ -1355,15 +1344,15 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				then ; immediate
 				
 				<selftest>
+					*** constant value and to
 					marker ---
-					*** constant value and to ... 
 					112233 constant x
 					x value y
 					x y = \ true
 					332211 to y x y = \ false
 					' x :> type=="constant" \ true
 					' y :> type=="value" \ true
-					and swap not and and ==>judge drop
+					[d true,false,true,true d] [p "constant","value","to" p]
 					---
 				</selftest>
 
@@ -1505,8 +1494,8 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 
 : jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
 				cr ." J a v a S c r i p t   C o n s o l e" cr
-				." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
-				js: if(1){vm.jsc.prompt="jsc>";eval(vm.jsc.xt)}
+				\ ." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
+				\ js: if(1){vm.jsc.prompt="jsc>";eval(vm.jsc.xt)}
 				;
 
 \ ------------------ Tools  ----------------------------------------------------------------------
@@ -1517,33 +1506,24 @@ code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
 
 				<selftest>
-					*** int 3.14 is 3, 12.34AB is 12 ...
-					3.14 int 3 =
-					char 12.34AB int 12 =
-					and
-					==>judge drop
+					*** int 3.14 is 3, 12.34AB is 12
+					3.14 int char 12.34AB int
+					[d 3,12 d] [p "int" p]
 				</selftest>
 
 : random 		( -- 0~1 )
 				js> Math.random() ;
 
 				<selftest>
-					*** random is (0...1) ...
+					*** random is (0...1)
 					random 0 > random 1 < and
 					random 0 > random 1 < and
 					random 0 > random 1 < and
 					random 0 > random 1 < and
-					and and and ==>judge drop
+					[d true,true,true,true d] [p "random" p]
 				</selftest>
 
 : nop 			; // ( -- ) No operation.
-
-				<selftest>
-					*** nop does nothing ...
-					nop
-					true ==>judge drop
-				</selftest>
-
 : drops 		( ... n -- ... ) \ Drop n cells from data stack.
 				1+ js> stack.splice(stack.length-tos(),pop()) drop ;
 				/// We need 'drops' <js> sections in a colon definition are easily to have
@@ -1551,7 +1531,7 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 
 				<selftest>
 					*** drops n data stack cells ...
-						1 2 3 4 5 2 drops depth 3 = ==>judge 4 drops
+						1 2 3 4 5 2 drops [d 1,2,3 d] [p "drops" p]
 				</selftest>
 
 \ JavaScript's hex is a little strange.
@@ -1601,32 +1581,30 @@ code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters 
 				/// We need to take care of that separately.
 
 				<selftest>
-					<text> .r 是 FigTaiwan 爽哥那兒抄來的。 JavaScript 本身就有 number.toString(base) 可以任何 base
-					印出數值。base@ base! hex decimal 等只對 .r .0r 有用。輸入時照 JavaScript 的慣例，數字就是十進位，
-					0x1234 是十六進位，已經足夠。 .r .0r 很有用, .s 的定義就是靠他們。
-					</text> drop
-
+					<comment> .r 是 FigTaiwan 爽哥那兒抄來的。 JavaScript 本身就有 
+					number.toString(base) 可以任何 base 印出數值。base@ base! hex 
+					decimal 等只對 .r .0r 有用。輸入時照 JavaScript 的慣例，數字就
+					是十進位，0x1234 是十六進位，已經足夠。 .r .0r 很有用, .s 的定
+					義就是靠他們。
+					</comment>
+					*** .r .0r can print hex-decimal
 					marker ---
-
-					*** .r .0r can print hex-decimal ...
-					selftest-invisible
 					decimal  -1 10  .r <js> vm.screenbuffer.slice(-10)=='        -1'</jsV> \ true
 					hex      -1 10  .r <js> vm.screenbuffer.slice(-10)=='  ffffffff'</jsV> \ true
 					decimal  56 10 .0r <js> vm.screenbuffer.slice(-10)=='0000000056'</jsV> \ true
 					hex      56 10 .0r <js> vm.screenbuffer.slice(-10)=='0000000038'</jsV> \ true
 					decimal -78 10 .0r <js> vm.screenbuffer.slice(-10)=='-000000078'</jsV> \ true
 					hex     -78 10 .0r <js> vm.screenbuffer.slice(-10)=='00ffffffb2'</jsV> \ true
-					selftest-visible
-					XOR XOR XOR XOR and space
-					==>judge [if] <js> ['decimal', 'hex', '.0r'] </jsV> all-pass [then]
+					cr [d true,true,true,true,true,true d] 
+					[p 'decimal', 'hex', '.0r', '.r' p]
 					---
 				</selftest>
 
 code dropall    stack=[] end-code // ( ... -- ) Clear the data stack.
 
 				<selftest>
-					*** dropall clean the data stack ...
-					1 2 3 4 5 dropall depth 0= ==>judge drop
+					*** dropall clean the data stack
+					1 2 3 4 5 dropall depth 0= [d true d] [p "dropall","0=" p]
 				</selftest>
 
 code (ASCII)    push(pop().charCodeAt(0)) end-code // ( str -- ASCII ) Get a character's ASCII code.
@@ -1638,12 +1616,12 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				; immediate
 
 				<selftest>
+					*** ASCII (ASCII) ASCII>char
 					marker ---
-					*** ASCII (ASCII) ASCII>char  ...
-					char abc (ASCII) 97 = \ true
-					98 ASCII>char char b = \ true
-					: test ASCII c ; test 99 = \ true
-					and and ==>judge [if] <js> ['(ASCII)', 'ASCII>char'] </jsV> all-pass [then]
+					char abc (ASCII) ( 97 )
+					98 ASCII>char ( b )
+					: test ASCII c ; test ( 99 )
+					[d 97,'b',99 d] [p '(ASCII)', 'ASCII>char', "ASCII" p]
 					---
 				</selftest>
 
@@ -1674,17 +1652,15 @@ code .s         ( ... -- ... ) \ Dump the data stack.
                 end-code
 
 				<selftest>
+					*** .s is probably the most used word
 					marker ---
-					*** .s is almost the most used word ...
-					selftest-invisible
 					32424 -24324 .s
-					selftest-visible
 					<js> vm.screenbuffer.indexOf('32424')    !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('7ea8h')    !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('-24324')   !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('ffffa0fch')!=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('2:')       ==-1 </jsV> \ true
-					and and and and ==>judge 3 drops
+					[d 32424,-24324,true,true,true,true,true d] [p ".s" p]
 					---
 				</selftest>
 
@@ -1720,8 +1696,8 @@ code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of w
 							break;
 						default:
 							var flag = 	(word_list[i].name.toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
-										(word_list[i].help.toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
-										(typeof(word_list[i].comment)!="undefined" && (word_list[i].comment.toLowerCase().indexOf(pattern.toLowerCase()) != -1));
+										((word_list[i].help||"").toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
+										((word_list[i].comment||"").toLowerCase().indexOf(pattern.toLowerCase()) != -1);
 							if (flag) {
 								result.push(word_list[i]);
 							}
@@ -1766,28 +1742,26 @@ code (words)    ( "option" "word-list" "pattern" -- word[] ) \ Get an array of w
 				/// Pattern matches name, help and comments.
 
 				<selftest>
-
 					<text>
 					本來 words help 都接受 RegEx 的，可是不好用。現已改回普通 non RegEx pattern. 只動
 					(words) 就可以來回修改成 RegEx/non-RegEx.
 					</text> drop
 
+					*** help words (words)
 					marker ---
-					*** help words (words) ...
 					: test ; // testing help words and (words) 32974974
 					/// 9247329474 comment
-					selftest-invisible
 					help test
 					<js> vm.screenbuffer.indexOf('32974974') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('9247329474') !=-1 </jsV> \ true
 					words 9247329474
 					<js> vm.screenbuffer.indexOf('test') !=-1 </jsV> \ true
 					words test
-					selftest-visible
 					<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
-					and and and and ==>judge [if] <js> ['(words)', 'words'] </jsV> all-pass [then]
+					[d true,true,true,true,true d] [p '(words)', 'words' p]
 					---
+stop
 				</selftest>
 
 code bye        ( ERRORLEVEL -- ) \ Exit to shell with TOS as the ERRORLEVEL.
