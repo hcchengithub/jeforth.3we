@@ -3747,8 +3747,21 @@
 			end-code
 
 [ ] cub.f 好了,攻 selftest, 改良。
+[ ] Original (words) in jeforth.f is very powerful but without -v and -V. 
+	While words and help was poor, because they were rely on voc.f unnecessarily.
+	So we need to improve words and help. --> 規定好 input 格式, 有助化簡程式。
+	words/help [pattern [switch [argument]]]
+	
+[ ] 老經驗
+	nexttoken('\n|\r'); // if use only '\n' then we get an unexpected ending '\r'.	
+	
+[x] see ~(create)~
+	JavaScript error on word ".0r" : Cannot read property 'length' of undefined
+	==> RI,FP: 產生一個 colon word 方法很多，不一定已經有 cfa。  
 
+[ ] 用 vm.init() 來設定 type() or print() function 多此一舉。已經有 vm.clearScreen 等
+	乾脆就不要 init() 了。projct-k 根本不知道也不用知道你需要 print() !!
+	==> jeforth.js 有用到 type() 這樣一來 project-k 就認為自己在有 display 的地方執行?!
+		雖然可以從 type() 的定義解決，總是不太理想。
 	
-	
-	  
 	
