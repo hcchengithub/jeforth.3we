@@ -3763,5 +3763,9 @@
 	乾脆就不要 init() 了。projct-k 根本不知道也不用知道你需要 print() !!
 	==> jeforth.js 有用到 type() 這樣一來 project-k 就認為自己在有 display 的地方執行?!
 		雖然可以從 type() 的定義解決，總是不太理想。
-	
-	
+	==> 用到 type() 的地方
+		1. panic() ==> 改成 call vm.panic(state-object)
+		2. docode() 的 reDef warning ==> 改 call vm.panic(state-object)
+		3. reset() 的 message 沒啥意義
+
+[ ]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎?

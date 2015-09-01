@@ -14,14 +14,15 @@
 	k :: clearScreen=function(){execute("cls")}
 	k :: screenbuffer=""
 	k :: type=function(s){g.k.screenbuffer+=s;print(s)}
-	<js> 
-	g.k.greeting = function(){
-		var v="01";
-		print("j e f o r t h  with project-k kernel -- r" + v + "\n");
-		print("source code http://github.com/hcchengithub/project-k\n");
-		return(parseFloat(v));
-	}
-	</js>
+		 <js> push(function(){
+			var v="01";
+			print("j e f o r t h  with project-k kernel -- r" + v + "\n");
+			print("source code http://github.com/hcchengithub/project-k\n");
+			return(parseFloat(v));
+		 })</js> 
+	k :: greeting=pop()
+	k :: type=function(){tbd}
+	k :: panic=function(){tbd}
 	
 \ 如果每次都用 k :: dictate(command line) 下命令，太累了。定義 hotkey 來
 \ 對 project-k 下命令，等於在定義 project-k 的 enter。
