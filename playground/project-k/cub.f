@@ -3,38 +3,60 @@
 	' --projectk-- [if] --projectk-- [else] marker --projectk-- [then] dropall cls 
 
 \ 取得 project-k VM constructor "jeForth()" 但避免重複。
+
 	js> typeof(jeForth)=="undefined" [if]
 		<h> <Script src="playground/project-k/jeforth.js"></Script></h> drop
 	[then]
 	
-\ 在 jeforth.3we 下以 k 稱呼 project-k VM。
+\ 在 jeforth.3we 下以 k 稱呼 project-k VM。注意, 在 project-k VM 裡則自稱 "vm"。
+\ 故在外的 js> g.k 或 k 就是在內的 js> vm。
+
 	<js> (new jeForth())</jsV> constant k // ( -- obj ) the project-k object
 
-\ 用 k 構建整套 forth 系統, 定義從外部設定的東西。
-	k :: clearScreen=function(){execute("cls")}
+\ 用 k 構建 forth 系統, 定義從外部設定的東西。project-k kernel 不知道 I/O、print、screen
+\ 、keyboard 這些東西，但它會 call vm.panic() 去處理 error。
+
 	k :: screenbuffer=""
-	k :: type=function(s){g.k.screenbuffer+=s;print(s)}
+	k :: clearScreen=function(){execute("cls");g.k.screenbuffer="";}
+	k :: selftest_visible=true
+	k :: type=function(s){g.k.screenbuffer+=s;if(g.k.selftest_visible){print(s)}}
 		 <js> push(function(){
 			var v="01";
-			print("j e f o r t h  with project-k kernel -- r" + v + "\n");
-			print("source code http://github.com/hcchengithub/project-k\n");
+			g.k.type("j e f o r t h  with project-k kernel -- r" + v + "\n");
+			g.k.type("source code http://github.com/hcchengithub/project-k\n");
 			return(parseFloat(v));
 		 })</js> 
 	k :: greeting=pop()
-	k :: type=function(){tbd}
-	k :: panic=function(){tbd}
+	k :: panic=function(state){g.k.type(state.msg);if(state.level)debugger;}
+	k :: bp=0 // breakpoint 
+	k :: continue=0 // *debug* resume point
+	k :: prompt="project-k-cub>"
 	
-\ 如果每次都用 k :: dictate(command line) 下命令，太累了。定義 hotkey 來
-\ 對 project-k 下命令，等於在定義 project-k 的 enter。
+	
+\ 如果每次都用 k :: dictate(command line) 下命令，太累了。定義 hotkey 來對 project-k 下
+\ 命令，等於在定義 project-k 的 {Enter} key。 jeforth.3we 本來就在等 {F1}..{F12} 這些命
+\ 令，一定義好就會生效。
 
-	code {F8} ( "command line" -- ) \ Let project-k VM to run the inputbox
+	code {F8} ( "command line" -- ) \ Let project-k jeforth VM to run the inputbox
 		var cmd = inputbox.value;
 		inputbox.value=""; 
-		print("\n> "); if(cmd) print(cmd + '\n');
-		g.k.dictate(cmd) ;
-		jump2endofinputbox.click();
-		inputbox.focus();
+		var rlwas = g.k.rstack().length; // r)stack l)ength was
+		g.k.type((cmd?'\n> ':"")+cmd+'\n');
+		g.k.dictate(cmd);  // Pass the command line to jeforth kernel
+		(function retry(){
+			// project-k kernel 可以 suspend-resume 控制權回來不等於工作完成。
+			// 用 return stack 當線索效果好，當 return stack 平衡了就表示工作
+			// 完成了，可以放心打上 prompt OK。
+			if(g.k.rstack().length!=rlwas)
+				setTimeout(retry,100); 
+			else {
+				g.k.type(" " + g.k.prompt + " ");
+				jump2endofinputbox.click(); inputbox.focus();
+			}
+		})();
 		end-code
+
+
 
 \ 用個辦法來把 source code 包成一個 string		
 
@@ -197,7 +219,9 @@
 						var w = phaseA(entry); // 翻譯成恰當的 w.
 						do{
 							while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
-								if(bp<0||bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)}; // 可用 bp=ip 設斷點, debug colon words.
+								// 可用 bp=ip 設斷點, debug colon words.
+								// if(vm.bp<0||vm.bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)};
+								if(vm.bp<0||vm.bp==ip){dictate("*debug* "+vm.bp+">>>")};
 								ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 								phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 								w = dictionary[ip];
@@ -305,7 +329,12 @@
 						*** // adds help to the last word
 							' // :> help.indexOf("message")!=-1 [d true d] [p "//", ":>", "'" p]
 						*** version should return a number
-							version js> typeof(pop())=="number" [d true d]
+							js: vm.selftest_visible=false;vm.screenbuffer=""
+							version 
+							js: vm.selftest_visible=true
+							js> typeof(pop())=="number" ( true )
+							<js> vm.screenbuffer.indexOf('j e f o r t h')!=-1 </jsV> ( true )
+							[d true,true d]
 							[p 'version' p]
 					</selftest>
 
@@ -538,7 +567,7 @@
 					newhelp = /* newname + " " + */ pop(); // help messages packed
 					push(newname); execute("(create)"); // 故 colon definition 裡有 last or last() 可用來取得本身。
 					compiling=true;
-					stackwas = stack.slice(0); // Should not be changed, ';' will check.
+					tick(':').stackwas = stack.slice(0); // Should not be changed, ';' will check.
 					last().type = "colon";
 					last().cfa = here;
 					last().help = newhelp;
@@ -549,7 +578,7 @@
 					end-code
 
 	code ;          ( -- ) \ End of the colon definition.
-					if (!vm.g.isSameArray(stackwas,stack)) {
+					if (!vm.g.isSameArray(tick(':').stackwas,stack)) {
 						panic("Stack changed during colon definition, it must be a mistake!\n", "error");
 						words[current].pop();
 					} else {
@@ -824,7 +853,12 @@
 						marker ---
 							variable x
 							: tt for x @ . x @ 1+ x ! next ;
-							10 tt space x @ [d 10 d]
+							js: vm.selftest_visible=false;vm.screenbuffer=""
+							10 tt space \ "0123456789 "
+							x @ ( 10 )
+							js: vm.selftest_visible=true
+							<js> vm.screenbuffer.slice(-11)=="0123456789 "</jsV> ( true )
+							[d 10,true d]
 							[p 'doNext','space', ',', 'colon-word', 'create',
 							'for', 'next' p]
 						---
@@ -1200,10 +1234,12 @@
 					<selftest>
 						*** .( ( ." .' s" s' s`
 						marker ---
+						js: vm.selftest_visible=false;vm.screenbuffer=""
 						.( ff) ( now vm.screenbuffer should be 'ff' )
 						js> vm.screenbuffer.slice(-2)=="ff" \ true
 						: test ." aa" .' bb' s' cc' . s` dd` . s" ee" . ;
 						test js> vm.screenbuffer.slice(-10)=="aabbccddee" \ true
+						js: vm.selftest_visible=true
 						[d true,true d] [p '(', '."', ".'", "s'", "s`", 's"' p]
 						---
 					</selftest>
@@ -1516,8 +1552,8 @@
 
 	: jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
 					cr ." J a v a S c r i p t   C o n s o l e" cr
-					\ ." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
-					\ js: if(1){vm.jsc.prompt="jsc>";eval(vm.jsc.xt)}
+					." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
+					js: if(1){vm.jsc.prompt="jsc>";eval(vm.jsc.xt)}
 					;
 
 	\ ------------------ Tools  ----------------------------------------------------------------------
@@ -1611,13 +1647,15 @@
 						</comment>
 						*** .r .0r can print hex-decimal
 						marker ---
+						js: vm.selftest_visible=false;vm.screenbuffer=""
 						decimal  -1 10  .r <js> vm.screenbuffer.slice(-10)=='        -1'</jsV> \ true
 						hex      -1 10  .r <js> vm.screenbuffer.slice(-10)=='  ffffffff'</jsV> \ true
 						decimal  56 10 .0r <js> vm.screenbuffer.slice(-10)=='0000000056'</jsV> \ true
 						hex      56 10 .0r <js> vm.screenbuffer.slice(-10)=='0000000038'</jsV> \ true
 						decimal -78 10 .0r <js> vm.screenbuffer.slice(-10)=='-000000078'</jsV> \ true
 						hex     -78 10 .0r <js> vm.screenbuffer.slice(-10)=='00ffffffb2'</jsV> \ true
-						cr [d true,true,true,true,true,true d] 
+						js: vm.selftest_visible=true
+						[d true,true,true,true,true,true d] 
 						[p 'decimal', 'hex', '.0r', '.r' p]
 						---
 					</selftest>
@@ -1676,7 +1714,9 @@
 					<selftest>
 						*** .s is probably the most used word
 						marker ---
+						js: vm.selftest_visible=false;vm.screenbuffer=""
 						32424 -24324 .s
+						js: vm.selftest_visible=true
 						<js> vm.screenbuffer.indexOf('32424')    !=-1 </jsV> \ true
 						<js> vm.screenbuffer.indexOf('7ea8h')    !=-1 </jsV> \ true
 						<js> vm.screenbuffer.indexOf('-24324')   !=-1 </jsV> \ true
@@ -1734,7 +1774,7 @@
 					/// -T pattern is exact type
 
 	: words			( <[pattern [switch]]> -- ) \ List words of name/help/comments screened by pattern.
-					char root char \r|\n word ( root line )
+					js> context char \r|\n word ( root line )
 					<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( root [pattern,option,rests] )
 					js> tos()[0] swap js> tos()[1] nip (words) <js>
 						var word_list = pop();
@@ -1748,7 +1788,7 @@
 
 	: (help)		( "pattern" -- ) \ Print help message of screened words
 					js> tos().length if 
-						char root swap ( root line )
+						js> context swap ( root line )
 						<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( root [pattern,option,rests] )
 						js> tos()[0] swap js> tos()[1] nip ( root pattern option ) (words) ( [words...] )
 						<js>
@@ -1785,6 +1825,7 @@
 						marker ---
 						: test ; // testing help words and (words) 32974974
 						/// 9247329474 comment
+						js: vm.selftest_visible=false;vm.screenbuffer=""
 						help test -N
 						<js> vm.screenbuffer.indexOf('32974974') !=-1 </jsV> \ true
 						<js> vm.screenbuffer.indexOf('9247329474') !=-1 </jsV> \ true
@@ -1793,7 +1834,8 @@
 						words test
 						<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
 						<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
-						cr [d true,true,true,true,true d] [p '(words)', 'words' p]
+						js: vm.selftest_visible=true
+						[d true,true,true,true,true d] [p '(words)', 'words' p]
 						---
 					</selftest>
 
@@ -1944,6 +1986,15 @@
 					20 dump 						\ (me addr')
 					js: pop(1).lastaddress=pop()
 					;
+					
+					<selftest>
+						*** d dump
+						js: vm.selftest_visible=false;vm.screenbuffer=""
+						d 0
+						js: vm.selftest_visible=true
+						<js> vm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
+						[d true d] [p 'dump', 'd' p]
+					</selftest>
 
 	code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
 					var w=pop();
@@ -1984,11 +2035,13 @@
 						*** see (see)
 						marker ---
 						: test ; // test.test.test
+						js: vm.selftest_visible=false;vm.screenbuffer=""
 						see test
+						js: vm.selftest_visible=true
 						<js> vm.screenbuffer.indexOf('test.test.test') !=-1 </jsV> \ true
 						<js> vm.screenbuffer.indexOf('cfa') !=-1 </jsV> \ true
 						<js> vm.screenbuffer.indexOf('colon') !=-1 </jsV> \ true
-						[d true,true,true d] [p 'see','(see)' p]
+						[d true,true,true d] [p 'see','(see)','(?)' p]
 						---
 					</selftest>
 
@@ -2007,18 +2060,11 @@
 					}
 					end-code
 
-					<selftest>
-						*** d dump
-						d 0
-						<js> vm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
-						[d true d] [p 'dump', 'd' p]
-					</selftest>
-
-	\ -------------- Forth Debug Console -------------------------------------------------
+	\ -------------- Debugger : set breakpoint to a colon word -------------------------
 
 	js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
 	code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'db' command.
-					bp = parseInt(nexttoken()); inner = vm.g.debugInner; end-code
+					vm.bp = parseInt(nexttoken()); inner = vm.g.debugInner; end-code
 					/// work with 'jsc' debug console, jsc is application dependent.
 	code db			( -- ) \ Disable breakpoint, inner=fastInner. See also 'bp' command.
 					inner = vm.g.fastInner end-code
@@ -2026,11 +2072,12 @@
 					
 	: (*debug*) 	( msg -- resume ) \ Suspend to command prompt, execute resume() to quit debugging.
 					<js>
+						if (vm.continue) panic();
 						var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=vm.prompt;
 						vm.prompt = pop().toString();
-						push(resume); // The clue for resume
+						// The clue to resume from debugging
+						vm.continue = function(){tib=tibwas; ntib=ntibwas; vm.prompt=promptwas;outer(ipwas);}
 						tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-						function resume(){tib=tibwas; ntib=ntibwas; vm.prompt=promptwas;outer(ipwas);}
 					</js> ;
 					/// resume() 線索由 data stack 傳回，故可以多重 debug。但有何用途？
 					

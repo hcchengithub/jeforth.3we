@@ -1818,14 +1818,16 @@
     Push 0 to rstack due to the assumption of that all handlers are started from the waiting state, 
     0 brings the handler back to waiting sate.
     
+		~%~%~%~%~%~ 參考自己,抓自己,取得自己,自身,參考自身,參考本身,取得本身 ~%~%~%~%~%~
+        \ 設定、取得 colon word 本身的方法，
+        \   : test [ last :: vv=1111 last literal ] :> vv ;
         \ 取得 colon word 本身的 cfa 有下列方法 
-        \ a）[ js> last().cfa ] literal 即是
-        \ b） [ last ] literal :> cfa 同上，這個不 optimize。
-        \ c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
-
-        \ 設定、取得 colon word 本身裡的 static variable 的方法，
-        \ : test2 [ last dup js: pop().vv=1111 ] literal js> pop().vv ;
-    
+        \   a）[ js> last().cfa ] literal 即是
+        \   b） [ last ] literal :> cfa 同上，這個不 optimize。
+        \   c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
+		\ 取得 code word 自身可以考慮用 tick('name'). 另一可能 arguments.callee 參考到 xt 而不是
+		\ code word object 本身。如何在 code word 裡安置 static variable 參考到自己?
+		
     3. Use an existing code word to setup a call back function
     This example shows that the xt of a code word can be used as a call back function.
         code cbServer ( request, response ) \ Web server call back function
@@ -2244,7 +2246,7 @@
     設定值為 interval-1 , 而 interval 的初值為 frameInterval。
     ==> 這樣調整有效，但是誤差會累積。t0 記住，frameCount * frameInterval 與 t0 的距離用來調整 interval 
         最直接，不會累積誤差。
-    ==> 先研究 JavaScript 怎麼弄出個 static variable
+    ==> 先研究 JavaScript 怎麼弄出個 static variable ==> 
         <js> 
             var a=0,b=0;
             var dumy = {seta:function(x){a=x},setb:function(x){b=x},average:function(){return((a+b)/2)}};
@@ -3759,13 +3761,22 @@
 	JavaScript error on word ".0r" : Cannot read property 'length' of undefined
 	==> RI,FP: 產生一個 colon word 方法很多，不一定已經有 cfa。  
 
-[ ] 用 vm.init() 來設定 type() or print() function 多此一舉。已經有 vm.clearScreen 等
+[x] 用 vm.init() 來設定 type() or print() function 多此一舉。已經有 vm.clearScreen 等
 	乾脆就不要 init() 了。projct-k 根本不知道也不用知道你需要 print() !!
 	==> jeforth.js 有用到 type() 這樣一來 project-k 就認為自己在有 display 的地方執行?!
 		雖然可以從 type() 的定義解決，總是不太理想。
 	==> 用到 type() 的地方
-		1. panic() ==> 改成 call vm.panic(state-object)
-		2. docode() 的 reDef warning ==> 改 call vm.panic(state-object)
+		1. docode() 的 reDef warning ==> 改 call panic(state-object). 
+		2. panic() ==> 所有 error/warning 都 call panic() 如前。但 panic() 裡面先檢查有
+		   沒有 vm.panic() 然後 call vm.panic(state)。
 		3. reset() 的 message 沒啥意義
-
-[ ]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎?
+	==> 已經都用 k :: type=function..., k :: prompt=.. 的方式。
+[ ] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
+[x]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎? --> 改成 tick(':').stackwas 了。
+[ ] 要參考 code word 自身,用 tick('name') 是可以考慮。有更好的辦法嗎?
+[ ] working on db bp *debug* for cub.f
+	==> resume function needs a static variable.
+		--> see processing.f, "JavaScript Module Pattern: In-Depth" in YouDao Notebook.
+		
+		
+		

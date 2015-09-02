@@ -3,7 +3,6 @@ function jeForth() {
 	var vm = this; // "vm" 就是 jeforth 自己。
 	var ip=0;
 	var stack = [] ;
-	var stackwas = []; // Definition of : ... ; needs a temp storage.
 	var rstack = [];
 	var vocs = [];
 	var words = [];
@@ -23,7 +22,7 @@ function jeForth() {
 	var newxt = function(){}; // new word's function()
 	var newhelp = "";
 	
-	// Call back to vm.type()
+	// Call out vm.type()
 	function type(s) {
 		if(vm.type) vm.type(s);
 	}
@@ -35,15 +34,16 @@ function jeForth() {
 		ip=0; // forth VM instruction pointer
 		stop = true; 
 		ntib = tib.length; // don't clear tib, a clue for debug.
-		// stack = []; don't clear it's a clue for debug
+		// stack = []; I guess it's a clue for debug
 	}
 
-	// Call back to vm.panic()
-	function panic(msg,isErr) {
+	// Call out vm.panic()
+	function panic(msg,level) {
 		var state = {
-				msg:msg, isErr:isErr, compiling:compiling, 
-				stack:stack.slice(0), rstack:rstack.slice(0), 
-				ip:ip, tib:tib, ntib:ntib, stop:stop
+				msg:msg, level:level
+				// , compiling:compiling, 
+				// stack:stack.slice(0), rstack:rstack.slice(0), 
+				// ip:ip, tib:tib, ntib:ntib, stop:stop
 			};
 		if(vm.panic) vm.panic(state);
 	}
@@ -372,9 +372,8 @@ function jeForth() {
 	
 	// -------------------- main() ----------------------------------------
 
-	// Recursively evaluate the input. 
-	// The input can be multiple lines or an entire ~.f file but
-	// it usually is the TIB.
+	// Recursively evaluate the input. The input can be multiple lines or 
+	// an entire ~.f file yet it usually is the TIB.
 	function dictate(input) {
 		var tibwas=tib, ntibwas=ntib, ipwas=ip;
 		tib = input; 
