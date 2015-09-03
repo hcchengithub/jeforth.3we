@@ -223,7 +223,7 @@
 						/// \ Example, 選中的格子都去掉頭尾空白。
 						/// manual 0 cut ( 前置準備 ) 
 						/// i?stop ( 【判斷】兼【移位】,留下 i ) 
-						/// cell@ remove-leading-ending-white-spaces cell! ( do 把當格前後空白都刪掉 )
+						/// cell@ trim cell! ( do 把當格前後空白都刪掉 )
 						/// 1 nap rewind ( 重複 )
 						/// auto ( 收尾 )						
 						
@@ -297,7 +297,7 @@
 						{} begin ( offset# hash )
 							cell@ ?dup  ( offset# hash key key|hash false )
 						while \ on going . . .  ( offset# hash key )
-							remove-leading-ending-white-spaces ( offset# hash key )
+							trim ( offset# hash key )
 							js> tos(2) ( x ) 0 ( y ) offset ( offset# hash key cell )
 							js: tos(2)[pop(1)]=pop().value ( offset# hash )
 							down 1 nap 
@@ -315,7 +315,7 @@
 						{} begin ( hash )
 							cell@ ?dup  ( hash key key|hash false )
 						while \ on going . . .  ( hash key )
-							remove-leading-ending-white-spaces ( hash key )
+							trim ( hash key )
 							right@ ( hash key value )
 							js: tos(2)[pop(1)]=pop() ( hash )
 							down 

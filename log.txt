@@ -1827,6 +1827,10 @@
         \   c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
 		\ 取得 code word 自身可以考慮用 tick('name'). 另一可能 arguments.callee 參考到 xt 而不是
 		\ code word object 本身。如何在 code word 裡安置 static variable 參考到自己?
+		\   經由 "newxt=function(_me){..." in docode() of kernel jeforth.js, and
+		\   simply call w.xt(w) in the inner() loop, we have _me in any code word
+		\   that indicates the code word itself. -- 08:42PM 2015/9/2
+
 		
     3. Use an existing code word to setup a call back function
     This example shows that the xt of a code word can be used as a call back function.
@@ -3771,12 +3775,39 @@
 		   沒有 vm.panic() 然後 call vm.panic(state)。
 		3. reset() 的 message 沒啥意義
 	==> 已經都用 k :: type=function..., k :: prompt=.. 的方式。
-[ ] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
+[x] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
 [x]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎? --> 改成 tick(':').stackwas 了。
-[ ] 要參考 code word 自身,用 tick('name') 是可以考慮。有更好的辦法嗎?
-[ ] working on db bp *debug* for cub.f
+[x] 要參考 code word 自身,用 tick('name') 是可以考慮。有更好的辦法嗎?
+	==> 現在 _me 直接就是該 word object 本身。
+[x] working on db bp *debug* for cub.f
 	==> resume function needs a static variable.
 		--> see processing.f, "JavaScript Module Pattern: In-Depth" in YouDao Notebook.
-		
-		
-		
+	==> I only want to get the code word object	in its xt(), it's the argument! So,
+		simply call w.xt(w) passes w over, this simple! This is done in the inner().
+		also "newxt=function(_me){..." in docode() of kernel jeforth.js.
+	==> 經由 "newxt=function(_me){..." in docode() of kernel jeforth.js, and
+		simply call w.xt(w) in the inner() loop, we have _me in any code word
+		that indicates the code word itself.
+[ ]	root word-list 還是叫 'forth' 好了, 因為 jeforth.f 本身不 support vocabulary, 分不出
+	root 跟 forth 不如就用 forth。當初想的是讓 project-k 盡量中性，罷了。
+
+[ ] should be moved to voc.f
+	: temp			( -- ) \ The source-code-file.f header macro 
+					<text>
+						?skip2 --EOF-- \ skip it if already included
+						dup .( Including ) . cr char -- over over + +
+						js: tick('<selftest>').masterMarker=tos()+"selftest--";
+						also forth definitions (marker) (vocabulary)
+						last execute definitions
+						<selftest>
+							js> tick('<selftest>').masterMarker (marker)
+							include kernel/selftest.f
+						</selftest>
+					</text> tib.insert ;
+					js: last().name="source-code"+"-header"
+					/// skip including if the module has been included.
+					/// setup the self-test module
+					/// initiate vocabulary for the including module
+
+
+

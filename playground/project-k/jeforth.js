@@ -6,8 +6,8 @@ function jeForth() {
 	var rstack = [];
 	var vocs = [];
 	var words = [];
-	var current = "root";
-	var context = "root";
+	var current = "forth";
+	var context = "forth";
 	var order = [context];
 	var wordhash = {};
 	var dictionary=[]; dictionary[0]=0;
@@ -186,7 +186,7 @@ function jeForth() {
 		var w = 0; 
 		switch(typeof(entry)){
 			case "string": // "string" is word name
-				w = tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/g,'')); // remove leading and tailing white spaces
+				w = tick(entry.trim()); // remove leading and tailing white spaces
 				break;
 			case "function": case "object": // object is a word
 				w = entry; 
@@ -217,7 +217,7 @@ function jeForth() {
 				break;
 			case "object": // Word object
 				try { // take care of JavaScript errors to avoid being kicked out very easily
-					w.xt();
+					w.xt(w);
 				} catch(err) {
 					panic('JavaScript error on word "'+w.name+'" : '+err.message+'\n',"error");
 				}
@@ -325,8 +325,9 @@ function jeForth() {
 		if(isReDef(newname)) panic("reDef "+newname+"\n"); 	// don't use tick(newname), it's wrong.
 		push(nextstring("end-code")); 
 		if(tos().flag){
+			// _me is the code word object itself.
 			eval(
-				'newxt=function(){ /* ' + newname + ' */\n' + 
+				'newxt=function(_me){ /* ' + newname + ' */\n' + 
 				pop().str + '\n}' // the ending "\n}" allows // comment at the end
 			);
 		} else {
@@ -341,7 +342,7 @@ function jeForth() {
 		new Word([
 			"code",
 			docode,
-			"this.vid='root'",
+			"this.vid='forth'",
 			"this.wid=1",
 			"this.type='code'",
 			"this.help='( <name> -- ) Start composing a code word.'"
@@ -358,7 +359,7 @@ function jeForth() {
 				wordhash[last().name]=last();
 				compiling  = false;
 			},
-			"this.vid='root'",
+			"this.vid='forth'",
 			"this.wid=2",
 			"this.type='code'",
 			"this.immediate=true",
@@ -459,7 +460,7 @@ function jeForth() {
 
 	vm.stack = function(){return(stack)}; // debug easier. stack got manipulated often, need a fresh grab.
 	vm.rstack = function(){return(rstack)}; // debug easier especially debugging TSR
-	vm.words = words; // debug easier. works.root is the root vocabulary or word-list
+	vm.words = words; // debug easier. works.forth is the root vocabulary or word-list
 	vm.dictionary = dictionary; // debug easier
 }
 if (typeof exports!='undefined') exports.jeForth = jeForth;	// export for node.js APP

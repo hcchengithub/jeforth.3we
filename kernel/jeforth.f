@@ -1495,8 +1495,9 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
-: remove-leading-ending-white-spaces ( string -- string' ) \ On one line.
-				dup if :> toString().replace(/^\s*|\s*$/g,'') then ;
+: trim			( string -- string' ) \ Remove leading&ending white spaces on one line.
+				dup if :> toString().trim() then ;
+				/// if TOS is not a string then do nothing.
 code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
 
