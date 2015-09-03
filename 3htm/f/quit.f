@@ -53,7 +53,7 @@
 				jump2endofinputbox.click();
 				_cmd_ = prompt("JavaScript debug console", _cmd_?_cmd_:"");
 				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
-				print(kvm.jsc.prompt + " " + _cmd_ + "\n");
+				type(kvm.jsc.prompt + " " + _cmd_ + "\n");
 				switch(_cmd_){
 					case "exit" : case "q" : case "quit": bp=0; return;
 					case "s" : bp=-1; return; // 
@@ -66,12 +66,12 @@
 						_result_ = eval(_cmd_);
 						// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";
 						// else _ss_ += _result_ + "  (" + mytypeof(_result_) + ")\n";
-						print(_result_);
-						print(" (" + mytypeof(_result_) + ")\n");
+						type(_result_);
+						type(" (" + mytypeof(_result_) + ")\n");
 						// if(!confirm(_ss_ + "\nGo on debugging?")) return;
 					} catch(err) {
 						_ss_ = "Oooops! " + err.message + "\n";
-						print(_ss_)
+						type(_ss_)
 						// alert(_ss_);
 					}
 				}
@@ -80,7 +80,7 @@
 	</text> js: kvm.jsc.xt=pop()
 
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-				js: print("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
+				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
 
 \ ------------------ Get args from URL -------------------------------------------------------
 	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 

@@ -1130,7 +1130,9 @@
 						*** spaces chars
 						marker ---
 						: test 3 spaces ;
+						js: vm.selftest_visible=false;vm.screenbuffer=""
 						test
+						js: vm.selftest_visible=true
 						<js> vm.screenbuffer.slice(-3)=='   '</jsV>
 						[d true d] [p 'chars',"spaces","(space)" p]
 						---
@@ -1711,9 +1713,9 @@
 					/// Pattern matches name, help and comments.
 					last :: comment+=tick("(words)").comment
 
-	: (help)		( "pattern" -- ) \ Print help message of screened words
+	: (help)		( "word-list" "[pattern [switch]]" -- ) \ Print help message of screened words
 					js> tos().length if 
-						js> context swap ( forth line )
+						\ js> context swap ( voc line )
 						<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
 						js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
 						<js>
@@ -1724,6 +1726,7 @@
 							}
 						</js>
 					else
+						2drop
 						<text>
 							words [<pattern> [-n|-N|-t|-T]] : Print matched words
 							help  [<pattern> [-n|-N|-t|-T]] : Print help message of matched words
@@ -1735,7 +1738,7 @@
 					last :: comment+=tick("(words)").comment
 
 	: help			( [<pattern> [-n|-N|-t|-T]] -- ) \ Print the help of screened words
-					char \n|\r word (help) ;
+					js> context char \n|\r word (help) ;
 					/// Original version
 					/// Pattern matches name, help and comments.
 					last :: comment+=tick("(words)").comment
@@ -1978,16 +1981,21 @@
 					inner = vm.g.fastInner end-code
 					/// work with 'jsc' debug console, jsc is application dependent.
 	code q			( -- ) \ Quit *debug*
-					var q=vm.continue; vm.continue=null; q(); end-code
+					var q = tick("(*debug*)").continue; 
+					tick("(*debug*)").continue=null; 
+					q(); 
+					end-code
 	: (*debug*) 	( msg -- resume ) \ Suspend to command prompt, execute resume() to quit debugging.
+					[ last literal ] ( _me )
 					<js>
-						if (vm.continue) {
+						var _me = pop();
+						if (_me.continue) {
 							panic("Error, already in *debug* can't *debug* again.\n");
 						} else {
 							var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=vm.prompt;
 							vm.prompt = pop().toString();
 							// The clue to resume from debugging
-							vm.continue = function(){
+							_me.continue = function(){
 								tib=tibwas; 
 								ntib=ntibwas; 
 								vm.prompt=promptwas;
@@ -2010,7 +2018,6 @@
 	<selftest>
 		*** End of kernel self-test
 		[d d] [p 'accept', 'refill', '***' p]
-		~~selftest~~
 	</selftest>
 
 	\ jeforth.f kernel code is now common for different application. I/O may not ready enough to read 
@@ -2021,4 +2028,4 @@
 		\		js: tick('<selftest>').enabled=false
 		\	[else] \ We don't have jobs from command line to do. So we do the self-test.
 				js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
-		\	[then] js: tick('<selftest>').buffer="" \ recycle the memory
+			[then] js: tick('<selftest>').buffer="" \ recycle the memory

@@ -5,28 +5,13 @@ marker --voc.f--
 
 char forth constant forth-wordlist // ( -- "forth" ) The vid of forth-wordlist.
 
-code obj>keys	( obj -- keys[] ) \ Get all keys of an object.
-				var obj=pop();
-				var array = [];
-				for(var i in obj) array.push(i);
-				push(array);
-				end-code
-
 				<selftest>
 					marker --voc.f-self-test--
-					include kernel/selftest.f
-					*** obj>keys should return an array with correct elements ... 
-					' + obj>keys js> pop().join(",")
-					js> tos().indexOf('name')!=-1 \ [...] true
-					js> tos(1).indexOf('selftest')!=-1 \ [...] true true
-					js> tos(2).indexOf('vid')!=-1 \ [...] true true true
-					js> pop(3).indexOf('cfa')==-1 \ true true true true
-					and and and ==>judge [if] <js> [] </jsV> all-pass [then]
 				</selftest>
 
 code isMember 	( value group -- key|index T|F ) \ Return key or index if value exists.
 				var group = pop();
-				var result = g.isMember(pop(), group);
+				var result = vm.g.isMember(pop(), group);
 				if (result.flag) {push(result.key); push(true)}
 				else push(false);
 				end-code
@@ -34,11 +19,11 @@ code isMember 	( value group -- key|index T|F ) \ Return key or index if value e
 				/// 'group' is either array or object.
 
 				<selftest>
-					*** isMember checks array or object ... 
+					*** isMember checks array or object
 					char name     ' code isMember [if] char code = [then] \ true
 					char selftest ' code isMember [if] char pass = [then] \ true true
 					' help js> words.forth isMember [if] js> words.forth[pop()].name=='help' [then] \ true true true
-					and and ==>judge [if] <js> [] </jsV> all-pass [then]
+					[d true,true,true d] [p "isMember" p]
 				</selftest>
 
 code get-context ( -- "vid" ) \ Get the word list that is searched first. 
@@ -50,10 +35,10 @@ code get-context ( -- "vid" ) \ Get the word list that is searched first.
 				 /// context is order[last], order[0] is protected to always be "forth".
 
 				<selftest>
-					*** set-context get-context manipulate the word-list of first priority ... 
+					*** set-context get-context manipulate the word-list of first priority
 					also forth vocabulary vvv char vvv set-context
 					get-context char vvv = \ true
-					==>judge [if] <js> ['get-context'] </jsV> all-pass [then]
+					[d true d] [p 'get-context' p]
 				</selftest>
 
 code get-current ( -- "vid" ) \ Return vid, new word's destination word list name.
@@ -63,7 +48,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				current = pop() end-code
 
 				<selftest>
-					*** set-current get-current manipulate the word-list to go to ... 
+					*** set-current get-current manipulate the word-list to go to
 					also vocabulary vvv000 vvv000 definitions
 					also char vvv set-current
 					get-current char vvv = \ true
@@ -74,8 +59,9 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					: ttt ; js> words.vvv[words.vvv.length-1].name=='ttt' \ true true true true 
 					previous \ use the previous word-list as the context
 					get-context char vvv000 = \ true true true true true
-					and and and and ==>judge [if] <js> ['get-current','forth','(vocabulary)','vocabulary',
-					'definitions','previous','forth-wordlist'] </jsV> all-pass [then]
+					[d true,true, true, true, true d] 
+					[p 'get-current','forth','(vocabulary)','vocabulary',
+					   'definitions','previous','forth-wordlist' p]
 				</selftest>
 
 : (vocabulary) 	( "name" -- ) \ create a new word list.
@@ -105,12 +91,12 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					get-context char forth = \ false
 					only
 					get-context char forth = \ true
-					XOR ==>judge [if] <js> [ ] </jsV> all-pass [then]
+					[d false,true d] [p "only" p]
 				</selftest>
 
 code also       order.push(order[order.length-1]) end-code // ( -- ) vocabulary array's dup
 
-code previous   if(order.length>1){order.pop();fortheval("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
+code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
 
 : forth 		( -- ) \ Make forth-wordlist be searched first, which is to set context="forth".
 				js> order.length>1 if forth-wordlist set-context then ; immediate
@@ -143,8 +129,8 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 				<selftest>
 					\ search: forth
 					\ define: vvv
-					*** also current order vocs ... 
-					selftest-invisible
+					*** also current order vocs
+					js: vm.selftest_visible=false
 					also vvv
 					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
@@ -153,10 +139,10 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("search: forth,vvv,vvv000")!=-1 </jsV> \ true true
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("define: vvv000")!=-1 </jsV> \ true true true
 					vocs
-					selftest-visible
+					js: vm.selftest_visible=true
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("vocs: forth,vvv,vvv000")!=-1 </jsV> \ true true true true
-					and and and ==>judge [if] <js> ['current','definitions','order','vocs',
-					'get-current','get-order','get-vocs','forth'] </jsV> all-pass [then]
+					[d true,true,true,true d] [p 'current','definitions','order','vocs',
+					'get-current','get-order','get-vocs','forth' p]
 				</selftest>
 
 : find-vocs     ( "vid" -- index T|F ) \ Is the given "vid" in the vocs?
@@ -164,10 +150,10 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 				/// this is an example of how to access vocs list.
 
 				<selftest>
-					*** find-vocs is a demo of accessing vocs list ... 
+					*** find-vocs is a demo of accessing vocs list
 					char vvv find-vocs swap 1 = and \ true 
 					char vvv000 find-vocs swap 2 = and \ true true
-					and ==>judge [if] <js> [ ] </jsV> all-pass [then]
+					[d true,true d] [p "find-vocs" p]
 				</selftest>
 				
 code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear search from the given word-list.
@@ -180,9 +166,9 @@ code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear sea
 				/// So we don't use search-wordlist at all. 
 
 				<selftest>
-					*** search-wordlist linear search a word-list ... 
+					*** search-wordlist linear search a word-list
 					char code char forth search-wordlist js> pop().name=='code' \ true
-					==>judge [if] <js> [ ] </jsV> all-pass [then]
+					[d true d] [p "search-wordlist" p]
 				</selftest>
 
 : forget		( <name> -- ) \ Forget the current vocabulary from <name>
@@ -211,10 +197,15 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				last().type='marker'
                 last().herewas = here;
                 last().lengthwas = lengthwas; // dynamic variable array 的 reference 給了別人之後就不會蒸發掉了。
-				var h = packhelp(); // help messages packed
+				
+				push(nexttoken('\n|\r')); // rest of the first line
+				execute("parse-help"); // ( "helpmsg" "rests" )
+				tib = pop() + " " + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
+				var h = pop(); // help messages packed
+				
 				if(h.indexOf("No help message")!=-1) h = "( -- ) I am a marker.";
 				last().help =newname + " " + h;
-				fortheval("get-vocs"); last().vocswas = pop(); 
+				dictate("get-vocs"); last().vocswas = pop(); 
 				last().orderwas = orderwas;  // FigTaiwan 爽哥提醒 // dynamic variable array 的 reference 給了別人之後就不會蒸發掉了。
 				// --------------------- the restore phase ----------------------------------
 				// xt's job is to restore the saved context  
@@ -223,7 +214,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					order.splice(0,order.length); 
 					for(var i=0; i<this.orderwas.length; i++) order[i] = this.orderwas[i]; // FigTaiwan 爽哥提醒; order[order.length-1] 就是 context 不必再 save-restore.
 					for(var vid in words) {
-						if(!g.isMember(vid, this.vocswas).flag) {
+						if(!vm.g.isMember(vid, this.vocswas).flag) {
 							delete words[vid]; // if the word-list was not exist then delete it.
 						}
 					}
@@ -232,7 +223,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					for(var vid in words) { // go through all word lists to restore their length
 						words[vid] = words[vid].slice(0, this.lengthwas[vid]); 
 					}
-                    fortheval("rescan-word-hash");
+                    dictate("rescan-word-hash");
                 }
                 end-code
 				/// voc.f reDef'ed 進一步解決 vocs 的 save-restore. 
@@ -241,97 +232,56 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				BL word (marker) ;
 
 				<selftest>
-					*** marker (marker) are very complicated ... 
+					*** marker (marker) are very complicated
 					marker ---%%%--- 
 					: marker-test-dummy ;
 					' marker-test-dummy boolean \ true
 					---%%%--- 
 					' marker-test-dummy boolean \ false
-					XOR ==>judge [if] <js> ['(marker)','marker'] </jsV> all-pass [then]
+					[d true,false d] [p '(marker)','marker' p]
 				</selftest>
-				
-code parser(words,help) ( "string" -- { v:vocname, vlock:boolean, sw:[nNtT], pattern:"string"} ) \ parser for 'words' and '(help)'.
-				if(!this.option) this.option={v:"",vlock:false};
-				this.option.pattern = ""; this.option.sw = "";
-				if(!this.option.vlock) this.option.v = "";
-				var spec = ' ' + pop() + ' '; // 我心裡想的 spec 是 -v -V -n -N 這些 option 一開始是整個 string
-				var vocSpec = spec.match(/(.*?)\s+(-[vV])\s+(\S+)(.*)/); 
-				// vocSpec[0]=全部, [1]:之前, [2]="-[vV]", [3]:"vocname.f", [4]=之後
-				// 如果缺 vocSpec[3] 整個 vocSpec 也都不會成立，變成 nuull
-				// 如果有多組 -[vV] vocname 取第一組。
-				if(vocSpec) {  
-					this.option.v = vocSpec[3];
-					this.option.vlock = vocSpec[2]=="-V";
-					spec = vocSpec[1]+vocSpec[4]; // 去除已經處理過的部分
-				}
-				var unlock = spec.match(/(.*?)\s(-V-)\s(.*)/);
-				if(unlock) {
-					// unlock[0]=全部, [1]:之前, [2]="-V-", [3]:之後
-					// 如果缺 -V- 整個都不會成立，變成 nuull
-					// 如果有多組 -V- 取第一組。
-					this.option.vlock = false;
-					this.option.v = "";
-					spec = unlock[1] + " " + unlock[3]; // 去除已經處理過的部分
-				}
-				
-				var sw = spec.match(/\s+(-[nNtT])\s+(\S+)/); 
-				// sw[1]:-[nNtT], sw[2]:"Name", 如果缺 sw[2] 整個 sw 也都不會成立，變成 nuull
-				if(sw) {
-					// 如果有 -[nNtT] 到此結束，不收別的 pattern 了（配合(words)的設計）
-					this.option.sw = sw[1];
-					this.option.pattern = sw[2];
-				} else {
-					// 剩下的整個都是 pattern
-					this.option.pattern = spec.replace(/(^\s*)|(\s*$)/g,'');
-				}
-				push(this.option);
-				end-code
-				\ 如果有 -v 或 -V 就取得 vocabulary 的 spec 加一層限制。
-				\ 其他分離出 (sw,pattern) 或單 pattern 丟給 (words) 
 
-code words      ( [<spec>] -- ) \ List all words or words screened by spec.
-				push(nexttoken("\\r|\\n")); execute("parser(words,help)"); var option = pop();
+code words		( <[pattern [switch]]> -- ) \ List all words or words screened by spec.
+				var spec = nexttoken("\\r|\\n").replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(option.v) 
-						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
-					var voc = "\n-------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) --------\n";
-					var ss = "";
-					if(option.sw) push(option.sw); else push(""); 
-					push(order[j]); push(option.pattern); execute("(words)");
-					var word_list = pop();
-					for (var i=0; i<word_list.length; i++) ss += word_list[i].name+" ";
-					if (i) { print(voc); print(ss); }
+					push(order[j]); // vocabulary
+					push(spec[0]||""); // pattern
+					push(spec[1]||""); // option
+					execute("(words)"); // [words...]
+					if (tos().length) { 
+						type("\n-------- " + order[j] +" ("+ tos().length + " words) --------\n"); 
+						for(var i=0; i<tos().length; i++) type(tos()[i].name+" ");
+					}
+					pop();
 				}
+				execute("cr");
                 end-code interpret-only
 				/// Modified by voc.f.
-				/// Usage: words ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
-				/// None or one of the vocabulary selector:
-				///	  -v for matching partial vocabulary name, case insensitive.
-				///	  -V is -v and lock, -V- to unlock.
+				/// Usage: words ["pattern" [-t|-T|-n|-N]]
 				/// None or one of the following switches:
-				///	  -n matches only name pattern, case insensitive.
+				///	  -n matches partial name pattern, case insensitive.
 				///	  -N matches exact name, case sensitive.
-				///   -t matches type pattern, case insensitive.
+				///   -t matches partial type pattern, case insensitive.
 				///   -T matches exact type, case sensitive.
 				/// If none of the aboves is given then pattern matches 
 				/// all names, helps and comments.
-				/// Example: words -V excel.f -n app
-				
+				/// Example: words ! -n
+
 				<selftest>
 					marker ---
-					*** words modified for volcabulary ... 
+					*** words modified for volcabulary
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
-					selftest-invisible
-					words \
-					selftest-visible
+					js: vm.selftest_visible=false
+					words \ 
+					js: vm.selftest_visible=true
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("-------- forth (")!=-1 </jsV> \ true
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("words) --------")!=-1 </jsV> \ true true
-					and ==>judge [if] <js> [ ] </jsV> all-pass [then]
+					[d true,true d] [p "words" p]
 					---
 				</selftest>
 
-code (help)		( "pattern" -- )  \ Print help message of screened words
-				execute("parser(words,help)"); var option = pop();
+code (help)		( "[pattern [switch]]" -- )  \ Print help message of screened words
+				var spec = pop();
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 					if(option.v) 
 						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
@@ -344,7 +294,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 						ss += word_list[i]+"\n";
 						if (typeof(word_list[i].comment) != "undefined") ss += word_list[i].comment;
 					}
-					if (i) { print(voc); print(ss); }
+					if (i) { type(voc); type(ss); }
 				} 
 				end-code
 				/// Modified by voc.f to support vocabulary
@@ -363,9 +313,34 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 : help			( [<pattern>] -- )  \ Print help message of screened words
                 char \n|\r word (help) ;
 				' (help) last :: comment=pop().comment
-				/// Example: help -V excel.f -n app
 				/// Example: help - (Show all words)
 
+code help		( <[pattern [switch]]> -- )  \ Print help message of screened words
+				var spec = nexttoken("\\r|\\n");
+				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
+					push(order[j]); // vocabulary
+					push(spec); // [pattern [switch]]
+					execute("(help)"); // [words...] js> context char \n|\r word (help) 
+					if (tos().length) { 
+						type("\n-------- " + order[j] +" ("+ tos().length + " words) --------\n"); 
+						for(var i=0; i<tos().length; i++) type(tos()[i].name+" ");
+					}
+					pop();
+				}
+				execute("cr");
+                end-code interpret-only
+				/// Modified by voc.f.
+				/// Usage: words ["pattern" [-t|-T|-n|-N]]
+				/// None or one of the following switches:
+				///	  -n matches partial name pattern, case insensitive.
+				///	  -N matches exact name, case sensitive.
+				///   -t matches partial type pattern, case insensitive.
+				///   -T matches exact type, case sensitive.
+				/// If none of the aboves is given then pattern matches 
+				/// all names, helps and comments.
+				/// Example: words ! -n
+
+				
 : ?skip2		( "name.f" <EOF> -- "name.f" |empty ) \ skip to <EOF> to avoid double including
 				dup (') 			( name.f exist? )
 				BL word swap 		( name.f eof exist? )
@@ -378,21 +353,21 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				drop ;
 				/// Conditional skep TIB down to the next EOF mark.
 				/// The EOF mark is supposed to be at the end of a \ comment at end of the .f file.
-				/// In None-blocking settings, to support suspend-resume of the forth VM, fortheval()
+				/// In None-blocking settings, to support suspend-resume of the forth VM, dictate()
 				/// can not call itself recursively so as to avoid from confusing the suspend-level.
-				/// While 'include' used to utilize fortheval() that is now replaced by "tib.insert".
+				/// While 'include' used to utilize dictate() that is now replaced by "tib.insert".
 				/// Use ?skip2 at the beginning of a .f file if you don't want it to be double included.
 
 				<selftest>
 					marker ---
 					*** help modified for volcabulary ... 
 					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
-					selftest-invisible
+					js: kvm.selftest_visible=false
 					help \
-					selftest-visible
+					js: kvm.selftest_visible=true
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("--------- forth (")!=-1 </jsV> \ true
 					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("words) ---------")!=-1 </jsV> \ true true
-					and ==>judge [if] <js> [ ] </jsV> all-pass [then]
+					[d true,true d] [p "help" p]
 					---
 				</selftest>
 

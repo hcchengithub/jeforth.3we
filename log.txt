@@ -3788,9 +3788,14 @@
 	==> 經由 "newxt=function(_me){..." in docode() of kernel jeforth.js, and
 		simply call w.xt(w) in the inner() loop, we have _me in any code word
 		that indicates the code word itself.
-[ ]	root word-list 還是叫 'forth' 好了, 因為 jeforth.f 本身不 support vocabulary, 分不出
-	root 跟 forth 不如就用 forth。當初想的是讓 project-k 盡量中性，罷了。
 
+[x]	root word-list 還是叫 'forth' 好了, 當初想的是讓 project-k 盡量中性，先有 root 然
+	後再加上 forth voc 等。但因為 kernel jeforth.f 本身不 support vocabulary, 故以上
+	已經落空，根本分不出 root 跟 forth 不如就用 forth。還是可以在 voc.f 進來了以後再
+	拆分 root 跟 forth。但這麼做有何意義? 既無意義就表示都是 forth 即可。
+	所以 forth 變成永遠都在的部分，不想讓 words help 太雜亂時，盡量用 only work.f,
+	only git.f 等來讓輸出清爽。故 words 的 -v -V -V- option 都不必了，好耶。
+	
 [ ] should be moved to voc.f
 	: temp			( -- ) \ The source-code-file.f header macro 
 					<text>
@@ -3811,3 +3816,11 @@
 
 [ ] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
 
+[ ] 大改寫, 
+	o  所有 \sg. 改成 vm.g.
+	o  fortheval --> dictate
+	o  (words) words , voc.f words ok
+	[ ] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配. 
+		(help) 不該負責印系統 help
+		
+	
