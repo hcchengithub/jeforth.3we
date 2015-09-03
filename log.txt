@@ -3809,5 +3809,5 @@
 					/// setup the self-test module
 					/// initiate vocabulary for the including module
 
-
+[ ] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
 

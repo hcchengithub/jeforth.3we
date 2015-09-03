@@ -11,32 +11,37 @@
 			}
     </style>
     <script src="js/jquery-1.11.2.js"></script>
-	<Script src="kernel/jeforth.js"></Script>
+	<!-- Script src="kernel/jeforth.js"></Script -->
+	<Script src="playground/project-k/jeforth.js"></Script>
 	<script id=js>
+	var kvm = new jeForth();
 	(function(){
+		kvm.version = "1.00";
 		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window;
 		kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
-		var print = kvm.print = function (s) { 
+		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready
+		kvm.selftest_visible = true;
+		var type = kvm.type = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test
 			} catch(err) {
 				ss = Object.prototype.toString.apply(s);
 			}
 			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-			$('#outputbox').append(plain(ss)); 
-			// jump2endofinputbox.click(); // inputbox.focus();
+			if(kvm.selftest_visible) $('#outputbox').append(plain(ss)); 
 		};
-		kvm.version = "1.00";
+		kvm.clearScreen = function () {
+			$('#outputbox').empty();
+		}
 		kvm.greeting = function(){
-			print("j e f o r t h . 3 h t m -- v"+kvm.version+'\n');
-			print("source code http://github.com/hcchengithub/jeforth.3we\n");
-			print("Program path " + window.location.toString());
+			type("j e f o r t h . 3 h t m -- v"+kvm.version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
 			return(parseFloat(kvm.version));
 		}
 		kvm.debug = false;
-		kvm.jsc = {xt:'print("Sorry, jsc is not available yet.")',prompt:"jsc>"};
-		kvm.screenbuffer = ""; // print() to screenbuffer before I/O ready
+		kvm.jsc = {xt:'type("Sorry, jsc is not available yet.")',prompt:"jsc>"};
 		kvm.inputbox = "";
 		kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
  		kvm.prompt = "OK";
@@ -50,21 +55,24 @@
 				$('#location').html(window.location.toString()); // it's built-in in DOM
 				$('.appname').html(kvm.appname); // 一次填好所有 appname
 				document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-				kvm.init();
-				var k = "kernel/jeforth.f";
+				// var k = "kernel/jeforth.f";
+				var k = "playground/project-k/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
-				var q = "3htm/f/quit.f";
+				// var q = "3htm/f/quit.f";
 				var kk = $.get(k,'text'); // callback only when success, not suitable, 
 				var rr = $.get(r,'text');
-				var qq = $.get(q,'text');
+				// var qq = $.get(q,'text');
 				(function retry(){
-					if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
+					// if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
+					if(kk.state()=="pending"||rr.state()=="pending")
 						setTimeout(retry,100); 
 					else {
 						if (kk.status!=200) kvm.panic("Error! Failed to read " + k + '\n');
 						else if (rr.status!=200) kvm.panic("Error! Failed to read " + r + '\n');
-						else if (qq.status!=200) kvm.panic("Error! Failed to read " + q + '\n');
-						else kvm.fortheval(kk.responseText+rr.responseText+qq.responseText);
+						// else if (qq.status!=200) kvm.panic("Error! Failed to read " + q + '\n');
+						// else kvm.dictate(kk.responseText+rr.responseText+qq.responseText);
+						else kvm.dictate(kk.responseText+rr.responseText);
+						// else kvm.dictate(kk.responseText);
 					}
 				})();
 			}                       
@@ -73,8 +81,8 @@
 		// There's no main loop, event driven call back function is this.
 		kvm.forthConsoleHandler = function(cmd) {
 			var rlwas = kvm.rstack().length; // r)stack l)ength was
-            print((cmd?'\n> ':"")+cmd+'\n');
-			kvm.fortheval(cmd);  // Pass the command line to KsanaVM
+            type((cmd?'\n> ':"")+cmd+'\n');
+			kvm.dictate(cmd);  // Pass the command line to KsanaVM
 			(function retry(){
 				// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
 				// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
@@ -82,7 +90,7 @@
 				if(kvm.rstack().length!=rlwas)
 					setTimeout(retry,100); 
 				else {
-					print(" " + kvm.prompt + " ");
+					type(" " + kvm.prompt + " ");
 					jump2endofinputbox.click(); inputbox.focus();
 				}
 			})();
@@ -100,10 +108,6 @@
 					return(false); 
 			}
 			return (true); // pass down to following handlers 
-		}
-		
-		kvm.clearScreen = function () {
-			$('#outputbox').empty();
 		}
 		
 		var plain = kvm.plain = function (s) {

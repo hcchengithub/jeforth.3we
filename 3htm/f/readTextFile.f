@@ -28,7 +28,7 @@
 	
 	: getTextFile	( "pathname" -- string ) \ "" if file not found
 		<js> 
-			var pathname = pop().replace(/^\s*|\s*$/g,''); // remove white spaces
+			var pathname = pop().trim(); //  replace(/^\s*|\s*$/g,''); remove white spaces
 			$.get(pathname, function(data){
 				push(data); // 成功，傳回讀到的檔案
 				// alert('Success reading '+pathname);
