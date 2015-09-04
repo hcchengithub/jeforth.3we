@@ -13,7 +13,7 @@ also forth definitions
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				." Input box EditMode = " 
-				js> kvm.EditMode=Boolean(kvm.EditMode^true) dup . js: print('\n')
+				js> vm.EditMode=Boolean(vm.EditMode^true) dup . js: type('\n')
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
 				then js: styleTextareaFocus.innerHTML=pop()                
@@ -81,10 +81,10 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 : history-selector ( -- ) \ Popup command history for selection
 				<o> <br><select style="width:800px;padding-left:2px;font-size:16px;"></select></o> ( select )
 				<js> 
-					tos().size = Math.min(16,kvm.cmdhistory.array.length);
-					for (var i=0; i<kvm.cmdhistory.array.length; i++){
+					tos().size = Math.min(16,vm.cmdhistory.array.length);
+					for (var i=0; i<vm.cmdhistory.array.length; i++){
 						var option = document.createElement("option");
-						option.text = kvm.cmdhistory.array[i];
+						option.text = vm.cmdhistory.array[i];
 						js: tos().add(option);
 					}
 					tos().selectedIndex=tos().length-1;
@@ -109,14 +109,14 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
 				<js> event.altKey </jsV> if history-selector false else
-				<js> event.ctrlKey </jsV> if js: inputbox.value=kvm.cmdhistory.up()
+				<js> event.ctrlKey </jsV> if js: inputbox.value=vm.cmdhistory.up()
 				false else true then then ;
 				/// Alt-Up pops up history-selector menu.
 				/// Ctrl-Up/Ctrl-Down recall command line history.
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {down}		( -- boolean ) \ Inputbox keydown handler, get next command history.
-				<js> event.ctrlKey </jsV> if js: inputbox.value=kvm.cmdhistory.down();
+				<js> event.ctrlKey </jsV> if js: inputbox.value=vm.cmdhistory.down();
 				false else true then ;
 				/// Alt-Up pops up history-selector menu.
 				/// Ctrl-Up/Ctrl-Down recall command line history.
@@ -213,15 +213,15 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					_comment_
 					</table>
 				</text> ( word html )
-				js> pop().replace(/_name_/,kvm.plain(tos().name))
-				js> pop().replace(/_help_/,kvm.plain(tos().help.match(/^\S+\s*(.*?)\s*$/)[1]))
-				js>	pop().replace(/_type_/,kvm.plain(tos().type))
-				js>	pop().replace(/_vid_/,kvm.plain(tos().vid))
+				js> pop().replace(/_name_/,vm.plain(tos().name))
+				js> pop().replace(/_help_/,vm.plain(tos().help.match(/^\S+\s*(.*?)\s*$/)[1]))
+				js>	pop().replace(/_type_/,vm.plain(tos().type))
+				js>	pop().replace(/_vid_/,vm.plain(tos().vid))
 				( word html ) <js> 
 					if (tos(1).comment) {
 						push(pop().replace(
 							/_comment_/,
-							"<tr><td colspan=5>"+kvm.plain(tos().comment)+"</td></tr>"
+							"<tr><td colspan=5>"+vm.plain(tos().comment)+"</td></tr>"
 						))
 					} else push(pop().replace(/_comment_/,""))
 					if (tos(1).immediate)  
@@ -244,7 +244,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					push(order[j]); push(option.pattern); execute("(words)");
 					var word_list = pop();
 					// 印出
-					if (word_list.length) print(voc);
+					if (word_list.length) type(voc);
 					for (var i=0; i<word_list.length; i++) {
 						push(word_list[i]); execute('help(word)')
 					}
@@ -387,20 +387,20 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				/// Example: help (Show basic usages)
 
 <js>
-	kvm.cmdhistory = {
-		max:   1000, // maximum length of the command history
+	vm.cmdhistory = {
+		max:   100, // maximum length of the command history
 		index: -1,
 		array: [],
 		push:
 			function (cmd){
 				cmd = cmd.replace(/^\s*/gm,''); // remove leading white spaces
-				cmd = cmd.replace(/\s*$/gm,'');  // remove tailing white spaces
+				cmd = cmd.replace(/\s*$/gm,'');  // remove tailing white spaces [ ] replace to trim()
 				if(cmd.search(/\S/)==-1) return; // skip blank lines
 				this.array.push(cmd);
 				for(var i=this.array.length-2; i>=0; i--)
-					if(cmd==this.array[i]) this.array.splice(i,1);
-				if (this.array.length > this.max ) this.array.shift();
-				this.index = this.array.length;
+					if(cmd==this.array[i]) this.array.splice(i,1); // remove duplicated
+				if (this.array.length > this.max ) this.array.shift(); // overflow
+				this.index = this.array.length; // point to last one, new one.
 			},
 		up:
 			function(){
@@ -410,7 +410,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (kvm.tick('beep')) kvm.beep();
+					if (vm.tick('beep')) vm.beep();
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -423,7 +423,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (kvm.tick('beep')) kvm.beep();
+					if (vm.tick('beep')) vm.beep();
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -433,44 +433,44 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
-			case   9: /* Tab  */ if(kvm.tick('{Tab}' )){kvm.execute('{Tab}' );return(kvm.pop());} break;
-			case  38: /* Up   */ if(kvm.tick('{up}'  )){kvm.execute('{up}'  );return(kvm.pop());} break;
-			case  40: /* Down */ if(kvm.tick('{down}')){kvm.execute('{down}');return(kvm.pop());} break;
-		 // case  77: /* M    */ if(kvm.tick('{M}'   )){kvm.execute('{M}'   );return(kvm.pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
+			case   9: /* Tab  */ if(vm.tick('{Tab}' )){vm.execute('{Tab}' );return(vm.pop());} break;
+			case  38: /* Up   */ if(vm.tick('{up}'  )){vm.execute('{up}'  );return(vm.pop());} break;
+			case  40: /* Down */ if(vm.tick('{down}')){vm.execute('{down}');return(vm.pop());} break;
+		 // case  77: /* M    */ if(vm.tick('{M}'   )){vm.execute('{M}'   );return(vm.pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
 		}
 		return (true); // pass down to following handlers
 	}
 
 	document.onkeydown = function (e) {
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
-		if(kvm.tick('{Tab}')){if(keycode!=9)kvm.tick('{Tab}').index=0} // 按過別的 key 就重來
+		if(vm.tick('{Tab}')){if(keycode!=9)vm.tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
 			case 13:
-				if (!kvm.EditMode || event.ctrlKey) { // CtrlKeyDown
-					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10).
+				if (!vm.EditMode || event.ctrlKey) { // CtrlKeyDown
+					vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.cmdhistory.push(kvm.inputbox);
-					kvm.forthConsoleHandler(kvm.inputbox);
+					vm.cmdhistory.push(vm.inputbox);
+					vm.forthConsoleHandler(vm.inputbox);
 					return(false);
 				}
 				return(true); // In EditMode
-			case  27: /* Esc */ if(kvm.tick('{esc}')){kvm.execute('{esc}');return(kvm.pop());} break;
-			case 109: /* -   */ if(kvm.tick('{-}'  )){kvm.execute('{-}'  );return(kvm.pop());} break;
-			case 107: /* +   */ if(kvm.tick('{+}'  )){kvm.execute('{+}'  );return(kvm.pop());} break;
-			case 112: /* F1  */ if(kvm.tick('{F1}' )){kvm.execute('{F1}' );return(kvm.pop());} break;
-			case 113: /* F2  */ if(kvm.tick('{F2}' )){kvm.execute('{F2}' );return(kvm.pop());} break;
-			case 114: /* F3  */ if(kvm.tick('{F3}' )){kvm.execute('{F3}' );return(kvm.pop());} break;
-			case 115: /* F4  */ if(kvm.tick('{F4}' )){kvm.execute('{F4}' );return(kvm.pop());} break;
-			case 116: /* F5  */ if(kvm.tick('{F5}' )){kvm.execute('{F5}' );return(kvm.pop());} break;
-			case 117: /* F6  */ if(kvm.tick('{F6}' )){kvm.execute('{F6}' );return(kvm.pop());} break;
-			case 118: /* F7  */ if(kvm.tick('{F7}' )){kvm.execute('{F7}' );return(kvm.pop());} break;
-			case 119: /* F8  */ if(kvm.tick('{F8}' )){kvm.execute('{F8}' );return(kvm.pop());} break;
-			case 120: /* F9  */ if(kvm.tick('{F9}' )){kvm.execute('{F9}' );return(kvm.pop());} break;
-			case 121: /* F10 */ if(kvm.tick('{F10}')){kvm.execute('{F10}');return(kvm.pop());} break;
-			case 122: /* F11 */ if(kvm.tick('{F11}')){kvm.execute('{F11}');return(kvm.pop());} break;
-			case 123: /* F12 */ if(kvm.tick('{F12}')){kvm.execute('{F12}');return(kvm.pop());} break;
-			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}')){kvm.execute('{ctrl-break}');return(kvm.pop());} break;
-			case   8: /* Back space */ if(kvm.tick('{backSpace}' )){kvm.execute('{backSpace}' );return(kvm.pop());} break; // disable the [switch previous page] function
+			case  27: /* Esc */ if(vm.tick('{esc}')){vm.execute('{esc}');return(vm.pop());} break;
+			case 109: /* -   */ if(vm.tick('{-}'  )){vm.execute('{-}'  );return(vm.pop());} break;
+			case 107: /* +   */ if(vm.tick('{+}'  )){vm.execute('{+}'  );return(vm.pop());} break;
+			case 112: /* F1  */ if(vm.tick('{F1}' )){vm.execute('{F1}' );return(vm.pop());} break;
+			case 113: /* F2  */ if(vm.tick('{F2}' )){vm.execute('{F2}' );return(vm.pop());} break;
+			case 114: /* F3  */ if(vm.tick('{F3}' )){vm.execute('{F3}' );return(vm.pop());} break;
+			case 115: /* F4  */ if(vm.tick('{F4}' )){vm.execute('{F4}' );return(vm.pop());} break;
+			case 116: /* F5  */ if(vm.tick('{F5}' )){vm.execute('{F5}' );return(vm.pop());} break;
+			case 117: /* F6  */ if(vm.tick('{F6}' )){vm.execute('{F6}' );return(vm.pop());} break;
+			case 118: /* F7  */ if(vm.tick('{F7}' )){vm.execute('{F7}' );return(vm.pop());} break;
+			case 119: /* F8  */ if(vm.tick('{F8}' )){vm.execute('{F8}' );return(vm.pop());} break;
+			case 120: /* F9  */ if(vm.tick('{F9}' )){vm.execute('{F9}' );return(vm.pop());} break;
+			case 121: /* F10 */ if(vm.tick('{F10}')){vm.execute('{F10}');return(vm.pop());} break;
+			case 122: /* F11 */ if(vm.tick('{F11}')){vm.execute('{F11}');return(vm.pop());} break;
+			case 123: /* F12 */ if(vm.tick('{F12}')){vm.execute('{F12}');return(vm.pop());} break;
+			case   3: /* ctrl-break */ if(vm.tick('{ctrl-break}')){vm.execute('{ctrl-break}');return(vm.pop());} break;
+			case   8: /* Back space */ if(vm.tick('{backSpace}' )){vm.execute('{backSpace}' );return(vm.pop());} break; // disable the [switch previous page] function
 		}
 		return (true); // pass down to following handlers
 	}

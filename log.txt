@@ -3824,4 +3824,11 @@
 	o	print --> type 
 	o	kvm --> vm
 
+[ ] html5.f , element.f 的 selftest 都很欠缺，無聊寫寫。
+[ ] 3htm 的 platform.f 裡又有 (help) help 用來超漂亮的 help .... 也得改寫.
+	---> keyboard events 有問題,回家繼續 debug
+
+
+
+
 	

@@ -40,10 +40,10 @@
 	: se ( element -- ) \ See the element
 		dup children ( -- element array ) <js> 
 			var i=0, a=pop(), element=pop(); if (typeof(element)=='object') {
-				print(node(element)+'\n');
+				type(node(element)+'\n');
 				for(; i<a.length; i++){
-					push(i);fortheval('5 .r');
-					print(" : " + node(a[i]) + '\n');
+					push(i);dictate('5 .r');
+					type(" : " + node(a[i]) + '\n');
 				}
 			}
 			function attr(ele,att) {
@@ -120,11 +120,11 @@
 	
 	0 value body.children // ( -- array ) the window.body children array
 	: test
-	eleBody js> kvm.appname char jeforth.3hta == if :> firstChild then ( -- body or HTA )
+	eleBody js> vm.appname char jeforth.3hta == if :> firstChild then ( -- body or HTA )
 	100 []children to body.children
 	body.children dup :> length ( -- array len )
 	<js> for(var i=0,l=pop(),a=pop(); i<l; i++) {
-		print(i+":"+a[i].toString()+'\n')
+		type(i+":"+a[i].toString()+'\n')
 	} </js>
 	;
 	
