@@ -68,15 +68,12 @@
 				var qq = $.get(q,'text');
 				(function retry(){
 					if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
-					// if(kk.state()=="pending"||rr.state()=="pending")
 						setTimeout(retry,100); 
 					else {
 						if (kk.status!=200) kvm.panic("Error! Failed to read " + k + '\n');
 						else if (rr.status!=200) kvm.panic("Error! Failed to read " + r + '\n');
 						else if (qq.status!=200) kvm.panic("Error! Failed to read " + q + '\n');
 						else kvm.dictate(kk.responseText+rr.responseText+qq.responseText);
-						// else kvm.dictate(kk.responseText+rr.responseText);
-						// else kvm.dictate(kk.responseText);
 					}
 				})();
 			}                       

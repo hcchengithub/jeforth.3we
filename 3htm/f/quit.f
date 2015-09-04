@@ -44,7 +44,7 @@
 		to drop a breakpoint. "msg" shows you which
 		breakpoint it is.
 
-	</text> <js> kvm.jsc.help=pop().replace(/^[\t ]*/gm,"")</js> \ remove leading Tab's and spaces
+	</text> <js> vm.jsc.help=pop().replace(/^[\t ]*/gm,"")</js> \ remove leading Tab's and spaces
 	<text>
 		(function(){
 			var _cmd_ = "";
@@ -77,7 +77,7 @@
 				}
 			}
 		})()
-	</text> js: kvm.jsc.xt=pop()
+	</text> js: vm.jsc.xt=pop()
 
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
@@ -107,6 +107,7 @@
 	js: tick('<selftest>').buffer="" \ recycle the memory
 
 	include voc.f			\ voc.f is basic of forth language
+stop	
 	include html5.f			\ html5.f is basic of jeforth.3htm
 	include element.f		\ HTML element manipulation
 	include platform.f		

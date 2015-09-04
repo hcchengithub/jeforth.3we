@@ -1694,13 +1694,14 @@
 					}
 					push(result);
 					end-code
-					/// option: 
+					/// Options: 
 					/// -n pattern in name
 					/// -N pattern is exact name 
 					/// -t pattern in type 
 					/// -T pattern is exact type
+					/// If no option given then pattern matches all names, helps and comments.
 
-	: words			( <[pattern [switch]]> -- ) \ List words of name/help/comments screened by pattern.
+	: words			( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
 					js> context char \r|\n word ( forth line )
 					<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
 					js> tos()[0] swap js> tos()[1] nip (words) <js>
@@ -1710,39 +1711,63 @@
 						type(w);
 					</js> ;
 					/// Original version
-					/// Pattern matches name, help and comments.
+					last :: comment+=tick("(words)").comment
+					/// An empty pattern matches all words.
+
+	: (help)		( "word-list" "[pattern [switch]]" -- "msg" ) \ Get help message of screened words
+					\ js> context swap ( voc line )
+					<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
+					js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
+					<js>
+						var word_list = pop();
+						for (var ss="",i=0; i<word_list.length; i++) {
+							ss += word_list[i]+"\n"; // help of the word
+							if (typeof(word_list[i].comment) != "undefined") ss += word_list[i].comment;
+						};ss
+					</jsV> ;
+					/// Original version
 					last :: comment+=tick("(words)").comment
 
-	: (help)		( "word-list" "[pattern [switch]]" -- ) \ Print help message of screened words
+	: help			( <["pattern" [-n|-N|-t|-T]]> -- ) \ Print the help of screened words
+					js> context char \n|\r word ( voc pattern )
 					js> tos().length if 
-						\ js> context swap ( voc line )
-						<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
-						js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
-						<js>
-							var word_list = pop();
-							for (var i=0; i<word_list.length; i++) {
-								type(word_list[i]+"\n");
-								if (typeof(word_list[i].comment) != "undefined") type(" "+word_list[i].comment+"\n");
-							}
-						</js>
+						dup char * = if drop "" then (help) .
 					else
-						2drop
-						<text>
-							words [<pattern> [-n|-N|-t|-T]] : Print matched words
-							help  [<pattern> [-n|-N|-t|-T]] : Print help message of matched words
-							see <word> : See details of the word
-						</text> <js> pop().replace(/^[ \t]*/gm,'  ')</jsV> . cr
+						2drop version drop
+						[ \ 先存起來,供往後新版引用.
+							<text>
+							
+								Basic commands that bring you the whole jeforth world.
+								
+								-- words --
+								Try 'words' command to view all words. It has following options:
+								> words [<pattern> [-n|-N|-t|-T]] 
+								that prints not all but matched words. Try,
+								> help words -N
+								to view more help of 'words' command. 
+								
+								-- help --
+								You are viewing 'help' now. Yet it has more options, try
+								> help  [<pattern> [-n|-N|-t|-T]]
+								that prints the help of matched words.
+								> help *
+								that prints all words' help.
+								
+								-- see --
+								Use 'see' command to view the definition of a word.
+								> see <word> 
+							</text> <js> pop().replace(/^[ \t]*/gm,'')</jsV> 
+							last :: general_help=pop()
+							last literal
+						] :> general_help . cr
 					then ;
 					/// Original version
-					/// Pattern matches name, help and comments.
 					last :: comment+=tick("(words)").comment
-
-	: help			( [<pattern> [-n|-N|-t|-T]] -- ) \ Print the help of screened words
-					js> context char \n|\r word (help) ;
-					/// Original version
-					/// Pattern matches name, help and comments.
-					last :: comment+=tick("(words)").comment
-
+					/// A pattern of star '*' matches all words.
+					/// Example: 
+					///   help * <-- show help of all words
+					///   help * -N <-- show help of '*' command
+					
 					<selftest>
 						<text>
 						本來 words help 都接受 RegEx 的，可是不好用。現已改回普通 non RegEx pattern. 只動
@@ -2027,5 +2052,5 @@
 		\	[if] \ We have jobs from command line to do. Disable self-test.
 		\		js: tick('<selftest>').enabled=false
 		\	[else] \ We don't have jobs from command line to do. So we do the self-test.
-				js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
-			[then] js: tick('<selftest>').buffer="" \ recycle the memory
+		\		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
+		\	[then] js: tick('<selftest>').buffer="" \ recycle the memory

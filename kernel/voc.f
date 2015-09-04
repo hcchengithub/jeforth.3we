@@ -73,7 +73,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				dup js: words[pop()]=[];words[pop()].push(0) ( empty ) \ words[][0] = 0 是源自 jeforth.WSH 的設計。
 				<js> 
 					last().type='colon-vocabulary';
-					last().help = newname + " " + "( -- ) I am a vocabulary. I switch word-list.";
+					last().help = "( -- ) I am a vocabulary. I switch word-list.";
 				</js>
 				immediate \ 要在 colon definition 裡切換 word-list 所以是 immediate。 
 				does> r> @ set-context rescan-word-hash ;
@@ -202,9 +202,8 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				execute("parse-help"); // ( "helpmsg" "rests" )
 				tib = pop() + " " + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
 				var h = pop(); // help messages packed
-				
 				if(h.indexOf("No help message")!=-1) h = "( -- ) I am a marker.";
-				last().help =newname + " " + h;
+				last().help = h;
 				dictate("get-vocs"); last().vocswas = pop(); 
 				last().orderwas = orderwas;  // FigTaiwan 爽哥提醒 // dynamic variable array 的 reference 給了別人之後就不會蒸發掉了。
 				// --------------------- the restore phase ----------------------------------
@@ -241,7 +240,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					[d true,false d] [p '(marker)','marker' p]
 				</selftest>
 
-code words		( <[pattern [switch]]> -- ) \ List all words or words screened by spec.
+code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
 				var spec = nexttoken("\\r|\\n").replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 					push(order[j]); // vocabulary
@@ -256,15 +255,8 @@ code words		( <[pattern [switch]]> -- ) \ List all words or words screened by sp
 				}
 				execute("cr");
                 end-code interpret-only
-				/// Modified by voc.f.
-				/// Usage: words ["pattern" [-t|-T|-n|-N]]
-				/// None or one of the following switches:
-				///	  -n matches partial name pattern, case insensitive.
-				///	  -N matches exact name, case sensitive.
-				///   -t matches partial type pattern, case insensitive.
-				///   -T matches exact type, case sensitive.
-				/// If none of the aboves is given then pattern matches 
-				/// all names, helps and comments.
+				/// Modified by voc.f to support vocabulary.
+				last :: comment+=tick("(words)").comment
 				/// Example: words ! -n
 
 				<selftest>
@@ -280,67 +272,46 @@ code words		( <[pattern [switch]]> -- ) \ List all words or words screened by sp
 					---
 				</selftest>
 
-code (help)		( "[pattern [switch]]" -- )  \ Print help message of screened words
-				var spec = pop();
-				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(option.v) 
-						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
-					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
-					var ss = "";
-					if(option.sw) push(option.sw); else push(""); 
-					push(order[j]); push(option.pattern); execute("(words)");
-					var word_list = pop();
-					for (var i=0; i<word_list.length; i++) {
-						ss += word_list[i]+"\n";
-						if (typeof(word_list[i].comment) != "undefined") ss += word_list[i].comment;
+: help			( <[pattern [switch]]> -- )  \ Print help message of screened words
+				char \r|\n word ( spec )
+				js> tos().length if 
+					<js>
+					var spec = pop();
+					for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
+						push(order[j]); // vocabulary
+						push(spec=='*'?"":spec); // "[pattern [switch]]" or "" if spec is '*'
+						execute("(help)");
+						if (tos()){
+							type("\n-------- " + order[j] + " --------\n"); 
+							execute('.');
+						} else pop();
 					}
-					if (i) { type(voc); type(ss); }
-				} 
-				end-code
-				/// Modified by voc.f to support vocabulary
-				/// Usage: help ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
-				/// None or one of the vocabulary selector:
-				///	  -v for matching partial vocabulary name, case insensitive.
-				///	  -V is -v and lock, -V- to unlock.
-				/// None or one of the following switches:
-				///	  -n matches only name pattern, case insensitive.
-				///	  -N matches exact name, case sensitive.
-				///   -t matches type pattern, case insensitive.
-				///   -T matches exact type, case sensitive.
-				/// If none of the aboves is given then pattern matches 
-				/// all names, helps and comments.
-				
-: help			( [<pattern>] -- )  \ Print help message of screened words
-                char \n|\r word (help) ;
-				' (help) last :: comment=pop().comment
-				/// Example: help - (Show all words)
+					</js>
+					cr
+				else
+					drop cr version drop
+					\ general-help message 引用原來的.
+					['] help :> general_help . cr
+				then ; 
+				/// Modified by voc.f to support vocabulary.
+				last :: comment+=tick("(words)").comment
+				/// A pattern of star '*' matches all words.
+				/// Example: 
+				///   help * <-- show help of all words
+				///   help * -N <-- show help of '*' command
 
-code help		( <[pattern [switch]]> -- )  \ Print help message of screened words
-				var spec = nexttoken("\\r|\\n");
-				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					push(order[j]); // vocabulary
-					push(spec); // [pattern [switch]]
-					execute("(help)"); // [words...] js> context char \n|\r word (help) 
-					if (tos().length) { 
-						type("\n-------- " + order[j] +" ("+ tos().length + " words) --------\n"); 
-						for(var i=0; i<tos().length; i++) type(tos()[i].name+" ");
-					}
-					pop();
-				}
-				execute("cr");
-                end-code interpret-only
-				/// Modified by voc.f.
-				/// Usage: words ["pattern" [-t|-T|-n|-N]]
-				/// None or one of the following switches:
-				///	  -n matches partial name pattern, case insensitive.
-				///	  -N matches exact name, case sensitive.
-				///   -t matches partial type pattern, case insensitive.
-				///   -T matches exact type, case sensitive.
-				/// If none of the aboves is given then pattern matches 
-				/// all names, helps and comments.
-				/// Example: words ! -n
+				<selftest>
+					marker ---
+					*** help modified for volcabulary ... 
+					js: vm.selftest_visible=false;vm.screenbuffer=""
+					help \
+					js: vm.selftest_visible=true
+					<js> vm.screenbuffer.indexOf("-- forth --")!=-1 </jsV> \ true
+					<js> vm.screenbuffer.indexOf("Comment down to the next")!=-1 </jsV> \ true
+					[d true,true d] [p "help" p]
+					---
+				</selftest>
 
-				
 : ?skip2		( "name.f" <EOF> -- "name.f" |empty ) \ skip to <EOF> to avoid double including
 				dup (') 			( name.f exist? )
 				BL word swap 		( name.f eof exist? )
@@ -357,19 +328,6 @@ code help		( <[pattern [switch]]> -- )  \ Print help message of screened words
 				/// can not call itself recursively so as to avoid from confusing the suspend-level.
 				/// While 'include' used to utilize dictate() that is now replaced by "tib.insert".
 				/// Use ?skip2 at the beginning of a .f file if you don't want it to be double included.
-
-				<selftest>
-					marker ---
-					*** help modified for volcabulary ... 
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
-					js: kvm.selftest_visible=false
-					help \
-					js: kvm.selftest_visible=true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("--------- forth (")!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("words) ---------")!=-1 </jsV> \ true true
-					[d true,true d] [p "help" p]
-					---
-				</selftest>
 
 <selftest> --voc.f-self-test-- </selftest>
 js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 
