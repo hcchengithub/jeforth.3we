@@ -201,7 +201,6 @@
 						生的「未來 words」, 對寫程式時的頭腦有很大的幫助。 
 						</comment>
 						
-						marker ~~selftest~~ // ( -- ) marker, clean entire selftest things.
 						"" value description // ( -- "text" ) description of a selftest section
 						[] value expected_rstack // ( -- [..] ) an array to compare rstack
 						[] value expected_stack // ( -- [..] ) an array to compare data stack
@@ -241,6 +240,7 @@
 						: p] ( -- boolean ) \ all-pass if test-result
 							test-result if [all-pass] all-pass then ;
 
+						marker ~~selftest~~ // ( -- ) marker, clean selftest garbage
 						.( *** Start self-test ) cr
 						*** Data stack should be empty
 							depth [d 0 d] 

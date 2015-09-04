@@ -329,6 +329,22 @@ code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screene
 				/// While 'include' used to utilize dictate() that is now replaced by "tib.insert".
 				/// Use ?skip2 at the beginning of a .f file if you don't want it to be double included.
 
+: temp			( -- ) \ The source-code-file.f header macro 
+				<text>
+					?skip2 --EOF-- \ skip it if already included
+					dup .( Including ) . cr char -- over over + +
+					js: tick('<selftest>').masterMarker=tos()+"selftest--";
+					also forth definitions (marker) (vocabulary)
+					last execute definitions
+					<selftest>
+						js> tick('<selftest>').masterMarker (marker)
+					</selftest>
+				</text> tib.insert ;
+				js: last().name="source-code"+"-header"
+				/// skip including if the module has been included.
+				/// setup the self-test module
+				/// initiate vocabulary for the including module
+
 <selftest> --voc.f-self-test-- </selftest>
 js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 
 js: tick('<selftest>').buffer="" \ recycle the memory

@@ -107,9 +107,9 @@
 	js: tick('<selftest>').buffer="" \ recycle the memory
 
 	include voc.f			\ voc.f is basic of forth language
-stop	
 	include html5.f			\ html5.f is basic of jeforth.3htm
 	include element.f		\ HTML element manipulation
+stop	
 	include platform.f		
 	include mytools.f		
 

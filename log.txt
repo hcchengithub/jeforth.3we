@@ -3817,10 +3817,11 @@
 [ ] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
 
 [ ] 大改寫, 
-	o  所有 g.sth 改成 vm.g.sth
-	o  fortheval --> dictate
-	o  (words) words , voc.f words ok 
-	[ ] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配. 
-		(help) 不該負責印系統 help
-		
+	[x] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配. 
+		(help) 不該負責印系統 help --> (words) words , voc.f words help ok
+	o	所有 g.sth 改成 vm.g.sth
+	o	fortheval --> dictate
+	o	print --> type 
+	o	kvm --> vm
+
 	
