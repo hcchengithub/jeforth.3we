@@ -241,7 +241,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 				</selftest>
 
 code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
-				var spec = nexttoken("\\r|\\n").replace(/\s+/g," ").split(" "); // [pattern,option,rests]
+				var spec = nexttoken("\r|\n").replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 					push(order[j]); // vocabulary
 					push(spec[0]||""); // pattern
@@ -329,7 +329,7 @@ code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screene
 				/// While 'include' used to utilize dictate() that is now replaced by "tib.insert".
 				/// Use ?skip2 at the beginning of a .f file if you don't want it to be double included.
 
-: temp			( -- ) \ The source-code-file.f header macro 
+: source-code-header ( -- ) \ The source-code-file.f header macro 
 				<text>
 					?skip2 --EOF-- \ skip it if already included
 					dup .( Including ) . cr char -- over over + +
@@ -340,7 +340,6 @@ code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screene
 						js> tick('<selftest>').masterMarker (marker)
 					</selftest>
 				</text> tib.insert ;
-				js: last().name="source-code"+"-header"
 				/// skip including if the module has been included.
 				/// setup the self-test module
 				/// initiate vocabulary for the including module

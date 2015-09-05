@@ -7,10 +7,10 @@ code tib.       ( result -- ) \ Print the command line and the TOS.
 				var L1 = cmd.length;
 				cmd = cmd.replace(/\s*""\s*$/,""); // remove the ending ""
 				var L2 = cmd.length;
-				print(cmd+" \\ ==> ");
-				if (L1==L2) print(tos() + " (" + mytypeof(pop()) + ")");
+				type(cmd+" \\ ==> ");
+				if (L1==L2) type(tos() + " (" + mytypeof(pop()) + ")");
 				else pop();
-				print('\n');
+				type('\n');
 				end-code 
 				/// Good for experiments that need to show command line and the result.
 				/// "" tib. prints the command line only, w/o the TOS.
@@ -61,12 +61,12 @@ code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do any
 				/// 'freeze' is not a good word, it totally blocks the entire system, useless maybe.
 				/// Try 'sleep' instead.
 
-code .longwords ( length -- ) \ print long words. I designed this word for fun to see what are they.
+code .longwords ( length -- ) \ type long words. I designed this word for fun to see what are they.
 				var limit = pop();
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					print("\n-------- " + order[j] +" "+ (words[order[j]].length-1) + " words --------\n" );
+					type("\n-------- " + order[j] +" "+ (words[order[j]].length-1) + " words --------\n" );
 					for (var i=1; i<words[order[j]].length; i++){  // 從舊到新
-						if(words[order[j]][i].name.length > limit) print(words[order[j]][i].name+" ");
+						if(words[order[j]][i].name.length > limit) type(words[order[j]][i].name+" ");
 					}
 				}
                 end-code

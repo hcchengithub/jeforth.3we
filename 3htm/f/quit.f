@@ -105,12 +105,10 @@
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] 
 	js: tick('<selftest>').buffer="" \ recycle the memory
-
 	include voc.f			\ voc.f is basic of forth language
 	include html5.f			\ html5.f is basic of jeforth.3htm
 	include element.f		\ HTML element manipulation
 	include platform.f		
-stop	
 	include mytools.f		
 
 \ ----------------- run the command line -------------------------------------

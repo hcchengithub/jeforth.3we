@@ -3827,8 +3827,10 @@
 [ ] html5.f , element.f 的 selftest 都很欠缺，無聊寫寫。
 [ ] 3htm 的 platform.f 裡又有 (help) help 用來超漂亮的 help .... 也得改寫.
 	---> keyboard events 有問題,回家繼續 debug
+[x] Error! source-code-header unknown.
 
-
-
-
-	
+[ ] jeforth.3we 的 'kernel' directory 直接就是 project-k 以免搞不清楚.
+	本來認為是 kernel 的 jeforth.f 跟 voc.f 則搬到 f 裡去。不當作 kernel 了。
+	[ ]	這個要把 kernel 拿掉, 以 3htm 為例,
+		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+	[ ] twist cub.html on going . . . so as to make a project-k release

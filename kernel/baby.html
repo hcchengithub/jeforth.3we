@@ -48,8 +48,7 @@
         jQuery(document).ready(
             function() {
                 document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-                vm.init(type); // Introduce I/O to Forth VM
-                // vm.dictate() is the only Forth command interface.
+                // vm.dictate() is the Forth command interface.
                 // Send a command line string, or an entire source code file into the Forth VM through
                 // this interface.
                 vm.dictate(source_code.value); 
@@ -100,10 +99,10 @@
 code //     var s = nexttoken('\n|\r'); last().help = s; end-code 
             // ( <comment> -- ) Give help message to the last word.
 code cls    vm.clearScreen() end-code // ( -- ) Clear output area
-code words  for(var i=1; i<words.root.length; i++) type(words.root[i].name+" ") end-code 
+code words  for(var i=1; i<words.forth.length; i++) type(words.forth[i].name+" ") end-code 
             // ( -- ) List all words
-code help   for(var i=1; i<words.root.length; i++) 
-            type(words.root[i].name+" "+words.root[i].help+'\n') 
+code help   for(var i=1; i<words.forth.length; i++) 
+            type(words.forth[i].name+" "+words.forth[i].help+'\n') 
             end-code // ( -- ) List all words' help message
 code hide   $("#source_box").hide() end-code // ( -- ) Hide the source code box by jQuery.
 code show   $("#source_box").show() end-code // ( -- ) Show the source code box by jQuery.

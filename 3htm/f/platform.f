@@ -214,7 +214,7 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					</table>
 				</text> ( word html )
 				js> pop().replace(/_name_/,vm.plain(tos().name))
-				js> pop().replace(/_help_/,vm.plain(tos().help.match(/^\S+\s*(.*?)\s*$/)[1]))
+				js> pop().replace(/_help_/,vm.plain(tos().help))
 				js>	pop().replace(/_type_/,vm.plain(tos().type))
 				js>	pop().replace(/_vid_/,vm.plain(tos().vid))
 				( word html ) <js> 
@@ -233,16 +233,16 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 				</js> 
 				</o> 2drop ;
 
-code (help)		( "pattern" -- )  \ Print help message of screened words
-				execute("parser(words,help)"); var option = pop();
+code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened words
+				// execute("parser(words,help)"); var option = pop();
+				var spec = pop().replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(option.v) 
-						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
-					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
-					// 取得範圍內的 words into word_list
-					if(option.sw) push(option.sw); else push(""); 
-					push(order[j]); push(option.pattern); execute("(words)");
+					push(order[j]); // vocabulary
+					push(spec[0]||""); // pattern
+					push(spec[1]||""); // option
+					execute("(words)"); // [words...]
 					var word_list = pop();
+					var voc = "\n--------- " + order[j] +" ("+ word_list.length + " words) ---------\n";
 					// 印出
 					if (word_list.length) type(voc);
 					for (var i=0; i<word_list.length; i++) {
@@ -251,22 +251,20 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 				} 
 				end-code
 				/// Modified by platform.f for HTML table.
-				/// Usage: help ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
-				/// None or one of the vocabulary selector:
-				///	  -v for matching partial vocabulary name, case insensitive.
-				///	  -V is -v and lock, -V- to unlock.
-				/// None or one of the following switches:
-				///	  -n matches only name pattern, case insensitive.
+				/// Pattern matches name, help and comment.
+				/// It can be qualified by an option of:
+				///	  -n matches name pattern, case insensitive.
 				///	  -N matches exact name, case sensitive.
 				///   -t matches type pattern, case insensitive.
 				///   -T matches exact type, case sensitive.
-				/// If none of the aboves is given then pattern matches 
-				/// all names, helps and comments.
-				/// Example: help -V excel.f -n app
-				/// Example: help - (Show all words)
+				/// Example: 
+				///   help ! -n  shows words with '!' in their name
 
-: help			( [<patthern>] -- )  \ Print help message of screened words
-                char \n|\r word js> tos().length if (help) else
+: help			( <[pattern [-t|-T|-n|-N]]> -- )  \ Print help message of screened words
+                char \n|\r word js> tos().length if 
+					js> tos()=='*' if drop "" then
+					(help) 
+				else
 					drop js> typeof(help3we)=='object' if else
 						<o> <style id=help3we>
 							.help3we table, .help3we td , .help3we th, .help3we caption {
@@ -383,8 +381,11 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 						
 					</o> drop
 				then ;
-				' (help) last :: comment=pop().comment
-				/// Example: help (Show basic usages)
+				last :: comment=tick('(help)').comment
+				/// A pattern of '*' means all words.
+				/// Example: 
+				///   help *     shows all words
+
 
 <js>
 	vm.cmdhistory = {
@@ -410,7 +411,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (vm.tick('beep')) vm.beep();
+					if (tick('beep')) vm.beep();
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -423,7 +424,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (vm.tick('beep')) vm.beep();
+					if (tick('beep')) vm.beep();
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -433,17 +434,17 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
-			case   9: /* Tab  */ if(vm.tick('{Tab}' )){vm.execute('{Tab}' );return(vm.pop());} break;
-			case  38: /* Up   */ if(vm.tick('{up}'  )){vm.execute('{up}'  );return(vm.pop());} break;
-			case  40: /* Down */ if(vm.tick('{down}')){vm.execute('{down}');return(vm.pop());} break;
-		 // case  77: /* M    */ if(vm.tick('{M}'   )){vm.execute('{M}'   );return(vm.pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
+			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
+			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
+			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
+		 // case  77: /* M    */ if(tick('{M}'   )){execute('{M}'   );return(pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
 		}
 		return (true); // pass down to following handlers
 	}
 
 	document.onkeydown = function (e) {
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
-		if(vm.tick('{Tab}')){if(keycode!=9)vm.tick('{Tab}').index=0} // 按過別的 key 就重來
+		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
 			case 13:
 				if (!vm.EditMode || event.ctrlKey) { // CtrlKeyDown
@@ -454,23 +455,23 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					return(false);
 				}
 				return(true); // In EditMode
-			case  27: /* Esc */ if(vm.tick('{esc}')){vm.execute('{esc}');return(vm.pop());} break;
-			case 109: /* -   */ if(vm.tick('{-}'  )){vm.execute('{-}'  );return(vm.pop());} break;
-			case 107: /* +   */ if(vm.tick('{+}'  )){vm.execute('{+}'  );return(vm.pop());} break;
-			case 112: /* F1  */ if(vm.tick('{F1}' )){vm.execute('{F1}' );return(vm.pop());} break;
-			case 113: /* F2  */ if(vm.tick('{F2}' )){vm.execute('{F2}' );return(vm.pop());} break;
-			case 114: /* F3  */ if(vm.tick('{F3}' )){vm.execute('{F3}' );return(vm.pop());} break;
-			case 115: /* F4  */ if(vm.tick('{F4}' )){vm.execute('{F4}' );return(vm.pop());} break;
-			case 116: /* F5  */ if(vm.tick('{F5}' )){vm.execute('{F5}' );return(vm.pop());} break;
-			case 117: /* F6  */ if(vm.tick('{F6}' )){vm.execute('{F6}' );return(vm.pop());} break;
-			case 118: /* F7  */ if(vm.tick('{F7}' )){vm.execute('{F7}' );return(vm.pop());} break;
-			case 119: /* F8  */ if(vm.tick('{F8}' )){vm.execute('{F8}' );return(vm.pop());} break;
-			case 120: /* F9  */ if(vm.tick('{F9}' )){vm.execute('{F9}' );return(vm.pop());} break;
-			case 121: /* F10 */ if(vm.tick('{F10}')){vm.execute('{F10}');return(vm.pop());} break;
-			case 122: /* F11 */ if(vm.tick('{F11}')){vm.execute('{F11}');return(vm.pop());} break;
-			case 123: /* F12 */ if(vm.tick('{F12}')){vm.execute('{F12}');return(vm.pop());} break;
-			case   3: /* ctrl-break */ if(vm.tick('{ctrl-break}')){vm.execute('{ctrl-break}');return(vm.pop());} break;
-			case   8: /* Back space */ if(vm.tick('{backSpace}' )){vm.execute('{backSpace}' );return(vm.pop());} break; // disable the [switch previous page] function
+			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
+			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
+			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
+			case 112: /* F1  */ if(tick('{F1}' )){execute('{F1}' );return(pop());} break;
+			case 113: /* F2  */ if(tick('{F2}' )){execute('{F2}' );return(pop());} break;
+			case 114: /* F3  */ if(tick('{F3}' )){execute('{F3}' );return(pop());} break;
+			case 115: /* F4  */ if(tick('{F4}' )){execute('{F4}' );return(pop());} break;
+			case 116: /* F5  */ if(tick('{F5}' )){execute('{F5}' );return(pop());} break;
+			case 117: /* F6  */ if(tick('{F6}' )){execute('{F6}' );return(pop());} break;
+			case 118: /* F7  */ if(tick('{F7}' )){execute('{F7}' );return(pop());} break;
+			case 119: /* F8  */ if(tick('{F8}' )){execute('{F8}' );return(pop());} break;
+			case 120: /* F9  */ if(tick('{F9}' )){execute('{F9}' );return(pop());} break;
+			case 121: /* F10 */ if(tick('{F10}')){execute('{F10}');return(pop());} break;
+			case 122: /* F11 */ if(tick('{F11}')){execute('{F11}');return(pop());} break;
+			case 123: /* F12 */ if(tick('{F12}')){execute('{F12}');return(pop());} break;
+			case   3: /* ctrl-break */ if(tick('{ctrl-break}')){execute('{ctrl-break}');return(pop());} break;
+			case   8: /* Back space */ if(tick('{backSpace}' )){execute('{backSpace}' );return(pop());} break; // disable the [switch previous page] function
 		}
 		return (true); // pass down to following handlers
 	}

@@ -11,15 +11,15 @@
 			}
     </style>
     <script src="js/jquery-1.11.2.js"></script>
-	<!-- Script src="kernel/jeforth.js"></Script -->
-	<Script src="playground/project-k/jeforth.js"></Script>
+	<Script src="kernel/jeforth.js"></Script>
 	<script id=js>
 	var kvm = new jeForth();
 	(function(){
-		kvm.version = "2.00";
+		kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window; // DOM window is the root for 3HTM.
-		kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3htm", "playground", "playground/project-k"];
+		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true;
 		var type = kvm.type = function (s) { 
@@ -40,10 +40,10 @@
 			$('#outputbox').empty();
 		}
 		kvm.greeting = function(){
-			type("j e f o r t h . 3 h t m -- v"+kvm.version+'\n');
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
 			type("source code http://github.com/hcchengithub/jeforth.3we\n");
 			type("Program path " + window.location.toString());
-			return(parseFloat(kvm.version));
+			return(version);
 		}
 		kvm.debug = false;
 		kvm.jsc = {xt:'type("Sorry, jsc is not available yet.")',prompt:"jsc>"};
@@ -56,11 +56,11 @@
 		jQuery(document).ready(
 			// jQuery convention, learned from W3School, make sure web page is ready.
 			function() {
-				$('#rev').html(kvm.version); // also .commandLine, .applicationName, ...
+				$('#rev').html(version); // also .commandLine, .applicationName, ...
 				$('#location').html(window.location.toString()); // it's built-in in DOM
 				$('.appname').html(kvm.appname); // 一次填好所有 appname
 				document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-				var k = "playground/project-k/jeforth.f"; // was var k = "kernel/jeforth.f";
+				var k = "kernel/jeforth.f"; // was var k = "kernel/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
 				var q = "3htm/f/quit.f";
 				var kk = $.get(k,'text'); // callback only when success, not suitable, 
