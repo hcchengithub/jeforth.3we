@@ -101,7 +101,8 @@
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		function hotKeyHandler(e) {
-			switch(e.keyCode) {
+			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+			switch(keyCode) {
 				case 13: /* Enter */
 					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。

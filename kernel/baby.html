@@ -9,7 +9,7 @@
                 background:#E0E0E0;
             }
     </style>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>	
+	<script type="text/javascript" src="http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js"></script>	
     <Script src="jeforth.js"></Script>
     <script id=js>
     window.vm = new jeForth();
@@ -67,7 +67,8 @@
         // event.shiftKey event.ctrlKey event.altKey event.metaKey
         // KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
         function hotKeyHandler(e) {
-            switch(e.keyCode) {
+			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+			switch(keyCode) {
                 case 13: /* Enter */
                     if(event.ctrlKey) {
                         vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
@@ -112,7 +113,11 @@ code +      push(pop(1)+pop()) end-code // ( a b -- a+b ) Add two numbers or str
 code .s     for(var i=0; i<stack.length; i++) type(i + ": " + stack[i] + '\n') end-code // ( -- ) Dump data stack
 code s"     push(nexttoken('"'));nexttoken() end-code // ( <string> -- "string" ) String
     </textarea></div></div><hr>
-    <div><i>Input box -- Ctrl-Enter to execute. Try 'help' command.</i><textarea id="inputbox" cols=100 rows=4></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div></div>
+    <div><i>Input box -- Ctrl-Enter to execute. Try 'help' command.</i><br>
+	<textarea id="inputbox" cols=100 rows=4></textarea>
+	<a id=jump2endofinputbox href="#endofinputbox"></a>
+	<div id=endofinputbox></div>
+	</div>
 </body>
 </html>
 

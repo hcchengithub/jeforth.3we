@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title class=appname>jeforth cub</title>
+    <title class=appname>jeforth demo - the cub</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" type="text/css" href="common.css">
     <style id=styleTextareaFocus type="text/css">
@@ -9,14 +9,14 @@
                 background:#E0E0E0;
             }
     </style>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>	
-    <Script src="jeforth.js"></Script>
-    <script id=js>
+	<script type="text/javascript" src="http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js"></script>	
+    <Script type="text/javascript" src="jeforth.js"></Script>
+    <script>
     window.vm = new jeForth();
     // vm is now the jeforth virtual machine object. It has no idea about the outside world
     // that can be variant applications: HTML, HTA, Node.js, Node-webkit, .. etc.
     // We need to help it a little as the following example:
-    
+
     (function(){
 		// version
 		// minor version specified by application, major version is from jeforth.js kernel.
@@ -25,7 +25,7 @@
 		
         // I/O  
         // Forth vm doesn't know how to 'type'.
-		vm.screenbuffer=""; // for selftest
+		vm.screenbuffer=""; // for self-test
 		vm.selftest_visible=true;
         var type = vm.type = function (s) {
             try {
@@ -34,7 +34,7 @@
                 ss = Object.prototype.toString.apply(s);
             }
 			vm.screenbuffer+=ss;
-			if(vm.selftest_visible) $('#outputbox').append(plain(ss));
+			if(vm.selftest_visible) $('#outputbox').append(plain(ss));  // jquery makes it simple, will be a lot of work otherwise.
         };
 		var panic = vm.panic = function(state){vm.type(state.msg);if(state.level)debugger;}
         
@@ -48,20 +48,15 @@
 			return(version);
         };
 		
-        // The Forth vm has no idea how to clear the display. We know that we will want to 
-        // clear the display so we define vm.clearScreen() here in the application main program.
-        // This is the good place to define application dependent functions. Use the same function 
-        // name for all different applications so your forth.f source code doesn't need to change.
+        // The Forth vm has no idea how to clear the display. This is the good place to define 
+		// application dependent functions. Use the same function name for all different applications 
+		// so the same forth.f source code doesn't need to change.
         function clearScreen(){
             outputbox.innerHTML="";
 			vm.screenbuffer="";
         }
         vm.clearScreen = clearScreen;
 		
-		// debug
-		vm.bp=0 \ breakpoint 
-		vm.continue=0 \ *debug* resume point
-
         // System initialization
         jQuery(document).ready(
             function() {
@@ -85,7 +80,8 @@
         // event.shiftKey event.ctrlKey event.altKey event.metaKey
         // KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
         function hotKeyHandler(e) {
-            switch(e.keyCode) {
+			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+			switch(keyCode) {
                 case 13: /* Enter */
                     if(event.ctrlKey) {
                         vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
@@ -116,7 +112,7 @@
 	<div id="source_box">Source code of basic words. Scroll to view all of them. This area is deposable because definitions are read already.<textarea id="source_code" cols=100 rows=10>
 	code //         last().help = nexttoken('\n|\r'); end-code
 					// ( <comment> -- ) Give help message to the new word.
-	code stop       reset() end-code // ( -- ) Stop the TIB loop
+	code stop       reset();debugger; end-code // ( -- ) Stop the TIB loop
 	code parse-help var ss = " " + pop() + " ", comment = "";
 					var stackDiagram = ss.match(/^\s+(\(\s.*\s\))\s+(.*)/); // null or [0] entire line, [1] (...), [2] the rest.
 					if(stackDiagram) { 
@@ -1592,6 +1588,7 @@
 	\	</js>
 	\
 	js: vm.jsc={} \ JavaScript console
+stop
 	<text>
 		J a v a S c r i p t   c o n s o l e
 		q, exit, quit, or <Esc> : Stop debugging.

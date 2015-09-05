@@ -3834,3 +3834,33 @@
 	[ ]	這個要把 kernel 拿掉, 以 3htm 為例,
 		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
 	[ ] twist cub.html on going . . . so as to make a project-k release
+[ ]	這兩個不必佔用 vm.member , 應該直接放進 *debug* 的 members。
+		// debug
+		vm.bp = 0 // breakpoint 
+		vm.continue = 0 // *debug* resume point
+	[ ] index.html [ ] cub.html
+[ ] some application didn't use this trick
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+	[ ] index.html of 3HTML, [ ] baby.html of project-k, [ ] cub.html of project-k
+[ ] chrome f12 跑出一個 message : 
+	cub.html:6 Resource interpreted as Stylesheet but transferred with MIME type text/plain: "http://localhost:8888/common.css".
+	我不喜歡這個解釋 http://stackoverflow.com/questions/12003107/resource-interpreted-as-script-but-transferred-with-mime-type-text-plain-for-l
+	用 Win8 ie10 也一樣有問題 SEC7113: CSS was ignored due to mime type mismatch 
+	--> utf-8 改成 ANSI 也沒用
+	==> 改直接執行 cub.html 就好了 (不透過 localhost:8888) --> 可能是 webserver.f 的問題.
+	==> 果然是 webserver.f 的問題! https://msdn.microsoft.com/en-us/library/hh180764(v=vs.85).aspx
+		RI : An imported style sheet was not used due to the wrong MIME type in the HTTP header.
+		FP : Ensure style sheet file is delivered with the proper HTTP response header, which includes 
+		     a content type of text\css. See MIME-Handling Changes in Internet Explorer for more information.
+	
+[ ]	ie10 還抓到 cub.html 好多別的問題
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 243 character 22
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 707 character 62
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 707 character 124
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 710 character 34
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 712 character 103

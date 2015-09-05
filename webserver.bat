@@ -1,4 +1,8 @@
 
+@echo 原本是 node.js 的 webserver.js 改成 jeforth 有何好處?
+@echo jeforth.3nd 有 cd dir 等 dos command 所以 cd 既可以查看 working
+@echo directory (或稱 root directory) 又可以任意改變它。讚! 讚! 讚!
+
 @rem We need a WEB server to run jeforth.3htm from local or remote, http://localhost:8888 
 @rem You'll need to make proper 'path' for your computer.
 

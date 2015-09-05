@@ -23,7 +23,8 @@
 \	本來是現成 JavaScript 的程式改成 forth 有啥好處？如下例，可以把任何變數拉出來
 \	隨時觀察，
 \		push(filename); fortheval("to filename"); <== in the callback function of http.createServer
-\
+\	更厲害的是 jeforth.3nd 有 cd dir 等 dos command 所以 cd 既可以查看 working directory
+\	或稱 root directory 又可以任意改變它。讚! 讚! 讚!
 
 	0 value request
 	0 value response
