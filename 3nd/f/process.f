@@ -42,7 +42,7 @@ js> process constant process // ( -- object ) Node.js process object
 				process :> execPath tib.
 				process :> hrtime() tib.
 				process :> hrtime() tib.
-				process :: nextTick(function(){print(process.hrtime());print('\n')}) "" tib.
+				process :: nextTick(function(){type(process.hrtime());type('\n')}) "" tib.
 				100 sleep 
 				process :> uptime() tib. 
 				process :> uptime() tib.
@@ -62,7 +62,7 @@ js> process constant process // ( -- object ) Node.js process object
 				process :> domain tib.
 				process :> _maxListeners tib.
 				process :> _exiting tib.
-				( Assertion is supposed to show more info ) <js> process.assert(true,function(){print("Assertion happens when previous argument is false")})</jsV> tib.
+				( Assertion is supposed to show more info ) <js> process.assert(true,function(){type("Assertion happens when previous argument is false")})</jsV> tib.
 				process :> config "" tib. (see) cr
 				process :> stdout tib.
 				process :> stderr tib.
@@ -80,11 +80,3 @@ js> process constant process // ( -- object ) Node.js process object
 				js: process.exit(pop()) ;
 			\	/// The exit-code goes %ERRORLEVEL% if run by Node.exe but *not* nw.exe.
 			\	/// 'bye' command uses window.close() so far (jeforth.3nw r16).
-
-js> kvm.appname char jeforth.3nd = [if] \ for 3nd only
-: e 			( -- ) \ Multiple line input mode, not 'edit mode' yet though. Ctrl-z to end.
-				js: kvm.gets.editMode=true 
-				js> kvm.gets()
-				js: kvm.gets.editMode=false
-				tib.insert ;
-[then]

@@ -5,9 +5,9 @@
 s" fs.f"		source-code-header
 
 				<selftest>
-				.( ---- Node.js File system object kvm.fso ---- ) cr
-				.(( kvm.fso.statSync(pathname) gets a lot of pathname properties ... )) cr
-				char . js> kvm.fso.statSync(pop()) dup tib.
+				.( ---- Node.js File system object vm.fso ---- ) cr
+				.(( vm.fso.statSync(pathname) gets a lot of pathname properties ... )) cr
+				char . js> vm.fso.statSync(pop()) dup tib.
 				dup :> isDirectory() tib.
 				dup :> isFile() tib.
 				dup :> isBlockDevice() tib.
@@ -21,18 +21,18 @@ s" fs.f"		source-code-header
 				</selftest>
 
 : readdir		( "path" -- array ) \ Read all file names of the dir.
-				js> kvm.fso.readdirSync(pop()) ;
+				js> vm.fso.readdirSync(pop()) ;
 
 : exists		( "path" -- boolean ) \  Check if the path or pathname exists
-				js> kvm.fso.existsSync(pop()) ;
+				js> vm.fso.existsSync(pop()) ;
 				/// Not only existence but also "operation not permitted" too.
 
 : realpath		( "path" -- "realpath" ) \ Returns the resolved path.
-				js> kvm.fso.realpathSync(pop()) ;
+				js> vm.fso.realpathSync(pop()) ;
 
 : (cd)			( "dir" -- ) \ Change directory to "dir", affects process.cwd.
 				dup exists if 							( dir )
-					js> kvm.fso.statSync(tos()).isDirectory()	( dir y/n )
+					js> vm.fso.statSync(tos()).isDirectory()	( dir y/n )
 					if js: process.chdir(pop()) exit then						( empty )
 				then										( badPath )
 				s" Change directory to " swap + s" ?" + "msg"abort ;
@@ -46,11 +46,11 @@ s" fs.f"		source-code-header
 				
 : [dir] 		( "path" -- [{path:pathname,type:integer}..] ) \ Get array of the directory.
 				dup readdir <js> 
-					var dir=pop(), path=kvm.fso.realpathSync(pop())+'/', result=[];
+					var dir=pop(), path=vm.fso.realpathSync(pop())+'/', result=[];
 					for(var i in dir) {
-						var pathname = kvm.fso.realpathSync(path + dir[i]);
-						if(!kvm.fso.existsSync(pathname)) continue;
-						if(kvm.fso.statSync(pathname).isDirectory()){
+						var pathname = vm.fso.realpathSync(path + dir[i]);
+						if(!vm.fso.existsSync(pathname)) continue;
+						if(vm.fso.statSync(pathname).isDirectory()){
 							result.push({path:pathname,type:1});
 						}else{
 							result.push({path:pathname,type:0});
@@ -65,13 +65,13 @@ s" fs.f"		source-code-header
 					var dir=pop(), path=pop()+'/';
 					if (path==process.cwd()) path="";
 					for(var i in dir) {
-						if(!kvm.fso.existsSync(path+'/'+dir[i])) continue;
-						// s += kvm.fso.statSync(path+'/'+dir[i]).mtime + " "; 
-						push(kvm.fso.statSync(path+'/'+dir[i]).mtime);
+						if(!vm.fso.existsSync(path+'/'+dir[i])) continue;
+						// s += vm.fso.statSync(path+'/'+dir[i]).mtime + " "; 
+						push(vm.fso.statSync(path+'/'+dir[i]).mtime);
 						execute('t.dateTime');
-						push(kvm.fso.statSync(path+'/'+dir[i]).size);
+						push(vm.fso.statSync(path+'/'+dir[i]).size);
 						fortheval("13 .r");
-						if(kvm.fso.statSync(path+'/'+dir[i]).isDirectory()){
+						if(vm.fso.statSync(path+'/'+dir[i]).isDirectory()){
 							print(' [' + dir[i] + ']\n');
 						}else{
 							print(' ' + dir[i] + '\n');

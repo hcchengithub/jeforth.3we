@@ -1,7 +1,7 @@
 
-@echo åŸæœ¬æ˜¯ node.js çš„ webserver.js æ”¹æˆ jeforth æœ‰ä½•å¥½è™•?
-@echo jeforth.3nd æœ‰ cd dir ç­‰ dos command æ‰€ä»¥ cd æ—¢å¯ä»¥æŸ¥çœ‹ working
-@echo directory (æˆ–ç¨± root directory) åˆå¯ä»¥ä»»æ„æ”¹è®Šå®ƒã€‚è®š! è®š! è®š!
+@echo ­ì¥»¬O node.js ªº webserver.js §ï¦¨ jeforth ¦³¦ó¦n³B?
+@echo jeforth.3nd ¦³ cd dir µ¥ dos command ©Ò¥H cd ¬J¥i¥H¬d¬İ working
+@echo directory (©ÎºÙ root directory) ¤S¥i¥H¥ô·N§ïÅÜ¥¦¡CÆg! Æg! Æg!
 
 @rem We need a WEB server to run jeforth.3htm from local or remote, http://localhost:8888 
 @rem You'll need to make proper 'path' for your computer.

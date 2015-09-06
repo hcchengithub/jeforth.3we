@@ -6,8 +6,8 @@
 \ define propritary features of each application.
 \  
 
-	\ ---------- Self-Test of jeforth.f kernel ----------------------------------------
-	\ Do the jeforth.f self-test only when there's no command line
+\ ---------- Self-Test of jeforth.f kernel ----------------------------------------
+\ Do the jeforth.f self-test only when there's no command line
 	js> kvm.argv.length 1 > \ Do we have jobs from command line?
 	[if] \ We have jobs from command line to do. Disable self-test.
 		js: tick('<selftest>').enabled=false
@@ -15,7 +15,17 @@
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 
-	\ ---------------- include other modules ------------------------------------------
+\ ---------------- jeforth.3nd special section ------------------------------------
+
+	js> vm.appname char jeforth.3nd = [if] \ for 3nd only
+	: e 		( -- ) \ Multiple line input mode, not 'edit mode' yet though. Ctrl-z to end.
+				js: vm.gets.editMode=true 
+				js> vm.gets()
+				js: vm.gets.editMode=false
+				tib.insert ;
+	[then]
+
+\ ---------------- include other modules ------------------------------------------
 	include voc.f
 	include mytools.f
 	include process.f

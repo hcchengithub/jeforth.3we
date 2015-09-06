@@ -3821,10 +3821,26 @@
 [ ] 大改寫, 
 	[x] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配. 
 		(help) 不該負責印系統 help --> (words) words , voc.f words help ok
-	o	所有 g.sth 改成 vm.g.sth
+	o	get jeForth() from jeforth.js > kvm = new jeForth()	
+	o	kernel/jeforth.f --> f/jeforth.f
 	o	fortheval --> dictate
 	o	print --> type 
-	o	kvm --> vm
+	o	所有 g.sth 改成 vm.g.sth
+	o	internel kvm --> vm
+	o	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	o	kvm.selftest_visible = true;
+	o	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+		kvm.greeting = function(){
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
+			return(version);
+		}
+	o	vm.base 改用 value []3htm []3nd []3nw []3hta
+	o	editMode 改用 value []3htm []3nd []3nw []3hta
+	o	改寫 vm.panic() 
+	
 
 [ ] html5.f , element.f 的 selftest 都很欠缺，無聊寫寫。
 [x] 3htm 的 platform.f 裡又有 (help) help 用來超漂亮的 help .... 也得改寫.
@@ -3880,7 +3896,8 @@
 	inputbox.value 是 \10 因為 \r\n 只吃掉 \r 故留下 \n 使得 inputbox 非 empty 因此
 	{backspace} 不工作。修改判斷條件為 inputbox.value==""||inputbox.value=="\n" 即可
 
-[ ] tweak cub.html on going . . . so as to make a project-k release
+[x] tweak cub.html on going . . . so as to make a project-k release
+	rename to sample.html. project-k released. [ ] make it a release on github.
 	
-
-
+[ ] webserver.f ok now. working on 3nd . . . 
+	[ ] no panic !!!!

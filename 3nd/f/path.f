@@ -8,12 +8,19 @@ js> require('path') constant path // ( -- obj ) Node.js Path module
 
 				<selftest>
 					.( ----- Node.js path module ----- ) cr
-					( Let's see goodies in the Node.js path object ) path obj>keys tib.
-					( We can guess the usage of a method throuth viewing it's definition this way )
-					path :> _makeLong tib.
-					path :> sep tib.
-					path :> delimiter tib.
-					s" x:/foo/bar/.." path :> normalize(pop()) tib.
+					*** See goodies in the Node.js path object as shown above?
+						js: vm.screenbuffer=""
+						path obj>keys tib.
+						<js> vm.screenbuffer.indexOf('resolve,normalize,isAbsolute')!=-1 </jsV> ( true )
+						[d true d] [p "path" p]
+					*** Can we guess the usage of a method throuth viewing it's definition as shown above?
+						js: vm.screenbuffer=""
+						path :> _makeLong tib.
+						path :> sep tib.
+						path :> delimiter tib.
+						s" x:/foo/bar/.." path :> normalize(pop()) tib.
+						<js> vm.screenbuffer.indexOf('==> x:\\foo (string)')!=-1 </jsV> ( true )
+						[d true d] [p p]
 				</selftest>
 
 : normalize		( 'path' -- "path" ) \ d:\foo\bar\.. => d:\foo
@@ -41,14 +48,22 @@ js> require('path') constant path // ( -- obj ) Node.js Path module
 				/// The input doesn't need to be a real path.
 
 				<selftest>
-					.( *** normalize the given string, it doesn't need to be a real path ... ) cr
-					( 前後 whitespace 都照抄 ) s"    a//./b\\..\c.e   " normalize tib.
-					s" file:///C:/Users/8304018/Dropbox/learnings/github/jeforth.3we/jeforth.3nw.html" normalize tib.
-					s" file:///a\\b" s" //c//d.e" join tib.
-					s" a\\b" s" //c//d.e" join dirname tib.
-					s" a\\b" s" //c//d.e" join basename tib.
-					s" a\\b" s" //c//d.e" join extname tib.
-					depth not ==>judge drop
+					*** normalize the given string, it doesn't need to be a real path
+						js: vm.screenbuffer=""
+						( 前後 whitespace 都照抄 ) s"    a//./b\\..\c.e   " normalize tib.
+						<js> vm.screenbuffer.indexOf('==>    a\\c.e    (string)')!=-1 </jsV> ( true )
+						s" file:///C:/Users/8304018/Dropbox/learnings/github/jeforth.3we/jeforth.3nw.html" normalize tib.
+						<js> vm.screenbuffer.indexOf('file:\\C:\\Users\\8304018\\Dropbox')!=-1 </jsV> ( true )
+						s" file:///a\\b" s" //c//d.e" join tib.
+						<js> vm.screenbuffer.indexOf('file:\\a\\b\\c\\d.e')!=-1 </jsV> ( true )
+						s" a\\b" s" //c//d.e" join dirname tib.
+						<js> vm.screenbuffer.indexOf('a\\b\\c (string)')!=-1 </jsV> ( true )
+						s" a\\b" s" //c//d.e" join "" basename tib.
+						<js> vm.screenbuffer.indexOf('==> d.e (string)')!=-1 </jsV> ( true )
+						s" a\\b" s" //c//d.e" join extname tib.
+						<js> vm.screenbuffer.indexOf('==> .e (string)')!=-1 </jsV> ( true )
+						[d true,true,true,true,true,true d] 
+						[p "normalize","join","dirname","basename","extname" p]
 				</selftest>
 
 code >path/		( "path?name" == "path/name" ) \ Unify path delimiter 
@@ -67,6 +82,6 @@ code >path\\	( "path?name" == "path\\name" ) \ Unify path delimiter
 				last :: comment=tick('>path/').comment
 
 				<selftest>
-					**** Should not leave anything in the data stack . . . 
-					depth not ==>judge drop
+					*** Should not leave anything in the data stack
+					[d d] [p p]
 				</selftest>
