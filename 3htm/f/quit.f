@@ -39,45 +39,45 @@
 		bye : Terminate the program.
 		help : you are reading me.
 		Put this line,
-		  if(kvm.debug){kvm.jsc.prompt="msg";eval(kvm.jsc.xt)}
-		into anywhere among JavaScript source code
-		to drop a breakpoint. "msg" shows you which
-		breakpoint it is.
+		> if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
+		into anywhere among JavaScript source code to drop a breakpoint. "msg" shows you which breakpoint it is.
 
-	</text> <js> vm.jsc.help=pop().replace(/^[\t ]*/gm,"")</js> \ remove leading Tab's and spaces
+	</text> 
+	<js> 
+		vm.jsc.help=pop().replace(/^[\t ]*/gm,""); // remove leading Tab's and spaces
+		vm.jsc.cmd = "";
+		vm.jsc.enable = true;
+	</js> 
 	<text>
 		(function(){
-			var _cmd_ = "";
 			for(;;) {
 				var _ss_, _result_; _ss_ = _result_ = "";
 				jump2endofinputbox.click();
-				_cmd_ = prompt("JavaScript debug console", _cmd_?_cmd_:"");
-				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
-				type(kvm.jsc.prompt + " " + _cmd_ + "\n");
-				switch(_cmd_){
-					case "exit" : case "q" : case "quit": bp=0; return;
-					case "s" : bp=-1; return; // 
-					case "p" : bp=ip+1; return;
-					case "r" : bp=rstack[rstack.length-1]; return;
+				vm.type(" ip=" + ip + ": " + dictionary[ip] + vm.jsc.prompt + "\n");
+				vm.jsc.cmd = prompt("JavaScript debug console", vm.jsc.cmd?vm.jsc.cmd:"");
+				vm.jsc.cmd = vm.jsc.cmd==null ? 'q' : vm.jsc.cmd; // Press Esc equals to press 'q'
+				vm.type(" > " + vm.jsc.cmd + "\n");
+				switch(vm.jsc.cmd){
+					case "exit" : case "q" : case "quit": execute("bd"); return;
+					case "s" : vm.g.breakPoint=-1; return; // 
+					case "p" : vm.g.breakPoint=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; return;
+					case "r" : vm.g.breakPoint=rstack[rstack.length-1]; return;
 					case "bye"  : execute("bye"); break;
-					case "help" : if(!confirm(kvm.jsc.help)) return; break;
+					case "help" : if(!confirm(vm.jsc.help)) return; break;
 					case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
-						_result_ = eval(_cmd_);
-						// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";
-						// else _ss_ += _result_ + "  (" + mytypeof(_result_) + ")\n";
-						type(_result_);
-						type(" (" + mytypeof(_result_) + ")\n");
-						// if(!confirm(_ss_ + "\nGo on debugging?")) return;
+						_result_ = eval(vm.jsc.cmd);
+						vm.type(_result_);
+						vm.type(" (" + mytypeof(_result_) + ")\n");
 					} catch(err) {
 						_ss_ = "Oooops! " + err.message + "\n";
-						type(_ss_)
-						// alert(_ss_);
+						vm.type(_ss_)
 					}
 				}
 			}
 		})()
-	</text> js: vm.jsc.xt=pop()
+	</text>
+	js: vm.jsc.xt=pop()
 
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;

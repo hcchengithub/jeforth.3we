@@ -1982,7 +1982,9 @@
     [x] jeforth.3hta jsc has a 'clean' command already that erase the output box from the bottom.
     [x] Same code but not work in jeforth.3htm yet,  why? ==> 檢查 inputbox 是否有東西的 
         Boolean(inputbox.value) 在 HTA 是 false; 在 Chrome browser 是 true <=== Root cause
-        ==> 查 inputbox.value.length -> 1, ==> inputbox.value.charCodeAt(0)->10 <== 先清掉
+        ==> 查 inputbox.value.length -> 1, ==> inputbox.value.charCodeAt(0)->10
+		==> 改用這個方法判斷 inputbox 是否為 empty --> inputbox.value!=""&&inputbox.value!="\n"
+		
 [x] need a way to see or to save screen info when in jsc. 不行，整個 browser 都 block 住了！
 
 [x] Study how to use command-line in jeforth.3htm. 
@@ -3732,7 +3734,7 @@
 	pack-help 獨立出來, vm/kvm 的問題也搞懂了. 應該從 jeforth.f 改好就好了。
 	jeforth.3we 還是可以自稱 kvm 噓~~~ ===> 不要直接改, 先用 cub.html debug。
 	或者用帶入新 vm 的手法直接在 jeforth.3we 裡 debug。
-[ ] cub.f 直接在 jeforth.3we 裡試驗 project-k-kernel 很成功。一下就把 cub.f
+[x] cub.f 直接在 jeforth.3we 裡試驗 project-k-kernel 很成功。一下就把 cub.f
 	run 起來了。cub.f 沒有 selftest 所以不可靠, jeforth.3we 穩是基本要求。準備
 	改用 3we/kernel/jeforth.f 
 [x] 用了很久的 packhelp() 傳回 "( foo ) bar" 或者 "( ?? ) No help message. Use // to add one."
@@ -3825,7 +3827,7 @@
 	o	kvm --> vm
 
 [ ] html5.f , element.f 的 selftest 都很欠缺，無聊寫寫。
-[ ] 3htm 的 platform.f 裡又有 (help) help 用來超漂亮的 help .... 也得改寫.
+[x] 3htm 的 platform.f 裡又有 (help) help 用來超漂亮的 help .... 也得改寫.
 	---> keyboard events 有問題,回家繼續 debug
 [x] Error! source-code-header unknown.
 
@@ -3833,16 +3835,19 @@
 	本來認為是 kernel 的 jeforth.f 跟 voc.f 則搬到 f 裡去。不當作 kernel 了。
 	[ ]	這個要把 kernel 拿掉, 以 3htm 為例,
 		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
-	[ ] twist cub.html on going . . . so as to make a project-k release
-[ ]	這兩個不必佔用 vm.member , 應該直接放進 *debug* 的 members。
+[x]	這兩個不必佔用 vm.member , 應該直接放進 *debug* 的 members。
+	因為掛在 vm 下的 properties 都要有關聯 vm 內外的目的，如 vm.type(), vm.prompt, 
+	等. bp 跟 continue 或 resume 純粹是 jeforth.f 內部的東西, 應該屬於 value 放
+	在 vm.g 下才對. 宣告成 value 就對了。
 		// debug
-		vm.bp = 0 // breakpoint 
-		vm.continue = 0 // *debug* resume point
-	[ ] index.html [ ] cub.html
-[ ] some application didn't use this trick
+		vm.bp = 0 // breakpoint  <---- tick("*debug*").breakpoint=0
+		vm.continue = 0 // *debug* resume point   <---- tick("*debug*").resume=null
+	[x] index.html [x] cub.html [ ] 3nw [ ] 3nd 
+	
+[x] some application didn't use this trick
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
-	[ ] index.html of 3HTML, [ ] baby.html of project-k, [ ] cub.html of project-k
-[ ] chrome f12 跑出一個 message : 
+	[x] index.html of 3HTML, [x] baby.html of project-k, [x] cub.html of project-k
+[x] chrome f12 跑出一個 message : 
 	cub.html:6 Resource interpreted as Stylesheet but transferred with MIME type text/plain: "http://localhost:8888/common.css".
 	我不喜歡這個解釋 http://stackoverflow.com/questions/12003107/resource-interpreted-as-script-but-transferred-with-mime-type-text-plain-for-l
 	用 Win8 ie10 也一樣有問題 SEC7113: CSS was ignored due to mime type mismatch 
@@ -3853,7 +3858,7 @@
 		FP : Ensure style sheet file is delivered with the proper HTTP response header, which includes 
 		     a content type of text\css. See MIME-Handling Changes in Internet Explorer for more information.
 	
-[ ]	ie10 還抓到 cub.html 好多別的問題
+[x]	ie10 還抓到 cub.html 好多別的問題
 	HTML1402: Character reference is missing an ending semicolon ";". 
 	cub.html, line 243 character 22
 	HTML1402: Character reference is missing an ending semicolon ";". 
@@ -3864,3 +3869,18 @@
 	cub.html, line 710 character 34
 	HTML1402: Character reference is missing an ending semicolon ";". 
 	cub.html, line 712 character 103
+	在 chrome 都沒問題,而且所列之處根本就是 forth code ! 別管他。
+	
+[ ] review project-k GitHub wiki 的文件、linkage 等。
+	文章寫多了,動不動就有斷鏈、command 已經改名等問題。
+	
+[ ] 檢查 browser 是否 Chrome, alert 用 chrome 比較好。cub.html 在 Win 10 Edge 直接跑，慢得要命。
+
+[x] 3htm jsc 裡 erase 無效 ... 感謝我自己! 以前已經發現在 jsc console 時
+	inputbox.value 是 \10 因為 \r\n 只吃掉 \r 故留下 \n 使得 inputbox 非 empty 因此
+	{backspace} 不工作。修改判斷條件為 inputbox.value==""||inputbox.value=="\n" 即可
+
+[ ] tweak cub.html on going . . . so as to make a project-k release
+	
+
+

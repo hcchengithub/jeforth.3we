@@ -11,7 +11,7 @@
 			}
     </style>
     <script src="js/jquery-1.11.2.js"></script>
-	<Script src="kernel/jeforth.js"></Script>
+	<Script src="project-k/jeforth.js"></Script>
 	<script id=js>
 	var kvm = new jeForth();
 	(function(){
@@ -60,7 +60,7 @@
 				$('#location').html(window.location.toString()); // it's built-in in DOM
 				$('.appname').html(kvm.appname); // 一次填好所有 appname
 				document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-				var k = "kernel/jeforth.f"; // was var k = "kernel/jeforth.f";
+				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
 				var q = "3htm/f/quit.f";
 				var kk = $.get(k,'text'); // callback only when success, not suitable, 

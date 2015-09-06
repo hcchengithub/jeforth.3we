@@ -151,7 +151,12 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					do{
 						while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
 							// 可用 bp=ip 設斷點, debug colon words.
-							if(vm.bp<0||vm.bp==ip){vm.jsc.prompt='ip='+ip+" jsc>";eval(vm.jsc.xt)};
+							if(vm.g.breakPoint<0||vm.g.breakPoint==ip){
+								if (vm.jsc.enable){ // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
+									vm.jsc.prompt=" jsc>";
+									eval(vm.jsc.xt);
+								}
+							};
 							ip++; // Forth 的通例，inner loop 準備 execute 這個 word 之前，IP 先指到下一個 word.
 							phaseB(w); // 針對不同種類的 w 採取正確方式執行它。
 							w = dictionary[ip];
@@ -1999,23 +2004,41 @@ code passed		( -- ) \ List words their sleftest flag are 'pass'.
 \ -------------- Debugger : set breakpoint to a colon word -------------------------
 
 js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
-code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'db' command.
-				vm.bp = parseInt(nexttoken()); inner = vm.g.debugInner; end-code
-				/// work with 'jsc' debug console, jsc is application dependent.
-code db			( -- ) \ Disable breakpoint, inner=fastInner. See also 'bp' command.
-				inner = vm.g.fastInner end-code
-				/// work with 'jsc' debug console, jsc is application dependent.
-code q			( -- ) \ Quit *debug*
-				var q = tick("(*debug*)").continue; 
-				tick("(*debug*)").continue=null; 
-				q(); 
+
+0 value breakPoint // ( -- ip ) jsc breakpoint address
+
+code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
+				inner = vm.g.debugInner; 
+				vm.jsc.enable = true;
+				dictate("bp");
 				end-code
-: (*debug*) 	( msg -- resume ) \ Suspend to command prompt, execute resume() to quit debugging.
+				/// work with 'jsc' debug console, jsc is application dependent.
+code bd			( -- ) \ Disable breakpoint, See also 'bp','be'.
+				inner = vm.g.fastInner;
+				vm.jsc.enable = false; // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
+				end-code
+				/// work with 'jsc' debug console, jsc is application dependent.
+code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
+				var bp = nexttoken();
+				vm.jsc.enable = true;
+				if (bp) {
+					vm.g.breakPoint = parseInt(bp);
+					execute("be") 
+				} else {
+					type("Breakpoint : " + vm.g.breakPoint);
+					if (inner == vm.g.debugInner) type(", activated\n");
+					else  type(", inactive\n");
+				}
+				end-code
+				/// If no address is given then show the recent breakPoint and 
+				/// its status.
+				/// work with 'jsc' debug console, jsc is application dependent.
+: (*debug*) 	( msg -- ) \ Suspend to command prompt, 'q' to quit debugging.
 				[ last literal ] ( _me )
 				<js>
 					var _me = pop();
 					if (_me.continue) {
-						panic("Error, already in *debug* can't *debug* again.\n");
+						panic("Error, already in *debug*, 'q' to continue.\n");
 					} else {
 						var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=vm.prompt;
 						vm.prompt = pop().toString();
@@ -2032,6 +2055,11 @@ code q			( -- ) \ Quit *debug*
 					}
 				</js> ;
 				/// 'q' command to quit debugging
+code q			( -- ) \ Quit *debug*
+				var q = tick("(*debug*)").continue; 
+				tick("(*debug*)").continue=null; 
+				q(); 
+				end-code
 				
 : *debug*		( <prompt> -- resume ) \ Forth debug console. Execute the resume() to quit debugging.
 				BL word compiling if literal compile (*debug*) 

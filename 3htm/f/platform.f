@@ -123,7 +123,7 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
-				js> inputbox.focus();inputbox.value if 
+				js> inputbox.focus();inputbox.value!=""&&inputbox.value!="\n" if 
 					true \ inputbox is not empty still don't do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
 					js> event==null||event.altKey \ So as to allow calling {backSpace} programmatically	
