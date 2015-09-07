@@ -19,6 +19,7 @@
 
 	js> vm.appname char jeforth.3nd = [if] \ for 3nd only
 	: e 		( -- ) \ Multiple line input mode, not 'edit mode' yet though. Ctrl-z to end.
+				cr ." ---- Edit Mode ---- (End by ctrl-z)" cr 
 				js: vm.gets.editMode=true 
 				js> vm.gets()
 				js: vm.gets.editMode=false

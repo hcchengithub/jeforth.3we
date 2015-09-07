@@ -5,10 +5,10 @@ if a%COMPUTERNAME%==aWKS-38EN3477     set NODEJSHOME=c:\Users\8304018.WKSCN\Drop
 path=%path%;%NODEJSHOME%
 set NODE_PATH=%NODEJSHOME%\node_modules
 
-subst /d x:
-subst x: .
-x:
-chcp 950
+@rem subst /d x:
+@rem subst x: .
+@rem x:
+@rem chcp 950
 
 :run
 if a%COMPUTERNAME%==aWKS-38EN3476     node64 jeforth.3nd.js %1 %2 %3 %4 %5 %6 %7 %8 %9

@@ -3818,7 +3818,7 @@
 
 [ ] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
 
-[ ] 大改寫, 
+[x] 大改寫, 
 	[x] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配. 
 		(help) 不該負責印系統 help --> (words) words , voc.f words help ok
 	o	get jeForth() from jeforth.js > kvm = new jeForth()	
@@ -3837,7 +3837,7 @@
 			type("Program path " + window.location.toString());
 			return(version);
 		}
-	o	vm.base 改用 value []3htm []3nd []3nw []3hta
+	o	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm []3nd []3nw []3hta
 	o	editMode 改用 value []3htm []3nd []3nw []3hta
 	o	改寫 vm.panic() 
 	
@@ -3899,5 +3899,38 @@
 [x] tweak cub.html on going . . . so as to make a project-k release
 	rename to sample.html. project-k released. [ ] make it a release on github.
 	
-[ ] webserver.f ok now. working on 3nd . . . 
-	[ ] no panic !!!!
+[x] webserver.f ok now. working on 3nd . . . 
+	[x] no panic !!!! in jeforth.3nd.js <---- master kvm.panic() was missing.
+	    in 3htm level doesn't work either <----- it works, it launchs F12 debugger.
+	[x] vm.gets() very poor, needs improvement.
+		--> e command tips ctrl-z at least
+	[x] fs.f has some self-test, they need to upgrade
+	[ ] jsc.hlp, jsc.js
+	[ ] eforth.com 
+
+[ ] jsc 能不能在 exit "", ret null 處停下來, 目前不會, 故看不到 ret / exit 就突然結束了。	
+	
+[ ] porting to project-k 大改寫 apply to 3HTA (3htm and 3nd are done)
+	[ ]	get jeForth() from jeforth.js > kvm = new jeForth()	
+	[ ]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	[ ]	kernel/jeforth.f --> f/jeforth.f
+	[ ]	kvm.selftest_visible = true;
+	[ ]	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+		kvm.greeting = function(){
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
+			return(version);
+		}
+	[ ]	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm []3nd []3nw []3hta
+	[ ]	editMode 改用 value []3htm []3nd []3nw []3hta
+	[ ]	改寫 vm.panic() 
+	[ ] apply to all *.f files 
+		[ ]	fortheval --> dictate  [ ] apply to all *.f files 
+		[ ]	print --> type   [ ] apply to all *.f files 
+		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
+		[ ]	internel kvm --> vm   
+
+[ ] working on improving 3nd jsc . . . 
+

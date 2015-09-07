@@ -35,6 +35,7 @@
 		s : Single step. (bp=-1)
 		p : Run until next IP. (bp=ip+1)
 		r : Free run until ret. (bp=rtos)
+		rr: Free run until ret. (bp=next rtos)
 		erase : Erase debug message at bottom.
 		bye : Terminate the program.
 		help : you are reading me.
@@ -51,7 +52,6 @@
 	<text>
 		(function(){
 			for(;;) {
-				var _ss_, _result_; _ss_ = _result_ = "";
 				jump2endofinputbox.click();
 				vm.type(" ip=" + ip + ": " + dictionary[ip] + vm.jsc.prompt + "\n");
 				vm.jsc.cmd = prompt("JavaScript debug console", vm.jsc.cmd?vm.jsc.cmd:"");
@@ -59,19 +59,19 @@
 				vm.type(" > " + vm.jsc.cmd + "\n");
 				switch(vm.jsc.cmd){
 					case "exit" : case "q" : case "quit": execute("bd"); return;
-					case "s" : vm.g.breakPoint=-1; return; // 
-					case "p" : vm.g.breakPoint=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; return;
-					case "r" : vm.g.breakPoint=rstack[rstack.length-1]; return;
+					case "s"  : vm.g.breakPoint=-1; return;
+					case "p"  : vm.g.breakPoint=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; return;
+					case "r"  : vm.g.breakPoint=rstack[rstack.length-1]; return;
+					case "rr" : vm.g.breakPoint=rstack[rstack.length-2]; return;
 					case "bye"  : execute("bye"); break;
 					case "help" : if(!confirm(vm.jsc.help)) return; break;
 					case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
-						_result_ = eval(vm.jsc.cmd);
+						var _result_ = eval(vm.jsc.cmd);
 						vm.type(_result_);
 						vm.type(" (" + mytypeof(_result_) + ")\n");
 					} catch(err) {
-						_ss_ = "Oooops! " + err.message + "\n";
-						vm.type(_ss_)
+						vm.type("Oooops! " + err.message + "\n")
 					}
 				}
 			}

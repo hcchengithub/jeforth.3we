@@ -8,3 +8,4 @@ playground/multitaskjavascripteforth
 *.mp3
 _selftest_.xls
 selftest.log
+project-k/*

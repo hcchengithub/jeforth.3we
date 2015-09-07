@@ -22,6 +22,12 @@
 		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true;
+		
+		// kvm.type() is the master typing or printing function.
+		// The type() called in code ... end-code is defined in the kernel jeforth.js.
+		// We need to use type() below, and we can't see the jeforth.js' type() so one 
+		// is also defined here, even just for a few convenience. The two type() functions 
+		// are both calling the same kvm.type().
 		var type = kvm.type = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test
@@ -31,10 +37,25 @@
 			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 			if(kvm.selftest_visible) $('#outputbox').append(plain(ss)); 
 		}
-		kvm.panic = function(state){
+		
+		// kvm.panic() is the master panic handler. The panic() function defined in 
+		// project-k kernel jeforth.js is the one called in code ... end-code.
+		// We need to use panic() below, so another panic() is defined here too, even 
+		// just for a few convenience. The two panic() functions are both calling the
+		// same kvm.panic().
+		kvm.panic = function(state){ 
 			type(state.msg);
 			if (state.level) debugger;
 		}
+		// We need the panic() function below but we can't see the one in jeforth.js
+		// so one is defined here for convenience.
+		function panic(msg,level) {
+			var state = {
+					msg:msg, level:level
+				};
+			if(kvm.panic) kvm.panic(state);
+		}
+		
 		kvm.clearScreen = function () {
 			kvm.screenbuffer = "";
 			$('#outputbox').empty();
@@ -70,9 +91,9 @@
 					if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
 						setTimeout(retry,100); 
 					else {
-						if (kk.status!=200) kvm.panic("Error! Failed to read " + k + '\n');
-						else if (rr.status!=200) kvm.panic("Error! Failed to read " + r + '\n');
-						else if (qq.status!=200) kvm.panic("Error! Failed to read " + q + '\n');
+						if (kk.status!=200) panic("Error! Failed to read " + k + '\n');
+						else if (rr.status!=200) panic("Error! Failed to read " + r + '\n');
+						else if (qq.status!=200) panic("Error! Failed to read " + q + '\n');
 						else kvm.dictate(kk.responseText+rr.responseText+qq.responseText);
 					}
 				})();
@@ -124,11 +145,11 @@
 		
 		// Called from jsEvalRaw, it will handle the try{}catch{} thing. 
 		kvm.writeTextFile = function(pathname,data) { // Write string to text file.
-			kvm.panic("Error writing " + pathname + ", jeforth.3htm doesn't know how to wrtieTextFile yet.\n"); 
+			panic("Error writing " + pathname + ", jeforth.3htm doesn't know how to wrtieTextFile yet.\n"); 
 		}
 
 		kvm.readTextFile = function(pathname){
-			kvm.panic("Error reading " + pathname + ", jeforth.3htm doesn't know how to readTextFile."+
+			panic("Error reading " + pathname + ", jeforth.3htm doesn't know how to readTextFile."+
 					  " Please use $.get(pathname,callback,'text') instead.\n");
 		}
 	})();

@@ -10,8 +10,14 @@ global.kvm = new jeForth();
 kvm.host = global;
 kvm.appname = "jeforth.3nd";
 kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
-kvm.screenbuffer = "";
-kvm.selftest_visible = true;
+kvm.screenbuffer = ""; // used by both inside and outside vm.
+kvm.selftest_visible = true; // used by both inside and outside vm.
+
+// kvm.type() is the master typing or printing function.
+// The type() called in code ... end-code is defined in the kernel jeforth.js.
+// We need to use type() below, and we can't see the jeforth.js' type() so one 
+// is also defined here, even just for a few convenience. The two type() functions 
+// are both calling the same kvm.type().
 var type = kvm.type = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test to avoid error 'JavaScript error on word "." : invalid data'
@@ -21,6 +27,31 @@ var type = kvm.type = function (s) {
 			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 			if (kvm.selftest_visible) process.stdout.write(ss);
 		}; 
+
+// application specific
+kvm.clearScreen = 
+		function(){console.log('\033c')} 
+		// '\033c' or '\033[2J' http://stackoverflow.com/questions/9006988/node-js-on-windows-how-to-clear-console
+		
+// kvm.panic() is the master panic handler. The panic() function defined in 
+// project-k kernel jeforth.js is the one called in code ... end-code.
+// We need to use panic() below, so another panic() is defined here too, even 
+// just for a few convenience. The two panic() functions are both calling the
+// same kvm.panic().
+kvm.panic = function (state) { 
+			type(state.msg);
+			if (state.level) debugger;
+		}
+// We need the panic() function below but we can't see the one in jeforth.js
+// so one is defined here for convenience.
+function panic(msg,level) {
+	var state = {
+			msg:msg, level:level
+		};
+	if(kvm.panic) kvm.panic(state);
+}
+
+// must be defined by each application
 kvm.greeting = function(){
 			var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 			type("j e f o r t h . 3 n d -- r"+version+'\n');
@@ -30,16 +61,15 @@ kvm.greeting = function(){
 			type("argv " + process.argv + '\n');
 			return(version);
 		}; 
-kvm.greeting();
-kvm.fso = require('fs');
-kvm.readTextFile = function(pathname){return(kvm.fso.readFileSync(pathname,'utf-8'))}
-kvm.writeTextFile = function(pathname,data){kvm.fso.writeFileSync(pathname,data,'utf8')}
-kvm.bye = function(n){process.exit(n)}
-kvm.gets = function(){
+kvm.greeting(); // print greeting message.
+kvm.fso = require('fs'); // Node.js specific
+kvm.readTextFile = function(pathname){return(kvm.fso.readFileSync(pathname,'utf-8'))} // application dependent
+kvm.writeTextFile = function(pathname,data){kvm.fso.writeFileSync(pathname,data,'utf8')} // application dependent
+kvm.bye = function(n){process.exit(n)} // application dependent
+kvm.gets = function(){ // Node.js specific
 			// http://stackoverflow.com/questions/3430939/node-js-readsync-from-stdin
 			// A blocking function that returns string from STDIN (keyboard or clipboard) synchronously.
 			// End by pressing Ctrl-Z when kvm.gets.editMode==True, or normally by <Enter>.
-			// 如果敲鍵盤
 			var CHUNKSIZE=256;
 			var chunk = new Buffer(CHUNKSIZE);
 			var bytesRead; // 收到的 byte 數，敲鍵盤回 1 包括 cr 亦然，Ctrl-z 回 0，copy-past 得實際長度。
@@ -67,15 +97,13 @@ kvm.gets = function(){
 			return (ss);
 		}
 kvm.gets.editMode = false;
-kvm.debug = false;
-kvm.prompt = "OK";
-kvm.argv = process.argv; 
+kvm.debug = false; // needed to be turned on/off outside vm
+kvm.prompt = "OK"; // application specific
+kvm.argv = process.argv; // application specific
 kvm.exec = kvm.argv.shift(); // remove node.exe to compatible with jeforth.hta
-kvm.base = 10;
-kvm.jsc = {prompt:""};
+kvm.jsc = {};
 kvm.jsc.help = kvm.fso.readFileSync('./3nd/f/jsc.hlp','utf-8');
 kvm.jsc.xt = kvm.fso.readFileSync('./3nd/f/jsc.js','utf-8');
-kvm.clearScreen = function(){console.log('\033c')} // '\033c' or '\033[2J' http://stackoverflow.com/questions/9006988/node-js-on-windows-how-to-clear-console
 
 // kvm.beep
 // kvm.inputbox

@@ -6,18 +6,40 @@ s" fs.f"		source-code-header
 
 				<selftest>
 				.( ---- Node.js File system object vm.fso ---- ) cr
-				.(( vm.fso.statSync(pathname) gets a lot of pathname properties ... )) cr
-				char . js> vm.fso.statSync(pop()) dup tib.
-				dup :> isDirectory() tib.
-				dup :> isFile() tib.
-				dup :> isBlockDevice() tib.
-				dup :> isCharacterDevice() tib.
-				dup :> isSymbolicLink() tib.
-				dup :> isFIFO() tib.
-				dup :> isSocket() tib.
-				dup :> atime tib.
-				dup :> ctime tib.
-				    :> mtime tib.
+				*** vm.fso.statSync(pathname) gets a lot of pathname properties as shown above
+					marker ---
+					js: vm.screenbuffer=""
+					char . js> vm.fso.statSync(pop()) dup obj>keys . constant properties
+					<js> vm.screenbuffer.indexOf(
+						"dev,mode,nlink,uid,gid,rdev,ino,size,atime,mtime," +
+						"ctime,_checkModeProperty,isDirectory,isFile,isBlockDevice," +
+						"isCharacterDevice,isSymbolicLink,isFIFO,isSocket"
+					)!=-1 </jsV> ( true )
+					properties :> isDirectory() tib.
+					<js> vm.screenbuffer.indexOf('isDirectory() \\ ==> true (boolean)')!=-1 </jsV> ( true )
+					properties :> isFile() tib.
+					<js> vm.screenbuffer.indexOf('isFile() \\ ==> false (boolean)')!=-1 </jsV> ( true )
+					properties :> isBlockDevice() tib.
+					<js> vm.screenbuffer.indexOf('isBlockDevice() \\ ==> false (boolean)')!=-1 </jsV> ( true )
+					properties :> isCharacterDevice() tib.
+					<js> vm.screenbuffer.indexOf('isCharacterDevice() \\ ==> false (boolean)')!=-1 </jsV> ( true )
+					properties :> isSymbolicLink() tib.
+					<js> vm.screenbuffer.indexOf('isSymbolicLink() \\ ==> false (boolean)')!=-1 </jsV> ( true )
+					properties :> isFIFO() tib.
+					<js> vm.screenbuffer.indexOf('isFIFO() \\ ==> false (boolean)')!=-1 </jsV> ( true )
+					properties :> isSocket() tib.
+					<js> vm.screenbuffer.indexOf('isSocket() \\ ==> false (boolean)')!=-1 </jsV> ( true )
+					js: vm.screenbuffer=""
+					properties :> atime tib.
+					<js> vm.screenbuffer.indexOf('Time) (object)')!=-1 </jsV> ( true )
+					js: vm.screenbuffer=""
+					properties :> ctime tib.
+					<js> vm.screenbuffer.indexOf('Time) (object)')!=-1 </jsV> ( true )
+					js: vm.screenbuffer=""
+					properties :> mtime tib.
+					<js> vm.screenbuffer.indexOf('Time) (object)')!=-1 </jsV> ( true )
+					[d true,true,true,true,true,true,true,true,true,true,true d] [p "fs.f" p]
+					---
 				</selftest>
 
 : readdir		( "path" -- array ) \ Read all file names of the dir.
@@ -70,11 +92,11 @@ s" fs.f"		source-code-header
 						push(vm.fso.statSync(path+'/'+dir[i]).mtime);
 						execute('t.dateTime');
 						push(vm.fso.statSync(path+'/'+dir[i]).size);
-						fortheval("13 .r");
+						dictate("13 .r");
 						if(vm.fso.statSync(path+'/'+dir[i]).isDirectory()){
-							print(' [' + dir[i] + ']\n');
+							type(' [' + dir[i] + ']\n');
 						}else{
-							print(' ' + dir[i] + '\n');
+							type(' ' + dir[i] + '\n');
 						}
 					}
 				</js> ;
@@ -100,7 +122,7 @@ code allFiles	( array "path" -- array ) \ Rescan the working dir
 				\ http://stackoverflow.com/questions/7065120/calling-a-javascript-function-recursively
 
 code findFile	( 'pathname' -- "pathname" ) \ Find a file under the working dir that matches "pathname".
-				fortheval(">path\\ [] char . allFiles"); var a = pop(), pathname=pop(), result=pathname;
+				dictate(">path\\ [] char . allFiles"); var a = pop(), pathname=pop(), result=pathname;
 				for(var i in a) {
 					var p = a[i].lastIndexOf(pathname);
 					if(p != -1 && (p+pathname.length) == a[i].length ){
@@ -113,6 +135,6 @@ code findFile	( 'pathname' -- "pathname" ) \ Find a file under the working dir t
 				/// if not found return the original pathname that may not be in working dir.
 
 				<selftest>
-					**** Should not leave anything in the data stack . . . 
-					depth not ==>judge drop
+					*** Should not leave anything in the data stack
+					[d d] [p p]
 				</selftest>

@@ -11,7 +11,7 @@ js> require('path') constant path // ( -- obj ) Node.js Path module
 					*** See goodies in the Node.js path object as shown above?
 						js: vm.screenbuffer=""
 						path obj>keys tib.
-						<js> vm.screenbuffer.indexOf('resolve,normalize,isAbsolute')!=-1 </jsV> ( true )
+						<js> vm.screenbuffer.indexOf('resolve,normalize')!=-1 </jsV> ( true )
 						[d true d] [p "path" p]
 					*** Can we guess the usage of a method throuth viewing it's definition as shown above?
 						js: vm.screenbuffer=""

@@ -793,27 +793,6 @@ code ,          comma(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 					---
 				</selftest>
 
-\ 目前 Base 切換只影響 .r .0r 的輸出結果。
-\ JavaScript 輸入用外顯的 0xFFFF 形式，用不著 hex decimal 切換。
-
-code hex        vm.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
-code decimal    vm.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
-code base@      push(vm.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
-code base!      vm.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
-10 base!        // 沒有經過宣告的 variable base 就是 vm.base
-
-				<selftest>
-					*** hex decimal base@ base!
-						decimal base@ 0x0A = \ true
-						10 0x10 = \ false
-						hex base@ 0x10 = \ true
-						10 0x10 = \ false !!!! JavaScript 輸入用外顯的表達 10 就是十不會變，這好！
-						0x0A base!
-						base@ 10 = \ true
-						[d true,false,true,false,true d]
-						[p 'decimal','base@', 'base!' p]
-				</selftest>
-
 code depth      ( -- depth ) \ Data stack depth
 				push(stack.length) end-code
 code pick       ( nj ... n1 n0 j -- nj ... n1 n0 nj ) \ Get a copy of a cell in stack.
@@ -1345,6 +1324,26 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 					---
 				</selftest>
 
+\ 目前 Base 切換只影響 .r .0r 的輸出結果。
+\ JavaScript 輸入用外顯的 0xFFFF 形式，用不著 hex decimal 切換。
+10 value base // ( -- base ) decimal base is 10, hex base is 16, can be any number.
+code hex        vm.g.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
+code decimal    vm.g.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
+code base@      push(vm.g.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
+code base!      vm.g.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
+
+				<selftest>
+					*** hex decimal base@ base!
+						decimal base@ 0x0A = \ true
+						10 0x10 = \ false
+						hex base@ 0x10 = \ true
+						10 0x10 = \ false !!!! JavaScript 輸入用外顯的表達 10 就是十不會變，這好！
+						0x0A base!
+						base@ 10 = \ true
+						[d true,false,true,false,true d]
+						[p 'decimal','base@', 'base!', 'base' p]
+				</selftest>
+
 : sleep 		( mS -- ) \ Suspend to idle, resume after mS. Can be 'stopSleeping'.
 				[ last literal ] ( mS me )
 				<js>
@@ -1484,7 +1483,7 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 : jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
 				cr ." J a v a S c r i p t   C o n s o l e" cr
 				." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
-				js: if(1){vm.jsc.prompt="jsc>";eval(vm.jsc.xt)}
+				<js> vm.jsc.prompt=" jsc>"; eval(vm.jsc.xt); </js>
 				;
 
 \ ------------------ Tools  ----------------------------------------------------------------------
@@ -1535,10 +1534,10 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 code .r         ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				if(typeof i == 'number') {
-					if(vm.base == 10){
-						i=i.toString(vm.base);
+					if(vm.g.base == 10){
+						i=i.toString(vm.g.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(vm.base) + (i & 0xffff).toString(vm.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.g.base) + (i & 0xffff).toString(vm.g.base);
 					}
 				}
 				n=n-i.length;
@@ -1553,11 +1552,11 @@ code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters 
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
-					if(vm.base == 10){
+					if(vm.g.base == 10){
 						if (i<0) minus = '-';
-						i=Math.abs(i).toString(vm.base);
+						i=Math.abs(i).toString(vm.g.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(vm.base) + (i & 0xffff).toString(vm.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.g.base) + (i & 0xffff).toString(vm.g.base);
 					}
 				}
 				n=n-i.length - (minus?1:0);
@@ -1631,7 +1630,7 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
-				var count=stack.length, basewas=vm.base;
+				var count=stack.length, basewas=vm.g.base;
 				if(count>0) for(var i=0;i<count;i++){
 					if (typeof(stack[i])=="number") {
 						push(stack[i]); push(i); dictate("decimal 7 .r char : . space dup decimal 11 .r space hex 11 .r char h .");
@@ -1640,7 +1639,7 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					}
 					type(" ("+mytypeof(stack[i])+")\n");
 				} else type("empty\n");
-				vm.base = basewas;
+				vm.g.base = basewas;
 				end-code
 
 				<selftest>
@@ -1939,7 +1938,7 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 
 code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
 				var w=pop();
-				var basewas = vm.base; vm.base = 10;
+				var basewas = vm.g.base; vm.g.base = 10;
 				if (!(w instanceof Word)) {
 					vm.g.see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
 				}else{
@@ -1968,7 +1967,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 					}
 					if (w.comment != undefined) type("\ncomment:\n"+w.comment+"\n");
 				}
-				vm.base = basewas;
+				vm.g.base = basewas;
 				end-code
 : see           ' (see) ; // ( <name> -- ) See definition of the word
 
