@@ -51,11 +51,23 @@
 	</js> 
 	<text>
 		(function(){
+			var eraseCount=12;
 			for(;;) {
+				type('\n -------- J a v a S c r i p t   C o n s o l e --------\n');
+				// show ip which is next step
+				type(
+					" " + (ip  ) + " : " + ((dictionary[(ip  )]==null) ? "RET" : ((dictionary[(ip  )]=="") ? "EXIT" : dictionary[(ip  )])) + "\n" +
+					" " + (ip+1) + " : " + ((dictionary[(ip+1)]==null) ? "RET" : ((dictionary[(ip+1)]=="") ? "EXIT" : dictionary[(ip+1)])) + "\n" +
+					" " + (ip+2) + " : " + ((dictionary[(ip+2)]==null) ? "RET" : ((dictionary[(ip+2)]=="") ? "EXIT" : dictionary[(ip+2)])) + "\n" +
+					" " + (ip+3) + " : " + ((dictionary[(ip+3)]==null) ? "RET" : ((dictionary[(ip+3)]=="") ? "EXIT" : dictionary[(ip+3)])) + "\n"
+				);
+				// show data stack
+				type(' rstack['+rstack+']  stack['+stack+']\n');
+				type(kvm.jsc.prompt ); 
 				jump2endofinputbox.click();
-				vm.type(" ip=" + ip + ": " + dictionary[ip] + vm.jsc.prompt + "\n");
-				vm.jsc.cmd = prompt("JavaScript debug console", vm.jsc.cmd?vm.jsc.cmd:"");
-				vm.jsc.cmd = vm.jsc.cmd==null ? 'q' : vm.jsc.cmd; // Press Esc equals to press 'q'
+				vm.jsc.cmd = // static variable so as to reuse last command
+					prompt("JavaScript console", vm.jsc.cmd?vm.jsc.cmd:""); // Press Enter repeat last command
+				vm.jsc.cmd = vm.jsc.cmd==null ? 'quit' : vm.jsc.cmd; // Press Esc equals to 'quit'
 				vm.type(" > " + vm.jsc.cmd + "\n");
 				switch(vm.jsc.cmd){
 					case "exit" : case "q" : case "quit": execute("bd"); return;
@@ -65,7 +77,7 @@
 					case "rr" : vm.g.breakPoint=rstack[rstack.length-2]; return;
 					case "bye"  : execute("bye"); break;
 					case "help" : if(!confirm(vm.jsc.help)) return; break;
-					case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
+					case "erase" : for(var _i_=0; _i_<eraseCount; _i_++){execute('{backSpace}');pop();} break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
 						var _result_ = eval(vm.jsc.cmd);
 						vm.type(_result_);

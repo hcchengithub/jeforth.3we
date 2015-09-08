@@ -3931,6 +3931,9 @@
 		[ ]	print --> type   [ ] apply to all *.f files 
 		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
 		[ ]	internel kvm --> vm   
+[x] working on improving 3nd jsc . . . done，it's very good now.
+	[x] 3htm [ ] 3hta [ ] 3nw
 
-[ ] working on improving 3nd jsc . . . 
-
+	
+	
+	

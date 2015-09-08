@@ -1,23 +1,24 @@
 // JavaScript Console for jeforth.3nd
 // hcchen5600 2014/10/15 17:15:16 
 // hcchen5600 2015/09/07 16:19:30 porting to use project-k kernel
-// kvm.jsc.xt 整個是個 string, 執行時間、地點決定 vm 或 kvm 看不看得見。以下都用 kvm 應用較廣。
-// 我想,只要能看見 kvm 的地方就可以用 jsc 來 debug。因為 kvm 是 global 所以 jsc 應開可以用來 debug jQuery !
-
 (function(){
+	// kvm.jsc.xt is a string, the point that executes eval(kvm.jsc.xt) decides what it can see.
 	var _continue_ = true;
 	while(_continue_){
-		type('\n ------------- jsc ---------------\n');
+		type('\n -------- J a v a S c r i p t   C o n s o l e --------\n');
 		// show ip which is next step
 		type(
-			" ip " + ip + " : " + 
-			((dictionary[ip]==null) ? "RET" : ((dictionary[ip]=="") ? "EXIT" : dictionary[ip])) + "\n" 
-			+ kvm.jsc.prompt 
+			" " + (ip  ) + " : " + ((dictionary[(ip  )]==null) ? "RET" : ((dictionary[(ip  )]=="") ? "EXIT" : dictionary[(ip  )])) + "\n" +
+			" " + (ip+1) + " : " + ((dictionary[(ip+1)]==null) ? "RET" : ((dictionary[(ip+1)]=="") ? "EXIT" : dictionary[(ip+1)])) + "\n" +
+			" " + (ip+2) + " : " + ((dictionary[(ip+2)]==null) ? "RET" : ((dictionary[(ip+2)]=="") ? "EXIT" : dictionary[(ip+2)])) + "\n" +
+			" " + (ip+3) + " : " + ((dictionary[(ip+3)]==null) ? "RET" : ((dictionary[(ip+3)]=="") ? "EXIT" : dictionary[(ip+3)])) + "\n"
 		);
 		// show data stack
-		type('\n stack ['+stack+']\n');
+		type(' rstack['+rstack+']  stack['+stack+']\n');
+		type(kvm.jsc.prompt );
 		var _line_ = kvm.gets();
-		kvm.jsc.cmd = (_line_=="\r") ? kvm.jsc.cmd||"" : _line_; // Press Enter repeat last command
+		kvm.jsc.cmd =  // static variable so as to reuse last command
+			(_line_=="\r") ? kvm.jsc.cmd||"" : _line_; // Press Enter repeat last command
 		switch(kvm.jsc.cmd.trim()) {
 			case "exit" : case "q" : case "quit": _continue_ = false; execute("bd"); return;
 			case "s"  : kvm.g.breakPoint=-1; return;
