@@ -31,34 +31,6 @@ s" html5.f"		source-code-header
 						[d "BBB",0,1 d] [p "appendChild" p]
 					---
 				</selftest>
-				
-\ include jQuery
-	char script createElement ( -- eleScript )
-	dup char src char js/jquery-1.10.2.js setAttribute ( -- eleScript )
-	js> document.getElementsByTagName('head')[0] swap ( -- eleHead eleScript ) appendChild
-
-code temp  		( -- ) \ redefine type() plain() for jQuery
-				type = vm.type = function (s) { 
-					try {
-						var ss = s + ''; // Print-able test
-					} catch(err) {
-						ss = Object.prototype.toString.apply(s);
-					}
-					if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
-					$('#outputbox').append(plain(ss)); 
-					// jump2endofinputbox.click(); // inputbox.focus();
-				};
-				plain = vm.plain = function (s) {
-					var ss = s + ""; // avoid numbers to fail at s.replace()
-					ss = ss.replace(/\t/g,' &nbsp; &nbsp; &nbsp; &nbsp;');
-					ss = ss.replace(/  /g,' &nbsp;');
-					ss = ss.replace(/</g,'&lt;');
-					ss = ss.replace(/>/g,'&gt;');
-					ss = ss.replace(/\n/g,'<br>');
-					return ss;
-				}
-				end-code
-				last execute (forget)
 	
 : getElementById ( "id" -- element ) \ Get element object by ID
 				js> document.getElementById(pop()) ;

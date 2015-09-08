@@ -31,7 +31,8 @@
 
 	<text>
 		J a v a S c r i p t   c o n s o l e
-		q, exit, quit, or <Esc> : Stop debugging.
+
+		g, q, exit, quit, or <Esc> : Stop debugging.
 		s : Single step. (bp=-1)
 		p : Run until next IP. (bp=ip+1)
 		r : Free run until ret. (bp=rtos)
@@ -39,8 +40,11 @@
 		erase : Erase debug message at bottom.
 		bye : Terminate the program.
 		help : you are reading me.
+
 		Put this line,
+
 		> if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
+
 		into anywhere among JavaScript source code to drop a breakpoint. "msg" shows you which breakpoint it is.
 
 	</text> 

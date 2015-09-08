@@ -3911,11 +3911,12 @@
 [ ] jsc 能不能在 exit "", ret null 處停下來, 目前不會, 故看不到 ret / exit 就突然結束了。	
 	
 [ ] porting to project-k 大改寫 apply to 3HTA (3htm and 3nd are done)
-	[ ]	get jeForth() from jeforth.js > kvm = new jeForth()	
-	[ ]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
-	[ ]	kernel/jeforth.f --> f/jeforth.f
-	[ ]	kvm.selftest_visible = true;
-	[ ]	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+	[x]	kernel/jeforth.js --> project-k/jeforth.js
+	[x]	get jeForth() from jeforth.js > kvm = new jeForth()	
+	[x]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	[x] kernel/jeforth.f --> f/jeforth.f
+	[x]	kvm.selftest_visible = true; // type() needs to check it
+	[x]	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.greeting = function(){
 			type("j e f o r t h . 3 h t m -- v"+version+'\n');
@@ -3923,17 +3924,20 @@
 			type("Program path " + window.location.toString());
 			return(version);
 		}
-	[ ]	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm []3nd []3nw []3hta
-	[ ]	editMode 改用 value []3htm []3nd []3nw []3hta
-	[ ]	改寫 vm.panic() 
+	[x]	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm [x]3nd []3nw [x]3hta
 	[ ] apply to all *.f files 
 		[ ]	fortheval --> dictate  [ ] apply to all *.f files 
 		[ ]	print --> type   [ ] apply to all *.f files 
 		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
 		[ ]	internel kvm --> vm   
+	[ ]	editMode 改用 value []3htm []3nd []3nw []3hta
+	[x]	改寫 vm.panic() 
 [x] working on improving 3nd jsc . . . done，it's very good now.
 	[x] 3htm [ ] 3hta [ ] 3nw
 
+[ ] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。
 	
-	
+[ ] *debug* should print the prompt at entering *debug* mode.
+[ ] include jQuery is done in html5.f , no good. Because html5.f is shared by 3hta, 3htm, and 3nw.
+	--> move include jQuery out of html5.f, jquery.f stand alone for 3hta.
 	

@@ -36,47 +36,60 @@
 		s : Single step. (bp=-1)
 		p : Run until next IP. (bp=ip+1)
 		r : Free run until ret. (bp=rtos)
+		rr: Free run until ret. (bp=next rtos)
 		erase : Erase debug message at bottom.
 		bye : Terminate the program.
 		help : you are reading me.
 
 		Put this line,
 
-		  if(kvm.debug){kvm.jsc.prompt="msg";eval(kvm.jsc.xt)}
+		> if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
 
-		into anywhere among JavaScript source code
-		to drop a breakpoint. "msg" shows you which
-		breakpoint it is.
+		into anywhere among JavaScript source code to drop a breakpoint. "msg" shows you which breakpoint it is.
 
-	</text> <js> kvm.jsc.help=pop().replace(/^[\t ]*/gm,"")</js> \ remove leading Tab's and spaces
+	</text> 
+	<js> 
+		vm.jsc.help=pop().replace(/^[\t ]*/gm,""); // remove leading Tab's and spaces
+		vm.jsc.cmd = "";
+		vm.jsc.enable = true;
+	</js>
 	<text>
 		(function(){
-			var _cmd_ = "";
+			var eraseCount=16;
 			for(;;) {
-				var _ss_, _result_; _ss_ = _result_ = "";
+				if (arguments.callee.show != "disable") {
+					type('\n -------- J a v a S c r i p t   C o n s o l e --------\n');
+					// show ip which is next step
+					type(
+						" " + (ip  ) + " : " + ((dictionary[(ip  )]==null) ? "RET" : ((dictionary[(ip  )]=="") ? "EXIT" : dictionary[(ip  )])) + "\n" +
+						" " + (ip+1) + " : " + ((dictionary[(ip+1)]==null) ? "RET" : ((dictionary[(ip+1)]=="") ? "EXIT" : dictionary[(ip+1)])) + "\n" +
+						" " + (ip+2) + " : " + ((dictionary[(ip+2)]==null) ? "RET" : ((dictionary[(ip+2)]=="") ? "EXIT" : dictionary[(ip+2)])) + "\n" +
+						" " + (ip+3) + " : " + ((dictionary[(ip+3)]==null) ? "RET" : ((dictionary[(ip+3)]=="") ? "EXIT" : dictionary[(ip+3)])) + "\n"
+					);
+					// show data stack
+					type(' rstack['+rstack+']  stack['+stack+']\n');
+					type(kvm.jsc.prompt ); 
+				}
 				jump2endofinputbox.click();
-				_cmd_ = prompt("JavaScript debug console", _cmd_?_cmd_:"");
-				_cmd_ = _cmd_==null ? 'q' : _cmd_; // Press Esc equals to press 'q'
-				kvm.print(kvm.jsc.prompt + ' ' + _cmd_ + "\n");
-				switch(_cmd_){
-					case "exit" : case "g" : case "q" : case "quit": bp=0; return;
-					case "s" : bp=-1; return; // 
-					case "p" : bp=ip+1; return;
-					case "r" : bp=rstack[rstack.length-1]; return;
-					case "erase" : for(var _i_=0; _i_<4; _i_++){execute('{backSpace}');pop();} break;
+				vm.jsc.cmd = // static variable so as to reuse last command
+					prompt("JavaScript console", vm.jsc.cmd?vm.jsc.cmd:""); // Press Enter repeat last command
+				vm.jsc.cmd = vm.jsc.cmd==null ? 'quit' : vm.jsc.cmd; // Press Esc equals to 'quit'
+				vm.type(" > " + vm.jsc.cmd + "\n");
+				switch(vm.jsc.cmd){
+					case "exit" : case "q" : case "quit": execute("bd"); return;
+					case "s"  : vm.g.breakPoint=-1; return;
+					case "p"  : vm.g.breakPoint=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; return;
+					case "r"  : vm.g.breakPoint=rstack[rstack.length-1]; return;
+					case "rr" : vm.g.breakPoint=rstack[rstack.length-2]; return;
 					case "bye"  : execute("bye"); break;
-					case "help" : if(!confirm(kvm.jsc.help)) return; break;
+					case "help" : if(!confirm(vm.jsc.help)) return; break;
+					case "erase" : for(var _i_=0; _i_<eraseCount; _i_++){execute('{backSpace}');pop();} break;
 					default : try { // 自己處理 JScript errors 以免動不動就被甩出去
-						_result_ = eval(_cmd_);
-						// if (typeof(_result_)=="undefined") _ss_ += "undefined\n";
-						// else _ss_ += _result_ + "  (" + kvm.mytypeof(_result_) + ")\n";
-						kvm.print(_result_);
-						kvm.print(" (" + kvm.mytypeof(_result_) + ")\n");
-						// if(!confirm(_ss_ + "\nGo on debugging?")) return;
+						var _result_ = eval(vm.jsc.cmd);
+						vm.type(_result_);
+						vm.type(" (" + mytypeof(_result_) + ")\n");
 					} catch(err) {
-						_ss_ = "Oooops! " + err.message + "\n";
-						kvm.print(_ss_)
-						// alert(_ss_);
+						vm.type("Oooops! " + err.message + "\n")
 					}
 				}
 			}
@@ -84,7 +97,7 @@
 	</text> js: kvm.jsc.xt=pop()
 
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-				js: print("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
+				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
 
 \ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
@@ -98,10 +111,12 @@
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 	include voc.f		\ voc.f is basic of forth language
 	include html5.f		\ HTML5 is HTA's plateform feature
+	include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems from happening immediately
 	include element.f	\ HTML element manipulation
 	include platform.f 	\ Hotkey handlers and platform features
 	include vb.f		\ Being able to run VBS is what HTA is for.
 	include wsh.f		\ Windows Shell Host
+stop
 	include env.f 		\ Windows environment variables
 	include beep.f		\ Define the beep command
 	include binary.f	\ Read/Write binary file

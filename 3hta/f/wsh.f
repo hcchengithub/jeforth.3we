@@ -4,12 +4,12 @@ include vb.f
 
 s" wsh.f"	source-code-header
 
-<js> kvm.fso = new ActiveXObject("Scripting.FileSystemObject") </jsV> constant kvm.fso // ( -- fso ) Scripting.FileSystemObject
+<js> vm.fso = new ActiveXObject("Scripting.FileSystemObject") </jsV> constant vm.fso // ( -- fso ) Scripting.FileSystemObject
 
 				<selftest> 
-					*** kvm.fso check the recent folder existance ... 
-					js> kvm.fso.FolderExists('.') \ ==> true (boolean)
-					==>judge [if] <js> ['kvm.fso'] </jsV> all-pass [then]
+					*** vm.fso check the recent folder existance
+					js> vm.fso.FolderExists('.') \ ==> true (boolean)
+					[d true d] [p 'vm.fso' p]
 				</selftest>
 
 code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application COM object
@@ -23,20 +23,25 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				/// Never! Never! lost the object reference or the application will terminate!
 				/// Save it to a constant or so.
 
-char wscript.shell ActiveXObject constant WshShell // ( -- obj ) WshShell object
-WshShell js: window.WshShell=pop() \ Make it a global object.
+\ Make WshShell a global object
+				char wscript.shell ActiveXObject constant WshShell // ( -- obj ) WshShell object
+				WshShell js: window.WshShell=pop() 
 
 				<selftest> 
-				\	Windows 10 小計算機的行為變了
-				\	*** WshShell use SendKeys to manipulate Calculator ... 
-				\	<vb> WshShell.Run "calc" </vb>               2800 sleep \ This is a fork. 
-				\	<vb> WshShell.AppActivate "Calculator" </vb> 1800 sleep \ Use title or processID
+				\	Windows 10 小計算機的行為變了, 簡化測法 hcchen5600 2015/09/08 16:47:38 
+				\ *** WshShell use SendKeys to manipulate Calculator ... 
+				*** WshShell launch Calculator and confirm
+					<vb> WshShell.Run "calc" </vb> 1000 sleep \ This is a fork. 
+					<vb> kvm.push(WshShell.AppActivate("Calculator"))</vb> 200 sleep \ ( true )
+					<vb> WshShell.SendKeys "12345" </vb> 200 sleep \ 太早回來這些 key 會變成由 3hta 衝出來收走
+					<vb> WshShell.SendKeys "%{F4}" </vb> 200 sleep \ 太早回來這些 key 會變成由 3hta 衝出來收走
+					[d true d] [p "ActiveXObject","WshShell" p]
+stop					
 				\	js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
 				\	\ js: clipboardData.setData("text","1+2=*3=")
 				\	js: clipboardData.setData("text","1+2")
 				\	<vb> WshShell.SendKeys "^v{enter}" </vb>             100 sleep \ Ctrl-v
 				\	<vb> WshShell.SendKeys "^c" </vb>             100 sleep \ Ctrl-c 
-				\	<vb> WshShell.SendKeys "%{F4}" </vb>          100 sleep \ Alt-f4
 				\	js> clipboardData.getData("text")
 				\	js: clipboardData.setData("text",pop(1))  \ save-RESTORE
 				\	9 = ==>judge [if] <js> ['ActiveXObject','WshShell'] </jsV> all-pass [then]
@@ -131,12 +136,12 @@ WshShell js: window.WshShell=pop() \ Make it a global object.
 				</selftest>
 
 : FileExists 	( "path-name" -- boolean ) \ Get file object corresponding to the pathname, no wildcard.
-				js> kvm.fso.FileExists(pop()) ; 
+				js> vm.fso.FileExists(pop()) ; 
 
 code GetFile ( "path-name" -- objFile|false ) \ Get file object corresponding to the pathname, no wildcard.
 				var f;
 				try {	
-					f = kvm.fso.GetFile(pop()); 
+					f = vm.fso.GetFile(pop()); 
 				} catch(err) {
 					f = false;
 				}
@@ -158,7 +163,7 @@ code GetFile ( "path-name" -- objFile|false ) \ Get file object corresponding to
 code GetFolder ( "path" -- objFolder|false ) \ Get folder object corresponding to the path, no wildcard.
 				var f;
 				try {	
-					f = kvm.fso.GetFolder(pop()); 
+					f = vm.fso.GetFolder(pop()); 
 				} catch(err) {
 					f = false;
 				}
@@ -221,21 +226,21 @@ code subFolders ( objFolder -- [objFolder,...] ) \ Get subfolder paths
 \ previous definitions
 
 code CreateFolder ( "path" -- objFolder ) \ Create folder
-				push(kvm.fso.CreateFolder(pop())) end-code
+				push(vm.fso.CreateFolder(pop())) end-code
 
 code DeleteFolder ( "folderspec" -- objFolder ) \ Delete folder, wildcard supported
-				kvm.fso.DeleteFolder(pop()) end-code
+				vm.fso.DeleteFolder(pop()) end-code
 
 code CopyFile 	( "source" "destination" -- ) \ Copies one or more files, Wildcard supported.
-				kvm.fso.CopyFile(pop(1), pop()) end-code
+				vm.fso.CopyFile(pop(1), pop()) end-code
 				/// Panic pops up when error, e.g. target file is read-only.
 
 code DeleteFile ( "pathname" -- ) \ Delete the specified file if it's not read-only, Wildcard supported.
-				kvm.fso.DeleteFile(pop()) end-code
+				vm.fso.DeleteFile(pop()) end-code
 				/// Panic pops up when error, e.g. target file is read-only.
 
 code MoveFile 	( "source" "destination" -- ) \ Move source file to destination folder, wildCard supported.
-				kvm.fso.MoveFile(pop(1), pop()) end-code
+				vm.fso.MoveFile(pop(1), pop()) end-code
 				/// Panic pops up when error, e.g. target file is read-only.
 
 				<selftest> 
@@ -272,7 +277,7 @@ code >path\\	( "path?name" == "path\\name" ) \ Unify path delimiter
 				</selftest>
 
 code GetFileName ( "path-name" -- "filename" ) \ Get file name portion of the given path-name
-				push(kvm.fso.GetFileName(pop())); 
+				push(vm.fso.GetFileName(pop())); 
 				end-code 
 				/// This fso method works only on the provided path string. 
 				/// It does not attempt to resolve the path, nor does it check for the existence of the specified path.
@@ -290,7 +295,7 @@ code GetFileName ( "path-name" -- "filename" ) \ Get file name portion of the gi
 				</selftest>
 				
 code GetBaseName ( "path-name" -- "base-name" ) \ Get file base name portion of the given path-name
-				push(kvm.fso.GetBaseName(pop())); 
+				push(vm.fso.GetBaseName(pop())); 
 				end-code 
 				/// This fso method works only on the provided path string. 
 				/// It does not attempt to resolve the path, nor does it check for the existence of the specified path.
@@ -307,7 +312,7 @@ code GetBaseName ( "path-name" -- "base-name" ) \ Get file base name portion of 
 				</selftest>
 
 code GetExtensionName ( "path-name" -- "ext-name" ) \ Get file extension name portion of the given path-name
-				push(kvm.fso.GetExtensionName(pop())); 
+				push(vm.fso.GetExtensionName(pop())); 
 				end-code 
 				/// This fso method works only on the provided path string. 
 				/// It does not attempt to resolve the path, nor does it check for the existence of the specified path.
@@ -324,7 +329,7 @@ code GetExtensionName ( "path-name" -- "ext-name" ) \ Get file extension name po
 				</selftest>
 
 code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of the given path-name
-				push(kvm.fso.GetParentFolderName(pop())); 
+				push(vm.fso.GetParentFolderName(pop())); 
 				end-code 
 				/// This fso method works only on the provided path string. 
 				/// It does not attempt to resolve the path, nor does it check for the existence of the specified path.
@@ -342,7 +347,7 @@ code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of
 				</selftest>
 
 code GetAbsolutePathName ( "path-name" -- "path-name" ) \ Get complete and unambiguous path from a provided path specification
-				push(kvm.fso.GetAbsolutePathName(pop())); end-code
+				push(vm.fso.GetAbsolutePathName(pop())); end-code
 				/// This fso method works only on the provided path string. 
 				/// It does not attempt to resolve the path, nor does it check for the existence of the specified path.
 				/// char sd//fs/fs\\ddf/s.abc GetAbsolutePathName tib. \ ==> X:\sd\fs\fs\ddf\s.abc (string)
@@ -364,7 +369,7 @@ code GetAbsolutePathName ( "path-name" -- "path-name" ) \ Get complete and unamb
 
 code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given folder
 				var filecollection;
-				filecollection = new Enumerator(kvm.fso.GetFolder(pop()).files);
+				filecollection = new Enumerator(vm.fso.GetFolder(pop()).files);
 				for (var files = []; !filecollection.atEnd(); filecollection.moveNext()) 
 					files.push(filecollection.item());
 				push(files); end-code 
@@ -376,4 +381,4 @@ code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given fol
 				</selftest>
 
 : precise-timer ( -- float ) \ Get precise timer value from VBS's Timer global variable.
-				<vb> kvm.push(Timer)</vb> ;
+				<vb> vm.push(Timer)</vb> ;
