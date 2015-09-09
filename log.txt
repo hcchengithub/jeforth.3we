@@ -3937,7 +3937,14 @@
 
 [ ] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。
 	
-[ ] *debug* should print the prompt at entering *debug* mode.
-[ ] include jQuery is done in html5.f , no good. Because html5.f is shared by 3hta, 3htm, and 3nw.
+[x] *debug* should print the prompt at entering *debug* mode.
+[x] include jQuery is done in html5.f , no good. Because html5.f is shared by 3hta, 3htm, and 3nw.
 	--> move include jQuery out of html5.f, jquery.f stand alone for 3hta.
+	--> type should be redefined in jquery.f but didn't --> fixed, but still pringing &gt;&gt;&gt; <br>&gt; js&gt
+	--> RI: multiple \t only first \t processed, because plain=function...; function vm.type=function...
+		something wrong. --> try newPlain() then ok. So which plain() is used? I know vm.plain() 
+	--> 乾脆不要有 type() plain(), 都用 vm.type() vm.plain() 免生疑惑。 ==> Bingo! and shit 自找麻煩。
+
+[ ] working on wsh.f selftest improvements
+
 	

@@ -36,7 +36,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 					<vb> WshShell.SendKeys "12345" </vb> 200 sleep \ 太早回來這些 key 會變成由 3hta 衝出來收走
 					<vb> WshShell.SendKeys "%{F4}" </vb> 200 sleep \ 太早回來這些 key 會變成由 3hta 衝出來收走
 					[d true d] [p "ActiveXObject","WshShell" p]
-stop					
+*debug* wsh.f>>>					
 				\	js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
 				\	\ js: clipboardData.setData("text","1+2=*3=")
 				\	js: clipboardData.setData("text","1+2")

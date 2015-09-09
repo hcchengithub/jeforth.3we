@@ -9,8 +9,8 @@
 		js> document.getElementsByTagName('head')[0] swap ( -- eleHead eleScript ) appendChild
 
 		<js>
-			// replace the plain() defined in jeforth.hta. Actually window.plain.
-			plain = function (s) {
+			// replace the vm.plain() defined in jeforth.hta.
+			vm.plain = function (s) {
 				// redefined to use jQuery. in html5.f.
 				var ss = s + ""; // avoid numbers to fail at s.replace()
 				ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
@@ -28,9 +28,7 @@
 					ss = Object.prototype.toString.apply(s);
 				}
 				if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
-				if(kvm.selftest_visible) $('#outputbox').append(plain(ss)); 
-if(vm.debug){vm.jsc.prompt=' type redefine in jquery.f ';eval(vm.jsc.xt)}
-
+				if(kvm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
 			};
 		</js>
 	[then]

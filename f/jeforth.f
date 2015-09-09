@@ -2033,6 +2033,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				/// its status.
 				/// work with 'jsc' debug console, jsc is application dependent.
 : (*debug*) 	( msg -- ) \ Suspend to command prompt, 'q' to quit debugging.
+				cr ." ---- Entering *debug* ----" cr
 				[ last literal ] ( _me )
 				<js>
 					var _me = pop();
@@ -2055,6 +2056,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				</js> ;
 				/// 'q' command to quit debugging
 code q			( -- ) \ Quit *debug*
+				type("\n ---- Leaving *debug* ----\n");
 				var q = tick("(*debug*)").continue; 
 				tick("(*debug*)").continue=null; 
 				q(); 

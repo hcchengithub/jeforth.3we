@@ -116,7 +116,7 @@
 	include platform.f 	\ Hotkey handlers and platform features
 	include vb.f		\ Being able to run VBS is what HTA is for.
 	include wsh.f		\ Windows Shell Host
-stop
+*debug* quit.f>>>
 	include env.f 		\ Windows environment variables
 	include beep.f		\ Define the beep command
 	include binary.f	\ Read/Write binary file

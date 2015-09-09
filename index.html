@@ -35,7 +35,7 @@
 				ss = Object.prototype.toString.apply(s);
 			}
 			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-			if(kvm.selftest_visible) $('#outputbox').append(plain(ss)); 
+			if(kvm.selftest_visible) $('#outputbox').append(kvm.plain(ss)); 
 		}
 		
 		// kvm.panic() is the master panic handler. The panic() function defined in 
@@ -133,7 +133,8 @@
 			return (true); // pass down to following handlers 
 		}
 		
-		var plain = kvm.plain = function (s) {
+		// Useful common tool
+		kvm.plain = function (s) {
 			var ss = s + ""; // avoid numbers to fail at s.replace()
 			ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
 			ss = ss.replace(/ /g,'&nbsp;');
