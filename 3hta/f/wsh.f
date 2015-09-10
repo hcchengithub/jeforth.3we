@@ -28,30 +28,47 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				WshShell js: window.WshShell=pop() 
 
 				<selftest> 
-				\	Windows 10 小計算機的行為變了, 簡化測法 hcchen5600 2015/09/08 16:47:38 
-				\ *** WshShell use SendKeys to manipulate Calculator ... 
-				*** WshShell launch Calculator and confirm
+				\ SendKey() 很難搞，下面範例指出了很多要點，值得參考。
+				*** WshShell launch Calculator and SendKeys() to it
 					<vb> WshShell.Run "calc" </vb> 1000 sleep \ This is a fork. 
-					<vb> kvm.push(WshShell.AppActivate("Calculator"))</vb> 200 sleep \ ( true )
-					<vb> WshShell.SendKeys "12345" </vb> 200 sleep \ 太早回來這些 key 會變成由 3hta 衝出來收走
-					<vb> WshShell.SendKeys "%{F4}" </vb> 200 sleep \ 太早回來這些 key 會變成由 3hta 衝出來收走
+					<vb> kvm.push(WshShell.AppActivate("Calculator"))</vb> 1 sleep \ ( boolean )
+					\ 想像 SendKeys() 有很長的【前後置】delay 時間, 會發生甚麼事? 只要 activated 是 Calculator
+					\ 前置時間就沒問題。觀察到有時候 SendKeys 是誤下給 3hta 何故? Active 無故回到 3hta 可能性較低，
+					\ 應該是 AppActivate() 沒成功。照這樣想,一定要做 error check。既然 AppActivate() 有傳回
+					\ 值,隨後的 sleep 理當沒必要。SendKeys() 之後的 sleep 有意義。要確保 activated 是 Calculator 
+					\ 直到 SendKeys() 全部倒完。
+					\ 所以原則是：凡有 SendKeys() 就要考慮最後的【後置時間】，讓它徹底完成工作。
+					\             預防 focus 半途被切走而把 key 送錯給別人。
+					[if]
+						<vb> WshShell.SendKeys "12345" </vb> 1 sleep
+						\ 以下離手前必須 sleep，我看過一半下在這裡一半下給 3hta 的情形!
+						<vb> WshShell.SendKeys "%{F4}" </vb> 1000 sleep 
+						\ 因為 Alt-F4 的特殊性，其後 Alt key 的 keyUp 沒人收，會咬住。
+						\ 此時應該 active 回 3hta，要確定它 focus 在 inputbox，要適時
+						\ 多按一下 Alt{HOME} (賭它沒用到) 把 Alt 放掉。
+						js: inputbox.focus() 100 sleep \ 我覺得 DOM 要花點時間
+						<vb> WshShell.SendKeys "%{HOME}" </vb> \ 目的是把 Alt 放掉,不必 sleep。
+						true
+					[else]
+						false
+					[then]
 					[d true d] [p "ActiveXObject","WshShell" p]
-*debug* wsh.f>>>					
-				\	js> clipboardData.getData("text") ?dup not [if] "" [then] \ SAVE-restore. Clipboard can be null, so be careful. 
-				\	\ js: clipboardData.setData("text","1+2=*3=")
-				\	js: clipboardData.setData("text","1+2")
-				\	<vb> WshShell.SendKeys "^v{enter}" </vb>             100 sleep \ Ctrl-v
-				\	<vb> WshShell.SendKeys "^c" </vb>             100 sleep \ Ctrl-c 
-				\	js> clipboardData.getData("text")
-				\	js: clipboardData.setData("text",pop(1))  \ save-RESTORE
-				\	9 = ==>judge [if] <js> ['ActiveXObject','WshShell'] </jsV> all-pass [then]
-				\	<vb> WshShell.SendKeys "%" </vb> \ Release Alt key, some how other wise it got locked.
-				\	<comment>
-				\	\ 改用 clipboard 已經成功，不怕中文輸入模式。以下留作紀念。
-				\	\ js: document.body.style.imeMode='disabled'; \ [x] 懸案，想要避免中文輸入法干擾，無效！
-				\	\ <vb> WshShell.SendKeys "1{+}" </vb>           100 sleep \ Pad plus
-				\	\ js: document.body.style.imeMode='auto'; 
-				\	</comment>
+
+				*** Manipulate clipboard
+					js: vm.selftest_visible=false
+					\ SAVE-restore. Clipboard can be null, so be careful. 
+					js> clipboardData.getData("text") ?dup not [if] "" [then] 
+					<js> clipboardData.setData("text","6 6 *") </js> ( 36 )
+					<vb> WshShell.SendKeys "^v{enter}" </vb> 1 sleep \ 必須有 sleep 先讓它完成工作再 restore 舊 clipboard 否則會全部攪再一起。
+					js: clipboardData.setData("text",pop(1))  \ save-RESTORE
+					js: vm.selftest_visible=true
+					[d 36 d] [p 'ActiveXObject','WshShell' p]
+
+					\ 改用 clipboard 成功，若用 SendKeys() 遇上中文輸入模式費解。以下留作紀念。
+					\   js: document.body.style.imeMode='disabled'; \ [x] 懸案，想要避免中文輸入法干擾，無效！
+					\   <vb> WshShell.SendKeys "1{+}" </vb> 100 sleep \ Pad plus
+					\   js: document.body.style.imeMode='auto'; 
+
 				</selftest>
 				
 : activate		( ProcessID|"^title" -- ) \ Activate an application
@@ -98,13 +115,16 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				\ otherwise the extra \n may pollute the command line.
 
 				<selftest> 
-					*** run anything and get errlevel, includes DOS command-lines ... 
+				
+					\ 這是個簡單明了的範例。
+					\ jeforth.3hta 可以靠傳回 TOS 層層套疊協力工作。
+					
+					*** run anything and get errlevel, includes DOS command-lines
 					run jeforth.hta 112233 bye 
-					112233 = \ true
+					( 112233 )
 					( 1 not found ) run cmd /c dir | find "lalilale"    
 					( 0 found     ) run cmd /c dir | find "jeforth.hta" 
-					0 = swap 1 = and and 
-					==>judge [if] <js> ['(run)','run'] </jsV> all-pass [then]
+					[d 112233,1,0 d] [p '(run)','run' p]
 				</selftest>
 
 : (fork)		( "command-line" -- ) \ Fork anything like Win-R does, fire and forget, no return value.
@@ -126,13 +146,17 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				\ otherwise the extra \n may pollute the command line.
 
 				<selftest> 
+				
+					\ 以下這個測試示範看得人眼花撩亂，但不要低估它。
+					\ jeforth.3hta 能夠這樣玩弄 DOS 等於是大大地增強了 DOS 的能力。
+					
 					*** fork append time stamp into selftest.log ... 
 					s" fork and dos test " js> Date().toString() + \ ( pattern )
 					s" fork cmd /c echo " over + s" >> selftest.log
 					" + tib.insert 
 					s' dos find "' swap + s' " selftest.log & exit
 					' + tib.insert
-					0 = ==>judge [if] <js> ['dos','(dos)','fork','(fork)'] </jsV> all-pass [then]
+					[d 0 d] [p 'dos','(dos)','fork','(fork)' p]
 				</selftest>
 
 : FileExists 	( "path-name" -- boolean ) \ Get file object corresponding to the pathname, no wildcard.

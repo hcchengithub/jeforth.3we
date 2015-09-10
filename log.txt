@@ -3932,6 +3932,8 @@
 		[ ]	internel kvm --> vm   
 	[ ]	editMode 改用 value []3htm []3nd []3nw []3hta
 	[x]	改寫 vm.panic() 
+	[ ] 照理說 "kvm" 應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
 [x] working on improving 3nd jsc . . . done，it's very good now.
 	[x] 3htm [ ] 3hta [ ] 3nw
 

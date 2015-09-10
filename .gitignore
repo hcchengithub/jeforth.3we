@@ -8,4 +8,5 @@ playground/multitaskjavascripteforth
 *.mp3
 _selftest_.xls
 selftest.log
-project-k/*
+project-k
+0-255.bin
