@@ -159,10 +159,10 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 					[d 0 d] [p 'dos','(dos)','fork','(fork)' p]
 				</selftest>
 
-: FileExists 	( "path-name" -- boolean ) \ Get file object corresponding to the pathname, no wildcard.
+: FileExists 	( "path-name" -- boolean ) \ Check file object existance, no wildcard.
 				js> vm.fso.FileExists(pop()) ; 
 
-code GetFile ( "path-name" -- objFile|false ) \ Get file object corresponding to the pathname, no wildcard.
+code GetFile ( "path-name" -- objFile|false ) \ Get file object, no wildcard.
 				var f;
 				try {	
 					f = vm.fso.GetFile(pop()); 
@@ -178,13 +178,13 @@ code GetFile ( "path-name" -- objFile|false ) \ Get file object corresponding to
 				/// char a.xls GetFile js> pop().name tib. \ ==> A.XLS (string)
 				
 				<selftest> 
-					*** GetFile gets file object ... 
+					*** GetFile gets file object
 					char . full-path char jeforth.hta path+name
 					char jeforth.hta GetFile js> pop().Path
-					= ==>judge [if] <js> ['GetFile'] </jsV> all-pass [then]
+					= [d true d] [p 'full-path','GetFile' p]
 				</selftest>
 
-code GetFolder ( "path" -- objFolder|false ) \ Get folder object corresponding to the path, no wildcard.
+code GetFolder ( "path" -- objFolder|false ) \ Get folder object, no wildcard.
 				var f;
 				try {	
 					f = vm.fso.GetFolder(pop()); 
@@ -199,10 +199,10 @@ code GetFolder ( "path" -- objFolder|false ) \ Get folder object corresponding t
 				/// char . GetFolder js> pop().DateLastAccessed tib.
 				/// char . GetFolder js> pop().DateLastModified tib.
 				<selftest> 
-					*** GetFolder gets folder object ... 
+					*** GetFolder gets folder object
 					char . full-path 
 					char . GetFolder js> pop().Path char \ +
-					= ==>judge [if] <js> ['GetFolder'] </jsV> all-pass [then]
+					= [d true d] [p 'GetFolder' p]
 				</selftest>
 				
 code subFolders ( objFolder -- [objFolder,...] ) \ Get subfolder paths
@@ -268,16 +268,15 @@ code MoveFile 	( "source" "destination" -- ) \ Move source file to destination f
 				/// Panic pops up when error, e.g. target file is read-only.
 
 				<selftest> 
-					*** CreateFolder CopyFile MoveFile DeleteFile DeleteFolder ... 
+					*** CreateFolder CopyFile MoveFile DeleteFile DeleteFolder
 					char selftest.log char temp.log CopyFile
 					char selftest.temp CreateFolder drop
 					char temp.log char selftest.temp\ MoveFile \ note the '\' is necessary to make it a path.
-					char selftest.temp\temp.log	FileExists true = 
+					char selftest.temp\temp.log	FileExists ( true )
 					char selftest.temp\temp.log	DeleteFile
 					char selftest.temp DeleteFolder \ Yes! even if it's not empty.
-					char selftest.temp\temp.log	FileExists false =
-					and ==>judge [if] <js> ['CopyFile','DeleteFile','MoveFile',
-					'CreateFolder','DeleteFolder'] </jsV> all-pass [then]
+					char selftest.temp\temp.log	FileExists ( false )
+					[d true,false d] [p 'CopyFile','DeleteFile','MoveFile','CreateFolder','DeleteFolder' p]
 				</selftest>
 
 code >path/		( "path?name" == "path/name" ) \ Unify path delimiter 
@@ -290,14 +289,14 @@ code >path\\	( "path?name" == "path\\name" ) \ Unify path delimiter
 				push(pop().replace(/\\\\|\\|\//g,"\\\\")) end-code
 
 				<selftest> 
-					*** >path/ >path\ >path\\ changes path delimiter ... 
+					*** >path/ >path\ >path\\ changes path delimiter
 					js> window.location.toString().slice(8).replace(/#endofinputbox/,"")
 					>path/ >path/ >path\ >path\ >path\\ >path\\
 					>path/ >path\ >path/ >path\\
 					>path\ >path/ >path\ >path\\
 					>path\\ >path/ >path\\ >path\
 					FileExists 
-					==>judge [if] <js> ['GetFileName'] </jsV> all-pass [then]
+					[d true d] [p 'GetFileName' p]
 				</selftest>
 
 code GetFileName ( "path-name" -- "filename" ) \ Get file name portion of the given path-name
@@ -308,14 +307,12 @@ code GetFileName ( "path-name" -- "filename" ) \ Get file name portion of the gi
 				/// char sdfs/fs/fs/dfs/df/sdf/sdf/s.abc GetFileName tib. \ ==> s.abc (string)
 
 				<selftest> 
-					*** GetFileName is a string operation ... 
+					*** GetFileName is a string operation
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
-					GetFileName \ ==> jeforth.3we (string)
+					GetFileName ( jeforth.3we (string) )
 					js> window.location.toString().replace(/#endofinputbox/,"") \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
-					GetFileName \ ==> jeforth.hta (string)
-					char jeforth.hta =
-					swap char jeforth.3we =
-					and ==>judge [if] <js> ['GetFileName'] </jsV> all-pass [then]
+					GetFileName ( jeforth.hta (string) )
+					[d "jeforth.3we","jeforth.hta" d] [p 'GetFileName' p]
 				</selftest>
 				
 code GetBaseName ( "path-name" -- "base-name" ) \ Get file base name portion of the given path-name
@@ -326,13 +323,12 @@ code GetBaseName ( "path-name" -- "base-name" ) \ Get file base name portion of 
 				/// char sdfs/fs/fs/dfs/df/sdf/sdf/s.abc GetBaseName tib. \ ==> s (string)
 
 				<selftest> 
-					*** GetBaseName is a string operation ... 
+					*** GetBaseName is a string operation
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3hta\ (string)
 					GetBaseName \ ==> jeforth (string)
 					js> window.location.toString() \ ==> file:///C:/Users/lalala/jeforth.3hta/jeforth.hta (string)
 					GetBaseName \ ==> jeforth (string)
-					over = swap char jeforth = \ true true
-					and ==>judge [if] <js> ['GetBaseName'] </jsV> all-pass [then]
+					[d "jeforth","jeforth" d] [p 'GetBaseName' p]
 				</selftest>
 
 code GetExtensionName ( "path-name" -- "ext-name" ) \ Get file extension name portion of the given path-name
@@ -343,13 +339,12 @@ code GetExtensionName ( "path-name" -- "ext-name" ) \ Get file extension name po
 				/// char sdfs/fs/fs/dfs/df/sdf/sdf/s.abc GetExtensionName tib. \ ==> abc (string)
 
 				<selftest> 
-					*** GetExtensionName is a string operation ... 
+					*** GetExtensionName is a string operation
 					char . full-path  \ ==> C:\lalala\jeforth.3we\ (string)
 					GetExtensionName  \ ==> 3we (string)
 					js> window.location.toString().replace(/#endofinputbox/,"")  \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
 					GetExtensionName \ ==> hta (string)
-					char hta = swap char 3we = and 
-					==>judge [if] <js> ['GetExtensionName'] </jsV> all-pass [then]
+					[d "3we","hta" d] [p 'GetExtensionName' p]
 				</selftest>
 
 code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of the given path-name
@@ -359,15 +354,14 @@ code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of
 				/// It does not attempt to resolve the path, nor does it check for the existence of the specified path.
 				/// char aa/bb/cc/dd/ee/ff/gg/s.abc GetParentFolderName tib. \ ==> aa/bb/cc/dd/ee/ff/gg (string)
 				<selftest> 
-					*** GetParentFolderName is a string operation ... 
-					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
-					GetParentFolderName \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github (string)
-					drop \ demo only, 不拿它做判斷
-					js> window.location.toString().replace(/#endofinputbox/,"") \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we/jeforth.hta (string)
+					*** GetParentFolderName is a string operation
+					s" file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we/jeforth.hta"
 					GetParentFolderName \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we (string)
-					GetFileName \ jeforth.3we
-					char jeforth.3we = 
-					==>judge [if] <js> ['GetParentFolderName','GetAbsolutePathName'] </jsV> all-pass [then]
+					dup GetFileName \ jeforth.3we
+					[d 
+						"file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we",
+						"jeforth.3we" 
+					d] [p 'GetParentFolderName' p]
 				</selftest>
 
 code GetAbsolutePathName ( "path-name" -- "path-name" ) \ Get complete and unambiguous path from a provided path specification
@@ -384,11 +378,11 @@ code GetAbsolutePathName ( "path-name" -- "path-name" ) \ Get complete and unamb
 				/// full-path does error check, this word doesn't.
 
 				<selftest> 
-					*** full-path reveals what .\ really is ... 
+					*** full-path reveals what .\ really is
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
 					char jeforth.hta path+name \ C:\lalala\jeforth.3we\jeforth.hta
 					FileExists \ true
-					==>judge [if] <js> ['GetAbsolutePathName','full-path','path+name','FileExists'] </jsV> all-pass [then]
+					[d true d] [p 'GetAbsolutePathName','full-path','path+name','FileExists' p]
 				</selftest>
 
 code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given folder
@@ -399,9 +393,9 @@ code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given fol
 				push(files); end-code 
 				
 				<selftest> 
-					*** (dir) gets file object list ... 
-					char . (dir) js> mytypeof(pop()) char array = 
-					==>judge [if] <js> ['(dir)'] </jsV> all-pass [then]
+					*** (dir) gets file object list
+					char . (dir) js> mytypeof(pop())
+					[d "array" d] [p '(dir)' p]
 				</selftest>
 
 : precise-timer ( -- float ) \ Get precise timer value from VBS's Timer global variable.
