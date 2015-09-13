@@ -118,7 +118,7 @@
 					<selftest> 
 						*** VBScript ScriptEngine version
 							<js> vm.vbscript.indexOf('VBScript')!=-1 </jsV> ( true )
-							<js> vm.vbscript.indexOf('Build:17')!=-1 </jsV> ( Build:17451 now, true )
+							<js> vm.vbscript.indexOf('Build:1')!=-1 </jsV> ( Build:17451 now, true )
 							[d true,true d] [p "vb>","vbEval" p]
 							
 						*** jeforth process ID

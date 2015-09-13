@@ -12,11 +12,8 @@
 	\ js: $(tos()).hide() eleHead swap appendChild \ 可以掛 header （與 body 同屬 document）但不能不掛
 
 	s" <embed id=beep autostart=false enablejavascript=true src='" 
-	char %WINDIR% env@ +
-	s" \Media\Windows Information Bar.wav'></embed>" + 
-	</h> constant eleBeep // ( -- element ) HTML embed element of the beep sound wave file.
-	js: kvm.beep=function(){beep.Play()} \ kvm.beep() can be used by call back functions
-	: beep	js: kvm.beep() ; // ( -- ) Sounds a beep
+	char %WINDIR% env@ + s" \Media\chord.wav'></embed>" + </h> drop
+	: beep	js: beep.play() 600 nap ; // ( -- ) Sounds a beep
 				
 
 

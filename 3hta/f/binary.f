@@ -16,18 +16,18 @@
 \   objBinaryFile.h2d("ABCD")               convert a hex strings into a decimal integer
 \   objBinaryFile.path                      return the path name of the binary file
 
-<vb> Set o = CreateObject("ADODB.Stream"): kvm.push(o) </vb> constant BinaryStream // ( -- ADODB.Stream-object ) Stream object for Read/Write binary file. 
-BinaryStream js: kvm.BinaryStream=pop()
+<vb> Set o = CreateObject("ADODB.Stream"): vm.push(o) </vb> constant BinaryStream // ( -- ADODB.Stream-object ) Stream object for Read/Write binary file. 
+BinaryStream js: vm.BinaryStream=pop()
 include.js js/binary.js
 
 s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
 
     <selftest>
-		***** Demo usage of BinaryFile() class, Wrte/Read binary file ........
-		marker -%-%-%-%-%-
-		js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
-		js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
-		( ------------ Start to do anything --------------- )
+		*** Demo usage of BinaryFile() class, Wrte/Read binary file
+			marker -%-%-%-%-%-
+			js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stops working if is null.
+			js> vm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 vm.screenbuffer 尾巴。
+			( ------------ Start to do anything --------------- )
 			code data0-255 ( -- binary-string ) \ Create a binary string of 0-255
 				var ba = String.fromCharCode( // this is the JavaScript way to create a binary array
                   0,
@@ -48,25 +48,22 @@ s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
 				push(ba);
 			end-code
 			last execute constant 0-255 // ( -- binary-string ) 
-			<js> new kvm.BinaryFile("0-255.bin") </jsV> constant 0-255.bin // ( -- objBinaryFile )
+			<js> new vm.BinaryFile("0-255.bin") </jsV> constant 0-255.bin // ( -- objBinaryFile )
 			0-255 0-255.bin js> pop().WriteAll(pop())  \ now you've got a binary file "0-255.bin" with 0-255 in it
 			0-255.bin js> pop().ReadAll(pop()) constant binary-string // ( -- binary-string ) 0-255 in it
 			binary-string <js> for (var i=0,sum=0; i<tos().length; i++) sum+=tos().charCodeAt(i); sum </jsV> nip
 			\ (255 + 0) * 256/2 = 32640 , says google
-		( ------------ done, start checking ---------------- ) 
-		js> stack.slice(0) <js> [32640] </jsV> isSameArray >r dropall r>
-		-->judge [if] <js> [
-			'BinaryStream'
-		] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
-		-%-%-%-%-%-
+			( ------------ done, start checking ---------------- ) 
+			[d 32640 d] [p 'BinaryStream' p]
+			-%-%-%-%-%-
 	</selftest>
 
     : writeBinaryFile ( binary-string pathname -- ) \ Save binary-string to binary file
-        <js> new kvm.BinaryFile(pop()) </jsV> ( -- objBinaryFile )
+        <js> new vm.BinaryFile(pop()) </jsV> ( -- objBinaryFile )
         <js> pop().WriteAll(pop()) </js> ;
 
     : readBinaryFile ( binary-file-pathname -- binary-string ) \ Read binary file into a binary string
-        <js> new kvm.BinaryFile(pop()) </jsV> ( -- objBinaryFile )
+        <js> new vm.BinaryFile(pop()) </jsV> ( -- objBinaryFile )
         <js> pop().ReadAll() </jsV> ;
 
     code binary-array>string ( byte-array -- binary-string ) \ Convert an array into binary string
@@ -82,7 +79,7 @@ s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
         end-code
 		
 		<selftest>
-			***** readBinaryFile writeBinaryFile ........
+			*** readBinaryFile writeBinaryFile
 			marker -%-%-%-%-%-
 			( ------------ Start to do anything --------------- )
 				char 0-255.bin readBinaryFile constant binaryString // ( -- "\0~\255" ) 
@@ -91,13 +88,8 @@ s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
 				binaryArray  <js> for (var i=0,sum=0; i<tos().length; i++) sum+=tos()[i]; sum </jsV> nip \ 32640
 				binaryArray binary-array>string binaryString = \ true
 			( ------------ done, start checking ---------------- ) 
-			js> stack.slice(0) <js> [32640,32640,true] </jsV> isSameArray >r dropall r>
-			-->judge [if] <js> [
-				'readBinaryFile',
-				'writeBinaryFile',
-				'binary-string>array',
-				'binary-array>string'
-			] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+			[d 32640,32640,true d] 
+			[p 'readBinaryFile','writeBinaryFile','binary-string>array','binary-array>string' p]
 			-%-%-%-%-%- char 0-255.bin DeleteFile
 		</selftest>
     
@@ -110,25 +102,20 @@ s" binary.f"	source-code-header // ( -- ) Switch vocabulary context to 'binary'
 	: .d 	base@ >r hex 8 .0r r> base! ; // ( n -- ) Print the number as a dword of hex-decimal
 	
 		<selftest>
-			***** Print binary numbers ........
+			*** Print binary numbers
 			marker -%-%-%-%-%-
-			js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stop working if it's null.
-			js> kvm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 kvm.screenbuffer 尾巴。
-			selftest-invisible \ 我想讓畫面整潔，self-test 的過程可以看 kvm.screenbuffer。 
+			js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stop working if it's null.
+			js> vm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 vm.screenbuffer 尾巴。
+			js: vm.selftest_visible=false \ 我想讓畫面整潔，self-test 的過程可以看 vm.screenbuffer。 
 			( ------------ Start to do anything --------------- )
 			123 .b cr \ 7b
 			321 .w cr \ 0141
 			888 .d cr \ 00000378
 			( ------------ done, start checking ---------------- ) 
-			selftest-visible
-			start-here <js> kvm.screenbuffer.slice(pop()).indexOf("7b")!=-1 </jsV> \ true 
-			start-here <js> kvm.screenbuffer.slice(pop()).indexOf("0141")!=-1 </jsV> \ true 
-			start-here <js> kvm.screenbuffer.slice(pop()).indexOf("00000378")!=-1 </jsV> \ true 
-			js> stack.slice(0) <js> [true,true,true] </jsV> isSameArray >r dropall r>
-			-->judge [if] <js> [
-				'.b',
-				'.w',
-				'.d'
-			] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+			js: vm.selftest_visible=true
+			start-here <js> vm.screenbuffer.slice(pop()).indexOf("7b")!=-1 </jsV> \ true 
+			start-here <js> vm.screenbuffer.slice(pop()).indexOf("0141")!=-1 </jsV> \ true 
+			start-here <js> vm.screenbuffer.slice(pop()).indexOf("00000378")!=-1 </jsV> \ true 
+			[d true,true,true d] [p '.b','.w','.d' p]
 			-%-%-%-%-%-
 		</selftest>

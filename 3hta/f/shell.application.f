@@ -3,23 +3,24 @@ s" shell.application.f"	source-code-header
 
 \ -------------- Microsoft Windows Shell.Application COM object ----------------------------------------------------
 \ I think it would be suitable for a stand alone shellapplication.f 
-\ [ ] see evernote for related articles.
+\ [ ] see Evernote for related articles.
 
-\ : shell.application ( -- obj ) \ Get shell.application COM object
-\ 				char Shell.Application ActiveXObject ;
 char Shell.Application ActiveXObject constant shell.application // ( -- obj ) shell.application COM object
 
 : ShutdownWindows ( -- ) \ Pops up the dialog for Log out, Power off, Reboot, Sleep, or Hibernation
-				shell.application js> pop().ShutdownWindows() ;
+				shell.application :: ShutdownWindows() ;
 
-: findfiles		( -- undefined ) \ Launch Win-F diaglog box or Windows 8 U/I to find a file.
-				shell.application js> pop().findfiles() ;
+: findfiles		( -- ) \ Launch Win-F diaglog box or Windows 8 U/I to find a file.
+				shell.application :: findfiles() ;
+				/// This is useless.
 				/// The Win8 UI only wants to open the file by an AP. So it 
 				/// does not return a meaningful result like a full-path or 
-				/// the likes. This is useless.
+				/// the likes. 
+				/// Win10, just like pressing the Windows key. Useless too.
 
 : open.c:\		( -- ) \ Demo how to open the 'c:\' folder. 
-				shell.application <js> pop().Open("C:\\") </js> ;
+				shell.application :: Open("C:\\") ;
+				/// Open(".") no work.
 
 : get-folder	( iOptions -- objFolder ) \ Get folder object through Windows GUI
 				shell.application 
@@ -34,38 +35,34 @@ char Shell.Application ActiveXObject constant shell.application // ( -- obj ) sh
 				///     'ulFlags' of http://msdn.microsoft.com/en-us/library/bb773205%28VS.85%29.aspx
 
 : run-dialog	( -- ) \ Equivalent to clicking the Start menu and selecting Run.
-				shell.application <js> pop().FileRun() </js> ;
+				shell.application :: FileRun() ;
 				/// Similar to above fork or (fork).
 
 : PhysicalMemoryInstalled ( -- nbytes ) \ Get memory size of this computer in OS's view point.
-				shell.application 
-				<js> pop().GetSystemInformation("PhysicalMemoryInstalled")</jsV> ;
+				shell.application :> GetSystemInformation("PhysicalMemoryInstalled") ;
 
 : IsOS_DomainMember ( -- boolean ) \ Is this computer a domain member?
-				shell.application 
-				<js> pop().GetSystemInformation("IsOS_DomainMember")</jsV> ;
+				shell.application :> GetSystemInformation("IsOS_DomainMember") ;
 
 : WindowSwitcher ( -- ) \ equivalent to press Alt-Tab
-				shell.application <js> pop().WindowSwitcher() </js> ;
+				shell.application :: WindowSwitcher() ;
+				/// 到了 Windows 10 已經不靈了。
 
 : MyDocument	( -- ) \ Open the MyDocument folder
-				shell.application <js> pop().explore(5) </js> ;
+				shell.application :: explore(5) ;
 
-\ 忘了以下是啥了，似乎挺有趣，保留。
-\ shell.application <js> pop().ShowBrowserBar("{EFA24E61-B078-11d0-89E4-00C04FC9E26E}", true) </js>
-\ shell.application <js> pop().ShowBrowserBar("{EFA24E64-B078-11d0-89E4-00C04FC9E26E}", true) </js>
-\ shell.application <js> pop().ShowBrowserBar("{30D02401-6A81-11d0-8274-00C04FD5AE38}", true) </js>
-\ 0x0010 constant FOF_NOCONFIRMATION 	
-\ 0x0080 constant FOF_FILESONLY 		
-\ 0x0100 constant FOF_SIMPLEPROGRESS 	
-\ 0x0200 constant FOF_NOCONFIRMMKDIR 	
-\ 0x0400 constant FOF_NOERRORUI 		
+: namespace		( "path" -- objFolder ) \ Get a destination folder object for copyHere() and moveHere()
+				shell.application :> namespace(pop()) ;
+				/// char c:\ namespace <-- works
+				/// char . namespace <-- no work
 
-: namespace		( "path" -- folder-obj ) \ Get a destination folder object for copyHere() and moveHere()
-				shell.application js> pop().namespace(pop()) ;
-
-: copyhere		( "C:\Reports\*.FR?" folder-obj flags -- ) \ Copy "C:\Reports\*.FR?" to the folder
+: copyhere		( "C:\Reports\*.FR?" objFolder flags -- ) \ Copy "C:\Reports\*.FR?" to the folder
 				js> pop(1).CopyHere(pop(1),pop()) ;
+				/// 0x0010 constant FOF_NOCONFIRMATION 	
+				/// 0x0080 constant FOF_FILESONLY 		
+				/// 0x0100 constant FOF_SIMPLEPROGRESS 	
+				/// 0x0200 constant FOF_NOCONFIRMMKDIR 	
+				/// 0x0400 constant FOF_NOERRORUI 		
 
 : movehere		( "C:\Reports\*.FR?" folder-obj flags -- ) \ Move "C:\Reports\*.FR?" to the folder
 				js> pop(1).MoveHere(pop(1),pop()) ;

@@ -32,6 +32,9 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				*** WshShell launch Calculator and SendKeys() to it
 					<vb> WshShell.Run "calc" </vb> 1000 sleep \ This is a fork. 
 					<vb> kvm.push(WshShell.AppActivate("Calculator"))</vb> 1 sleep \ ( boolean )
+					\ Windows 10 的行為怪異 AppActivate() 看切到誰，返回值不一定，幸好
+					\ 都會成功，乾脆不看結果了。
+					drop 
 					\ 想像 SendKeys() 有很長的【前後置】delay 時間, 會發生甚麼事? 只要 activated 是 Calculator
 					\ 前置時間就沒問題。觀察到有時候 SendKeys 是誤下給 3hta 何故? Active 無故回到 3hta 可能性較低，
 					\ 應該是 AppActivate() 沒成功。照這樣想,一定要做 error check。既然 AppActivate() 有傳回
@@ -39,7 +42,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 					\ 直到 SendKeys() 全部倒完。
 					\ 所以原則是：凡有 SendKeys() 就要考慮最後的【後置時間】，讓它徹底完成工作。
 					\             預防 focus 半途被切走而把 key 送錯給別人。
-					[if]
+					true [if]
 						<vb> WshShell.SendKeys "12345" </vb> 1 sleep
 						\ 以下離手前必須 sleep，我看過一半下在這裡一半下給 3hta 的情形!
 						<vb> WshShell.SendKeys "%{F4}" </vb> 1000 sleep 
@@ -59,7 +62,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 					\ SAVE-restore. Clipboard can be null, so be careful. 
 					js> clipboardData.getData("text") ?dup not [if] "" [then] 
 					<js> clipboardData.setData("text","6 6 *") </js> ( 36 )
-					<vb> WshShell.SendKeys "^v{enter}" </vb> 1 sleep \ 必須有 sleep 先讓它完成工作再 restore 舊 clipboard 否則會全部攪再一起。
+					<vb> WshShell.SendKeys "^v{enter}" </vb> 500 sleep \ 必須有 sleep 先讓它完成工作再 restore 舊 clipboard 否則會全部攪再一起。
 					js: clipboardData.setData("text",pop(1))  \ save-RESTORE
 					js: vm.selftest_visible=true
 					[d 36 d] [p 'ActiveXObject','WshShell' p]
