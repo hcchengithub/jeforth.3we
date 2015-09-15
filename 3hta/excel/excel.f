@@ -15,11 +15,13 @@
 						s" where name = 'ExCeL.ExE'" see-process ;
 	: kill-excel 		( -- n ) \ Kill all excel.exe processes
 						s" where name = 'ExCeL.ExE'" kill-them ;
+						/// Formal way is : excel.app :: quit()
 						
 	\ 先查有幾個 excel.application 在 running? 通常應該只有一個，如果是一個就用它, 如果超過一個
 	\ 就警告, 如果沒有就開一個。 [x] 如果 excel 沒有 install 的情形要跳過。
 	
 	{} value excel.app 	// ( -- obj ) The Excel.Application object or undefined if no excel exists.
+						/// "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
 						see-excel ( count ) 
 						js> tos()>1 [if] 
 							." Warning: Multiple Excel.Application are running." *debug* Multiple-Excel-error>>> 
@@ -44,14 +46,11 @@
 						/// selection :: item(123).value="hello" 
 	
 						<selftest>
-							***** excel.app is like a constant it gets you the app object ........
+							*** excel.app is like a constant it gets you the app object
 							( ------------ Start to do anything --------------- )
 							excel.app js> pop().Application.Application.Application.Application.name \ How many .Application ? It doesn't matter. 
 							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> ["Microsoft Excel"] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'excel.app'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+							[d "Microsoft Excel" d] [p 'excel.app' p]
 						</selftest>
 
 	: openFileDialog ( -- "pathname" ) \ Get a pathname string through excel dialog.
@@ -68,15 +67,12 @@
 						excel.app js> pop().visible=false drop ;
 						
 						<selftest>
-							*** excel.visible excel.invisible ... 
+							*** excel.visible excel.invisible
 							excel.invisible
 							excel.app js> pop().visible false = \ true
 							excel.visible
 							excel.app js> pop().visible \ true true
-							and ==>judge  [if] <js> [
-								'excel.visible',
-								'excel.invisible'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+							[d true,true d] [p 'excel.visible', 'excel.invisible' p]
 						</selftest>
 
 	: new.xls           ( -- WorkBook ) \ Create a new excel workbook file object
@@ -85,15 +81,12 @@
 						/// mathods: close(), save(), saveas() .. etc.
 						
 						<selftest>
-							***** new.xls gets workbook file object ....
+							*** new.xls gets workbook file object
 							( ------------ Start to do anything --------------- )
 							new.xls constant WORKBOOK // ( -- obj ) excel workbook
 							WORKBOOK js> typeof(pop().name) \ something like 活頁簿1 or Workbook1
 							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> ['string'] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'new.xls'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+							[d 'string' d] [p 'new.xls' p]
 						</selftest>
 
 	code excel.save     ( workbook -- ) \ Save workbook object to excel file
@@ -109,15 +102,12 @@
 						/// always save-as Office 97&2003 compatible format
 						
 						<selftest>
-							***** excel.save-as saves workbook to file ....
+							*** excel.save-as saves workbook to file
 							( ------------ Start to do anything --------------- )
 							char . full-path char _selftest_.xls + constant 'selftest.xls' // ( -- pathname )
 							'selftest.xls' WORKBOOK excel.save-as \ true
 							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'excel.save-as'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+							[d true d] [p 'excel.save-as' p]
 						</selftest>
 
 	code open.xls       ( "pathname" -- workbook ) \ Open excel file get workbook object
@@ -132,15 +122,12 @@
 						end-code
 						
 						<selftest>
-							***** excel.close closes the workbook ....
+							*** excel.close closes the workbook
 							( ------------ Start to do anything --------------- )
 							WORKBOOK excel.close \ true
 							'selftest.xls' open.xls constant WORKBOOK // ( -- obj ) excel workbook re-opened
 							( ------------ done, start checking ---------------- )
-							js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
-							-->judge [if] <js> [
-								'excel.close','open.xls','excel.save'
-							] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+							[d true d] [p 'excel.close','open.xls','excel.save' p]
 						</selftest>
 
 	: excel.close-all	( -- ) \ Close all excel file without saving.
@@ -372,8 +359,7 @@
 						///     ( hashDataTable ) activeSheet char b ( index ) char z 
 						///     ( target ) 4 ( top row# ) hash>column
 
-	code workbook>sheets
-						( workbook -- array ) \ Get array of all sheet names in a workbook
+	code workbook>sheets ( workbook -- array ) \ Get array of all sheet names in a workbook
 						var target = pop(), count = target.sheets.count, aa = [];
 						for(var i=1; i<=count; i++) aa.push(target.sheets(i).name);
 						push(aa);
@@ -431,6 +417,13 @@
 		vb> Minute(vm.tos())  2 .0r space
 		vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
 		;
+		
+	<selftest>
+		*** clsoe excel
+		excel.app :: quit()
+		[d d] [p p]
+	</selftest>
+	
 	[else]
 		excel.app.count [if] ." The excel.exe running in this system does not response to COM requests. Try fix it by the kill-excel command." [then]
 	[then] \ excel.app exists
