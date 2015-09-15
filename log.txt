@@ -3930,6 +3930,8 @@
 		[ ]	print --> type   [ ] apply to all *.f files 
 		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
 		[ ]	internel kvm --> vm   
+		[ ] js: vm.selftest_visible=true
+		[ ] -->judge 改用 [d d] [p p]
 	[ ]	editMode 改用 value []3htm []3nd []3nw []3hta
 	[x]	改寫 vm.panic() 
 	[ ] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
@@ -3949,4 +3951,12 @@
 
 [ ] working on wsh.f selftest improvements
 
+[ ] In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
+	it's an error for JavaScript.
+[ ] 如何分辨 interactive -- none-interactive? 若 none-interactive 則對 error/warning 的處置應該要
+	讓程式停下來，以免衝出太多添危險。<=== 很久以前就是用 command line 來分辨了。如今可以在 panic()
+	裡面判斷。
+[ ] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
+	' <selftest> :: enabled=true dropall cls --wmi.f-- include wmi.f
+	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
 	

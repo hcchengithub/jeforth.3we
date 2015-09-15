@@ -6,18 +6,19 @@ s" shell.application.f"	source-code-header
 \	Windows desktop applications >  Develop >  Desktop technologies >  
 \ 	Desktop Environment >  The Windows Shell >  Shell Reference >  
 \ 	Shell Objects for Scripting and Microsoft Visual Basic >  Shell > ...
-\ ¥Î PowerShell ¤]¥i¥H¬d¥X(³¡¤À) shell.application ªº¥\¯à¡C ¨£©ó https://msdn.microsoft.com/en-us/library/windows/desktop/bb774063(v=vs.85).aspx ºô¤Í comment¡C
+\ ç”¨ PowerShell ä¹Ÿå¯ä»¥æŸ¥å‡º(éƒ¨åˆ†) shell.application çš„åŠŸèƒ½ã€‚ è¦‹æ–¼ https://msdn.microsoft.com/en-us/library/windows/desktop/bb774063(v=vs.85).aspx ç¶²å‹ commentã€‚
 \	# get object
 \	$shell  = new-object -com shell.application
-\	# Display members of the shell.application object. PowerShell ¤U¦C¥X shell.application members.
+\	# Display members of the shell.application object. PowerShell ä¸‹åˆ—å‡º shell.application members.
 \	$shell | get-member
 \
 \ I guess these pages may be useful too :
 \	Microsoft dev center http://dev.windows.com
 \	[x] see Evernote for related articles.
 \	Scriptable Shell Objects http://msdn.microsoft.com/en-us/library/windows/desktop/bb776890(v=vs.85).aspx
-\	¦n¹³ shell.application »P Shell Objects ¤£¦P? µL¤£¦P,¦P¤@¥ó¨Æ¡C
+\	å¥½åƒ shell.application èˆ‡ Shell Objects ä¸åŒ? ç„¡ä¸åŒ,åŒä¸€ä»¶äº‹ã€‚
 \	Windows Shell https://msdn.microsoft.com/en-us/library/windows/desktop/bb773177(v=vs.85).aspx
+\ [ ] å€¼å¾—å¥½å¥½ç ”ç©¶ã€‚æ²’å¿…è¦å¯«æˆ forth words, ä½†æ˜¯æœ‰å¿…è¦é€é forth å¾—åˆ°å¥½ç”¨çš„å”åŠ©ã€‚
 
 char Shell.Application ActiveXObject constant shell.application // ( -- obj ) shell.application COM object
 
@@ -32,15 +33,15 @@ char Shell.Application ActiveXObject constant shell.application // ( -- obj ) sh
 				/// the likes. 
 				/// Win10, just like pressing the Windows key. Useless too.
 
-: open.c:\		( -- ) \ Demo how to open the 'c:\' folder. 
-				shell.application :: Open("C:\\") ;
-				/// Open(".") no work.
+: open			( path -- ) \ Open a folder. 
+				shell.application :: Open(pop()) ;
+				/// Open(".") no work. open("c:\\") works.
 				/// See explore() metnod, it's better and more interesting.
 
-: get-folder	( iOptions -- objFolder ) \ Get folder object through Windows GUI
+: BrowseForFolder	( iOptions -- objFolder ) \ Get folder object through Windows GUI
 				shell.application 
 				<js> 
-					var vRootFolder = 0x11; // special folder 0x11 is MyComputer, or someting like "d:\\"
+					var vRootFolder = 0x11; // special folder 0x11 is MyComputer
 					var iOptions = pop(1); 
 					pop().BrowseForFolder(0,"Get me the folder",iOptions,vRootFolder) 
 				</jsV> ;
@@ -49,7 +50,7 @@ char Shell.Application ActiveXObject constant shell.application // ( -- obj ) sh
 				/// 'iOptions' try 0xC0 or see: 
 				///     'ulFlags' of http://msdn.microsoft.com/en-us/library/bb773205%28VS.85%29.aspx
 
-: run-dialog	( -- ) \ Equivalent to clicking the Start menu and selecting Run.
+: FileRun		( -- ) \ Click the "Run" in Start menu.
 				shell.application :: FileRun() ;
 				/// Similar to above fork or (fork).
 
@@ -61,7 +62,7 @@ char Shell.Application ActiveXObject constant shell.application // ( -- obj ) sh
 
 : WindowSwitcher ( -- ) \ equivalent to press Alt-Tab
 				shell.application :: WindowSwitcher() ;
-				/// ¨ì¤F Windows 10 ¤w¸g¤£ÆF¤F¡C
+				/// åˆ°äº† Windows 10 å·²ç¶“ä¸éˆäº†ã€‚
 
 : MyDocument	( -- ) \ Use shell.application :: explore() method to open the MyDocument folder
 				shell.application :: explore(5) ;
@@ -116,11 +117,7 @@ char Shell.Application ActiveXObject constant shell.application // ( -- obj ) sh
 
 : copyhere		( "C:\Reports\*.FR?" objFolder flags -- ) \ Copy "C:\Reports\*.FR?" to the folder
 				js> pop(1).CopyHere(pop(1),pop()) ;
-				/// 0x0010 constant FOF_NOCONFIRMATION 	
-				/// 0x0080 constant FOF_FILESONLY 		
-				/// 0x0100 constant FOF_SIMPLEPROGRESS 	
-				/// 0x0200 constant FOF_NOCONFIRMMKDIR 	
-				/// 0x0400 constant FOF_NOERRORUI 		
+				/// flags or options see https://msdn.microsoft.com/en-us/library/windows/desktop/ms723207(v=vs.85).aspx
 
 : movehere		( "C:\Reports\*.FR?" folder-obj flags -- ) \ Move "C:\Reports\*.FR?" to the folder
 				js> pop(1).MoveHere(pop(1),pop()) ;
@@ -133,4 +130,10 @@ char Shell.Application ActiveXObject constant shell.application // ( -- obj ) sh
 
 : tilehorizontally ( -- ) \ Tile Windows Horizontally
 				shell.application js> pop().TileHorizontally() ;
-\ --EOF--
+
+<selftest>
+	*** shell.application, Try PhysicalMemoryInstalled() should > 64M
+		PhysicalMemoryInstalled js> pop()>(64*1024*1024) ( true )
+		[d true d] [p "shell.application" p]
+		
+</selftest>

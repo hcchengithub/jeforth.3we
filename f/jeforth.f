@@ -205,45 +205,6 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 					用上〈selftest〉〈/selftest〉出現在每個 word 定義處，裡頭可以放心自由地使用尚未出
 					生的「未來 words」, 對寫程式時的頭腦有很大的幫助。 
 					</comment>
-					
-					"" value description // ( -- "text" ) description of a selftest section
-					[] value expected_rstack // ( -- [..] ) an array to compare rstack
-					[] value expected_stack // ( -- [..] ) an array to compare data stack
-					0  value test-result // ( -- boolean ) selftest result from [d .. d] 
-					[] value [all-pass] // ( -- ["words"] ) array of words for all-pass.
-					: *** ( <description> -- ) \ Start a selftest section
-						char \n|\r word 
-						<js> pop().trim() </jsV> \ remove 頭尾 white spaces
-						<js> "*** " + pop() + " ... " </jsV> to description
-						depth if 
-							description . ." aborted" cr 
-							." *** Warning, Data stack is not empty." cr
-							stop
-						then ;
-					code all-pass ( ["name",...] -- ) \ Pass-mark all these word's selftest flag
-						var a=pop();
-						for (var i in a) {
-							var w = tick(a[i]);
-							if(!w) panic("Error! " + a[i] + "?\n");
-							else w.selftest='pass';
-						}
-						end-code
-					: [r ( <"text"> -- ) \ Prepare an array of data to compare with rstack.
-						char r] word js> eval("["+pop()+"]") to expected_rstack ;
-					: r] ( -- boolean ) \ compare rstack and expected_rstack
-						js> vm.g.isSameArray(rstack,vm.g.expected_rstack) ;
-					: [d ( <"text"> -- ) \ Prepare an array to compare with data stack. End of a selftest section.
-						char d] word js> eval("["+pop()+"]") to expected_stack ;
-						/// Data stack will be clean after check
-					: d] ( -- boolean ) \ compare data stack and expected_stack
-						js> vm.g.isSameArray(stack,vm.g.expected_stack) to test-result 
-						description . test-result if ." pass" cr dropall
-						else ." fail" cr stop then ;
-						/// Data stack will be clean after check
-					: [p ( <"text"> -- ) \ Prepare an array ([all-pass]) of words for all-pass if test-result
-						char p] word js> eval("["+pop()+"]") to [all-pass] ;
-					: p] ( -- boolean ) \ all-pass if test-result
-						test-result if [all-pass] all-pass then ;
 
 					marker ~~selftest~~ // ( -- ) marker, clean selftest garbage
 					.( *** Start self-test ) cr
@@ -2068,6 +2029,44 @@ code q			( -- ) \ Quit *debug*
 				/// 'q' command to quit debugging
 
 \ ----------------- Self Test -------------------------------------
+"" value description // ( -- "text" ) description of a selftest section
+[] value expected_rstack // ( -- [..] ) an array to compare rstack in selftest
+[] value expected_stack // ( -- [..] ) an array to compare data stack in selftest
+0  value test-result // ( -- boolean ) selftest result from [d .. d] 
+[] value [all-pass] // ( -- ["words"] ) array of words for all-pass in selftest
+: *** 			( <description> -- ) \ Start a selftest section
+				char \n|\r word 
+				<js> pop().trim() </jsV> \ remove 頭尾 white spaces
+				<js> "*** " + pop() + " ... " </jsV> to description
+				depth if 
+					description . ." aborted" cr 
+					." *** Warning, Data stack is not empty." cr
+					stop
+				then ;
+code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
+				var a=pop();
+				for (var i in a) {
+					var w = tick(a[i]);
+					if(!w) panic("Error! " + a[i] + "?\n");
+					else w.selftest='pass';
+				}
+				end-code
+: [r 			( <"text"> -- ) \ Prepare an array of data to compare with rstack in selftest.
+				char r] word js> eval("["+pop()+"]") to expected_rstack ;
+: r] 			( -- boolean ) \ compare rstack and expected_rstack in selftest
+				js> vm.g.isSameArray(rstack,vm.g.expected_rstack) ;
+: [d 			( <"text"> -- ) \ Prepare an array to compare with data stack. End of a selftest section.
+				char d] word js> eval("["+pop()+"]") to expected_stack ;
+				/// Data stack will be clean after check
+: d] 			( -- boolean ) \ compare data stack and expected_stack in selftest
+				js> vm.g.isSameArray(stack,vm.g.expected_stack) to test-result 
+				description . test-result if ." pass" cr dropall
+				else ." fail" cr stop then ;
+				/// Data stack will be clean after check
+: [p 			( <"text"> -- ) \ Prepare an array ([all-pass]) of words for all-pass if test-result.
+				char p] word js> eval("["+pop()+"]") to [all-pass] ; /// In selftest
+: p] 			( -- boolean ) \ all-pass if test-result
+				test-result if [all-pass] all-pass then ; /// In selftest
 
 <selftest>
 	*** End of kernel self-test

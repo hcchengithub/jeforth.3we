@@ -25,10 +25,10 @@
 							." Warning: Multiple Excel.Application are running." *debug* Multiple-Excel-error>>> 
 						[then] value excel.app.count // ( -- count ) excel.exe instance count, I can only handle 1. 
 						excel.app.count [if] 
-							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):kvm.push(xl)</vb> 會開出新 Excel.Application。
-							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):kvm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
+							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):vm.push(xl)</vb> 會開出新 Excel.Application。
+							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):vm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
 						[else]
-							<vb> On Error Resume Next:Set xl=CreateObject("excel.application"):kvm.push(xl)</vb>						
+							<vb> On Error Resume Next:Set xl=CreateObject("excel.application"):vm.push(xl)</vb>						
 						[then] to excel.app \ 如果 excel 沒有 install 會是 undefined。
 					
 	excel.app [if] \ excel.app exists
@@ -121,7 +121,7 @@
 						</selftest>
 
 	code open.xls       ( "pathname" -- workbook ) \ Open excel file get workbook object
-						fortheval("excel.app");
+						dictate("excel.app");
 						push(pop().Workbooks.open(pop()));
 						end-code
 						/// Ex. openFileDialog open.xls constant myWorkbook
@@ -276,7 +276,7 @@
 						var columnValue = pop(), columnKey = pop(), sheet = pop();
 						var key = sheet.range(columnKey  +":"+columnKey);
 						var val = sheet.range(columnValue+":"+columnValue);
-						push(key); fortheval("bottom"); var bottom = pop();
+						push(key); dictate("bottom"); var bottom = pop();
 						for (var i=1, hash={}; i<=bottom; i++) {
 							if (key(i).value == undefined ) continue;
 							hash[key(i).value] = val(i).value;
@@ -329,7 +329,7 @@
 						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
 						var key = sheet.range(colKey  +":"+colKey);
 						var val = sheet.range(colValue+":"+colValue);
-						push(key); fortheval("bottom"); var bottom = pop();
+						push(key); dictate("bottom"); var bottom = pop();
 						for (var i=top; i<=bottom; i++) {
 							if (key(i).value == undefined ) continue;
 							val(i).value = hash[key(i).value];
@@ -347,7 +347,7 @@
 						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
 						var key = sheet.range(colKey  +":"+colKey);
 						var val = sheet.range(colValue+":"+colValue);
-						push(key); fortheval("bottom"); var bottom = pop();
+						push(key); dictate("bottom"); var bottom = pop();
 						for (var i=top; i<=bottom; i++) {
 							if (key(i).value == undefined ) continue;
 							if (lookup(key(i).value)== undefined) continue;
@@ -384,10 +384,10 @@
 						var excelapp = pop(),
 							count = 0;
 						push(count = excelapp.workbooks.count); push(excelapp.name);
-						fortheval(". .(  has ) . .(  opened workbooks at this moment.) cr");
+						dictate(". .(  has ) . .(  opened workbooks at this moment.) cr");
 						for (var i=1; i<=excelapp.workbooks.count; i++){
 							push(excelapp.workbooks(i).name); push(excelapp.workbooks(i).path); push(i);
-							fortheval("3 .r space . char \\ . . cr");
+							dictate("3 .r space . char \\ . . cr");
 						}
 						push(count);
 						end-code
@@ -424,12 +424,12 @@
 		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把這些格子都塗上顏色。
 		
 	: printDateTime ( time -- ) \ Print an excel Date-time value. Result like "2015-05-04 08:29 Mon".
-		vb> Year(kvm.tos())    . char - .
-		vb> Month(kvm.tos())   2 .0r char - .
-		vb> Day(kvm.tos())     2 .0r space   
-		vb> Hour(kvm.tos())    2 .0r char : .
-		vb> Minute(kvm.tos())  2 .0r space
-		vb> WeekDay(kvm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
+		vb> Year(vm.tos())    . char - .
+		vb> Month(vm.tos())   2 .0r char - .
+		vb> Day(vm.tos())     2 .0r space   
+		vb> Hour(vm.tos())    2 .0r char : .
+		vb> Minute(vm.tos())  2 .0r space
+		vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
 		;
 	[else]
 		excel.app.count [if] ." The excel.exe running in this system does not response to COM requests. Try fix it by the kill-excel command." [then]
@@ -450,14 +450,14 @@
 	\
 	\   1。 Create a new Excel.Application object
 	\		<js> push(new ActiveXObject("Excel.application")) </js> constant excel.app 
-	\		<vb> set kvm.excel.app = CreateObject(...)' </vb>
+	\		<vb> set vm.excel.app = CreateObject(...)' </vb>
 	\       excel.app :> Workbooks.open("x:\\cooked.xls");
 	\
 	\   2。 Use the existing instance of Excel.Application object
-	\		<vb> set kvm.excel.app = GetObject(,"Excel.Application") </vb> 
-	\		<vb> set kvm.excel.app = GetObject("file.xls") </vb>
-	\       <vb> set kvm.excel.app = GetObject("x:\\raw.xls") </vb>
-	\       <vb> set kvm.excel.app = GetObject("x:\\cooked.xls") </vb>
+	\		<vb> set vm.excel.app = GetObject(,"Excel.Application") </vb> 
+	\		<vb> set vm.excel.app = GetObject("file.xls") </vb>
+	\       <vb> set vm.excel.app = GetObject("x:\\raw.xls") </vb>
+	\       <vb> set vm.excel.app = GetObject("x:\\cooked.xls") </vb>
 	\
 	\ 前者的 excel.app 獨立於電腦內其他 "Excel.application" instances，重複 open 同一個檔案的問題很
 	\ 難解決。Internet 上有很多人在問，問不出好答案。因為要搜出所有的 "Excel.application" instances
@@ -1058,7 +1058,7 @@
 	-----------------------------------------------------------------------------------------------
 
 	code row.sum ( count col row sheet|cell|range -- sum ) \ Demo, get sum of an excel row
-		fortheval("cell"); // ( count cell )
+		dictate("cell"); // ( count cell )
 		var origine = pop().cells(1,1);
 		var count = pop();
 		var sum = 0;
@@ -1069,7 +1069,7 @@
 		end-code
 
 	code colume.sum ( count col row sheet|cell|range -- sum ) \ Demo, get sum of an excel colume
-		fortheval("cell"); // ( count cell )
+		dictate("cell"); // ( count cell )
 		var origine = pop().cells(1,1);
 		var count = pop();
 		var sum = 0;
@@ -1132,7 +1132,7 @@
 	code init-hash      ( sheet "columnKey" "columnValue"-- Hash ) \ get hash table from excel sheet
 						var columnValue = pop(), columnKey = pop(), sheet = pop();
 						var key = sheet.range(columnKey  +":"+columnKey);
-						push(key); fortheval("bottom"); var bottom = pop();
+						push(key); dictate("bottom"); var bottom = pop();
 						var val = sheet.range(columnValue+":"+columnValue);
 						var hash = {};
 						for (var i=1; i<=bottom; i++) {

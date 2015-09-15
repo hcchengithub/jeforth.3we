@@ -120,9 +120,9 @@
 	include beep.f		\ Define the beep command
 	include binary.f	\ Read/Write binary file
 	include shell.application.f
-*debug* quit.f>>>
 	include wmi.f
 	include excel.f
+*debug* quit.f>>>
 	include canvas.f
 	include ie.f
 	include mytools.f
