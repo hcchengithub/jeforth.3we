@@ -30,11 +30,10 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				<selftest> 
 				\ SendKey() 很難搞，下面範例指出了很多要點，值得參考。
 				*** WshShell launch Calculator and SendKeys() to it
-					<vb> WshShell.Run "calc" </vb> 1000 sleep \ This is a fork. 
+					<vb> WshShell.Run "calc" </vb> 5000 sleep \ 有時候 run 不起來，改 5 秒試試。
 					<vb> kvm.push(WshShell.AppActivate("Calculator"))</vb> 1 sleep \ ( boolean )
-					\ Windows 10 的行為怪異 AppActivate() 看切到誰，返回值不一定，幸好
-					\ 都會成功，乾脆不看結果了。
-					drop 
+					\ Windows 10 的行為怪異 AppActivate() 看切到誰，返回值不一定，幸好...
+					drop \ ... 都會成功，乾脆不看結果了。
 					\ 想像 SendKeys() 有很長的【前後置】delay 時間, 會發生甚麼事? 只要 activated 是 Calculator
 					\ 前置時間就沒問題。觀察到有時候 SendKeys 是誤下給 3hta 何故? Active 無故回到 3hta 可能性較低，
 					\ 應該是 AppActivate() 沒成功。照這樣想,一定要做 error check。既然 AppActivate() 有傳回
