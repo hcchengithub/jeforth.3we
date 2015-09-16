@@ -2,37 +2,38 @@
 	\ ShellWindows object https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974(v=vs.85).aspx
 	\ Windows Internet Explorer object https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
 	\ shell.application :> windows() 即 ShellWindows. ShellWindows 有可能是 File Explorer 或 Windows Internet Explorer,
-	\ 也許還不只？用 ie :> application . 察看即知。
+	\ 也許還不只？用 "ie :> application ." or "list-ie-windows" 察看即知。
 	
 	s" ie.f"	source-code-header
 
 	: see-ie 			( -- count ) \ List all IE processes and return the count
 						s" where name = 'iexplore.exe'" see-process ;
-						/// IE process 的個數不能用，它的意義不明，與 ShellWindows count 不符。
-						/// 第一次 Run iexplore.exe 會跑出兩個 IE process 一主一副。
+						/// iexplore.exe process 的個數意義不明，與 ShellWindows count 不同
+						/// ，因為後者含 File Explorer，但不含 Windows 10 的 Edge。第一次 
+						/// Run iexplore.exe 會跑出兩個 IE process 一主一副。
 						
-	: kill-ie 			( -- bodyCount ) \ Kill all IE processes return the count.
+	: kill-ie 			( -- bodyCount ) \ Kill all iexplore.exe processes, return the count.
 						<js> var f=confirm("Kill IEs are you sure? ShellWindows.count will not be reduced");f</jsV>
 						if s" where name = 'iexplore.exe'" kill-them then ;
-						/// 但是，當 (Win8) IE 被徹底用 processID 殺掉之後, ShellWindows :> count 
-						/// 仍不會減去! Kill IE process 不是正常使用的動作。
+						/// (Win8) IE 被徹底用 processID 殺掉之後, ShellWindows :> count 
+						/// 仍不會減去，因為它可能本來就是 null。總之非正常能使用。
 
-	shell.application :> windows() constant ShellWindows // ( -- obj ) shell.application (IE) windows object.
-						/// 這個 collection 就是所有的 IE windows. ShellWindows :> count 就是 IE 頁面
-						/// 的總數。ShellWindows :> item(0,1,2,3...) 即 IE objects 與 DOM window 不同。
-						/// ShellWindows 整合所有的 IE 頁面，但 ShellWindows 本身沒有開啟 IE 頁面的功
-						/// 能。我本來以為 ShellWindows :> count >= 1 時 ShellWindows :> item(0) 可以
-						/// 當作 defauult IE object 來操作。可是 item(0) 常常是 null! 
+	shell.application :> windows() 
+	constant ShellWindows // ( -- obj ) shell.application (FE/IE) windows object.
+						/// 這個 collection 就是所有的 IE 以及 File Explorer windows. ShellWindows :> count 就是
+						/// 兩者頁面的總數。ShellWindows :> item(0,1,2,3...) 即 FE/IE objects (與 DOM window 不
+						/// 同)。ShellWindows 本身沒有開啟 IE 頁面的功能。我本來以為 ShellWindows :> count >= 1 
+						/// 時 ShellWindows :> item(0) 可以當作 default IE object 來操作。可是 item(0) 常常是 null! 
 						
 	\ IE run 起來有幾種方式
-	\ 1. s" iexplore ibm.com" (fork) 當 ShellWindows.count==0 時要用這個，還不如都用這個。
+	\ 1. s" iexplore ibm.com" (fork) 當 ShellWindows.count==0 時必須用這個，那乾脆都用這個。
 	\ 2. ShellWindows.item(0).navigate("url") 當 ShellWindows.count==0 時不能用。
 	\ 3. GetObject("","InternetExplorer.Application") 取得一個沒有 document 的 IE object
-	\ 4. CreateObject("InternetExplorer.Application") 用不著，不必研究。
-	\ 有了 ShellWindows 可以隨時 access 所有的 IE web 頁面, 後三者都用不著了。
+	\ 4. CreateObject("InternetExplorer.Application") 用不著，咱禁用，不必研究。
+	\ 有了 ShellWindows 可以隨時 access 所有的 FE/IE 頁面, 後三者都用不著了。
 	
 	: ie(i)				( i -- ie|null ) \ Get IE object of the indexed window
-						s" g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
+						s" vm.g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
 						/// 一個 window 關掉: 0 ie() :> document.parentWindow :: close() 
 						/// 也會把 IE process 關掉,當然 0 ie(i) 也是 null。
@@ -40,8 +41,8 @@
 	0 value theIE // ( -- i ) Make ShellWindows.item(i) the default IE object
 						
 	: ie 				( -- ie|null ) \ Get the ShellWindows.item(theIE) IE object
-						\ js> g.ShellWindows.item(g.theIE) [ ] 不能直接用變數,很奇怪,是個 bug 吧!
-						theIE s" g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
+						\ js> vm.g.ShellWindows.item(vm.g.theIE) [ ] 不能直接用變數,很奇怪,是個 bug 吧!
+						theIE s" vm.g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
 						/// 一個 window 關掉: ie :> document.parentWindow :: close() 
 						/// 也會把 IE process 關掉,當然 ie 也是 null。但 ie(0) 有時候是 null
@@ -118,7 +119,7 @@
 	: locationUrl		( -- obj ) \ Get ShellWindows.item(theIE).locatonUrl string
 						ie :> locationUrl ;
 	: visible			( -- ) \ Make ShellWindows.item(theIE) visible
-						js: g.ShellWindows.item(theIE).visible=true ;
+						js: vm.g.ShellWindows.item(theIE).visible=true ;
 	: visible?			( -- flag ) \ Get ShellWindows.item(theIE).visible setting
 						ie :> visible ;
 	: (navigate)		( "url" flags -- ) \ Visit the URL
@@ -250,11 +251,11 @@
 		照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都被一一執行到。
 		document <js> 
 		$("*",pop()).click(function(){
-			if(g.flag) return;
+			if(vm.g.flag) return;
 			$(this)
 			.css("border","2px ridge red")
 			.addClass("_selected_");
-			g.flag = true;
+			vm.g.flag = true;
 		});
 		</js>
 		除了紅框, 印出來看也證實。
@@ -280,11 +281,11 @@
 		\ 過一會兒就把 flag 清掉, 以便連續選擇。
 		document <js> 
 		$("*",pop()).click(function(){
-			if(kvm.flag) {
-				g.setTimeout("kvm.flag=false",500);
+			if(vm.flag) {
+				vm.g.setTimeout("vm.flag=false",500);
 				return;
 			}
-			kvm.flag = true;
+			vm.flag = true;
 			if($(this).hasClass("_selected_")){
 				$(this)
 				.removeClass("_selected_")
@@ -319,16 +320,16 @@
 		document <js> 
 		var doc=pop();
 		$("._selected_",doc).each(function(){
-			g.selected += $(this)[0].outerHTML;
+			vm.g.selected += $(this)[0].outerHTML;
 		});
-		doc.body.innerHTML = g.selected;
+		doc.body.innerHTML = vm.g.selected;
 		</js>		
 
 		\ 想要把重複的 track item 都刪掉，但本程式會當，好像變成無窮迴路。
 		<js>
-			for (var i=0; i<g.track.length; i++){
-				for (var j=i+1; i<g.track.length; j++) {
-					if (g.track[i]==g.track[j]) g.track.splice(j,1);
+			for (var i=0; i<vm.g.track.length; i++){
+				for (var j=i+1; i<vm.g.track.length; j++) {
+					if (vm.g.track[i]==vm.g.track[j]) vm.g.track.splice(j,1);
 				}
 			}
 		</js>
@@ -349,9 +350,9 @@
 		document <js> var doc=pop();
 			$("*",doc).mouseenter(function(){
 				print("mouse enter "+ this); execute("cr");
-				$(g.theElement).removeAttr('style'); // 無須防呆
+				$(vm.g.theElement).removeAttr('style'); // 無須防呆
 				$(this).css("border","4px dashed red");
-				g.theElement = this;
+				vm.g.theElement = this;
 			});
 			$("*",doc).mouseleave(function(){
 				print("mouse leave"+ this); execute("cr");
@@ -361,8 +362,8 @@
 		
 		\ 想讀取 attached 網頁的 css 失敗
 		js> $("#inputbox").css("background-Color") .s 成功
-		js> $("div",g.doc).css("background-Color") .s 失敗 JavaScript error : Unspecified error.
-		js> $("div",g.doc)[0].getAttribute("style") . 成功 所以是 jQuery 的問題 "border: 4px dashed yellow; background-color: yellow;" 
+		js> $("div",vm.g.doc).css("background-Color") .s 失敗 JavaScript error : Unspecified error.
+		js> $("div",vm.g.doc)[0].getAttribute("style") . 成功 所以是 jQuery 的問題 "border: 4px dashed yellow; background-color: yellow;" 
 		
 		\ 如果快速把 mouse 移到某 div 收到的 event 順序如下, 不照順序! 所以利用 lastThing 或 theElement 
 		\ 去清前一個也不靈。
@@ -415,10 +416,10 @@
 			})
 			$("*",doc).mouseenter(function(){
 				print("Enter " + this.nodeName + ". ");
-				$(g.track[g.track.length-1]).removeAttr('style'); // 無須防呆
+				$(vm.g.track[vm.g.track.length-1]).removeAttr('style'); // 無須防呆
 				$(this).css("border","4px dashed red");
-				g.track.push(this);
-				g.itrack = g.track.length-1;
+				vm.g.track.push(this);
+				vm.g.itrack = vm.g.track.length-1;
 			});
 			$("*",doc).mouseleave(function(){
 				print("Leave " + this.nodeName + ". ");
@@ -440,62 +441,62 @@
 				e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 				switch(keycode) {
 					case 67: /* [c]lear */
-						for(var i=0; i<g.track.length; i++){
-							$(g.track[i])
+						for(var i=0; i<vm.g.track.length; i++){
+							$(vm.g.track[i])
 							.removeAttr('style')
 							.removeClass("_selected_");
 						}
 						return(!GoOn); 
 					case 68: /* [d]elete the highlighted node */
-						push(g.track[g.itrack]);
+						push(vm.g.track[vm.g.itrack]);
 						execute("removeElement");
 						return(!GoOn); 
 					case 70: /* [f]reeze */
-						g.freeze = !g.freeze;
-						print("The freezing flag : " + g.freeze); execute("cr");
+						vm.g.freeze = !vm.g.freeze;
+						print("The freezing flag : " + vm.g.freeze); execute("cr");
 						return(!GoOn); 
 					case 83: /* [s]elect */
-						$(g.track[g.itrack])
+						$(vm.g.track[vm.g.itrack])
 						.removeAttr('style')
 						.css("border","2px solid lime")
 						.addClass("_selected_");
 						return(!GoOn); 
 					case 85: /* [u]nselect */
-						$(g.track[g.itrack])
+						$(vm.g.track[vm.g.itrack])
 						.removeAttr('style')
 						.removeClass("_selected_");
 						return(!GoOn); 
 					case 86: /* [v]iew selected nodes */
-						for(var i=0; i<g.track.length; i++){
-							$(g.track[i]).removeAttr('style');
-							if($(g.track[i]).hasClass("_selected_"))
-								$(g.track[i]).css("border","2px solid lime");
+						for(var i=0; i<vm.g.track.length; i++){
+							$(vm.g.track[i]).removeAttr('style');
+							if($(vm.g.track[i]).hasClass("_selected_"))
+								$(vm.g.track[i]).css("border","2px solid lime");
 						}
 						return(!GoOn); 
 					case 188: /* < , */
-						$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
-						g.itrack = Math.max(0,g.itrack-1);
-						$(g.track[g.itrack]).css("border","4px dashed red");						
+						$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+						vm.g.itrack = Math.max(0,vm.g.itrack-1);
+						$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 						return(!GoOn); 
 					case 190: /* > . */
-						$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
-						g.itrack = Math.min(g.track.length-1,g.itrack+1);
-						$(g.track[g.itrack]).css("border","4px dashed red");						
+						$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+						vm.g.itrack = Math.min(vm.g.track.length-1,vm.g.itrack+1);
+						$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 						return(!GoOn); 
 				}
 				return (!GoOn);
 			});
 			$("*",doc).mouseenter(function(){
 				print("Enter " + this.nodeName + ". ");
-				if (g.freeze) return;
-				$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
-				if (g.track[g.track.length-1]!=this) g.track.push(this);
-				g.itrack = g.track.length-1;
-				$(g.track[g.itrack]).css("border","4px dashed red");						
+				if (vm.g.freeze) return;
+				$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+				if (vm.g.track[vm.g.track.length-1]!=this) vm.g.track.push(this);
+				vm.g.itrack = vm.g.track.length-1;
+				$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 			});
 			$("*",doc).mouseleave(function(){
 				print("Leave " + this.nodeName + ". ");
-				if (g.freeze) return;
+				if (vm.g.freeze) return;
 				$(this).removeAttr('style'); // 無須防呆
 			});
 		</js>

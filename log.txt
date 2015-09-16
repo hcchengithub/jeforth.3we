@@ -3959,4 +3959,6 @@
 [ ] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
 	' <selftest> :: enabled=true dropall cls --wmi.f-- include wmi.f
 	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
+	' <selftest> :: enabled=true dropall cls --canvas.f-- include canvas.f
+	' <selftest> :: enabled=true dropall cls --ie.f-- include ie.f
 	

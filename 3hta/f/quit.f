@@ -122,9 +122,9 @@
 	include shell.application.f
 	include wmi.f
 	include excel.f
-*debug* quit.f>>>
 	include canvas.f
 	include ie.f
+*debug* quit.f>>>
 	include mytools.f
 	
 \ ----------------- save selftest.log -------------------------------------
