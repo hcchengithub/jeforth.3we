@@ -100,22 +100,11 @@
 	kvm.clearScreen = function(){outputbox.innerHTML=""};
 	
 	// kvm.panic() is the master panic handler. The panic() function defined in 
-	// project-k kernel jeforth.js is the one called in code ... end-code.
-	// We need to use panic() below, so another panic() is defined here too, even 
-	// just for a few convenience. The two panic() functions are both calling the
-	// same kvm.panic().
+	// project-k kernel jeforth.js is the one called in code ... end-code and it's
+	// not visible here.
 	kvm.panic = function(state){ 
 		kvm.type(state.msg);
 		if (state.level) debugger;
-	}
-	
-	// We need the panic() function below but we can't see the one in jeforth.js
-	// so one is defined here for convenience.
-	function panic(msg,level) {
-		var state = {
-				msg:msg, level:level
-			};
-		if(kvm.panic) kvm.panic(state);
 	}
 	
 	// When used in forth words, inner() handles the try{}catch{} thing.

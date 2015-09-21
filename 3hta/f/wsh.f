@@ -117,7 +117,6 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				\ otherwise the extra \n may pollute the command line.
 
 				<selftest> 
-				
 					\ 這是個簡單明了的範例。
 					\ jeforth.3hta 可以靠傳回 TOS 層層套疊協力工作。
 					
@@ -148,7 +147,6 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				\ otherwise the extra \n may pollute the command line.
 
 				<selftest> 
-				
 					\ 以下這個測試示範看得人眼花撩亂，但不要低估它。
 					\ jeforth.3hta 能夠這樣玩弄 DOS 等於是大大地增強了 DOS 的能力。
 					

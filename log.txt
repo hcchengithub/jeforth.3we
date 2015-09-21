@@ -1820,10 +1820,11 @@
     
 		~%~%~%~%~%~ 參考自己,抓自己,取得自己,自身,參考自身,參考本身,取得本身 ~%~%~%~%~%~
         \ 設定、取得 colon word 本身的方法，
-        \   : test [ last :: vv=1111 last literal ] :> vv ;
+        \   : test [ last literal ] ; \ 基本型 TOS is _me
+        \   : test [ last :: vv=1111 last literal ] :> vv ; \ init static variable
         \ 取得 colon word 本身的 cfa 有下列方法 
         \   a）[ js> last().cfa ] literal 即是
-        \   b） [ last ] literal :> cfa 同上，這個不 optimize。
+        \   b）[ last literal ] :> cfa 同上，這個不 optimize。
         \   c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
 		\ 取得 code word 自身可以考慮用 tick('name'). 另一可能 arguments.callee 參考到 xt 而不是
 		\ code word object 本身。如何在 code word 裡安置 static variable 參考到自己?
@@ -3932,15 +3933,14 @@
 		[ ]	internel kvm --> vm   
 		[ ] js: vm.selftest_visible=true
 		[ ] -->judge 改用 [d d] [p p]
-	[ ]	editMode 改用 value []3htm []3nd []3nw []3hta
+	[ ]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
 	[x]	改寫 vm.panic() 
-	[ ] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+	[!] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
 		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
+		
 [x] working on improving 3nd jsc . . . done，it's very good now.
-	[x] 3htm [ ] 3hta [ ] 3nw
+	[x] 3htm [x] 3hta [ ] 3nw
 
-[ ] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。
-	
 [x] *debug* should print the prompt at entering *debug* mode.
 [x] include jQuery is done in html5.f , no good. Because html5.f is shared by 3hta, 3htm, and 3nw.
 	--> move include jQuery out of html5.f, jquery.f stand alone for 3hta.
@@ -3953,12 +3953,67 @@
 
 [ ] In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
 	it's an error for JavaScript.
-[ ] 如何分辨 interactive -- none-interactive? 若 none-interactive 則對 error/warning 的處置應該要
-	讓程式停下來，以免衝出太多添危險。<=== 很久以前就是用 command line 來分辨了。如今可以在 panic()
-	裡面判斷。
 [ ] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
 	' <selftest> :: enabled=true dropall cls --wmi.f-- include wmi.f
 	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
 	' <selftest> :: enabled=true dropall cls --canvas.f-- include canvas.f
 	' <selftest> :: enabled=true dropall cls --ie.f-- include ie.f
+[ ] ie.f 已知 ShellWindows 包括 fe ie . ie(i) ie 等不該以 ie 為名。
+[ ] fe/ie 其實是 sw 才對，ShellWindows.item(i) 	
+[x] ie.f 最嚴重的問題是這個, ShellWindows.item(index) 不能收 argument !!??
+	\ [x] 不能直接用變數,很奇怪? <-- RI: 需 parseInt() cast 一下。
+	\ theIE s" vm.g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
+	> : sw <js> var index=vm.g.theIE; var oo = vm.g.ShellWindows.item(index); oo; </jsV> ;
+	> sw .
+	> JavaScript error on word "sw" : Invalid procedure call or argument
+	==> 改用 code word 
+	code sw2 
+		var index=vm.g.theIE; 
+		var oo = vm.g.ShellWindows.item(index); 
+		push(oo);
+		end-code
+	--> 結果一樣
+	==> 改用 .js 發現用 parseInt() cast 一下就好了
+		var sa = new ActiveXObject("Shell.Application");
+		var sw = sa.windows();
+		var index = vm.g.theIE;
+		type(sw.item(index)); // 還是有問題
+	--> <js>
+		var sa = new ActiveXObject("Shell.Application");
+		var sw = sa.windows();
+		type(sw.item(parseInt(vm.g.theIE))); // parseInt() cast 一下就好了。
+		</js>
+	==> : sw js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ; <--- OK !!
+[ ] rename ntib to itib ok? think about it.
+[ ] ie.f shell.application.f 這種大題目要另外深入探討。先拿掉，把 ADO 改成 optional 研究用
+	fso 的可能性。盡早發表。
+[x] 在 wsh.f 裡會自動切中文? 如何避免?	---> 乾脆讓它 "Let me set a different input method for
+	each app window" @ Control Panel>Clock, Language, and Region > Language > Advanced settings.
+	因為不讓它切它總是要切乾脆由它去吧!
+[x] Consider the proper .f for [stringify] and [parse] , according to 3hta's quit.f,
+		include voc.f		\ voc.f is basic of forth language
+	==>	include html5.f		\ HTML5 is HTA's plateform feature
+		include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems from happening immediately
+		include element.f	\ HTML element manipulation
+		include platform.f 	\ Hotkey handlers and platform features
+		include vb.f		\ Being able to run VBS is what HTA is for.
+		include wsh.f		\ Windows Shell Host
+[ ] 在 panic() 裡面用 ' <selftest> :> enabled 來判斷是否 free run mode。
+	panic() 是 application dependent, 以 3hta 為例，如果是 free run mode ,碰到 severe panic 
+	通通要進 jsc 停下來; 如果是 interactive mode 則進 F12 debugger. 
+	看來 <selftest> 定義好之後要改寫 panic() 但是又不方便放進 jeforth.f 成為 common code,
+	因此應該在 quit.f 裡面改寫。
+	------------- ^^^^ 以上不對 ^^^^ -------------------------------
+	實際上 panic() 要不要進 jsc 只跟 severity 有關, 沒機會管 <selftest>.enabled.
+	[x] 3hta []3nd []3nw [x]3htm
+	
+[ ] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。 <--- jeforth.f 之後馬上就是 quit.f 不
+	能更早了! 所以放在 quit.f 裡面沒問題。===> ok, but 問題是重複寫了好幾份, 能不能在 quit.f
+	裡面都參考同一份 jsc source code?
+	
+[ ] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise it moves cursor.
+	Use ctrl-arrow to recall commands then.
+	
+[ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
+
 	

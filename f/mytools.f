@@ -71,17 +71,8 @@ code .longwords ( length -- ) \ type long words. I designed this word for fun to
 				}
                 end-code
 
-code precise-time(mS)	( -- mS ) \ Precise recent time in mini seconds
+code precise-time(mS)	( -- mS ) \ JavaScript's precise recent time in mini seconds
 						push((new Date()).getTime()) end-code
-
-: stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
-				/// Example:
-				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
-				/// stringify char pathname.json writeTextFile ( Convert to JSON save to file )
-: parse			js> JSON.parse(pop()) ; // ( "json" -- obj ) Convert the "json" string to an object.
-				/// Example:
-				/// char pathname.json readTextFile ( Read JSON text )
-				/// parse value MyHashTable ( convert JSON text to hash table object )
 				
 <comment>
 \ 已經有更好的方法： mySetTimeout() mySetInterval()

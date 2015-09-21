@@ -1416,36 +1416,6 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 				end-code immediate
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
-				
-\ ------------------ jsc JavaScript console debugger  --------------------------------------------
-\ jeforth.f is common for all applications. jsc is application dependent. So the definition of 
-\ vm.jsc.xt has been moved to quit.f of each application for their different treatments.
-\ The initial module of each application, e.g. jeforth.hta and jeforth.htm, should provide a
-\ dummy vm.jsc.xt before quit.f available.
-\
-\ Usage:
-\   Put this line,
-\     if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
-\   among JavaScript code as a break point. The "msg" shows you which break point is triggered.
-\
-\	Example:
-\	Debugger can see variables aa, bb, and input in below example.
-\
-\	<js>
-\		function test (input) {
-\			var aa = 11;
-\			var bb = 22;
-\	if(1){vm.jsc.prompt="bp1>>>";eval(vm.jsc.xt)}
-\		}
-\		test(33);
-\	</js>
-\
-
-: jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
-				cr ." J a v a S c r i p t   C o n s o l e" cr
-				." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
-				<js> vm.jsc.prompt=" jsc>"; eval(vm.jsc.xt); </js>
-				;
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 

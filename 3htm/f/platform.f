@@ -12,8 +12,10 @@ also forth definitions
 				/// Must intercept onkeydown event to avoid original function.
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
+				[ last literal ] ( _me )
 				." Input box EditMode = " 
-				js> vm.EditMode=Boolean(vm.EditMode^true) dup . js: type('\n')
+				\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 此處會吃掉 TOS
+				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
 				then js: styleTextareaFocus.innerHTML=pop()                

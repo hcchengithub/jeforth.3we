@@ -5,15 +5,42 @@
 \ B - D * G = 4
 \ 9 - E - H = 4
 
-10 value range
-random range * int value a
-random range * int value b
-random range * int value c
-random range * int value d
-random range * int value e
-random range * int value f
-random range * int value g
-random range * int value h
+<js> 
+	var temp = 
+	 [[ 0,13],  //  0
+	  [ 1,12],  //  1 
+	  [ 2,11],  //  2 
+	  [ 3,10],  //  3 
+	  [ 4, 9],  //  4 
+	  [ 5, 8],  //  5 
+	  [ 6, 7],  //  6 
+	  [ 7, 6],  //  7 
+	  [ 8, 5],  //  8 
+	  [ 9, 4],  //  9 
+	  [10, 3],  // 10 
+	  [11, 2],  // 11 
+	  [12, 1],  // 12 
+	  [13, 0]]; // 13 
+	temp; 
+</jsV> constant ab // ( -- array ) possible [a,b] pairs
+
+<js> 
+	var temp = 
+	 [[0,5],  // 0
+	  [1,4],  // 1
+	  [2,3],  // 2 
+	  [3,2],  // 3 
+	  [4,1],  // 4
+	  [5,0]]; // 5
+	temp; 
+</jsV> constant eh // ( -- array ) possible [e,h] pairs
+ 
+
+20 value range
+	0 value c
+	0 value d
+	0 value f
+	0 value g
 
 : verify ( -- boolean ) \ verify the recent set
 	\ a b c d e f g h + + + + + + + . space
@@ -24,24 +51,29 @@ random range * int value h
 	b d g * - 4 =
 	9 e - h - 4 = 
 	and and and and and ;
+	
 : refresh ( -- ) \ refresh a~h
-	random range * int to a
-	random range * int to b
+	random ab :> length * int 
+	ab :> [tos()][0] to a 
+	ab :> [pop()][1] to b
+	random eh :> length * int 
+	eh :> [tos()][0] to e
+	eh :> [pop()][1] to h
 	random range * int to c
 	random range * int to d
-	random range * int to e
 	random range * int to f
 	random range * int to g
-	random range * int to h ;
+	;
+	
 : view ( -- ) \ view a ~ h
-	a . space 
-	b . space 
-	c . space 
-	d . space 
-	e . space 
-	f . space 
-	g . space 
-	h . space cr ;
+	a 2 .r space
+	b 2 .r space
+	c 2 .r space
+	d 2 .r space
+	e 2 .r space
+	f 2 .r space
+	g 2 .r space
+	h 2 .r cr ;
 
 \ 10000
 \ [for] 
@@ -51,5 +83,12 @@ random range * int value h
 \ 	js: jump2endofinputbox.click() 
 \ [next]
 
-20 to range [begin] 10 nap refresh verify [until] ." Bingo!!!" cr
+20 to range 
+[begin] 
+	10 nap 
+	\ char . . js: jump2endofinputbox.click() 
+	refresh verify 
+[until] ." Bingo!!!" cr
+	
+50 to range 10000 [for] 9 e - h - 4 = [if] e 3 .r h 3 .r cr [then] refresh 10 nap [next]
 	

@@ -95,8 +95,26 @@
 	</text>
 	js: vm.jsc.xt=pop()
 
+: jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
+				cr ." J a v a S c r i p t   C o n s o l e" cr
+				." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
+				<js> vm.jsc.prompt=" jsc>"; eval(vm.jsc.xt); </js>
+				;
+
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
+
+<js>
+	// vm.panic() is the master panic handler. The panic() function defined in 
+	// project-k kernel jeforth.js is the one called in code ... end-code. That 
+	// panic() is actually calling vm.panic(). We redefine vm.panic() because jsc is ready 
+	// now whild F12 debugger can be called from jsc still.
+
+	vm.panic = function(state){ 
+		vm.type(state.msg);
+		if (state.level) eval(vm.jsc.xt); // was debugger;
+	}
+</js>
 
 \ ------------------ Get args from URL -------------------------------------------------------
 	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 

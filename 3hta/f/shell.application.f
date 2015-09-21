@@ -18,7 +18,8 @@ s" shell.application.f"	source-code-header
 \	Scriptable Shell Objects http://msdn.microsoft.com/en-us/library/windows/desktop/bb776890(v=vs.85).aspx
 \	好像 shell.application 與 Shell Objects 不同? 無不同,同一件事。
 \	Windows Shell https://msdn.microsoft.com/en-us/library/windows/desktop/bb773177(v=vs.85).aspx
-\ [ ] 值得好好研究。沒必要寫成 forth words, 但是有必要透過 forth 得到好用的協助。
+\ [ ]	值得好好研究。沒必要寫成 forth words, 但是有必要透過 forth 得到好用的協助。至少 selftest 可以
+\		提供使用範例。
 
 char Shell.Application ActiveXObject constant shell.application // ( -- obj ) shell.application COM object
 

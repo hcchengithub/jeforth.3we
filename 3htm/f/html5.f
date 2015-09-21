@@ -1,6 +1,16 @@
 
 s" html5.f"		source-code-header
 
+\ Where HTML5 is supported, JSON is too, I guess.
+: stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
+				/// Example:
+				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
+				/// stringify char pathname.json writeTextFile ( Convert to JSON save to file )
+: parse			js> JSON.parse(pop()) ; // ( "json" -- obj ) Convert the "json" string to an object.
+				/// Example:
+				/// char pathname.json readTextFile ( Read JSON text )
+				/// parse value MyHashTable ( convert JSON text to hash table object )
+
 : createElement	( <tagName> -- element ) \ Create an HTML element w/o instance yet
 				js> document.createElement(pop()) ; 
 				/// tagName can be 'div','script' or anything you like.
