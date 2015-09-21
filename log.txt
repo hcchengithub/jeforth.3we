@@ -4016,4 +4016,5 @@
 	
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
-	
+[ ] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
+	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以。
