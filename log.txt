@@ -4018,3 +4018,32 @@
 
 [ ] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
 	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以。
+[ ] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
+	---- modify jeforth.3nw.html --------------------
+	[x]	kernel/jeforth.js --> project-k/jeforth.js
+	[x]	get jeForth() from jeforth.js > kvm = new jeForth()	
+	[x]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	[x] kernel/jeforth.f --> f/jeforth.f
+	[x]	kvm.selftest_visible = true; // type() needs to check it
+	[x]	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+		kvm.greeting = function(){
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
+			return(version);
+		}
+	[x]	vm.base 改用 value -> vm.g.base [x]jeforth.f [x]3htm [x]3nd [x]3nw [x]3hta
+	[x] drop kvm.init 
+	[ ] apply to all *.f files 
+		[x]	fortheval --> dictate  [ ] apply to all *.f files 
+		[x]	print --> type   [ ] apply to all *.f files 
+		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
+		[ ]	internel kvm --> vm   
+		[ ] js: vm.selftest_visible=true
+		[ ] -->judge 改用 [d d] [p p]
+	[ ]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
+	[ ]	改寫 vm.panic() 
+	[ ] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
+		

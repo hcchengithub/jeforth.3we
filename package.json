@@ -1,7 +1,7 @@
 {
-  "version": "17",
+  "version": "21",
   "name": "jeforth.3nw",
-  "description": "jeforth with the 3WE kernel for node-webkit",
+  "description": "jeforth with the 3-word-engine project-k kernel for node-webkit",
   "main": "jeforth.3nw.html",
   "window": {
 	"icon":"3nw/img/icon.png",

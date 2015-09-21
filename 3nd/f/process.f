@@ -73,10 +73,10 @@ js> process constant process // ( -- object ) Node.js process object
 				( Looks like the gui.App object ) process :> _nw_app "" tib. obj>keys .
 				( ref _events above ) process :> listeners("uncaughtException") tib.
 				.( ---------- End of process.things demo ----------- ) cr
-				depth 0 = ==>judge drop
+				[d d] [p 'process' p]
 				</selftest>
 
 : process.exit	( exit-code -- ) \ Terminate node.js, actually the entire program.
 				js: process.exit(pop()) ;
-			\	/// The exit-code goes %ERRORLEVEL% if run by Node.exe but *not* nw.exe.
-			\	/// 'bye' command uses window.close() so far (jeforth.3nw r16).
+				/// The exit-code goes to %ERRORLEVEL% if run by Node.exe but *not* nw.exe.
+				/// 'bye' command uses window.close() so far (jeforth.3nw r16).

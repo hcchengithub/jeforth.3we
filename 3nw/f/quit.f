@@ -6,14 +6,14 @@
 \  
 
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-				js: print("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
+				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
 
 \ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
 	\ application dependent. 
 	\
 
-	js> kvm.argv.length \ Do we have jobs from command line?
+	js> vm.argv.length \ Do we have jobs from command line?
 	[if] \ We have jobs from command line to do. Disable self-test.
 		js: tick('<selftest>').enabled=false
 	[else] \ We don't have jobs from command line to do. So we do the self-test.
@@ -34,13 +34,13 @@
 \ ----------------- save selftest.log -------------------------------------
 	s" I want to view selftest.log" s" yes" = [if]
 		js> tick('<selftest>').enabled [if]
-			js> kvm.screenbuffer char selftest.log writeTextFile
+			js> vm.screenbuffer char selftest.log writeTextFile
 		[then]
 	[then]	
 
 \ ----------------- run the command line -------------------------------------
-	<js> (kvm.argv.slice()).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
+	<js> (vm.argv.slice()).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
 
 \ ------------ End of jeforth.f -------------------
-	js: kvm.screenbuffer=null \ turn off the logging
+	js: vm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.

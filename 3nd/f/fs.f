@@ -10,11 +10,7 @@ s" fs.f"		source-code-header
 					marker ---
 					js: vm.screenbuffer=""
 					char . js> vm.fso.statSync(pop()) dup obj>keys . constant properties
-					<js> vm.screenbuffer.indexOf(
-						"dev,mode,nlink,uid,gid,rdev,ino,size,atime,mtime," +
-						"ctime,_checkModeProperty,isDirectory,isFile,isBlockDevice," +
-						"isCharacterDevice,isSymbolicLink,isFIFO,isSocket"
-					)!=-1 </jsV> ( true )
+					<js> vm.screenbuffer.indexOf("isSymbolicLink")!=-1 </jsV> ( true )
 					properties :> isDirectory() tib.
 					<js> vm.screenbuffer.indexOf('isDirectory() \\ ==> true (boolean)')!=-1 </jsV> ( true )
 					properties :> isFile() tib.
@@ -31,13 +27,13 @@ s" fs.f"		source-code-header
 					<js> vm.screenbuffer.indexOf('isSocket() \\ ==> false (boolean)')!=-1 </jsV> ( true )
 					js: vm.screenbuffer=""
 					properties :> atime tib.
-					<js> vm.screenbuffer.indexOf('Time) (object)')!=-1 </jsV> ( true )
+					<js> vm.screenbuffer.indexOf(') (object)')!=-1 </jsV> ( true )
 					js: vm.screenbuffer=""
 					properties :> ctime tib.
-					<js> vm.screenbuffer.indexOf('Time) (object)')!=-1 </jsV> ( true )
+					<js> vm.screenbuffer.indexOf(') (object)')!=-1 </jsV> ( true )
 					js: vm.screenbuffer=""
 					properties :> mtime tib.
-					<js> vm.screenbuffer.indexOf('Time) (object)')!=-1 </jsV> ( true )
+					<js> vm.screenbuffer.indexOf(') (object)')!=-1 </jsV> ( true )
 					[d true,true,true,true,true,true,true,true,true,true,true d] [p "fs.f" p]
 					---
 				</selftest>
