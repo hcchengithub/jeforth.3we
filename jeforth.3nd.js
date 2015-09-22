@@ -40,7 +40,7 @@ kvm.clearScreen =
 // same kvm.panic().
 kvm.panic = function (state) { 
 			type(state.msg);
-			if (state.level) debugger;
+			if (state.serious) debugger;
 		}
 // We need the panic() function below but we can't see the one in jeforth.js
 // so one is defined here for convenience.

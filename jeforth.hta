@@ -89,7 +89,6 @@
 		return(version);
 	}
 	kvm.debug = false;
-	kvm.jsc = {xt:'kvm.type("Sorry, jsc is not available yet.")',prompt:"jsc>"};
 	kvm.screenbuffer = ""; // kvm.type() to screenbuffer before I/O ready
 	kvm.inputbox = "";
 	kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
@@ -104,7 +103,7 @@
 	// not visible here.
 	kvm.panic = function(state){ 
 		kvm.type(state.msg);
-		if (state.level) debugger;
+		if (state.serious) debugger;
 	}
 	
 	// When used in forth words, inner() handles the try{}catch{} thing.

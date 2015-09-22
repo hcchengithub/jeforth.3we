@@ -1941,12 +1941,12 @@ code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
 				vm.jsc.enable = true;
 				dictate("bp");
-				end-code
+				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
 code bd			( -- ) \ Disable breakpoint, See also 'bp','be'.
 				inner = vm.g.fastInner;
 				vm.jsc.enable = false; // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
-				end-code
+				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
 code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				var bp = nexttoken();
@@ -1959,7 +1959,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 					if (inner == vm.g.debugInner) type(", activated\n");
 					else  type(", inactive\n");
 				}
-				end-code
+				end-code interpret-only
 				/// If no address is given then show the recent breakPoint and 
 				/// its status.
 				/// work with 'jsc' debug console, jsc is application dependent.
@@ -1991,7 +1991,7 @@ code q			( -- ) \ Quit *debug*
 				var q = tick("(*debug*)").continue; 
 				tick("(*debug*)").continue=null; 
 				q(); 
-				end-code
+				end-code interpret-only
 				
 : *debug*		( <prompt> -- resume ) \ Forth debug console. Execute the resume() to quit debugging.
 				BL word compiling if literal compile (*debug*) 

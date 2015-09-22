@@ -38,13 +38,17 @@
 			kvm.type("Program path " + process.cwd());
 			return(version);
 		}
+		// kvm.panic() is the master panic handler. The panic() function defined in 
+		// project-k kernel jeforth.js is the one called in code ... end-code and it's
+		// not visible here.
+		kvm.panic = function(state){ 
+			kvm.type(state.msg);
+			if (state.serious) debugger;
+		}
 		kvm.debug = false;
 		kvm.fso = require( "fs" ); // http://nodejs.org/api/fs.html
 		kvm.readTextFile = function(pathname){return kvm.fso.readFileSync(pathname,'utf8')}
 		kvm.writeTextFile = function(pathname,data){kvm.fso.writeFileSync(pathname,data,'utf8')}
-		kvm.jsc = {prompt:""};
-		kvm.jsc.help = kvm.readTextFile('3nw/f/jsc.hlp');
-		kvm.jsc.xt = kvm.readTextFile('3nw/f/jsc.js');
 		kvm.inputbox = "";
 		kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
  		kvm.prompt = "OK";

@@ -3894,8 +3894,9 @@
 [ ] 檢查 browser 是否 Chrome, alert 用 chrome 比較好。cub.html 在 Win 10 Edge 直接跑，慢得要命。
 
 [x] 3htm jsc 裡 erase 無效 ... 感謝我自己! 以前已經發現在 jsc console 時
-	inputbox.value 是 \10 因為 \r\n 只吃掉 \r 故留下 \n 使得 inputbox 非 empty 因此
+	inputbox.value 是 \10 因為 \r\n (Chrome & IE) 只吃掉 \r 故留下 \n 使得 inputbox 非 empty 因此
 	{backspace} 不工作。修改判斷條件為 inputbox.value==""||inputbox.value=="\n" 即可
+	* 3nw 也解過這個問題, 方法是在 jsc.xt 裡一見面就把 inputbox.value 清成 "" 也可以。
 
 [x] tweak cub.html on going . . . so as to make a project-k release
 	rename to sample.html. project-k released. [ ] make it a release on github.
@@ -4017,7 +4018,7 @@
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
 [ ] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
-	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以。
+	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
 [ ] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
 	---- modify jeforth.3nw.html --------------------
 	[x]	kernel/jeforth.js --> project-k/jeforth.js
@@ -4038,12 +4039,39 @@
 	[ ] apply to all *.f files 
 		[x]	fortheval --> dictate  [ ] apply to all *.f files 
 		[x]	print --> type   [ ] apply to all *.f files 
-		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
-		[ ]	internel kvm --> vm   
-		[ ] js: vm.selftest_visible=true
-		[ ] -->judge 改用 [d d] [p p]
-	[ ]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
-	[ ]	改寫 vm.panic() 
-	[ ] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+		[x]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
+		[x]	internel kvm --> vm   
+		[x] js: vm.selftest_visible=true
+		[x] -->judge 改用 [d d] [p p]
+	[x]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
+	[x]	改寫 vm.panic() 
+	[x] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
 		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
-		
+	[ ] jsc is now defined in quit.f
+	
+[x] 3nw 的 jsc 直接 copy 用 3hta 的是可以用的。有機會把 3hta 3htm 3nw 三個 jsc 統一起來。
+	[x]	乾脆寫成一個 jsc.f 統一起來。
+	[x] jsc.f 可以自給自足 vm.jsc 不需要 initial module 定義。 [x]3hta [x]3htm [x]3nw 
+	
+[x] 3nw jsc 目前有下列問題:
+		[x]	initializing of vm.jsc.cmd, vm.jsc.enable should be done in 3nw.html <=== 這兩個根本不用 init
+			jsc.cmd 用到前有給值的動作, vm.jsc.enable undefined 時正好是 fault。
+		[x] Replace the arguments.callee.show by vm.jsc.statusToggle, that switches the status 
+			prompt, by 't' command. 
+		[x] exit/q/quit 光 return 好像不夠, 下 debugger; instruction 會卡在 jsc 裡出不來。--> restart 後消失了。
+		[x] erase 有時無效,且 rstack 一直堆積同一個回返地址 
+			RI ==> 因為 single step 會 break 所有的動作, 連 {backSpace} 也被 break 到了!! 
+			[ ] 以後再想想辦法。jsc 裡面用到的 words 都會有這個問題。
+		[!] jsc help shows only a few lines <---- nw.js' problem
+	
+[ ] 3nw F2 editMode 怎麼無效了?!
+[x] vm.panic redefine was in 3hta/quit.f , move to 3htm/f/jsc.f 
+	[x]3hta [x]3htm [x]3nw 
+[x] the --- save selftest.log --- thing in all quit.f can be removed
+	[x]3hta [x]3htm [x]3nw 
+
+[ ] playground 裡面的 project-k things 可以清除了
+[ ] panic()'s state.level should be state.serious because it's used as a boolean.
+
+
+
