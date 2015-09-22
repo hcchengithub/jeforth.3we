@@ -9,7 +9,7 @@
 \ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
 \
 
-js> kvm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
+js> vm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
 s" git.f"   source-code-header
 
@@ -91,6 +91,7 @@ s" git.f"   source-code-header
     char ASROCK-P8H61 char COMPUTERNAME proc-env@ = [if] s" C:\Users\hchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
     char WKS-38EN3476 char COMPUTERNAME proc-env@ = [if] s" C:\Users\8304018\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
     char DESKTOP-Q94AC8A char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcche\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+    char T550 char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcche\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
     
     value git-shell-path // ( -- str ) Command line to launch Git Shell.
     /// Something like this:
@@ -122,7 +123,7 @@ s" git.f"   source-code-header
             s' WshShell.AppActivate ' swap + </vb> 
         then 500 nap ; /// assume it's powershell
     : activate-jeforth ( -- ) \ Come back to jeforth.3hta
-        1000 nap s" WshShell.AppActivate " kvm.process :> processID + </vb> 500 nap ;
+        1000 nap s" WshShell.AppActivate " vm.process :> processID + </vb> 500 nap ;
 
     : <shell> ( <command line> -- ) \ Command line to the Git Shell
         char {enter}{enter} char </shell> word + compiling if literal then ; immediate
