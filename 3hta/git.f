@@ -511,6 +511,9 @@ s" git.f"   source-code-header
 
     : merge ( <from commit> -- ) \ Merge the commit(s) into the recent HEAD
         s" git merge " char \n|\r word + </shell> ;
+		/// 新的 GitHub for Windows 有 tutorial https://guides.github.com/introduction/flow/ 
+		/// 圖解說明 branch > pull request > merge 的流程。
+
     
     \ 第 24 天：使用 GitHub 遠端儲存庫 - 入門篇
     

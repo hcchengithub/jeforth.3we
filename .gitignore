@@ -1,12 +1,11 @@
 js/box2dweb/*
 js/chipmunk.js/*
-js/bootstrap*
 js/jquery*
 js/jefvm.v3.js
+project-k
 private/*
-playground/multitaskjavascripteforth
 *.mp3
 _selftest_.xls
+playground/game.js
+playground/game.js
 selftest.log
-project-k
-0-255.bin
