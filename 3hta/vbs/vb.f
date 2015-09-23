@@ -3,22 +3,26 @@
 
 	s" vb.f"		source-code-header
 
-					\ include basic.vbs
-					\ 這行無效不知何故 <h> <script id=vbsBasic type="text/vbscript" src="3hta/vbs/basic.vbs"></script></h> drop
-					\ 添加 VBScript tag into head section, 裡應外合才認得 VBScript.
-					char script createElement constant vbsBasic // ( -- element ) The vbs script tag element
-					vbsBasic char type char text/vbscript setAttribute
-					vbsBasic char id   char vbsBasic      setAttribute
-					vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
-					eleHead vbsBasic appendChild
-				
-					\ 不用 global 因為 Node-webkit 已經有用到，改用 kvm 最保險。 
-					\ 讓 VBScript 認得 global. global object 含有 jeforth.3hta 所有的 global variables.
-					\ js> global <text>
-					\ 	Dim global
-					\ 	Set global = kvm.pop()
-					\ </text> js: vbExecuteGlobal(pop())
-				
+	\ include basic.vbs
+	\ 不知何故這行無效 --> <h> <script id=vbsBasic type="text/vbscript" src="3hta/vbs/basic.vbs"></script></h> drop
+	\ 添加 VBScript tag into head section, 裡應外合才認得 VBScript.
+		
+		char script createElement constant vbsBasic // ( -- element ) The vbs script tag element
+		vbsBasic char type char text/vbscript setAttribute
+		vbsBasic char id   char vbsBasic      setAttribute
+		vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
+		eleHead vbsBasic appendChild
+	
+	\ <vb> 裡面天然只認得 global 不認得 vm，所以有 global variable
+	\ jeforth_project_k_virtual_machine_object 就是為了這種情形。
+
+		<js> vbExecuteGlobal("Dim vm:set vm=jeforth_project_k_virtual_machine_object") </js>
+		
+	\ <vb> ... </vb> 裡面需要用到 push(), pop() 但 jeforth.js kernel 沒有 export
+	\ 出來。這點小問題可以這樣輕鬆解決：
+
+		js: vm.push=push;vm.pop=pop;
+					
 	code vbEval 	( "string" -- result ) \ Evaluate the given vbs statements return value on TOS.
 					try {
 						var result = vbEval(pop());
@@ -29,10 +33,8 @@
 					end-code
 					
 					<selftest> 
-						*** vbEval evaluates a VBS statement ... 
-						s" 123 * 456" vbEval
-						123 456 * = 
-						==>judge [if] <js> ['vbEval'] </jsV> all-pass [then]
+						*** vbEval evaluates a VBS statement
+						s" 123 * 456" vbEval [d 123*456 d] [p 'vbEval' p]
 					</selftest>
 
 	code vbExecute 	( "string" -- ) \ Execute the given vbs statements, you need to push return value in your program.
@@ -53,15 +55,15 @@
 					/// Things defined by it will be global.
 					
 					<selftest> 
-						*** vbExecuteGlobal creates global none-volatile things ... 
+						*** vbExecuteGlobal creates global none-volatile things
 						<text>
 						   Dim vbExecuteGlobal_test_temp
 						   vbExecuteGlobal_test_temp = "I am good"
 						</text> vbExecuteGlobal 
 						js> vbExecuteGlobal_test_temp s" I am good" =
-						==>judge [if] <js> ['vbEval'] </jsV> all-pass [then]
+						[d true d] [p 'vbExecuteGlobal' p]
 					</selftest>
-		
+
 	: <vb> 			( <vbs statements> -- "statements" ) \ Execute vbs statements
 					char </vb> word 
 					compiling if literal then ; immediate
@@ -81,37 +83,50 @@
 	: vb> 			( <vbs statements> -- result ) \ Evaluate vbs statements
 					BL word compiling if literal compile vbEval else vbEval then  ; immediate
 					/// Same thing as "s' blablabla' vbEval" but simpler. Return the last statement's value.
+					
+					vb> ScriptEngine s"  V" +
+					vb> ScriptEngineMajorVersion + char . +
+					vb> ScriptEngineMinorVersion + s"  Build:" +
+					vb> ScriptEngineBuildVersion + 
+					js> vm.vbscript=pop() . cr
 
-					\ Print ScriptEngine version
-					vb> ScriptEngine . space char V .
-					vb> ScriptEngineMajorVersion  . char . .
-					vb> ScriptEngineMinorVersion  . space char Build: .
-					vb> ScriptEngineBuildVersion  . 
-					cr
-					<vb> Set o=GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2"): kvm.push(o) </vb> \ objWMIService
+					<vb> 
+						Set o=GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
+						vm.push(o) 
+					</vb> 
+					( objWMIService ) 
 					<js> 
 						var objWMIService = pop();
 						var myPath = window.location.pathname.toLowerCase();
 						var colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'mshta.exe'");
 						var enumProcesses = new Enumerator(colProcesses);
 						for ( var p = null ; !enumProcesses.atEnd() ; enumProcesses.moveNext() ) {
-							p = enumProcesses.item();
+							p = enumProcesses.item(); // 若有多個,取得最後一個。
 						}
-						kvm.process = p;
-						print("jeforth.hta process ID:" + p.ProcessID + '\n');
-						// start /WAIT jeforth.hta js: kvm.process.terminate('12345')
-						// echo %errorlevel% ==> prints 
+						vm.process = p;
+						type("jeforth.3hta process ID:" + p.ProcessID + '\n');
 					</js> 
-					
-	js> kvm.process constant kvm.process // ( -- Win32_process ) Process object of this mshta.exe
+
+	js> vm.process constant vm.process // ( -- Win32_process ) Process object of this mshta.exe
 					/// see http://msdn.microsoft.com/en-us/library/aa394372(v=vs.85).aspx
 					/// or search "Win32_Process class" in MSDN.
 	
+					<selftest> 
+						*** VBScript ScriptEngine version
+							<js> vm.vbscript.indexOf('VBScript')!=-1 </jsV> ( true )
+							<js> vm.vbscript.indexOf('Build:1')!=-1 </jsV> ( Build:17451 now, true )
+							[d true,true d] [p "vb>","vbEval" p]
+							
+						*** jeforth process ID
+							js> isNaN(vm.process.ProcessID)
+							[d false d] [p "<vb>","</vb>" p]
+							
+					</selftest>
 
 	: bye			( errorlevel -- ) \ Terminate jeforth.hta return TOS as the errorlevel
 					<js> 
 						if(stack.length==0 || isNaN(tos())) push(0); 
-						kvm.process.terminate(pop());
+						vm.process.terminate(pop());
 					</js> ;
 					/// start /WAIT jeforth.hta . . . don't forget the /WAIT option!
 	
@@ -198,11 +213,11 @@
 		<vb>
 		Set objProcess = GetObject("winmgmts:root\cimv2:Win32_Process")
 		errReturn = objProcess.Create("c:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3wsh\run.bat")
-		kvm.push(errReturn)
+		vm.push(errReturn)
 		</vb>
 		
 		\ The actual application is like this,
-		<vb> Set o=GetObject("winmgmts:root\cimv2:Win32_Process"): kvm.push(o) </vb> constant Win32_Process
+		<vb> Set o=GetObject("winmgmts:root\cimv2:Win32_Process"): vm.push(o) </vb> constant Win32_Process
 		Win32_Process js: pop().Create("cmd")
 	
 	Example: ...determine which scripts are running on the local computer?
@@ -217,14 +232,14 @@
 			" WHERE Name = 'cscript.exe'" & _
 			" OR Name = 'mshta.exe'",,48) 
 		For Each objItem in colItems 
-			print "-------------------------------------------" & vbCrLf
-			print "CommandLine: " & objItem.CommandLine & vbCrLf
-			print "Name: " & objItem.Name & vbCrLf
+			type "-------------------------------------------" & vbCrLf
+			type "CommandLine: " & objItem.CommandLine & vbCrLf
+			type "Name: " & objItem.Name & vbCrLf
 		Next
 		</vb>		
 		
 	Example: ...find out the account name under which a process is running?
-	Compatibility: fair, change 'Wscript.Echo' to 'print' then it works. Add vbCrLf too.
+	Compatibility: fair, change 'Wscript.Echo' to 'type' then it works. Add vbCrLf too.
 	Comment: The above example that runs a hiden notepad.exe which is listed too.
 		<vb>
 			strComputer = "."
@@ -236,7 +251,7 @@
 			For Each objProcess in colProcessList
 				colProperties = objProcess.GetOwner( _
 					strNameOfUser,strUserDomain)
-				print "Process " & objProcess.Name _
+				type "Process " & objProcess.Name _
 					& " is owned by " _ 
 					& strUserDomain & "\" & strNameOfUser & "." & vbCrLf
 			Next
@@ -258,7 +273,7 @@
 		</vb>
 		
 	Example: ...determine how much processor time and memory each process is using?
-	Compatibility: fair, change 'Wscript.Echo' to 'print' then it works. Add vbCrLf too.
+	Compatibility: fair, change 'Wscript.Echo' to 'type' then it works. Add vbCrLf too.
 				   fine, no change needed	
 	Comment: Wow, so easy!
 		<vb>
@@ -269,21 +284,21 @@
 			Set colProcesses = objWMIService.ExecQuery _
 			   ("Select * from Win32_Process")
 			For Each objProcess in colProcesses
-				print "Process: " & objProcess.Name & vbCrLf
+				type "Process: " & objProcess.Name & vbCrLf
 				sngProcessTime = (CSng(objProcess.KernelModeTime) + _
 					CSng(objProcess.UserModeTime)) / 10000000
-				print "Processor Time: " & sngProcessTime & vbCrLf
-				print "Process ID: " & objProcess.ProcessID & vbCrLf
-				print "Working Set Size: " _
+				type "Processor Time: " & sngProcessTime & vbCrLf
+				type "Process ID: " & objProcess.ProcessID & vbCrLf
+				type "Working Set Size: " _
 				& objProcess.WorkingSetSize & vbCrLf
-				print "Page File Size: " _
+				type "Page File Size: " _
 				& objProcess.PageFileUsage & vbCrLf
-				print "Page Faults: " & objProcess.PageFaults & vbCrLf & vbCrLf
+				type "Page Faults: " & objProcess.PageFaults & vbCrLf & vbCrLf
 			Next
 		</vb>
 		
 	Example: ...tell what applications are running on a remote computer? 
-	Compatibility: fair, change 'Wscript.Echo' to 'print' then it works. Add vbCrLf too.
+	Compatibility: fair, change 'Wscript.Echo' to 'type' then it works. Add vbCrLf too.
 				   fine, no change needed	
 	Comment: No it doesn't work so far hcchen5600 2014/07/01 18:49:04 
 		<vb>
@@ -294,20 +309,20 @@
 			Set colProcessList = objWMIService.ExecQuery _
 				("Select * from Win32_Process")
 			For Each objProcess in colProcessList
-				print "Process: " & objProcess.Name  & vbCrLf
-				print "Process ID: " & objProcess.ProcessID  & vbCrLf
-				print "Thread Count: " & objProcess.ThreadCount  & vbCrLf
-				print "Page File Size: " _
+				type "Process: " & objProcess.Name  & vbCrLf
+				type "Process ID: " & objProcess.ProcessID  & vbCrLf
+				type "Thread Count: " & objProcess.ThreadCount  & vbCrLf
+				type "Page File Size: " _
 					& objProcess.PageFileUsage  & vbCrLf
-				print "Page Faults: " _
+				type "Page Faults: " _
 					& objProcess.PageFaults  & vbCrLf
-				print "Working Set Size: " _
+				type "Working Set Size: " _
 					& objProcess.WorkingSetSize  & vbCrLf
 			Next
 		</vb>
 		
 	Example: Sample VBS WMI reads disk information
-	Compatibility: fair, change 'Wscript.Echo' to 'print' then it works. Add vbCrLf too.
+	Compatibility: fair, change 'Wscript.Echo' to 'type' then it works. Add vbCrLf too.
 	Comment: It works!
 		<vb>
 			' Disk.vbs
@@ -332,7 +347,7 @@
 			' Classic For Next Loop
 			For Each objItem in colItems
 				intDrive = intDrive + 1
-				print "DiskDrive " & intDrive & vbCrLf & _ 
+				type "DiskDrive " & intDrive & vbCrLf & _ 
 					"Caption: " & objItem.Caption & vbCrLf & _ 
 					"Description: " & objItem.Description & vbCrLf & _ 
 					"Manufacturer: " & objItem.Manufacturer & vbCrLf & _ 
@@ -353,14 +368,14 @@
 		</vb>
 		
 	Example: 
-	Compatibility: fair, change 'Wscript.Echo' to 'print' then it works. Add vbCrLf too.
+	Compatibility: fair, change 'Wscript.Echo' to 'type' then it works. Add vbCrLf too.
 				   fine, no change needed	
 	Comment: 
 		<vb>
 		</vb>
 
 	Example: 
-	Compatibility: fair, change 'Wscript.Echo' to 'print' then it works. Add vbCrLf too.
+	Compatibility: fair, change 'Wscript.Echo' to 'type' then it works. Add vbCrLf too.
 				   fine, no change needed	
 	Comment: 
 		<vb>

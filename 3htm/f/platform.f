@@ -12,8 +12,10 @@ also forth definitions
 				/// Must intercept onkeydown event to avoid original function.
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
+				[ last literal ] ( _me )
 				." Input box EditMode = " 
-				js> kvm.EditMode=Boolean(kvm.EditMode^true) dup . js: print('\n')
+				\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS
+				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
 				then js: styleTextareaFocus.innerHTML=pop()                
@@ -81,10 +83,10 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 : history-selector ( -- ) \ Popup command history for selection
 				<o> <br><select style="width:800px;padding-left:2px;font-size:16px;"></select></o> ( select )
 				<js> 
-					tos().size = Math.min(16,kvm.cmdhistory.array.length);
-					for (var i=0; i<kvm.cmdhistory.array.length; i++){
+					tos().size = Math.min(16,vm.cmdhistory.array.length);
+					for (var i=0; i<vm.cmdhistory.array.length; i++){
 						var option = document.createElement("option");
-						option.text = kvm.cmdhistory.array[i];
+						option.text = vm.cmdhistory.array[i];
 						js: tos().add(option);
 					}
 					tos().selectedIndex=tos().length-1;
@@ -109,21 +111,21 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
 				<js> event.altKey </jsV> if history-selector false else
-				<js> event.ctrlKey </jsV> if js: inputbox.value=kvm.cmdhistory.up()
+				<js> event.ctrlKey </jsV> if js: inputbox.value=vm.cmdhistory.up()
 				false else true then then ;
 				/// Alt-Up pops up history-selector menu.
 				/// Ctrl-Up/Ctrl-Down recall command line history.
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {down}		( -- boolean ) \ Inputbox keydown handler, get next command history.
-				<js> event.ctrlKey </jsV> if js: inputbox.value=kvm.cmdhistory.down();
+				<js> event.ctrlKey </jsV> if js: inputbox.value=vm.cmdhistory.down();
 				false else true then ;
 				/// Alt-Up pops up history-selector menu.
 				/// Ctrl-Up/Ctrl-Down recall command line history.
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
-				js> inputbox.focus();inputbox.value if 
+				js> inputbox.focus();inputbox.value!=""&&inputbox.value!="\n" if 
 					true \ inputbox is not empty still don't do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
 					js> event==null||event.altKey \ So as to allow calling {backSpace} programmatically	
@@ -213,15 +215,15 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					_comment_
 					</table>
 				</text> ( word html )
-				js> pop().replace(/_name_/,kvm.plain(tos().name))
-				js> pop().replace(/_help_/,kvm.plain(tos().help.match(/^\S+\s*(.*?)\s*$/)[1]))
-				js>	pop().replace(/_type_/,kvm.plain(tos().type))
-				js>	pop().replace(/_vid_/,kvm.plain(tos().vid))
+				js> pop().replace(/_name_/,vm.plain(tos().name))
+				js> pop().replace(/_help_/,vm.plain(tos().help))
+				js>	pop().replace(/_type_/,vm.plain(tos().type))
+				js>	pop().replace(/_vid_/,vm.plain(tos().vid))
 				( word html ) <js> 
 					if (tos(1).comment) {
 						push(pop().replace(
 							/_comment_/,
-							"<tr><td colspan=5>"+kvm.plain(tos().comment)+"</td></tr>"
+							"<tr><td colspan=5>"+vm.plain(tos().comment)+"</td></tr>"
 						))
 					} else push(pop().replace(/_comment_/,""))
 					if (tos(1).immediate)  
@@ -233,40 +235,38 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 				</js> 
 				</o> 2drop ;
 
-code (help)		( "pattern" -- )  \ Print help message of screened words
-				execute("parser(words,help)"); var option = pop();
+code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened words
+				// execute("parser(words,help)"); var option = pop();
+				var spec = pop().replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
-					if(option.v) 
-						if (order[j].toLowerCase().indexOf(option.v.toLowerCase()) == -1) continue;
-					var voc = "\n--------- " + order[j] +" ("+ Math.max(0,words[order[j]].length-1) + " words) ---------\n";
-					// 取得範圍內的 words into word_list
-					if(option.sw) push(option.sw); else push(""); 
-					push(order[j]); push(option.pattern); execute("(words)");
+					push(order[j]); // vocabulary
+					push(spec[0]||""); // pattern
+					push(spec[1]||""); // option
+					execute("(words)"); // [words...]
 					var word_list = pop();
+					var voc = "\n--------- " + order[j] +" ("+ word_list.length + " words) ---------\n";
 					// 印出
-					if (word_list.length) print(voc);
+					if (word_list.length) type(voc);
 					for (var i=0; i<word_list.length; i++) {
 						push(word_list[i]); execute('help(word)')
 					}
 				} 
 				end-code
 				/// Modified by platform.f for HTML table.
-				/// Usage: help ([(-V|-v) pattern][(-t|-T|-n|-N) pattern])|[pattern]
-				/// None or one of the vocabulary selector:
-				///	  -v for matching partial vocabulary name, case insensitive.
-				///	  -V is -v and lock, -V- to unlock.
-				/// None or one of the following switches:
-				///	  -n matches only name pattern, case insensitive.
+				/// Pattern matches name, help and comment.
+				/// It can be qualified by an option of:
+				///	  -n matches name pattern, case insensitive.
 				///	  -N matches exact name, case sensitive.
 				///   -t matches type pattern, case insensitive.
 				///   -T matches exact type, case sensitive.
-				/// If none of the aboves is given then pattern matches 
-				/// all names, helps and comments.
-				/// Example: help -V excel.f -n app
-				/// Example: help - (Show all words)
+				/// Example: 
+				///   help ! -n  shows words with '!' in their name
 
-: help			( [<patthern>] -- )  \ Print help message of screened words
-                char \n|\r word js> tos().length if (help) else
+: help			( <[pattern [-t|-T|-n|-N]]> -- )  \ Print help message of screened words
+                char \n|\r word js> tos().length if 
+					js> tos()=='*' if drop "" then
+					(help) 
+				else
 					drop js> typeof(help3we)=='object' if else
 						<o> <style id=help3we>
 							.help3we table, .help3we td , .help3we th, .help3we caption {
@@ -383,24 +383,27 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 						
 					</o> drop
 				then ;
-				' (help) last :: comment=pop().comment
-				/// Example: help (Show basic usages)
+				last :: comment=tick('(help)').comment
+				/// A pattern of '*' means all words.
+				/// Example: 
+				///   help *     shows all words
+
 
 <js>
-	kvm.cmdhistory = {
-		max:   1000, // maximum length of the command history
+	vm.cmdhistory = {
+		max:   100, // maximum length of the command history
 		index: -1,
 		array: [],
 		push:
 			function (cmd){
 				cmd = cmd.replace(/^\s*/gm,''); // remove leading white spaces
-				cmd = cmd.replace(/\s*$/gm,'');  // remove tailing white spaces
+				cmd = cmd.replace(/\s*$/gm,'');  // remove tailing white spaces [ ] replace to trim()
 				if(cmd.search(/\S/)==-1) return; // skip blank lines
 				this.array.push(cmd);
 				for(var i=this.array.length-2; i>=0; i--)
-					if(cmd==this.array[i]) this.array.splice(i,1);
-				if (this.array.length > this.max ) this.array.shift();
-				this.index = this.array.length;
+					if(cmd==this.array[i]) this.array.splice(i,1); // remove duplicated
+				if (this.array.length > this.max ) this.array.shift(); // overflow
+				this.index = this.array.length; // point to last one, new one.
 			},
 		up:
 			function(){
@@ -410,7 +413,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (kvm.tick('beep')) kvm.beep();
+					if (tick('beep')) vm.beep();
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -423,7 +426,7 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (kvm.tick('beep')) kvm.beep();
+					if (tick('beep')) vm.beep();
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -433,44 +436,44 @@ code (help)		( "pattern" -- )  \ Print help message of screened words
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
-			case   9: /* Tab  */ if(kvm.tick('{Tab}' )){kvm.execute('{Tab}' );return(kvm.pop());} break;
-			case  38: /* Up   */ if(kvm.tick('{up}'  )){kvm.execute('{up}'  );return(kvm.pop());} break;
-			case  40: /* Down */ if(kvm.tick('{down}')){kvm.execute('{down}');return(kvm.pop());} break;
-		 // case  77: /* M    */ if(kvm.tick('{M}'   )){kvm.execute('{M}'   );return(kvm.pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
+			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
+			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
+			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
+		 // case  77: /* M    */ if(tick('{M}'   )){execute('{M}'   );return(pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
 		}
 		return (true); // pass down to following handlers
 	}
 
 	document.onkeydown = function (e) {
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
-		if(kvm.tick('{Tab}')){if(keycode!=9)kvm.tick('{Tab}').index=0} // 按過別的 key 就重來
+		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
 			case 13:
-				if (!kvm.EditMode || event.ctrlKey) { // CtrlKeyDown
-					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10).
+				if (!tick("{F2}").EditMode || event.ctrlKey) { // CtrlKeyDown
+					vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.cmdhistory.push(kvm.inputbox);
-					kvm.forthConsoleHandler(kvm.inputbox);
+					vm.cmdhistory.push(vm.inputbox);
+					vm.forthConsoleHandler(vm.inputbox);
 					return(false);
 				}
 				return(true); // In EditMode
-			case  27: /* Esc */ if(kvm.tick('{esc}')){kvm.execute('{esc}');return(kvm.pop());} break;
-			case 109: /* -   */ if(kvm.tick('{-}'  )){kvm.execute('{-}'  );return(kvm.pop());} break;
-			case 107: /* +   */ if(kvm.tick('{+}'  )){kvm.execute('{+}'  );return(kvm.pop());} break;
-			case 112: /* F1  */ if(kvm.tick('{F1}' )){kvm.execute('{F1}' );return(kvm.pop());} break;
-			case 113: /* F2  */ if(kvm.tick('{F2}' )){kvm.execute('{F2}' );return(kvm.pop());} break;
-			case 114: /* F3  */ if(kvm.tick('{F3}' )){kvm.execute('{F3}' );return(kvm.pop());} break;
-			case 115: /* F4  */ if(kvm.tick('{F4}' )){kvm.execute('{F4}' );return(kvm.pop());} break;
-			case 116: /* F5  */ if(kvm.tick('{F5}' )){kvm.execute('{F5}' );return(kvm.pop());} break;
-			case 117: /* F6  */ if(kvm.tick('{F6}' )){kvm.execute('{F6}' );return(kvm.pop());} break;
-			case 118: /* F7  */ if(kvm.tick('{F7}' )){kvm.execute('{F7}' );return(kvm.pop());} break;
-			case 119: /* F8  */ if(kvm.tick('{F8}' )){kvm.execute('{F8}' );return(kvm.pop());} break;
-			case 120: /* F9  */ if(kvm.tick('{F9}' )){kvm.execute('{F9}' );return(kvm.pop());} break;
-			case 121: /* F10 */ if(kvm.tick('{F10}')){kvm.execute('{F10}');return(kvm.pop());} break;
-			case 122: /* F11 */ if(kvm.tick('{F11}')){kvm.execute('{F11}');return(kvm.pop());} break;
-			case 123: /* F12 */ if(kvm.tick('{F12}')){kvm.execute('{F12}');return(kvm.pop());} break;
-			case   3: /* ctrl-break */ if(kvm.tick('{ctrl-break}')){kvm.execute('{ctrl-break}');return(kvm.pop());} break;
-			case   8: /* Back space */ if(kvm.tick('{backSpace}' )){kvm.execute('{backSpace}' );return(kvm.pop());} break; // disable the [switch previous page] function
+			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
+			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
+			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
+			case 112: /* F1  */ if(tick('{F1}' )){execute('{F1}' );return(pop());} break;
+			case 113: /* F2  */ if(tick('{F2}' )){execute('{F2}' );return(pop());} break;
+			case 114: /* F3  */ if(tick('{F3}' )){execute('{F3}' );return(pop());} break;
+			case 115: /* F4  */ if(tick('{F4}' )){execute('{F4}' );return(pop());} break;
+			case 116: /* F5  */ if(tick('{F5}' )){execute('{F5}' );return(pop());} break;
+			case 117: /* F6  */ if(tick('{F6}' )){execute('{F6}' );return(pop());} break;
+			case 118: /* F7  */ if(tick('{F7}' )){execute('{F7}' );return(pop());} break;
+			case 119: /* F8  */ if(tick('{F8}' )){execute('{F8}' );return(pop());} break;
+			case 120: /* F9  */ if(tick('{F9}' )){execute('{F9}' );return(pop());} break;
+			case 121: /* F10 */ if(tick('{F10}')){execute('{F10}');return(pop());} break;
+			case 122: /* F11 */ if(tick('{F11}')){execute('{F11}');return(pop());} break;
+			case 123: /* F12 */ if(tick('{F12}')){execute('{F12}');return(pop());} break;
+			case   3: /* ctrl-break */ if(tick('{ctrl-break}')){execute('{ctrl-break}');return(pop());} break;
+			case   8: /* Back space */ if(tick('{backSpace}' )){execute('{backSpace}' );return(pop());} break; // disable the [switch previous page] function
 		}
 		return (true); // pass down to following handlers
 	}

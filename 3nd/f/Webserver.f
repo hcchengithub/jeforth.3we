@@ -22,8 +22,9 @@
 \
 \	本來是現成 JavaScript 的程式改成 forth 有啥好處？如下例，可以把任何變數拉出來
 \	隨時觀察，
-\		push(filename); fortheval("to filename"); <== in the callback function of http.createServer
-\
+\		push(filename); dictate("to filename"); <== in the callback function of http.createServer
+\	更厲害的是 jeforth.3nd 有 cd dir 等 dos command 所以 cd 既可以查看 working directory
+\	或稱 root directory 又可以任意改變它。讚! 讚! 讚!
 
 	0 value request
 	0 value response
@@ -31,6 +32,8 @@
 	0 value filename
 	0 value err
 	0 value file
+	0 value path
+	0 value fs
 	
 	<js>
 	var http = require("http"),
@@ -38,14 +41,17 @@
 		path = require("path"),
 		fs = require("fs")
 		port = process.argv[3] || 8888; // for jeforth.3nd it's argv[3]
+
+	push(path); dictate("to path");
+	push(fs); dictate("to fs");
 	 
 	http.createServer(function(request, response) {
-		push(response); fortheval("to response"); push(request); fortheval("to request");
-		var uri = url.parse(request.url).pathname
-		, filename = path.join(process.cwd(), uri);
-		push(uri); fortheval("to uri"); push(filename); fortheval("to filename");
+		push(response); dictate("to response"); push(request); dictate("to request");
+		var uri = url.parse(request.url).pathname, 
+		    filename = path.join(process.cwd(), uri);
+		push(uri); dictate("to uri"); push(filename); dictate("to filename");
 	  
-		path.exists(filename, function(exists) {
+		fs.exists(filename, function(exists) {
 			if(!exists) {
 				response.writeHead(404, {"Content-Type": "text/plain"});
 				response.write("404 Not Found\n");
@@ -55,10 +61,10 @@
 		 
 			// 不會當成 directory 處理，不加這行會出錯 "Error: EISDIR, read"
 			if (fs.statSync(filename).isDirectory()) filename += '/index.html';
-			push(filename); fortheval("to filename");
+			push(filename); dictate("to filename");
 		 
 			fs.readFile(filename, "binary", function(err, file) {
-				push(err); fortheval("to err"); push(file); fortheval("to file");	
+				push(err); dictate("to err"); push(file); dictate("to file");	
 				if(err) {        
 					response.writeHead(500, {"Content-Type": "text/plain"});
 					response.write(err + "\n");
@@ -73,7 +79,7 @@
 	}).listen(parseInt(port, 10));
 	switch(kvm.appname){
 		case "jeforth.3nw":
-			print("Static file server running at\n  => http://localhost:" + port);
+			type("Static file server running at\n  => http://localhost:" + port);
 			break;
 		case "jeforth.3nd":
 			console.log("Static file server running at\n  => http://localhost:" + port);

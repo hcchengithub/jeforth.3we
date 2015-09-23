@@ -42,7 +42,8 @@ js> WshShell.Environment("USER")    constant WshUserEnv // ( -- obj ) WSH user e
 : env@       	( "%name%" -- value ) \ Get value of the environment variable %NAME%
                 js> WshShell.expandenvironmentstrings(pop()) ;
 
-: demo-dump-environment-variables  ( -- ) \ demo, you may find these env. variables useful.
+				<selftest>
+				*** env variables
                 ."  sys-env NUMBER_OF_PROCESSORS   = " s" NUMBER_OF_PROCESSORS"    sys-env@  . cr \ 小心此處餵給 sys-env@ proc-env@ 的 env variable name 不能有 white space。
                 ."  sys-env OS                     = " s" OS"                      sys-env@  . cr
                 ."  sys-env PATH                   = " s" PATH"                    sys-env@  . cr
@@ -79,7 +80,9 @@ js> WshShell.Environment("USER")    constant WshUserEnv // ( -- obj ) WSH user e
                 ." proc-env USERNAME               = " s" USERNAME"                proc-env@ . cr
                 ." proc-env USERPROFILE            = " s" USERPROFILE"             proc-env@ . cr
                 ." proc-env WINDIR                 = " s" WINDIR"                  proc-env@ . cr
-                ;
+                ." env      ERRORLEVEL             = " s" %ERRORLEVEL%"            env@      . cr
+				[d d] [p "sys-env@","proc-env@","env@" p]
+				</selftest>
 
 <comment>
 ------------ old implementations --------------------------------------------
