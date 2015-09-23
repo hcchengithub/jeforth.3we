@@ -3,10 +3,12 @@ js/chipmunk.js/*
 js/bootstrap*
 js/jquery*
 private/*
+project-k/*
 *.mp3
 kernel/kernel.js
 js/jefvm.v3.js
 _selftest_.xls
+selftest.log
 playground/multitaskjavascripteforth
 playground/project-k
 departmentcode.json
