@@ -13,7 +13,8 @@
     <script src="js/jquery-1.10.2.js"></script>
 	<Script src="project-k/jeforth.js"></Script>
 	<script id=js>
-	var kvm = new jeForth();
+	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
+	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 	(function(){
 		kvm.gui = require('nw.gui'); // 等效寫法 gui = global.window.nwDispatcher.requireNwGui(); https://github.com/rogerwang/node-webkit/issues/707
 		kvm.appname = kvm.gui.App.manifest.name; // defined by package.json
@@ -50,7 +51,6 @@
 		kvm.readTextFile = function(pathname){return kvm.fso.readFileSync(pathname,'utf8')}
 		kvm.writeTextFile = function(pathname,data){kvm.fso.writeFileSync(pathname,data,'utf8')}
 		kvm.inputbox = "";
-		kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
  		kvm.prompt = "OK";
 		kvm.argv = kvm.gui.App.argv;
 		kvm.bye = function(){process.exit()};

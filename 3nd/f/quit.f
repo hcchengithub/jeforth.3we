@@ -27,18 +27,12 @@
 	[then]
 
 \ ---------------- include other modules ------------------------------------------
+	include jsc.f
 	include voc.f
 	include mytools.f
 	include process.f
 	include path.f
 	include fs.f
-
-\ ----------------- save selftest.log -------------------------------------
-	s" I want to view selftest.log" s" yes" = [if]
-		js> tick('<selftest>').enabled [if]
-			js> kvm.screenbuffer char selftest.log writeTextFile
-		[then]
-	[then]	
 
 \ ---------------- Run command line -----------------------------------------------
 	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the jeforth.3nd.js pathname itself.

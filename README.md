@@ -17,7 +17,8 @@ Get source code and help
 
 | Item | Address |
 ----------------|----------------------------------------------
-| Source code | *http://github.com/hcchengithub/jeforth.3we* |
+| jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
+| jeforth.js kernel | *http://github.com/hcchengithub/project-k* |
 | FigTaiwan | *http://figtaiwan.org* |
 | Contact | hcchen5600@gmail.com |
 

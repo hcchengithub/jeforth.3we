@@ -3,27 +3,25 @@
 
 	s" vb.f"		source-code-header
 
-				\ include basic.vbs
-				\ 不知何故這行無效 --> <h> <script id=vbsBasic type="text/vbscript" src="3hta/vbs/basic.vbs"></script></h> drop
-				\ 添加 VBScript tag into head section, 裡應外合才認得 VBScript.
-					
-					char script createElement constant vbsBasic // ( -- element ) The vbs script tag element
-					vbsBasic char type char text/vbscript setAttribute
-					vbsBasic char id   char vbsBasic      setAttribute
-					vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
-					eleHead vbsBasic appendChild
-				
-				\ jeforth.3we VM 裡不該用 "kvm" 否則倒回去依存 application instance 不好。但是
-				\ 若不下點功夫 <vb> 裡面天然只認得 kvm 不認得 vm。以下令 <vb> 用 vm 代表 VM 
-				\ instanse name (kvm)。"kvm" 還是得用一次，幾經嘗試似乎無法避免。因此若 "kvm" 
-				\ 之名改了 vb.f 也得跟著改，暫無他法。
+	\ include basic.vbs
+	\ 不知何故這行無效 --> <h> <script id=vbsBasic type="text/vbscript" src="3hta/vbs/basic.vbs"></script></h> drop
+	\ 添加 VBScript tag into head section, 裡應外合才認得 VBScript.
+		
+		char script createElement constant vbsBasic // ( -- element ) The vbs script tag element
+		vbsBasic char type char text/vbscript setAttribute
+		vbsBasic char id   char vbsBasic      setAttribute
+		vbsBasic char src  char 3hta/vbs/basic.vbs setAttribute
+		eleHead vbsBasic appendChild
+	
+	\ <vb> 裡面天然只認得 global 不認得 vm，所以有 global variable
+	\ jeforth_project_k_virtual_machine_object 就是為了這種情形。
 
-					<js> vbExecuteGlobal("Dim vm:set vm=kvm") </js>
-					
-				\ <vb> ... </vb> 裡面需要用到 push() 但 jeforth.js kernel 沒有 export push() 
-				\ 出來。這點小問題可以這樣輕鬆解決：
+		<js> vbExecuteGlobal("Dim vm:set vm=jeforth_project_k_virtual_machine_object") </js>
+		
+	\ <vb> ... </vb> 裡面需要用到 push(), pop() 但 jeforth.js kernel 沒有 export
+	\ 出來。這點小問題可以這樣輕鬆解決：
 
-					js: vm.push=push;vm.pop=pop;
+		js: vm.push=push;vm.pop=pop;
 					
 	code vbEval 	( "string" -- result ) \ Evaluate the given vbs statements return value on TOS.
 					try {

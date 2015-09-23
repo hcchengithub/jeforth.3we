@@ -6,7 +6,7 @@
 //
 
 var jeForth = require('./project-k/jeforth.js').jeForth;
-global.kvm = new jeForth();
+global.kvm = global.jeforth_project_k_virtual_machine_object = new jeForth()
 kvm.host = global;
 kvm.appname = "jeforth.3nd";
 kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
@@ -35,9 +35,6 @@ kvm.clearScreen =
 		
 // kvm.panic() is the master panic handler. The panic() function defined in 
 // project-k kernel jeforth.js is the one called in code ... end-code.
-// We need to use panic() below, so another panic() is defined here too, even 
-// just for a few convenience. The two panic() functions are both calling the
-// same kvm.panic().
 kvm.panic = function (state) { 
 			type(state.msg);
 			if (state.serious) debugger;
@@ -100,22 +97,12 @@ kvm.gets.editMode = false;
 kvm.debug = false; // needed to be turned on/off outside vm
 kvm.prompt = "OK"; // application specific
 kvm.argv = process.argv; // application specific
-kvm.exec = kvm.argv.shift(); // remove node.exe to compatible with jeforth.hta
-kvm.jsc = {};
-kvm.jsc.help = kvm.fso.readFileSync('./3nd/f/jsc.hlp','utf-8');
-kvm.jsc.xt = kvm.fso.readFileSync('./3nd/f/jsc.js','utf-8');
+kvm.argv.shift(); // remove node.exe to compatible with jeforth.hta
 
-// kvm.beep
-// kvm.inputbox
-// kvm.EditMode
-// kvm.forthConsoleHandler
-// kvm.plain
-// kvm.cmdhistory
-// kvm.process
-// kvm.BinaryStream
-// kvm.BinaryFile
-// kvm.objWMIService
-// kvm.cv
+// This JavaScript Debug Console was importent when developing jeforth.f, now replaced by jsc.f
+// kvm.jsc = {};
+// kvm.jsc.help = kvm.fso.readFileSync('./3nd/f/jsc.hlp','utf-8');
+// kvm.jsc.xt = kvm.fso.readFileSync('./3nd/f/jsc.js','utf-8');
 
 // There's no main loop, event driven call back function is this.
 kvm.forthConsoleHandler = function(cmd) {
@@ -135,10 +122,8 @@ kvm.forthConsoleHandler = function(cmd) {
 }
  
 kvm.stdio = require('readline').createInterface({input: process.stdin,output: process.stdout});
-// kvm.stdio.on('line', function (cmd){kvm.dictate(cmd);kvm.type(' '+kvm.prompt+' ')});
 kvm.stdio.on('line', kvm.forthConsoleHandler);
 kvm.stdio.setPrompt(' '+kvm.prompt+' ',4);
-// kvm.init();
 kvm.dictate(kvm.fso.readFileSync('f/jeforth.f','utf-8')+kvm.fso.readFileSync('3nd/f/quit.f','utf-8'));
 // dictate() 之後不能再有任何東西，否則因為有 sleep/suspend/resume 之故，會被意外執行到。
 

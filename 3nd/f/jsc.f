@@ -1,5 +1,5 @@
 
-\ ------------------ jsc JavaScript console debugger  --------------------------------------------
+\ ------------------ jsc JavaScript console debugger for jeforth.3nd --------------------------------
 \
 \ jeforth.f is common for all applications. jsc is application dependent.
 \ jeforth.f words bp, be, bd and vm.g.debugInner() refer to jsc before its birth.
@@ -26,24 +26,27 @@
 \
 
 <text>
+
 	J a v a S c r i p t   c o n s o l e
-	  for jeforth.[3nw|3htm|3hta]
+	        for jeforth.3nd
 
 	t : Toggle displaying the status.
 	s : Single step. (bp=-1)
 	p : Run until next IP. (bp=ip+1)
 	r : Free run until ret. (bp=rtos)
 	rr: Free run until ret. (bp=next rtos)
-	erase : Erase debug message at bottom.
 	bye : Terminate the program.
 	help : you are reading me.
 	g, q, exit, quit, or <Esc> : Stop debugging.
 
 	Put this line,
-	> if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
-	into anywhere among JavaScript source code to drop a breakpoint. "msg" indicates which breakpoint it is.
+	
+		> if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
+	
+	into anywhere among JavaScript source code to drop a breakpoint. 
+	"msg" indicates which breakpoint it is.
 
-</text> <js> vm.jsc={}; vm.jsc.help=pop().replace(/^[\t ]*/gm,""); </js> \ remove leading Tab's and spaces
+</text> js: vm.jsc={};vm.jsc.help=pop()
 <text>
 
 	// Variable        Description
@@ -56,8 +59,6 @@
 	// -------------   ---------------------------------------------------------
 	
 	(function(){
-		var eraseCount=16;
-		inputbox.value = ""; // for erase command
 		vm.jsc.enable = false; // 避免 jsc 自己用的 colon word 也 hit 到 break-point。
 		for(;;) {
 			if (!vm.jsc.statusToggle) {
@@ -72,12 +73,10 @@
 					);
 			}
 			type(vm.jsc.prompt ); 
-			jump2endofinputbox.click();
-			vm.jsc.cmd = // static variable so as to reuse last command
-				prompt("JavaScript console", vm.jsc.cmd||""); // Press Enter repeat last command
-			vm.jsc.cmd = vm.jsc.cmd==null ? 'quit' : vm.jsc.cmd; // Press Esc equals to 'quit'
-			vm.type("\n > " + vm.jsc.cmd + "\n");
-			switch(vm.jsc.cmd){
+			var _line_ = kvm.gets();
+			kvm.jsc.cmd =  // static variable so as to reuse last command
+				(_line_=="\r") ? kvm.jsc.cmd||"" : _line_; // Press Enter repeat last command
+			switch(vm.jsc.cmd.trim()){
 				case "t" : 
 					vm.jsc.statusToggle=Boolean(vm.jsc.statusToggle^true); 
 					break;
@@ -102,12 +101,7 @@
 					return;
 				case "bye"  : execute("bye"); break;
 				case "help" : 
-					alert(vm.jsc.help); 
-					break;
-				case "erase" : 
-					for(var _i_=0; _i_<eraseCount; _i_++){
-						execute('{backSpace}'); pop();
-					} 
+					type(vm.jsc.help); 
 					break;
 				default : try { // 自己處理 JScript errors 以免動不動就被甩出去
 					var _result_ = eval(vm.jsc.cmd);

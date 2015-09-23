@@ -14,7 +14,7 @@ also forth definitions
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				[ last literal ] ( _me )
 				." Input box EditMode = " 
-				\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 此處會吃掉 TOS
+				\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS
 				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
@@ -449,7 +449,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
 			case 13:
-				if (!vm.EditMode || event.ctrlKey) { // CtrlKeyDown
+				if (!tick("{F2}").EditMode || event.ctrlKey) { // CtrlKeyDown
 					vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					vm.cmdhistory.push(vm.inputbox);

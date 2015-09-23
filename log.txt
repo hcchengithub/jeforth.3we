@@ -3826,7 +3826,9 @@
 	o	kernel/jeforth.f --> f/jeforth.f
 	o	fortheval --> dictate
 	o	print --> type 
-	o	所有 g.sth 改成 vm.g.sth
+	o	所有 g.sth 改成 vm.g.sth, 否則 g 本身要在哪裡定義?
+		--> 如果是在 init module (index.html), 跑出一個不是掛在 vm 下的例外。
+		--> 如果在 kernel jeforth.js 裡, 更不好。
 	o	internel kvm --> vm
 	o	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
 	o	kvm.selftest_visible = true;
@@ -3839,7 +3841,7 @@
 			return(version);
 		}
 	o	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm []3nd []3nw []3hta
-	o	editMode 改用 value []3htm []3nd []3nw []3hta
+	o	vm.editMode 改用 ({F2}).EditMode 
 	o	改寫 vm.panic() 
 	
 
@@ -3907,12 +3909,12 @@
 	[x] vm.gets() very poor, needs improvement.
 		--> e command tips ctrl-z at least
 	[x] fs.f has some self-test, they need to upgrade
-	[ ] jsc.hlp, jsc.js
+	[x] jsc.hlp, jsc.js
 	[ ] eforth.com 
 
 [ ] jsc 能不能在 exit "", ret null 處停下來, 目前不會, 故看不到 ret / exit 就突然結束了。	
 	
-[ ] porting to project-k 大改寫 apply to 3HTA (3htm and 3nd are done)
+[x] porting to project-k 大改寫 apply to 3HTA (3htm and 3nd are done)
 	[x]	kernel/jeforth.js --> project-k/jeforth.js
 	[x]	get jeForth() from jeforth.js > kvm = new jeForth()	
 	[x]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
@@ -3927,17 +3929,19 @@
 			return(version);
 		}
 	[x]	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm [x]3nd []3nw [x]3hta
-	[ ] apply to all *.f files 
-		[ ]	fortheval --> dictate  [ ] apply to all *.f files 
-		[ ]	print --> type   [ ] apply to all *.f files 
-		[ ]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
-		[ ]	internel kvm --> vm   
-		[ ] js: vm.selftest_visible=true
-		[ ] -->judge 改用 [d d] [p p]
-	[ ]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
+	[x] apply to all *.f files 
+		[x]	fortheval --> dictate  [ ] apply to all *.f files 
+		[x]	print --> type   [ ] apply to all *.f files 
+		[x]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
+		[x]	internel kvm --> vm   
+		[x] js: vm.selftest_visible=true
+		[x] -->judge 改用 [d d] [p p]
+	[x]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
+		[x]3htm [x]3nw [x]3hta all are in 3htm/f/platform.f
+		[x]3nd 
 	[x]	改寫 vm.panic() 
-	[!] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
-		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
+	[x] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。<==== FP, use a very long VM name in global.
 		
 [x] working on improving 3nd jsc . . . done，it's very good now.
 	[x] 3htm [x] 3hta [ ] 3nw
@@ -4013,13 +4017,13 @@
 	裡面都參考同一份 jsc source code?
 	
 [ ] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise it moves cursor.
-	Use ctrl-arrow to recall commands then.
+	No more ctrl-up,down. Clear inputbox before recalling commands.
 	
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
-[ ] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
+[x] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
 	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
-[ ] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
+[x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
 	---- modify jeforth.3nw.html --------------------
 	[x]	kernel/jeforth.js --> project-k/jeforth.js
 	[x]	get jeForth() from jeforth.js > kvm = new jeForth()	
@@ -4036,18 +4040,22 @@
 		}
 	[x]	vm.base 改用 value -> vm.g.base [x]jeforth.f [x]3htm [x]3nd [x]3nw [x]3hta
 	[x] drop kvm.init 
-	[ ] apply to all *.f files 
+	[x] apply to all *.f files 
 		[x]	fortheval --> dictate  [ ] apply to all *.f files 
 		[x]	print --> type   [ ] apply to all *.f files 
 		[x]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
 		[x]	internel kvm --> vm   
 		[x] js: vm.selftest_visible=true
 		[x] -->judge 改用 [d d] [p p]
-	[x]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
+	[x]	vm.editMode, in platform.f, 改用 {F2}.EditMode 
+		[x]3htm [x]3nw [x]3hta
+		[x]3nd 另外 review <---- gets is different thing.
 	[x]	改寫 vm.panic() 
 	[x] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
 		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
-	[ ] jsc is now defined in quit.f
+	[x] jsc is now defined in quit.f
+		[x]3htm [x]3nw [x]3hta <---------- same 3htm/f/jsc.f
+		[x]3nd 另外 review <--------- 3nd/f/jsc.f 
 	
 [x] 3nw 的 jsc 直接 copy 用 3hta 的是可以用的。有機會把 3hta 3htm 3nw 三個 jsc 統一起來。
 	[x]	乾脆寫成一個 jsc.f 統一起來。
@@ -4061,17 +4069,165 @@
 		[x] exit/q/quit 光 return 好像不夠, 下 debugger; instruction 會卡在 jsc 裡出不來。--> restart 後消失了。
 		[x] erase 有時無效,且 rstack 一直堆積同一個回返地址 
 			RI ==> 因為 single step 會 break 所有的動作, 連 {backSpace} 也被 break 到了!! 
-			[ ] 以後再想想辦法。jsc 裡面用到的 words 都會有這個問題。
+			[x] 以後再想想辦法。jsc 裡面用到的 words 都會有這個問題 ==> jsc.enable is the solution.
 		[!] jsc help shows only a few lines <---- nw.js' problem
-	
-[ ] 3nw F2 editMode 怎麼無效了?!
+
 [x] vm.panic redefine was in 3hta/quit.f , move to 3htm/f/jsc.f 
 	[x]3hta [x]3htm [x]3nw 
+	[x]3nd
 [x] the --- save selftest.log --- thing in all quit.f can be removed
 	[x]3hta [x]3htm [x]3nw 
+	[x]3nd
 
-[ ] playground 裡面的 project-k things 可以清除了
-[ ] panic()'s state.level should be state.serious because it's used as a boolean.
+[x] playground 裡面的 project-k things 可以清除了
+[x] panic()'s state.level should be state.serious because it's used as a boolean.
+
+[x] <vb> needs a global name for the jeforthVM, so let it be 
+		var jeforth_project_k_virtual_machine_object = new jeForth()
+		var kvm = jeforth_project_k_virtual_machine_object;
+	<vb> 裡要重新取得 vm through jeforth_project_k_virtual_machine_object
+	全部都叫 vm 感覺也不好, init module 裡維持作 kvm, 因為 vm 聽起來是一個自稱, 事
+	實亦然。
+	[x]3hta [x]3htm [x]3nw <----- 目前只 3hta 有用到。
+	[x]3nd <-------- global.kvm = global.jeforth_project_k... = new jeForth();
+
+[ ]	vm 在 initial module (index.html) 裡只用來加掛 jeforth.f 需要的東西，主要是 I/O。
+	此外的東西都不該出現在 vm 下的第一層, 但在 vm.g 以下則 OK.
+	這是為求整套系統 building blocks 之間的簡單明了。
+	[ ] 手工 js> vm obj>keys . 列出所有 members 一一檢討。
+		3nw: > js> vm obj>keys .
+			major_version,execute,dictate,stack,rstack,words,dictionary,gui,appname,
+			selftest_visible,minor_version,host,path,screenbuffer,type,greeting,panic,
+			debug,fso,readTextFile,writeTextFile,prompt,argv,bye,clearScreen,plain,g,
+			[ ] --> inputbox
+			[ ] --> jsc
+			[ ] --> cmdhistory 
+			[ ] --> forthConsoleHandler
+		3hta: > js> vm obj>keys .
+			major_version,execute,dictate,stack,rstack,words,dictionary,appname,host,path,
+			selftest_visible,plain,type,greeting,debug,screenbuffer,prompt,ado,argv,bye,
+			clearScreen,panic,writeTextFile,readTextFile,g,process,fso,BinaryStream,
+			[ ] --> push,pop,
+			[ ] --> BinaryFile,objWMIService
+			[ ] --> vbscript,
+			[ ] --> jsc,cmdhistory,
+			[ ] --> forthConsoleHandler,
+			[ ] --> inputbox,EditMode,
+		3nd: 
+			major_version,execute,dictate,stack,rstack,words,dictionary,host,appname,path,
+			screenbuffer,selftest_visible,type,clearScreen,panic,greeting,fso,readTextFile,
+			writeTextFile,bye,gets,debug,prompt,argv,exec,stdio,g
+			[ ] --> jsc,
+			[ ] --> forthConsoleHandler,
+
+[x]	jsc.prompt are "undefined" when it was from panic
+[ ] project-k kernel porting done. Merge to jeforth.3we master.
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

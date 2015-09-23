@@ -110,11 +110,15 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				
 : (run)			( "command-line" -- errorlevel ) \ Run anything like Win-R does and wait for the return.
 				<js> WshShell.run(pop(),5,true) </jsV> ;
+				/// See also run, (run), fork, (fork), dos, (dos).
+				/// Use run or dos if want the return value. 
 
 : run			( <command-line> -- errorlevel ) \ Run anything like Win-R does and wait for the return.
 				char \n|\r word (run) ; interpret-only 
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
+				/// See also run, (run), fork, (fork), dos, (dos).
+				/// Use run or dos if want the return value. 
 
 				<selftest> 
 					\ 這是個簡單明了的範例。
@@ -131,20 +135,28 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 : (fork)		( "command-line" -- ) \ Fork anything like Win-R does, fire and forget, no return value.
 				<js> WshShell.run(pop(),5,false) </js> ;
 				/// No return value, because the caller doesn't wait.
+				/// See also run, (run), fork, (fork), dos, (dos).
+				/// Use run or dos if want the return value. 
 
 : fork			( <command-line> -- ) \ Fork anything like Win-R does, fire and forget, no return value.
 				char \n|\r word (fork) ;
 				/// No return value, because the caller doesn't wait.
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
+				/// See also run, (run), fork, (fork), dos, (dos).
+				/// Use run or dos if want the return value. 
 
-: (dos) 		( "command-line" -- errorlevel ) \ Run DOS command-line and return with errorlevel.
+: (dos) 		( "command-line" -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
 				s" cmd /c " swap + (run) ;
+				/// See also run, (run), fork, (fork), dos, (dos).
+				/// Use run or dos if want the return value. 
 
 : dos			( <command-line> -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
 				char \n|\r word s" cmd /k " swap + (run) ;
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
+				/// See also run, (run), fork, (fork), dos, (dos).
+				/// Use run or dos if want the return value. 
 
 				<selftest> 
 					\ 以下這個測試示範看得人眼花撩亂，但不要低估它。

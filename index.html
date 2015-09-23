@@ -13,7 +13,8 @@
     <script src="js/jquery-1.11.2.js"></script>
 	<Script src="project-k/jeforth.js"></Script>
 	<script id=js>
-	var kvm = new jeForth();
+	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
+	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 	(function(){
 		kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
@@ -21,7 +22,7 @@
 		kvm.host = window; // DOM window is the root for 3HTM.
 		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
-		kvm.selftest_visible = true;
+		kvm.selftest_visible = true; // type() refers to it.
 		
 		// kvm.type() is the master typing or printing function.
 		// The type() called in code ... end-code is defined in the kernel jeforth.js.
@@ -65,7 +66,6 @@
 		}
 		kvm.debug = false;
 		kvm.inputbox = "";
-		kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
  		kvm.prompt = "OK";
 		kvm.bye = function(){window.close()};
 		

@@ -153,7 +153,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 							// 可用 bp=ip 設斷點, debug colon words.
 							if(vm.g.breakPoint<0||vm.g.breakPoint==ip){
 								if (vm.jsc.enable){ // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
-									vm.jsc.prompt=" jsc>";
+									vm.jsc.prompt=" BreakPoint jsc>";
 									eval(vm.jsc.xt);
 								}
 							};
