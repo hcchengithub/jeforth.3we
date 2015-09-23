@@ -4122,7 +4122,7 @@
 
 [x]	jsc.prompt are "undefined" when it was from panic
 [ ] project-k kernel porting done. Merge to jeforth.3we master.
- 
+	--> Click "Pull" on "GitHub for Windows" --> "Pull request created" -->
 
 
 
