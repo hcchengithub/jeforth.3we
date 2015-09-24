@@ -110,16 +110,37 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				</js> ;
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
-				<js> event.altKey </jsV> if history-selector false else
-				<js> event.ctrlKey </jsV> if js: inputbox.value=vm.cmdhistory.up()
-				false else true then then ;
+				js> event.altKey if 
+					history-selector false \ eat the key
+				else
+					js> event.ctrlKey if
+						js: inputbox.value=vm.cmdhistory.up() false \ eat the key
+					else 
+						js> inputbox.value==""||inputbox.value=="\n" if
+							history-selector false \ eat the key
+						else
+							true \ don't eat the key, let it pass down
+						then
+					then 
+				then ;
 				/// Alt-Up pops up history-selector menu.
 				/// Ctrl-Up/Ctrl-Down recall command line history.
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {down}		( -- boolean ) \ Inputbox keydown handler, get next command history.
-				<js> event.ctrlKey </jsV> if js: inputbox.value=vm.cmdhistory.down();
-				false else true then ;
+				js> event.altKey if 
+					history-selector false \ eat the key
+				else
+					js> event.ctrlKey if
+						js: inputbox.value=vm.cmdhistory.down() false \ eat the key
+					else 
+						js> inputbox.value==""||inputbox.value=="\n" if
+							history-selector false \ eat the key
+						else
+							true \ don't eat the key, let it pass down
+						then
+					then 
+				then ;
 				/// Alt-Up pops up history-selector menu.
 				/// Ctrl-Up/Ctrl-Down recall command line history.
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
@@ -413,7 +434,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (tick('beep')) vm.beep();
+					if (tick('beep')) execute('beep');
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -426,7 +447,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					cmd = this.array[this.index];
 				}
 				if (indexwas == this.index) {
-					if (tick('beep')) vm.beep();
+					if (tick('beep')) execute('beep');
 					cmd += "  \\ the end";
 				}
 				return(cmd);
@@ -439,7 +460,6 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
 			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
-		 // case  77: /* M    */ if(tick('{M}'   )){execute('{M}'   );return(pop());} break; // ^m 在 textarea 裡本來就有效，無需處理。
 		}
 		return (true); // pass down to following handlers
 	}
@@ -449,11 +469,13 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
 			case 13:
-				if (!tick("{F2}").EditMode || event.ctrlKey) { // CtrlKeyDown
-					vm.inputbox = inputbox.value; // w/o the '\n' character ($10).
+				if (!event.shiftKey) // 想換行用 Shift-Enter 避免把命令發出去
+				if (!tick("{F2}").EditMode || event.ctrlKey) { // 在 EditMode 用 Ctrl-Enter 發出命令
+					var cmd = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					vm.cmdhistory.push(vm.inputbox);
-					vm.forthConsoleHandler(vm.inputbox);
+					vm.cmdhistory.push(cmd);
+					if (tick("{F2}").EditMode) {execute('{F2}');pop()} // 自動恢復
+					vm.forthConsoleHandler(cmd);
 					return(false);
 				}
 				return(true); // In EditMode

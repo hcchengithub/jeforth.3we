@@ -3955,8 +3955,6 @@
 
 [ ] working on wsh.f selftest improvements
 
-[ ] In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
-	it's an error for JavaScript.
 [ ] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
 	' <selftest> :: enabled=true dropall cls --wmi.f-- include wmi.f
 	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
@@ -3988,9 +3986,6 @@
 		type(sw.item(parseInt(vm.g.theIE))); // parseInt() cast 一下就好了。
 		</js>
 	==> : sw js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ; <--- OK !!
-[ ] rename ntib to itib ok? think about it.
-[ ] ie.f shell.application.f 這種大題目要另外深入探討。先拿掉，把 ADO 改成 optional 研究用
-	fso 的可能性。盡早發表。
 [x] 在 wsh.f 裡會自動切中文? 如何避免?	---> 乾脆讓它 "Let me set a different input method for
 	each app window" @ Control Panel>Clock, Language, and Region > Language > Advanced settings.
 	因為不讓它切它總是要切乾脆由它去吧!
@@ -4002,21 +3997,20 @@
 		include platform.f 	\ Hotkey handlers and platform features
 		include vb.f		\ Being able to run VBS is what HTA is for.
 		include wsh.f		\ Windows Shell Host
-[ ] 在 panic() 裡面用 ' <selftest> :> enabled 來判斷是否 free run mode。
+[x] 在 panic() 裡面用 ' <selftest> :> enabled 來判斷是否 free run mode。
 	panic() 是 application dependent, 以 3hta 為例，如果是 free run mode ,碰到 severe panic 
 	通通要進 jsc 停下來; 如果是 interactive mode 則進 F12 debugger. 
 	看來 <selftest> 定義好之後要改寫 panic() 但是又不方便放進 jeforth.f 成為 common code,
 	因此應該在 quit.f 裡面改寫。
 	------------- ^^^^ 以上不對 ^^^^ -------------------------------
 	實際上 panic() 要不要進 jsc 只跟 severity 有關, 沒機會管 <selftest>.enabled.
-	[x] 3hta []3nd []3nw [x]3htm
+	[x] 3hta [x]3nd [x]3nw [x]3htm
 	
-[ ] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。 <--- jeforth.f 之後馬上就是 quit.f 不
+[x] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。 <--- jeforth.f 之後馬上就是 quit.f 不
 	能更早了! 所以放在 quit.f 裡面沒問題。===> ok, but 問題是重複寫了好幾份, 能不能在 quit.f
 	裡面都參考同一份 jsc source code?
-	
-[ ] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise it moves cursor.
-	No more ctrl-up,down. Clear inputbox before recalling commands.
+	==> done, 統一成只有兩分 jsc.f : 3hta,3htm,3nw and 3nd. 
+	[ ]	晚點把 3nd 裡的 jsc.hlp jsc.js delete 掉，已經沒有用了。
 	
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
@@ -4120,10 +4114,45 @@
 			[ ] --> forthConsoleHandler,
 
 [x]	jsc.prompt are "undefined" when it was from panic
-[ ] project-k kernel porting done. Merge to jeforth.3we master.
+[x] project-k kernel porting done. Merge to jeforth.3we master.
 	--> Click "Pull" on "GitHub for Windows" --> "Pull request created" -->
+	一頓亂搞解決 git merge 的問題 --> 好像是先切到 master, 然後 git merge the-working-branch。
+	會在 local 產生一個特別的版本, 其中如果有問題必須在 local 解決, 否則無法 push 上雲端。
+
+[x] 3nd 的 version 顯示沒有照新 style.
+	j e f o r t h . 3 n d -- r2 <============== should be major.minor
+	Node.js v0.12.4 ... snip ....
+	--> refer to 3htm's index.html
+
+[ ] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
+
+[ ] ie.f shell.application.f 這種大題目要另外深入探討。先拿掉，把 ADO 改成 optional 研究用
+	fso 的可能性。盡早發表。
+[x] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise 
+	it moves cursor. <--- for [x]3hta, [x]3htm, [x]3nw they share the same platform.f
+	--> redefine 3htm/f/platform.f {up} {down}
+	--> 想錯了! 第一下可以 recall older command, 再一下因為 inputbox 已非 empty 就不行了。
+		故 up down 應該 launch alt-up history-selector 而非 ctrl-up ctrl-down recall。
+	[x] ctrl-up,down 不會整理跨行的 textarea, alt-up history-selector 則會。兩者還是有一點
+		差別。故保留 ctrl-up ctrl-down 仍有效。
+	[!] Chrome 3htm inputbox ^m 無效! 3hta ok，任其自然。
+	[x] case  77: /* m    */ ^m 在 HTA textarea 裡本來就有效。在 Chrome 無效也無法簒改 
+		e.keyCode。仿 excel 用 Alt-Enter 也不成功。難道只能切 EditMode? 但為什麼 EditMode
+		有效? 因為 Alt-Enter 被 Chrome textarea 處裡掉了所以無效。
+		--> 那就改用 shift-Enter 呀! ==> B i n g o ! !
+			non-EditMode 想換行用 Shift-Enter 避免把命令發出去
+			EditMode 用 Ctrl-Enter 發出命令
+	[x] 下過命令自動取消 EditMode。
+[ ] rename ntib to itib ok? think about it.
+[ ] 要不要突破第一行的限制?
+	--> In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
+		it's an error for JavaScript.
+[ ] vm.beep 本來在 platform.f 有用到, 改成 execute("beep") 把 vm.beep 取消。
+	beep 也算是 I/O 定義成 vm.beep() 似乎有理。但既然可以用 execute("beep"), 還是不要的好。
+	[ ]3hta, [ ]3htm, [ ]3nw, [ ]3nd
 
 
 
 
 
+	
