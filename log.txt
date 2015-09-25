@@ -8,7 +8,9 @@
 ---------- developping log --------------------------------------------------------------
 
 [x] first line of jeforth.f is strange. I skip it now. Need to find out the reason someday.  hcchen5600 2014/01/28 11:39:49 
+	==> fso does not support utf-8, ado does.
 [x] why UTF-8 chinese characters are not shown correctly? ==> big5 is ok!  
+	==> fso does not support utf-8, ado does.
 [X] jquery.terminal-0.7.7.js  ==> I give up jQuery-terminal when it comes to HTA.
 
     > 552           var data = $.Storage.get(name + 'commands');
@@ -4156,3 +4158,4 @@
 
 
 	
+http://www.online-html-editor.org/
