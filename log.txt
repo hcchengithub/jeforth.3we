@@ -4157,19 +4157,20 @@
 	http://www.online-html-editor.org/
         
 
-[ ] 3hta to support both ado and fso switch 
+[x] 3hta to support both ado and fso switch 
 	--> What happened if use fso? <--- see "HTA does not work with utf-8 with BOM" above
 		git.f 讀一半就會出錯, 因為有用到中文 word name。
 	--> What happened if use ado? 	
 		"Safety Settings on this computer prohibit accessing a data source on another domain"
 		https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
 
-[ ] execute(123) 的 warning 好像不對, PhaseA() 收 numbers.
 [x] project-k can't use string.trim(), Windows XP JScript does not support that.
 	String.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
+	
 [ ] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
-	"JavaScript error : Safety settings on this computer prohibit accessing a data source on another domain."
-	==> How about Windows 7 ? [ ] try Nana's Windows 7.
+	"JavaScript error : Safety settings on this computer prohibit accessing a data 
+	 source on another domain."
+[ ] Try Windows 7.
 
 
 
