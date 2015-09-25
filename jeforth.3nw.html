@@ -20,7 +20,7 @@
 		kvm.appname = kvm.gui.App.manifest.name; // defined by package.json
 		kvm.selftest_visible = true;
 		kvm.minor_version = kvm.gui.App.manifest.version; // defined by package.json
-		kvm.host = window;
+		kvm.host = window;  // global 掛那裡的根據。
 		kvm.path = ["dummy", "f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready
 		var type = kvm.type = function (s) { 

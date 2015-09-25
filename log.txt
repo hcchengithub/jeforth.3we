@@ -1963,13 +1963,6 @@
 [x] 把 jeforth.js kernel code 裡頭原來用 hash table 取代 switch(){...} 的寫法改回去用 switch().
     經 吳政昌 指點，這個場合用 switch 比較好。 ==> Done, committed.
 
-[ ] Thinking of how to improve the user experience on http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/,
-    I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
-    It's beautiful and it can help us to convert a picture into base64 embeded HTML code. Good for jeforth
-    to have embeded pictures.
-    [ ] Use contentBuilder.js' online editor to design what I want to show on jeforth.3htm online. Then pay
-        some money to find a front end designer to translate into HTML.
-        
 [x] canvas.f self-test is annoying. Remove the confirming dialogs.
     [x] 引用 kvm.cv 當 default canvas 可簡化 canvas commands. 但是要記住自己的 canvas ID, processing.js
         alike event driven animation 上手時要把 kvm.cv 改成自己的，離開前要還原。 clock3.f 有做，很好。
@@ -4128,8 +4121,8 @@
 
 [ ] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
 
-[ ] ie.f shell.application.f 這種大題目要另外深入探討。先拿掉，把 ADO 改成 optional 研究用
-	fso 的可能性。盡早發表。
+[ ] ie.f shell.application.f 這種大題目要另外深入探討。
+
 [x] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise 
 	it moves cursor. <--- for [x]3hta, [x]3htm, [x]3nw they share the same platform.f
 	--> redefine 3htm/f/platform.f {up} {down}
@@ -4153,9 +4146,18 @@
 	beep 也算是 I/O 定義成 vm.beep() 似乎有理。但既然可以用 execute("beep"), 還是不要的好。
 	[ ]3hta, [ ]3htm, [ ]3nw, [ ]3nd
 
+[ ] Thinking of how to improve the user experience on http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/,
+    I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
+    It's beautiful and it can help us to convert a picture into base64 embeded HTML code. Good for jeforth
+    to have embeded pictures.
+    [ ] Use contentBuilder.js' online editor to design what I want to show on jeforth.3htm online. Then pay
+        some money to find a front end designer to translate into HTML.
+	http://www.online-html-editor.org/
+        
 
-
-
-
-	
-http://www.online-html-editor.org/
+[ ] 3hta to support both ado and fso switch 
+	--> What happened if use fso? <--- see "HTA does not work with utf-8 with BOM" above
+		git.f 讀一半就會出錯, 因為有用到中文 word name。
+	--> What happened if use ado? 	
+		"Safety Settings on this computer prohibit accessing a data source on another domain"
+		https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a

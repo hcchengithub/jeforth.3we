@@ -39,15 +39,17 @@
 </body>
 <!-- moved to html5.f script src="js/jquery-1.10.2.js"></script -->
 <Script src="project-k/jeforth.js"></Script>
-<script id=js>
-	// 人家都把 script 放在 head 或 body。我怎麼發現可以放在這裡的? 為什麼? 都忘了。想起來記得的寫下來。
+<script>
+	// 人家都把 script 放在 head 或 body。我怎麼發現可以放在這裡的，為什麼？
 	// 原因: 你看這 source code 不是很清爽嗎? head , body 都很短很清晰。大片 script 放在下面，整整齊齊。
-	// 時間: 想必是把 jquery 抽出去時改的。HTA 在舊版 Windows XP, Windows 7 都有很多問題。太早 include jQuery 馬上
-	// 撞上不好，延後到 jeforth.f 都起來了之後是比較好的安排。
+	//       簡單用 <body onload="init();"> 即銜接良好。
+	// 時間: 想必是把 jquery 抽出去時改的。
+	//       HTA 在 Windows XP, Windows 7 都有很多問題，如果太早 include jQuery 馬
+	//       上就會撞上。延後到 jeforth.f 都起來了之後是比較好的安排。
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 	kvm.appname = hta.applicationName;
-	kvm.host = window;
+	kvm.host = window; // global 掛那裡的根據。
 	kvm.path = ["dummy", "f", "3htm/f", "3htm/canvas", "3htm", "3hta/f", "3hta/vbs", "3hta/excel", "3hta", "playground", "private"];
 	kvm.selftest_visible = true; // static variable, self-test adjusts it, type() checks it. both sides need to access it.
 
@@ -71,6 +73,8 @@
 		if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 		if(kvm.selftest_visible){
 			// was: $('#outputbox').append(kvm.plain(ss)); 不用 jQuery 變成一大片還缺特性。
+			// HTA 在 Windows XP, Windows 7 都有很多問題，如果太早 include jQuery 馬
+			// 上就會撞上。延後到 jeforth.f 都起來了之後是比較好的安排。
 			var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
 			for(i=0; i<aa.length-1; i++){
 				outputbox.appendChild(document.createTextNode(aa[i]));
@@ -94,6 +98,7 @@
 	kvm.inputbox = "";
 	kvm.prompt = "OK";
 	kvm.ado = new ActiveXObject("ADODB.Stream");
+	kvm.fso = new ActiveXObject("Scripting.FileSystemObject");
 	kvm.argv = (hta.commandLine + " dummy").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
 	kvm.bye = function(){window.close()}; // vb.f will improve it
 	kvm.clearScreen = function(){outputbox.innerHTML=""};
@@ -105,10 +110,53 @@
 		kvm.type(state.msg);
 		if (state.serious) debugger;
 	}
+
+	// -------------------- read/write local file ----------------------------------
+	//                   through either FSO or ADO
+	//  FSO does not support utf-8.  http://www.w3schools.com/asp/ado_ref_stream.asp 
+	//	ADO does not work well on Windows XP, not good enough on Windows 7 neither on some computers.
+	//  I use ADO, my computers are Windows 8 or 10.
 	
 	// When used in forth words, inner() handles the try{}catch{} thing.
-	// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
-	kvm.writeTextFile = function(pathname,data) { // Write string to text file.
+	function writeTextFile_fso (pathname, data) {
+		var flag = false, 
+			ForReading = 1,  
+			ForWriting = 2,  
+			ForAppending = 8,  
+			TristateUseDefault = -2,  
+			TristateTrue = -1,  
+			TristateFalse = 0; // JScript switch constants. 
+		var ts = kvm.fso.OpenTextFile( 
+				pathname, 
+				ForWriting,  
+				true, // create when not existing 
+				TristateUseDefault // ASCII or Unicode depends on the system default. 
+			); 
+		if(ts){ 
+			ts.Write(data); 
+			ts.Close(); 
+			flag = true; 
+		}  
+	} 
+
+	// When used in forth words, inner() handles the try{}catch{} thing.
+	function readTextFile_fso (pathname) { 
+		var data = ""; 
+		var txtFile = kvm.fso.OpenTextFile( 
+			pathname,  
+			1, 		// ForReading 
+			false,  
+			0		// TristateFalse 
+		); 
+		if (txtFile){ 
+			data = txtFile.ReadAll(); 
+			txtFile.Close(); 
+		} 
+		return(data); 
+	} 
+	
+	// When used in forth words, inner() handles the try{}catch{} thing.
+	function writeTextFile_ado (pathname, data) {
 		var objStream = kvm.ado;
 		try{objStream.Close()}catch(err){}
 		objStream.CharSet="utf-8"
@@ -119,8 +167,7 @@
 	}
 
 	// When used in forth words, inner() handles the try{}catch{} thing.
-	// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
-	kvm.readTextFile = function(pathname) {
+	function readTextFile_ado (pathname) { 
 		var strData, objStream = kvm.ado;
 		try{objStream.Close()}catch(err){}
 		objStream.CharSet = "utf-8";
@@ -130,12 +177,17 @@
 		objStream.Close();
 		return(strData);
 	}
+	//  Use fso because no Chinese yet and compatibility first.
+	kvm.writeTextFile = writeTextFile_fso; 
+	kvm.readTextFile  = readTextFile_fso;
+
+	// -------------------- End of the read/write local file section -------------------------------
 
 	// There's no main loop, event driven call back function is this.
 	kvm.forthConsoleHandler = function (cmd) {
 		var rlwas = kvm.rstack().length; // r)stack l)ength was
 		kvm.type((cmd?'\n> ':"")+cmd+'\n');
-		kvm.dictate(cmd);  // Pass the command line to KsanaVM
+		kvm.dictate(cmd);  // Pass the command line to jeForth VM
 		(function retry(){
 			// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
 			// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
