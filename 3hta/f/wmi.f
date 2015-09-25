@@ -521,11 +521,11 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				push(new Enumerator(vm.objWMIService.ExecQuery("Select * from Win32_Process "+pop())));
 				end-code 
 
-: list-processes 
-				( -- count ) \ List all processes
+: list-processes ( -- count ) \ Demo List some processes
 				0 "" objEnumWin32_Process >r  ( 0 | objEnum )
 				begin
-					r@ js> !pop().atEnd() ( 0 NotAtEnd? )
+					\ 示範列十個就好，太多等很久。
+					r@ js> !pop().atEnd() over 10 < and ( 0 under10&&NotAtEnd? )
 				while ( count | objEnum )
 					1+ ( count++ | objEnum )
 					." -------------------------------------------" cr
@@ -547,7 +547,7 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 					list-processes \ count
 					( ------------ done, start checking ---------------- ) 
 					js> isNaN(pop()) \ false
-					start-here <js> vm.screenbuffer.indexOf("mshta.exe",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("smss.exe",pop())!=-1 </jsV> \ true
 					start-here <js> vm.screenbuffer.indexOf("System Idle Process",pop())!=-1 </jsV> \ true
 					[d false,true,true d] [p 'objEnumWin32_Process' p]
 					-%-%-%-%-%-

@@ -4163,7 +4163,8 @@
 	--> What happened if use ado? 	
 		"Safety Settings on this computer prohibit accessing a data source on another domain"
 		https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
-
+	[x] 2. HTA 版用 fso 開始, 看到 Windows 8 以上自動改用 ADO (file system)
+	
 [x] project-k can't use string.trim(), Windows XP JScript does not support that.
 	String.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
 	
@@ -4172,8 +4173,10 @@
 	 source on another domain."
 [ ] Try Windows 7.
 
-
-
+[x] How to tell Windows version?
+	> objEnumWin32_OperatingSystem :> item().Version .
+	6.2.9200 OK  <==== I guess > 6 are Windows 8, 10, ... 
+[x] 自動判斷, Windows 8 以上就自動切 ado 否則續用 fso。
 
 
 

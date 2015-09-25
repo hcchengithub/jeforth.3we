@@ -6,4 +6,5 @@ project-k/
 *.mp3
 *.wav
 jeforth.hta.lnk
+_selftest_.xls
 selftest.log

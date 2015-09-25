@@ -36,20 +36,25 @@
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 	
-	ado \ <------ change to fso if your OS is Windows XP or Windows 7 with a bad luck.
+	fso \ In case your OS is Windows XP or Windows 7 with a bad luck.
 	include jsc.f		\ JavaScript debug console in 3htm/f
 	include voc.f		\ voc.f is basic of forth language
+	include vb.f		\ Being able to run VBS is what HTA is for.
+	include wmi.f
+	
+						\ 查看是否 Windows 8 以上？決定要不要改用 ado, utf-8 才會正常。
+						objEnumWin32_OperatingSystem :> item().Version float 6 > ( Windows 8 )
+						[if] ado [then] \ 若非 Windows 8 以上則續用 fso 就得避免用到中文 word 名。
+						
 	include html5.f		\ HTML5 is HTA's plateform feature
 	include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems from happening immediately
 	include element.f	\ HTML element manipulation
 	include platform.f 	\ Hotkey handlers and platform features
-	include vb.f		\ Being able to run VBS is what HTA is for.
 	include wsh.f		\ Windows Shell Host
 	include env.f 		\ Windows environment variables
 	include beep.f		\ Define the beep command
 	include binary.f	\ Read/Write binary file
 	include shell.application.f
-	include wmi.f
 	include excel.f
 	include canvas.f
 	include mytools.f
