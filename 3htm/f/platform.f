@@ -417,8 +417,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 		array: [],
 		push:
 			function (cmd){
-				cmd = cmd.replace(/^\s*/gm,''); // remove leading white spaces
-				cmd = cmd.replace(/\s*$/gm,'');  // remove tailing white spaces [ ] replace to trim()
+				cmd = cmd.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
 				if(cmd.search(/\S/)==-1) return; // skip blank lines
 				this.array.push(cmd);
 				for(var i=this.array.length-2; i>=0; i--)

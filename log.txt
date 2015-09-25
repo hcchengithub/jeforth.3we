@@ -3772,7 +3772,9 @@
 		   沒有 vm.panic() 然後 call vm.panic(state)。
 		3. reset() 的 message 沒啥意義
 	==> 已經都用 k :: type=function..., k :: prompt=.. 的方式。
-[x] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
+[ ] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
+	==> 小心用! Windows XP 的 JScript v5.6 未 support. 故 project-k jeforth.f 裡都不能用。
+	
 [x]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎? --> 改成 tick(':').stackwas 了。
 [x] 要參考 code word 自身,用 tick('name') 是可以考慮。有更好的辦法嗎?
 	==> 現在 _me 直接就是該 word object 本身。
@@ -4161,3 +4163,17 @@
 	--> What happened if use ado? 	
 		"Safety Settings on this computer prohibit accessing a data source on another domain"
 		https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
+
+[ ] execute(123) 的 warning 好像不對, PhaseA() 收 numbers.
+[x] project-k can't use string.trim(), Windows XP JScript does not support that.
+	String.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
+[ ] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
+	"JavaScript error : Safety settings on this computer prohibit accessing a data source on another domain."
+	==> How about Windows 7 ? [ ] try Nana's Windows 7.
+
+
+
+
+
+
+
