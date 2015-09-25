@@ -4,6 +4,20 @@
 \ QUIT is the traditional forth system's CLI loop. jeforth.f kernel is common for all
 \ applications. quit.f is the good place to define propritary features of each application.
 \  
+
+: ado			( -- ) \ Switch (read/write)TextFile to use ADODB.Stream.
+				js: vm.writeTextFile=writeTextFile_ado;vm.readTextFile=readTextFile_ado ;
+				/// Windows XP 以及部分 Windows 7 上會有這個問題：
+				/// "Safety Settings on this computer prohibit accessing a data source on another domain"
+				/// https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
+				/// 改用 fso 即可。
+				
+: fso			( -- ) \ Switch (read/write)TextFile to use Scripting.FileSystemObject.
+				js: vm.writeTextFile=writeTextFile_fso;vm.readTextFile=readTextFile_fso ;
+				/// 用 fso 可避免 Windows XP 以及部分 Windows 7 上這個問題：
+				/// "Safety Settings on this computer prohibit accessing a data source on another domain"
+				/// https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
+				/// 但是不能用中文 word. git.f(utf-8) 有用到結果 include 半路就會出錯。
 				
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
@@ -22,6 +36,7 @@
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 	
+	ado \ <------ change to fso if your OS is Windows XP or Windows 7 with a bad luck.
 	include jsc.f		\ JavaScript debug console in 3htm/f
 	include voc.f		\ voc.f is basic of forth language
 	include html5.f		\ HTML5 is HTA's plateform feature

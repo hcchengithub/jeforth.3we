@@ -383,7 +383,7 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 
 code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
 				var ss=pop();
-				ss = ss.trim(); // remove 頭尾 white spaces
+				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
 				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
 				ss = ss.replace(/(\n|\r)*/gm,''); // merge to one line
 				ss = ss.replace(/\s*\/\*.*?\*\/\s*/gm,''); // remove /* */ comments
@@ -1420,7 +1420,9 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 \ ------------------ Tools  ----------------------------------------------------------------------
 
 : trim			( string -- string' ) \ Remove leading&ending white spaces on one line.
-				dup if :> toString().trim() then ;
+				\ remove 頭尾 whitespaces. 但 .trim() 舊 JScript v5.6 未 support
+				dup if <js> pop().toString().replace(/(^( |\t)*)|(( |\t)*$)/mg,'') </jsV> 
+				then ;
 				/// if TOS is not a string then do nothing.
 code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
@@ -2005,8 +2007,7 @@ code q			( -- ) \ Quit *debug*
 0  value test-result // ( -- boolean ) selftest result from [d .. d] 
 [] value [all-pass] // ( -- ["words"] ) array of words for all-pass in selftest
 : *** 			( <description> -- ) \ Start a selftest section
-				char \n|\r word 
-				<js> pop().trim() </jsV> \ remove 頭尾 white spaces
+				char \n|\r word trim
 				<js> "*** " + pop() + " ... " </jsV> to description
 				depth if 
 					description . ." aborted" cr 
