@@ -119,7 +119,7 @@ code objEnumWin32_OperatingSystem ( -- objEnumWin32_OperatingSystem ) \ Get WMI 
 					.( SystemDrive            ) dup js> pop().item().systemdrive . cr
 					.( TotalVisibleMemorySize )     js> pop().item().totalvisiblememorysize
 					js> parseInt(pop()/1024) dup . space .( Mega Bytes) cr \ translate string to integer
-					2000 > \ true 現在的電腦都有 2G 以上 memory 了吧！
+					128 > \ true 現在的電腦都有 128M 以上 memory 了吧！
 					start-here <js> vm.screenbuffer.indexOf("Microsoft Windows",pop())!=-1 </jsV> \ true
 					[d true, true d] [p 'objEnumWin32_OperatingSystem' p]
 					-%-%-%-%-%-

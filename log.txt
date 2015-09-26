@@ -4175,9 +4175,11 @@
 
 [x] How to tell Windows version?
 	> objEnumWin32_OperatingSystem :> item().Version .
-	6.2.9200 OK  <==== I guess > 6 are Windows 8, 10, ... 
+	6.2.9200 Win 8, 6.1.7601 Win 7, 10.0.10240 Win 10
 [x] 自動判斷, Windows 8 以上就自動切 ado 否則續用 fso。
-
-
+[x] Windows 7 compatibliity
+	[x] wmi.f Win32_OperatingSystem selftest memory 本來要求 > 2G 改成 > 128M
+	[x] skip html5.f appendChild selftest if IE/HTA too old. Check document.getElementsByClassName existance.
+	[x] html5.f selftest createElement aaa will become AAA on newer IE/HTA but Win7 older IE/HTA will not.
 
 

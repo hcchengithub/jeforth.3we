@@ -1970,13 +1970,13 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				[ last literal ] ( _me )
 				<js>
 					var _me = pop();
-					if (_me.continue) {
-						panic("Error, already in *debug*, 'q' to continue.\n");
+					if (_me.resume) {
+						panic("Error, already in *debug*, 'q' to resume.\n");
 					} else {
 						var tibwas=tib, ntibwas=ntib, ipwas=ip, promptwas=vm.prompt;
 						vm.prompt = pop().toString();
 						// The clue to resume from debugging
-						_me.continue = function(){
+						_me.resume = function(){
 							tib=tibwas; 
 							ntib=ntibwas; 
 							vm.prompt=promptwas;
@@ -1990,8 +1990,8 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				/// 'q' command to quit debugging
 code q			( -- ) \ Quit *debug*
 				type("\n ---- Leaving *debug* ----\n");
-				var q = tick("(*debug*)").continue; 
-				tick("(*debug*)").continue=null; 
+				var q = tick("(*debug*)").resume; 
+				tick("(*debug*)").resume=null; 
 				q(); 
 				end-code interpret-only
 				

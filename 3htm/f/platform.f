@@ -362,13 +362,12 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 						<tr>
 						  <td>Hotkey Ctrl-Up/Ctrl-Down</td>
 						  <td><a href="http://www.camdemy.com/media/19265">Recall command history</a>
-						  Were only Up/Down without the 'Ctrl' key. I found using Up/Down key for editing
-						  is more often than to recall the command history. BTW, use Ctrl-M instead of 
-						  'Enter' when you want a 'Carriage Return'.
+						  Up/Down key (w/o Ctrl) pops up the command history if inputbox is empty. 
+						  Use Ctrl-M or Shift-Enter when you want a 'Carriage Return' in inputbox.
 						  </td>
 						</tr>
 						<tr>
-						  <td>Hotkey Alt-Up</td>
+						  <td>Hotkey Alt-Up/Alt-Down</td>
 						  <td><a href="http://www.camdemy.com/media/19266">List command history</a></td>
 						</tr>
 						<tr>
@@ -381,11 +380,15 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 						</tr>
 						<tr>
 						  <td>Hotkey BackSpace</td>
-						  <td><a href="http://www.camdemy.com/media/19269">Trims the output box</a></td>
+						  <td><a href="http://www.camdemy.com/media/19269">Erase the outputbox</a>
+						   bottom-up, Alt-BackSpace top-down. But they don't erase elements.
+						   Ctrl-BackSpace to erase elements. Add Shift key makes it faster.
+						  </td>
 						</tr>
 						<tr>
-						  <td>help [pattern]</td>
-						  <td>You are reading me. 'help' is also an useful command, "help -N help" to read more.
+						  <td>help [*|pattern [-t|-T|-n|-N]]</td>
+						  <td>You are reading me. 'help' is also an useful command, 
+						  "help *" lists all words' help. "help help -N" to see options.
 						  <a href="http://www.camdemy.com/media/19270">Video: Help is helpful</a>.
 						  </td>
 						</tr>

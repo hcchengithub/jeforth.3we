@@ -27,18 +27,20 @@ s" html5.f"		source-code-header
 					null value aa // ( -- element )
 					null value bb // ( -- element )
 					*** createElement creates an HTML element, you name whatever tagName you like!
-						char aaa createElement to aa aa :> tagName ( AAA )
+						char AAA createElement to aa aa :> tagName ( AAA )
 						[d "AAA" d] [p "createElement" p]
 					*** setAttribute can be any name:value pair
 						aa char bbb char ccc setAttribute 
 						aa char bbb getAttribute
 						[d 'ccc' d] [p "setAttribute","getAttribute" p]
-					*** appendChild appends child element to parent element
-						char bbb createElement to bb bb :> tagName ( BBB )
-						aa :> childElementCount \ 0 
-						aa bb appendChild 
-						aa :> childElementCount \ 1
-						[d "BBB",0,1 d] [p "appendChild" p]
+					js> document.getElementsByClassName [if] \ skip old IE/HTA
+						*** appendChild appends child element to parent element
+							char BBB createElement to bb bb :> tagName ( BBB )
+							aa :> childElementCount \ 0 
+							aa bb appendChild 
+							aa :> childElementCount \ 1
+							[d "BBB",0,1 d] [p "appendChild" p]
+					[then]
 					---
 				</selftest>
 	

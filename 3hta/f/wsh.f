@@ -79,14 +79,14 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				
 : sendkeys		( "keys" -- ) \ Send keys to the recent activated application
 				[ last literal ] :> wait ( -- "keys" wait ) 
-				WshShell :: sendkeys(pop(1),pop()) ;
-				/// == ' sendkeys :> wait ==
-				/// False: (or omitted) continue running without waiting for the keys to be processed.
-				/// True : wait for the keys to be processed before returning control. 
-				/// 不 wait 時，可以一邊手動切 app 一邊看到（大量的）key buffer dump 過來 dump 過去。
-				/// 要 wait 時，則一開始倒就無法切換。
+				WshShell :: sendkeys(pop(1),pop()) ; last :: wait=true
+				/// ----- ' sendkeys :> wait -----
+				/// False: Continue running without waiting for the keys to be processed.
+				///        可以一邊手動切 app 一邊看到 key buffer dump 過來 dump 過去。
+				/// True : (default) Wait for the keys to be processed before returning. 
+				///        實驗結果：一開始倒就無法切換。
 				/// 
-				/// == Usage Tip ==
+				/// ----- Usage Tip -----
 				/// This method places keystrokes in a key buffer. In some cases, you must call this 
 				/// method before you call the method that will use the keystrokes. For example, to 
 				/// send a password to a dialog box, you must call the SendKeys method before you 
@@ -94,18 +94,17 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				/// 注意！JavaScript 把控制權交出去之前，這些 key 都在 buffer 裡。故應該先 sendkeys 
 				/// 切往 target application 然後 nap 一會兒讓 target application 工作。
 				/// 
-				/// == Special keys ==
+				/// ----- Special keys -----
 				/// +Shift ^Ctrl %Alt {BACKSPACE}or{BS},{BREAK},{CAPSLOCK},{CLEAR},{DELETE} or {DEL},
 				/// {DOWN},{END},{ENTER},{ESCAPE} or {ESC},{F1}{F15},{HELP},{HOME},{INSERT},{LEFT},
 				/// {NUMLOCK},{PGDN},{PGUP},{RETURN},{RIGHT},{SCROLLLOCK},{TAB},{UP},~(Enter)
 				///
-				/// == Example ==
+				/// ----- Example -----
 				/// 先弄出個很大的 string :
 				/// <js> var ss="112233"; for(var i=0; i<10000; i++) ss += "ab"; ss += "<end>"</jsV> value ss
-				/// Notepad 有先跑起來。做下面實驗，其中 1 nap 讓 notepad 上手必要， 10000 nap 時間不夠
-				/// 讓 keys 倒完，結果前半段倒往 notepad 後半段倒往 jeforth.3hta 的 inputbox,
-				/// char untitled ( notepad ) activate 1 nap ss sendkeys 10000 nap
-				/// 不論 wait 是 true/false 都一樣。
+				/// Notepad 先跑起來。做下面實驗：
+				/// > char untitled ( notepad ) activate 1 nap ss sendkeys 10000 nap
+				/// 其中 1 nap 讓 notepad 上手必要， 10000 nap 時間不足以讓 keys 倒完，結果前半段倒往 notepad 後半段倒往 jeforth.3hta 的 inputbox,不論 wait 是 true/false 都一樣,因為實驗做完 jeforth 有下 focus 奪回關注。
 				
 				
 : (run)			( "command-line" -- errorlevel ) \ Run anything like Win-R does and wait for the return.
