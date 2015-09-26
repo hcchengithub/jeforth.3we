@@ -1,32 +1,30 @@
 	\ 80286 PC DOS assembler
 
-	s" 80286asm.f"	.( Including ) dup . cr also forth definitions 
-					char -- over over + + (marker) (vocabulary) 
-					last execute definitions
-					// ( -- ) Switch to 80286asm vocabulary
+	s" 80286asm.f"		source-code-header
+	\ s" 80286asm.f"	.( Including ) dup . cr also forth definitions 
+	\ 				char -- over over + + (marker) (vocabulary) 
+	\ 				last execute definitions
+	\ 				// ( -- ) Switch to 80286asm vocabulary
 
     : malloc    ( -- array ) \ Allocate an array
                 js: push([]) ;
                 /// Assembler space allocator
 
                 <selftest>
-					marker --80286asm.f-self-test--
-					include selftest.f
-					*** 80286asm.f ... 
+					*** check vocabulary 80286asm.f 
 					char 80286asm.f find-vocs nip \ true
-					==>judge [if] <js> ['80286asm.f'] </jsV> all-pass [then]
+					[d true d] [p '80286asm.f' p]
 				</selftest>
 
                 <selftest>
-					*** nop <== wut, explain the test strategy ... 
-					js> stack.slice(0) js> [] isSameArray >r dropall r>
-					==>judge [if] <js> ['nop'] </jsV> all-pass [then]
+					*** nop <== wut, explain the test strategy
+					[d d] [p 'nop' p] 
 				</selftest>
 
                 <selftest>
-					*** malloc allocates an normal array ... 
+					*** malloc allocates an normal array
                     malloc js> pop().length 0 = \ true
-					==>judge [if] <js> ['malloc'] </jsV> all-pass [then]
+					[d true d] [p 'malloc' p]
 				</selftest>
 
     malloc constant target-space // ( -- space[] ) Get target space which is an array.
@@ -56,20 +54,20 @@
                 0xffff AND ( take care of negative numbers ) dup 256 / int swap 255 AND ;
 
                 <selftest>
-					*** word>bytes 0x1234 => 0x12 0x34 ... 
+					*** word>bytes 0x1234 => 0x12 0x34
                     0x1234 word>bytes 0x34 = swap 0x12 = and \ true
                     0x5678 word>bytes 0x78 = swap 0x56 = and \ true true
-					and ==>judge [if] <js> ['word>bytes'] </jsV> all-pass [then]
+					[d true,true d] [p 'word>bytes' p]
 				</selftest>
 
     : bytes>word ( high-byte low-byte -- word ) \ Convert two bytes into a word
                 0xff AND ( take care of negative numbers ) swap 0xff AND 256 * + ;
 
                 <selftest>
-					*** bytes>word 0x12 0x34 => 0x1234 ... 
+					*** bytes>word 0x12 0x34 => 0x1234
                     0x12 0x34 bytes>word 0x1234 = \ true
                     0x56 0x78 bytes>word 0x5678 = \ true true
-					and ==>judge [if] <js> ['word>bytes'] </jsV> all-pass [then]
+					[d true,true d] [p 'word>bytes' p]
 				</selftest>
 
     : org       ( address -- ) \ Specify target space
@@ -87,7 +85,7 @@
                 word>bytes ( high-byte low-byte ) 8, 8, ;
 
                 <selftest>
-					*** malloc target-space 8, 16, ++ org target-here ... 
+					*** malloc target-space 8, 16, ++ org target-here
 					malloc       js> mytypeof(pop()) char array = [if] 1 [else] 0 [then] \ 1
 					target-space js> mytypeof(pop()) char array = [if] 1 [else] 0 [then] \ 1
 					0 org
@@ -97,8 +95,8 @@
 					target-space js> pop().pop() \ 1
 					target-space js> pop().pop() \ 2
 					target-space js> pop().pop() \ 3
-					js> stack.slice(0) js> [1,1,18,52,1,2,3] isSameArray >r dropall r>
-					==>judge [if] <js> ['malloc','target-space','8,','16,','++','org','target-here'] </jsV> all-pass [then]
+					[d 1,1,18,52,1,2,3 d]
+					[p 'malloc','target-space','8,','16,','++','org','target-here' p]
 				</selftest>
 
 
@@ -109,10 +107,9 @@
                 swap 255 AND ( take care of negative numbers ) swap target-space js: pop()[pop()]=pop() ;
 
                 <selftest>
-					*** peek8 poke8 ... 
+					*** peek8 poke8
 					1234567890 0xf poke8 0xf peek8
-					js> stack.slice(0) js> [210] isSameArray >r dropall r>
-					==>judge [if] <js> ['peek8', 'poke8'] </jsV> all-pass [then]
+					[d 210 d] [p 'peek8', 'poke8' p]
 				</selftest>
 
     : peek16    ( addr -- word ) \ Read a word from target space
@@ -122,15 +119,14 @@
                 swap word>bytes ( addr high low ) -rot over 1+ ( low addr high addr' ) poke8 poke8 ;
 
                 <selftest>
-					*** peek16 poke16 ... 
+					*** peek16 poke16
 					0x1234567890 0xe poke16 0xe peek16
-					js> stack.slice(0) js> [0x7890] isSameArray >r dropall r>
-					==>judge [if] <js> ['peek16','poke16'] </jsV> all-pass [then]
+					[d 0x7890 d] [p 'peek16','poke16' p]
 				</selftest>
 
     code cmove(t>t) ( fStart fEnd tStart -- ) \ move from (fStart-fEnd) to tStart, where fStart,fEnd,tStart are target addresses.
                 var ts=pop(), fe=pop(), fs=pop(), len=Math.max(0,fe-fs+1);
-                fortheval("target-space"); var space=pop();
+                dictate("target-space"); var space=pop();
                 for(var i=0; i<len; i++) {
                     if(typeof space[fs+i] == "undefined") break;
                     space[ts+i] = space[fs+i];
@@ -140,45 +136,43 @@
                 /// fStart must be smaller than fEnd or it does nothing.
 
                 <selftest>
-					*** cmove(t>t) ... 
+					*** cmove(t>t) 
                     0x0000 org 0x11 8, 0x22 8, 0x33 8, 0x44 8, 0x0000 0x0ff 4 - 0x0004 cmove(t>t)
                     0xfc peek8 \ 0x11
                     0xfd peek8 \ 0x22
                     0xfe peek8 \ 0x33
                     0xff peek8 \ 0x44
-					js> stack.slice(0) js> [0x11,0x22,0x33,0x44] isSameArray >r dropall r>
-					==>judge [if] <js> ['cmove(t>t)'] </jsV> all-pass [then]
+					[d 0x11,0x22,0x33,0x44 d] [p 'cmove(t>t)' p]
 				</selftest>
 
     code cmove(h>t) ( [host] tStart -- ) \ move from [host] to tStart, where [host] is host binary array, tStart is target addresses.
                 var ts=pop(), from=pop(), len=from.length;
-                fortheval("target-space"); var space=pop();
+                dictate("target-space"); var space=pop();
                 for(var i=0; i<len; i++) {
                     space[ts+i] = from[i];
                 }
                 end-code
 
                 <selftest>
-					*** cmove(h>t) ...
+					*** cmove(h>t)
                     js> [0x11,0x22,0x33,0x44] 0x300 cmove(h>t)
                     0x300 peek8 \ 0x11
                     0x301 peek8 \ 0x22
                     0x302 peek8 \ 0x33
                     0x303 peek8 \ 0x44
-					js> stack.slice(0) js> [0x11,0x22,0x33,0x44] isSameArray >r dropall r>
-					==>judge [if] <js> ['cmove(h>t)'] </jsV> all-pass [then]
+					[d 0x11,0x22,0x33,0x44 d] [p 'cmove(h>t)' p]
 				</selftest>
 
     code hex16  ( address -- ) \ Dump target space 16 bytes from address
                 var start=pop();
-                fortheval("target-space"); var space=pop();
+                dictate("target-space"); var space=pop();
                 for(var i=0; i<16; i++){
-                    if (i==8) fortheval("space char - . ");
+                    if (i==8) dictate("space char - . ");
                     if (space[start+i] == undefined) push("??");
                     else push(space[start+i]);
-                    fortheval("space 0x2 .0r");
+                    dictate("space 0x2 .0r");
                 }
-                fortheval("2 spaces");
+                dictate("2 spaces");
                 for(var i=0; i<16; i++){
                     var cc = space[start+i];
                     switch(cc){
@@ -197,37 +191,35 @@
                         case   7 :
                         case  10 :
                         case  13 : push("_"); break;
-                        default : push(cc); fortheval("ASCII>char");
+                        default : push(cc); dictate("ASCII>char");
                     }
-                    fortheval(".");
+                    dictate(".");
                 }
-                fortheval("cr");
+                dictate("cr");
                 end-code
                 /// base must be 16 before calling me
 
                 <selftest>
 					*** hex16 ...
                     cr 0 hex16
-					js> stack.slice(0) js> [] isSameArray >r dropall r>
-					==>judge [if] <js> ['hex16'] </jsV> all-pass [then]
+					[d d] [p 'hex16' p]
 				</selftest>
 
     code dump(t) ( address -- ) \ Dump target space from address
                 var start=pop();
-                fortheval("cr base@ hex"); var basewas=pop();
+                dictate("cr base@ hex"); var basewas=pop();
                 for (var i=0; i<16; i++){
                     push(start + i*16);
-                    fortheval("dup 5 .0r space space hex16");
+                    dictate("dup 5 .0r space space hex16");
                 }
-                push(basewas); fortheval("base! cr");
+                push(basewas); dictate("base! cr");
                 end-code
                 /// Usage: 0x100 dump(t) <=== Hex dump 0x100 ~ 0x1FF
 
                 <selftest>
-					*** dump(t) ...
+					*** dump(t)
                     cr 0 dump(t)
-					js> stack.slice(0) js> [] isSameArray >r dropall r>
-					==>judge [if] <js> ['dump(t)'] </jsV> all-pass [then]
+					[d d] [p 'dump(t)' p]
 				</selftest>
 
 \ -------------- Label tools ---------------------------------------------------------
@@ -237,35 +229,28 @@
 	code name>word  push(tick(pop())) end-code // ( "name" -- obj ) Translate TOS to its Word() object
 
     : L:        ( <label> -- ) \ Resolve all above 8rel> 16rel> labels. label is absolute address constant.
-\ ( _debug_ ) js: if(kvm.debug){kvm.jsc.prompt='000';eval(kvm.jsc.xt)}
                 create
                     char [ js> last().name char ] + + 
-\ ( _debug_ ) js: if(kvm.debug){kvm.jsc.prompt='000fffff';eval(kvm.jsc.xt)}
 					(') ( word.name )
-\ ( _debug_ ) js: if(kvm.debug){kvm.jsc.prompt='000aaaaa';eval(kvm.jsc.xt)}
                     ?dup if ( word.name )
                         target-space target-here @
-\ ( _debug_ ) js: if(kvm.debug){kvm.jsc.prompt='000bbbb';eval(kvm.jsc.xt)}
                         <js>
                             var dest=pop(), target_space=pop(), label=pop(), storage=label.storage;
                             for(var i=0; i<storage.length; i++) {
                                 var offset = dest - storage[i];
                                 var size = target_space[storage[i]-1]; // this is a trick, this value was stored in by fwd>
-// ( _debug_ ) if(kvm.debug){kvm.jsc.prompt='11cccc';eval(kvm.jsc.xt)}
                                 switch (size){
                                     case 8: // 8 bits relative address
-// ( _debug_ ) if(kvm.debug){kvm.jsc.prompt='11111';eval(kvm.jsc.xt)}
                                         if (offset>127){
                                             push(storage[i]); push(last().name);
-                                            fortheval("cr .' Error! label ' . .'  connects ' .w .'  to ' target-here .w .' , overloads one byte.' cr *debug* Error> ");
+                                            dictate("cr .' Error! label ' . .'  connects ' .w .'  to ' target-here .w .' , overloads one byte.' cr *debug* Error> ");
                                         }
-// ( _debug_ ) if(kvm.debug){kvm.jsc.prompt='2222';eval(kvm.jsc.xt)}
                                         target_space[storage[i]-1] = offset;
                                         break;
                                     case 16: // 16 bits relative address
                                         if (offset>32767){
                                             push(storage[i]); push(last().name);
-                                            fortheval("cr .' Error! label ' . .'  connects ' .w .'  to ' target-here .w .' , overloads one word.' cr *debug* Error> ");
+                                            dictate("cr .' Error! label ' . .'  connects ' .w .'  to ' target-here .w .' , overloads one word.' cr *debug* Error> ");
                                         }
                                         target_space[storage[i]-2] = offset & 0xff;
                                         target_space[storage[i]-1] = parseInt(offset/256);
@@ -278,7 +263,7 @@
                                         push(storage[i]);
                                         push(size);
                                         push(last().name);
-                                        fortheval("cr .( Error! ) . .(  relative label size ) . .(  at ) .w .(  is unknown.) cr *debug* Error> ");
+                                        dictate("cr .( Error! ) . .(  relative label size ) . .(  at ) .w .(  is unknown.) cr *debug* Error> ");
                                 }
                             }
                             storage.splice(0,storage.length); // clean up the storage so we can re-use the same label
@@ -313,13 +298,12 @@
 				/// 'L> name' manually is suggested.
 
                 <selftest>
-					*** L> L: ...
+					*** L> L:
 					0x100 org
 					0x11 8, 0x12 8, 0x13 8,  8 L> LookForward
 					0x21 8, 0x22 8, 0x23 8, 16 L> LookForward
 					0x31 8, 0x32 8, 0x33 8, AB L> LookForward
 					0x41 8, 0x42 8, 0x43 8, 
-\ ( _debug_ ) js: kvm.debug=true .( _debug_ )
 	L: LookForward  0x51 8, 0x52 8, 0x53 8, 
 	( 0x10c )		LookForward 16, 0x63 8, 0x64 8,  8 L> LookForward
 					LookForward 16, 0x73 8, 0x74 8, 16 L> LookForward
@@ -333,8 +317,7 @@
 					.( 00110   01 63 08 0c 01 04 00 0c - 01 1b 01 91 92 93 1b 01) cr
 					.( 00120   ?? ?? ?? ?? ?? ?? ?? ?? - ?? ?? ?? ?? ?? ?? ?? ??) cr
 					*debug* >> 
-					js> stack.slice(0) js> [] isSameArray >r dropall r>
-					==>judge [if] <js> ['L>','L:'] </jsV> all-pass [then]
+					[d d] [p 'L>','L:' p]
 				</selftest>
 
 \ -------------- Assembly CPU instructions ---------------------------------------------------------
@@ -599,11 +582,6 @@
     0xDB19  16c:        bx-bx(carry)        \ SBB   BX,BX
 
     0xFBC1  16c8#:      sar#8.bx            \ SAR   BX,#8
-
-	<selftest> --80286asm.f-self-test-- </selftest>
-	js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 
-	js: tick('<selftest>').buffer="" \ recycle the memory
-
 
 <comment> %~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~
 %~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~

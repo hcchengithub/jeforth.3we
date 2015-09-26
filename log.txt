@@ -3950,9 +3950,9 @@
 		something wrong. --> try newPlain() then ok. So which plain() is used? I know vm.plain() 
 	--> 乾脆不要有 type() plain(), 都用 vm.type() vm.plain() 免生疑惑。 ==> Bingo! and shit 自找麻煩。
 
-[ ] working on wsh.f selftest improvements
+[x] working on wsh.f selftest improvements
 
-[ ] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
+[x] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
 	' <selftest> :: enabled=true dropall cls --wmi.f-- include wmi.f
 	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
 	' <selftest> :: enabled=true dropall cls --canvas.f-- include canvas.f
@@ -4007,7 +4007,7 @@
 	能更早了! 所以放在 quit.f 裡面沒問題。===> ok, but 問題是重複寫了好幾份, 能不能在 quit.f
 	裡面都參考同一份 jsc source code?
 	==> done, 統一成只有兩分 jsc.f : 3hta,3htm,3nw and 3nd. 
-	[ ]	晚點把 3nd 裡的 jsc.hlp jsc.js delete 掉，已經沒有用了。
+	[x]	晚點把 3nd 裡的 jsc.hlp jsc.js delete 掉，已經沒有用了。
 	
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
@@ -4083,7 +4083,7 @@
 	[x]3nd <-------- global.kvm = global.jeforth_project_k... = new jeForth();
 
 [ ]	vm 在 initial module (index.html) 裡只用來加掛 jeforth.f 需要的東西，主要是 I/O。
-	此外的東西都不該出現在 vm 下的第一層, 但在 vm.g 以下則 OK.
+	此外的東西都不該出現在 vm 下的第一層, 但在 vm.g 以下則 OK. [ ] 畫圖說明
 	這是為求整套系統 building blocks 之間的簡單明了。
 	[ ] 手工 js> vm obj>keys . 列出所有 members 一一檢討。
 		3nw: > js> vm obj>keys .
@@ -4189,3 +4189,5 @@
 	[ ] 修改文件, how to run 要改良說明。
 
 [x] 3nw's quit.f needs a jump focus at the end.
+
+[x] eforth.com selftest needs a rewrite --> Done.
