@@ -8,7 +8,7 @@
 	<HTA:APPLICATION 
 		ID="hta"
 		APPLICATIONNAME="jeforth.3hta"
-		VERSION="1.1" 
+		VERSION="2" 
 		/>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" type="text/css" href="common.css">
@@ -38,47 +38,24 @@
 	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div>
 </body>
 <!-- moved to html5.f script src="js/jquery-1.10.2.js"></script -->
-<Script src="kernel/jeforth.js"></Script>
-<script id=js>
+<Script src="project-k/jeforth.js"></Script>
+<script>
+	// 人家都把 script 放在 head 或 body。我怎麼發現可以放在這裡的，為什麼？
+	// 原因: 你看這 source code 不是很清爽嗎? head , body 都很短很清晰。大片 script 放在下面，整整齊齊。
+	//       簡單用 <body onload="init();"> 即銜接良好。
+	// 時間: 想必是把 jquery 抽出去時改的。
+	//       HTA 在 Windows XP, Windows 7 都有很多問題，如果太早 include jQuery 馬
+	//       上就會撞上。延後到 jeforth.f 都起來了之後是比較好的安排。
+	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
+	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 	kvm.appname = hta.applicationName;
-	kvm.host = window;
-	kvm.path = ["dummy","kernel","f", "3htm/f", "3htm/canvas", "3htm", "3hta/f", "3hta/vbs", "3hta/excel", "3hta", "playground"];
-	kvm.version = "1.00";
-	kvm.greeting = function(){
-		var revision = hta.version;
-		kvm.print("j e f o r t h . 3 h t a -- r"+revision+'\n');
-		kvm.print(jsengine.innerText+'\n');
-		kvm.print("source code http://github.com/hcchengithub/jeforth.3we\n");
-		kvm.print("Root " + window.location.toString()+'\n');
-		kvm.print("argv " + hta.commandLine+'\n');
-		return(parseFloat(revision));
-	}
-	kvm.debug = false;
-	kvm.jsc = {xt:'kvm.print("Sorry, jsc is not available yet.")',prompt:"jsc>"};
-	kvm.screenbuffer = ""; // print() to screenbuffer before I/O ready
-	kvm.inputbox = "";
-	kvm.EditMode = false; // Ctrl-Enter instead of Enter when in EditMode
-	kvm.prompt = "OK";
-	kvm.ado = new ActiveXObject("ADODB.Stream");
-	kvm.argv = (hta.commandLine + " dummy").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
-	kvm.print = function (s) { 
-		try {
-			var ss = s + ''; // Print-able test
-		} catch(err) {
-			ss = Object.prototype.toString.apply(s);
-		}
-		if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-		// was: $('#outputbox').append(plain(ss)); 
-		var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
-		for(i=0; i<aa.length-1; i++){
-			outputbox.appendChild(document.createTextNode(aa[i]));
-			outputbox.appendChild(document.createElement("br"));
-		}
-		if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
-	};
-	kvm.bye = function(){window.close()}; // vb.f will improve it
-	kvm.clearScreen = function(){outputbox.innerHTML=""};
+	kvm.host = window; // global 掛那裡的根據。
+	kvm.path = ["dummy", "f", "3htm/f", "3htm/canvas", "3htm", "3hta/f", "3hta/vbs", "3hta/excel", "3hta", "playground", "private"];
+	kvm.selftest_visible = true; // static variable, self-test adjusts it, type() checks it. both sides need to access it.
+
+	// Useful common tool, need to be redefined after jQuery also.
 	kvm.plain = function (s) {
+		// Origin in jeforth.hta before jQuery available
 		var ss = s + ""; // avoid numbers to fail at s.replace()
 		ss = ss.replace(/\t/g,'\u00a0\u00a0\u00a0\u00a0');
 		ss = ss.replace(/ /g,'\u00a0'); // utf-8 space ce@ :: textContent="a\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0b"
@@ -87,10 +64,99 @@
 		ss = ss.replace(/\r?\n\r?/g,'\n');
 		return ss;
 	}
+	kvm.type = function (s) { 
+		try {
+			var ss = s + ''; // Print-able test
+		} catch(err) {
+			ss = Object.prototype.toString.apply(s);
+		}
+		if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
+		if(kvm.selftest_visible){
+			// was: $('#outputbox').append(kvm.plain(ss)); 不用 jQuery 變成一大片還缺特性。
+			// HTA 在 Windows XP, Windows 7 都有很多問題，如果太早 include jQuery 馬
+			// 上就會撞上。延後到 jeforth.f 都起來了之後是比較好的安排。
+			var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
+			for(i=0; i<aa.length-1; i++){
+				outputbox.appendChild(document.createTextNode(aa[i]));
+				outputbox.appendChild(document.createElement("br"));
+			}
+			if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
+		}
+	};
+	// minor version specified by application(hta.version), major version is from jeforth.js kernel.
+	var version = parseFloat(kvm.major_version+"."+hta.version);
+	kvm.greeting = function(){
+		kvm.type("j e f o r t h . 3 h t a -- v"+version+'\n');
+		kvm.type(jsengine.innerText+'\n');
+		kvm.type("source code http://github.com/hcchengithub/jeforth.3we\n");
+		kvm.type("Root " + window.location.toString()+'\n');
+		kvm.type("argv " + hta.commandLine+'\n');
+		return(version);
+	}
+	kvm.debug = false;
+	kvm.screenbuffer = ""; // kvm.type() to screenbuffer before I/O ready
+	kvm.inputbox = "";
+	kvm.prompt = "OK";
+	kvm.ado = new ActiveXObject("ADODB.Stream");
+	kvm.fso = new ActiveXObject("Scripting.FileSystemObject");
+	kvm.argv = (hta.commandLine + " dummy").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
+	kvm.bye = function(){window.close()}; // vb.f will improve it
+	kvm.clearScreen = function(){outputbox.innerHTML=""};
+	
+	// kvm.panic() is the master panic handler. The panic() function defined in 
+	// project-k kernel jeforth.js is the one called in code ... end-code and it's
+	// not visible here.
+	kvm.panic = function(state){ 
+		kvm.type(state.msg);
+		if (state.serious) debugger;
+	}
+
+	// -------------------- read/write local file ----------------------------------
+	//                   through either FSO or ADO
+	//  FSO does not support utf-8.  http://www.w3schools.com/asp/ado_ref_stream.asp 
+	//	ADO does not work well on Windows XP, not good enough on Windows 7 neither on some computers.
+	//  I use ADO, my computers are Windows 8 or 10.
 	
 	// When used in forth words, inner() handles the try{}catch{} thing.
-	// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
-	kvm.writeTextFile = function(pathname,data) { // Write string to text file.
+	function writeTextFile_fso (pathname, data) {
+		var flag = false, 
+			ForReading = 1,  
+			ForWriting = 2,  
+			ForAppending = 8,  
+			TristateUseDefault = -2,  
+			TristateTrue = -1,  
+			TristateFalse = 0; // JScript switch constants. 
+		var ts = kvm.fso.OpenTextFile( 
+				pathname, 
+				ForWriting,  
+				true, // create when not existing 
+				TristateUseDefault // ASCII or Unicode depends on the system default. 
+			); 
+		if(ts){ 
+			ts.Write(data); 
+			ts.Close(); 
+			flag = true; 
+		}  
+	} 
+
+	// When used in forth words, inner() handles the try{}catch{} thing.
+	function readTextFile_fso (pathname) { 
+		var data = ""; 
+		var txtFile = kvm.fso.OpenTextFile( 
+			pathname,  
+			1, 		// ForReading 
+			false,  
+			0		// TristateFalse 
+		); 
+		if (txtFile){ 
+			data = txtFile.ReadAll(); 
+			txtFile.Close(); 
+		} 
+		return(data); 
+	} 
+	
+	// When used in forth words, inner() handles the try{}catch{} thing.
+	function writeTextFile_ado (pathname, data) {
 		var objStream = kvm.ado;
 		try{objStream.Close()}catch(err){}
 		objStream.CharSet="utf-8"
@@ -101,8 +167,7 @@
 	}
 
 	// When used in forth words, inner() handles the try{}catch{} thing.
-	// use ADO instead of fso, because fso can't access utf-8. http://www.w3schools.com/asp/ado_ref_stream.asp 
-	kvm.readTextFile = function(pathname) {
+	function readTextFile_ado (pathname) { 
 		var strData, objStream = kvm.ado;
 		try{objStream.Close()}catch(err){}
 		objStream.CharSet = "utf-8";
@@ -112,12 +177,17 @@
 		objStream.Close();
 		return(strData);
 	}
+	//  Use fso because no Chinese yet and compatibility first.
+	kvm.writeTextFile = writeTextFile_fso; 
+	kvm.readTextFile  = readTextFile_fso;
+
+	// -------------------- End of the read/write local file section -------------------------------
 
 	// There's no main loop, event driven call back function is this.
 	kvm.forthConsoleHandler = function (cmd) {
 		var rlwas = kvm.rstack().length; // r)stack l)ength was
-		kvm.print((cmd?'\n> ':"")+cmd+'\n');
-		kvm.fortheval(cmd);  // Pass the command line to KsanaVM
+		kvm.type((cmd?'\n> ':"")+cmd+'\n');
+		kvm.dictate(cmd);  // Pass the command line to jeForth VM
 		(function retry(){
 			// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
 			// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
@@ -125,7 +195,7 @@
 			if(kvm.rstack().length!=rlwas)
 				setTimeout(retry,100); 
 			else {
-				kvm.print(" " + kvm.prompt + " ");
+				kvm.type(" " + kvm.prompt + " ");
 				jump2endofinputbox.click(); inputbox.focus();
 			}
 		})();
@@ -148,7 +218,7 @@
 	
 	// System initialization
 	function init() { // jQuery(document).ready(function($) {  
-		rev.innerHTML = hta.version; // also .commandLine, .applicationName, ...
+		rev.innerHTML = version; // also .commandLine, .applicationName, ...
 		loc.innerHTML = window.location.toString(); // it's built-in in DOM
 		jsengine.innerHTML = (  
 				// http://stackoverflow.com/questions/19567887/javascript-version-in-hta
@@ -164,9 +234,8 @@
 			alert("Warning: Your system is old, IE10 or newer preferred. Try Windows upgrade.");
 		}
 		document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-		kvm.init();  // setup platform related I/O
-		kvm.fortheval(kvm.readTextFile("kernel/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 
-		// fortheval() 之後不能再有任何東西，否則因為有 sleep/suspend/resume 之故，會被意外執行到。
+		kvm.dictate(kvm.readTextFile("f/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 
+		// dictate() 之後不能再有任何東西，否則因為有 sleep/suspend/resume 之故，會被意外執行到。
 	};	
 </script>
 </html>

@@ -1,129 +1,118 @@
 	
-	\ ShellWindows object https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974(v=vs.85).aspx
-	\ Windows Internet Explorer object https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
-	\ shell.application :> windows() 即 ShellWindows. ShellWindows 有可能是 File Explorer 或 Windows Internet Explorer,
-	\ 也許還不只？用 ie :> application . 察看即知。
+	\ ShellWindows object                https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974(v=vs.85).aspx
+	\ Windows Internet Explorer object   https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
+
+	\ shell.application :> windows() 即 ShellWindows. 
+	\ ShellWindows 有可能是 File Explorer 或 Windows Internet Explorer,
+	\ 也許還不只？用 "ie :> application ." or "list-sw-windows" 察看即知。
 	
 	s" ie.f"	source-code-header
 
 	: see-ie 			( -- count ) \ List all IE processes and return the count
 						s" where name = 'iexplore.exe'" see-process ;
-						/// IE process 的個數不能用，它的意義不明，與 ShellWindows count 不符。
-						/// 第一次 Run iexplore.exe 會跑出兩個 IE process 一主一副。
+						/// iexplore.exe process 的個數意義不明，與 ShellWindows count 不同
+						/// ，因為後者含 File Explorer，但不含 Windows 10 的 Edge。第一次 
+						/// Run iexplore.exe 會跑出兩個 IE process 一主一副。
 						
-	: kill-ie 			( -- bodyCount ) \ Kill all IE processes return the count.
+	: kill-ie 			( -- bodyCount ) \ Kill all iexplore.exe processes, return the count.
 						<js> var f=confirm("Kill IEs are you sure? ShellWindows.count will not be reduced");f</jsV>
 						if s" where name = 'iexplore.exe'" kill-them then ;
-						/// 但是，當 (Win8) IE 被徹底用 processID 殺掉之後, ShellWindows :> count 
-						/// 仍不會減去! Kill IE process 不是正常使用的動作。
+						/// (Win8) IE 被徹底用 processID 殺掉之後, ShellWindows :> count 
+						/// 仍不會減去，因為它可能本來就是 null。總之非正常能使用。
 
-	shell.application :> windows() constant ShellWindows // ( -- obj ) shell.application (IE) windows object.
-						/// 這個 collection 就是所有的 IE windows. ShellWindows :> count 就是 IE 頁面
-						/// 的總數。ShellWindows :> item(0,1,2,3...) 即 IE objects 與 DOM window 不同。
-						/// ShellWindows 整合所有的 IE 頁面，但 ShellWindows 本身沒有開啟 IE 頁面的功
-						/// 能。我本來以為 ShellWindows :> count >= 1 時 ShellWindows :> item(0) 可以
-						/// 當作 defauult IE object 來操作。可是 item(0) 常常是 null! 
+	shell.application :> windows() 
+	constant ShellWindows // ( -- obj ) Shell Windows (File Explorer & Internet Explorer) object.
+		/// 這個 collection 就是所有的 IE 以及 File Explorer windows. ShellWindows :> count 就是
+		/// 兩者頁面的總數。ShellWindows :> item(0,1,2,3...) 即 FE/IE objects (與 DOM window 不
+		/// 同)。ShellWindows 本身沒有開啟 IE 頁面的功能。我本來以為 ShellWindows :> count >= 1 
+		/// 時 ShellWindows :> item(0) 可以當作 default IE object 來操作。可是 item(0) 常常是 null! 
 						
 	\ IE run 起來有幾種方式
-	\ 1. s" iexplore ibm.com" (fork) 當 ShellWindows.count==0 時要用這個，還不如都用這個。
+	\ 1. s" iexplore ibm.com" (fork) 當 ShellWindows.count==0 時必須用這個，那乾脆都用這個。
 	\ 2. ShellWindows.item(0).navigate("url") 當 ShellWindows.count==0 時不能用。
 	\ 3. GetObject("","InternetExplorer.Application") 取得一個沒有 document 的 IE object
-	\ 4. CreateObject("InternetExplorer.Application") 用不著，不必研究。
-	\ 有了 ShellWindows 可以隨時 access 所有的 IE web 頁面, 後三者都用不著了。
+	\ 4. CreateObject("InternetExplorer.Application") 用不著，咱禁用，不必研究。
+	\ 有了 ShellWindows 可以隨時 access 所有的 FE/IE 頁面, 後三者都用不著了。
 	
-	: ie(i)				( i -- ie|null ) \ Get IE object of the indexed window
-						s" g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
-						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
-						/// 一個 window 關掉: 0 ie() :> document.parentWindow :: close() 
-						/// 也會把 IE process 關掉,當然 0 ie(i) 也是 null。
+	: sw(i)				( i -- sw|null ) \ Get ShellWindow object of the indexed ShellWindow
+						js> vm.g.ShellWindows.item(parseInt(pop())) ;
+						/// IE,FE run 起來之前是 null 即無 IE process。若照下面這樣把最後
+						/// 一個 window 關掉: 0 sw(i) :> document.parentWindow :: close() 
+						/// 也會把 IE process 關掉,當然 0 sw(i) 也是 null。
 	
 	0 value theIE // ( -- i ) Make ShellWindows.item(i) the default IE object
 						
-	: ie 				( -- ie|null ) \ Get the ShellWindows.item(theIE) IE object
-						\ js> g.ShellWindows.item(g.theIE) [ ] 不能直接用變數,很奇怪,是個 bug 吧!
-						theIE s" g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
+	: sw 				( -- sw|null ) \ Get the ShellWindows.item(theIE) sw object
+						js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ;
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
-						/// 一個 window 關掉: ie :> document.parentWindow :: close() 
-						/// 也會把 IE process 關掉,當然 ie 也是 null。但 ie(0) 有時候是 null
-						/// 即使 ie(1) 有東西，故需要用 theIE 來指定 active IE object。
-						
-	last alias available? // ( -- objIe|null ) Is the ShellWindows.item(0) IE object available?
-						/// ie 可能是存在的, 但沒有 connect 任何網址, 此時 ReadyState 也是 4, 
-						/// 也有 document, 但是 document 裡 innerHTML 是 undefined。 這樣就
-						/// available 了, 可以 navigate() 了。如果不 available 則推薦用
-						/// s" iexplore" (fork) 把 IE run 起來。
-	
-						
-	: window(i)			( i -- window|null ) \ Get window object of the indexed ie tab
-						ie(i) ?dup if ( ie ) 
-							dup :> ReadyState if ( ie ) \ [ ] 不是 0 就有 document 是真的嗎? 直接 check document 不就好了?
-								:> document.parentWindow exit
-							then
-						then drop null ;
-						/// [ ] 疑問 ie.ReadyState 不是 0 就有 document 是真的嗎?
-						/// ie(i).ReadyState == 0 就不會有 document。即使
-						/// 有 document 也不一定有 innerHTML 的內容。
+						/// 一個 window 關掉: sw :> document.parentWindow :: close() 
+						/// 也會把 IE process 關掉,當然 sw 也是 null。但 sw(0) 有時候是 null
+						/// 即使 sw(1) 有東西，故需要用 theIE 來指定 active sw object。
+						/// sw 存在,但沒有 connect 任何網址時 ReadyState 也是 4,也有 document, 
+						/// 但是 document 裡 innerHTML 是 undefined。這樣就 available 了, 可以
+						/// navigate() 了。sw 都是 null 時 推薦用 s" iexplore" (fork) 把 IE 
+						/// run 起來。
 
-	: window			( -- window|null ) \ Get the ShellWindows.item(0) window object
-						ie ?dup if ( ie ) 
-							dup :> ReadyState if ( ie ) \ [ ] 不是 0 就有 document 是真的嗎? 直接 check document 不就好了?
-								:> document.parentWindow exit
+	: window			( -- window|null ) \ Get the ShellWindows.item(theIE) window object
+						sw if
+							sw :> ReadyState if \ [ ] 不是 0 就有 document 是真的嗎? 直接 check document 不就好了?
+								sw :> document.parentWindow exit
 							then
-						then drop null ;
-						/// [ ] 疑問 ie.ReadyState 不是 0 就有 document 是真的嗎?
-						/// ie(i).ReadyState == 0 就不會有 document。
+						then null ;
+						/// [ ] 疑問 sw.ReadyState 不是 0 就有 document 是真的嗎?
+						/// sw(i).ReadyState == 0 就不會有 document。
 						/// 有 document 也不一定有 innerHTML 的內容。
 						
-	: isIe?				( ie -- ie flag ) \ Is it an IE object?
+	: isIe?				( sw -- sw flag ) \ Is it an sw object?
 						<js> typeof(tos())=="object"&&tos().name=="Windows Internet Explorer"</jsV> ;
 						
-	: check-ie			( ie -- ie ) \ Pass or abort
-						isIe? if else drop abort" Error! Need an IE object (from ShellWindows)." then ;
+	: check-sw			( sw -- sw ) \ Pass or abort
+						isIe? if else drop abort" Error! Need an sw object (from ShellWindows)." then ;
 
-	: list-ie-windows	( -- count ) \ List all IE windows' locationName and URL
-		\ 0 begin dup ie(i) ( count IE ) dup while ( count IE ) 
+	: list-sw-windows	( -- count ) \ List all sw windows' locationName and URL
+		\ 0 begin dup sw(i) ( count sw ) dup while ( count sw ) 
 		\ over . space dup :> LocationName . space :> LocationURL . cr ( count )
-		\ 1+ repeat ( count IE ) drop ;
+		\ 1+ repeat ( count sw ) drop ;
 		ShellWindows :> count ?dup if dup for dup r@ - ( COUNT i )
-		dup . space ( COUNT i ) ie(i) ?dup if dup :> LocationName . space :> LocationURL . else ." Null" then cr
+		dup . space ( COUNT i ) sw(i) ?dup if dup :> LocationName . space :> LocationURL . else ." Null" then cr
 		next drop then ;
-		/// 有時候存在沒有內容的空 ie(i) 連 ie(0) 都有可能。
+		/// 有時候存在沒有內容的空 sw(i) 連 sw(0) 都有可能。
 		last alias list
 
-	\ 我不知道哪個 IE window 是 activated
+	\ 我不知道哪個 sw window 是 activated
 	\ 以下命令固定用 ShellWindows.item(theIE) 來做 automation。
 						
 	: ready				( -- ) \ Wait ShellWindows.item(theIE) to become ready
-						ie ?dup if 
-							dup :> ReadyState if ( ie )
+						sw ?dup if 
+							dup :> ReadyState if ( sw )
 								begin dup :> ReadyState==4 if drop space exit else char . . then 200 nap again
 							else
-							drop abort" Error! The given IE object is empty, nothing to do with 'ready'."
+							drop abort" Error! The given sw object is empty, nothing to do with 'ready'."
 							then
 						else \ 還沒有實體
-							drop abort" Error! The given IE object is NULL, nothing to do with 'ready'."
+							drop abort" Error! The given sw object is NULL, nothing to do with 'ready'."
 						then ;
-						/// 因為是 Wait ready 所以出問題要 abort。要預防,用 available? 先查。
+						/// 因為是 Wait ready 所以出問題要 abort。要預防,用 sw 先查。
 						
 	: not-busy			( -- ) \ Wait ShellWindows.item(0) to become not-busy
-						ie begin ( ie )
+						sw begin ( sw )
 							dup :> busy if char * . else drop space exit then
 						200 nap again ;
-						/// Wait ready first it checks IE object existence.
+						/// Wait ready first it checks sw object existence.
 						
 	: document			( -- obj ) \ Get ShellWindows.item(theIE).document object
-						ie :> document ;
+						sw :> document ;
 	: locationName		( -- "name" ) \ Get ShellWindows.item(theIE).locationName string
-						ie :> locationName ;
+						sw :> locationName ;
 	: locationUrl		( -- obj ) \ Get ShellWindows.item(theIE).locatonUrl string
-						ie :> locationUrl ;
+						sw :> locationUrl ;
 	: visible			( -- ) \ Make ShellWindows.item(theIE) visible
-						js: g.ShellWindows.item(theIE).visible=true ;
+						js: vm.g.ShellWindows.item(theIE).visible=true ;
 	: visible?			( -- flag ) \ Get ShellWindows.item(theIE).visible setting
-						ie :> visible ;
+						sw :> visible ;
 	: (navigate)		( "url" flags -- ) \ Visit the URL
-						ShellWindows :> count==0 ?abort" No connection to any IE web page."
-						ie :: navigate(pop(1),pop()) ;
+						ShellWindows :> count==0 ?abort" No connection to any sw web page."
+						sw :: navigate(pop(1),pop()) ;
 						/// Flags : A combined number of following bits:
 						/// 	navOpenInNewWindow = 0x1,
 						/// 	navNoHistory = 0x2,
@@ -250,11 +239,11 @@
 		照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都被一一執行到。
 		document <js> 
 		$("*",pop()).click(function(){
-			if(g.flag) return;
+			if(vm.g.flag) return;
 			$(this)
 			.css("border","2px ridge red")
 			.addClass("_selected_");
-			g.flag = true;
+			vm.g.flag = true;
 		});
 		</js>
 		除了紅框, 印出來看也證實。
@@ -280,11 +269,11 @@
 		\ 過一會兒就把 flag 清掉, 以便連續選擇。
 		document <js> 
 		$("*",pop()).click(function(){
-			if(kvm.flag) {
-				g.setTimeout("kvm.flag=false",500);
+			if(vm.flag) {
+				vm.g.setTimeout("vm.flag=false",500);
 				return;
 			}
-			kvm.flag = true;
+			vm.flag = true;
 			if($(this).hasClass("_selected_")){
 				$(this)
 				.removeClass("_selected_")
@@ -319,16 +308,16 @@
 		document <js> 
 		var doc=pop();
 		$("._selected_",doc).each(function(){
-			g.selected += $(this)[0].outerHTML;
+			vm.g.selected += $(this)[0].outerHTML;
 		});
-		doc.body.innerHTML = g.selected;
+		doc.body.innerHTML = vm.g.selected;
 		</js>		
 
 		\ 想要把重複的 track item 都刪掉，但本程式會當，好像變成無窮迴路。
 		<js>
-			for (var i=0; i<g.track.length; i++){
-				for (var j=i+1; i<g.track.length; j++) {
-					if (g.track[i]==g.track[j]) g.track.splice(j,1);
+			for (var i=0; i<vm.g.track.length; i++){
+				for (var j=i+1; i<vm.g.track.length; j++) {
+					if (vm.g.track[i]==vm.g.track[j]) vm.g.track.splice(j,1);
 				}
 			}
 		</js>
@@ -349,9 +338,9 @@
 		document <js> var doc=pop();
 			$("*",doc).mouseenter(function(){
 				print("mouse enter "+ this); execute("cr");
-				$(g.theElement).removeAttr('style'); // 無須防呆
+				$(vm.g.theElement).removeAttr('style'); // 無須防呆
 				$(this).css("border","4px dashed red");
-				g.theElement = this;
+				vm.g.theElement = this;
 			});
 			$("*",doc).mouseleave(function(){
 				print("mouse leave"+ this); execute("cr");
@@ -361,8 +350,8 @@
 		
 		\ 想讀取 attached 網頁的 css 失敗
 		js> $("#inputbox").css("background-Color") .s 成功
-		js> $("div",g.doc).css("background-Color") .s 失敗 JavaScript error : Unspecified error.
-		js> $("div",g.doc)[0].getAttribute("style") . 成功 所以是 jQuery 的問題 "border: 4px dashed yellow; background-color: yellow;" 
+		js> $("div",vm.g.doc).css("background-Color") .s 失敗 JavaScript error : Unspecified error.
+		js> $("div",vm.g.doc)[0].getAttribute("style") . 成功 所以是 jQuery 的問題 "border: 4px dashed yellow; background-color: yellow;" 
 		
 		\ 如果快速把 mouse 移到某 div 收到的 event 順序如下, 不照順序! 所以利用 lastThing 或 theElement 
 		\ 去清前一個也不靈。
@@ -415,10 +404,10 @@
 			})
 			$("*",doc).mouseenter(function(){
 				print("Enter " + this.nodeName + ". ");
-				$(g.track[g.track.length-1]).removeAttr('style'); // 無須防呆
+				$(vm.g.track[vm.g.track.length-1]).removeAttr('style'); // 無須防呆
 				$(this).css("border","4px dashed red");
-				g.track.push(this);
-				g.itrack = g.track.length-1;
+				vm.g.track.push(this);
+				vm.g.itrack = vm.g.track.length-1;
 			});
 			$("*",doc).mouseleave(function(){
 				print("Leave " + this.nodeName + ". ");
@@ -440,66 +429,69 @@
 				e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 				switch(keycode) {
 					case 67: /* [c]lear */
-						for(var i=0; i<g.track.length; i++){
-							$(g.track[i])
+						for(var i=0; i<vm.g.track.length; i++){
+							$(vm.g.track[i])
 							.removeAttr('style')
 							.removeClass("_selected_");
 						}
 						return(!GoOn); 
 					case 68: /* [d]elete the highlighted node */
-						push(g.track[g.itrack]);
+						push(vm.g.track[vm.g.itrack]);
 						execute("removeElement");
 						return(!GoOn); 
 					case 70: /* [f]reeze */
-						g.freeze = !g.freeze;
-						print("The freezing flag : " + g.freeze); execute("cr");
+						vm.g.freeze = !vm.g.freeze;
+						print("The freezing flag : " + vm.g.freeze); execute("cr");
 						return(!GoOn); 
 					case 83: /* [s]elect */
-						$(g.track[g.itrack])
+						$(vm.g.track[vm.g.itrack])
 						.removeAttr('style')
 						.css("border","2px solid lime")
 						.addClass("_selected_");
 						return(!GoOn); 
 					case 85: /* [u]nselect */
-						$(g.track[g.itrack])
+						$(vm.g.track[vm.g.itrack])
 						.removeAttr('style')
 						.removeClass("_selected_");
 						return(!GoOn); 
 					case 86: /* [v]iew selected nodes */
-						for(var i=0; i<g.track.length; i++){
-							$(g.track[i]).removeAttr('style');
-							if($(g.track[i]).hasClass("_selected_"))
-								$(g.track[i]).css("border","2px solid lime");
+						for(var i=0; i<vm.g.track.length; i++){
+							$(vm.g.track[i]).removeAttr('style');
+							if($(vm.g.track[i]).hasClass("_selected_"))
+								$(vm.g.track[i]).css("border","2px solid lime");
 						}
 						return(!GoOn); 
 					case 188: /* < , */
-						$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
-						g.itrack = Math.max(0,g.itrack-1);
-						$(g.track[g.itrack]).css("border","4px dashed red");						
+						$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+						vm.g.itrack = Math.max(0,vm.g.itrack-1);
+						$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 						return(!GoOn); 
 					case 190: /* > . */
-						$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
-						g.itrack = Math.min(g.track.length-1,g.itrack+1);
-						$(g.track[g.itrack]).css("border","4px dashed red");						
+						$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+						vm.g.itrack = Math.min(vm.g.track.length-1,vm.g.itrack+1);
+						$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 						return(!GoOn); 
 				}
 				return (!GoOn);
 			});
 			$("*",doc).mouseenter(function(){
 				print("Enter " + this.nodeName + ". ");
-				if (g.freeze) return;
-				$(g.track[g.itrack]).removeAttr('style'); // 無須防呆
-				if (g.track[g.track.length-1]!=this) g.track.push(this);
-				g.itrack = g.track.length-1;
-				$(g.track[g.itrack]).css("border","4px dashed red");						
+				if (vm.g.freeze) return;
+				$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+				if (vm.g.track[vm.g.track.length-1]!=this) vm.g.track.push(this);
+				vm.g.itrack = vm.g.track.length-1;
+				$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 			});
 			$("*",doc).mouseleave(function(){
 				print("Leave " + this.nodeName + ". ");
-				if (g.freeze) return;
+				if (vm.g.freeze) return;
 				$(this).removeAttr('style'); // 無須防呆
 			});
 		</js>
 	
+	</comment>	
+	<comment>	
+	[ ] 徹底研究
 	</comment>	
 		
 		

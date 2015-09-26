@@ -1,22 +1,22 @@
 
-\ WMI.f  ¨ÒÁ| WMI ªºÀ³¥Î¡C 
+\ WMI.f  ä¾‹èˆ‰ WMI çš„æ‡‰ç”¨ã€‚ 
 
 s" wmi.f"	source-code-header
 
 \
-\ WMI ¥i¥H access ªºªF¦è«D±`¦h¡C³o»ò¦h¥i¥ÎªºªF¦èÀY¸£°O¤£±o¡A¥²¶·¤Wºô¬d¸ß¡A¬d¸ßªººô§}¡B¥H¤Î
-\ ¥Ñ Win32_1394Controller ¶}©l¨ì Win32_WMISetting ¤îªº´X¦Ê­Ó WMI class ¦Cªíªş¦b¥»ÀÉ³Ì¤U­±¨Ñ
-\ °Ñ¦Ò¡C
+\ WMI å¯ä»¥ access çš„æ±è¥¿éå¸¸å¤šã€‚é€™éº¼å¤šå¯ç”¨çš„æ±è¥¿é ­è…¦è¨˜ä¸å¾—ï¼Œå¿…é ˆä¸Šç¶²æŸ¥è©¢ï¼ŒæŸ¥è©¢çš„ç¶²å€ã€ä»¥åŠ
+\ ç”± Win32_1394Controller é–‹å§‹åˆ° Win32_WMISetting æ­¢çš„å¹¾ç™¾å€‹ WMI class åˆ—è¡¨é™„åœ¨æœ¬æª”æœ€ä¸‹é¢ä¾›
+\ åƒè€ƒã€‚
 \
 
 \ Most of wmi.f tools are working on a target computer which can be "localhost" , "." or an IP address or computer
 \ name of a remote computer. We need to specify it to a constant named "t/c". If t/c is not defined then it will be
 \ "localhost" by default. Define t/c before include wmi.f in command line if your target computer is not localhost.
 
-\ ¦pªG¦b include wmi.f ¤§«e¥ı³]©w t/c ¤§­È¡A«h¾ã®M wmi.f ³£ refer to the specified t/c. ©Ò¥H§A¥i¥H¥h access §Oªº¾÷¾¹.
-\ ¨Ò¦p "cscript jeforth.js s' 10.34.98.76' constant t/c include wmi.f list-some-OS-properties" ¥i¥H¥h¬İ»·ºİ¾÷¾¹ªº¤º®e¡C
-\ ­Y¤£¥ıµ¹©w t/c «h¥H¤U³o¬qµ{¦¡·|§â t/c ³]¦¨ localhost ©Ò¥H¬O¹ï¥»¦a¹q¸£¤u§@¡C§Ú¤£·Q¨C¦¸³£±o«ü©w target computer ¦]¦¹
-\ °µ¦¹¦w±Æ¡C
+\ å¦‚æœåœ¨ include wmi.f ä¹‹å‰å…ˆè¨­å®š t/c ä¹‹å€¼ï¼Œå‰‡æ•´å¥— wmi.f éƒ½ refer to the specified t/c. æ‰€ä»¥ä½ å¯ä»¥å» access åˆ¥çš„æ©Ÿå™¨.
+\ ä¾‹å¦‚ "cscript jeforth.js s' 10.34.98.76' constant t/c include wmi.f list-some-OS-properties" å¯ä»¥å»çœ‹é ç«¯æ©Ÿå™¨çš„å…§å®¹ã€‚
+\ è‹¥ä¸å…ˆçµ¦å®š t/c å‰‡ä»¥ä¸‹é€™æ®µç¨‹å¼æœƒæŠŠ t/c è¨­æˆ localhost æ‰€ä»¥æ˜¯å°æœ¬åœ°é›»è…¦å·¥ä½œã€‚æˆ‘ä¸æƒ³æ¯æ¬¡éƒ½å¾—æŒ‡å®š target computer å› æ­¤
+\ å¦‚æ­¤å®‰æ’ã€‚
 
 ' t/c [if] [else]
 	s" localhost" constant t/c // ( -- "target-computer" ) wmi.f tools' default target computer is "localhost".
@@ -24,10 +24,10 @@ s" wmi.f"	source-code-header
 
 : getWMIService	( "target computer" -- objWMIService ) \ Get WMI service object of the target-computer.
 				s" winmgmts:{impersonationLevel=impersonate}!\\" swap + s" \root\cimv2" +
-				<vb> Set o = GetObject(kvm.pop()): kvm.push(o) </vb> ; 
+				<vb> Set o = GetObject(vm.pop()): vm.push(o) </vb> ; 
 
-\ Create JavaScript global variable kvm.objWMIService
-t/c getWMIService js: kvm.objWMIService=pop() 
+\ Create JavaScript global variable vm.objWMIService
+t/c getWMIService js: vm.objWMIService=pop() 
 				
 \ WMI Win32_NetworkAdapterConfiguration class
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394217(v=vs.85).aspx
@@ -35,7 +35,7 @@ t/c getWMIService js: kvm.objWMIService=pop()
 				( "where-clause" -- objEnumWin32_NetworkAdapterConfiguration ) \ Get Win32_NetworkAdapterConfiguration object onto TOS.
 				<js> 
 					new Enumerator(
-						kvm.objWMIService.ExecQuery("Select * from Win32_NetworkAdapterConfiguration "+pop())
+						vm.objWMIService.ExecQuery("Select * from Win32_NetworkAdapterConfiguration "+pop())
 					) 
 				</jsV> ;
 
@@ -53,55 +53,52 @@ t/c getWMIService js: kvm.objWMIService=pop()
 				
 				<selftest>
 					marker -%-%-%-%-%-
-					***** get WMI object, get NIC config, print IP addresses ...... 
-					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					*** get WMI object, get NIC config, print IP addresses
+					js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stops working if is null.
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					\ Start to do anything ...
-					js> kvm.objWMIService js> typeof(pop()) \ "object" 
+					js> vm.objWMIService js> typeof(pop()) \ "object" 
 					printIPAddress
 					\ .... done, start checking ...
-					start-here <js> kvm.screenbuffer.indexOf("thernet",pop())!=-1 </jsV> \ true  Ethernet
-					start-here <js> kvm.screenbuffer.indexOf("dapter",pop())!=-1 </jsV> \ true   Adapter
-					start-here <js> kvm.screenbuffer.indexOf("ireless",pop())!=-1 </jsV> \ true  Wireless
-					start-here <js> kvm.screenbuffer.indexOf("ontroller",pop())!=-1 </jsV> \ true  Controller
-					or or or
-					js> stack.slice(0) <js> ["object",true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
+					start-here <js> vm.screenbuffer.indexOf("thernet",pop())!=-1 </jsV> \ true  Ethernet
+					start-here <js> vm.screenbuffer.indexOf("dapter",pop())!=-1 </jsV> \ true   Adapter
+					start-here <js> vm.screenbuffer.indexOf("ireless",pop())!=-1 </jsV> \ true  Wireless
+					start-here <js> vm.screenbuffer.indexOf("ontroller",pop())!=-1 </jsV> \ true  Controller
+					or or or [d "object",true d] [p 
 						't/c',
 						'getWMIService',
 						'objEnumWin32_NetworkAdapterConfiguration',
 						'printIPAddress'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					p]
 					-%-%-%-%-%-
 				</selftest>
 
-\ §Q¥Î jeforth for WSH »P¨ä JavaScript console ¤â°Ê¨Ó¾Ş§@ WMI «Ü¦³¥Î¡A¨S¥²­n¼g¤@¤j°ï¤H¾÷¤¶­±¡C
-\ ¶]¤@¤U objEnumWin32_OperatingSystem ·Ç³Æ¦n Win32_OperatingSystem object ©ñ¦b TOS¡A¦¹«á¥Î console ¶i js console, 
-\ var os = pop(), §Y¥i¥Î os ¨Ó access ©Ò¦³ Win32_OperatingSystem ªºªF¦è¡C¨Ò¦p¡G
+\ åˆ©ç”¨ jeforth for WSH èˆ‡å…¶ JavaScript console æ‰‹å‹•ä¾†æ“ä½œ WMI å¾ˆæœ‰ç”¨ï¼Œæ²’å¿…è¦å¯«ä¸€å¤§å †äººæ©Ÿä»‹é¢ã€‚
+\ è·‘ä¸€ä¸‹ objEnumWin32_OperatingSystem æº–å‚™å¥½ Win32_OperatingSystem object æ”¾åœ¨ TOSï¼Œæ­¤å¾Œç”¨ console é€² js console, 
+\ var os = pop(), å³å¯ç”¨ os ä¾† access æ‰€æœ‰ Win32_OperatingSystem çš„æ±è¥¿ã€‚ä¾‹å¦‚ï¼š
 \     os.item().caption,      os.item().bootdevice,      os.item().countrycode, 
 \     os.item().installdate,  os.item().lastbootuptime,  os.item().systemdrive, 
 \	  os.item().totalvisiblememorysize 
-\ µ¥µ¥¡C ³o­Ó«ØÄ³¹ï©Ò¦³ WMI classes ³£¾A¥Î¡C
+\ ç­‰ç­‰ã€‚ é€™å€‹å»ºè­°å°æ‰€æœ‰ WMI classes éƒ½é©ç”¨ã€‚
 
 \ Win32_OperatingSystem class
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394239(v=vs.85).aspx
-code objEnumWin32_OperatingSystem 
-				( -- objEnumWin32_OperatingSystem ) \ Get WMI OS object onto TOS.
-				push(new Enumerator(kvm.objWMIService.InstancesOf("Win32_OperatingSystem")));
+code objEnumWin32_OperatingSystem ( -- objEnumWin32_OperatingSystem ) \ Get WMI OS object onto TOS.
+				push(new Enumerator(vm.objWMIService.InstancesOf("Win32_OperatingSystem")));
 				end-code 
 
 \  win32shutdown options
 \ -------------------------------------- 
 \  Value    Meaning
 \ -------------------------------------- 
-\  0 (0x0)  Log Off                   ¥Ø«e¬ã¨s¨ì³o¸Ì¡A¥u¦³ log off ¯à¥Î
-\  4 (0x4)  Forced Log Off (0 + 4)    ¥Ø«e¬ã¨s¨ì³o¸Ì¡A¥u¦³ log off ¯à¥Î
-\  1 (0x1)  Shutdown                  doesn't work on Win7, JScript error : Privilege not held. «İ·dÀ´ SE_SHUTDOWN_NAME
-\  5 (0x5)  Forced Shutdown (1 + 4)   doesn't work on Win7, JScript error : Privilege not held. «İ·dÀ´ SE_SHUTDOWN_NAME
-\  2 (0x2)  Reboot                    doesn't work on Win7, JScript error : Privilege not held. «İ·dÀ´ SE_SHUTDOWN_NAME
-\  6 (0x6)  Forced Reboot (2 + 4)     doesn't work on Win7, JScript error : Privilege not held. «İ·dÀ´ SE_SHUTDOWN_NAME
-\  8 (0x8)  Power Off                 doesn't work on Win7, JScript error : Privilege not held. «İ·dÀ´ SE_SHUTDOWN_NAME
-\ 12 (0xC)  Forced Power Off (8 + 4)  doesn't work on Win7, JScript error : Privilege not held. «İ·dÀ´ SE_SHUTDOWN_NAME
+\  0 (0x0)  Log Off                   ç›®å‰ç ”ç©¶åˆ°é€™è£¡ï¼Œåªæœ‰ log off èƒ½ç”¨
+\  4 (0x4)  Forced Log Off (0 + 4)    ç›®å‰ç ”ç©¶åˆ°é€™è£¡ï¼Œåªæœ‰ log off èƒ½ç”¨
+\  1 (0x1)  Shutdown                  doesn't work on Win7, JScript error : Privilege not held. å¾…ææ‡‚ SE_SHUTDOWN_NAME
+\  5 (0x5)  Forced Shutdown (1 + 4)   doesn't work on Win7, JScript error : Privilege not held. å¾…ææ‡‚ SE_SHUTDOWN_NAME
+\  2 (0x2)  Reboot                    doesn't work on Win7, JScript error : Privilege not held. å¾…ææ‡‚ SE_SHUTDOWN_NAME
+\  6 (0x6)  Forced Reboot (2 + 4)     doesn't work on Win7, JScript error : Privilege not held. å¾…ææ‡‚ SE_SHUTDOWN_NAME
+\  8 (0x8)  Power Off                 doesn't work on Win7, JScript error : Privilege not held. å¾…ææ‡‚ SE_SHUTDOWN_NAME
+\ 12 (0xC)  Forced Power Off (8 + 4)  doesn't work on Win7, JScript error : Privilege not held. å¾…ææ‡‚ SE_SHUTDOWN_NAME
 \ -------------------------------------- 
 \ see also  Win32ShutdownTracker method and  SE_SHUTDOWN_NAME privilege, SetSuspendState function
 \ To enable the SE_SHUTDOWN_NAME privilege, use the AdjustTokenPrivileges function. For more information, see Changing Privileges in a Token.
@@ -111,8 +108,8 @@ code objEnumWin32_OperatingSystem
 
 				<selftest>
 					marker -%-%-%-%-%-
-					***** Demo how to use objEnumWin32_OperatingSystem object ... 
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					*** objEnumWin32_OperatingSystem object
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					objEnumWin32_OperatingSystem 
 					.( Caption                ) dup js> pop().item().caption . cr
 					.( BootdDvice             ) dup js> pop().item().bootdevice . cr
@@ -122,24 +119,20 @@ code objEnumWin32_OperatingSystem
 					.( SystemDrive            ) dup js> pop().item().systemdrive . cr
 					.( TotalVisibleMemorySize )     js> pop().item().totalvisiblememorysize
 					js> parseInt(pop()/1024) dup . space .( Mega Bytes) cr \ translate string to integer
-					2000 > \ true ²{¦bªº¹q¸£³£¦³ 2G ¥H¤W memory ¤F§a¡I
-					start-here <js> kvm.screenbuffer.indexOf("Microsoft Windows",pop())!=-1 </jsV> \ true
-					js> stack.slice(0) <js> [true, true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
-						'objEnumWin32_OperatingSystem'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					2000 > \ true ç¾åœ¨çš„é›»è…¦éƒ½æœ‰ 2G ä»¥ä¸Š memory äº†å§ï¼
+					start-here <js> vm.screenbuffer.indexOf("Microsoft Windows",pop())!=-1 </jsV> \ true
+					[d true, true d] [p 'objEnumWin32_OperatingSystem' p]
 					-%-%-%-%-%-
 				</selftest>
 
-code objEnumWin32_ComputerSystem 
-				( -- objEnumWin32_ComputerSystem ) \ Get WMI Win32_ComputerSystem object onto TOS.
-				push(new Enumerator(kvm.objWMIService.InstancesOf("Win32_ComputerSystem")));
+code objEnumWin32_ComputerSystem ( -- objEnumWin32_ComputerSystem ) \ Get WMI Win32_ComputerSystem object onto TOS.
+				push(new Enumerator(vm.objWMIService.InstancesOf("Win32_ComputerSystem")));
 				end-code 
 				
 				<selftest>
-					***** Demo how to use objEnumWin32_ComputerSystem object ... 
+					*** objEnumWin32_ComputerSystem object
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					objEnumWin32_ComputerSystem >r
 					." Caption                " r@ js> pop().item().caption dup . cr    \ <<**** get caption
@@ -153,10 +146,7 @@ code objEnumWin32_ComputerSystem
 					." Domain                 " r@ js> pop().item().Domain . cr
 					r> drop
 					( ------------ done, start checking ---------------- ) 
-					= js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
-						'objEnumWin32_ComputerSystem'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					= [d true d] [p 'objEnumWin32_ComputerSystem' p]
 					-%-%-%-%-%-
 				</selftest>
 				
@@ -165,9 +155,8 @@ code objEnumWin32_ComputerSystem
 				
 \ Win32_PhysicalMemory class
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394347(v=vs.85).aspx
-code objEnumWin32_PhysicalMemory 
-				( -- objEnumWin32_PhysicalMemory ) \ Get WMI Win32_PhysicalMemory object onto TOS.
-				push(new Enumerator(kvm.objWMIService.InstancesOf("Win32_PhysicalMemory")));
+code objEnumWin32_PhysicalMemory ( -- objEnumWin32_PhysicalMemory ) \ Get WMI Win32_PhysicalMemory object onto TOS.
+				push(new Enumerator(vm.objWMIService.InstancesOf("Win32_PhysicalMemory")));
 				end-code 
 				
 : list-some-Win32_PhysicalMemory-properties 
@@ -200,18 +189,17 @@ code objEnumWin32_PhysicalMemory
   				;
 		
 				<selftest>
-					***** Demo how to use objEnumWin32_PhysicalMemory object ... 
+					*** Demo how to use objEnumWin32_PhysicalMemory object
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					list-some-Win32_PhysicalMemory-properties
 					2000 >
 					( ------------ done, start checking ---------------- ) 
-					js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
+					[d true d] [p
 						'objEnumWin32_PhysicalMemory',
 						'list-some-Win32_PhysicalMemory-properties'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					p]
 					-%-%-%-%-%-
 				</selftest>
 				
@@ -221,9 +209,8 @@ code objEnumWin32_PhysicalMemory
 \ Win32_PnPEntity class
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394353(v=vs.85).aspx
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394587(v=vs.85).aspx   
-code objEnumWin32_PnPEntity 
-				( "where-clause" -- objEnumWin32_PnPEntity ) \ Get WMI Win32_PnPEntity object onto TOS.
-				push(new Enumerator(kvm.objWMIService.ExecQuery("Select * from Win32_PnPEntity "+pop())));
+code objEnumWin32_PnPEntity ( "where-clause" -- objEnumWin32_PnPEntity ) \ Get WMI Win32_PnPEntity object onto TOS.
+				push(new Enumerator(vm.objWMIService.ExecQuery("Select * from Win32_PnPEntity "+pop())));
 				end-code 
 				
 : list-all-PnP-devices 
@@ -241,21 +228,20 @@ code objEnumWin32_PnPEntity
 				\ cscript jeforth.js include wmi.f cr list-all-PnP-devices bye
 
 				<selftest>
-					***** Demo how to use objEnumWin32_PnPEntity object ... 
+					*** Demo how to use objEnumWin32_PnPEntity object
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					list-all-PnP-devices
 					10 > \ true
 					( ------------ done, start checking ---------------- ) 
-					start-here <js> kvm.screenbuffer.indexOf("PCI",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("ACPI",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("HID-compliant",pop())!=-1 </jsV> \ true
-					js> stack.slice(0) <js> [true,true,true,true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
+					start-here <js> vm.screenbuffer.indexOf("PCI",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("ACPI",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("HID-compliant",pop())!=-1 </jsV> \ true
+					[d true,true,true,true d] [p
 						'objEnumWin32_PnPEntity',
 						'list-all-PnP-devices'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					p]
 					-%-%-%-%-%-
 				</selftest>
 				
@@ -282,25 +268,23 @@ code objEnumWin32_PnPEntity
 				\ cscript jeforth.js include wmi.f cr list-abnormal-items-in-device-manager bye
 
 				<selftest>
-					***** Let's see if there's any abnormal items in device manager ... 
+					*** Let's see if there's any abnormal items in device manager
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					list-abnormal-items-in-device-manager
 					js> isNaN(pop()) > \ false
 					( ------------ done, start checking ---------------- ) 
-					js> stack.slice(0) <js> [false] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
+					[d false d] [p
 						'list-abnormal-items-in-device-manager'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					p]
 					-%-%-%-%-%-
 				</selftest>
 
 \ MSDN Dev Center - Desktop > Docs > Windows Development Reference > System Administration > Windows Management Instrumentation > Using WMI > Creating WMI Clients > WMI Tasks for Scripts and Applications > WMI Tasks: Computer Hardware
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394587(v=vs.85).aspx   
-code objEnumWin32_CDROMDrive 
-				( "where-clause" -- objEnumWin32_CDROMDrive ) \ Get WMI Win32_CDROMDrive object onto TOS.
-				push(new Enumerator(kvm.objWMIService.ExecQuery("Select * from Win32_CDROMDrive "+pop())));
+code objEnumWin32_CDROMDrive ( "where-clause" -- objEnumWin32_CDROMDrive ) \ Get WMI Win32_CDROMDrive object onto TOS.
+				push(new Enumerator(vm.objWMIService.ExecQuery("Select * from Win32_CDROMDrive "+pop())));
 				end-code 
 				
 : list-CD/DVD-drives 
@@ -330,28 +314,26 @@ code objEnumWin32_CDROMDrive
 				\ cscript jeforth.js include wmi.f list-CD/DVD-drives bye
 				
 				<selftest>
-					***** Demo objEnumWin32_CDROMDrive object ... 
+					*** Demo objEnumWin32_CDROMDrive object
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					list-CD/DVD-drives
 					js> isNaN(pop()) > \ false
 					( ------------ done, start checking ---------------- ) 
-					js> stack.slice(0) <js> [false] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
+					[d false d] [p
 						'objEnumWin32_CDROMDrive',
 						'list-CD/DVD-drives'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					p]
 					-%-%-%-%-%-
 				</selftest>
 
 \ MSDN Dev Center - Desktop > Docs > Windows Development Reference > System Administration > Windows Management Instrumentation > WMI Reference > WMI Classes > Win32 Classes > Win32_Processor
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394373(v=vs.85).aspx
-code objEnumWin32_Processor 
-				( -- objEnumWin32_Processor ) \ Get WMI Win32_Processor object onto TOS.
-				push(new Enumerator(kvm.objWMIService.InstancesOf("Win32_Processor")));
+code objEnumWin32_Processor ( -- objEnumWin32_Processor ) \ Get WMI Win32_Processor object onto TOS.
+				push(new Enumerator(vm.objWMIService.InstancesOf("Win32_Processor")));
 				end-code 
-				
+
 : list-all-processors 
 				( -- #Cores #LogicalProcessers #Processers ) \ List all processors in this computer. Return physical CPU count.
 				0 objEnumWin32_Processor >r  ( 0 | obj )
@@ -409,9 +391,9 @@ code objEnumWin32_Processor
 				\ cscript jeforth.js include wmi.f list-all-processors drop drop bye
 
 				<selftest>
-					***** Demo objEnumWin32_Processor object ... 
+					*** Demo objEnumWin32_Processor object
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					list-all-processors
 					js> isNaN(pop()) \ false
@@ -420,24 +402,19 @@ code objEnumWin32_Processor
 					-rot
 					js> isNaN(pop())  \ false
 					( ------------ done, start checking ---------------- ) 
-					js> stack.slice(0) <js> [false,false,false] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
-						'objEnumWin32_Processor',
-						'list-all-processors'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					[d false,false,false d] [p 'objEnumWin32_Processor','list-all-processors' p]
 					-%-%-%-%-%-
 				</selftest>
 
 \ View BIOS info
-code objEnumWin32_BIOS 
-				( -- objEnumWin32_BIOS ) \ Get WMI Win32_BIOS object onto TOS.
-				push(new Enumerator(kvm.objWMIService.InstancesOf("Win32_BIOS")));
+code objEnumWin32_BIOS ( -- objEnumWin32_BIOS ) \ Get WMI Win32_BIOS object onto TOS.
+				push(new Enumerator(vm.objWMIService.InstancesOf("Win32_BIOS")));
 				end-code 
 
 				<selftest>
-					***** Demo how to use objEnumWin32_BIOS, list Win32_BIOS properties ... 
+					*** Demo how to use objEnumWin32_BIOS, list Win32_BIOS properties
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					objEnumWin32_BIOS >r
 					." BiosCharacteristics[] " r@ js> pop().item().BiosCharacteristics   .VBArray cr
@@ -469,13 +446,10 @@ code objEnumWin32_BIOS
 					." Version               " r@ js> pop().item().Version               . cr
 					r> drop
 					( ------------ done, start checking ---------------- ) 
-					start-here <js> kvm.screenbuffer.indexOf("Status                OK",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("PrimaryBIOS           true",pop())!=-1 </jsV> \ true
-					\ start-here <js> kvm.screenbuffer.indexOf("en-US",pop())!=-1 </jsV> \ true
-					js> stack.slice(0) <js> [true,true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
-						'objEnumWin32_BIOS'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					start-here <js> vm.screenbuffer.indexOf("Status                OK",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("PrimaryBIOS           true",pop())!=-1 </jsV> \ true
+					\ start-here <js> vm.screenbuffer.indexOf("en-US",pop())!=-1 </jsV> \ true
+					[d true,true d] [p 'objEnumWin32_BIOS' p]
 					-%-%-%-%-%-
 				</selftest>
 				
@@ -485,18 +459,17 @@ code objEnumWin32_BIOS
 \ View Battery info
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394074(v=vs.85).aspx
 \ Dev Center - Desktop > Docs > Windows Development Reference > System Administration > Windows Management Instrumentation > WMI Reference > WMI Classes > Win32 Classes > Win32_Battery
-code objEnumWin32_Battery 
-				( -- objEnumWin32_Battery ) \ Get WMI Win32_Battery object onto TOS.
-				push(new Enumerator(kvm.objWMIService.InstancesOf("Win32_Battery")));
+code objEnumWin32_Battery ( -- objEnumWin32_Battery ) \ Get WMI Win32_Battery object onto TOS.
+				push(new Enumerator(vm.objWMIService.InstancesOf("Win32_Battery")));
 				end-code 
 
 				\ This is a one liner to show battery things.
 				\ cscript jeforth.js list-Win32_Battery-properties bye /f0:wmi.f //nologo
 
 				<selftest>
-					***** Demo how to use objEnumWin32_Battery, list Win32_Battery properties ... 
+					*** Demo how to use objEnumWin32_Battery, list Win32_Battery properties
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					objEnumWin32_Battery js> tos().atEnd() [if] drop ." This computer has no battery." cr [else] >r
 					." Availability                  " r@ js> pop().item().Availability                . cr \ uint16  
@@ -534,30 +507,25 @@ code objEnumWin32_Battery
 					." TimeToFullCharge              " r@ js> pop().item().TimeToFullCharge            . cr \ uint32  
 					r> drop [then] 
 					( ------------ done, start checking ---------------- ) 
-					start-here <js> kvm.screenbuffer.indexOf("Status                        OK",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("CreationClassName             Win32_Battery",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("This computer has no battery",pop())!=-1 </jsV> \ true|false
-					or or
-					js> stack.slice(0) <js> [true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
-						'objEnumWin32_Battery'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					start-here <js> vm.screenbuffer.indexOf("Status                        OK",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("CreationClassName             Win32_Battery",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("This computer has no battery",pop())!=-1 </jsV> \ true|false
+					or or [d true d] [p 'objEnumWin32_Battery' p]
 					-%-%-%-%-%-
 				</selftest>
 
 \ View Process info
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394372(v=vs.85).aspx
 \ Win32_Process class
-code objEnumWin32_Process
-				( "where-clause" -- objEnumWin32_Process ) \ Get WMI Win32_Process object onto TOS.
-				push(new Enumerator(kvm.objWMIService.ExecQuery("Select * from Win32_Process "+pop())));
+code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI Win32_Process object onto TOS.
+				push(new Enumerator(vm.objWMIService.ExecQuery("Select * from Win32_Process "+pop())));
 				end-code 
 
-: list-processes 
-				( -- count ) \ List all processes
+: list-processes ( -- count ) \ Demo List some processes
 				0 "" objEnumWin32_Process >r  ( 0 | objEnum )
 				begin
-					r@ js> !pop().atEnd() ( 0 NotAtEnd? )
+					\ ç¤ºç¯„åˆ—åå€‹å°±å¥½ï¼Œå¤ªå¤šç­‰å¾ˆä¹…ã€‚
+					r@ js> !pop().atEnd() over 10 < and ( 0 under10&&NotAtEnd? )
 				while ( count | objEnum )
 					1+ ( count++ | objEnum )
 					." -------------------------------------------" cr
@@ -572,19 +540,16 @@ code objEnumWin32_Process
 				\ jeforth.hta include wmi.f list-processes 
 				
 				<selftest>
-					***** Demo how to use objEnumWin32_Process, list all processes ... 
+					*** Demo how to use objEnumWin32_Process, list all processes
 					marker -%-%-%-%-%-
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) ¶}©l´ú¸Õ«eªº kvm.screenbuffer §À¤Ú¡C
+					js> vm.screenbuffer.length constant start-here // ( -- n ) é–‹å§‹æ¸¬è©¦å‰çš„ vm.screenbuffer å°¾å·´ã€‚
 					( ------------ Start to do anything --------------- )
 					list-processes \ count
 					( ------------ done, start checking ---------------- ) 
 					js> isNaN(pop()) \ false
-					start-here <js> kvm.screenbuffer.indexOf("mshta.exe",pop())!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.indexOf("System Idle Process",pop())!=-1 </jsV> \ true
-					js> stack.slice(0) <js> [false,true,true] </jsV> isSameArray >r dropall r>
-					-->judge [if] <js> [
-						'objEnumWin32_Process'
-					] </jsV> all-pass [else] *debug* selftest-failed->>> [then]
+					start-here <js> vm.screenbuffer.indexOf("smss.exe",pop())!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.indexOf("System Idle Process",pop())!=-1 </jsV> \ true
+					[d false,true,true d] [p 'objEnumWin32_Process' p]
 					-%-%-%-%-%-
 				</selftest>
 
@@ -696,13 +661,13 @@ code objEnumWin32_Process
 				///     s" where name = 'ExCeL.ExE'" get-them
 				///     s" where name like 'chrom%'" get-them 
 
-<comment> ¡ã¡ã¡ã¡ã¡ã¡ã ¥H¤U¬O§Úªºµ§°O¡B¯ó½Z ¡ã¡ã¡ã¡ã¡ã¡ã¡ã¡ã
+<comment> ï½ï½ï½ï½ï½ï½ ä»¥ä¸‹æ˜¯æˆ‘çš„ç­†è¨˜ã€è‰ç¨¿ ï½ï½ï½ï½ï½ï½ï½ï½
 
-WMI ´£¨ÑªºªF¦è«D±`¦h¡A³£¥i¥H³z¹L MSDN ¥h¬d¸ß¡Cºô§}¦p¤U¡A
+WMI æä¾›çš„æ±è¥¿éå¸¸å¤šï¼Œéƒ½å¯ä»¥é€é MSDN å»æŸ¥è©¢ã€‚ç¶²å€å¦‚ä¸‹ï¼Œ
 Dev Center - Desktop > Docs > Windows Development Reference > System Administration > Windows Management Infrastructure > WMI Reference > WMI Classes
 http://msdn.microsoft.com/en-us/library/windows/desktop/aa394554(v=vs.85).aspx
 
-§ó°®¯ÜÂI¨à¡A¥Î¤U¦C WMI class ªº name ¬° key ª½±µ¤Wºô¬d¤]³\§ó§Ö¡A
+æ›´ä¹¾è„†é»å…’ï¼Œç”¨ä¸‹åˆ— WMI class çš„ name ç‚º key ç›´æ¥ä¸Šç¶²æŸ¥ä¹Ÿè¨±æ›´å¿«ï¼Œ
 	Win32_1394Controller
 	Win32_1394ControllerDevice
 	Win32_AccountSID

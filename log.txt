@@ -8,7 +8,9 @@
 ---------- developping log --------------------------------------------------------------
 
 [x] first line of jeforth.f is strange. I skip it now. Need to find out the reason someday.  hcchen5600 2014/01/28 11:39:49 
+	==> fso does not support utf-8, ado does.
 [x] why UTF-8 chinese characters are not shown correctly? ==> big5 is ok!  
+	==> fso does not support utf-8, ado does.
 [X] jquery.terminal-0.7.7.js  ==> I give up jQuery-terminal when it comes to HTA.
 
     > 552           var data = $.Storage.get(name + 'commands');
@@ -1818,14 +1820,21 @@
     Push 0 to rstack due to the assumption of that all handlers are started from the waiting state, 
     0 brings the handler back to waiting sate.
     
+		~%~%~%~%~%~ 參考自己,抓自己,取得自己,自身,參考自身,參考本身,取得本身 ~%~%~%~%~%~
+        \ 設定、取得 colon word 本身的方法，
+        \   : test [ last literal ] ; \ 基本型 TOS is _me
+        \   : test [ last :: vv=1111 last literal ] :> vv ; \ init static variable
         \ 取得 colon word 本身的 cfa 有下列方法 
-        \ a）[ js> last().cfa ] literal 即是
-        \ b） [ last ] literal :> cfa 同上，這個不 optimize。
-        \ c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
+        \   a）[ js> last().cfa ] literal 即是
+        \   b）[ last literal ] :> cfa 同上，這個不 optimize。
+        \   c）colon word 裡一見面 js> ip 2- 也是，但有 proprietary 之嫌。
+		\ 取得 code word 自身可以考慮用 tick('name'). 另一可能 arguments.callee 參考到 xt 而不是
+		\ code word object 本身。如何在 code word 裡安置 static variable 參考到自己?
+		\   經由 "newxt=function(_me){..." in docode() of kernel jeforth.js, and
+		\   simply call w.xt(w) in the inner() loop, we have _me in any code word
+		\   that indicates the code word itself. -- 08:42PM 2015/9/2
 
-        \ 設定、取得 colon word 本身裡的 static variable 的方法，
-        \ : test2 [ last dup js: pop().vv=1111 ] literal js> pop().vv ;
-    
+		
     3. Use an existing code word to setup a call back function
     This example shows that the xt of a code word can be used as a call back function.
         code cbServer ( request, response ) \ Web server call back function
@@ -1954,13 +1963,6 @@
 [x] 把 jeforth.js kernel code 裡頭原來用 hash table 取代 switch(){...} 的寫法改回去用 switch().
     經 吳政昌 指點，這個場合用 switch 比較好。 ==> Done, committed.
 
-[ ] Thinking of how to improve the user experience on http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/,
-    I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
-    It's beautiful and it can help us to convert a picture into base64 embeded HTML code. Good for jeforth
-    to have embeded pictures.
-    [ ] Use contentBuilder.js' online editor to design what I want to show on jeforth.3htm online. Then pay
-        some money to find a front end designer to translate into HTML.
-        
 [x] canvas.f self-test is annoying. Remove the confirming dialogs.
     [x] 引用 kvm.cv 當 default canvas 可簡化 canvas commands. 但是要記住自己的 canvas ID, processing.js
         alike event driven animation 上手時要把 kvm.cv 改成自己的，離開前要還原。 clock3.f 有做，很好。
@@ -1976,7 +1978,9 @@
     [x] jeforth.3hta jsc has a 'clean' command already that erase the output box from the bottom.
     [x] Same code but not work in jeforth.3htm yet,  why? ==> 檢查 inputbox 是否有東西的 
         Boolean(inputbox.value) 在 HTA 是 false; 在 Chrome browser 是 true <=== Root cause
-        ==> 查 inputbox.value.length -> 1, ==> inputbox.value.charCodeAt(0)->10 <== 先清掉
+        ==> 查 inputbox.value.length -> 1, ==> inputbox.value.charCodeAt(0)->10
+		==> 改用這個方法判斷 inputbox 是否為 empty --> inputbox.value!=""&&inputbox.value!="\n"
+		
 [x] need a way to see or to save screen info when in jsc. 不行，整個 browser 都 block 住了！
 
 [x] Study how to use command-line in jeforth.3htm. 
@@ -2244,7 +2248,7 @@
     設定值為 interval-1 , 而 interval 的初值為 frameInterval。
     ==> 這樣調整有效，但是誤差會累積。t0 記住，frameCount * frameInterval 與 t0 的距離用來調整 interval 
         最直接，不會累積誤差。
-    ==> 先研究 JavaScript 怎麼弄出個 static variable
+    ==> 先研究 JavaScript 怎麼弄出個 static variable ==> 
         <js> 
             var a=0,b=0;
             var dumy = {seta:function(x){a=x},setb:function(x){b=x},average:function(){return((a+b)/2)}};
@@ -3715,11 +3719,465 @@
 [x] hcchen5600 2015/08/21 17:40:12 
 	完成 [begin][again] [begin][until] [for][next] interpret mode 的重要 flow control 命令
 	以後不用 cut .. rewind 了。
-
 [x] Use this line to setup Fubon e01 association in excel 	
     ==> [begin] DDE-formula down @?stop 10 nap [again]
-
 [ ] study meney.f against the recent decline.
-
 [ ] work on project-k jeforth.f
+[ ]	新增 private folder 放 work.f money.f departmentcode.json 等。
+	--> 看怎麼把 project-k-kernel merge 回 master?
+[ ] 把 jeforth.3we 的 kernel 換成 project-k. project-k 的 cub.html 已經成功把
+	pack-help 獨立出來, vm/kvm 的問題也搞懂了. 應該從 jeforth.f 改好就好了。
+	jeforth.3we 還是可以自稱 kvm 噓~~~ ===> 不要直接改, 先用 cub.html debug。
+	或者用帶入新 vm 的手法直接在 jeforth.3we 裡 debug。
+[x] cub.f 直接在 jeforth.3we 裡試驗 project-k-kernel 很成功。一下就把 cub.f
+	run 起來了。cub.f 沒有 selftest 所以不可靠, jeforth.3we 穩是基本要求。準備
+	改用 3we/kernel/jeforth.f 
+[x] 用了很久的 packhelp() 傳回 "( foo ) bar" 或者 "( ?? ) No help message. Use // to add one."
+	等於是從 tib 抽 help 出來。用新的 "parse-help" 取代，方法如下：
+		push(nexttoken('\n|\r')); // rest of the first line
+		execute("parse-help"); // ( "helpmsg" "rests" )
+		tib = pop() + " " + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
+		newhelp = pop();
+[ ] project-k 的 panic 要表明身分,否則搞搞不清楚.
+		
+[ ] 從 jeforth.3we 下命令給 project-k VM 用 hotkey f8：
+		code {F8} ( "command line" -- ) \ Let project-k VM to run the inputbox
+			var cmd = inputbox.value;
+			inputbox.value=""; 
+			g.k.dictate(cmd) ;
+			jump2endofinputbox.click();
+			inputbox.focus();
+			end-code
+
+[ ] cub.f 好了,攻 selftest, 改良。
+[ ] Original (words) in jeforth.f is very powerful but without -v and -V. 
+	While words and help was poor, because they were rely on voc.f unnecessarily.
+	So we need to improve words and help. --> 規定好 input 格式, 有助化簡程式。
+	words/help [pattern [switch [argument]]]
+	
+[ ] 老經驗
+	nexttoken('\n|\r'); // if use only '\n' then we get an unexpected ending '\r'.	
+	
+[x] see ~(create)~
+	JavaScript error on word ".0r" : Cannot read property 'length' of undefined
+	==> RI,FP: 產生一個 colon word 方法很多，不一定已經有 cfa。  
+
+[x] 用 vm.init() 來設定 type() or print() function 多此一舉。已經有 vm.clearScreen 等
+	乾脆就不要 init() 了。projct-k 根本不知道也不用知道你需要 print() !!
+	==> jeforth.js 有用到 type() 這樣一來 project-k 就認為自己在有 display 的地方執行?!
+		雖然可以從 type() 的定義解決，總是不太理想。
+	==> 用到 type() 的地方
+		1. docode() 的 reDef warning ==> 改 call panic(state-object). 
+		2. panic() ==> 所有 error/warning 都 call panic() 如前。但 panic() 裡面先檢查有
+		   沒有 vm.panic() 然後 call vm.panic(state)。
+		3. reset() 的 message 沒啥意義
+	==> 已經都用 k :: type=function..., k :: prompt=.. 的方式。
+[ ] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
+	==> 小心用! Windows XP 的 JScript v5.6 未 support. 故 project-k jeforth.f 裡都不能用。
+	
+[x]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎? --> 改成 tick(':').stackwas 了。
+[x] 要參考 code word 自身,用 tick('name') 是可以考慮。有更好的辦法嗎?
+	==> 現在 _me 直接就是該 word object 本身。
+[x] working on db bp *debug* for cub.f
+	==> resume function needs a static variable.
+		--> see processing.f, "JavaScript Module Pattern: In-Depth" in YouDao Notebook.
+	==> I only want to get the code word object	in its xt(), it's the argument! So,
+		simply call w.xt(w) passes w over, this simple! This is done in the inner().
+		also "newxt=function(_me){..." in docode() of kernel jeforth.js.
+	==> 經由 "newxt=function(_me){..." in docode() of kernel jeforth.js, and
+		simply call w.xt(w) in the inner() loop, we have _me in any code word
+		that indicates the code word itself.
+
+[x]	root word-list 還是叫 'forth' 好了, 當初想的是讓 project-k 盡量中性，先有 root 然
+	後再加上 forth voc 等。但因為 kernel jeforth.f 本身不 support vocabulary, 故以上
+	已經落空，根本分不出 root 跟 forth 不如就用 forth。還是可以在 voc.f 進來了以後再
+	拆分 root 跟 forth。但這麼做有何意義? 既無意義就表示都是 forth 即可。
+	所以 forth 變成永遠都在的部分，不想讓 words help 太雜亂時，盡量用 only work.f,
+	only git.f 等來讓輸出清爽。故 words 的 -v -V -V- option 都不必了，好耶。
+	
+[ ] should be moved to voc.f
+	: temp			( -- ) \ The source-code-file.f header macro 
+					<text>
+						?skip2 --EOF-- \ skip it if already included
+						dup .( Including ) . cr char -- over over + +
+						js: tick('<selftest>').masterMarker=tos()+"selftest--";
+						also forth definitions (marker) (vocabulary)
+						last execute definitions
+						<selftest>
+							js> tick('<selftest>').masterMarker (marker)
+							include kernel/selftest.f
+						</selftest>
+					</text> tib.insert ;
+					js: last().name="source-code"+"-header"
+					/// skip including if the module has been included.
+					/// setup the self-test module
+					/// initiate vocabulary for the including module
+
+[ ] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
+
+[x] 大改寫, 
+	[x] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配. 
+		(help) 不該負責印系統 help --> (words) words , voc.f words help ok
+	o	get jeForth() from jeforth.js > kvm = new jeForth()	
+	o	kernel/jeforth.f --> f/jeforth.f
+	o	fortheval --> dictate
+	o	print --> type 
+	o	所有 g.sth 改成 vm.g.sth, 否則 g 本身要在哪裡定義?
+		--> 如果是在 init module (index.html), 跑出一個不是掛在 vm 下的例外。
+		--> 如果在 kernel jeforth.js 裡, 更不好。
+	o	internel kvm --> vm
+	o	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	o	kvm.selftest_visible = true;
+	o	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+		kvm.greeting = function(){
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
+			return(version);
+		}
+	o	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm []3nd []3nw []3hta
+	o	vm.editMode 改用 ({F2}).EditMode 
+	o	改寫 vm.panic() 
+	
+
+[ ] html5.f , element.f 的 selftest 都很欠缺，無聊寫寫。
+[x] 3htm 的 platform.f 裡又有 (help) help 用來超漂亮的 help .... 也得改寫.
+	---> keyboard events 有問題,回家繼續 debug
+[x] Error! source-code-header unknown.
+
+[ ] jeforth.3we 的 'kernel' directory 直接就是 project-k 以免搞不清楚.
+	本來認為是 kernel 的 jeforth.f 跟 voc.f 則搬到 f 裡去。不當作 kernel 了。
+	[ ]	這個要把 kernel 拿掉, 以 3htm 為例,
+		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+[x]	這兩個不必佔用 vm.member , 應該直接放進 *debug* 的 members。
+	因為掛在 vm 下的 properties 都要有關聯 vm 內外的目的，如 vm.type(), vm.prompt, 
+	等. bp 跟 continue 或 resume 純粹是 jeforth.f 內部的東西, 應該屬於 value 放
+	在 vm.g 下才對. 宣告成 value 就對了。
+		// debug
+		vm.bp = 0 // breakpoint  <---- tick("*debug*").breakpoint=0
+		vm.continue = 0 // *debug* resume point   <---- tick("*debug*").resume=null
+	[x] index.html [x] cub.html [ ] 3nw [ ] 3nd 
+	
+[x] some application didn't use this trick
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+	[x] index.html of 3HTML, [x] baby.html of project-k, [x] cub.html of project-k
+[x] chrome f12 跑出一個 message : 
+	cub.html:6 Resource interpreted as Stylesheet but transferred with MIME type text/plain: "http://localhost:8888/common.css".
+	我不喜歡這個解釋 http://stackoverflow.com/questions/12003107/resource-interpreted-as-script-but-transferred-with-mime-type-text-plain-for-l
+	用 Win8 ie10 也一樣有問題 SEC7113: CSS was ignored due to mime type mismatch 
+	--> utf-8 改成 ANSI 也沒用
+	==> 改直接執行 cub.html 就好了 (不透過 localhost:8888) --> 可能是 webserver.f 的問題.
+	==> 果然是 webserver.f 的問題! https://msdn.microsoft.com/en-us/library/hh180764(v=vs.85).aspx
+		RI : An imported style sheet was not used due to the wrong MIME type in the HTTP header.
+		FP : Ensure style sheet file is delivered with the proper HTTP response header, which includes 
+		     a content type of text\css. See MIME-Handling Changes in Internet Explorer for more information.
+	
+[x]	ie10 還抓到 cub.html 好多別的問題
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 243 character 22
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 707 character 62
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 707 character 124
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 710 character 34
+	HTML1402: Character reference is missing an ending semicolon ";". 
+	cub.html, line 712 character 103
+	在 chrome 都沒問題,而且所列之處根本就是 forth code ! 別管他。
+	
+[ ] review project-k GitHub wiki 的文件、linkage 等。
+	文章寫多了,動不動就有斷鏈、command 已經改名等問題。
+	
+[ ] 檢查 browser 是否 Chrome, alert 用 chrome 比較好。cub.html 在 Win 10 Edge 直接跑，慢得要命。
+
+[x] 3htm jsc 裡 erase 無效 ... 感謝我自己! 以前已經發現在 jsc console 時
+	inputbox.value 是 \10 因為 \r\n (Chrome & IE) 只吃掉 \r 故留下 \n 使得 inputbox 非 empty 因此
+	{backspace} 不工作。修改判斷條件為 inputbox.value==""||inputbox.value=="\n" 即可
+	* 3nw 也解過這個問題, 方法是在 jsc.xt 裡一見面就把 inputbox.value 清成 "" 也可以。
+
+[x] tweak cub.html on going . . . so as to make a project-k release
+	rename to sample.html. project-k released. [ ] make it a release on github.
+	
+[x] webserver.f ok now. working on 3nd . . . 
+	[x] no panic !!!! in jeforth.3nd.js <---- master kvm.panic() was missing.
+	    in 3htm level doesn't work either <----- it works, it launchs F12 debugger.
+	[x] vm.gets() very poor, needs improvement.
+		--> e command tips ctrl-z at least
+	[x] fs.f has some self-test, they need to upgrade
+	[x] jsc.hlp, jsc.js
+	[ ] eforth.com 
+
+[ ] jsc 能不能在 exit "", ret null 處停下來, 目前不會, 故看不到 ret / exit 就突然結束了。	
+	
+[x] porting to project-k 大改寫 apply to 3HTA (3htm and 3nd are done)
+	[x]	kernel/jeforth.js --> project-k/jeforth.js
+	[x]	get jeForth() from jeforth.js > kvm = new jeForth()	
+	[x]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	[x] kernel/jeforth.f --> f/jeforth.f
+	[x]	kvm.selftest_visible = true; // type() needs to check it
+	[x]	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+		kvm.greeting = function(){
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
+			return(version);
+		}
+	[x]	vm.base 改用 value -> vm.g.base [x]jeforth.f []3htm [x]3nd []3nw [x]3hta
+	[x] apply to all *.f files 
+		[x]	fortheval --> dictate  [ ] apply to all *.f files 
+		[x]	print --> type   [ ] apply to all *.f files 
+		[x]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
+		[x]	internel kvm --> vm   
+		[x] js: vm.selftest_visible=true
+		[x] -->judge 改用 [d d] [p p]
+	[x]	vm.editMode, in platform.f, 改用 {F2}.EditMode [x]3htm []3nd []3nw [x]3hta
+		[x]3htm [x]3nw [x]3hta all are in 3htm/f/platform.f
+		[x]3nd 
+	[x]	改寫 vm.panic() 
+	[x] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。<==== FP, use a very long VM name in global.
+		
+[x] working on improving 3nd jsc . . . done，it's very good now.
+	[x] 3htm [x] 3hta [ ] 3nw
+
+[x] *debug* should print the prompt at entering *debug* mode.
+[x] include jQuery is done in html5.f , no good. Because html5.f is shared by 3hta, 3htm, and 3nw.
+	--> move include jQuery out of html5.f, jquery.f stand alone for 3hta.
+	--> type should be redefined in jquery.f but didn't --> fixed, but still pringing &gt;&gt;&gt; <br>&gt; js&gt
+	--> RI: multiple \t only first \t processed, because plain=function...; function vm.type=function...
+		something wrong. --> try newPlain() then ok. So which plain() is used? I know vm.plain() 
+	--> 乾脆不要有 type() plain(), 都用 vm.type() vm.plain() 免生疑惑。 ==> Bingo! and shit 自找麻煩。
+
+[ ] working on wsh.f selftest improvements
+
+[ ] 半路發動 selftest 的方法，必須用 include 的才會自動幫 .f 檔加東西執行 selftest。
+	' <selftest> :: enabled=true dropall cls --wmi.f-- include wmi.f
+	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
+	' <selftest> :: enabled=true dropall cls --canvas.f-- include canvas.f
+	' <selftest> :: enabled=true dropall cls --ie.f-- include ie.f
+[ ] ie.f 已知 ShellWindows 包括 fe ie . ie(i) ie 等不該以 ie 為名。
+[ ] fe/ie 其實是 sw 才對，ShellWindows.item(i) 	
+[x] ie.f 最嚴重的問題是這個, ShellWindows.item(index) 不能收 argument !!??
+	\ [x] 不能直接用變數,很奇怪? <-- RI: 需 parseInt() cast 一下。
+	\ theIE s" vm.g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
+	> : sw <js> var index=vm.g.theIE; var oo = vm.g.ShellWindows.item(index); oo; </jsV> ;
+	> sw .
+	> JavaScript error on word "sw" : Invalid procedure call or argument
+	==> 改用 code word 
+	code sw2 
+		var index=vm.g.theIE; 
+		var oo = vm.g.ShellWindows.item(index); 
+		push(oo);
+		end-code
+	--> 結果一樣
+	==> 改用 .js 發現用 parseInt() cast 一下就好了
+		var sa = new ActiveXObject("Shell.Application");
+		var sw = sa.windows();
+		var index = vm.g.theIE;
+		type(sw.item(index)); // 還是有問題
+	--> <js>
+		var sa = new ActiveXObject("Shell.Application");
+		var sw = sa.windows();
+		type(sw.item(parseInt(vm.g.theIE))); // parseInt() cast 一下就好了。
+		</js>
+	==> : sw js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ; <--- OK !!
+[x] 在 wsh.f 裡會自動切中文? 如何避免?	---> 乾脆讓它 "Let me set a different input method for
+	each app window" @ Control Panel>Clock, Language, and Region > Language > Advanced settings.
+	因為不讓它切它總是要切乾脆由它去吧!
+[x] Consider the proper .f for [stringify] and [parse] , according to 3hta's quit.f,
+		include voc.f		\ voc.f is basic of forth language
+	==>	include html5.f		\ HTML5 is HTA's plateform feature
+		include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems from happening immediately
+		include element.f	\ HTML element manipulation
+		include platform.f 	\ Hotkey handlers and platform features
+		include vb.f		\ Being able to run VBS is what HTA is for.
+		include wsh.f		\ Windows Shell Host
+[x] 在 panic() 裡面用 ' <selftest> :> enabled 來判斷是否 free run mode。
+	panic() 是 application dependent, 以 3hta 為例，如果是 free run mode ,碰到 severe panic 
+	通通要進 jsc 停下來; 如果是 interactive mode 則進 F12 debugger. 
+	看來 <selftest> 定義好之後要改寫 panic() 但是又不方便放進 jeforth.f 成為 common code,
+	因此應該在 quit.f 裡面改寫。
+	------------- ^^^^ 以上不對 ^^^^ -------------------------------
+	實際上 panic() 要不要進 jsc 只跟 severity 有關, 沒機會管 <selftest>.enabled.
+	[x] 3hta [x]3nd [x]3nw [x]3htm
+	
+[x] jsc.hlp , jsc.js 都該像 3nd 一樣獨立。 <--- jeforth.f 之後馬上就是 quit.f 不
+	能更早了! 所以放在 quit.f 裡面沒問題。===> ok, but 問題是重複寫了好幾份, 能不能在 quit.f
+	裡面都參考同一份 jsc source code?
+	==> done, 統一成只有兩分 jsc.f : 3hta,3htm,3nw and 3nd. 
+	[ ]	晚點把 3nd 裡的 jsc.hlp jsc.js delete 掉，已經沒有用了。
+	
+[ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
+
+[x] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
+	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
+[x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
+	---- modify jeforth.3nw.html --------------------
+	[x]	kernel/jeforth.js --> project-k/jeforth.js
+	[x]	get jeForth() from jeforth.js > kvm = new jeForth()	
+	[x]	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+	[x] kernel/jeforth.f --> f/jeforth.f
+	[x]	kvm.selftest_visible = true; // type() needs to check it
+	[x]	kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+		kvm.greeting = function(){
+			type("j e f o r t h . 3 h t m -- v"+version+'\n');
+			type("source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("Program path " + window.location.toString());
+			return(version);
+		}
+	[x]	vm.base 改用 value -> vm.g.base [x]jeforth.f [x]3htm [x]3nd [x]3nw [x]3hta
+	[x] drop kvm.init 
+	[x] apply to all *.f files 
+		[x]	fortheval --> dictate  [ ] apply to all *.f files 
+		[x]	print --> type   [ ] apply to all *.f files 
+		[x]	所有 g.sth 改成 vm.g.sth   [ ] apply to all *.f files 
+		[x]	internel kvm --> vm   
+		[x] js: vm.selftest_visible=true
+		[x] -->judge 改用 [d d] [p p]
+	[x]	vm.editMode, in platform.f, 改用 {F2}.EditMode 
+		[x]3htm [x]3nw [x]3hta
+		[x]3nd 另外 review <---- gets is different thing.
+	[x]	改寫 vm.panic() 
+	[x] 照理說 "kvm" 只應出現在 jeforth.hta 裡, 其他都用 "vm"。但是 vb.f 裡似乎免不了要用一次 "kvm" 讓
+		VBscript 認得 "vm"。若 "kvm" 之名改了，vb.f 也得跟著改。
+	[x] jsc is now defined in quit.f
+		[x]3htm [x]3nw [x]3hta <---------- same 3htm/f/jsc.f
+		[x]3nd 另外 review <--------- 3nd/f/jsc.f 
+	
+[x] 3nw 的 jsc 直接 copy 用 3hta 的是可以用的。有機會把 3hta 3htm 3nw 三個 jsc 統一起來。
+	[x]	乾脆寫成一個 jsc.f 統一起來。
+	[x] jsc.f 可以自給自足 vm.jsc 不需要 initial module 定義。 [x]3hta [x]3htm [x]3nw 
+	
+[x] 3nw jsc 目前有下列問題:
+		[x]	initializing of vm.jsc.cmd, vm.jsc.enable should be done in 3nw.html <=== 這兩個根本不用 init
+			jsc.cmd 用到前有給值的動作, vm.jsc.enable undefined 時正好是 fault。
+		[x] Replace the arguments.callee.show by vm.jsc.statusToggle, that switches the status 
+			prompt, by 't' command. 
+		[x] exit/q/quit 光 return 好像不夠, 下 debugger; instruction 會卡在 jsc 裡出不來。--> restart 後消失了。
+		[x] erase 有時無效,且 rstack 一直堆積同一個回返地址 
+			RI ==> 因為 single step 會 break 所有的動作, 連 {backSpace} 也被 break 到了!! 
+			[x] 以後再想想辦法。jsc 裡面用到的 words 都會有這個問題 ==> jsc.enable is the solution.
+		[!] jsc help shows only a few lines <---- nw.js' problem
+
+[x] vm.panic redefine was in 3hta/quit.f , move to 3htm/f/jsc.f 
+	[x]3hta [x]3htm [x]3nw 
+	[x]3nd
+[x] the --- save selftest.log --- thing in all quit.f can be removed
+	[x]3hta [x]3htm [x]3nw 
+	[x]3nd
+
+[x] playground 裡面的 project-k things 可以清除了
+[x] panic()'s state.level should be state.serious because it's used as a boolean.
+
+[x] <vb> needs a global name for the jeforthVM, so let it be 
+		var jeforth_project_k_virtual_machine_object = new jeForth()
+		var kvm = jeforth_project_k_virtual_machine_object;
+	<vb> 裡要重新取得 vm through jeforth_project_k_virtual_machine_object
+	全部都叫 vm 感覺也不好, init module 裡維持作 kvm, 因為 vm 聽起來是一個自稱, 事
+	實亦然。
+	[x]3hta [x]3htm [x]3nw <----- 目前只 3hta 有用到。
+	[x]3nd <-------- global.kvm = global.jeforth_project_k... = new jeForth();
+
+[ ]	vm 在 initial module (index.html) 裡只用來加掛 jeforth.f 需要的東西，主要是 I/O。
+	此外的東西都不該出現在 vm 下的第一層, 但在 vm.g 以下則 OK.
+	這是為求整套系統 building blocks 之間的簡單明了。
+	[ ] 手工 js> vm obj>keys . 列出所有 members 一一檢討。
+		3nw: > js> vm obj>keys .
+			major_version,execute,dictate,stack,rstack,words,dictionary,gui,appname,
+			selftest_visible,minor_version,host,path,screenbuffer,type,greeting,panic,
+			debug,fso,readTextFile,writeTextFile,prompt,argv,bye,clearScreen,plain,g,
+			[ ] --> inputbox
+			[ ] --> jsc
+			[ ] --> cmdhistory 
+			[ ] --> forthConsoleHandler
+		3hta: > js> vm obj>keys .
+			major_version,execute,dictate,stack,rstack,words,dictionary,appname,host,path,
+			selftest_visible,plain,type,greeting,debug,screenbuffer,prompt,ado,argv,bye,
+			clearScreen,panic,writeTextFile,readTextFile,g,process,fso,BinaryStream,
+			[ ] --> push,pop,
+			[ ] --> BinaryFile,objWMIService
+			[ ] --> vbscript,
+			[ ] --> jsc,cmdhistory,
+			[ ] --> forthConsoleHandler,
+			[ ] --> inputbox,EditMode,
+		3nd: 
+			major_version,execute,dictate,stack,rstack,words,dictionary,host,appname,path,
+			screenbuffer,selftest_visible,type,clearScreen,panic,greeting,fso,readTextFile,
+			writeTextFile,bye,gets,debug,prompt,argv,exec,stdio,g
+			[ ] --> jsc,
+			[ ] --> forthConsoleHandler,
+
+[x]	jsc.prompt are "undefined" when it was from panic
+[x] project-k kernel porting done. Merge to jeforth.3we master.
+	--> Click "Pull" on "GitHub for Windows" --> "Pull request created" -->
+	一頓亂搞解決 git merge 的問題 --> 好像是先切到 master, 然後 git merge the-working-branch。
+	會在 local 產生一個特別的版本, 其中如果有問題必須在 local 解決, 否則無法 push 上雲端。
+
+[x] 3nd 的 version 顯示沒有照新 style.
+	j e f o r t h . 3 n d -- r2 <============== should be major.minor
+	Node.js v0.12.4 ... snip ....
+	--> refer to 3htm's index.html
+
+[ ] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
+
+[ ] ie.f shell.application.f 這種大題目要另外深入探討。
+
+[x] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise 
+	it moves cursor. <--- for [x]3hta, [x]3htm, [x]3nw they share the same platform.f
+	--> redefine 3htm/f/platform.f {up} {down}
+	--> 想錯了! 第一下可以 recall older command, 再一下因為 inputbox 已非 empty 就不行了。
+		故 up down 應該 launch alt-up history-selector 而非 ctrl-up ctrl-down recall。
+	[x] ctrl-up,down 不會整理跨行的 textarea, alt-up history-selector 則會。兩者還是有一點
+		差別。故保留 ctrl-up ctrl-down 仍有效。
+	[!] Chrome 3htm inputbox ^m 無效! 3hta ok，任其自然。
+	[x] case  77: /* m    */ ^m 在 HTA textarea 裡本來就有效。在 Chrome 無效也無法簒改 
+		e.keyCode。仿 excel 用 Alt-Enter 也不成功。難道只能切 EditMode? 但為什麼 EditMode
+		有效? 因為 Alt-Enter 被 Chrome textarea 處裡掉了所以無效。
+		--> 那就改用 shift-Enter 呀! ==> B i n g o ! !
+			non-EditMode 想換行用 Shift-Enter 避免把命令發出去
+			EditMode 用 Ctrl-Enter 發出命令
+	[x] 下過命令自動取消 EditMode。
+[ ] rename ntib to itib ok? think about it.
+[ ] 要不要突破第一行的限制?
+	--> In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
+		it's an error for JavaScript.
+[ ] vm.beep 本來在 platform.f 有用到, 改成 execute("beep") 把 vm.beep 取消。
+	beep 也算是 I/O 定義成 vm.beep() 似乎有理。但既然可以用 execute("beep"), 還是不要的好。
+	[ ]3hta, [ ]3htm, [ ]3nw, [ ]3nd
+
+[ ] Thinking of how to improve the user experience on http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/,
+    I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
+    It's beautiful and it can help us to convert a picture into base64 embeded HTML code. Good for jeforth
+    to have embeded pictures.
+    [ ] Use contentBuilder.js' online editor to design what I want to show on jeforth.3htm online. Then pay
+        some money to find a front end designer to translate into HTML.
+	http://www.online-html-editor.org/
+        
+
+[x] 3hta to support both ado and fso switch 
+	--> What happened if use fso? <--- see "HTA does not work with utf-8 with BOM" above
+		git.f 讀一半就會出錯, 因為有用到中文 word name。
+	--> What happened if use ado? 	
+		"Safety Settings on this computer prohibit accessing a data source on another domain"
+		https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
+	[x] 2. HTA 版用 fso 開始, 看到 Windows 8 以上自動改用 ADO (file system)
+	
+[x] project-k can't use string.trim(), Windows XP JScript does not support that.
+	String.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
+	
+[ ] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
+	"JavaScript error : Safety settings on this computer prohibit accessing a data 
+	 source on another domain."
+[ ] Try Windows 7.
+
+[x] How to tell Windows version?
+	> objEnumWin32_OperatingSystem :> item().Version .
+	6.2.9200 OK  <==== I guess > 6 are Windows 8, 10, ... 
+[x] 自動判斷, Windows 8 以上就自動切 ado 否則續用 fso。
+
+
+
 
