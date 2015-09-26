@@ -4013,6 +4013,7 @@
 
 [x] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
 	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
+	
 [x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
 	---- modify jeforth.3nw.html --------------------
 	[x]	kernel/jeforth.js --> project-k/jeforth.js
@@ -4121,8 +4122,6 @@
 	Node.js v0.12.4 ... snip ....
 	--> refer to 3htm's index.html
 
-[ ] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
-
 [ ] ie.f shell.application.f 這種大題目要另外深入探討。
 
 [x] inputbox arrow keys can be smarter. When it's empty, recall commands, otherwise 
@@ -4140,13 +4139,15 @@
 			non-EditMode 想換行用 Shift-Enter 避免把命令發出去
 			EditMode 用 Ctrl-Enter 發出命令
 	[x] 下過命令自動取消 EditMode。
+
 [ ] rename ntib to itib ok? think about it.
+
 [ ] 要不要突破第一行的限制?
 	--> In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
 		it's an error for JavaScript.
-[ ] vm.beep 本來在 platform.f 有用到, 改成 execute("beep") 把 vm.beep 取消。
+[x] HTA's vm.beep 本來在 platform.f 有用到, 改成 execute("beep") 把 vm.beep 取消。
 	beep 也算是 I/O 定義成 vm.beep() 似乎有理。但既然可以用 execute("beep"), 還是不要的好。
-	[ ]3hta, [ ]3htm, [ ]3nw, [ ]3nd
+	[x]3hta, [n/a]3htm, [ ]3nw, [ ]3nd
 
 [ ] Thinking of how to improve the user experience on http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/,
     I found a wonderful web page design helper called contentBuilder.js http://www.online-html-editor.org/.
@@ -4182,4 +4183,9 @@
 	[x] skip html5.f appendChild selftest if IE/HTA too old. Check document.getElementsByClassName existance.
 	[x] html5.f selftest createElement aaa will become AAA on newer IE/HTA but Win7 older IE/HTA will not.
 
+[x] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
+	要求 node.js 先裝好, node.exe 入 path, nw.js 整個 copy 到 node.js home folder 因此
+	nw.exe 也入了 path。
+	[ ] 修改文件, how to run 要改良說明。
 
+[x] 3nw's quit.f needs a jump focus at the end.

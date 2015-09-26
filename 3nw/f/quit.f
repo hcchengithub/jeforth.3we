@@ -41,3 +41,4 @@
 \ ------------ End of quit.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
+	js: jump2endofinputbox.click();inputbox.focus()
