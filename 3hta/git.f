@@ -769,7 +769,7 @@ s" git.f"   source-code-header
     Import code
 </comment>      
 
-: git-分支管理策略-阮一峰的網絡日誌 ( -- ) \ Digest of the article
+: Digest:Git分支管理策略 ( -- ) \ Digest of the article《Git 分支管理策略》from 阮一峰的網絡日誌
 	<o>
 	<p>阮一峰的網絡日誌</p>
 	<h1 id="digestgit-分支管理策略"><a href="http://www.ruanyifeng.com/blog/2012/07/git.html">Digest：Git 分支管理策略</a></h1>
