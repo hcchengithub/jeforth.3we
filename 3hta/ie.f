@@ -25,7 +25,7 @@
 		/// 這個 collection 就是所有的 IE 以及 File Explorer windows. ShellWindows :> count 就是
 		/// 兩者頁面的總數。ShellWindows :> item(0,1,2,3...) 即 FE/IE objects (與 DOM window 不
 		/// 同)。ShellWindows 本身沒有開啟 IE 頁面的功能。我本來以為 ShellWindows :> count >= 1 
-		/// 時 ShellWindows :> item(0) 可以當作 default IE object 來操作。可是 item(0) 常常是 null! 
+		/// 時 ShellWindows :> item(0) 可以當作 default IE object 來操作，可是 item(0) 常常是 null! 
 						
 	\ IE run 起來有幾種方式
 	\ 1. s" iexplore ibm.com" (fork) 當 ShellWindows.count==0 時必須用這個，那乾脆都用這個。
@@ -490,8 +490,34 @@
 		</js>
 	
 	</comment>	
+	
+	<comment>	
+		Study HTML <article> </article> tag
+
+		阮兄，说句题外话。你的版式似乎对阅读器的支持不是很好，例如Safari的Reader，经过实验估
+		计是p元素太多，但没有突出文章主体，话说只要把文章内容放在article标签里就好了。<=== 我
+		可以用 jeforth.3hta ie.f 來幫網頁加 artical tag 試試看！
+
+		teven 说：
+		引用阮一峰的发言：
+		加了一个article标签，好像解决了。
+		但是为什么作者和日期信息，都会被省略呢……
+		是用<time>标签定义日期吗？
+		试试这个，阮兄
+		<article>
+		　　<header>
+		　　　　<h1>title</h1>
+		　　　　<p>Date：<time　pubdate="pubdate">7/09/2012</time></p>
+		　　　　<p>Posted　by:　steven</p>
+		　　</header>
+		　　<footer>
+		　　　　<p>Copyright</p>
+		　　</footer>
+		< /article>
+	</comment>	
 	<comment>	
 	[ ] 徹底研究
+	
 	</comment>	
 		
 		
