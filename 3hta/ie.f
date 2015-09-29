@@ -1,7 +1,14 @@
 	
+	\ 參考資料
 	\ ShellWindows object                https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974(v=vs.85).aspx
 	\ Windows Internet Explorer object   https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
-
+	
+	\ 好像有用
+	\ Microsoft Edge Developer Guide	 https://msdn.microsoft.com/en-us/library/dn904191(v=vs.85).aspx
+	\ Windows Internet Explorer Command Identifiers
+	\	js> [document|element].execCommand("BrowseMode").
+	\	Chrome document 也有 execCommand.
+	
 	\ shell.application :> windows() 即 ShellWindows. 
 	\ ShellWindows 有可能是 File Explorer 或 Windows Internet Explorer,
 	\ 也許還不只？用 "ie :> application ." or "list-sw-windows" 察看即知。
@@ -32,7 +39,7 @@
 	\ 2. ShellWindows.item(0).navigate("url") 當 ShellWindows.count==0 時不能用。
 	\ 3. GetObject("","InternetExplorer.Application") 取得一個沒有 document 的 IE object
 	\ 4. CreateObject("InternetExplorer.Application") 用不著，咱禁用，不必研究。
-	\ 有了 ShellWindows 可以隨時 access 所有的 FE/IE 頁面, 後三者都用不著了。
+	\ **Note** 有了 ShellWindows 可以隨時 access 所有的 FE/IE 頁面, 後三者都用不著了。
 	
 	: sw(i)				( i -- sw|null ) \ Get ShellWindow object of the indexed ShellWindow
 						js> vm.g.ShellWindows.item(parseInt(pop())) ;
@@ -46,15 +53,23 @@
 						js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ;
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
 						/// 一個 window 關掉: sw :> document.parentWindow :: close() 
-						/// 也會把 IE process 關掉,當然 sw 也是 null。但 sw(0) 有時候是 null
+						/// 也會把 IE process 關掉，此時 sw 變成 null。但 sw(0) 有時候是 null
 						/// 即使 sw(1) 有東西，故需要用 theIE 來指定 active sw object。
 						/// sw 存在,但沒有 connect 任何網址時 ReadyState 也是 4,也有 document, 
 						/// 但是 document 裡 innerHTML 是 undefined。這樣就 available 了, 可以
 						/// navigate() 了。sw 都是 null 時 推薦用 s" iexplore" (fork) 把 IE 
 						/// run 起來。
 
+	: isIE?				( object -- flag ) \ Is it an IE object?
+						js> typeof(tos())=="object" ( obj f )
+						<js> pop(1).name.indexOf("Internet Explorer")!=-1</jsV> ( f f )
+						and ;
+						
+	: check-IE			( -- ) \ Pass or abort
+						sw isIE? if else drop abort" Error! need an IE object (from ShellWindows)." then ;
+						
 	: window			( -- window|null ) \ Get the ShellWindows.item(theIE) window object
-						sw if
+						sw isIE? if
 							sw :> ReadyState if \ [ ] 不是 0 就有 document 是真的嗎? 直接 check document 不就好了?
 								sw :> document.parentWindow exit
 							then
@@ -63,11 +78,7 @@
 						/// sw(i).ReadyState == 0 就不會有 document。
 						/// 有 document 也不一定有 innerHTML 的內容。
 						
-	: isIe?				( sw -- sw flag ) \ Is it an sw object?
-						<js> typeof(tos())=="object"&&tos().name=="Windows Internet Explorer"</jsV> ;
 						
-	: check-sw			( sw -- sw ) \ Pass or abort
-						isIe? if else drop abort" Error! Need an sw object (from ShellWindows)." then ;
 
 	: list-sw-windows	( -- count ) \ List all sw windows' locationName and URL
 		\ 0 begin dup sw(i) ( count sw ) dup while ( count sw ) 
@@ -516,8 +527,49 @@
 		< /article>
 	</comment>	
 	<comment>	
-	[ ] 徹底研究
-	
+		\ Study ShellWindows
+		\ Example of _NewEnum from https://msdn.microsoft.com/en-us/library/windows/desktop/bb773972(v=vs.85).aspx
+			<vb>
+				set objShellWindows = vm.g.ShellWindows ' it's a constant
+				if (not objShellWindows is nothing) then
+					dim objEnumItems
+					for each objEnumItems in objShellWindows ' it's good to use M$ things in M$ way.
+						vm.type(objEnumItems+", ") ' File Explorer, Internet Explorer,  OK 
+					next
+				end if
+			</vb>
+		\ 靠!咱只要一行就可以搞定：	
+			<js>
+				for (var i=0; i<vm.g.ShellWindows.count; i++) type(vm.g.ShellWindows.item(i)+", ");
+				\ File Explorer, Internet Explorer,  OK 
+			</js>
+		\ ShellWindows object 包括所有的 File Explorer, Internet Explorer instances. 別無他用, 
+		\ 所以很單純只有 count, item() 兩個 member。
+		
+	</comment>	
+	<comment>	
+		\ Study Windows Internet Explorer object   https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
+		\ Use ShellWindows (or sw) to get IE object. But sw gets *not* only IE but also FE. Tell by sw.name.
+
+			0 sw(i) :> name \ ==> File Explorer (string)
+			1 sw(i) :> name \ ==> Internet Explorer (string)
+
+		\ IE object events
+		\ Below command lines works 但都是一下達就馬上 alert 了，不知道 event 啥？最後給他亂打一通，居然也
+		\ alert 了! 可見用法存疑。
+			eleBody :: attachEvent("BeforeNavigate",alert("123")) 
+			js> inputbox :: attachEvent("BeforeNavigate",alert("234")) 
+			js> inputbox :: attachEvent("WindowResize",alert("345")) 
+			js> inputbox :: attachEvent("WindowResdfsdsfdssize",alert("345"))
+		\ [ ] So, don't know how to hook an event to IE object and why these events are 
+		\	  appearing here in IE object document.
+		
+		\ IE object methods
+			[x] sw :: GoBack() 
+			[x] sw :: GoForward() 
+			[x] sw :: GoHome() 
+			[ ] sw :: navigate
+		
 	</comment>	
 		
 		

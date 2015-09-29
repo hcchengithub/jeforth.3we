@@ -3823,8 +3823,14 @@
 	o	fortheval --> dictate
 	o	print --> type 
 	o	所有 g.sth 改成 vm.g.sth, 否則 g 本身要在哪裡定義?
-		--> 如果是在 init module (index.html), 跑出一個不是掛在 vm 下的例外。
-		--> 如果在 kernel jeforth.js 裡, 更不好。
+		--> 如果是在 init module (index.html, jeforth.hta, etc) 的 global 
+			可以考慮，但我不想跑出一個不是掛在 vm 下的例外來降低 porting project-k 的一致性。
+		--> 如果在 kernel jeforth.js 裡，不好！多出個人色彩。
+		--> 必須 HTA 下 <vb> .. vm.g.name .. </vb> 也能看得見。 
+			<vb> 本來看不見 vm 只看得見 kvm 但死認 kvm 當然不行，所以後來引進 
+			var jeforth_project_k_virtual_machine_object = new jeForth()
+			把 vm 的本名弄到絕對不會有人來衝突，然後再介紹給 <vb> 內部自己的 global vm。
+		--> 所以 g hash 目前是掛在 vm.g 暫無他法。
 	o	internel kvm --> vm
 	o	去掉 kernel kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
 	o	kvm.selftest_visible = true;
@@ -4191,3 +4197,18 @@
 [x] 3nw's quit.f needs a jump focus at the end.
 
 [x] eforth.com selftest needs a rewrite --> Done.
+
+[ ] bug
+	> help ShellWindows <--- also all other constants!!
+	JavaScript error on word "(words)" : Object doesn't support property or method 'toLowerCase'
+	JavaScript error on word "(help)" : Object doesn't support this property or method
+	JavaScript error on word "help" : Object doesn't support this property or method
+	--> check help calls (help) calls (words) <--- only one, see (help) shit!!
+		help and (help) are : Modified by platform.f for HTML table.
+	--> platform.f is common among 3htm too, so it's easy to debug --> try 3nw --> but 3nw is ok on help <constant>
+		--> include ie.f makes the problem? No.
+		--> not the 
+	
+		
+
+	
