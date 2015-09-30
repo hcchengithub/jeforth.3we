@@ -62,6 +62,7 @@
 	include excel.f
 	include canvas.f
 	include mytools.f
+	marker ---
 	
 \ ----------------- run the command line -------------------------------------
 	<js> (vm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.

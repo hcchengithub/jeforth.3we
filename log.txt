@@ -4198,7 +4198,7 @@
 
 [x] eforth.com selftest needs a rewrite --> Done.
 
-[ ] bug
+[x] bug
 	> help ShellWindows <--- also all other constants!!
 	JavaScript error on word "(words)" : Object doesn't support property or method 'toLowerCase'
 	JavaScript error on word "(help)" : Object doesn't support this property or method
@@ -4207,7 +4207,8 @@
 		help and (help) are : Modified by platform.f for HTML table.
 	--> platform.f is common among 3htm too, so it's easy to debug --> try 3nw --> but 3nw is ok on help <constant>
 		--> include ie.f makes the problem? No.
-		--> not the 
+		--> not the experiment, 
+	--> the problem has gone after restart jeforth.hta.
 	
 		
 

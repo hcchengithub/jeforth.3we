@@ -46,9 +46,19 @@
 						/// IE,FE run 起來之前是 null 即無 IE process。若照下面這樣把最後
 						/// 一個 window 關掉: 0 sw(i) :> document.parentWindow :: close() 
 						/// 也會把 IE process 關掉,當然 0 sw(i) 也是 null。
+
+	: list-sw-windows	( -- count ) \ List all sw windows' locationName and URL
+						ShellWindows :> count ?dup if dup for dup r@ - ( COUNT i )
+						dup . space ( COUNT i ) sw(i) ?dup if dup :> LocationName . space :> LocationURL . else ." Null" then cr
+						next drop then ;
+						/// 有時候存在沒有內容的空 sw(i) 連 sw(0) 都有可能。
+						last alias list
+	
+	\ 我不知道哪個 sw window 是 activated
+	\ 以下命令固定用 ShellWindows.item(theIE) 來做 automation。
 	
 	0 value theIE // ( -- i ) Make ShellWindows.item(i) the default IE object
-						
+	
 	: sw 				( -- sw|null ) \ Get the ShellWindows.item(theIE) sw object
 						js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ;
 						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
@@ -61,69 +71,77 @@
 						/// run 起來。
 
 	: isIE?				( object -- flag ) \ Is it an IE object?
-						js> typeof(tos())=="object" ( obj f )
-						<js> pop(1).name.indexOf("Internet Explorer")!=-1</jsV> ( f f )
-						and ;
+						dup if 
+							js> typeof(tos())=="object" ( obj f )
+							<js> pop(1).name.indexOf("Internet Explorer")!=-1</jsV> ( f f )
+							and 
+						else drop false then ;
+						\ 必須用 "Internet Explorer" 判斷，因為 FE.name 有可能是中文的"檔案總管"。
+
+	: ready				( -- ) \ Wait ShellWindows.item(theIE) to become ready
+						1200 for ( total 120 sec which is 2 minutes ) 
+							100 nap sw isIE? if
+								sw :> ReadyState==4 if ( break ) r> drop 0 >r then
+							then
+						next ;
+						/// ctrl-break if don't want to wait so long.
+						
+	: busy				( -- ) \ Wait ShellWindows.item(0) to become not-busy
+						1200 for ( total 120 sec which is 2 minutes ) 
+							100 nap sw isIE? if
+								sw :> busy if else ( break ) r> drop 0 >r then
+							then
+						next ;
+						/// ctrl-break if don't want to wait so long.
 						
 	: check-IE			( -- ) \ Pass or abort
-						sw isIE? if else drop abort" Error! need an IE object (from ShellWindows)." then ;
-						
-	: window			( -- window|null ) \ Get the ShellWindows.item(theIE) window object
-						sw isIE? if
-							sw :> ReadyState if \ [ ] 不是 0 就有 document 是真的嗎? 直接 check document 不就好了?
-								sw :> document.parentWindow exit
-							then
-						then null ;
-						/// [ ] 疑問 sw.ReadyState 不是 0 就有 document 是真的嗎?
-						/// sw(i).ReadyState == 0 就不會有 document。
-						/// 有 document 也不一定有 innerHTML 的內容。
-						
-						
-
-	: list-sw-windows	( -- count ) \ List all sw windows' locationName and URL
-		\ 0 begin dup sw(i) ( count sw ) dup while ( count sw ) 
-		\ over . space dup :> LocationName . space :> LocationURL . cr ( count )
-		\ 1+ repeat ( count sw ) drop ;
-		ShellWindows :> count ?dup if dup for dup r@ - ( COUNT i )
-		dup . space ( COUNT i ) sw(i) ?dup if dup :> LocationName . space :> LocationURL . else ." Null" then cr
-		next drop then ;
-		/// 有時候存在沒有內容的空 sw(i) 連 sw(0) 都有可能。
-		last alias list
-
-	\ 我不知道哪個 sw window 是 activated
-	\ 以下命令固定用 ShellWindows.item(theIE) 來做 automation。
-						
-	: ready				( -- ) \ Wait ShellWindows.item(theIE) to become ready
-						sw ?dup if 
-							dup :> ReadyState if ( sw )
-								begin dup :> ReadyState==4 if drop space exit else char . . then 200 nap again
-							else
-							drop abort" Error! The given sw object is empty, nothing to do with 'ready'."
-							then
-						else \ 還沒有實體
-							drop abort" Error! The given sw object is NULL, nothing to do with 'ready'."
+						sw isIE? if else drop beep 
+						abort" Error! IE object (from ShellWindows) is empty." 
 						then ;
-						/// 因為是 Wait ready 所以出問題要 abort。要預防,用 sw 先查。
-						
-	: not-busy			( -- ) \ Wait ShellWindows.item(0) to become not-busy
-						sw begin ( sw )
-							dup :> busy if char * . else drop space exit then
-						200 nap again ;
-						/// Wait ready first it checks sw object existence.
+
+	: ie 				( -- ) \ Make sure sw points to theIE object which is alive
+						sw isIE? if else
+							<js> 
+							for (var i=0; i<vm.g.ShellWindows.count; i++){
+								if(vm.g.ShellWindows.item(i).name.indexOf("Internet Explorer")!=-1){
+									vm.g.theIE = i;
+									break;
+								}
+							}
+							if (i >= vm.g.ShellWindows.count){
+								vm.g.theIE = i;
+								dictate('s" iexplore about:blank" (fork)');
+							}
+							</js>
+						then ;
+						/// If there're an IE existing the first one will be theIE
+						/// or open an about:blank page. So you need to check 'ready' 
+						/// and 'busy' before using the IE object.
+
+	: window			( -- window|null ) \ Get the ShellWindows.item(theIE) window object
+						ie ready sw :> ReadyState if
+							sw :> document.parentWindow
+						else null then ;
+						/// 疑問：sw.ReadyState 不是 0 就有 document 是真的嗎?
+						/// 錯,FE 也有 ReadyState,正常是 4,要先確定是 IE。
+						/// 只要是 IE 即使 navigate about:blank 出來的空頁也有 document。
+						/// sw(i).ReadyState == 0 就不會有 document。
+						/// 有 document 也不一定有 innerHTML 的內容，但一定有 parent 即 window。
+						/// document :> constructor \ ==> undefined (undefined) 這是 FE。
+						/// document :> constructor \ ==> [object HTMLDocument] (object) 這是 IE。
 						
 	: document			( -- obj ) \ Get ShellWindows.item(theIE).document object
-						sw :> document ;
+						ie ready sw :> document ;
 	: locationName		( -- "name" ) \ Get ShellWindows.item(theIE).locationName string
-						sw :> locationName ;
+						ie ready sw :> locationName ;
 	: locationUrl		( -- obj ) \ Get ShellWindows.item(theIE).locatonUrl string
-						sw :> locationUrl ;
+						ie ready sw :> locationUrl ;
 	: visible			( -- ) \ Make ShellWindows.item(theIE) visible
-						js: vm.g.ShellWindows.item(theIE).visible=true ;
+						sw :: visible=true ;
 	: visible?			( -- flag ) \ Get ShellWindows.item(theIE).visible setting
 						sw :> visible ;
 	: (navigate)		( "url" flags -- ) \ Visit the URL
-						ShellWindows :> count==0 ?abort" No connection to any sw web page."
-						sw :: navigate(pop(1),pop()) ;
+						ie ready sw :: navigate(pop(1),pop()) ;
 						/// Flags : A combined number of following bits:
 						/// 	navOpenInNewWindow = 0x1,
 						/// 	navNoHistory = 0x2,
@@ -146,60 +164,9 @@
 	: navigate			( <url> -- ) \ ShellWindows.item(theIE) to visit the URL
 						BL word 0 (navigate) ;
 	: source 			( -- "HTML" ) \ Get source code of the ShellWindows.item(theIE) page
-						ready not-busy document :> body.innerHTML ;
-	
-	<comment>	
-		AddressBar
-		/// Sets or gets a value indicating whether the address bar of the object is visible or hidden.
-		Application
-		/// Gets the automation object for the application that is hosting the WebBrowser Control. 就是 IE object 自己。
-		Busy
-		/// Gets a value that indicates whether the object is engaged in a navigation or downloading operation.
-		Container
-		/// Gets an object reference to a container. [ ] 不知是啥,讀出來是 NULL。
-		Document
-		/// Gets the automation object of the active document, if any. ==> [object Document] (object)
-		FullName
-		/// FullName may be altered or unavailable in subsequent versions of the operating system or product.
-		/// Retrieves the fully qualified path of the Internet Explorer executable.
-		FullScreen
-		/// Sets or gets a value that indicates whether Internet Explorer is in full-screen mode or normal window mode.
-		Left
-		/// Sets or gets the coordinate of the left edge of the object.
-		LocationName
-		/// (ReadOnly) Retrieves the path or title of the resource that is currently displayed.
-		LocationURL
-		/// (ReadOnly) Gets the URL of the resource that is currently displayed.
-		MenuBar
-		/// Sets or gets a value that indicates whether the Internet Explorer menu bar is visible.
-		Offline
-		/// Sets or gets a value that indicates whether the object is operating in offline mode.
-		Parent
-		/// Gets the parent of the object.
-		Path
-		/// Path may be altered or unavailable in subsequent versions of the operating system or product. Retrieves the system folder of the Internet Explorer executable.
-		ReadyState
-		/// Gets the ready state of the object. READYSTATE_UNINITIALIZED = 0, READYSTATE_LOADING = 1, READYSTATE_LOADED = 2, READYSTATE_INTERACTIVE = 3, READYSTATE_COMPLETE = 4
-		RegisterAsBrowser
-		/// Sets or gets a value that indicates whether the object is registered as a top-level browser window.
-		RegisterAsDropTarget
-		/// Sets or gets a value that indicates whether the object is registered as a drop target for navigation.
-		Silent
-		/// Sets or gets a value that indicates whether the object can display dialog boxes.
-		StatusBar
-		/// Sets or gets a value that indicates whether the status bar for the object is visible.
-		TheaterMode
-		/// Sets or gets whether the object is in theater mode.
-		ToolBar
-		/// Sets or gets whether toolbars for the object are visible.
-		TopLevelContainer
-		/// Gets a value that indicates whether the object is a top-level container.
-		Type
-		/// Gets the user type name of the contained document object.
-		Visible
-		/// Sets or gets a value that indicates whether the object is visible or hidden.
-	</comment>	
-	<comment>	
+						ie ready busy document :> body.innerHTML ;
+
+	<comment>
 	[ ] 在 ie.f theIE 網頁上加上程式先讓 click 打 alert 看看。
 		--> 複習一下, 不久前才搞懂的 jQuery 2nd argument, the 'context'。
 			document js> $("div",pop()) constant page.jq \ 取得 jQuery object, 只限 <DIV>
@@ -452,7 +419,7 @@
 						return(!GoOn); 
 					case 70: /* [f]reeze */
 						vm.g.freeze = !vm.g.freeze;
-						print("The freezing flag : " + vm.g.freeze); execute("cr");
+						type("The freezing flag : " + vm.g.freeze); execute("cr");
 						return(!GoOn); 
 					case 83: /* [s]elect */
 						$(vm.g.track[vm.g.itrack])
@@ -486,7 +453,7 @@
 				return (!GoOn);
 			});
 			$("*",doc).mouseenter(function(){
-				print("Enter " + this.nodeName + ". ");
+				type("Enter " + this.nodeName + ". ");
 				if (vm.g.freeze) return;
 				$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
 				if (vm.g.track[vm.g.track.length-1]!=this) vm.g.track.push(this);
@@ -494,7 +461,7 @@
 				$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 			});
 			$("*",doc).mouseleave(function(){
-				print("Leave " + this.nodeName + ". ");
+				type("Leave " + this.nodeName + ". ");
 				if (vm.g.freeze) return;
 				$(this).removeAttr('style'); // 無須防呆
 			});
@@ -551,8 +518,8 @@
 		\ Study Windows Internet Explorer object   https://msdn.microsoft.com/library/aa752084(v=vs.85).aspx
 		\ Use ShellWindows (or sw) to get IE object. But sw gets *not* only IE but also FE. Tell by sw.name.
 
-			0 sw(i) :> name \ ==> File Explorer (string)
-			1 sw(i) :> name \ ==> Internet Explorer (string)
+			0 sw(i) :> name \ ==> File Explorer (string) or 檔案總管 (string)
+			1 sw(i) :> name \ ==> Internet Explorer (string) 在中文系統亦同
 
 		\ IE object events
 		\ Below command lines works 但都是一下達就馬上 alert 了，不知道 event 啥？最後給他亂打一通，居然也
@@ -570,10 +537,8 @@
 			[x] sw :: GoHome() 
 			[ ] sw :: navigate
 		
-	</comment>	
-		
-		
-		
-		
-	
-	
+	</comment>
+
+
+
+
