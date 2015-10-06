@@ -43,34 +43,31 @@
 	
 	: sw(i)				( i -- sw|null ) \ Get ShellWindow object of the indexed ShellWindow
 						js> vm.g.ShellWindows.item(parseInt(pop())) ;
-						/// IE,FE run 起來之前是 null 即無 IE process。若照下面這樣把最後
-						/// 一個 window 關掉: 0 sw(i) :> document.parentWindow :: close() 
-						/// 也會把 IE process 關掉,當然 0 sw(i) 也是 null。
+						/// IE,FE run 起來之前 sw 是 null 即 IE process 不存在。
+						/// 若把 window 都關掉: 0 sw(i) :> document.parentWindow 
+						/// :: close() 也會把 IE process 關掉, 0 sw(i) 就是 null。
 
 	: list-sw-windows	( -- count ) \ List all sw windows' locationName and URL
 						ShellWindows :> count ?dup if dup for dup r@ - ( COUNT i )
 						dup . space ( COUNT i ) sw(i) ?dup if dup :> LocationName . space :> LocationURL . else ." Null" then cr
-						next drop then ;
-						/// 有時候存在沒有內容的空 sw(i) 連 sw(0) 都有可能。
-						last alias list
+						next drop then ; last alias list
+						/// 有可能是空的。
 	
 	\ 我不知道哪個 sw window 是 activated
 	\ 以下命令固定用 ShellWindows.item(theIE) 來做 automation。
 	
-	0 value theIE // ( -- i ) Make ShellWindows.item(i) the default IE object
+	0 value theIE // ( -- i ) Make ShellWindows.item(theIE) the default IE object.
 	
 	: sw 				( -- sw|null ) \ Get the ShellWindows.item(theIE) sw object
 						js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ;
-						/// IE run 起來之前是 null 即無 IE process。若照下面這樣把最後
-						/// 一個 window 關掉: sw :> document.parentWindow :: close() 
-						/// 也會把 IE process 關掉，此時 sw 變成 null。但 sw(0) 有時候是 null
-						/// 即使 sw(1) 有東西，故需要用 theIE 來指定 active sw object。
-						/// sw 存在,但沒有 connect 任何網址時 ReadyState 也是 4,也有 document, 
-						/// 但是 document 裡 innerHTML 是 undefined。這樣就 available 了, 可以
-						/// navigate() 了。sw 都是 null 時 推薦用 s" iexplore" (fork) 把 IE 
-						/// run 起來。
+						/// ShellWindows collection 有可能跳空，sw(0) 是 null 即使 sw(1)
+						/// 有東西。 sw 存在,但沒有 connect 任何網址時 ReadyState 也是 4,
+						/// 也有 document, 但是 document 裡 innerHTML 是 undefined，這樣
+						/// 就 available 了, 可以 navigate() 了。sw 都是 null 時推薦用 
+						/// s" iexplore" (fork) 把 IE 先 run 起來。已經有 high level 的 
+						/// ie command 會自動搞定這些。
 
-	: isIE?				( object -- flag ) \ Is it an IE object?
+	: isIE?				( object -- flag ) \ Is the object IE?
 						dup if 
 							js> typeof(tos())=="object" ( obj f )
 							<js> pop(1).name.indexOf("Internet Explorer")!=-1</jsV> ( f f )
@@ -78,7 +75,7 @@
 						else drop false then ;
 						\ 必須用 "Internet Explorer" 判斷，因為 FE.name 有可能是中文的"檔案總管"。
 
-	: ready				( -- ) \ Wait ShellWindows.item(theIE) to become ready
+	: ready				( -- ) \ Wait theIE to become ready
 						1200 for ( total 120 sec which is 2 minutes ) 
 							100 nap sw isIE? if
 								sw :> ReadyState==4 if ( break ) r> drop 0 >r then
@@ -86,7 +83,7 @@
 						next ;
 						/// ctrl-break if don't want to wait so long.
 						
-	: busy				( -- ) \ Wait ShellWindows.item(0) to become not-busy
+	: busy				( -- ) \ Wait  theIE to become not-busy
 						1200 for ( total 120 sec which is 2 minutes ) 
 							100 nap sw isIE? if
 								sw :> busy if else ( break ) r> drop 0 >r then
@@ -94,9 +91,9 @@
 						next ;
 						/// ctrl-break if don't want to wait so long.
 						
-	: check-IE			( -- ) \ Pass or abort
+	: check-IE			( -- ) \ NOP or abort if theIE is not available.
 						sw isIE? if else drop beep 
-						abort" Error! IE object (from ShellWindows) is empty." 
+						abort" Error! 'theIE' object is empty." 
 						then ;
 
 	: ie 				( -- ) \ Make sure sw points to theIE object which is alive
@@ -163,17 +160,36 @@
 						
 	: navigate			( <url> -- ) \ ShellWindows.item(theIE) to visit the URL
 						BL word 0 (navigate) ;
-	: source 			( -- "HTML" ) \ Get source code of the ShellWindows.item(theIE) page
-						ie ready busy document :> body.innerHTML ;
+
+	: remove-script-from-element ( element -- ) \ Through jQuery, the element will be modified.
+						js> $("script",pop()) ( jqObject )
+						<js>
+							for (var i=0; i<tos().length; i++)
+								tos()[i].parentNode.removeChild(tos()[i])
+						</js>
+						( jqObject ) drop ;
+						/// The given element 可以是某個 IE 頁面不一定在本地。
+						/// document js> $("*",pop())[0] ( IE web page ) 
+						/// remove-script-from-element \ document's trimed now
+						/// document :> body.innerHTML </o> \ No script trouble
 
 	<comment>
-	[ ] 在 ie.f theIE 網頁上加上程式先讓 click 打 alert 看看。
+	[x] 利用 jQuery 鎖定目標，在 div 外框打上紅細線
 		--> 複習一下, 不久前才搞懂的 jQuery 2nd argument, the 'context'。
 			document js> $("div",pop()) constant page.jq \ 取得 jQuery object, 只限 <DIV>
 			document js> $("*",pop()) constant page.jq \ 取得 jQuery object, 整個網頁
 			page.jq :> [0].outerHTML </o> \ 在 jeforth.3hta outputbox 上顯示
+			\ 我記得 page.jq :> [0] 是 query 結果的 root 整體。
 			page.jq :> length . \ ==> 1 看有沒有東西
 			page.jq :> [0] ce! ce \ ==> 用 jeforth.3hta element.f 來直接操作這個 IE 上的網頁。
+		--> jquery 出來的東西裡有很多 <script> 如上經 </o> 顯示會有很多問題。
+			如何把它們都去掉? 簡單：
+			document js> $("script",pop()) constant script.jq \ ==> 成功 script.jq :> length \ ==> 19 (number)
+			script.jq :> [0].outerHTML \ ==> 可查看 source code。
+			19 [for] 19 r@ - script.jq :> [pop()] removeElement 100 nap [next] \ 全部刪除
+			Bingo!!
+			html5.f 裡有以前用 RegEx 方法寫的 remove-script, remove-select, remove-onmouse
+			等，[x] 應該都改成用 jquery --> remove-script-from-element done.
 		--> 這樣真的可以為某 element 加紅框了,但不知如何去除?
 			\ myh2 :: setAttribute('style',"background-color:white;border: 1px ridge")
 			\ style="background-color:red;border: 1px ridge"
@@ -182,8 +198,11 @@
 			myh2 <js> pop().setAttribute('style',"background-color:white;border: 2px ridge red")</js>	
 		--> 給全部 <DIV> 加上紅框
 			document js> $("div",pop())[0] <js> pop().setAttribute('style',"background-color:white;border: 2px ridge red")</js>	
+			\ [0] 是整頁,以上把整頁的快框弄成細紅線，個別 div 則無。改成 [1] 就僅第一個 div 打上紅線框。
 			document <js> $("div",pop()).css("border","2px ridge red")</js>
+			\ 以上從 css 下手把全部 div 都打上紅細線。
 		--> remove it : document <js> $("div",pop())[0].removeAttribute('style')</js>
+			\ 移除整頁外框的紅細線。
 	[ ] http://api.jquery.com/css/ 抄到這段 example 
 		<script>
 		$( "div" ).click(function() {
@@ -403,6 +422,8 @@
 		0 value freeze // ( -- boolean ) The freezing flag
 		document <js> var doc=pop();
 			var GoOn=false;
+if(vm.debug){vm.jsc.prompt='1111';eval(vm.jsc.xt)}
+			
 			$(doc).keydown(function(e){
 				e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 				switch(keycode) {
@@ -452,6 +473,7 @@
 				}
 				return (!GoOn);
 			});
+if(vm.debug){vm.jsc.prompt='2222';eval(vm.jsc.xt)}
 			$("*",doc).mouseenter(function(){
 				type("Enter " + this.nodeName + ". ");
 				if (vm.g.freeze) return;
@@ -460,11 +482,15 @@
 				vm.g.itrack = vm.g.track.length-1;
 				$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
 			});
+if(vm.debug){vm.jsc.prompt='3333';eval(vm.jsc.xt)}
+
 			$("*",doc).mouseleave(function(){
 				type("Leave " + this.nodeName + ". ");
 				if (vm.g.freeze) return;
 				$(this).removeAttr('style'); // 無須防呆
 			});
+if(vm.debug){vm.jsc.prompt='4444';eval(vm.jsc.xt)}
+
 		</js>
 	
 	</comment>	

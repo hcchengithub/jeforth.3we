@@ -4210,6 +4210,24 @@
 		--> not the experiment, 
 	--> the problem has gone after restart jeforth.hta.
 	
-		
+[x] element.f 的 ce@ 有防呆，會自動剔除非 element objects 回復到前一個有效的 element。
+	但沒有警告, 今加上。 2015/10/5 14:14
 
-	
+[x] html5.f 裡寫出 
+	: remove-script-from-element ( element -- ) \ Through jQuery, the element will be modified.
+			js> $("script",pop()) ( jqObject )
+			<js>
+				for (var i=0; i<tos().length; i++)
+					tos()[i].parentNode.removeChild(tos()[i])
+			</js>
+			( jqObject ) drop ;
+			/// The given element 可以是某個 IE 頁面不一定在本地。
+			/// document js> $("*",pop())[0] ( the web page ) 
+			/// remove-script-from-element \ document is trimed now
+			/// document :> body.innerHTML </o> \ No script trouble
+			
+			
+			
+			
+			
+			
