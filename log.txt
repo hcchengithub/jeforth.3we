@@ -4229,8 +4229,10 @@
 [ ] Strange, Windows 10 T550 makes an unknown JavaScript error by,
 	  shell.application :> windows().item(0).document .
       jsc: vm.g.ShellWindows.item(parseInt(vm.g.theIE)).document
-	--> try older version.
-	--> try S7 --> OK no such problem.
+	--> try older version --> master is old, same problem on the T550. --> cold boot --> same problem. --> Windows update ...
+	--> try S7 Win8 --> OK no such problem.
+	--> !!! try other Windows 10 computer --> an UUD in the lab 10.0.10546 is ok!! so it's T550's problem.
+		--> but it appears like [object HTMLDocument] while S7 Win8 appears [object Document], different!
 	--> try Windows 10 at home.
 	
 
