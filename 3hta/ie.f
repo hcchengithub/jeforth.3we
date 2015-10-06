@@ -168,10 +168,11 @@
 								tos()[i].parentNode.removeChild(tos()[i])
 						</js>
 						( jqObject ) drop ;
-						/// The given element 可以是某個 IE 頁面不一定在本地。
-						/// document js> $("*",pop())[0] ( IE web page ) 
-						/// remove-script-from-element \ document's trimed now
-						/// document :> body.innerHTML </o> \ No script trouble
+						/// The given element 可以是某個 IE 頁面，不一定在本地。
+						/// Example:
+						///   document js> $("*",pop())[0] ( IE web page ) 
+						///   remove-script-from-element \ document's trimed now
+						///   document :> body.innerHTML </o> \ No script trouble
 
 	<comment>
 	[x] 利用 jQuery 鎖定目標，在 div 外框打上紅細線
