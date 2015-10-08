@@ -3554,12 +3554,25 @@
 
 [ ] ie.f 裡 ready not-busy 常常等很久, 有時 readyStatus 卡在 1 不變 4, 配合收 event 可能較好。
 
-[ ] hcchen5600 2015/06/29 14:08:57
+[x] hcchen5600 2015/06/29 14:08:57
 	想用 jQuery 去 access jeforth 去 attach 的 IE object 網頁, 成功! 太棒了!
 	Fortunately the $() function has a second argument, the context, that has to be used here, like:
 	$('p', $(ht).context) ==> 去 study 這個 2nd argument 的玄機。
 	--
-	Document see : jQuery 2nd argument, see http://api.jquery.com/jQuery/ Categories: Core
+	jQuery 2nd argument, see http://api.jquery.com/jQuery/ Categories: Core
+	jQuery 有很多種形式, jQuery("selector") 形式是原型 jQuery( selector [, context ] ) 
+	的簡略式, jQuery(element) 也很常用。鑽進 IE 去控制網頁用的是有 2nd argument 
+	context object 的形式。 其中 context 實例 ShellWindows.item(theIE).document 即是。
+	jQuery 的各種形式,
+		1, jQuery(selector [, context ]) 
+		2, jQuery(element)
+		3, jQuery(elementArray)
+		4, jQuery(object)
+		5, jQuery(selection) <--- 猜想是第一式的結果
+		6, jQuery()
+		7, jQuery( html [, ownerDocument ] )
+		8, jQuery( html, attributes )
+		9, jQuery( callback )
 	--
 	document js> $('div',pop()) 在 S7 會跑出 : JavaScript error : Permission denied
 	可能又是 same origin policy issue。靠,這要怎麼避免? 關鍵是, 拿得到 IE document 可
@@ -4233,7 +4246,7 @@
 	--> try S7 Win8 --> OK no such problem.
 	--> !!! try other Windows 10 computer --> an UUD in the lab 10.0.10546 is ok!! so it's T550's problem.
 		--> but it appears like [object HTMLDocument] while S7 Win8 appears [object Document], different!
-	--> try Windows 10 at home.
+	--> try Windows 10 at home --> it's ok.
 	
 
 

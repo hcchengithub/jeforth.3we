@@ -175,6 +175,21 @@
 						///   document :> body.innerHTML </o> \ No script trouble
 
 	<comment>
+	[x] jQuery 可以從 jeforth 伸手進 IE 網頁工作：
+		\ jQuery 可以對 IE 網頁工作(而非侷限在 jeforth.hta 的 window 裡)
+		\ 整個 IE 網頁 elements 存進一個 array 
+			document <js> $("*",pop()).toArray() </jsV> constant a
+			a :> length tib.
+		\ 以下三個例子 work 但是寫法很多餘。當初怎麼想的,太拘泥於 
+		\ jQuery(selector [,context]) 的形式，照下面這樣之所以會成功
+		\ 我猜是因為 2nd arguement 無用，被正確地忽略了。
+			a :> [0] a :> [9] js> $(pop(),pop()).first().click(function(){alert("abc")}) \ works
+			a :> [0] a :> [9] js> $(pop(),pop()).removeAttr('style') \ it works
+			a :> [0] a :> [9] js> $(pop(),pop()).css("background-color","yellow") \ works
+		\ 以上的第三個為例，應該簡單寫成這樣：
+			js: $(vm.g.a[1120]).css("background-color","pink")
+		\ 整頁塗成黃色
+			document <js> $("*",pop()).css("background","yellow") </js>
 	[x] 利用 jQuery 鎖定目標，在 div 外框打上紅細線
 		--> 複習一下, 不久前才搞懂的 jQuery 2nd argument, the 'context'。
 			document js> $("div",pop()) constant page.jq \ 取得 jQuery object, 只限 <DIV>
@@ -204,51 +219,69 @@
 			\ 以上從 css 下手把全部 div 都打上紅細線。
 		--> remove it : document <js> $("div",pop())[0].removeAttribute('style')</js>
 			\ 移除整頁外框的紅細線。
-	[ ] http://api.jquery.com/css/ 抄到這段 example 
+			
+	[x] Click 到某個 element 的 event 處理方法,
+		http://api.jquery.com/css/ 抄到這段 example 
 		<script>
-		$( "div" ).click(function() {
-		  var html = [ "The clicked div has the following styles:" ];
-		 
-		  var styleProps = $( this ).css([
-			"width", "height", "color", "background-color"
-		  ]);
-		  $.each( styleProps, function( prop, value ) {
-			html.push( prop + ": " + value );
-		  });
-		 
-		  $( "#result" ).html( html.join( "<br>" ) );
-		});
+			$( "div" ).click(function() {
+			  var html = [ "The clicked div has the following styles:" ];
+			 
+			  var styleProps = $( this ).css([
+				"width", "height", "color", "background-color"
+			  ]);
+			  $.each( styleProps, function( prop, value ) {
+				html.push( prop + ": " + value );
+			  });
+			 
+			  $( "#result" ).html( html.join( "<br>" ) );
+			});
 		</script>
-		改寫成 click 任何東西都把它 hide , <ESC> 或 Ctrl-Z toggle 回來。
-		document <js> 
-		$("*",pop()).click(function(){
-			$(this)
-			.css("border","2px ridge red")
-			.addClass("_selected_");
-		});
+		\ 以上網友的範例改寫成 jeforth.3we 可直接執行的形式。
+		\ 執行後任意 click 就會 show 出該 element 的 CSS properties,
+		<js>
+			$( "div" ).click(function() {
+				type("The clicked div has the following styles:\n");
+				var styleProps = $( this ).css([
+					"width", "height", "color", "background-color"
+				]);
+				$.each( styleProps, function(prop,value) {
+					type( prop + ":" + value + " ");
+				});
+				type("\n");
+			});
 		</js>
-		document <js> $("*",pop()).toArray() </jsV> constant a
-		a :> length tib.
-		a :> [0] a :> [9] js> $(pop(),pop()).first().click(function(){alert("abc")}) \ works
-		a :> [0] a :> [9] js> $(pop(),pop()).removeAttr('style') \ it works
-		a :> [0] a :> [9] js> $(pop(),pop()).css("background-color","yellow") \ works
-		a :> [0] a :> [9] js> $(pop(),pop()).hide() \ JavaScript error : Unspecified error.
-		document <js> $("*",pop()).css("background","yellow") </js>
-		照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都被一一執行到。
-		document <js> 
-		$("*",pop()).click(function(){
-			if(vm.g.flag) return;
-			$(this)
-			.css("border","2px ridge red")
-			.addClass("_selected_");
-			vm.g.flag = true;
-		});
-		</js>
-		除了紅框, 印出來看也證實。
+		--------------------------------------------------------
+		\ 執行後對 theIE 網頁隨處 click 一下, 整頁每個 element 都打上紅細線。
+		\ 原因是 bubbling (我想是這麼稱呼)
+		
+			document <js> 
+				$("*",pop()).click(function(){
+					$(this)
+					.css("border","2px ridge red")
+					.addClass("_selected_");
+				});
+			</js>
+			
+		\ 照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都
+		\ 被一一執行到。似乎像這樣類似氣泡向上擴散到 parents 上去叫做 bubbling? 
+		\ 有了 flag 就可以終止 bubbling。不知這個方法好不好？
+
+			false value flag // ( -- boolean ) 控制不讓 bubble 擴散上去的開關。
+			document <js> 
+				$("*",pop()).click(function(){
+					if(vm.g.flag) return;
+					$(this)
+					.css("border","2px ridge red")
+					.addClass("_selected_");
+					vm.g.flag = true;
+				});
+			</js>
+			
+		\ 把打了紅框的 , 印出來看也證實。
 		document <js> $("._selected_",pop()).each(function(){
-			print("-------------------------\n");
-			print($(this).html());
-			print("\n");
+			type("-------------------------\n");
+			type($(this).html());
+			type("\n");
 		});
 		</js>		
 		調查整串都被 click 到的順序...由內而外。
@@ -494,6 +527,15 @@ if(vm.debug){vm.jsc.prompt='4444';eval(vm.jsc.xt)}
 
 		</js>
 	
+	</comment>	
+	
+	<comment>	
+		--------------------------------------------------------
+		改寫成 click 任何東西都把它 hide , <ESC> 或 Ctrl-Z toggle 回來。
+		--> 這個不成功, 手伸到 IE 去有些 jQuery 功能就不靈了：
+			js: $(vm.g.a[1120]).hide() \ ==> JavaScript error : Unspecified error.
+		--> [ ] 實驗在本地用 $(select,context) 形式看行不行？
+
 	</comment>	
 	
 	<comment>	
