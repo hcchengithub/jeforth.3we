@@ -3564,7 +3564,7 @@
 	的簡略式, jQuery(element) 也很常用。鑽進 IE 去控制網頁用的是有 2nd argument 
 	context object 的形式。 其中 context 實例 ShellWindows.item(theIE).document 即是。
 	jQuery 的各種形式,
-		1, jQuery(selector [, context ]) 
+		1, jQuery(selector [,context]) 
 		2, jQuery(element)
 		3, jQuery(elementArray)
 		4, jQuery(object)
