@@ -25,9 +25,9 @@
 	系的模擬動畫，該太陽是靜止不動的。我們可以另外下達一個不斷 rewind 的 TIB line 讓它去微調太陽的
 	位置，使其左右來回移動，如下：
 
-		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=g.stars[0].x+=e 
-		js> h>=(kvm.cv.canvas.width-kvm.cv.canvas.height/2) [if] js: e=-d [then] 
-		js> h<=kvm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
+		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=vm.g.stars[0].x+=e 
+		js> h>=(vm.cv.canvas.width-vm.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=vm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
 		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
 		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
 
@@ -101,9 +101,9 @@ marker ~~~
 		' ( n word ) 
 		js> tos().type!="star.property" ?abort" Error! Assigning to a none star.property."
 		compiling if ( n word ) 
-			<js> var s='var f;f=function(){/* to star.property */ g.stars[g.istar]["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+			<js> var s='var f;f=function(){/* to star.property */ vm.g.stars[vm.g.istar]["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
 		else ( n word )
-			js: g.stars[g.istar][pop().name]=pop()
+			js: vm.g.stars[vm.g.istar][pop().name]=pop()
 		then ; immediate
 		/// 以下要用 Function Overloading 的手法把專為 'star.property' 寫就的這個 'to' command 加
 		/// 回原 'to' 使它能處理多種 type。
@@ -130,11 +130,11 @@ marker ~~~
 	: property ( <name> -- ) \ Create a property of a stars[istar]
 		BL word (create) <js> 
 		last().type = "star.property";
-		var s = 'var f;f=function(){push(g.stars[g.istar]["' 
+		var s = 'var f;f=function(){push(vm.g.stars[vm.g.istar]["' 
 				+ last().name 
 				+ '"])}';
 		last().xt = eval(s);
-		// g.stars[g.istar][last().name] = undefined;
+		// vm.g.stars[vm.g.istar][last().name] = undefined;
 		</js> reveal ;
 		/// A property is a global variable but pointed by a common index, istar.
 		/// Like 'value', use 'to' to assign data into a property. You may need to use 
@@ -162,7 +162,7 @@ marker ~~~
 	
 	: newStar ( -- ) \ Create a New stars[istar]
 		istar ( save ) stars :> length to istar \ point to the last star which is the New Star
-		js: if(!g.stars[g.istar])g.stars[g.istar]={} \ if it's empty then declair
+		js: if(!vm.g.stars[vm.g.istar])vm.g.stars[vm.g.istar]={} \ if it's empty then declair
 		<js>  // get color fillStyle string
 			(function(){
 			var r=80,g=80,b=100,range=100,c="rgba(";
@@ -173,8 +173,8 @@ marker ~~~
 			push(c)})() 
 		</js> to color
 		js> Math.random()*(30-10)+10 to radius \ radius 10 ~ 30
-		js> Math.random()*g.maxPlanet+kvm.cv.canvas.width to x \ 座標位置，初值在畫面之外
-		js> Math.random()*g.maxPlanet+kvm.cv.canvas.height to y
+		js> Math.random()*vm.g.maxPlanet+vm.cv.canvas.width to x \ 座標位置，初值在畫面之外
+		js> Math.random()*vm.g.maxPlanet+vm.cv.canvas.height to y
 		js> Math.random()*5-2.5 to vx \ 速度向量 between -2.5 ~ 2.5 
 		js> Math.random()*5-2.5 to vy
 		0 to ax 0 to ay \ 重力加速度
@@ -199,12 +199,12 @@ marker ~~~
 		vx ax + to vx    vy ay + to vy \ 速度一直加 (ax,ay) 上去，所以叫「加速度」
 		x vx + to x      y vy + to y
 		\ 在畫布範圍外看不見的地方動手腳
-		x radius - js> kvm.cv.canvas.width > if
+		x radius - js> vm.cv.canvas.width > if
 			vx 10 / to vx \ 跑出視野的就偷偷把它減速
 		else x radius + 0< if
 			vx 10 / to vx
 		then then
-		y radius - js> kvm.cv.canvas.height > if
+		y radius - js> vm.cv.canvas.height > if
 			vy 10 / to vy \ 跑出視野的就偷偷把它減速
 		else y radius + 0< if
 			vy 10 / to vy
@@ -232,7 +232,7 @@ marker ~~~
 		next
 		stars :> length-1 for r@ to istar \ where istar : numBalls,...,3,2,1 
 			\ 垃圾清理撞進太陽湮滅掉的行星，換一個新的上去
-			radius if else stars :: splice(g.istar,1) newStar then
+			radius if else stars :: splice(vm.g.istar,1) newStar then
 		next
 		( restore ) to istar
 	;
@@ -269,9 +269,9 @@ marker ~~~
 	一度孤獨的太陽在太空中慢慢捕獲它的五顆行星，過程可能要半小時，期間很多都撞進太陽裡湮滅了。。。。
 	手動 Copy-paste 下列整段命令到 inputbox 命令區執行，可讓太陽左右來回移動，
 	
-		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=g.stars[0].x+=e 
-		js> h>=(kvm.cv.canvas.width-kvm.cv.canvas.height/2) [if] js: e=-d [then] 
-		js> h<=kvm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
+		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=vm.g.stars[0].x+=e 
+		js> h>=(vm.cv.canvas.width-vm.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=vm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
 		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
 		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
 	
@@ -289,7 +289,7 @@ marker ~~~
 		5.	s" yellow" to color \ 改一號行星的顏色。
 		6	3 to vx \ 往右輕推一號行星一把，故意擾動它的路線。
 		7.	10 to radius \ 改一號行星的大小。
-		8.	js: g.stars=g.stars.slice(0,3) \ 只留 0,1,2 三顆星體，其他都刪掉。其中 0 是太陽。用 newStar 命令則可添加行星。
+		8.	js: vm.g.stars=vm.g.stars.slice(0,3) \ 只留 0,1,2 三顆星體，其他都刪掉。其中 0 是太陽。用 newStar 命令則可添加行星。
 	
 	當你在 inputbox 輸入這些命令時，等於是在給 jeforth 系統加派工作。如果像剛才 copy
 	- past 上去的整段命令末尾有 50 nap rewind 者則成為又一個「常駐程式」，有如 event 
@@ -307,9 +307,9 @@ marker ~~~
 		draw 20 nap rewind 
 	</task>
 	<task>
-		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=g.stars[0].x+=e 
-		js> h>=(kvm.cv.canvas.width-kvm.cv.canvas.height/2) [if] js: e=-d [then] 
-		js> h<=kvm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
+		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=vm.g.stars[0].x+=e 
+		js> h>=(vm.cv.canvas.width-vm.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=vm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
 		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
 		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
 	</task>

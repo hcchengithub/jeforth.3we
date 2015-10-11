@@ -17,11 +17,6 @@
 	\ jeforth_project_k_virtual_machine_object 就是為了這種情形。
 
 		<js> vbExecuteGlobal("Dim vm:set vm=jeforth_project_k_virtual_machine_object") </js>
-		
-	\ <vb> ... </vb> 裡面需要用到 push(), pop() 但 jeforth.js kernel 沒有 export
-	\ 出來。這點小問題可以這樣輕鬆解決：
-
-		js: vm.push=push;vm.pop=pop;
 					
 	code vbEval 	( "string" -- result ) \ Evaluate the given vbs statements return value on TOS.
 					try {

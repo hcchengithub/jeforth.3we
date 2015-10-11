@@ -4248,6 +4248,18 @@
 		--> but it appears like [object HTMLDocument] while S7 Win8 appears [object Document], different!
 	--> try Windows 10 at home --> it's ok.
 	
-
+[ ] box2dweb-arrow.f 在 arrow.js 裡為了要把物理引擎的 world 傳出來給 jeforth 必須要
+	用到 vm.push 而vm 裡偏偏沒有 push, 從 kernel jeforth.js 裡把它們 export 出來吧!
+	--> 修改 project-k jeforth.js.
+	--> vb.f 也要簡化, 先前是它自己定義 vm.push vm.pop 可以拿掉了。
+[ ]	同時, arrow.js 裡看不見 vm 因為 vm 是 project-k kernel jeforth.js 裡的自稱,外面
+	看不見. 而 kvm 是 jeforth.hta 給的 instance name 是個 global 所以 arrow.js 裡可
+	以看見。但是 arrow.js 不要用 kvm 而用 jeforth_project_k_virtual_machine_object 
+	來取得 vm。
+	
+	
+	
+	
+	
 
 

@@ -1,4 +1,5 @@
 function init() {
+	var vm = jeforth_project_k_virtual_machine_object; // access to jeforth VM
     // Common code for using Box2D object.
     var b2Vec2 = Box2D.Common.Math.b2Vec2;
     var b2AABB = Box2D.Collision.b2AABB;
@@ -20,7 +21,7 @@ function init() {
     var dragConstant=0.05;
     var dampingConstant = 2;
     var world = new b2World(new b2Vec2(0, 10),true);
-	kvm.push(world); // [ ]
+	vm.push(world); // [ ]
     
     // document.addEventListener("mousedown",onMouseDown);
 	canvas.onmousedown = onMouseDown;
@@ -40,7 +41,7 @@ function init() {
         var evt = e||window.event;
         // createArrow(e.clientX-canvasPosition.x,e.clientY-canvasPosition.y);
         createArrow(e.offsetX,e.offsetY);
-		if(kvm.debug){kvm.jsc.prompt='222>>>';eval(kvm.jsc.xt)}
+		if(vm.debug){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)}
     }
 
     function createArrow(pX,pY) {
@@ -75,7 +76,7 @@ function init() {
         body.SetLinearVelocity(new b2Vec2(20*Math.cos(angle), 20*Math.sin(angle)));
         body.SetAngle(angle);
         body.SetAngularDamping(dampingConstant);
-		kvm.push(body); // [ ]
+		vm.push(body); // [ ]
     }
 
     function createBox(width,height,pX,pY,type,data) {

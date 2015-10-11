@@ -36,6 +36,7 @@
 	<script type="text/javascript" src="playground/arrow.js"></script>
 	</h> constant arrow.js // ( -- obj ) The arrow.js script element
 	
+	\ arrow.js pushes the world to data stack during initial
 	constant world // ( -- obj ) Box2Dweb world
 	code b2Vec2 ( x y -- objVector ) \ Convert x,y to vector
 		var v = new Box2D.Common.Math.b2Vec2(pop(1),pop());

@@ -1,1 +1,0 @@
-start jeforth.hta cls include git.f words -v git.f 
