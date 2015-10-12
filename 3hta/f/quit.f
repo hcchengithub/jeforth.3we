@@ -5,19 +5,35 @@
 \ applications. quit.f is the good place to define propritary features of each application.
 \  
 
+js: vm.push=push;vm.pop=pop \ before commit desktop at home, temp solution.
+
 : ado			( -- ) \ Switch (read/write)TextFile to use ADODB.Stream.
 				js: vm.writeTextFile=writeTextFile_ado;vm.readTextFile=readTextFile_ado ;
 				/// Windows XP 以及部分 Windows 7 上會有這個問題：
 				/// "Safety Settings on this computer prohibit accessing a data source on another domain"
 				/// https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
-				/// 改用 fso 即可。
+				/// 改用 fso 可部分改善。
 				
 : fso			( -- ) \ Switch (read/write)TextFile to use Scripting.FileSystemObject.
 				js: vm.writeTextFile=writeTextFile_fso;vm.readTextFile=readTextFile_fso ;
-				/// 用 fso 可避免 Windows XP 以及部分 Windows 7 上這個問題：
+				/// 用 fso 可部分改善 Windows XP 以及部分 Windows 7 上這個問題：
 				/// "Safety Settings on this computer prohibit accessing a data source on another domain"
 				/// https://www.evernote.com/shard/s22/nl/2472143/db532ac2-04d1-4618-9fc9-e81dc3ed1d0a
-				/// 但是不能用中文 word. git.f(utf-8) 有用到結果 include 半路就會出錯。
+				/// 但是不能用中文 word. git.f(utf-8) 有用到結果 include 半路就會出錯。升級到 Windows 8 
+				/// 以上是最好的辦法。
+
+: ado-or-fso?	( -- 'ado'|'fso' ) \ See what's the recent file read/write method, ado or fso.
+				js> vm.writeTextFile==writeTextFile_ado if 1 else 0 then 
+				js> vm.readTextFile==readTextFile_ado   if 1 else 0 then 1 << +
+				js> vm.writeTextFile==writeTextFile_fso if 1 else 0 then 2 << +
+				js> vm.readTextFile==readTextFile_fso   if 1 else 0 then 3 << +
+				<js> switch(pop()){
+					case  3: push('ado'); break;
+					case 12: push('fso'); break;
+					default: dictate('fso abort" Fatal error! Was none ADO nor FSO, very strange!! Now force to FSO."');
+				} </js> ;
+				/// fso is older method. Better Windows XP and Windows 7 compatible but can't access utf-8 files.
+				/// ado is newer method and is prefereed. But has compatible issues on older Windows. 
 				
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
