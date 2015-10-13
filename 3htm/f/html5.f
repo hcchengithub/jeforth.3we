@@ -213,17 +213,18 @@ s" html5.f"		source-code-header
 				/// Example: dropall js> outputbox 10 children[] <== get an array 
 				///          of ending 10 child nodes to TOS.
 
-: remove-script	( "HTML" -- "HTML'" ) \ Remove scripts and other things
+: remove-script-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				:> replace(/<script.*?script>/g,"")		\ remove all <script>
 				:> replace(/{_cr_}/g,"\n") ;
+				/// See also remove-script-from-element in ie.f.
 				
-: remove-select	( "HTML" -- "HTML'" ) \ Remove scripts and other things
+: remove-select-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				:> replace(/<select.*?select>/g,"")		\ remove all <select>
 				:> replace(/{_cr_}/g,"\n") ;
 				
-: remove-onmouse ( "HTML" -- "HTML'" ) \ Remove onmouseXX="dothis"  onmouseXX=dothat onmouseXX='dowhat' listenings.
+: remove-onmouse-from-HTML ( "HTML" -- "HTML'" ) \ Remove onmouseXX="dothis"  onmouseXX=dothat onmouseXX='dowhat' listenings.
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				<js> pop().replace(/\s+onmouse.+?=\s?\S+/g,"")</jsV> 
 				:> replace(/{_cr_}/g,"\n") ;

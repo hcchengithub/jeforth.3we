@@ -149,7 +149,7 @@ s" split.f" source-code-header
 				var worksheet_name = dept_name_Column.rows(row).value;
 				var tgt_worksheet = workbook.sheets(worksheet_name);
 				sheet.rows(row).copy;
-				push(tgt_worksheet.columns(dept_name_column_letter)); fortheval("bottom"); var tgt_row=pop()+1;
+				push(tgt_worksheet.columns(dept_name_column_letter)); dictate("bottom"); var tgt_row=pop()+1;
 				tgt_worksheet.paste(tgt_worksheet.rows(tgt_row));
 			}
 		</js> ;
@@ -164,7 +164,7 @@ s" split.f" source-code-header
 				tos(1).worksheets(i).copy; /* copy the worksheet to a new xls file in memory */
 				var workbook = tos(4).workbooks(tos(3));
 				push(workbook); push(pathname); 
-				fortheval("over excel.save-as swap excel.close and [if] [else] char Panic>> *debug* [then]");
+				dictate("over excel.save-as swap excel.close and [if] [else] char Panic>> *debug* [then]");
 			}
 		</js> 5 drops ;
 		

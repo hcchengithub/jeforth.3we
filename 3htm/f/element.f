@@ -28,12 +28,17 @@
 	[] constant ce-history // ( -- array ) Visited current-element history
 
 	: ce! ce-history js: pop().push(pop()) ; // ( element -- ) Set current-element
+		/// 非 element 的雜物可以放進去,但 ce@ 有防呆會把它丟掉。
+	
 	js> outputbox ce! \ Default current-element points to the display area of the forth console
 	: ce@ ( -- element ) \ Get current-element
 		ce-history :> length if else js> window.document ce! then \ guarantee history is not empty
 		ce-history js> tos()[pop().length-1] ( history.tos )
 		js> typeof(tos())=='object'&&tos().parentNode  ( history.tos flag ) if else \ element may be destroyed 
-		js> tos()==window.document if else drop ce-history js> tos().pop();tos()[pop().length-1] then
+		js> tos()==window.document if else 
+			cr ." Warning! Abnormal current-element. Go back to previous ce." cr cr
+			drop ce-history js> tos().pop();tos()[pop().length-1] 
+		then
 		then ;
 		/// Error proof, return previous history ce, or window.document if history is empty.
 
