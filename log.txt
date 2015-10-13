@@ -4263,11 +4263,44 @@
 [ ] A gh-pages branch which was created via GitHub .... don't know what it is for?
 	--> Ah! it's the project's web page!! I should use it.
 	
-[x] User suffering problem, jeforth.3we and project-k are separated they don't know, release new README.md
-	immediately!!!
-	
 [ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.	
 	--> 應該如實稱作 kernel_version 才對。
 	
+[x] release 3.1 之後 master == develop 如何複查? 
+	--> S7 checkout to develop, T550 checkout to master 
+	--> compare the two folders via Total Commander > menu : Commands > Synchronize Dirs...
+	依內容 compare 只看 != 者, 忽略 .git folders. 證實無誤。
+	
+[x] User suffering problem, jeforth.3we and project-k are separated they don't know, release new README.md
+	immediately!!! ---> README.md improved
+	[ ] but an even better arrangement is expected. --> Simply : git add -f project-k/jeforth.js 
+		--> Test downlaod jeforth.3we.zip from GitHub, run it, failed !!!
+				reDef code
+				JavaScript error on word "code" : Expected '}'
+				reDef code
+				JavaScript error on word "code" : Invalid character
+				Error! ; is compile-only.
+				Error! ; is compile-only.
+				Error! ; is compile-only.
+				Error! word is compile-only.
+				reDef \s
+		--> stop in quit.f no work. problem in jeforth.f
+		--> Stop right after reDef code, copy-paste the entire remaining jeforth.f ... PASS!
+			so what's the matter?
+		--> Strange, when defining init, the error message appears. But copy-pase ok.
+				JavaScript error on word "code" : Expected '}'
+			--> define init-debug which is mirror of init before init. stop before init, Binary search the problem.
+			--> gotcha ! vm.g.isSameArray = function (a,b) 
+			--> RI! 竟然是中文 comment 的問題, 因為程式一開始是用 fso 而問題直接就發生在 jeforth.f 裡。
+				==> 中文 comment 之後加幾個 space 即可避免。<---- 誤導了!這是個已知的問題, 有 config setting 可以設定.
+				clone 下來的沒問題, 但是 [Download Zip] 下來的有問題因為 push 上去時 CRLF 被換成 LF, pull 下來時會自動
+				又把 LF 換回 CRLF, clone 下來時也無誤. 我猜 [Download Zip] 直接把雲端的 repo 打包下來時沒有做轉換, 所
+				以都是 LF 因而出問題。
+				See http://www.cnblogs.com/flying_bat/archive/2013/09/16/3324769.html
+			--> 整個 project 已經 run 很久了, cloud 端都被轉換成 LF 了, 這至少對 project-k 是好事. 	因為號稱它在所有
+				有 JavaScript 的地方都能用, 一見面就卡在 CRLF(MS), CR(Apple), LF(Linux) 的問題上不好。
+		[ ] 值得研究!!
+		
+			
 
 
