@@ -4260,8 +4260,14 @@
 [x] 昨天忘了 push proejct-k, 在辦公室 vm.push vm.pop 還是沒有, 先用 quit.f 應急. 回家記得 push & 拿掉。
 	working on branch release-3.1 <--- done
 
+[ ] A gh-pages branch which was created via GitHub .... don't know what it is for?
+	--> Ah! it's the project's web page!! I should use it.
 	
+[x] User suffering problem, jeforth.3we and project-k are separated they don't know, release new README.md
+	immediately!!!
 	
+[ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.	
+	--> 應該如實稱作 kernel_version 才對。
 	
 
 
