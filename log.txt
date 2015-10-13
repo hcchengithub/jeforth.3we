@@ -4264,10 +4264,20 @@
 	--> Ah! it's the project's web page!! I should use it.
 	
 [x] User suffering problem, jeforth.3we and project-k are separated they don't know, release new README.md
-	immediately!!!
+	immediately!!! ---> README.md improved
+	[ ] but an even better arrangement is expected. --> Simply : git add -f project-k/jeforth.js 
+	[ ] jeforth.3we contains multiple applications (HTA, HTM, Node, NW, ..) version become a problem.
+		Consider to avoid kernel version, major, minor ... only by date ok? Ok if only one author, not
+		ok if there are many authors. 
 	
 [ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.	
 	--> 應該如實稱作 kernel_version 才對。
+	
+[x] release 3.1 之後 master == develop 如何複查? 
+	--> S7 checkout to develop, T550 checkout to master 
+	--> compare the two folders via Total Commander > menu : Commands > Synchronize Dirs...
+	依內容 compare 只看 != 者, 忽略 .git folders. 證實無誤。
+	
 	
 
 
