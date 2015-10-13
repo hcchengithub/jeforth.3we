@@ -4301,3 +4301,9 @@
 		--> 整個 project 已經 run 很久了, cloud 端都被轉換成 LF 了, 這至少對 project-k 是好事. 	因為號稱它在所有
 			有 JavaScript 的地方都能用, 一見面就卡在 CRLF(MS), CR(Apple), LF(Linux) 的問題上不好。
 	[ ] 值得研究!!
+
+[ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
+	值得研究。
+	
+	
+	
