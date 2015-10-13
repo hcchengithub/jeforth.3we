@@ -9,6 +9,8 @@
 \ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
 \
 
+ado \ 中文 word name 需用到 utf-8 不能用 fso readTextFile 要用 ado.
+
 js> vm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
 s" git.f"   source-code-header
@@ -773,6 +775,7 @@ s" git.f"   source-code-header
 	<o>
 	<p>阮一峰的網絡日誌</p>
 	<h1 id="digestgit-分支管理策略"><a href="http://www.ruanyifeng.com/blog/2012/07/git.html">Digest：Git 分支管理策略</a></h1>
+	<p>"GitHub for Windows" does not see a new branch even that is already on the cloud. Solution is: Use "list-all-branch" to review its name then "checkout the-branch-name".</p>
 	<h2 id="二開發分支-develop">二、開發分支 develop</h2>
 	<p>主分支只用來分佈重大版本，日常開發應該在另一條分支上完成。我們把開發用的分支，叫做 develop。這個分支可以用來生成代碼的最新隔夜版本（nightly）。如果想正式對外發佈，就在 Master 分支上，對 develop 分支進行」合併」（merge）。</p>
 	<p>Git 創建 develop 分支的命令：</p>

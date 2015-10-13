@@ -5,8 +5,6 @@
 \ applications. quit.f is the good place to define propritary features of each application.
 \  
 
-js: vm.push=push;vm.pop=pop \ before commit desktop at home, temp solution.
-
 : ado			( -- ) \ Switch (read/write)TextFile to use ADODB.Stream.
 				js: vm.writeTextFile=writeTextFile_ado;vm.readTextFile=readTextFile_ado ;
 				/// Windows XP 以及部分 Windows 7 上會有這個問題：
