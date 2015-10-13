@@ -1,4 +1,3 @@
- 
 
 j e f o r t h . 3 w e
 ==============
@@ -29,11 +28,9 @@ Get source code, unzip, and start running
 ----------------|----------------------------------------------
 | jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
-----------------|----------------------------------------------
 
 
-
-You **[download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) from GitHub web page. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs.
+You click **[download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs.
 ```
     The jeforth.3we/ directory 
     ... snip ...
@@ -149,7 +146,9 @@ jeforth.hta include merge2.f
 
 ####The End
 
-FigTaiwan [http://figtaiwan.org](http://figtaiwan.org)
-H.C. Chen  [hcchen5600@gmail.com](hcchen5600@gmail.com)
+ - FigTaiwan [http://figtaiwan.org](http://figtaiwan.org) 
+ - H.C. Chen [hcchen5600@gmail.com](hcchen5600@gmail.com) 
+ - Written with [StackEdit](https://stackedit.io/)
 
-> Written with [StackEdit](https://stackedit.io/)
+
+
