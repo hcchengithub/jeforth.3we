@@ -4354,7 +4354,8 @@
 		: guarantee-CRLF ( string -- string' ) \ Replace LF 0A in the given string to CRLF 0D0A.
 			remove-all-CR replace-LF-to-CRLF ;
 			
-			
+	[ ] guaranteeCRLF (ss) // return a new string with new lines be CRLF
+		ok now, but read -> write file test still failed.
 
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
