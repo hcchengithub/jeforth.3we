@@ -4322,41 +4322,37 @@
 			
 			
 			
-		code remove-all-CR ( [array] -- [array'] ) \ Remove all CR 13 from the array of characters
-			var aa = pop(), bb = [], cc = "";
-			while (cc = aa.shift()) if (cc != 13)  bb.push(cc);
-			push(bb);
-			end-code
-		code replace-LF-to-CRLF ( [array] -- [array'] ) \ Replace all LF 10 to CRLF 13 10.
-			var aa = pop(), bb = [], cc = "";
-			while (cc = aa.shift()) {
-				if (cc == 10) bb.push(13);
-				bb.push(cc); 
-			}
-			push(bb);
-			end-code
-			
-		: guarantee-CRLF ( "string" -- n ) \ Replace LF 0A in the given string to CRLF 0D0A.
-			binary-string>array remove-all-CR replace-LF-to-CRLF binary-array>string ;
+		// code remove-all-CR ( [array] -- [array'] ) \ Remove all CR 13 from the array of characters
+		// 	var aa = pop(), bb = [], cc = "";
+		// 	while (cc = aa.shift()) if (cc != 13)  bb.push(cc);
+		// 	push(bb);
+		// 	end-code
+		// code replace-LF-to-CRLF ( [array] -- [array'] ) \ Replace all LF 10 to CRLF 13 10.
+		// 	var aa = pop(), bb = [], cc = "";
+		// 	while (cc = aa.shift()) {
+		// 		if (cc == 10) bb.push(13);
+		// 		bb.push(cc); 
+		// 	}
+		// 	push(bb);
+		// 	end-code
+		// : guarantee-CRLF ( "string" -- n ) \ Replace LF 0A in the given string to CRLF 0D0A.
+		// 	binary-string>array remove-all-CR replace-LF-to-CRLF binary-array>string ;
 
 		code remove-all-CR ( string -- string' ) \ Remove all CR 13 from the string
-			var aa = pop(), bb = [], cc = "";
-			for(var i=0; i<aa.length; i++) {
-				cc = aa.charCodeAt(i);
-				if (cc != 13) bb.push(cc);
-			}
+			var aa = pop(), bb = "";
+			for(var i=0; i<aa.length; i++)  if (aa.charCodeAt(i) != 13) bb += aa[i];
 			push(bb);
 			end-code
 		code replace-LF-to-CRLF ( string -- string' ) \ Replace all LF 10 to CRLF 13 10.
-			var aa = pop(), bb = [], cc = "";
-			while (cc = aa.shift()) {
-				if (cc == 10) bb.push(13);
-				bb.push(cc); 
+			var aa = pop(), bb = "";
+			for(var i=0; i<aa.length; i++) {
+				if (aa.charCodeAt(i) == 10) bb += String.fromCharCode(13);
+				bb += aa[i]; 
 			}
 			push(bb);
 			end-code
-		: guarantee-CRLF ( "string" -- n ) \ Replace LF 0A in the given string to CRLF 0D0A.
-			binary-string>array remove-all-CR replace-LF-to-CRLF binary-array>string ;
+		: guarantee-CRLF ( string -- string' ) \ Replace LF 0A in the given string to CRLF 0D0A.
+			remove-all-CR replace-LF-to-CRLF ;
 			
 			
 
