@@ -111,6 +111,30 @@
 		if (state.serious) debugger;
 	}
 
+	// -------------------- GitHub CRLF issue ----------------------------------
+	// New lines become LF only, they should be CRLF for Microsoft HTA, if were 
+	// [Download Zip] from GitHub. 3nd, 3nw, 3htm are all fine with LF. HTA should 
+	// handle this problem by application itself.
+	
+	function guaranteeCRLF (ss) { // return a new string with new lines be CRLF
+		return(replaceLF2CRLF(removeCR(ss))); // remove all CR then replace LF to CRLF.
+		function removeCR (aa) { // Remove all CR 13 from the string
+			var bb = "";
+			for(var i=0; i<aa.length; i++)  
+				if (aa.charCodeAt(i) != 13) bb += aa[i];
+			return(bb);
+		}
+		function replaceLF2CRLF (aa) { // Replace all LF 10 to CRLF 13 10.
+			var bb = "";
+			for(var i=0; i<aa.length; i++) {
+				if (aa.charCodeAt(i) == 10) 
+					bb += String.fromCharCode(13);
+				bb += aa[i]; 
+			}
+			return(bb);
+		}
+	}
+	
 	// -------------------- read/write local file ----------------------------------
 	//                   through either FSO or ADO
 	//  FSO does not support utf-8.  http://www.w3schools.com/asp/ado_ref_stream.asp 
@@ -152,7 +176,7 @@
 			data = txtFile.ReadAll(); 
 			txtFile.Close(); 
 		} 
-		return(data); 
+		return(guaranteeCRLF(data)); 
 	} 
 	
 	// When used in forth words, inner() handles the try{}catch{} thing.
@@ -168,14 +192,14 @@
 
 	// When used in forth words, inner() handles the try{}catch{} thing.
 	function readTextFile_ado (pathname) { 
-		var strData, objStream = kvm.ado;
+		var data, objStream = kvm.ado;
 		try{objStream.Close()}catch(err){}
 		objStream.CharSet = "utf-8";
 		objStream.Open();
 		objStream.LoadFromFile(pathname);
-		strData = objStream.ReadText();
+		data = objStream.ReadText();
 		objStream.Close();
-		return(strData);
+		return(guaranteeCRLF(data));
 	}
 	//  Use fso because no Chinese yet and compatibility first.
 	kvm.writeTextFile = writeTextFile_fso; 
