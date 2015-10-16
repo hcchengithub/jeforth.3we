@@ -4312,68 +4312,66 @@
 			--> GB2312 coded file readTextFile 結果 HTA 會把每個不認得的 code 逐 byte 用 65533 (0xfffd) 取代。
 				所以 '義' C1-78 讀進來變成 2 個 character [65533][120] (0x78 == 120)。讀進不認得的編碼沒救,因
 				為一堆都被 65533 替換掉了。
-			--> 本來是 0A 或 0D 0A 皆保留 fso ado 都不會動他們。
-			--> 總之, 用 charCodeAt() 不用擔心會看錯, 0d 0a 看到了就是 CR LF 不會錯。
-				--> 錯了! utf-8 中文行尾用 fso 讀進來會被搞亂, 行尾的 0A 不見了!!! <--- root cause
+			--> 本來是 0A 或 0D 0A 皆保留 fso ado 都不會動他們。 <==== 錯!
+				[@] 解法就是, 先把所有的 charCodeAt(i) == 13 的都刪掉, 然後把所有的 charCodeAt(i) == 10 的都
+					insert 13 改成 13 10.
+					binary-string>array 
+					<js> var aa=[11,22,33,44]; aa.splice(2,1); aa </jsV> \ ==> 11,22,44 (array)
+					binary-array>string
+					==> 無效, fso 一讀進 utf-8 就已經亂了。亂了再處理已經來不及。
+				<無效取消>
+					[@] guaranteeCRLF (ss) // return a new string with new lines be CRLF
+						ok now, but read -> write file test still failed. --> device a way to see the actual file read by readTextFile
+						code remove-all-CR ( string -- string' ) \ Remove all CR 13 from the string
+							var aa = pop(), bb = "";
+							for(var i=0; i<aa.length; i++)  if (aa.charCodeAt(i) != 13) bb += aa[i];
+							push(bb);
+							end-code
+						code replace-LF-to-CRLF ( string -- string' ) \ Replace all LF 10 to CRLF 13 10.
+							var aa = pop(), bb = "";
+							for(var i=0; i<aa.length; i++) {
+								if (aa.charCodeAt(i) == 10) bb += String.fromCharCode(13);
+								bb += aa[i]; 
+							}
+							push(bb);
+							end-code
+						: guarantee-CRLF ( string -- string' ) \ Replace LF 0A in the given string to CRLF 0D0A.
+							remove-all-CR replace-LF-to-CRLF ;
+						--> write it to a file
+							code test
+								var ff = readTextFile_fso("f/jeforth.f");
+								writeTextFile_fso ("ff.f", ff);
+							end-code
+				</無效取消>
+			--> 總之, 用 charCodeAt() 不用擔心會看錯, 0d 0a 看到了就是 CR LF 不會錯。 <=== 錯!
+				--> 錯了! 
+					--> 看到問題了, 中文 comment 之後的 CRLF 真的有問題,把下行的 } 給吃上來了!
+					--> 因為 fso 不認得 utf-8 中文
+					utf-8 中文行尾用 fso 讀進來會被搞亂, 行尾的 0A 不見了!!! <--- root cause
 					--> 隨便用個中文檔 fso 去讀應該可以複製現象... Bingo!! ... shit! 上面的實驗不夠周延。
 			--> 實際上隨便一個 utf-8 中文檔, 用 fso 讀近來都會有 LF 或 CRLF 被吃掉的現象!
-				解法曾考慮加強成 20 0D 0A 而非單 0D 0A, 但 fso 一讀進來就已經亂了!
-				--> 0D 0A 可能真的有助於避免 fso 把 0A 吃掉? ==> Bingo!! 完全正確。
+				解法曾考慮加強成 20 0D 0A 而非單 0D 0A, 但 fso 一讀進來就已經亂了!來不及做任何補救。
+				--> 如果來源是 0D 0A 可能真的有助於避免 fso 把 0A 吃掉? ==> Bingo!! 完全正確。
 		[ ]	這下子 GitHub 的 CRLF 問題又陷入膠著了... 因為 fso 一讀進來單 LF 0A 的檔案就已經亂了。
-			==> 看來 jeforth.f quit.f 等, 用 fso 讀進來的 module 都不能用 utf-8 而必須用 Big5。
-			==> 切換成 ado 的時間早一點。而且自動挑選正確編碼的 jeforth.js 跟相關檔案。
-			
-			
-				
-		[ ] 解法就是, 先把所有的 charCodeAt(i) == 13 的都刪掉, 然後把所有的 charCodeAt(i) == 10 的都
-			insert 13 改成 13 10.
-			binary-string>array 
-			<js> var aa=[11,22,33,44]; aa.splice(2,1); aa </jsV> \ ==> 11,22,44 (array)
-			binary-array>string
-			
-			
-			
-		// code remove-all-CR ( [array] -- [array'] ) \ Remove all CR 13 from the array of characters
-		// 	var aa = pop(), bb = [], cc = "";
-		// 	while (cc = aa.shift()) if (cc != 13)  bb.push(cc);
-		// 	push(bb);
-		// 	end-code
-		// code replace-LF-to-CRLF ( [array] -- [array'] ) \ Replace all LF 10 to CRLF 13 10.
-		// 	var aa = pop(), bb = [], cc = "";
-		// 	while (cc = aa.shift()) {
-		// 		if (cc == 10) bb.push(13);
-		// 		bb.push(cc); 
-		// 	}
-		// 	push(bb);
-		// 	end-code
-		// : guarantee-CRLF ( "string" -- n ) \ Replace LF 0A in the given string to CRLF 0D0A.
-		// 	binary-string>array remove-all-CR replace-LF-to-CRLF binary-array>string ;
+			( )	看來 jeforth.f quit.f 等, 用 fso 讀進來的 module 都不能用 utf-8 而必須用 Big5 
+			(x)	主要檔案不要用中文。<---- 寫個程式來檢查 "string".charCodeAt(i) > 128 的就可能
+				是問題。
+			( )	自動挑選正確編碼的 jeforth.js e.g. jeforth-big5.js, jeforth-utf8.js 跟相關檔案。
+			( )	乾脆不 support Windows 7 以前的版本, 就可以不用 fso 直接都用 ado。
 
-		code remove-all-CR ( string -- string' ) \ Remove all CR 13 from the string
-			var aa = pop(), bb = "";
-			for(var i=0; i<aa.length; i++)  if (aa.charCodeAt(i) != 13) bb += aa[i];
-			push(bb);
-			end-code
-		code replace-LF-to-CRLF ( string -- string' ) \ Replace all LF 10 to CRLF 13 10.
-			var aa = pop(), bb = "";
-			for(var i=0; i<aa.length; i++) {
-				if (aa.charCodeAt(i) == 10) bb += String.fromCharCode(13);
-				bb += aa[i]; 
-			}
-			push(bb);
-			end-code
-		: guarantee-CRLF ( string -- string' ) \ Replace LF 0A in the given string to CRLF 0D0A.
-			remove-all-CR replace-LF-to-CRLF ;
-			
-	[ ] guaranteeCRLF (ss) // return a new string with new lines be CRLF
-		ok now, but read -> write file test still failed. --> device a way to see the actual file read by readTextFile
-		--> write it to a file
-			code test
-				var ff = readTextFile_fso("f/jeforth.f");
-				writeTextFile_fso ("ff.f", ff);
-			end-code
-		--> 看到問題了, 中文 comment 之後的 CRLF 真的有問題,把下行的 } 給吃上來了!
-		--> 因為 fso 不認得 utf-8 中文
+				<無效取消>
+						code ansi? ( string -- T/F ) \ The string is all ANSI characters? (code < 128)
+							var ss = pop(), flag = true;
+							for (var i=0; i<ss.length; i++) { 
+								if (ss.charCodeAt(i) > 128) {
+									flag = false;
+									type(ss.slice(i,i+20+'\n'));
+									i += 20;
+								}
+							}
+							push(flag);
+							end-code
+				</無效取消>
 
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
