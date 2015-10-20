@@ -4275,7 +4275,7 @@
 	immediately!!! ---> README.md improved
 	[x] but an even better arrangement is expected. --> Simply : git add -f project-k/jeforth.js 
 	
-[ ] Test downlaod jeforth.3we.zip from GitHub, run it, failed !!!
+[x] Test downlaod jeforth.3we.zip from GitHub, run it, failed !!! <== unix2dos.exe is the solution
 			reDef code
 			JavaScript error on word "code" : Expected '}'
 			reDef code
@@ -4301,7 +4301,7 @@
 		--> 試過了, 只有 3hta 會這樣。3nw, 3nd, 3htm 都 ok. 所以要從 jeforth.hta 下手自己解決這個問題。
 		--> 整個 project 已經 run 很久了, cloud 端都被轉換成 LF 了, 這至少對 project-k 是好事. 	因為號稱它在所有
 			有 JavaScript 的地方都能用, 一見面就卡在 CRLF(MS), CR(Apple), LF(Linux) 的問題上不好。
-	[ ] 值得研究!! jeforth.hta should recover this problem in readTextFile and writeTextFile.
+	[x] 值得研究!! jeforth.hta should recover this problem in readTextFile and writeTextFile.
 		[x] make sure Chinese text files HTA created, Big5, utf-8, and GB2312 are all 0D0A/CRLF conflict free
 			--> Write a Chinese or pure English string from HTA to a file, check the file, ---> it's utf-8/BOM that 
 				has a EF BB BF at beginning. Always. Because my method is ado I guess --> Yes. New line is only LF 0A
@@ -4352,26 +4352,25 @@
 			--> 實際上隨便一個 utf-8 中文檔, 用 fso 讀近來都會有 LF 或 CRLF 被吃掉的現象!
 				解法曾考慮加強成 20 0D 0A 而非單 0D 0A, 但 fso 一讀進來就已經亂了!來不及做任何補救。
 				--> 如果來源是 0D 0A 可能真的有助於避免 fso 把 0A 吃掉? ==> Bingo!! 完全正確。
-		[ ]	這下子 GitHub 的 CRLF 問題又陷入膠著了... 因為 fso 一讀進來單 LF 0A 的檔案就已經亂了。
+		[x]	這下子 GitHub 的 CRLF 問題又陷入膠著了... 因為 fso 一讀進來單 LF 0A 的檔案就已經亂了。
 			( )	看來 jeforth.f quit.f 等, 用 fso 讀進來的 module 都不能用 utf-8 而必須用 Big5 
 			(x)	主要檔案不要用中文。<---- 寫個程式來檢查 "string".charCodeAt(i) > 128 的就可能
 				是問題。
+				code ansi? ( string -- T/F ) \ The string is all ANSI characters? (code < 128)
+					var ss = pop(), flag = true;
+					for (var i=0; i<ss.length; i++) { 
+						if (ss.charCodeAt(i) > 128) {
+							flag = false;
+							type(ss.slice(i,i+20+'\n'));
+							i += 20;
+						}
+					}
+					push(flag);
+					end-code				
 			( )	自動挑選正確編碼的 jeforth.js e.g. jeforth-big5.js, jeforth-utf8.js 跟相關檔案。
 			( )	乾脆不 support Windows 7 以前的版本, 就可以不用 fso 直接都用 ado。
-
-				<無效取消>
-						code ansi? ( string -- T/F ) \ The string is all ANSI characters? (code < 128)
-							var ss = pop(), flag = true;
-							for (var i=0; i<ss.length; i++) { 
-								if (ss.charCodeAt(i) > 128) {
-									flag = false;
-									type(ss.slice(i,i+20+'\n'));
-									i += 20;
-								}
-							}
-							push(flag);
-							end-code
-				</無效取消>
+			[x] [Download Zip] extract 之後用轉碼程式先處理過, 很簡單:
+				~\jeforth.3we>for /R %G in (*.f) do c:\your-path\dos2unix-7.3.1-win32-nls\bin\unix2dos.exe "%G"
 
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
