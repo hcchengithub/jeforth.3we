@@ -1,4 +1,3 @@
-
 j e f o r t h . 3 w e
 ==============
 **Forth** is the simplest computer programming language ever. **jeforth.3we** is an implementation with a **3 Words Engine** *jeforth.js* from [project-k](http://github.com/hcchengithub/project-k) (another project) for all applications: *HTA*, *HTM*, *Node.js*, *Node-webkit*, and can be more. Let's call them *jeforth.3hta*, *jeforth.3htm*, *jeforth.3nd*, and *jeforth.3nw*. They are tested on Windows operating systems, I believe the same kernel can be also working on Linux, iOS, Android, and any where JavaScript is available with a minimal porting efforts.
@@ -30,9 +29,15 @@ Get source code, unzip, and start running
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
 
 
-You click **[download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs.
+Click **[Download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs. 
+
+**Note:** One thing we need to know that, specially for jeforth.3hta, It's necessary to use something like GNU tool [unix2dos](https://en.wikipedia.org/wiki/Unix2dos) to convert the new line characters of all ~.f files from Unix's LF to Windows' CRLF. Do this or not doesn't matter for other versions, so far jeforth.3htm, jeforth.3nd and jeforth.3nw. If you **clone** them instead of **Download Zip** then forget this step, GitHub client side for Windows converts new line characters to CRLF correctly already. This is the usage:
+
+    ~\jeforth.3we>for /R %G in (*.f) do d:\dos2unix-7.3.1-win32-nls\bin\unix2dos.exe "%G"
+
+Below is my jeforth.3we/ directory listing for example,
+
 ```
-    The jeforth.3we/ directory 
     ... snip ...
     2015/09/06  12:57    <DIR>          3wsh
     2015/09/26  09:23    <DIR>          f
@@ -140,6 +145,7 @@ Use jeforth.3hta to manipulate excel spread sheets. This example gets a column f
 
  1. Double click on jeforth.3we/jeforth.hta to start it. After the self-test type the command line "include merge2.f" into the input box.
  2. Or run the below command line directory for the same thing:
+
 ```
 jeforth.hta include merge2.f
 ```
@@ -151,4 +157,4 @@ jeforth.hta include merge2.f
  - Written with [StackEdit](https://stackedit.io/)
 
 
-
+  
