@@ -4263,13 +4263,6 @@
 [ ] A gh-pages branch which was created via GitHub .... don't know what it is for?
 	--> Ah! it's the project's web page!! I should use it.
 	
-[x] User suffering problem, jeforth.3we and project-k are separated they don't know, release new README.md
-	immediately!!! ---> README.md improved
-	[ ] but an even better arrangement is expected. --> Simply : git add -f project-k/jeforth.js 
-	[ ] jeforth.3we contains multiple applications (HTA, HTM, Node, NW, ..) version become a problem.
-		Consider to avoid kernel version, major, minor ... only by date ok? Ok if only one author, not
-		ok if there are many authors. 
-	
 [ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.	
 	--> 應該如實稱作 kernel_version 才對。
 	
@@ -4278,6 +4271,109 @@
 	--> compare the two folders via Total Commander > menu : Commands > Synchronize Dirs...
 	依內容 compare 只看 != 者, 忽略 .git folders. 證實無誤。
 	
+[x] User suffering problem, jeforth.3we and project-k are separated they don't know, release new README.md
+	immediately!!! ---> README.md improved
+	[x] but an even better arrangement is expected. --> Simply : git add -f project-k/jeforth.js 
 	
+[x] Test downlaod jeforth.3we.zip from GitHub, run it, failed !!! <== unix2dos.exe is the solution
+			reDef code
+			JavaScript error on word "code" : Expected '}'
+			reDef code
+			JavaScript error on word "code" : Invalid character
+			Error! ; is compile-only.
+			Error! ; is compile-only.
+			Error! ; is compile-only.
+			Error! word is compile-only.
+			reDef \s
+	--> stop in quit.f no work. problem in jeforth.f
+	--> Stop right after reDef code, copy-paste the entire remaining jeforth.f ... PASS!
+		so what's the matter?
+	--> Strange, when defining init, the error message appears. But copy-pase ok.
+			JavaScript error on word "code" : Expected '}'
+		--> define init-debug which is mirror of init before init. stop before init, Binary search the problem.
+		--> gotcha ! vm.g.isSameArray = function (a,b) 
+		--> RI! 竟然是中文 comment 的問題, 因為程式一開始是用 fso 而問題直接就發生在 jeforth.f 裡。
+			==> 中文 comment 之後加幾個 space 即可避免。<---- 誤導了!這是個已知的問題, 有 config setting 可以設定.
+			clone 下來的沒問題, 但是 [Download Zip] 下來的有問題因為 push 上去時 CRLF 被換成 LF, pull 下來時會自動
+			又把 LF 換回 CRLF, clone 下來時也無誤. 我猜 [Download Zip] 直接把雲端的 repo 打包下來時沒有做轉換, 所
+			以都是 LF 因而出問題。
+			See http://www.cnblogs.com/flying_bat/archive/2013/09/16/3324769.html
+		--> 試過了, 只有 3hta 會這樣。3nw, 3nd, 3htm 都 ok. 所以要從 jeforth.hta 下手自己解決這個問題。
+		--> 整個 project 已經 run 很久了, cloud 端都被轉換成 LF 了, 這至少對 project-k 是好事. 	因為號稱它在所有
+			有 JavaScript 的地方都能用, 一見面就卡在 CRLF(MS), CR(Apple), LF(Linux) 的問題上不好。
+	[x] 值得研究!! jeforth.hta should recover this problem in readTextFile and writeTextFile.
+		[x] make sure Chinese text files HTA created, Big5, utf-8, and GB2312 are all 0D0A/CRLF conflict free
+			--> Write a Chinese or pure English string from HTA to a file, check the file, ---> it's utf-8/BOM that 
+				has a EF BB BF at beginning. Always. Because my method is ado I guess --> Yes. New line is only LF 0A
+			--> switch to fso and try again --> Yes! switch to fso then there's no BOM so it's not utf-8 but a plain 
+				text if it's English and Big5 for Chinese. New line is also only LF 0A.
+			--> '想' charCodeAt() is unicode 60-f3, Big5 is B7-51, utf-8 is E6-83-B3, GBK is CF-EB (saved from notepad++) 
+				Online character code lookup http://bianma.supfree.net/sos.asp?id=12054
+			--> GB2312 coded file readTextFile 結果 HTA 會把每個不認得的 code 逐 byte 用 65533 (0xfffd) 取代。
+				所以 '義' C1-78 讀進來變成 2 個 character [65533][120] (0x78 == 120)。讀進不認得的編碼沒救,因
+				為一堆都被 65533 替換掉了。
+			--> 本來是 0A 或 0D 0A 皆保留 fso ado 都不會動他們。 <==== 錯!
+				[@] 解法就是, 先把所有的 charCodeAt(i) == 13 的都刪掉, 然後把所有的 charCodeAt(i) == 10 的都
+					insert 13 改成 13 10.
+					binary-string>array 
+					<js> var aa=[11,22,33,44]; aa.splice(2,1); aa </jsV> \ ==> 11,22,44 (array)
+					binary-array>string
+					==> 無效, fso 一讀進 utf-8 就已經亂了。亂了再處理已經來不及。
+				<無效取消>
+					[@] guaranteeCRLF (ss) // return a new string with new lines be CRLF
+						ok now, but read -> write file test still failed. --> device a way to see the actual file read by readTextFile
+						code remove-all-CR ( string -- string' ) \ Remove all CR 13 from the string
+							var aa = pop(), bb = "";
+							for(var i=0; i<aa.length; i++)  if (aa.charCodeAt(i) != 13) bb += aa[i];
+							push(bb);
+							end-code
+						code replace-LF-to-CRLF ( string -- string' ) \ Replace all LF 10 to CRLF 13 10.
+							var aa = pop(), bb = "";
+							for(var i=0; i<aa.length; i++) {
+								if (aa.charCodeAt(i) == 10) bb += String.fromCharCode(13);
+								bb += aa[i]; 
+							}
+							push(bb);
+							end-code
+						: guarantee-CRLF ( string -- string' ) \ Replace LF 0A in the given string to CRLF 0D0A.
+							remove-all-CR replace-LF-to-CRLF ;
+						--> write it to a file
+							code test
+								var ff = readTextFile_fso("f/jeforth.f");
+								writeTextFile_fso ("ff.f", ff);
+							end-code
+				</無效取消>
+			--> 總之, 用 charCodeAt() 不用擔心會看錯, 0d 0a 看到了就是 CR LF 不會錯。 <=== 錯!
+				--> 錯了! 
+					--> 看到問題了, 中文 comment 之後的 CRLF 真的有問題,把下行的 } 給吃上來了!
+					--> 因為 fso 不認得 utf-8 中文
+					utf-8 中文行尾用 fso 讀進來會被搞亂, 行尾的 0A 不見了!!! <--- root cause
+					--> 隨便用個中文檔 fso 去讀應該可以複製現象... Bingo!! ... shit! 上面的實驗不夠周延。
+			--> 實際上隨便一個 utf-8 中文檔, 用 fso 讀近來都會有 LF 或 CRLF 被吃掉的現象!
+				解法曾考慮加強成 20 0D 0A 而非單 0D 0A, 但 fso 一讀進來就已經亂了!來不及做任何補救。
+				--> 如果來源是 0D 0A 可能真的有助於避免 fso 把 0A 吃掉? ==> Bingo!! 完全正確。
+		[x]	這下子 GitHub 的 CRLF 問題又陷入膠著了... 因為 fso 一讀進來單 LF 0A 的檔案就已經亂了。
+			( )	看來 jeforth.f quit.f 等, 用 fso 讀進來的 module 都不能用 utf-8 而必須用 Big5 
+			(x)	主要檔案不要用中文。<---- 寫個程式來檢查 "string".charCodeAt(i) > 128 的就可能
+				是問題。
+				code ansi? ( string -- T/F ) \ The string is all ANSI characters? (code < 128)
+					var ss = pop(), flag = true;
+					for (var i=0; i<ss.length; i++) { 
+						if (ss.charCodeAt(i) > 128) {
+							flag = false;
+							type(ss.slice(i,i+20+'\n'));
+							i += 20;
+						}
+					}
+					push(flag);
+					end-code				
+			( )	自動挑選正確編碼的 jeforth.js e.g. jeforth-big5.js, jeforth-utf8.js 跟相關檔案。
+			( )	乾脆不 support Windows 7 以前的版本, 就可以不用 fso 直接都用 ado。
+			[x] [Download Zip] extract 之後用轉碼程式先處理過, 很簡單:
+				~\jeforth.3we>for /R %G in (*.f) do c:\your-path\dos2unix-7.3.1-win32-nls\bin\unix2dos.exe "%G"
 
-
+[ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
+	值得研究。
+	
+	
+	

@@ -476,6 +476,7 @@ function jeForth() {
 	vm.dictionary = dictionary; // debug easier
 	vm.push = push; // interface for passing data into the VM.
 	vm.pop = pop;   // interface for getting data out of the VM.
+	vm.tos = tos;   // interface for getting data out of the VM.
 }
 if (typeof exports!='undefined') exports.jeForth = jeForth;	// export for node.js APP
 
