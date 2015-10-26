@@ -4188,10 +4188,12 @@
 [x] project-k can't use string.trim(), Windows XP JScript does not support that.
 	String.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
 
-[ ] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
+[x] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
 	"JavaScript error : Safety settings on this computer prohibit accessing a data
-	 source on another domain."
-[ ] Try Windows 7.
+	 source on another domain." ===> 放棄 Windows XP.
+[ ] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
+	[ ] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
+		I wish HTA supports something to tell OS version? 	
 
 [x] How to tell Windows version?
 	> objEnumWin32_OperatingSystem :> item().Version .
@@ -4205,7 +4207,7 @@
 [x] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
 	要求 node.js 先裝好, node.exe 入 path, nw.js 整個 copy 到 node.js home folder 因此
 	nw.exe 也入了 path。
-	[ ] 修改文件, how to run 要改良說明。
+	[x] 修改文件, how to run 要改良說明。
 
 [x] 3nw's quit.f needs a jump focus at the end.
 
@@ -4302,6 +4304,7 @@
 		--> 整個 project 已經 run 很久了, cloud 端都被轉換成 LF 了, 這至少對 project-k 是好事. 	因為號稱它在所有
 			有 JavaScript 的地方都能用, 一見面就卡在 CRLF(MS), CR(Apple), LF(Linux) 的問題上不好。
 	[x] 值得研究!! jeforth.hta should recover this problem in readTextFile and writeTextFile.
+		==> jeforth.3we-develop.zip 就應該先處理好, 執行 jeforth.hta 時若未處裡已經太晚了， unix2dos.exe is the solution
 		[x] make sure Chinese text files HTA created, Big5, utf-8, and GB2312 are all 0D0A/CRLF conflict free
 			--> Write a Chinese or pure English string from HTA to a file, check the file, ---> it's utf-8/BOM that 
 				has a EF BB BF at beginning. Always. Because my method is ado I guess --> Yes. New line is only LF 0A
@@ -4370,7 +4373,7 @@
 			( )	自動挑選正確編碼的 jeforth.js e.g. jeforth-big5.js, jeforth-utf8.js 跟相關檔案。
 			( )	乾脆不 support Windows 7 以前的版本, 就可以不用 fso 直接都用 ado。
 			[x] [Download Zip] extract 之後用轉碼程式先處理過, 很簡單:
-				~\jeforth.3we>for /R %G in (*.f) do c:\your-path\dos2unix-7.3.1-win32-nls\bin\unix2dos.exe "%G"
+				~\jeforth.3we>for /R %G in (*.*) do c:\your-path\bin\unix2dos.exe "%G"
 
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
