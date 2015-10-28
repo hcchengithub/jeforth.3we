@@ -80,6 +80,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 : sendkeys		( "keys" -- ) \ Send keys to the recent activated application
 				[ last literal ] :> wait ( -- "keys" wait ) 
 				WshShell :: sendkeys(pop(1),pop()) ; last :: wait=true
+				/// Note! WshShell.SendKeys 對 administrator mode 時的 process 無效。
 				/// ----- ' sendkeys :> wait -----
 				/// False: Continue running without waiting for the keys to be processed.
 				///        可以一邊手動切 app 一邊看到 key buffer dump 過來 dump 過去。

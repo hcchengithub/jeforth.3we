@@ -4378,5 +4378,7 @@
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
 	
+[ ] Jump into jsc due to error then ESC is to go on the ongoing process, ok fine but
+	how to terminate the entire system? We need a jsc abort command?
 	
 	
