@@ -56,13 +56,13 @@
 	include vb.f		\ Being able to run VBS is what HTA is for.
 	include wmi.f
 	
-						\ 查看是否 Windows 8 以上？決定要不要改用 ado, utf-8 才會正常。
-						objEnumWin32_OperatingSystem :> item().Version float 6.2 > ( Windows 8 )
-						[if] ado [then] 
-						\ 若非 Windows 8 以上則續用 fso 就得避免用到中文 word 名。
-						\ Windows 7  :  6.1.7601
-						\ Windows 8  :  6.2.9200
-						\ Windows 10 : 10.0.10240
+	\ 查看是否 Windows 8 以上？決定要不要改用 ado, utf-8 才會正常。
+	objEnumWin32_OperatingSystem :> item().Version float 6.2 >= ( Windows 8 )
+	[if] ado [then] 
+	\ 若非 Windows 8 以上則續用 fso 就得避免用到中文 word 名。
+	\ Windows 7  :  6.1.7601
+	\ Windows 8  :  6.2.9200
+	\ Windows 10 : 10.0.10240
 						
 	include html5.f		\ HTML5 is HTA's plateform feature
 	include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems from happening immediately

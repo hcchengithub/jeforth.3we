@@ -3523,7 +3523,7 @@
 [ ] ie(i) 的 alias ie 有問題, run 不起來。
 	ieWindow 也一樣問題。
 
-[ ]	JavaScript "Table to JSON" http://lightswitch05.github.io/table-to-json/
+[x]	JavaScript "Table to JSON" http://lightswitch05.github.io/table-to-json/
 	works fine.
 	<h> <script src="js/jquery.tabletojson.js"></script></h> drop
 	"table HTML" </o> constant table table er
@@ -3531,7 +3531,7 @@
 
 	Computer name : ASRock-P8H61 is my desktop at home.
 
-[ ] 希望能把整個網頁都抓進來 jquery 搜尋/控制 其中的東西
+[x] 希望能把整個網頁都抓進來 jquery 搜尋/控制 其中的東西
 	http://stackoverflow.com/questions/18145273/how-to-load-an-external-webpage-into-a-div-of-a-html-page
 	<o> <div>
     <object type="text/html" data="http://validator.w3.org/" width="800px" height="600px" style="overflow:auto;border:5px ridge blue">
@@ -3607,13 +3607,13 @@
 	我可能是給錯參數了, 絕對有 table 的, 但指定 fubon 之下, 沒有, 很自然。用 jQuery 也是這個邏輯。
 	[x] iframe 只有一個, 又有 src, 直接 browse ==> 可以。
 
-[ ] hcchen5600 2015/06/29 15:38:58
+[/] hcchen5600 2015/06/29 15:38:58
 	以上 Fubon 這個 iframe 頁面 ^1 沒有 <body> 倒有 <frameset> 竟然可用 .body 來 access:
 	> document :> body . \ ==> [object HTMLFrameSetElement] OK
 	==> 這是常識! http://www.cnblogs.com/yinluhui0229/archive/2011/04/27/2030822.html
 		YoudaoNote "frame,iframe,frameset用法和区别"
 		每個 frame 都有自己的 <html>...</html> document。
-[ ] frame (等於是另一個網頁) 要怎麼 access
+[/] frame (等於是另一個網頁) 要怎麼 access
 	--> document :> getElementsByTagName("frame").length . \ ==> 3 OK the ^1 fubon page
 	--> document :> getElementsByTagName("frame")[2] obj>keys . \ ==> 列出 members
 		有 getElementsBy TagName,ClassName 但是沒有 ById 想想好像也有道理。
@@ -3734,11 +3734,11 @@
 	以後不用 cut .. rewind 了。
 [x] Use this line to setup Fubon e01 association in excel
     ==> [begin] DDE-formula down @?stop 10 nap [again]
-[ ] study meney.f against the recent decline.
-[ ] work on project-k jeforth.f
-[ ]	新增 private folder 放 work.f money.f departmentcode.json 等。
+[x] study meney.f against the recent decline.
+[x] work on project-k jeforth.f
+[x]	新增 private folder 放 work.f money.f departmentcode.json 等。
 	--> 看怎麼把 project-k-kernel merge 回 master?
-[ ] 把 jeforth.3we 的 kernel 換成 project-k. project-k 的 cub.html 已經成功把
+[x] 把 jeforth.3we 的 kernel 換成 project-k. project-k 的 cub.html 已經成功把
 	pack-help 獨立出來, vm/kvm 的問題也搞懂了. 應該從 jeforth.f 改好就好了。
 	jeforth.3we 還是可以自稱 kvm 噓~~~ ===> 不要直接改, 先用 cub.html debug。
 	或者用帶入新 vm 的手法直接在 jeforth.3we 裡 debug。
@@ -3751,9 +3751,9 @@
 		execute("parse-help"); // ( "helpmsg" "rests" )
 		tib = pop() + " " + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
 		newhelp = pop();
-[ ] project-k 的 panic 要表明身分,否則搞搞不清楚.
+[x] project-k 的 panic 要表明身分,否則搞搞不清楚.
 
-[ ] 從 jeforth.3we 下命令給 project-k VM 用 hotkey f8：
+[x] 從 jeforth.3we 下命令給 project-k VM 用 hotkey f8：
 		code {F8} ( "command line" -- ) \ Let project-k VM to run the inputbox
 			var cmd = inputbox.value;
 			inputbox.value="";
@@ -3762,8 +3762,8 @@
 			inputbox.focus();
 			end-code
 
-[ ] cub.f 好了,攻 selftest, 改良。
-[ ] Original (words) in jeforth.f is very powerful but without -v and -V.
+[x] cub.f 好了,攻 selftest, 改良。
+[x] Original (words) in jeforth.f is very powerful but without -v and -V.
 	While words and help was poor, because they were rely on voc.f unnecessarily.
 	So we need to improve words and help. --> 規定好 input 格式, 有助化簡程式。
 	words/help [pattern [switch [argument]]]
@@ -3785,7 +3785,8 @@
 		   沒有 vm.panic() 然後 call vm.panic(state)。
 		3. reset() 的 message 沒啥意義
 	==> 已經都用 k :: type=function..., k :: prompt=.. 的方式。
-[ ] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
+	
+[x] Javascript 的 string 有 trim() method 可以去頭尾 white spaces, 從來不知。
 	==> 小心用! Windows XP 的 JScript v5.6 未 support. 故 project-k jeforth.f 裡都不能用。
 
 [x]	stackwas 放在 jeforth.js kernel 裏頭有必要嗎? --> 改成 tick(':').stackwas 了。
@@ -3808,7 +3809,7 @@
 	所以 forth 變成永遠都在的部分，不想讓 words help 太雜亂時，盡量用 only work.f,
 	only git.f 等來讓輸出清爽。故 words 的 -v -V -V- option 都不必了，好耶。
 
-[ ] should be moved to voc.f
+[x] should be moved to voc.f
 	: temp			( -- ) \ The source-code-file.f header macro
 					<text>
 						?skip2 --EOF-- \ skip it if already included
@@ -3826,7 +3827,7 @@
 					/// setup the self-test module
 					/// initiate vocabulary for the including module
 
-[ ] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
+[x] cub.f 寫好了以後要併回 cub.html, project-k 保持單純。
 
 [x] 大改寫,
 	[x] voc.f help calls (help) but origianl (help)/help 的 系統 help 要重新調配.
@@ -3865,10 +3866,11 @@
 	---> keyboard events 有問題,回家繼續 debug
 [x] Error! source-code-header unknown.
 
-[ ] jeforth.3we 的 'kernel' directory 直接就是 project-k 以免搞不清楚.
+[x] jeforth.3we 的 'kernel' directory 直接就是 project-k 以免搞不清楚.
 	本來認為是 kernel 的 jeforth.f 跟 voc.f 則搬到 f 裡去。不當作 kernel 了。
-	[ ]	這個要把 kernel 拿掉, 以 3htm 為例,
+	[x]	這個要把 kernel 拿掉, 以 3htm 為例,
 		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+		
 [x]	這兩個不必佔用 vm.member , 應該直接放進 *debug* 的 members。
 	因為掛在 vm 下的 properties 都要有關聯 vm 內外的目的，如 vm.type(), vm.prompt,
 	等. bp 跟 continue 或 resume 純粹是 jeforth.f 內部的東西, 應該屬於 value 放
@@ -3908,7 +3910,7 @@
 [ ] review project-k GitHub wiki 的文件、linkage 等。
 	文章寫多了,動不動就有斷鏈、command 已經改名等問題。
 
-[ ] 檢查 browser 是否 Chrome, alert 用 chrome 比較好。cub.html 在 Win 10 Edge 直接跑，慢得要命。
+[/] 檢查 browser 是否 Chrome, alert 用 chrome 比較好。cub.html 在 Win 10 Edge 直接跑，慢得要命。
 
 [x] 3htm jsc 裡 erase 無效 ... 感謝我自己! 以前已經發現在 jsc console 時
 	inputbox.value 是 \10 因為 \r\n (Chrome & IE) 只吃掉 \r 故留下 \n 使得 inputbox 非 empty 因此
@@ -3976,8 +3978,8 @@
 	' <selftest> :: enabled=true dropall cls --excel.f-- include excel.f
 	' <selftest> :: enabled=true dropall cls --canvas.f-- include canvas.f
 	' <selftest> :: enabled=true dropall cls --ie.f-- include ie.f
-[ ] ie.f 已知 ShellWindows 包括 fe ie . ie(i) ie 等不該以 ie 為名。
-[ ] fe/ie 其實是 sw 才對，ShellWindows.item(i)
+[x] ie.f 已知 ShellWindows 包括 fe ie . ie(i) ie 等不該以 ie 為名。
+[x] fe/ie 其實是 sw 才對，ShellWindows.item(i)
 [x] ie.f 最嚴重的問題是這個, ShellWindows.item(index) 不能收 argument !!??
 	\ [x] 不能直接用變數,很奇怪? <-- RI: 需 parseInt() cast 一下。
 	\ theIE s" vm.g.ShellWindows.item(_i_)" :> replace(/_i_/,pop()) jsEval ;
@@ -4188,10 +4190,12 @@
 [x] project-k can't use string.trim(), Windows XP JScript does not support that.
 	String.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support
 
-[ ] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
+[x] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
 	"JavaScript error : Safety settings on this computer prohibit accessing a data
-	 source on another domain."
-[ ] Try Windows 7.
+	 source on another domain." ===> 放棄 Windows XP.
+[ ] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
+	[ ] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
+		I wish HTA supports something to tell OS version? 	
 
 [x] How to tell Windows version?
 	> objEnumWin32_OperatingSystem :> item().Version .
@@ -4205,7 +4209,7 @@
 [x] ~.bat 的 path 設定使 jeforth.3we 對別人很難用。統一 install 方法，去個人化。
 	要求 node.js 先裝好, node.exe 入 path, nw.js 整個 copy 到 node.js home folder 因此
 	nw.exe 也入了 path。
-	[ ] 修改文件, how to run 要改良說明。
+	[x] 修改文件, how to run 要改良說明。
 
 [x] 3nw's quit.f needs a jump focus at the end.
 
@@ -4239,7 +4243,7 @@
 			/// remove-script-from-element \ document is trimed now
 			/// document :> body.innerHTML </o> \ No script trouble
 
-[ ] Strange, Windows 10 T550 makes an unknown JavaScript error by,
+[/] Strange, Windows 10 T550 makes an unknown JavaScript error by,
 	  shell.application :> windows().item(0).document .
       jsc: vm.g.ShellWindows.item(parseInt(vm.g.theIE)).document
 	--> try older version --> master is old, same problem on the T550. --> cold boot --> same problem. --> Windows update ...
@@ -4248,23 +4252,17 @@
 		--> but it appears like [object HTMLDocument] while S7 Win8 appears [object Document], different!
 	--> try Windows 10 at home --> it's ok.
 	
-[ ] box2dweb-arrow.f 在 arrow.js 裡為了要把物理引擎的 world 傳出來給 jeforth 必須要
+[x] box2dweb-arrow.f 在 arrow.js 裡為了要把物理引擎的 world 傳出來給 jeforth 必須要
 	用到 vm.push 而vm 裡偏偏沒有 push, 從 kernel jeforth.js 裡把它們 export 出來吧!
 	--> 修改 project-k jeforth.js.
 	--> vb.f 也要簡化, 先前是它自己定義 vm.push vm.pop 可以拿掉了。
-[ ]	同時, arrow.js 裡看不見 vm 因為 vm 是 project-k kernel jeforth.js 裡的自稱,外面
-	看不見. 而 kvm 是 jeforth.hta 給的 instance name 是個 global 所以 arrow.js 裡可
-	以看見。但是 arrow.js 不要用 kvm 而用 jeforth_project_k_virtual_machine_object 
-	來取得 vm。
+	[x]	同時, arrow.js 裡看不見 vm 因為 vm 是 project-k kernel jeforth.js 裡的自稱,外面
+		看不見. 而 kvm 是 jeforth.hta 給的 instance name 是個 global 所以 arrow.js 裡可
+		以看見。但是 arrow.js 不要用 kvm 而用 jeforth_project_k_virtual_machine_object 
+		來取得 vm。
 	
 [x] 昨天忘了 push proejct-k, 在辦公室 vm.push vm.pop 還是沒有, 先用 quit.f 應急. 回家記得 push & 拿掉。
 	working on branch release-3.1 <--- done
-
-[ ] A gh-pages branch which was created via GitHub .... don't know what it is for?
-	--> Ah! it's the project's web page!! I should use it.
-	
-[ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.	
-	--> 應該如實稱作 kernel_version 才對。
 	
 [x] release 3.1 之後 master == develop 如何複查? 
 	--> S7 checkout to develop, T550 checkout to master 
@@ -4302,6 +4300,7 @@
 		--> 整個 project 已經 run 很久了, cloud 端都被轉換成 LF 了, 這至少對 project-k 是好事. 	因為號稱它在所有
 			有 JavaScript 的地方都能用, 一見面就卡在 CRLF(MS), CR(Apple), LF(Linux) 的問題上不好。
 	[x] 值得研究!! jeforth.hta should recover this problem in readTextFile and writeTextFile.
+		==> jeforth.3we-develop.zip 就應該先處理好, 執行 jeforth.hta 時若未處裡已經太晚了， unix2dos.exe is the solution
 		[x] make sure Chinese text files HTA created, Big5, utf-8, and GB2312 are all 0D0A/CRLF conflict free
 			--> Write a Chinese or pure English string from HTA to a file, check the file, ---> it's utf-8/BOM that 
 				has a EF BB BF at beginning. Always. Because my method is ado I guess --> Yes. New line is only LF 0A
@@ -4370,11 +4369,23 @@
 			( )	自動挑選正確編碼的 jeforth.js e.g. jeforth-big5.js, jeforth-utf8.js 跟相關檔案。
 			( )	乾脆不 support Windows 7 以前的版本, 就可以不用 fso 直接都用 ado。
 			[x] [Download Zip] extract 之後用轉碼程式先處理過, 很簡單:
-				~\jeforth.3we>for /R %G in (*.f) do c:\your-path\dos2unix-7.3.1-win32-nls\bin\unix2dos.exe "%G"
+				~\jeforth.3we>for /R %G in (*.*) do c:\your-path\bin\unix2dos.exe "%G"
 
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
 	
 [ ] ie.f , Windows 10 , observed vm.g.ShellWindows.count==2 but both are null.
 
+[ ] Jump into jsc due to error then ESC is to go on the ongoing process, ok fine but
+	how to terminate the entire system? We need a jsc abort command?
 	
+[ ] A gh-pages branch which was created via GitHub .... don't know what it is for?
+	--> Ah! it's the project's web page!! I should use it.
+	
+[ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.	
+	--> 應該如實稱作 kernel_version 才對。
+	
+[ ] 'document' command 經常觸發 JavaScript 無名 error. 即使不用 ShellWindows 而直接取得 IE
+	object 如下, 經實驗證實這個 object 跟 sw.item(i) 是同一個，所以對這個無名 error 無助。
+	<js> var ie = new ActiveXObject('InternetExplorer.Application'); ie</jsV> onstant InternetExplorer.Application
+	==> 先嘗試 Chrome automation
