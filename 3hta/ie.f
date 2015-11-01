@@ -100,7 +100,8 @@
 						sw isIE? if else
 							<js> 
 							for (var i=0; i<vm.g.ShellWindows.count; i++){
-								if(vm.g.ShellWindows.item(i).name.indexOf("Internet Explorer")!=-1){
+								if(vm.g.ShellWindows.item(i) && 
+								   vm.g.ShellWindows.item(i).name.indexOf("Internet Explorer")!=-1){
 									vm.g.theIE = i;
 									break;
 								}

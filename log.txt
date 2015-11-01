@@ -4375,5 +4375,6 @@
 [ ] jeforth.3hta 從 DOS box 下執行當然沒問題, 但是從 PowerShell 下執行就會有些 wsh.f 的 selftest 會過不了。
 	值得研究。
 	
-	
+[ ] ie.f , Windows 10 , observed vm.g.ShellWindows.count==2 but both are null.
+
 	
