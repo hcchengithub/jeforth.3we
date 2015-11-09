@@ -4389,3 +4389,13 @@
 	object 如下, 經實驗證實這個 object 跟 sw.item(i) 是同一個，所以對這個無名 error 無助。
 	<js> var ie = new ActiveXObject('InternetExplorer.Application'); ie</jsV> onstant InternetExplorer.Application
 	==> 先嘗試 Chrome automation
+	==> Try autoit
+	==> Try jeforth.3wsh
+
+[ ]	16:36 2015-11-09 Study how to publish jeforth.3htm directly from GitHub.
+	16:43 2015-11-09 It really works! Both baby.html and sample.html
+		http://rawgit.com/hcchengithub/project-k/master/baby.html
+		http://rawgit.com/hcchengithub/project-k/master/sample.html
+		
+		
+		

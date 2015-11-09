@@ -85,10 +85,13 @@
 		-- Change the interface's DNS to google
 		netsh int ipv4 set dns name="乙太網路 2" static 8.8.8.8 primary validate=no
 		netsh int ipv4 add dns name="乙太網路 2" 8.8.4.4 index=2 validate=no
+		netsh int ipv4 set dns name="Wi-Fi" static 8.8.8.8 primary validate=no
+		netsh int ipv4 add dns name="Wi-Fi" 8.8.4.4 index=2 validate=no
 		-- Change the interface's DNS to automatic
 		netsh interface ipv4 set dnsservers "乙太網路 2" dhcp
 		-- See the DNS of the interface
 		netsh interface ipv4 show dnsserver "乙太網路 2"
+		netsh interface ipv4 show dnsserver "Wi-Fi"
 		-- example
 		C:\Windows\system32>netsh interface ipv4 show dnsserver "乙太網路 2"
 
