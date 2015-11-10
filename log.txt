@@ -4392,10 +4392,49 @@
 	==> Try autoit
 	==> Try jeforth.3wsh
 
-[ ]	16:36 2015-11-09 Study how to publish jeforth.3htm directly from GitHub.
+[x]	16:36 2015-11-09 Study how to publish jeforth.3htm directly from GitHub through rawgit.com.
 	16:43 2015-11-09 It really works! Both baby.html and sample.html
 		http://rawgit.com/hcchengithub/project-k/master/baby.html
 		http://rawgit.com/hcchengithub/project-k/master/sample.html
-		
-		
-		
+	[x] How to make a release, so as to try rawgit
+		Releases 有專門一群說明點  https://help.github.com/categories/releases/
+		原來 release 是從 GitHub.com 網頁上執行的,所以可以提供 binary 檔。
+	** rawgit 使用方法 **
+	到了 rawgit.com home page 它直接讓你輸入[Paste a GitHub file or Gist URL here]. 
+	如果輸入的位址是錯的，它不會有反應; 必須輸入對了,底下的測試版、production 版 URL
+	才會自動反映出來。正確的輸入內容是從 GitHub.com 網址列抄過來的
+		https://github.com/hcchengithub/project-k + '/master/' + 'filename'
+	所組成。我把 project-k release 了一版 1.0 而 1.0 就是這版的 release_name 也就是
+	branch name.
+	輸入：
+		"https://github.com/hcchengithub/project-k/master/1.0/baby.html"
+	得到：
+		"http://cdn.rawgit.com/hcchengithub/project-k/master/1.0/baby.html"
+	但是這個不能用，要把 master 刪掉才可以, 變成：
+		"https://cdn.rawgit.com/hcchengithub/project-k/1.0/baby.html"
+	就好了!
+[ ] 問題是從 rawgit.com 或 cdn.rawgit.com 上執行都很容易出現 jquery loading 失敗。
+	Ctrl-Enter 無效時，進 F12 debugger 即見該 error message。Refresh 幾次就會成功。
+	[ ]	想讓 index.html 檢查看 jquery 有沒有 load 成功。
+	[ ] 研究為何有這種情形?
+	==> 寫一個簡單的 index.html 裡面就是 include jquery 跟檢查。看能不能複製問題出來。
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
