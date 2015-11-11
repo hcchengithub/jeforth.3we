@@ -1,4 +1,4 @@
-
+	\   檔名都用小寫避免非 Windows 的系統找不到。
 	\	[ ] 人家說用 jQuery 是 over kill, 直接用 http 值得探討，
 	\	http://stackoverflow.com/questions/247483/http-get-request-in-javascript
 
