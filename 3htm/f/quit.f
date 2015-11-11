@@ -35,12 +35,16 @@
 	[then] 
 	js: tick('<selftest>').buffer="" \ recycle the memory
 	
-	include jsc.f		    \ JavaScript debug console in 3htm/f
-	include voc.f			\ voc.f is basic of forth language
-	include html5.f			\ html5.f is basic of jeforth.3htm
-	include element.f		\ HTML element manipulation
-	include platform.f		
-	include mytools.f		
+	\ 發現透過 rawgit.com 可以直接執行發佈在 GitHub 上的 jeforth.3htm
+	\ 為了加快速度,以下都用絕對位址。避免讓 readTextFileAuto 順著 path
+	\ 慢慢嘗試錯誤。
+	
+	include 3htm/f/jsc.f		    \ JavaScript debug console in 3htm/f
+	include f/voc.f					\ voc.f is basic of forth language
+	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
+	include 3htm/f/element.f		\ HTML element manipulation
+	include 3htm/f/platform.f		
+	include f/mytools.f		
 
 \ ----------------- run the command line -------------------------------------
 	args tib.insert
