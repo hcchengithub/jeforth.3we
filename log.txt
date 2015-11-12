@@ -4418,9 +4418,11 @@
 	[ ]	想讓 index.html 檢查看 jquery 有沒有 load 成功。
 	[ ] 研究為何有這種情形?
 	==> 寫一個簡單的 index.html 裡面就是 include jquery 跟檢查。看能不能複製問題出來。
+	==> https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html?nop
+		run 得很好。
+	[ ] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
 	
-	
-	
+[ ] solar-system.f 改寫,變成教材。	
 	
 	
 	
