@@ -3656,16 +3656,7 @@
 		document :> getElementsByName("SysJustBody")[0] constant SysJustBody
 		SysJustBody :> contentDocument list-links
 		0 所屬產業        11 補充揭露事項   22 產銷組合       33 資產負債季表
-		1 公司互動        12 基本面         23 相關權證       34 資產負債表年表
-		2 動態報導        13 股價表現       24 籌碼分佈       35 損益季表
-		3 個股速覽        14 基本資料       25 董監持股       36 損益年表
-		4 個股總覽        15 股本形成       26 董監質設       37 財務比率季表
-		5 公司業務範圍    16 股利政策       27 法人持股       38 財務比率年表
-		6 市場分析        17 經營績效       28 集保庫存       39 現金流量表
-		7 產銷概況        18 獲利能力       29 融資融券       40 Ｋ線圖
-		8 研發狀況        19 轉投資         30 主力進出       41 分價圖
-		9 有利不利因素    20 營收盈餘       31 投信持股       42 分時走勢圖
-		10 券商評估報告   21 重大行事曆     32 資產負債簡表
+		... snip ...
 		--> SysJustBody :> contentDocument.links[17].click() 成功!
 		--> 17 經營績效 的 table id oMainTable 裏頭還有 select 在 tr id=oScrollHead 裡。
 
@@ -4422,8 +4413,44 @@
 		run 得很好。
 	[ ] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
 	
-[ ] solar-system.f 改寫,變成教材。	
-	
+[ ] hcchen5600 2015/11/13 10:46:32 
+	hash>column2 改寫成好用的介面。
+
+[ ] hcchen5600 2015/11/13 10:46:37 
+	solar-system.f 改寫,變成教材。
+	---------------------------
+	: test
+		cls
+		js> outputbox removeElement
+		js> inputbox removeElement
+		s" body" <e>
+		<table width="90%" border="1" cellspacing="0" cellpadding="4" bgcolor="#F0F0F0" bordercolor="#FFFFFF">>
+		<tr>
+		<td width=60% rowspan="2" valign="bottom"><IMG SRC="https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png"></td>
+		<td width=40% valign="TOP"><div id=outputbox>lalala fsfs fs fslfs fs fslfs flsjf lsjfsldfjsd fs fs f sfs flsjdf jdsf sd fsd fsdjflsjdlfsjd fsd fs f sdf sf fs f</div></td>
+		</tr>
+		<tr>
+		<td height=10%><textarea id=inputbox></textarea></td>
+		</tr>
+		</table> </e>
+	;
+	-------------------------------------
+	: test
+		cls
+		js> outputbox removeElement
+		js> inputbox removeElement
+		s" body" <e>
+		<table width="90%" border="1" cellspacing="0" cellpadding="4" bgcolor="#F0F0F0" bordercolor="#FFFFFF">>
+		<tr>
+		<td width=40% valign="TOP"><div id=outputbox>lalala fsfs fs fslfs fs fslfs flsjf lsjfsldfjsd fs fs f sfs flsjdf jdsf sd fsd fsdjflsjdlfsjd fsd fs f sdf sf fs f</div></td>
+		<td width=60% rowspan="2" valign="bottom"><IMG SRC="https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png"></td>
+		</tr>
+		<tr>
+		<td height=10%><textarea id=inputbox></textarea></td>
+		</tr>
+		</table> </e>
+	;
+	-------------------------------------
 	
 	
 	
