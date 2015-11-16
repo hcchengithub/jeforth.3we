@@ -8,20 +8,20 @@ s" cloth.f"	source-code-header
 
 \ messages
 	: starting-message ( -- )
-		." Start . . ." cr ;
+		." Start . . . " ;
 	: ending-message ( -- ) 
 		." Done!" cr ;
 	
 \ setup
-	1000 300	setCanvasSize	\ ( width height -- ) 
-	15			setFrameRate	\ ( times per second ) 60 已經快到頂了，電腦速度跟不上了。
-	130			setFrameCountLimit \ ( n -- ) we don't run it infinitly
-	40			lineWidth		\ ( n -- )
-	100			value r			// ( -- int ) Red 
-	200			value g	 		// ( -- int ) green 
-	200			value b			// ( -- int ) blue
-	55			value range		// ( -- int ) Range of colour variation
-	90			value d			// ( -- int ) Drifting distance of the 2nd point
+	600 300	setCanvasSize	\ ( width height -- ) 
+	15		setFrameRate	\ ( times per second ) 60 已經快到頂了，電腦速度跟不上了。
+	130		setFrameCountLimit \ ( n -- ) we don't run it infinitly
+	40		lineWidth		\ ( n -- )
+	100		value r			// ( -- int ) Red 
+	200		value g	 		// ( -- int ) green 
+	200		value b			// ( -- int ) blue
+	55		value range		// ( -- int ) Range of colour variation
+	90		value d			// ( -- int ) Drifting distance of the 2nd point
 	
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function

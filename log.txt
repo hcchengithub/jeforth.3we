@@ -4418,52 +4418,31 @@
 
 [ ] hcchen5600 2015/11/13 10:46:37 
 	solar-system.f 改寫,變成教材。
-	---------------------------
-	: test
-		cls
-		js> outputbox removeElement
-		js> inputbox removeElement
-		s" body" <e>
-		<table width="90%" border="1" cellspacing="0" cellpadding="4" bgcolor="#F0F0F0" bordercolor="#FFFFFF">>
-		<tr>
-		<td width=60% rowspan="2" valign="bottom"><IMG SRC="https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png"></td>
-		<td width=40% valign="TOP"><div id=outputbox>lalala fsfs fs fslfs fs fslfs flsjf lsjfsldfjsd fs fs f sfs flsjdf jdsf sd fsd fsdjflsjdlfsjd fsd fs f sdf sf fs f</div></td>
-		</tr>
-		<tr>
-		<td height=10%><textarea id=inputbox></textarea></td>
-		</tr>
-		</table> </e>
-	;
 	-------------------------------------
-	: test
+	\ 想要讓 outputbox 能 word-wrap 的努力都失敗了,因為 type 是用 $().append() 做的,
+	\ 它不吃 text-wrap 這一套。想想反正都是在 <div> 裡面,怎麼會無效? 先放下罷了。
+	<text>
 		cls
-		js> outputbox removeElement
-		js> inputbox removeElement
 		s" body" <e>
-		<table width="90%" border="1" cellspacing="0" cellpadding="4" bgcolor="#F0F0F0" bordercolor="#FFFFFF">>
+		<table width="98%" border="1" cellspacing="0" cellpadding="4" bgcolor="#F0F0F0" bordercolor="#FFFFFF">>
 		<tr>
-		<td width=40% valign="TOP"><div id=outputbox>lalala fsfs fs fslfs fs fslfs flsjf lsjfsldfjsd fs fs f sfs flsjdf jdsf sd fsd fsdjflsjdlfsjd fsd fs f sdf sf fs f</div></td>
-		<td width=60% rowspan="2" valign="bottom"><IMG SRC="https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png"></td>
+		<td rowspan="2" valign="bottom"><div id=cvdiv></div></td>
+		<td width=90% valign="TOP"><div id=newoutputbox></div></td>
 		</tr>
 		<tr>
-		<td height=10%><textarea id=inputbox></textarea></td>
+		<td height=10%><textarea id=newinputbox>\ Type commands here, ESC to clear.</textarea></td>
 		</tr>
-		</table> </e>
-	;
-	-------------------------------------
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		</table> </e> drop
+		js> inputbox  js> newinputbox  replaceNode
+		js> outputbox js> newoutputbox replaceNode
+		include processing.f
+		js> vm.cv :> canvas js> cvdiv replaceNode
+		include cloth.f
+	</text> 
+	tib.append
+
+[ ]	only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
+	order 裡面。為了避免礙眼。
+
+
+
