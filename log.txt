@@ -4435,8 +4435,12 @@
 		</table> </e> drop
 		js> inputbox  js> newinputbox  replaceNode
 		js> outputbox js> newoutputbox replaceNode
+		eleBody ce! er
+		<o> <textarea></textarea></o> constant notepad // ( -- element ) My Notepad 
+		notepad js> outputbox insertBefore notepad :: rows=10 \ 變出一塊區域處理文字
+		: 2notepad notepad :: value+=vm.screenbuffer cls ; // ( -- ) Save screenbuffer to notepad.
 		include processing.f
-		js> vm.cv :> canvas js> cvdiv replaceNode
+		js> vm.cv :> canvas js> cvdiv replaceNode \ Position the canvas
 		include cloth.f
 	</text> 
 	tib.append
@@ -4444,5 +4448,8 @@
 [ ]	only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
 	order 裡面。為了避免礙眼。
 
-
+[ ] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
+	以避免干擾其他操作。
+	
+	
 

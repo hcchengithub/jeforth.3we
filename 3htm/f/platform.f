@@ -458,18 +458,12 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
+			case   8: /* Back space */ if(tick('{backSpace}' )){execute('{backSpace}' );return(pop());} break; // disable the [switch previous page] function
 			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
 			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
-		}
-		return (true); // pass down to following handlers
-	}
-
-	document.onkeydown = function (e) {
-		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
-		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
-		switch(keycode) {
 			case 13:
 				if (!event.shiftKey) // 想換行用 Shift-Enter 避免把命令發出去
 				if (!tick("{F2}").EditMode || event.ctrlKey) { // 在 EditMode 用 Ctrl-Enter 發出命令
@@ -481,6 +475,13 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					return(false);
 				}
 				return(true); // In EditMode
+		}
+		return (true); // pass down to following handlers
+	}
+
+	document.onkeydown = function (e) {
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		switch(keycode) {
 			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
 			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
 			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
@@ -497,7 +498,6 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 			case 122: /* F11 */ if(tick('{F11}')){execute('{F11}');return(pop());} break;
 			case 123: /* F12 */ if(tick('{F12}')){execute('{F12}');return(pop());} break;
 			case   3: /* ctrl-break */ if(tick('{ctrl-break}')){execute('{ctrl-break}');return(pop());} break;
-			case   8: /* Back space */ if(tick('{backSpace}' )){execute('{backSpace}' );return(pop());} break; // disable the [switch previous page] function
 		}
 		return (true); // pass down to following handlers
 	}
