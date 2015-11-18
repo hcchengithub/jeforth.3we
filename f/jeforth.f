@@ -427,14 +427,16 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {};
-				for (var j=0; j<order.length; j++) { // 越後面的 priority 越高
-					for (var i=1; i<words[order[j]].length; i++){  // 從舊到新，以新蓋舊,重建 wordhash{} hash table.
-						if (compiling) if (last()==words[order[j]][i]) continue; // skip the last() avoid of an unexpected 'reveal'.
-						wordhash[words[order[j]][i].name] = words[order[j]][i];
+				scan_vocabulary("forth"); // words in "forth" always available
+				for (var j=0; j<order.length; j++) scan_vocabulary(order[j]); // 越後面的 priority 越高
+				function scan_vocabulary(v) {
+					for (var i=1; i<words[v].length; i++){  // 第零個都放 0，一律跳過。
+						// skip the last() to avoid unexpected 'reveal'.
+						if (compiling) if (last()==words[v][i]) continue; 
+						wordhash[words[v][i].name] = words[v][i];
 					}
 				}
 				end-code
-				/// Used in (forget) and vocabulary words.
 
 code (forget) 	( -- ) \ Forget the last word
 				if (last().cfa) here = last().cfa;

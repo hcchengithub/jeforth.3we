@@ -4445,8 +4445,22 @@
 	</text> 
 	tib.append
 
-[ ]	only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
+[x]	only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
 	order 裡面。為了避免礙眼。
+	[x] re-design rescan-word-hash, let it always read 'forth' first even when it's 
+		not in the 'order' list.
+	[x] 執行 code 的時候觸發 js error, 這時候 compiling 的質居然是 "code" 
+			reDef code
+			JavaScript error on word "code" : Unexpected token ]
+			reDef cr
+			*** Start self-test 
+		==> 我猜是 bb 裡面有問題。把 bb 拿掉部分看 error msg 還在不在?
+		==> 果然就是這行的問題。
+			wordhash[words[v][i].name] = words[v]][i]; 
+			靠! 多了個 ] ------------------------^
+		結論是, code word 裡面要是有 typo 會有 error on word "code" 症狀會變成
+		定義中的 word 的 xt 變成前一個 word 的，而且該 error 觸發 Chrome F12 debugger 時，
+		compiling 的值是個字串 "code"。
 
 [ ] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
 	以避免干擾其他操作。

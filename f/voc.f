@@ -28,11 +28,12 @@ code isMember 	( value group -- key|index T|F ) \ Return key or index if value e
 
 code get-context ( -- "vid" ) \ Get the word list that is searched first. 
 				push(order[Math.max(0,order.length-1)]) end-code
-				/// context is order[last], order[0] is always "forth".
+				/// context is order[last]
 
-: set-context	 ( "vid" -- ) \ Set the word list that is searched first.
-				 js: order[Math.max(1,order.length-1)]=pop() rescan-word-hash ;
-				 /// context is order[last], order[0] is protected to always be "forth".
+: set-context	 ( "vid" -- ) \ Replace the word-list which is searched first.
+				 js: order.pop();order.push(pop()) rescan-word-hash ;
+				 /// context and order[last] are samething. 
+				 /// No error-proof, because it is only used in vocabulary words.
 
 				<selftest>
 					*** set-context get-context manipulate the word-list of first priority
@@ -46,9 +47,10 @@ code get-current ( -- "vid" ) \ Return vid, new word's destination word list nam
 
 code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				current = pop() end-code
+				 /// No error-proof, because it is only used in vocabulary words.
 
 				<selftest>
-					*** set-current get-current manipulate the word-list to go to
+					*** set-current get-current word-list new words are going to
 					also vocabulary vvv000 vvv000 definitions
 					also char vvv set-current
 					get-current char vvv = \ true
@@ -81,17 +83,18 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 : vocabulary	( <name> -- ) \ create a new word list.
 				BL word (vocabulary) ;
 				
-: only       	( -- ) \ Clear vocabulary search order[] list, leave order[0] = forth-wordlist only.
-				js: order=order.slice(0,1) rescan-word-hash ;
+: only       	( -- ) \ Clear vocabulary search order[] list.
+				js: order=order.slice(0,0) rescan-word-hash ;
 
 				<selftest>
 					\ search: forth,vvv,vvv000
 					\ define: vvv
-					*** only leaves 'forth' along ... 
+					*** only leaves empty order list ... 
 					get-context char forth = \ false
-					only
+					only forth
 					get-context char forth = \ true
-					[d false,true d] [p "only" p]
+					js> order.length==1 \ true
+					[d false,true,true d] [p "only" p]
 				</selftest>
 
 code also       order.push(order[order.length-1]) end-code // ( -- ) vocabulary array's dup
@@ -99,8 +102,8 @@ code also       order.push(order[order.length-1]) end-code // ( -- ) vocabulary 
 code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
 
 : forth 		( -- ) \ Make forth-wordlist be searched first, which is to set context="forth".
-				js> order.length>1 if forth-wordlist set-context then ; immediate
-				/// order[0] is always 'forth'.
+				forth-wordlist set-context ; immediate
+				
 ' get-current alias current // ( -- "vid" ) current is alias of get-current, get the compilation word list's vid name.
 
 \ 如果照 ANS 標準，get-order 應該如下定義。但是 jeforth 有 JavaScript 當靠山，TOS 可以直接操作 array，實在無需如此委屈。
