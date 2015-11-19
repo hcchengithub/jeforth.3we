@@ -97,7 +97,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					[d false,true,true d] [p "only" p]
 				</selftest>
 
-code also       order.push(order[order.length-1]) end-code // ( -- ) vocabulary array's dup
+code also       if(order.length) order.push(order[order.length-1]) end-code // ( -- ) vocabulary array's dup
 
 code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
 

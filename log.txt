@@ -4404,6 +4404,7 @@
 	但是這個不能用，要把 master 刪掉才可以, 變成：
 		"https://cdn.rawgit.com/hcchengithub/project-k/1.0/baby.html"
 	就好了!
+	
 [ ] 問題是從 rawgit.com 或 cdn.rawgit.com 上執行都很容易出現 jquery loading 失敗。
 	Ctrl-Enter 無效時，進 F12 debugger 即見該 error message。Refresh 幾次就會成功。
 	[ ]	想讓 index.html 檢查看 jquery 有沒有 load 成功。
@@ -4412,38 +4413,6 @@
 	==> https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html?nop
 		run 得很好。
 	[ ] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
-	
-[ ] hcchen5600 2015/11/13 10:46:32 
-	hash>column2 改寫成好用的介面。
-
-[ ] hcchen5600 2015/11/13 10:46:37 
-	solar-system.f 改寫,變成教材。
-	-------------------------------------
-	\ 想要讓 outputbox 能 word-wrap 的努力都失敗了,因為 type 是用 $().append() 做的,
-	\ 它不吃 text-wrap 這一套。想想反正都是在 <div> 裡面,怎麼會無效? 先放下罷了。
-	<text>
-		cls
-		s" body" <e>
-		<table width="98%" border="1" cellspacing="0" cellpadding="4" bgcolor="#F0F0F0" bordercolor="#FFFFFF">>
-		<tr>
-		<td rowspan="2" valign="bottom"><div id=cvdiv></div></td>
-		<td width=90% valign="TOP"><div id=newoutputbox></div></td>
-		</tr>
-		<tr>
-		<td height=10%><textarea id=newinputbox>\ Type commands here, ESC to clear.</textarea></td>
-		</tr>
-		</table> </e> drop
-		js> inputbox  js> newinputbox  replaceNode
-		js> outputbox js> newoutputbox replaceNode
-		eleBody ce! er
-		<o> <textarea></textarea></o> constant notepad // ( -- element ) My Notepad 
-		notepad js> outputbox insertBefore notepad :: rows=10 \ 變出一塊區域處理文字
-		: 2notepad notepad :: value+=vm.screenbuffer cls ; // ( -- ) Save screenbuffer to notepad.
-		include processing.f
-		js> vm.cv :> canvas js> cvdiv replaceNode \ Position the canvas
-		include cloth.f
-	</text> 
-	tib.append
 
 [x]	only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
 	order 裡面。為了避免礙眼。
@@ -4461,9 +4430,15 @@
 		結論是, code word 裡面要是有 typo 會有 error on word "code" 症狀會變成
 		定義中的 word 的 xt 變成前一個 word 的，而且該 error 觸發 Chrome F12 debugger 時，
 		compiling 的值是個字串 "code"。
+	
+[ ] hcchen5600 2015/11/13 10:46:32 
+	hash>column2 改寫成好用的介面。
 
-[ ] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
+[ ] hcchen5600 2015/11/13 10:46:37 
+	[solar-system.f] cloth.f 改寫,變成教材。
+
+[x] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
 	以避免干擾其他操作。
 	
-	
+[ ] 撰寫 cloth.md / cloth.html 	
 

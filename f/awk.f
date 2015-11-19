@@ -36,7 +36,7 @@
 
 	<selftest>
 		marker ---
-		*** <search> RegEx<flags> igm</search> ... 
+		*** <search> RegEx<flags> igm</search>
 		s" 11 22 33 44 55 66" <search> 33</search> \ 6
 		s" aa bb cc dd AAA BBB CCC DDD " <search> cc</search> \ 6
 		s" aa bb cc dd AAA BBB CCC DDD " <search> ccc<flags> i</search> \ 20
@@ -46,7 +46,7 @@
 		char 234234628933629349287923426 last execute \ 1
 		: test3 s" aa bb cc dd AAA BBB CCC DDD " <search> c.+ddd<flags> ig</search> ; last execute \ 6
 		: test4 s" aa bb cc dd AAA BBB CCC DDD " <search> c.?ddd<flags> i</search> ; last execute \ 22
-        js> [6,6,20,13,1,6,22] =>judge [if] js> ['<search>','<flags>','<igm>','</search>'] all-pass [else] *debug* selftest-failed->>> [then]
+        [d 6,6,20,13,1,6,22 d] [p '<search>','<flags>','<igm>','</search>' p]
 		---
 	</selftest>
 	\ -------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@
 		/// Usage: "source" <indexof> "sub-string"[<start> n]</indexof> ( -- position|-1 ) -1 not found, or position of sub-string.
 
 	<selftest>
-		*** <indexof> "sub-string"[<start> n]</indexof> returns the index or -1 ... 
+		*** <indexof> "sub-string"[<start> n]</indexof> returns the index or -1
 		marker ~selftest~
 		s" 11 22 33 44 55 66" s" 33" 0 </indexof> \ 6 
 		s" 11 22 33 44 55 66" <indexof> 33</indexof> \ 6
@@ -84,7 +84,7 @@
 		char 23423sdf4628933629349287923426 last execute \ 13
 		: test2 s" aa bb cc dd AAA BBB CCC DDD " <indexof> CC</indexof> ; last execute \ 20
 		: test3 s" aa bb cc dd AAA BBB CCC DDD " <indexof> cc</indexof> ; last execute \ 6
-		js> [6,6,6,-1,20,13,20,6] =>judge [if] js> ['<indexof>','</indexof>','<start>'] all-pass [else] *debug* selftest-failed->>> [then]
+		[d 6,6,6,-1,20,13,20,6 d] [p '<indexof>','</indexof>','<start>' p]
 		~selftest~
 	</selftest>
  
@@ -109,7 +109,7 @@
 		/// Usage: "source" <lastindexof> "sub-string"[<start> n]</lastindexof> ( -- position|-1 ) -1 not found, or position of sub-string.
 
 	<selftest>
-		*** <lastindexof> "sub-string"[<start> n]</lastindexof> returns index or position of sub-string or -1 ...
+		*** <lastindexof> "sub-string"[<start> n]</lastindexof> returns index or position of sub-string or -1
 		marker ~selftest~
 		s" 11 22 33 44 55 33 66" s" 33" 10000 </lastindexof> \ 15
 		s" 11 22 33 44 55 33 66" <lastindexof> 33</lastindexof> \ 15
@@ -120,7 +120,7 @@
 		char 23423sdf46289336293492879233426 last execute \ 26
 		: test2 s" aa bb cc dd AAA BBB CCC DDD " <lastindexof> CC</lastindexof> ; last execute \ 21
 		: test3 s" aa bb cc dd AAA BBB CCC DDD " <lastindexof> cc</lastindexof> ; last execute \ 6
-		js> [15,15,6,6,-1,26,21,6] =>judge [if] js> ['<lastindexof>','</lastindexof>','<start>'] all-pass [else] *debug* selftest-failed->>> [then]
+		[d 15,15,6,6,-1,26,21,6 d] [p '<lastindexof>','</lastindexof>','<start>' p]
 		~selftest~
 	</selftest>
 
@@ -155,8 +155,8 @@
 		char 23423sdf46289336293492879233426 last execute js> pop().index
 		: test2 s" aa bb cc dd AAA BBB CCC DDD " <match> CC</match> ; last execute js> pop().index
 		: test3 s" aa bb cc dd AAA BBB CCC DDD " <match> cc</match> ; last execute js> pop().index
-		js> [3,true,18,6,6,2,13,20,6] =>judge [if]
-		js> ['<match>','</match>','<flags>'] all-pass [else] *debug* selftest-failed->>> [then]
+		[d 3,true,18,6,6,2,13,20,6 d]
+		[p '<match>','</match>','<flags>' p]
 		~selftest~
 	</selftest>
  
@@ -197,7 +197,7 @@
 		/// Usage: "source" <replace> "regex"[<flags> "igm"]<to> "replaceText"</replace> ( -- ["replace",..] ) 
 
 	<selftest>
-		*** <replace> "regex"[<flags> "igm"]<to> "replaceText"</replace> ... 
+		*** <replace> "regex"[<flags> "igm"]<to> "replaceText"</replace>
 		marker ~selftest~
 		s" 11 22 33 44" s" 33" s" i" s" EEEE" </replace> \ "11 22 EEEE 44"
 		s" 11 22 33 44 55 33 66" <replace> 3+<to> 99</replace> \ "11 22 99 44 55 33 66"
@@ -206,14 +206,15 @@
 		: test1 <replace> 33<to> EEEE</replace> ; 
 		char 23423sdf46289336293492879233426 last execute \ "23423sdf46289EEEE6293492879233426"
 		: test2 s" aa bb cc dd AAA BBB CCC DDD " <replace> CC<flags> ig<to> PPPP</replace> ; last execute \ "aa bb PPPP dd AAA BBB PPPPC DDD "
-		<js> [
+		[d
 			"11 22 EEEE 44",
 			"11 22 99 44 55 33 66",
 			"aa bb pp dd AAA BBB CCC DDD ",
 			"aa bb pppp dd AAA BBB ppppC DDD ",
 			"23423sdf46289EEEE6293492879233426",
 			"aa bb PPPP dd AAA BBB PPPPC DDD "
-		] </jsV> =>judge [if] js> ['<replace>','</replace>','<to>','literal>escape'] all-pass [else] *debug* selftest-failed->>> [then]
+		d]
+		[p '<replace>','</replace>','<to>','literal>escape' p]
 		~selftest~
 	</selftest>
 
