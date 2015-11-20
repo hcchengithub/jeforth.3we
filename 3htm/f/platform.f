@@ -108,6 +108,8 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 						return (false);
 					}
 				</js> ;
+				
+true value up/down-recall-needs-alt-key? // ( -- boolean ) An optional setting. Up/Down key to recall command history needs the Alt-key?
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
 				js> event.altKey if 
@@ -116,7 +118,9 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					js> event.ctrlKey if
 						js: inputbox.value=vm.cmdhistory.up() false \ eat the key
 					else 
-						js> inputbox.value==""||inputbox.value=="\n" if
+						js> inputbox.value==""||inputbox.value=="\n" 
+						up/down-recall-needs-alt-key? not and
+						if
 							history-selector false \ eat the key
 						else
 							true \ don't eat the key, let it pass down
@@ -134,7 +138,9 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					js> event.ctrlKey if
 						js: inputbox.value=vm.cmdhistory.down() false \ eat the key
 					else 
-						js> inputbox.value==""||inputbox.value=="\n" if
+						js> inputbox.value==""||inputbox.value=="\n" 
+						up/down-recall-needs-alt-key? not and
+						if
 							history-selector false \ eat the key
 						else
 							true \ don't eat the key, let it pass down

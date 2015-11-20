@@ -4440,5 +4440,13 @@
 [x] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
 	以避免干擾其他操作。
 	
-[ ] 撰寫 cloth.md / cloth.html 	
+[ ] 撰寫 cloth.md / cloth.html 
 
+[ ] cloth.f 發現 up/down recall command history 時,	popup menu 有點怪。
+	最好能讓 command history popup menu 真的 popup 出來，以適應不同版面。
+	如何清除 command history popup menu?
+	
+[ ] help ==> How to	Run the HTML version online. Click here to run.
+	change to rawgit.com
+[ ] up/down 直接 recall history 有點煩, 改成 default disabled。
+	
