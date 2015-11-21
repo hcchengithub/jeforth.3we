@@ -1418,6 +1418,20 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 				end-code immediate
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
+code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpret mode
+				var ss = pop();
+				var result = ss
+					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3")
+					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3");
+					// 連做兩次解決 if else then 翻成 [if] else [then] 的現象。 
+				dictate(result);
+				end-code
+				/// Replace "if", "for", "begin", .. etc to "[if]", "[for]", "[beign]" .. etc
+				/// I like to use "if" in interpret mode directly instead of "[if]" and
+				/// to merge them is difficult to me so far. So I defined this word.
+: run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
+				char \r|\n word (run:) ;
+				/// To run multiple lines use <text>...</text> (run:)
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 

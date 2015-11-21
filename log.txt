@@ -4448,5 +4448,18 @@
 	
 [ ] help ==> How to	Run the HTML version online. Click here to run.
 	change to rawgit.com
-[ ] up/down 直接 recall history 有點煩, 改成 default disabled。
+[x] up/down 直接 recall history 有點煩, 改成 default disabled。
+	
+[x] 合併 [if][else][then][begin][again][until][for][next] 成對應的 if else ... etc 
+	想想挺困難。不如設計一個 run: 來假裝它可以 run interpret mode 而其實
+	只是把 if else then begin .. etc 等改成對應的 [if][else][then][begin] 再
+	交給 interpreter 執行。
+	==> run: and (run:) 	
+
+[ ] recall all vocabulary after only 
+	get-vocs js> tos().length [for] js> tos().shift() . cr [next] drop
+	get-vocs js> tos().length [for] js: order.push(tos().shift()) [next] drop rescan-word-hash
+
+
+
 	
