@@ -1,16 +1,28 @@
-
 	<text> /* <text>...</Text> 是一段可以跨行的 string */
+		<h> /* <h>..</h> 是寫東西進 head 裡 */
+			<style type="text/css">
+				code,.code { 
+					font-family: courier new;
+					background: #E0E0E0;
+				}
+				.essay { 
+					font-family: Microsoft Yahei;
+					letter-spacing: 2px;
+					line-height: 160%;
+				}
+			</style>
+		</h> drop
 		<o> /* <o>..</o> 是在 outputbox 裡寫 HTML */
 		    /* 本來 HTML 是很難寫註解的，用 jeforth 包裹起來寫 HTML 則無所不能！！ */
-			<div id=eleOpening> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
+			<div id=eleOpening class=essay > /* 將來可以 js> eleOpening 來取用這整個 DIV element */
 			<h1>經由電腦繪圖熟悉 jeforth - 布料圖案 cloth.f</h1>
 			<blockquote><p>
 				幾年前剛聽說 Processing.js 這個繪圖電腦語言的時候，
 				上網一查就看到我們接下來要示範的這個 demo，
-				現在已經找不到它了。
-				以下用 jeforth 來重現經典畫出美麗的布料圖案，
+				可是現在已經找不到了。
+				以下用 jeforth 來重現經典畫出這個美麗的布料圖案，
 				並且請您親手鑽進這個十分簡單的程式裡去玩一玩，
-				說不定您現在還看得到下面的【布料圖案】還在畫布上逐漸完成中？
+				說不定您現在還看得到下面的【布料圖案】仍在畫布上逐漸完成中？
 				這表示這塊區域是活的，
 				我們一邊操作它一邊自然地熟悉 jeforth 的使用。
 			</p></blockquote>
@@ -45,7 +57,7 @@
 	js> vm.cv :> canvas js> cvdiv replaceNode \ Place the canvas
 	include cloth.f
 	<o>
-		<div id=eleTopic1>
+		<div id=eleTopic1 class=essay>
 		<h2>認識環境</h2>
 		<blockquote><p>
 			上面看到的畫布、Outputbox、Inputbox 等分別標註如下圖。
@@ -63,9 +75,9 @@
 			【交談區】初看只是上下兩塊區域，看起來幾乎沒甚麼。
 			不要被騙了，其實它們提供了相當完備的 Console 或 Shell 程式的常見功能。
 			例如 Command auto-completion, Command history recall, 
-			甚至 Outputbox triming 別地方還沒見過。
-			為了到處通用，外觀宜簡約，以便呈交給各個應用接管。
-			否則每多一樣東西外顯，應用場合就會有更多限制而不自由。
+			至於 Outputbox triming 則別地方都還沒見過。
+			為了到處通用外觀宜簡約，留給應用各自去發揮，
+			否則每多一樣東西外顯，應用場合就會更不自由。
 			請嘗試在 inputbox 打入 cls 命令把 outputbox 清乾淨。
 			打入 words 列出所有的命令。
 			打入 help * 列出所有命令的說明。
@@ -75,24 +87,20 @@
 		<blockquote><p>
 			以上嘗試的結果，您可能也覺得命令好多，眼花撩亂。
 			它們都是各個 ~.f 檔定義的，
-			我習慣把每個 ~.f 檔當成一個 Forth 語言的 vocabulary
+			我建議把每個 ~.f 檔當成一個 Forth 語言的 vocabulary
 			且直接以檔名為 vocabulary name。
 			Vocabulary 是分門別類的意思，是 Forth 歸納眾多命令的方式。
 			我們只想專注在 demo 程式 cloth.f 就好，
 			請打入這組命令:
 		</p>
-		<pre><code>
-	only cloth.f words 
-		</code></pre>
+		<table><td><pre class=code> only cloth.f words </pre></td></table>
 		<p>
 			如此列出來的命令就只限 cloth.f 裡面的了。
 			隨後我們要用到 canvas.f 裡的命令來把 canvas 抹乾淨。
 			然而剛才下達的 <code>only</code> 命令排除掉了所有的 vocabulary，
 			我們得把 canvas.f 請回來，請打入這組命令:
 		</p>
-		<pre><code>
-	also canvas.f
-		</code></pre>
+		<pre><code><blockquote>	also canvas.f </blockquote></code></pre>
 		<p>
 			然後重新查看我們有那些命令可用，
 		</p>
