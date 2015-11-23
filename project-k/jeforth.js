@@ -477,6 +477,7 @@ function jeForth() {
 	vm.push = push; // interface for passing data into the VM.
 	vm.pop = pop;   // interface for getting data out of the VM.
 	vm.tos = tos;   // interface for getting data out of the VM.
+	vm.reset = reset; // Recovery from a crash
 }
 if (typeof exports!='undefined') exports.jeForth = jeForth;	// export for node.js APP
 

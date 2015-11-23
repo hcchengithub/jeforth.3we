@@ -153,32 +153,32 @@ true value up/down-recall-needs-alt-key? // ( -- boolean ) An optional setting. 
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
 				js> inputbox.focus();inputbox.value!=""&&inputbox.value!="\n" if 
-					true \ inputbox is not empty still don't do the norm.
+					true \ inputbox is not empty, do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
-					js> event==null||event.altKey \ So as to allow calling {backSpace} programmatically	
-					if \ erase top down
-						js> event==null||event.shiftKey \ So as to allow calling {backSpace} programmatically
-						if 30 else 1 then for
+					js> event==null||!event.altKey \ So as to allow calling {backSpace} programmatically	
+					if \ erase bottom up 
+						js> outputbox.lastChild ?dup if
+							js> tos().nodeName char BR = if removeElement else drop then
+						then				
+						js> event==null||!event.shiftKey \ So as to allow calling {backSpace} programmatically
+						if 1 else 30 then for
 							js> event&&event.ctrlKey if
-								js> outputbox.firstChild ?dup if removeElement then
+								js> outputbox.lastChild ?dup if removeElement then
 							else
-								js> outputbox.firstChild ?dup if
+								js> outputbox.lastChild ?dup if
 									js> tos().nodeName  char BR    =
 									js> tos(1).nodeName char #text =
 									or if removeElement else drop then
 								then
 							then
 						next
-					else \ erase bottom up 
-						js> outputbox.lastChild ?dup if
-							js> tos().nodeName char BR = if removeElement else drop then
-						then				
-						js> event==null||event.shiftKey \ So as to allow calling {backSpace} programmatically
-						if 30 else 1 then for
+					else \ erase top down
+						js> event==null||!event.shiftKey \ So as to allow calling {backSpace} programmatically
+						if 1 else 30 then for
 							js> event&&event.ctrlKey if
-								js> outputbox.lastChild ?dup if removeElement then
+								js> outputbox.firstChild ?dup if removeElement then
 							else
-								js> outputbox.lastChild ?dup if
+								js> outputbox.firstChild ?dup if
 									js> tos().nodeName  char BR    =
 									js> tos(1).nodeName char #text =
 									or if removeElement else drop then

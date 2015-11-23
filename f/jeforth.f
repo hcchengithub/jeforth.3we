@@ -151,7 +151,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					do{
 						while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
 							// 可用 bp=ip 設斷點, debug colon words.
-							if(vm.g.breakPoint<0||vm.g.breakPoint==ip){
+							if(vm.jsc.bp<0||vm.jsc.bp==ip){
 								if (vm.jsc.enable){ // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
 									vm.jsc.prompt=" BreakPoint jsc>";
 									eval(vm.jsc.xt);
@@ -1970,10 +1970,10 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				var bp = nexttoken();
 				vm.jsc.enable = true;
 				if (bp) {
-					vm.g.breakPoint = parseInt(bp);
+					vm.jsc.bp = parseInt(bp);
 					execute("be") 
 				} else {
-					type("Breakpoint : " + vm.g.breakPoint);
+					type("Breakpoint : " + vm.jsc.bp);
 					if (inner == vm.g.debugInner) type(", activated\n");
 					else  type(", inactive\n");
 				}
