@@ -11,13 +11,15 @@
 			*/
 		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
 			<style type="text/css">
-				code,.code,table{ 
+				code, .code { 
 					font-family: courier new;
-					font-size: 100%;
+					font-size: 110%;
 					background: #E0E0E0;
+				}
+				table {
 					width: 100%;
 				}
-				blockquote { 
+				.essay { 
 					font-family: Microsoft Yahei;
 					letter-spacing: 2px;
 					line-height: 160%;
@@ -25,7 +27,10 @@
 			</style>
 		</h> drop \ /* 丟掉 <h>..</h> 留下來的 <style> element object, 用不著 */
 		<o> /* <o>..</o> 是在 outputbox 裡寫 HTML */
-			<div id=eleOpening> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
+
+/* ----- Greeting 前言 --------------------------------------------------------------------- */
+
+			<div id=eleOpening class=essay> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
 			<h1>經由電腦繪圖熟悉 jeforth.3we - 布料圖案 cloth.f</h1>
 			<blockquote><p>
 				jeforth 是 FitTaiwan 兩位先進 Yap & 爽哥 所提示之用 JavaScript 
@@ -35,24 +40,32 @@
 				其中 3 之後加上一點點努力就是 Forth 語言的吉祥數字 4 了， 
 				而目前 we 則有 jeforth.3htm (HTML), jeforth.3hta (Microsoft HTML Application), 
 				jeforth.3nd (Node.js), jeforth.3nw (Node-Webkit or NW.js) 等。
-				在本網頁上呈現的是 jeforth.3htm 的應用。
+				在本網頁上呈現的是 jeforth.3htm 的應用。我會用到一些 Forth 語言的概念或語彙如 stack,
+				push, pop, TOS 等
+				
+				完全不懂 Forth 語言的讀者應該不會照著
+				http://wiki.laptop.org/go/FORTH
 			</p><p>	
 				幾年前剛聽說 Processing.js 這個繪圖電腦語言的時候，
 				上網一查就看到我們接下來要示範的這個 demo。
 				別急，您現在去找已經找不到了。
 				以下用 jeforth 來重現經典畫出這個美麗的布料圖案，
 				並且請您親手鑽進這個十分簡單的程式裡去玩一玩，
-				說不定您現在還看得到下面的【布料圖案】仍在畫布上逐漸完成中？
+				說不定現在還看得到下面的【布料圖案】仍在畫布上逐漸完成中？
 				這表示這塊區域是活的，
 				我們一邊操作它一邊自然地熟悉 jeforth.3we 的使用。
 			</p></blockquote>
 			</div>
+/* -------------------------------------------------------------------------- */
 		</o> ( eleOpening ) js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
 	tib.insert
 	<text> 
-		<o> <blockquote>
-		<table id=elePlayarea align=center width=90% border=2 cellspacing=0 cellpadding=4 bordercolor=white>
+	
+/* ----- Playground 互動區 --------------------------------------------------------------------- */
+
+		<o> <blockquote id=elePlayarea>
+		<table align=center width=90% border=2 cellspacing=0 cellpadding=4 bordercolor=white>
 			<tr>
 				<td rowspan="2" valign="bottom">
 					<div id=cvdiv></div> /* reserved for the canvas */
@@ -68,6 +81,7 @@
 			</tr>
 		</table> 
 		<blockquote></o> js> eleOpening insertAfter
+/* -------------------------------------------------------------------------- */
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
 	tib.insert
 	
@@ -82,9 +96,11 @@
 	include cloth.f
 	<text>
 		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore 之類的手法搬動就定位 */
-/* -------------------------------------------------------------------------- */
+		
+/* ----- 認識操作環境 --------------------------------------------------------------------- */
+
+			<div class=essay>
 			<h2>認識環境</h2>
-/* -------------------------------------------------------------------------- */
 			<blockquote><p>
 				上面看到的畫布、Outputbox、Inputbox 等分別標註如下圖。
 				jeforth 可以自由設計版面，
@@ -111,7 +127,6 @@
 			</p></blockquote>
 /* -------------------------------------------------------------------------- */
 			<h2>cloth.f 裡有些甚麼？</h2>
-/* -------------------------------------------------------------------------- */
 			<blockquote>
 /* -------------------------------------------------------------------------- */
 				<p>
@@ -175,17 +190,71 @@ starting-message ending-message r g b range d draw
 				<img src="playground/jeforth-demo-cloth-2015-11-202.jpg">
 /* -------------------------------------------------------------------------- */
 				<p>
-					那麼 draw 是怎麼畫出一條色帶的呢？用 <code>see draw</code> 查看它的定義。
+					那麼 draw 是怎麼畫出一條色帶的呢？用 <code>see draw</code>
+					查「看」它的定義。從下圖的結果看起來類似 Assembly 語言的
+					反組譯 disassembly 之結果，其中 Assembly instruction 現在變成
+					Forth word 或 JavaScript function. 這樣看到的是 draw 這個 word
+					經過 Forth compile 過的程式碼，所以 Forth 常被稱為 Virtual Machine.
+					請由圖中注釋了解一下 see 一個 word 的結果大概的樣子。
+					注意到 property 中的 type 指出它是個 colon word。
+					
+				</p>
+				<img src="playground/jeforth-demo-cloth-see-2015-11-241.jpg">
+/* -------------------------------------------------------------------------- */
+				<p>
+					我們要直接參考 draw 的定義進去它裡面玩以前，先看 + 的定義比較簡單。
+					請下達 <code>see +</code> 命令看到：
+				</p>
+				<table width=100%><td class=code><blockquote>
+<pre><code>> see +
+	name : + (string)
+	 vid : forth (string)
+	 wid : 73 (number)
+	type : code (string)
+	help : ( a b -- a+b) Add two numbers or concatenate two strings.  (string)
+	  xt :
+function (_me){ /* + */
+            push(pop(1)+pop()) 
+}
+toString :
+function (){return this.name + " " + this.help}
+ OK </code></pre>
+				</blockquote></td></table>
+/* -------------------------------------------------------------------------- */
+				<p>
+					其中的 type 屬性指出 + 是個 code word。它的工作是從 Forth stack
+					裡 pop 兩個 cell 出來相加以後 push 回去，這正是 + 沒錯。
+					您可能還注意到我們有 push(), pop() 可用來操作 Forth data stack.
+					pop() 還有個 input argument 可以不照 stack 的一般順序直接 pop 
+					指定的 stack cell 出來。
+					pop() 取用 TOS, 而 pop(1) 取用 TOS 的下一 cell, 可見 TOS 本身是
+					pop(0) 而 0 可以省略。這些 kernel 中定義的 
+					JavaScript 小工具不多，
+					
 				</p>
 				<table width=100%><td class=code><blockquote><code>
-					--- results ----------
+					--- result ----
 				</code></blockquote></td></table>
 /* -------------------------------------------------------------------------- */
 				<p>
-					--- description ---
+					description
 				</p>
 				<table width=100%><td class=code><blockquote><code>
-					--- results ----------
+					--- result ----
+				</code></blockquote></td></table>
+/* -------------------------------------------------------------------------- */
+				<p>
+					description
+				</p>
+				<table width=100%><td class=code><blockquote><code>
+					--- result ----
+				</code></blockquote></td></table>
+/* -------------------------------------------------------------------------- */
+				<p>
+					description
+				</p>
+				<table width=100%><td class=code><blockquote><code>
+					--- result ----
 				</code></blockquote></td></table>
 /* -------------------------------------------------------------------------- */
 				<p>
@@ -237,7 +306,7 @@ define: cloth.f
 					
 				</p>
 				
-
+			</div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
 	tib.insert

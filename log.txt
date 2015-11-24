@@ -4460,6 +4460,6 @@
 	get-vocs js> tos().length [for] js> tos().shift() . cr [next] drop
 	get-vocs js> tos().length [for] js: order.push(tos().shift()) [next] drop rescan-word-hash
 
-
+[ ] how to ban hao123
 
 	
