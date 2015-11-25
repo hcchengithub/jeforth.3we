@@ -33,8 +33,8 @@ s" p5.f"			source-code-header
 		b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。
 		js> Math.random() + char )  +
 		( .s jsc ) strokeStyle
-		js> Math.random()*(kvm.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。
-		r> d js> Math.random()*tos()-pop()*0.5+pop() js> kvm.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。
+		js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。
+		r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。
 		stroke
 	;
 

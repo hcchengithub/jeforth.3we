@@ -26,8 +26,8 @@
 	位置，使其左右來回移動，如下：
 
 		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=vm.g.stars[0].x+=e 
-		js> h>=(vm.cv.canvas.width-vm.cv.canvas.height/2) [if] js: e=-d [then] 
-		js> h<=vm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
+		js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
 		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
 		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
 
@@ -173,8 +173,8 @@ marker ~~~
 			push(c)})() 
 		</js> to color
 		js> Math.random()*(30-10)+10 to radius \ radius 10 ~ 30
-		js> Math.random()*vm.g.maxPlanet+vm.cv.canvas.width to x \ 座標位置，初值在畫面之外
-		js> Math.random()*vm.g.maxPlanet+vm.cv.canvas.height to y
+		js> Math.random()*vm.g.maxPlanet+vm.g.cv.canvas.width to x \ 座標位置，初值在畫面之外
+		js> Math.random()*vm.g.maxPlanet+vm.g.cv.canvas.height to y
 		js> Math.random()*5-2.5 to vx \ 速度向量 between -2.5 ~ 2.5 
 		js> Math.random()*5-2.5 to vy
 		0 to ax 0 to ay \ 重力加速度
@@ -199,12 +199,12 @@ marker ~~~
 		vx ax + to vx    vy ay + to vy \ 速度一直加 (ax,ay) 上去，所以叫「加速度」
 		x vx + to x      y vy + to y
 		\ 在畫布範圍外看不見的地方動手腳
-		x radius - js> vm.cv.canvas.width > if
+		x radius - js> vm.g.cv.canvas.width > if
 			vx 10 / to vx \ 跑出視野的就偷偷把它減速
 		else x radius + 0< if
 			vx 10 / to vx
 		then then
-		y radius - js> vm.cv.canvas.height > if
+		y radius - js> vm.g.cv.canvas.height > if
 			vy 10 / to vy \ 跑出視野的就偷偷把它減速
 		else y radius + 0< if
 			vy 10 / to vy
@@ -270,8 +270,8 @@ marker ~~~
 	手動 Copy-paste 下列整段命令到 inputbox 命令區執行，可讓太陽左右來回移動，
 	
 		( 讓太陽左右來回移動 ) js: e=d=0.5 cut js: h=vm.g.stars[0].x+=e 
-		js> h>=(vm.cv.canvas.width-vm.cv.canvas.height/2) [if] js: e=-d [then] 
-		js> h<=vm.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
+		js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap rewind ( rewind
 		回到 cut 之後重複執行，50 nap 交還控制權給 host 休息 50 mS 之後回來繼續。
 		太陽一動起來，行星維持繞日公轉而不焚毀或飛走就越加困難了。 )
 	
@@ -310,8 +310,8 @@ marker ~~~
 	js: e=d=0.5 
 	[begin]
 		js: h=vm.g.stars[0].x+=e 
-		js> h>=(vm.cv.canvas.width-vm.cv.canvas.height/2) [if] js: e=-d [then] 
-		js> h<=vm.cv.canvas.height/2 [if] js: e=d [then] 50 nap
+		js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+		js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
 	[again]
 
 

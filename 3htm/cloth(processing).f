@@ -2,13 +2,20 @@
 \ Re-produce an old processing.js demo
 \ 重現經典範例，畫出美麗的布料圖案。
 
-s" cloth.f"	source-code-header
-	include canvas.f
-	\ 有現成的畫布就用現成的，否則變出一個來用。
-	' cv [if] [else] createCanvas setWorkingCanvas [then] 
+include processing.f
 
+s" cloth.f"	source-code-header
+
+\ messages
+	: starting-message ( -- )
+		." Start . . . " ;
+	: ending-message ( -- ) 
+		." Done!" cr ;
+	
 \ setup
 	600 300	setCanvasSize	\ ( width height -- ) 
+	15		setFrameRate	\ ( times per second ) 60 已經快到頂了，電腦速度跟不上了。
+	130		setFrameCountLimit \ ( n -- ) we don't run it infinitly
 	40		lineWidth		\ ( n -- )
 	100		value r			// ( -- int ) Red 
 	200		value g	 		// ( -- int ) green 
@@ -30,9 +37,8 @@ s" cloth.f"	source-code-header
 		stroke
 	;
 
-\ main
-
-	150 [for] draw [next]
+\ start to run
+	processing
 
 \ The End
 

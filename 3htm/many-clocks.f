@@ -44,7 +44,7 @@
 			( 0 offset ) 60 * 60 * 1000 * , \ city time offset in (+-)hours
 			( 1 canvas ) createCanvas dup , 	
 			( 2 grd    ) \ 宣告漸層色 
-						 js: push(kvm.cv);kvm.cv=pop(1) \ save recent cv
+						 js: push(vm.g.cv);vm.g.cv=pop(1) \ save recent cv
 						 20 40 80 50 createLinearGradient
 						 dup 0   char black   addColorStop
 						 dup 0.3 char magenta addColorStop
@@ -52,22 +52,22 @@
 						 dup 0.6 char green   addColorStop
 						 dup 0.8 char yellow  addColorStop
 						 dup 1   char red     addColorStop
-						 , js: kvm.cv=pop() \ restore recent cv
+						 , js: vm.g.cv=pop() \ restore recent cv
 			( 3 buffer ) 0 , \ original canvas buffer
 			( 4 name   ) js> last().name ,
 		\	( 5 callbk ) s" push(function(){inner(" js> last().cfa + s" )})" + jsEvalNo dup ,
 			( 5 callbk ) s" push(function(){execute('" js> last().name + s" ')})" + [compile] </js> dup ,
-						 js: g.setTimeout(pop(),100) \ 直接啟動，此時 does> 尚未宣告完成，所以要等一下。 
+						 js: vm.g.setTimeout(pop(),100) \ 直接啟動，此時 does> 尚未宣告完成，所以要等一下。 
 		does> 
-			js> kvm.cv r@ 3 + ! \ save original cv 
-			r@ 1+ @ js: kvm.cv=pop() \ activate the cv of the clock
+			js> vm.g.cv r@ 3 + ! \ save original cv 
+			r@ 1+ @ js: vm.g.cv=pop() \ activate the cv of the clock
 			清螢幕 畫框 r@ 4 + @ r@ 2+ @ 畫訊息 
 			r@ @ <js> new Date((new Date()).valueOf()+pop())</jsV>
 			js> tos().getHours()%12*5+tos().getMinutes()/12 畫時針 
 			js> tos().getMinutes()+tos().getSeconds()/60 畫分針 
 			js> pop().getSeconds() 畫秒針 
-			r@ 3 + @ js: kvm.cv=pop() \ restore original cv
-			r> 5 + @ js: g.setTimeout(pop(),1000)
+			r@ 3 + @ js: vm.g.cv=pop() \ restore original cv
+			r> 5 + @ js: vm.g.setTimeout(pop(),1000)
 		\	js> rstack.length if 0 >r then \ TSR 不要吃到別人 (in suspending) 的 rstack。重要！
 	; interpret-only
 

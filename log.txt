@@ -4462,4 +4462,31 @@
 
 [ ] how to ban hao123
 
+[ ] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be 
+	a global, and it is.
+	So cv will be a value, a global too.
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\ball.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\blowing-in-the-wind.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.txt
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\many-clocks.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3wsh\jeforth.3wsh.js
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\h2o.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\solar-system.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\processing.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\c.f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
+	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth.f
+	[ ] c:\Users\hcche\Documents\GitHub\jeforth.3we\log.txt	
+	
+[ ] 能不能把 vm.g.cv.lineWidth 直接弄成 value?
+
+
+
+	
 	

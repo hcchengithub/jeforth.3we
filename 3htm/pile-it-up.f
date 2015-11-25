@@ -36,7 +36,7 @@ s" pile-it-up.f" source-code-header
 					// the distance from this ball to another ball
 					var dx = others[i].x - x;  
 					var dy = others[i].y - y;  
-					var distance = sqrt(dx*dx + dy*dy);  // 碰撞時的球心距離，有凹陷，所以可小於 minDist
+					var distance = Math.sqrt(dx*dx + dy*dy);  // 碰撞時的球心距離，有凹陷，所以可小於 minDist
 					var minDist = others[i].radius + radius;  // 緊貼兩 ball 的球心距離。
 				
 					if (distance < minDist) {   // 撞上了！ 當兩球相撞時，總動量不變。
@@ -65,40 +65,40 @@ if(1){kvm.jsc.prompt='333';eval(kvm.jsc.xt)}
 			}
 			this.move = function(){
 				if (mousepressed) return;
-				vy += g.gravity;  // 「力」表現為位移的幅度，而重力就是在 vy 上加成.  vx,vy 是該 ball 的瞬時向量。
-				vx += vx>0 ? -g.friction : g.friction ; // 扣除摩擦係數
-				vy += vy>0 ? -g.friction : g.friction ;
-				vx = Math.abs(vx) < g.friction? 0 : vx ; // 比摩擦力小就是零，否則會抖。
-				vy = Math.abs(vy) < g.friction? 0 : vy ;
-				vx = Math.abs(vx) > g.maxvx? g.maxvx*vx/Math.abs(vx) : vx ; // 這啥？ [ ]
-				vy = Math.abs(vy) > g.maxvy? g.maxvy*vy/Math.abs(vy) : vy ;
+				vy += vm.g.gravity;  // 「力」表現為位移的幅度，而重力就是在 vy 上加成.  vx,vy 是該 ball 的瞬時向量。
+				vx += vx>0 ? -vm.g.friction : vm.g.friction ; // 扣除摩擦係數
+				vy += vy>0 ? -vm.g.friction : vm.g.friction ;
+				vx = Math.abs(vx) < vm.g.friction? 0 : vx ; // 比摩擦力小就是零，否則會抖。
+				vy = Math.abs(vy) < vm.g.friction? 0 : vy ;
+				vx = Math.abs(vx) > vm.g.maxvx? vm.g.maxvx*vx/Math.abs(vx) : vx ; // 這啥？ [ ]
+				vy = Math.abs(vy) > vm.g.maxvy? vm.g.maxvy*vy/Math.abs(vy) : vy ;
 				
 				x += vx;  
 				y += vy;  
 				// 如果不考慮牆面，以上就是 move() 了！
 				
-				if (x + radius > kvm.cv.canvas.width) {  // 超過 canvas 右邊
-					x = kvm.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
-					vx *= -g.wallBounce;               // 牆壁的反彈力 [ ] 為何這裡用加的，而下面卻用乘的？ 用加的可能是 typo! 改正之。
+				if (x + radius > vm.g.cv.canvas.width) {  // 超過 canvas 右邊
+					x = vm.g.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
+					vx *= -vm.g.wallBounce;               // 牆壁的反彈力 [ ] 為何這裡用加的，而下面卻用乘的？ 用加的可能是 typo! 改正之。
 				} else if (x - radius < 0) {   // 超過 canvas 左邊
 					x = radius;  
-					vx *= -g.wallBounce;  
+					vx *= -vm.g.wallBounce;  
 				}  
-				if (y + radius > kvm.cv.canvas.height) {  // 撞上 canvas 地板
-					y = kvm.cv.canvas.height - radius;  
-					vy *= -g.wallBounce;   
+				if (y + radius > vm.g.cv.canvas.height) {  // 撞上 canvas 地板
+					y = vm.g.cv.canvas.height - radius;  
+					vy *= -vm.g.wallBounce;   
 				} else if (y - radius < 0) {  // 超過 canvas 上邊
 					y = radius;  
-					vy *= -g.wallBounce;  
+					vy *= -vm.g.wallBounce;  
 				}  
 			}
 			this.display = function(){
 				// fill(255, 204);  // specify ball color
 				// ellipse(x, y, diameter, diameter);  
-				kvm.cv.arc (x, y, radius, 0, Math.PI*2, false);
+				vm.g.cv.arc (x, y, radius, 0, Math.PI*2, false);
 				// fill(0); // specify font color text color 
 				// text(id, x, y);  
-				kvm.cv.fill();
+				vm.g.cv.fill();
 			}
 		};
 		push(new Ball(pop(4),pop(3),pop(2),pop(1),pop()));
@@ -132,19 +132,19 @@ if(1){kvm.jsc.prompt='333';eval(kvm.jsc.xt)}
 		s" green"  	fillStyle 		\ ( " )
 		\ create all the balls id=1,2,3...numBalls
 			numBalls for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
-				js> Math.random()*kvm.cv.canvas.width	\ x position
-				js> Math.random()*kvm.cv.canvas.height	\ y position
+				js> Math.random()*vm.g.cv.canvas.width	\ x position
+				js> Math.random()*vm.g.cv.canvas.height	\ y position
 				js> Math.random()*(75-40)+40			\ radius=[40~75]
 				balls newBall ( id x y radius balls -- ball ) balls :: unshift(pop())
 			next
 			balls :: unshift(0)
 		\ Arrange event handlers
 			\ <js> 
-			\  kvm.cv.canvas.onmouseup   =function(e){if(tick('onmouseup'   )){push(e);execute('onmouseup'   )}};
-			\  kvm.cv.canvas.onmousedown =function(e){if(tick('onmousedown' )){push(e);execute('onmousedown' )}};
-			\  kvm.cv.canvas.onmousemove =function(e){if(tick('onmousemove' )){push(e);execute('onmousemove' )}};
-			\  kvm.cv.canvas.onmouseenter=function(e){if(tick('onmouseenter')){push(e);execute('onmouseenter')}};
-			\  kvm.cv.canvas.onmouseleave=function(e){if(tick('onmouseleave')){push(e);execute('onmouseleave')}};
+			\  vm.g.cv.canvas.onmouseup   =function(e){if(tick('onmouseup'   )){push(e);execute('onmouseup'   )}};
+			\  vm.g.cv.canvas.onmousedown =function(e){if(tick('onmousedown' )){push(e);execute('onmousedown' )}};
+			\  vm.g.cv.canvas.onmousemove =function(e){if(tick('onmousemove' )){push(e);execute('onmousemove' )}};
+			\  vm.g.cv.canvas.onmouseenter=function(e){if(tick('onmouseenter')){push(e);execute('onmouseenter')}};
+			\  vm.g.cv.canvas.onmouseleave=function(e){if(tick('onmouseleave')){push(e);execute('onmouseleave')}};
 			\ </js>
 	;
 
@@ -242,7 +242,7 @@ if(1){kvm.jsc.prompt='333';eval(kvm.jsc.xt)}
 		  // the distance from this ball to next ball
 		  float dx = others[i].x - x;  
 		  float dy = others[i].y - y;  
-		  float distance = sqrt(dx*dx + dy*dy);  
+		  float distance = Math.sqrt(dx*dx + dy*dy);  
 		  float minDist = others[i].radius + radius;  // 緊貼兩 ball 的球心距離。
 	 
 		  //println("frameCount is " + frameCount);
@@ -325,7 +325,7 @@ if(1){kvm.jsc.prompt='333';eval(kvm.jsc.xt)}
 	  }  
 	 
 	  boolean mouseOver(int mx, int my) {
-		return sqrt((x-mx)*(x-mx) + (y-my)*(y-my)) <= radius;  // 勾股弦定理 check if the distance from (x,y) to (mx,my) is less than radius.
+		return Math.sqrt((x-mx)*(x-mx) + (y-my)*(y-my)) <= radius;  // 勾股弦定理 check if the distance from (x,y) to (mx,my) is less than radius.
 	  }
 	 
 	  boolean mousePressed() {

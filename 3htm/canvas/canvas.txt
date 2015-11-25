@@ -6,7 +6,7 @@
 \	http://www.w3school.com.cn/tags/html_ref_canvas.asp
 
 <comment>
-OK js> kvm.cv obj>keys .
+OK js> vm.g.cv obj>keys .
 	canvas,
 	fillStyle,
 	font,
@@ -57,7 +57,7 @@ OK js> kvm.cv obj>keys .
 	transform,
 	translate
 
-OK js> kvm.cv.canvas obj>keys .
+OK js> vm.g.cv.canvas obj>keys .
 	height,
 	width,
 	getContext,
@@ -312,7 +312,7 @@ OK js> kvm.cv.canvas obj>keys .
 	PROCESSING_INSTRUCTION_NODE,
 	TEXT_NODE OK 
 
-OK <js> kvm.cv.canvas.onmousedown=function(e){push(e)} </js> \ click anywhere in the canvas, get the event obj
+OK <js> vm.g.cv.canvas.onmousedown=function(e){push(e)} </js> \ click anywhere in the canvas, get the event obj
 0: [object MouseEvent] (object) ==> constant mouse-event ==> mouse-event obj>keys .
 	mouse-event :> fromElement \ ==> null (null)
 	mouse-event :> layerX \ ==> 32 (number)
@@ -382,21 +382,21 @@ OK <js> kvm.cv.canvas.onmousedown=function(e){push(e)} </js> \ click anywhere in
 	mouse-event :> CAPTURING_PHASE \ ==> 1 (number)
 
 以下這些實驗證實 canvas mouse event 的用法很簡單，
-	<js> kvm.cv.canvas.onmouseup=function(e){print(e.offsetX + "<up>" + e.offsetY + '  ')} </js>
-	<js> kvm.cv.canvas.onmousedown=function(e){print(e.offsetX + "<down>" + e.offsetY + '  ')} </js>
-	<js> kvm.cv.canvas.onmousemove=function(e){print(e.offsetX + "<move>" + e.offsetY + '  ')} </js>
-	<js> kvm.cv.canvas.onmouseenter=function(e){print(e.offsetX + "<enter>" + e.offsetY + '  ')} </js>
-	<js> kvm.cv.canvas.onmouseleave=function(e){print(e.offsetX + "<leave>" + e.offsetY + '  ')} </js>
-	<js> kvm.cv.canvas.onmouseover=function(e){print(e.offsetX + "<over>" + e.offsetY + '  ')} </js>
-	<js> kvm.cv.canvas.onmouseout=function(e){print(e.offsetX + "<out>" + e.offsetY + '  ')} </js>
-	\ kvm.cv.canvas.onmousedown=function(e){} Click 一下進來一次，注意裡面 down 離開後 up，善用 onmouseelave
-	\ kvm.cv.canvas.onmouseup=function(e){} Click 一下進來一次，注意外面 down 進入後 up，善用 onmouseenter
-	\ kvm.cv.canvas.onmousemove=function(e){} 不斷進來更新座標
-	\ kvm.cv.canvas.onmouseout=function(e){} 離開前打一槍
-	\ kvm.cv.canvas.onmouseover=function(e){} 只進入時打一槍
-	\ kvm.cv.canvas.onmouseup=function(e){}
-	\ kvm.cv.canvas.onmousewheel=function(e){}
-	\ kvm.cv.canvas.onmouseenter=function(e){} 同 onmouseover 會有 -1 -2 -3? 出現
-	\ kvm.cv.canvas.onmouseleave=function(e){} 同 onmouseout 會有 width+n height+n 出現, n=1,2,3
+	<js> vm.g.cv.canvas.onmouseup=function(e){print(e.offsetX + "<up>" + e.offsetY + '  ')} </js>
+	<js> vm.g.cv.canvas.onmousedown=function(e){print(e.offsetX + "<down>" + e.offsetY + '  ')} </js>
+	<js> vm.g.cv.canvas.onmousemove=function(e){print(e.offsetX + "<move>" + e.offsetY + '  ')} </js>
+	<js> vm.g.cv.canvas.onmouseenter=function(e){print(e.offsetX + "<enter>" + e.offsetY + '  ')} </js>
+	<js> vm.g.cv.canvas.onmouseleave=function(e){print(e.offsetX + "<leave>" + e.offsetY + '  ')} </js>
+	<js> vm.g.cv.canvas.onmouseover=function(e){print(e.offsetX + "<over>" + e.offsetY + '  ')} </js>
+	<js> vm.g.cv.canvas.onmouseout=function(e){print(e.offsetX + "<out>" + e.offsetY + '  ')} </js>
+	\ vm.g.cv.canvas.onmousedown=function(e){} Click 一下進來一次，注意裡面 down 離開後 up，善用 onmouseelave
+	\ vm.g.cv.canvas.onmouseup=function(e){} Click 一下進來一次，注意外面 down 進入後 up，善用 onmouseenter
+	\ vm.g.cv.canvas.onmousemove=function(e){} 不斷進來更新座標
+	\ vm.g.cv.canvas.onmouseout=function(e){} 離開前打一槍
+	\ vm.g.cv.canvas.onmouseover=function(e){} 只進入時打一槍
+	\ vm.g.cv.canvas.onmouseup=function(e){}
+	\ vm.g.cv.canvas.onmousewheel=function(e){}
+	\ vm.g.cv.canvas.onmouseenter=function(e){} 同 onmouseover 會有 -1 -2 -3? 出現
+	\ vm.g.cv.canvas.onmouseleave=function(e){} 同 onmouseout 會有 width+n height+n 出現, n=1,2,3
 	
 </comment>

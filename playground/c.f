@@ -33,26 +33,24 @@
 			<div id=eleOpening class=essay> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
 			<h1>經由電腦繪圖熟悉 jeforth.3we - 布料圖案 cloth.f</h1>
 			<blockquote><p>
-				jeforth 是 FitTaiwan 兩位先進 Yap & 爽哥 所提示之用 JavaScript 
-				打造 Forth 系統的簡便方法，
-				我接下去做的版本就稱為 jeforth.3we (3 Words Engine) 統稱同一個 kernel
-				所發展出來的各種版本。
-				其中 3 之後加上一點點努力就是 Forth 語言的吉祥數字 4 了， 
-				而目前 we 則有 jeforth.3htm (HTML), jeforth.3hta (Microsoft HTML Application), 
+				jeforth 是 「台灣符式協會 FitTaiwan」 兩位先進 
+				Yap 與 爽哥 所提示之用 JavaScript 打造 Forth 系統的方法。
+				我依法做出來的結果就稱為 jeforth.3we (3 Words Engine) 統稱同一個 
+				kernel 在不同環境的各種版本。
+				3we 當中的 3 之後加上一點點努力就是 Forth 語言的吉祥數字 4， 
+				而目前「we」則有 jeforth.3htm (HTML), jeforth.3hta (Microsoft HTML Application), 
 				jeforth.3nd (Node.js), jeforth.3nw (Node-Webkit or NW.js) 等。
 				在本網頁上呈現的是 jeforth.3htm 的應用。我會用到一些 Forth 語言的概念或語彙如 stack,
-				push, pop, TOS 等
-				
-				完全不懂 Forth 語言的讀者應該不會照著
-				http://wiki.laptop.org/go/FORTH
+				push, pop, TOS 等等，完全不懂 Forth 語言的讀者可以「不求甚解」照著做無妨，
+				若希望先讀幾個小時書，我推薦 
+				<A HREF="http://wiki.laptop.org/go/Forth_Lessons" target="_blank">OLPC (One Laptop per Child)	的 online 教材：http://wiki.laptop.org/go/Forth_Lessons</A>，
+				也許將來該特別為 OLPC 做一版以求更完整地執行該教材的範例。
 			</p><p>	
 				幾年前剛聽說 Processing.js 這個繪圖電腦語言的時候，
 				上網一查就看到我們接下來要示範的這個 demo。
 				別急，您現在去找已經找不到了。
 				以下用 jeforth 來重現經典畫出這個美麗的布料圖案，
 				並且請您親手鑽進這個十分簡單的程式裡去玩一玩，
-				說不定現在還看得到下面的【布料圖案】仍在畫布上逐漸完成中？
-				這表示這塊區域是活的，
 				我們一邊操作它一邊自然地熟悉 jeforth.3we 的使用。
 			</p></blockquote>
 			</div>
@@ -92,10 +90,10 @@
 	js> outputbox js> newoutputbox replaceNode \ 同上。
 	cls eleBody ce! er \ 清除畫面上的小垃圾。
 	include processing.f
-	js> vm.cv :> canvas js> cvdiv replaceNode \ Place the canvas
+	js> vm.g.cv :> canvas js> cvdiv replaceNode \ Place the canvas
 	include cloth.f
 	<text>
-		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore 之類的手法搬動就定位 */
+		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore, replaceNode 之類的手法搬動就定位 */
 		
 /* ----- 認識操作環境 --------------------------------------------------------------------- */
 
@@ -139,9 +137,11 @@
 					這麼多 words 無論是英文或 Forth 語言都令人飆淚，所以要分門整理。
 					我們只想專注在 demo 程式 cloth.f 就好，
 					請打入這個命令 <code>only</code> 然後再輸入 <code>words</code> 試試，剛才還在的大堆命令
-					(Forth words) 都不見了。這就是 only 的作用 — 不看除了基本的以外之其他命令。
-					jeforth.3we 的基本命令就是在名為 <code>forth</code> 的 vocabulary 之內的 words 皆是。
-					請打入命令：
+					(Forth 的 words) 都不見了。這就是 only 的作用 — 不看除了「基本」的以外之其他命令。
+					jeforth.3we 的「基本」命令就是在名為 <code>forth</code> 的 vocabulary 之內的 words 皆是。
+					因為是「基本」命令所以即使 words 或 help 命令都看不到的時候還是可以執行。 
+					其他 vocabulary 裡的命令於 words 或 help 看不到時也就執行不到了 
+					( 一般是 only 命令視需要所為 )。 請打入命令：
 				</p>
 				<table>
 				<td class=code /* .code 影響到整格區域的 background color 這是用上 <table> 的目的 */>
@@ -150,7 +150,7 @@
 				</blockquote></td></table>
 /* -------------------------------------------------------------------------- */
 				<p>
-					如此列出來的 words 就只限 canvas.f 跟 cloth.f 的了。
+					如此列出來的 words 就只限 canvas.f 跟 cloth.f 的。
 				</p>
 				<table><td class=code /* 影響整格的 background color */>
 				<blockquote><pre><code /* 影響 font-size 跟 font-family */>
@@ -190,7 +190,63 @@ starting-message ending-message r g b range d draw
 				<img src="playground/jeforth-demo-cloth-2015-11-202.jpg">
 /* -------------------------------------------------------------------------- */
 				<p>
-					那麼 draw 是怎麼畫出一條色帶的呢？用 <code>see draw</code>
+					那麼 draw 是怎麼畫出一條色帶的呢？下這行命令就可以查看 
+					cloth.f 的 source code:
+				</p>
+				<table width=100%><td class=code><blockquote><code>
+					s" cloth.f" readTextFileAuto .
+				</code></blockquote></td></table>
+				<p>
+					注意最後有個小點兒，那是 forth 用來印出 TOS 的命令不要漏掉。
+					當時的 TOS 就是 cloth.f 整個檔案的 text string，的確很短。
+					您輸入 readTextFileAuto 這麼長的命令時，可以只敲 readT 
+					然後打幾下 TAB 就會輪到它。
+					
+				</p>
+				<table width=100%><td class=code><blockquote>
+<pre><code>> s" cloth.f" readTextFileAuto .
+
+\ Re-produce an old processing.js demo 
+\ 重現經典範例，畫出美麗的布料圖案。 
+
+s" cloth.f"    source-code-header 
+    include canvas.f 
+    \ 有現成的畫布就用現成的，否則變出一個來用。 
+    ' cv [if] [else] createCanvas setWorkingCanvas [then]  
+
+\ setup 
+    600 300    setCanvasSize    \ ( width height -- )  
+    40        lineWidth        \ ( n -- ) 
+    100        value r            // ( -- int ) Red  
+    200        value g             // ( -- int ) green  
+    200        value b            // ( -- int ) blue 
+    55        value range        // ( -- int ) Range of colour variation 
+    90        value d            // ( -- int ) Drifting distance of the 2nd point 
+     
+\ draw 
+    : draw ( -- ) \ Mimic processing's draw() function 
+        beginPath 
+        char rgba(  
+        r js> Math.random()*pop() int + char ,  + 
+        g js> Math.random()*pop() int + char ,  + 
+        b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。 
+        js> Math.random() + char )  + 
+        ( .s jsc ) strokeStyle 
+        js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。 
+        r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。 
+        stroke 
+    ; 
+
+\ main 
+
+    150 [for] draw [next] 
+
+\ The End </code><pre>
+				</blockquote></td></table>
+					
+					
+				<p>	
+					用 <code>see draw</code>
 					查「看」它的定義。從下圖的結果看起來類似 Assembly 語言的
 					反組譯 disassembly 之結果，其中 Assembly instruction 現在變成
 					Forth word 或 JavaScript function. 這樣看到的是 draw 這個 word
@@ -310,3 +366,14 @@ define: cloth.f
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
 	tib.insert
+<comment>
+> run: 200 for draw next
+ OK 
+> clearCanvas
+ OK 
+> 200 [for] draw [next]
+ OK 
+> .s
+empty
+ OK 
+</comment>

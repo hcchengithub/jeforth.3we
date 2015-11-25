@@ -10,10 +10,10 @@
 
 	s" processing.f" source-code-header
 
-	js> vm.cv ( :> constructor :> name char CanvasRenderingContext2D = ) [if] 
+	js> vm.g.cv ( :> constructor :> name char CanvasRenderingContext2D = ) [if] 
 		\ use the existing canvas.
 	[else]
-		createCanvas setWorkingCanvas \ Init default canvas vm.cv
+		createCanvas setWorkingCanvas \ Init default canvas vm.g.cv
 	[then]
 
 	( dummy ) 0	value timeOutId 	// ( -- int ) setTimeout() returns the ID, clearTimeout(id) to stop it.
@@ -64,10 +64,10 @@
 		[ s" push(function(){execute('" js> last().name + s" ')})" + </js> literal ] ( -- callBack )
 		frameTickInterval :> value() ( -- callBack interval ) js> vm.g.setTimeout(pop(1),pop()) to timeOutId
 		frameCount 1+ to frameCount 
-		[ last literal ] js: tos().cvwas=vm.cv;vm.cv=pop().cv \ save 人家的 cv 換成自己的 --- (1)
+		[ last literal ] js: tos().cvwas=vm.g.cv;vm.g.cv=pop().cv \ save 人家的 cv 換成自己的 --- (1)
 		char draw execute \ call by name 因為 draw 尚未出生
-		[ last literal ] js: vm.cv=pop().cvwas \ restore 別人家的 cv ----- (2)
-		; interpret-only last :: cv=vm.cv \ initial 自己的 cv ------ (3) 
+		[ last literal ] js: vm.g.cv=pop().cvwas \ restore 別人家的 cv ----- (2)
+		; interpret-only last :: cv=vm.g.cv \ initial 自己的 cv ------ (3) 
 		/// onFrameTick command 本身是個 TSR 因此設定為 interpret-only。
 
 	: processing ( -- ) \ 整個程式像新的一樣重跑。

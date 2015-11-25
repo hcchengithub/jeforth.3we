@@ -3,6 +3,8 @@
 \ http://processingjs.org/articles/PomaxGuide.html
 \ ~\Dropbox\learnings\processing\Pomax's guide to Processing.js.pdf
 
+\ processing.f 下了功夫使時間精確。 
+
 include processing.f
 
 s" ball.f" source-code-header
@@ -19,7 +21,7 @@ s" ball.f" source-code-header
 	s" green" 	strokeStyle		\ ( '#RRGGBB'|'rgb(255,0,0)'|'rgba(255,0,0,0.5)'|'green'  -- ) 
 	s" blue"  	fillStyle 		\ ( '#RRGGBB'|'rgb(255,0,0)'|'rgba(255,0,0,0.5)'|'green'  -- ) 
 	20 			value ball_radius // ( -- n )
-	js> kvm.cv.canvas.width/2 	value ball_x // ( -- n ) initial ball coordinates
+	js> vm.g.cv.canvas.width/2 	value ball_x // ( -- n ) initial ball coordinates
 	ball_radius	value ball_y // ( -- n) initial ball coordinates
 	0 			value bounce_height // ( -- n ) ball height for this frame
 	0			value ball_height // ( -- n )
@@ -27,7 +29,7 @@ s" ball.f" source-code-header
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function
 		frameCount frameRate <js> 
-			kvm.cv.canvas.height/2 * Math.abs(
+			vm.g.cv.canvas.height/2 * Math.abs(
 				Math.sin( 
 					Math.PI * (pop(1) % tos()) / pop()
 				)
@@ -35,7 +37,7 @@ s" ball.f" source-code-header
 		</jsV> to bounce_height
 
 		bounce_height ball_radius <js> 
-			kvm.cv.canvas.height - ( pop(1) + pop() )
+			vm.g.cv.canvas.height - ( pop(1) + pop() )
 			// because the top of the screen is 0, and the bottom is "height",
 		</jsV> to ball_height 
 		clearCanvas beginPath
