@@ -1,3 +1,34 @@
+
+	\ tutor-cloth.f 玩電腦繪圖，熟悉 jeforth.3we
+	\ H.C. Chen hcchen5600@gmail.com
+	\ FigTaiwan http://groups.google.com/group/figtaiwan
+
+	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
+	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;
+	
+	code <>escape ( "string" -- "cooked" ) \ "<>" to "&lt;&gt;"
+		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;")||"";
+		push(result);
+		end-code
+		
+	: (<code>escape) ( "raw" -- "cooked" ) \ foo <code><> to &lt;&gt;</code> bar
+		\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
+		\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,<>,</code>,bar 的形式。
+		:> split(/(<code.*?>|<\/code>)/) >r \ <code foo=bar> 也要考慮
+		"" ( cooked ) begin 
+			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
+			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
+			r@ :> shift() dup undefined = if drop r> drop exit then <>escape + ( cooked )
+			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
+		again ;
+		/// foo bar must be both existing
+	
+	: <code>escape ( "raw" -- "cooked" ) \ <code>"<>" to "&lt;&gt;"</code>
+		s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
+		(<code>escape)
+		:> slice(1,-1) \ remove dummy 'x'
+		;
+
 	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
 			** tib.insert 意思是：把這一大段 text 當作主人輸入 TIB 的 Forth commands 執行。 
@@ -37,7 +68,7 @@
 /* ----- Greeting 前言 --------------------------------------------------------------------- */
 
 			<div id=eleOpening class=essay> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
-			<blockquote><h1>經由電腦繪圖熟悉 jeforth - 布料圖案 cloth.f</h1></blockquote>
+			<blockquote><h1>玩電腦繪圖，熟悉 jeforth.3we</h1></blockquote>
 			<blockquote>
 			<p>	
 				以下用到一些 Forth 語言的概念或語彙如 stack, push, pop, TOS 
@@ -59,7 +90,7 @@
 /* -------------------------------------------------------------------------- */
 		</o> ( eleOpening ) js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
-	tib.insert
+	<code>escape tib.insert
 	<text> 
 	
 /* ----- Playground 互動區 --------------------------------------------------------------------- */
@@ -96,7 +127,7 @@
 	include cloth.f
 	<text>
 		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore, replaceNode 之類的手法搬動就定位 */
-		<div class=essay><blockquote>
+		<div id=article class=essay><blockquote>
 /* ----- 認識操作環境 --------------------------------------------------------------------- */
 			<h2>認識環境</h2>
 			<p>
@@ -141,9 +172,9 @@
 				這就是 only 的作用——不看除了「基本」的以外之其他 word。
 				jeforth.3we 的「基本」 word 就是在名為 
 				<code>forth</code> 的 vocabulary 之內的 words 皆是。
-				因為是「基本」word 所以即使 words 或 help 指令都看不到的時候還是可以執行。 
+				因為是「基本」word 所以即使 words 或 help 指令都看不到的時候
+				( 一般是 only 命令視需要所為 ) 還是可以執行。 
 				其他 vocabulary 裡的指令於 words 或 help 看不到時
-				( 一般是 only 命令視需要所為 )
 				也就執行不到了。
 				請打入命令：
 			</p>
@@ -170,6 +201,15 @@ addColorStop font move-cv-up-into-outputbox
 -------- cloth.f (8 words) --------
 starting-message ending-message r g b range d draw
  OK 			</code></pre></blockquote></td></table>
+/* -------------------------------------------------------------------------- */
+			<p>
+				有這些指令已足夠畫畫兒需要。
+				jeforth 可以很容易地使用
+				JavaScript 所以不一定要把所有的 HTML5 Canvas 指令都包裝成
+				Forth 的 word.
+			</p>
+/* -------------------------------------------------------------------------- */
+			<h2>draw a ribbon</h2>
 /* -------------------------------------------------------------------------- */
 			<p>
 				看到 canvas.f 裡有個 clearCanvas 指令嗎？
@@ -252,7 +292,9 @@ s" cloth.f"    source-code-header
 			</blockquote></td></table>
 			<h2 id="play">看到甚麼都可以玩玩看</h2>
 			<p>	
-				其中 <code>\ setup</code> 這一段裡面的東西都可以玩一玩。
+				其中 <code>\ setup</code> 這一段是在設定數值，以下可以來玩一玩。
+			</p>	
+			<p>	
 				前面試過的 <code>draw</code> 指令這回我們用 
 				<code>[for] .. [next]</code> 重複執行。
 				jeforth.3we 在 interpret mode 有 
@@ -278,7 +320,6 @@ s" cloth.f"    source-code-header
 				 得到這幅舉世唯一的畫作，名喚《臥虎藏龍》。
 			</p>
 			<img src="playground/jeforth-demo-cloth-for-next_20151126111159.jpg">
-			<h2 id="空性">中文、Forth、與「空性」</h2>
 			<p>	
 				其中 <code>10 lineWidth</code> 跟 <code>3 lineWidth</code>
 				是設定色帶線條的寬度。<code>30 [for]...</code> 跟 <code>40 [for]...</code>
@@ -290,6 +331,7 @@ s" cloth.f"    source-code-header
 			<table width=100%><td class=code><blockquote><code>
 				run: clearCanvas 10 lineWidth 30 for draw next 3 lineWidth 40 for draw next
 			</code></blockquote></td></table>
+			<h2>Forth 與 中文神似</h2>
 			<p>	
 				Forth 語言獨特在它沒有「規定好的」語法，它只是一個 word 一個 word
 				執行下去而已，我們覺得有語法是這些 word 聯合起來給人的感覺。
@@ -300,10 +342,12 @@ s" cloth.f"    source-code-header
 				因此任何人都可以拿中文字來自由擺放，
 				若能形成別人也看得懂的意義就對了；
 				Forth 亦然，也可以拿 Forth 的 word 不照平常的用法來擺出有效果的組合。
+			</p>
+			<h2>Forth 的「空性」</h2>	
+			<p>
 				這就形成一種有趣的結果：一般電腦語言的 function 或 
-				sub-routine 都是看它裡面做什麼來命名；但是咱用 Forth 
-				寫程式就應該要依我們自己怎麼看待這個 
-				word 來命名。
+				sub-routine 都是看它裡面做什麼來命名；但咱用 Forth 
+				寫程式是依我們對這個 word 的「看法」來命名。
 				如果同一個 word 被你看出不同意義，
 				也許就該考慮給它一個適合這個不同看法的 alias, 
 				或者修改本來的 name 使它更恰當點。
@@ -326,10 +370,12 @@ s" cloth.f"    source-code-header
 			</UL>				
 			<p>
 				您可以用 <code>see run:</code> 以及 <code>see (run:)</code> 
-				命令來查看它的定義。
-				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的。
-				這種情形在 Forth 裡比比皆是。因為我是活的，
-				致使每個我眼下的 word 也都活起來——這這這不就是「空性」的意義嗎？
+				命令來查看它的定義，實在跟「run、執行」毫無關係。
+				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的，
+				這種情形在 Forth 裡比比皆是。
+				Forth words 本身性空，它的意義都是我們給它的。
+				與中文神似，又加上「空性」使得設計得當的 
+				Forth words 意味深長到不可思議。
 			</p>
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
@@ -345,7 +391,7 @@ s" cloth.f"    source-code-header
 				還指出了它們是在 cloth.f 裡定義的，而且是個 value。
 				旁邊兩個空格說明它們不是 <code>[IMMEDIATE][COMPILE-ONLY]</code>.
 				既知是 value 即知直接 b 或 g 得其值，而 <code>123 to b</code> 
-				就是賦予 b 新值 123。我們要讓名畫《臥虎藏龍》顯得偏綠一點，可將 
+				就是賦予 b 新值 123。我們要讓名畫《臥虎藏龍》多點春天的氣息，可將 
 				setup 區段裡定義的 
 				b (藍色的中心強度) 跟 
 				g (綠色的中心強度) 兩個 value 改一改：
@@ -384,67 +430,76 @@ cv	( -- cv ) The default cv object (CanvasRenderingContext2D) [value][canvas.f][
 				(F9 把它縮小) 然後 copy-paste 以下這段命令進去執行：
 			</p>
 			<table width=100%><td class=code><blockquote><pre><code class=source>
-cv &lt;js&gt;
+cv <js>
 tos().beginPath();
 tos().moveTo(0,0);
 tos().lineTo(100,100);
 pop().stroke();
-&lt;/js&gt;
+</js>
 			</code></pre></blockquote></td></table>
 			
 			<p>
 				看到畫布上出現了一條從座標 (0,0) 到 (100,100) 的直線？
 				cv 指令把 canvas object 留在 TOS，隨後 
-				&lt;js&gt;&nbsp;...&nbsp;&lt;/js&gt;&nbsp; 
-				之間的都是 JavaScript statements。之中的 tos() 使用
+				<code> <js>...</js> </code>
+				之間的都是 JavaScript statements. 其中的 <code> tos() </code> 使用
 				TOS 但是不把它「用掉」，到了最後下達 stroke() 時，改用
-				pop() 取用 TOS 這才把它給「用掉」。這是一段最基本的 HTML5
-				canvas 繪圖。最後面的 <code>&nbsp;&lt;/js&gt;&nbsp</code>
+				<code> pop() </code> 取用 TOS 這才把它給「用掉」。這是一段最基本的 HTML5
+				canvas 繪圖。最後面的 <code> </js> </code>
 				是「不傳回最後 statement 的 Value」，如果改用
-				<code>&nbsp;&lt;/jsV&gt;&nbsp</code> 則會把這些 
-				JavaScript statements 中最後一條 statement 的 Value
+				<code> </jsV> </code> 則會把這些 
+				JavaScript statements 中最後一條的 Value
 				放上 TOS 傳回。例如
-				<blockquote><p><code>cv&nbsp;&lt;js&gt;&nbsp;pop().canvas.width&lt;/jsV&gt;</code></p></blockquote>
+				<blockquote class=code><code>cv <js> pop().canvas.width</jsV> .s</code></blockquote>
 				查出畫布的寬度，結果留在 TOS，您試試看。
 				jeforth.3we 使用 JavaScript 的機會非常頻繁，我們有簡化的寫法提供當 
 				statements 整串都沒有 white space 時使用，例如：
-				<blockquote><p><code>cv <b>js></b> pop().canvas.width</code></p></blockquote>
+				<blockquote class=code>cv <b style=font-size:120%>js></b> pop().canvas.width</blockquote>
 				是有傳回值的；
-				<blockquote><p><code>cv <b>js:</b> pop().beginPath()</code></p></blockquote> 
+				<blockquote class=code>cv <b style=font-size:120%>js:</b> pop().beginPath()</blockquote> 
 				是沒有傳回值的。
 				早期我建議 Forther 直接引用 JavaScript 如上，不要另訂「Forth 式的」寫法。
-				結果像上面 
-				<blockquote><p><code>js> pop().sth</code></p></blockquote>
-				或 
-				<blockquote><p><code>js> pop()[sth]</code></p></blockquote> 
-				這樣的 
-				pattern 出現得很多，程式裡都到處這個 pattern. 
-				所以有類似於： 
-				<blockquote><p><code>cv :> canvas.width</code></p></blockquote>
+				結果像上面 <code>object js> pop().something</code>
+				或 <code>object js> pop()[something]</code>
+				這樣的 pattern 出現得太多了，程式裡到處都是，所以有類似於： 
+				<blockquote class=code>cv <b style=font-size:120%>:></b> canvas.width</blockquote>
 				以及
-				<blockquote><p><code>cv :: beginPath()</code></p></blockquote> 
+				<blockquote class=code>cv <b style=font-size:120%>::</b> beginPath()</blockquote> 
 				分別再簡化的寫法，縮減常用的 pattern。
 				所有的簡化寫法都只是文字 pattern 的替代而已，所以 compile 出來是一樣的。
 				而且像這樣一直點下去也是可以的：
-				<blockquote><p><code>cv :> canvas.getContext('2d').canvas.getContext('2d')</code></p></blockquote>
+				<blockquote class=code><code>cv :> canvas.getContext('2d').canvas.getContext('2d')</code></blockquote>
 				相當於：
-				<blockquote><p><code>cv js> pop().canvas.getContext('2d').canvas.getContext('2d')</code></p></blockquote>
-				當中有 white space 時，就必須用 <code>&lt;js&gt;&nbsp;...&nbsp;&lt;/js&gt;&nbsp;</code>
-				的形式，不要忘記。
+				<blockquote class=code><code>cv js> pop().canvas.getContext('2d').canvas.getContext('2d')</code></blockquote>
+				Statements 當中有 white space 時，就必須用 
+				<code><js>...</js></code> 或
+				<code><js>...</jsV></code>
+				的原形，不要忘記。
 			</p>
 			<h2 id="bp">jeforth.3we 的 debug</h2>
 			<p>
 				draw 指令的定義裡面由 beginPath 到 
 				strokeStyle 之間視覺上比較雜亂，
-				這段是在調製顏色。請在 strokeStyle 之前找到
-				<p><code>( *debug* Draw> )</code></p>
+				這段是在調製顏色。請在 source code 裡 strokeStyle 之前找到
+				<code>( *debug* Draw> )</code>
 				這是個 Forth 的 comment, 
 				把括號去掉即可讓 Break point 指令 <code>*debug*</code>
-				起來工作。執行到這裡就會暫停，回到 inputbox 
-				等你的下一個命令。這時候下達 <code>.s</code> 
+				起來工作。
+			</p>
+			<p>
+				請把 draw 的 source code 抄寫進 inputbox, 按一下 F2 key
+				讓 inputbox toggle 進入 edit mode, 
+				( 再次提醒 F9/F10 可以把 inputbox 縮小/放大 )
+				然後進行上述修改。
+				再按一下 F2 key 取消 edit mode，即予執行得到新的 draw 指令。
+			</p>	
+			<p>	
+				此後 draw 執行到這裡就會暫停，回到 inputbox 
+				等你的下一個命令。
+				大部分的 Forth word 應該都可以用，幫助你調查此瞬間一刻。
+				這時候下達 <code>.s</code> 
 				查看 stack 內容就很容易明白原來這段程式是在組合一段
 				text string 準備要餵給 strokeStyle。
-				大部分的 Forth word 應該都可以用，幫助你調查此瞬間一刻。
 				進到 *debug* break point 的特徵是 <code>OK</code> 
 				prompt 被改成了我們任意指定的字樣 <code>Draw></code>。
 				如果一次埋下了多個 *debug* break point 就需要靠個別不同的
@@ -453,20 +508,35 @@ pop().stroke();
 				這用 <code>help *debug*</code> 也可以查得到。
 				
 			</p>
-			<table width=100%><td class=code><blockquote><pre class=source><code>
+			<table width=100%><td class=code><blockquote><pre><code class=source>
 > draw
 
 ---- Entering *debug* ----
- >> 
- >> 
+
 > .s
-      0: rgba(5,21,248,0.5097118131816387) (string)
- >> 
+      0: rgba(78,24,247,0.3767092579510063) (string)
+ Draw> 
 > q
 
  ---- Leaving *debug* ----
- OK 		</code></pre></blockquote></td></table>
+ OK  		</code></pre></blockquote></td></table>
 
+			<h2>查看本文的 source code</h2>
+			<p>
+			本文本身就是一支 jeforth.3htm 的應用程式。
+			下達這段命令就可以把它讀出來放到這個網頁的最下面。
+			您也可以把 jeforth.3we 從 GitHub 上 clone 
+			下來找到 tutor-cloth.f 就是了。
+			我盡量都寫了註解，請多指教。
+			</p>
+			<table width=100%><td class=code><blockquote><pre><code class=source>
+s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
+<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
+js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
+js> article \ article 是本文最後一段的 element ID
+insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
+			</code></pre></blockquote></td></table>
+			
 			<h2 id=3we>jeforth.3we 簡介</h2>
 			<p>
 				jeforth 是 「台灣符式協會 FitTaiwan」 兩位先進 
@@ -484,6 +554,6 @@ pop().stroke();
 		</blockquote></div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
-	tib.insert
+	<code>escape tib.insert
 \ ---------- The End -----------------
 	

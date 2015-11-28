@@ -13,11 +13,12 @@
 			vm.plain = function (s) {
 				// redefined to use jQuery. in html5.f.
 				var ss = s + ""; // avoid numbers to fail at s.replace()
-				ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
-				ss = ss.replace(/  /g,' &nbsp;');
-				ss = ss.replace(/</g,'&lt;');
-				ss = ss.replace(/>/g,'&gt;');
-				ss = ss.replace(/\n/g,'<br>');
+				ss = ss.replace(/&/g,'&amp;')
+				       .replace(/\t/g,' &nbsp; &nbsp;')
+				       .replace(/  /g,' &nbsp;')
+				       .replace(/</g,'&lt;')
+				       .replace(/>/g,'&gt;')
+				       .replace(/\r?\n\r?/g,'<br>');
 				return ss;
 			}
 			vm.type = function (s) { 
