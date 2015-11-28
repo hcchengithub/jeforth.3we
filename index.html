@@ -20,7 +20,7 @@
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-		kvm.path = ["dummy","f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true; // type() refers to it.
 		
@@ -132,11 +132,12 @@
 		// Useful common tool
 		kvm.plain = function (s) {
 			var ss = s + ""; // avoid numbers to fail at s.replace()
-			ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
-			ss = ss.replace(/ /g,'&nbsp;');
-			ss = ss.replace(/</g,'&lt;');
-			ss = ss.replace(/>/g,'&gt;');
-			ss = ss.replace(/\n/g,'<br>');
+			ss = ss.replace(/&/g,'&amp;')
+				   .replace(/\t/g,' &nbsp; &nbsp;')
+				   .replace(/ /g,'&nbsp;')
+				   .replace(/</g,'&lt;')
+				   .replace(/>/g,'&gt;')
+				   .replace(/\r?\n\r?/g,'<br>');
 			return ss;
 		}
 		

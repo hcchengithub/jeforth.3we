@@ -84,19 +84,19 @@
 					execute("bd"); 
 					return;
 				case "s"  : 
-					vm.g.breakPoint=-1; 
+					vm.jsc.bp=-1; 
 					vm.jsc.enable = true; 
 					return;
 				case "p"  : 
-					vm.g.breakPoint=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; 
+					vm.jsc.bp=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; 
 					vm.jsc.enable = true; 
 					return;
 				case "r"  : 
-					vm.g.breakPoint=rstack[rstack.length-1]; 
+					vm.jsc.bp=rstack[rstack.length-1]; 
 					vm.jsc.enable = true;
 					return;
 				case "rr" : 
-					vm.g.breakPoint=rstack[rstack.length-2]; 
+					vm.jsc.bp=rstack[rstack.length-2]; 
 					vm.jsc.enable = true;
 					return;
 				case "bye"  : execute("bye"); break;

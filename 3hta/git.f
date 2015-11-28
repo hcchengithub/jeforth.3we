@@ -9,8 +9,6 @@
 \ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
 \
 
-ado \ 中文 word name 需用到 utf-8 不能用 fso readTextFile 要用 ado.
-
 js> vm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
 s" git.f"   source-code-header
@@ -129,6 +127,8 @@ s" git.f"   source-code-header
 
     : <shell> ( <command line> -- ) \ Command line to the Git Shell
         char {enter}{enter} char </shell> word + compiling if literal then ; immediate
+		/// Note! Use two "" instead of any " in the command line due to VBscript syntax.
+
 
     : </shell> ( "command line" -- ) \ Send command line to the Git Shell
         compiling if 

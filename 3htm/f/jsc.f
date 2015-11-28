@@ -56,11 +56,12 @@
 	// -------------   ---------------------------------------------------------
 	
 	(function(){
-		var eraseCount=16;
+		var eraseCount=4;
 		inputbox.value = ""; // for erase command
 		vm.jsc.enable = false; // 避免 jsc 自己用的 colon word 也 hit 到 break-point。
 		for(;;) {
-			if (!vm.jsc.statusToggle) {
+			if (vm.jsc.statusToggle) {
+				vm.jsc.cmd = ""; // don't want to repeat this command
 				type(
 					"\n -------- Following Instructions --------\n" +
 					" " + (ip  ) + " : " + ((dictionary[(ip  )]==null) ? "RET" : ((dictionary[(ip  )]=="") ? "EXIT" : dictionary[(ip  )])) + "\n" +
@@ -85,19 +86,19 @@
 					execute("bd"); 
 					return;
 				case "s"  : 
-					vm.g.breakPoint=-1; 
+					vm.jsc.bp=-1; 
 					vm.jsc.enable = true; 
 					return;
 				case "p"  : 
-					vm.g.breakPoint=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; 
+					vm.jsc.bp=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; 
 					vm.jsc.enable = true; 
 					return;
 				case "r"  : 
-					vm.g.breakPoint=rstack[rstack.length-1]; 
+					vm.jsc.bp=rstack[rstack.length-1]; 
 					vm.jsc.enable = true;
 					return;
 				case "rr" : 
-					vm.g.breakPoint=rstack[rstack.length-2]; 
+					vm.jsc.bp=rstack[rstack.length-2]; 
 					vm.jsc.enable = true;
 					return;
 				case "bye"  : execute("bye"); break;
@@ -119,7 +120,56 @@
 			}
 		}
 	})()
-</text> js: vm.jsc.xt=pop()
+</text> constant jsc.xt.hta // ( -- source code ) jsc.xt for HTA
+<text>
+	(function(){
+		inputbox.value = ""; // for erase command
+		vm.jsc.t = function() { vm.jsc.statusToggle=Boolean(vm.jsc.statusToggle^true) }
+		vm.jsc.q = function() { execute("bd") }
+		vm.jsc.s = function() { vm.jsc.bp=-1;vm.jsc.enable = true; }
+		vm.jsc.p = function() {
+			vm.jsc.bp=(isNaN(dictionary[ip+1]))?ip+1:dictionary[ip+1]; 
+			vm.jsc.enable = true;
+		}
+		vm.jsc.r = function() {
+			vm.jsc.bp=rstack[rstack.length-1]; 
+			vm.jsc.enable = true;
+		}
+		vm.jsc.rr = function() {
+			vm.jsc.bp=rstack[rstack.length-2]; 
+			vm.jsc.enable = true;
+		}
+		vm.jsc.bye = function() { execute("bye") }
+		vm.jsc.erase = function(count) {
+			count = count||1;
+			for(var _i_=0; _i_<count; _i_++){
+				execute('{backSpace}'); pop();
+			} 
+		}
+		vm.jsc.bottom = function() { jump2endofinputbox.click() }
+		vm.jsc.status = function() { 
+			console.log(
+				" -------- See IP --------\n" +
+				" " + (ip  ) + " : " + ((dictionary[(ip  )]==null) ? "RET" : ((dictionary[(ip  )]=="") ? "EXIT" : dictionary[(ip  )])) + "\n" +
+				" " + (ip+1) + " : " + ((dictionary[(ip+1)]==null) ? "RET" : ((dictionary[(ip+1)]=="") ? "EXIT" : dictionary[(ip+1)])) + "\n" +
+				" " + (ip+2) + " : " + ((dictionary[(ip+2)]==null) ? "RET" : ((dictionary[(ip+2)]=="") ? "EXIT" : dictionary[(ip+2)])) + "\n" +
+				" " + (ip+3) + " : " + ((dictionary[(ip+3)]==null) ? "RET" : ((dictionary[(ip+3)]=="") ? "EXIT" : dictionary[(ip+3)])) + "\n" +
+				" -------------- See Stacks ------------\n" +
+				' rstack['+rstack+']:' + rstack.length + '  stack['+stack+']:' + stack.length + '\n' +
+				" --------------------------------------\n"
+			);
+		}
+		if (!vm.jsc.statusToggle) { vm.jsc.status() }
+		vm.jsc.bottom();
+		debugger;
+	})()
+</text> constant jsc.xt.F12 // ( -- source code ) jsc.xt for F12 debugger
+
+js> vm.appname char jeforth.3hta = [if]
+	jsc.xt.hta js: vm.jsc.xt=pop()
+[else] 
+	jsc.xt.F12 js: vm.jsc.xt=pop()
+[then]
 	
 : jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
 				cr ." J a v a S c r i p t   C o n s o l e" cr

@@ -140,15 +140,15 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 				// 開始往下加速度，這樣來回會不會越加越多？好像也不會，從地板彈回來時又都被減回去了。但是
 				// 預測到撞牆時，球被直接移置到牆面上，這個處置會不會干擾物理現實？不會，不然才反而會減損
 				// 重力加速度落下的距離，因而越彈越低，最後沉沒到地板之下！
-				if (x + radius > vm.cv.canvas.width) {  // 超過 canvas 右邊
-					x = vm.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
+				if (x + radius > vm.g.cv.canvas.width) {  // 超過 canvas 右邊
+					x = vm.g.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
 					vx = -Math.abs(vx)*vm.g.wallBounce;               // 牆壁的反彈力
 				} else if (x - radius < 0) {   // 超過 canvas 左邊
 					x = radius;  
 					vx = Math.abs(vx)*vm.g.wallBounce;               // 牆壁的反彈力
 				}  
-				if (y + radius > vm.cv.canvas.height) {  // 撞上地板
-					y = vm.cv.canvas.height - radius;  
+				if (y + radius > vm.g.cv.canvas.height) {  // 撞上地板
+					y = vm.g.cv.canvas.height - radius;  
 					vy = -Math.abs(vy)*vm.g.wallBounce;               // 地板的反彈力
 				} else if (y - radius < 0) {  // 超過 canvas 上邊
 					y = radius;  
@@ -156,16 +156,16 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 				}  
 			}
 			this.display = function(){
-				vm.cv.beginPath();
-				vm.cv.arc (x, y, radius, 0, Math.PI*2, false);
-				vm.cv.fillStyle=color;
-				vm.cv.fill(); 
+				vm.g.cv.beginPath();
+				vm.g.cv.arc (x, y, radius, 0, Math.PI*2, false);
+				vm.g.cv.fillStyle=color;
+				vm.g.cv.fill(); 
 			}
 		}};
 		vm.g.balls.push(new Ball(
 			vm.g.balls.length, 	// id
-			Math.random()*vm.cv.canvas.width, // x
-			Math.random()*vm.cv.canvas.height,	// y
+			Math.random()*vm.g.cv.canvas.width, // x
+			Math.random()*vm.g.cv.canvas.height,	// y
 			Math.random()*(50-20)+20,			// radius=[20~50]
 			(function(){
 				var r=60,g=60,b=80,range=50,c="rgba(";

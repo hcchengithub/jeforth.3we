@@ -17,14 +17,20 @@ s" canvas.f"	source-code-header
 	: createCanvas			( -- cv ) \ cv is [object CanvasRenderingContext2D], cv.canvas is the parent object
 							char body <e> <canvas width=300 height=300></canvas></e>
 							js> pop().getContext('2d') ;
-							/// The new canvas is appended to the end of HTML body. Use insertBefore
-							/// or insertAfter command to move it to where you want it to be.
-							
-	code setWorkingCanvas	( [object CanvasRenderingContext2D] -- ) \ Assign the given cv to the default canvas vm.cv
-							vm.cv=pop() end-code
+							/// The new canvas is appended to the end of HTML body. 
+							/// Use commands e.g. replaceNode, insertBefore, or insertAfter 
+							/// to move it to where you want it to be.
+
+	null value cv			// ( -- cv ) The default cv object (CanvasRenderingContext2D)
+							/// 即 js> vm.g.cv。引入 default canvas 可以簡化 canvas 操
+							/// 作，避免每次都得指定 canvas。若有多個 canvas 必要時用切
+							/// 換的，看來還可以。 
+	
+	code setWorkingCanvas	( [object CanvasRenderingContext2D] -- ) \ Make the given cv be the default canvas.
+							vm.g.cv = pop() end-code
 
 	code setCanvasSize		( width height -- )
-							vm.cv.canvas.width=pop(1);vm.cv.canvas.height=pop(); end-code 
+							vm.g.cv.canvas.width=pop(1);vm.g.cv.canvas.height=pop(); end-code 
 							/// Canvas size can be changed dynamically.
 
 	: setCanvasStyle		( "canvas{border:solid 1px #CCC}" -- )
@@ -34,21 +40,21 @@ s" canvas.f"	source-code-header
 \ ------------------ Drawing commands -------------------------------------------------------
 
 							/// https://www.evernote.com/shard/s22/nl/2472143/21cd4837-e468-468b-b013-56716522dd76
-	code save				vm.cv.save() end-code // ( -- ) Push canvas settings. 保留座標旋轉、位移、縮放等之前的狀態。
-	code restore			vm.cv.restore() end-code // ( -- ) Pop canvas settings. 恢復座標旋轉、位移、縮放等之前的狀態。
-	code translate			vm.cv.translate(pop(1),pop()) end-code // ( x y -- ) Move canvas origin to (x,y)
-	code rotate				vm.cv.rotate(pop()) end-code // ( angle -- ) 旋轉座標系
-	code beginPath			vm.cv.beginPath() end-code // ( -- ) Start a new path. http://www.tuicool.com/articles/Bb6RV3
+	code save				vm.g.cv.save() end-code // ( -- ) Push canvas settings. 保留座標旋轉、位移、縮放等之前的狀態。
+	code restore			vm.g.cv.restore() end-code // ( -- ) Pop canvas settings. 恢復座標旋轉、位移、縮放等之前的狀態。
+	code translate			vm.g.cv.translate(pop(1),pop()) end-code // ( x y -- ) Move canvas origin to (x,y)
+	code rotate				vm.g.cv.rotate(pop()) end-code // ( angle -- ) 旋轉座標系
+	code beginPath			vm.g.cv.beginPath() end-code // ( -- ) Start a new path. http://www.tuicool.com/articles/Bb6RV3
 							/// canvas 中的落筆 methods (如 stroke,fill)，都會以上一次 beginPath 之後的所有 path 為基礎下筆。
-	code moveTo				vm.cv.moveTo(pop(1),pop()) end-code // ( x y -- ) Specify the pen to (x,y), not painted yet
-	code lineTo				vm.cv.lineTo(pop(1),pop()) end-code // ( x y -- ) Specify a line, not painted yet
-	code closePath			vm.cv.closePath() end-code // ( -- ) 自動閉合到 path 起點，幾乎與 beginPath 無關。 http://www.tuicool.com/articles/Bb6RV3
-	code stroke				vm.cv.stroke() end-code // ( -- ) Verb, draw the recent path.
+	code moveTo				vm.g.cv.moveTo(pop(1),pop()) end-code // ( x y -- ) Specify the pen to (x,y), not painted yet
+	code lineTo				vm.g.cv.lineTo(pop(1),pop()) end-code // ( x y -- ) Specify a line, not painted yet
+	code closePath			vm.g.cv.closePath() end-code // ( -- ) 自動閉合到 path 起點，幾乎與 beginPath 無關。 http://www.tuicool.com/articles/Bb6RV3
+	code stroke				vm.g.cv.stroke() end-code // ( -- ) Verb, draw the recent path.
 							/// canvas 中的落筆 methods (如 stroke,fill)，都會以上一次 beginPath 之後的所有 path 為基礎下筆。
 							/// see also 'fill'
 
-	code lineWidth			vm.cv.lineWidth=pop() end-code // ( n -- ) 
-	code strokeStyle 		vm.cv.strokeStyle=pop() end-code // ( 'style' -- ) Sets or returns the color, gradient, or pattern used for strokes
+	code lineWidth			vm.g.cv.lineWidth=pop() end-code // ( n -- ) 
+	code strokeStyle 		vm.g.cv.strokeStyle=pop() end-code // ( 'style' -- ) Sets or returns the color, gradient, or pattern used for strokes
 							/// '#RRGGBB','rgb(255,0,0)','rgba(255,0,0,0.5)' or 'green'
 
 							<selftest>
@@ -70,9 +76,9 @@ s" canvas.f"	source-code-header
 								"closePath","lineWidth","strokeStyle","stroke" p]
 							</selftest>
 	
-	code clearRect			vm.cv.clearRect(pop(3),pop(2),pop(1),pop()) end-code // ( x y w h -- ) Clear rectangular
-	code fillStyle			vm.cv.fillStyle=pop() end-code // ( 'style' -- ) 'color' or Gradient fill style object
-	code fill				vm.cv.fill() end-code // ( -- ) Verb, fill the recent path
+	code clearRect			vm.g.cv.clearRect(pop(3),pop(2),pop(1),pop()) end-code // ( x y w h -- ) Clear rectangular
+	code fillStyle			vm.g.cv.fillStyle=pop() end-code // ( 'style' -- ) 'color' or Gradient fill style object
+	code fill				vm.g.cv.fill() end-code // ( -- ) Verb, fill the recent path
 							/// canvas 中的落筆 methods (如 stroke,fill)，都會以上一次 beginPath 之後的所有 path 為基礎下筆。
 							/// see also 'stroke'
 							
@@ -96,11 +102,11 @@ s" canvas.f"	source-code-header
 								[d d] [p "clearCanvas","beginPath","fill" p]
 							</selftest>
 							
- 	code fillRect			vm.cv.fillRect(pop(3),pop(2),pop(1),pop()) end-code // ( x y w h -- ) Fill rectangular
-	code fillText			vm.cv.fillText(pop(2),pop(1),pop()) end-code // ( 'text' x y -- ) Fill the given text at the given position
-	code strokeText			vm.cv.strokeText(pop(2),pop(1),pop()) end-code // ( 'text' x y -- ) Stroke (描邊) the given text at the given position
-	: clearCanvas			0 0 js> vm.cv.canvas.width js> vm.cv.canvas.height clearRect ; // ( -- )
-	code arc				vm.cv.arc(pop(5),pop(4),pop(3),pop(2),pop(1),pop()) end-code // ( x y r sAngle eAngle !clockwise -- )
+ 	code fillRect			vm.g.cv.fillRect(pop(3),pop(2),pop(1),pop()) end-code // ( x y w h -- ) Fill rectangular
+	code fillText			vm.g.cv.fillText(pop(2),pop(1),pop()) end-code // ( 'text' x y -- ) Fill the given text at the given position
+	code strokeText			vm.g.cv.strokeText(pop(2),pop(1),pop()) end-code // ( 'text' x y -- ) Stroke (描邊) the given text at the given position
+	: clearCanvas			0 0 js> vm.g.cv.canvas.width js> vm.g.cv.canvas.height clearRect ; // ( -- )
+	code arc				vm.g.cv.arc(pop(5),pop(4),pop(3),pop(2),pop(1),pop()) end-code // ( x y r sAngle eAngle !clockwise -- )
 							/// Example: A circle ==> 100 100 50 0 js> Math.PI*2 false arc stroke
 							/// http://www.w3school.com.cn/tags/canvas_arc.asp
 
@@ -111,12 +117,12 @@ s" canvas.f"	source-code-header
 							</selftest>
 
 	code createRadialGradient ( x0,y0,r0,x1,y1,r1 -- objStyle ) \ 宣告 style : 圓形漸層色 
-							var v=vm.cv.createRadialGradient(pop(5),pop(4),pop(3),pop(2),pop(1),pop());
+							var v=vm.g.cv.createRadialGradient(pop(5),pop(4),pop(3),pop(2),pop(1),pop());
 							push(v); end-code
 							/// http://www.w3school.com.cn/tags/canvas_createradialgradient.asp
 							/// Work with addColorStop(), fillStyle, fillRect, ...etc.
 	code createLinearGradient ( x0,y0,x1,y1 -- objGradient ) \ 宣告 style : 線性漸層色 
-							var v=vm.cv.createLinearGradient(pop(3),pop(2),pop(1),pop());
+							var v=vm.g.cv.createLinearGradient(pop(3),pop(2),pop(1),pop());
 							push(v); end-code
 							/// http://www.w3school.com.cn/tags/canvas_createlineargradient.asp
 							/// Work with addColorStop(), fillStyle, fillRect, ...etc.
@@ -140,7 +146,7 @@ s" canvas.f"	source-code-header
 							</selftest>
 							
 	code font				( "font" -- ) \ Example: s" 20pt bold Arial" font
-							vm.cv.font=pop() end-code
+							vm.g.cv.font=pop() end-code
 
 	: move-cv-up-into-outputbox	( -- ) \ Move the last thing, expecting a canvas, up into the outputbox.
 							eleBody lastChild dup :> constructor==HTMLCanvasElement 

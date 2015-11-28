@@ -40,7 +40,7 @@ kvm.host = global;
 kvm.appname = "jeforth.3wsh";
 kvm.path = ["dummy", "kernel", "f", "3wsh/f", "3wsh", "playground"];
 
-var print = kvm.print = function (s) { 
+var type = kvm.type = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test to avoid error 'JavaScript error on word "." : invalid data'
 			} catch(err) {
@@ -51,8 +51,8 @@ var print = kvm.print = function (s) {
 		}; 
 kvm.version = "1.00";
 kvm.greeting = function(){
-			print("j e f o r t h . 3 w s h -- r"+kvm.version+'\n');
-			print("Source code http://github.com/hcchengithub/jeforth.3we\n");
+			type("j e f o r t h . 3 w s h -- r"+kvm.version+'\n');
+			type("Source code http://github.com/hcchengithub/jeforth.3we\n");
 			return(parseFloat(kvm.version));
 		}; 
 kvm.greeting();
@@ -86,7 +86,7 @@ kvm.jsc.xt = readTextFile('.\\3wsh\\f\\jsc.js');
 // kvm.objWMIService
 // kvm.cv
 // kvm.stdio = require('readline').createInterface({input: process.stdin,output: process.stdout});
-// kvm.stdio.on('line', function (cmd){kvm.fortheval(cmd);kvm.print(' '+kvm.prompt+' ')});
+// kvm.stdio.on('line', function (cmd){kvm.fortheval(cmd);kvm.type(' '+kvm.prompt+' ')});
 // kvm.stdio.setPrompt(' '+kvm.prompt+' ',4);
 kvm.init();
 kvm.fortheval(kvm.readTextFile('kernel\\jeforth.f')+kvm.readTextFile('3wsh\\f\\quit.f'));
@@ -94,7 +94,7 @@ kvm.fortheval(kvm.readTextFile('kernel\\jeforth.f')+kvm.readTextFile('3wsh\\f\\q
 for(;;){
 	var cmd = kvm.stdin.ReadLine();
 	kvm.fortheval(cmd);
-	kvm.print(' '+kvm.prompt+' ')
+	kvm.type(' '+kvm.prompt+' ')
 }
 
 

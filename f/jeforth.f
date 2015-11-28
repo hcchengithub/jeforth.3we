@@ -151,7 +151,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					do{
 						while(w) { // 這裡是 forth inner loop 決戰速度之所在，奮力衝鋒！
 							// 可用 bp=ip 設斷點, debug colon words.
-							if(vm.g.breakPoint<0||vm.g.breakPoint==ip){
+							if(vm.jsc.bp<0||vm.jsc.bp==ip){
 								if (vm.jsc.enable){ // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
 									vm.jsc.prompt=" BreakPoint jsc>";
 									eval(vm.jsc.xt);
@@ -427,14 +427,16 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {};
-				for (var j=0; j<order.length; j++) { // 越後面的 priority 越高
-					for (var i=1; i<words[order[j]].length; i++){  // 從舊到新，以新蓋舊,重建 wordhash{} hash table.
-						if (compiling) if (last()==words[order[j]][i]) continue; // skip the last() avoid of an unexpected 'reveal'.
-						wordhash[words[order[j]][i].name] = words[order[j]][i];
+				scan_vocabulary("forth"); // words in "forth" always available
+				for (var j=0; j<order.length; j++) scan_vocabulary(order[j]); // 越後面的 priority 越高
+				function scan_vocabulary(v) {
+					for (var i=1; i<words[v].length; i++){  // 第零個都放 0，一律跳過。
+						// skip the last() to avoid unexpected 'reveal'.
+						if (compiling) if (last()==words[v][i]) continue; 
+						wordhash[words[v][i].name] = words[v][i];
 					}
 				}
 				end-code
-				/// Used in (forget) and vocabulary words.
 
 code (forget) 	( -- ) \ Forget the last word
 				if (last().cfa) here = last().cfa;
@@ -1416,6 +1418,20 @@ code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
 				end-code immediate
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
+code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpret mode
+				var ss = pop();
+				var result = ss
+					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3")
+					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3");
+					// 連做兩次解決 if else then 翻成 [if] else [then] 的現象。 
+				dictate(result);
+				end-code
+				/// Replace "if", "for", "begin", .. etc to "[if]", "[for]", "[beign]" .. etc
+				/// I like to use "if" in interpret mode directly instead of "[if]" and
+				/// to merge them is difficult to me so far. So I defined this word.
+: run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
+				char \r|\n word (run:) ;
+				/// To run multiple lines use <text>...</text> (run:)
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
@@ -1954,10 +1970,10 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				var bp = nexttoken();
 				vm.jsc.enable = true;
 				if (bp) {
-					vm.g.breakPoint = parseInt(bp);
+					vm.jsc.bp = parseInt(bp);
 					execute("be") 
 				} else {
-					type("Breakpoint : " + vm.g.breakPoint);
+					type("Breakpoint : " + vm.jsc.bp);
 					if (inner == vm.g.debugInner) type(", activated\n");
 					else  type(", inactive\n");
 				}

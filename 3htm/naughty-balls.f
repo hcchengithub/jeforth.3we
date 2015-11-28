@@ -18,8 +18,8 @@
 	[x]	Two balls on the floor collision experiment,
 		newBall 1 onFloor 2 onFloor 1 to spring 1 to wallBounce ( 100% 彈性 ) 
 		0 to friction 0.02 to gravity
-		js: g.balls[2].radius=g.balls[1].radius=30 \ same size
-		js: g.balls[2].vx=5 \ move one ball
+		js: vm.g.balls[2].radius=vm.g.balls[1].radius=30 \ same size
+		js: vm.g.balls[2].vx=5 \ move one ball
 		draw 20 nap rewind \ check 
 		Wow! 看到兩球對撞時，動能全部移轉給靜止的一方之實況！（vy=-0.02～0震盪，因為 gravity=0.02，放地板上就是會有微幅震動）
 			--- 1 --- radius=32.9509679753981, x=462.04903202460195, y=367.0490320246019, vx=-5, vy=0
@@ -49,12 +49,12 @@
 	==>	Test	
 		newBall newBall newBall 1 to spring 1 to wallBounce ( 100% 彈性 ) 
 		0 to friction 0 to gravity ( 為了做碰撞實驗，去掉重力 )
-		js: g.balls[1].radius=g.balls[2].radius=50 \ same size
+		js: vm.g.balls[1].radius=vm.g.balls[2].radius=50 \ same size
 		400 300 setCanvasSize	\ ( width height -- ) 
-		js: g.balls[1].x=100;g.balls[1].y=100; \ 擺好位置 
-		js: g.balls[2].x=200;g.balls[2].y=101; draw
+		js: vm.g.balls[1].x=100;vm.g.balls[1].y=100; \ 擺好位置 
+		js: vm.g.balls[2].x=200;vm.g.balls[2].y=101; draw
 		js: kvm.debug=false
-		js: g.balls[1].vx=1 \ move one ball
+		js: vm.g.balls[1].vx=1 \ move one ball
 		cut draw js: jump2endofinputbox.click() 20 nap rewind \ check 
 	==> 避免 atan2(dy,dx) 程式要改寫 --> naughty-balls2.f
 	
@@ -83,9 +83,9 @@ marker ~~~
 			this.x=X; this.y=Y; this.radius=RADIUS; this.color=COLOR; this.vx=0; this.vy=0; 
 			this.debug = function(){ debugger; }
 			this.see = function(){
-				print("--- "+id+" --- radius=" + this.radius);
-				print(", x=" + x + ", y=" + y);
-				print(", vx=" + vx + ", vy=" + vy);
+				type("--- "+id+" --- radius=" + this.radius);
+				type(", x=" + x + ", y=" + y);
+				type(", vx=" + vx + ", vy=" + vy);
 				execute("cr");
 			}
 			this.movex = function(xx){ x=xx}
@@ -93,7 +93,7 @@ marker ~~~
 			this.move = function(xx,yy){ x=xx; y=yy; }
 			this.collide = function(){
 				for (var i = id - 1; i >= 1; i--) {  // 只管自己 id 以下兩兩之間的 collision
-					var a=g.balls[id], b=g.balls[i]; // a 是本球 b 是他球。這樣不會搞混。他球是一個個輪著計算的不一定是哪個。
+					var a=vm.g.balls[id], b=vm.g.balls[i]; // a 是本球 b 是他球。這樣不會搞混。他球是一個個輪著計算的不一定是哪個。
 					
 					// the distance from this ball to another ball
 					var dx = b.x - a.x;  // a.x == x, a.y == y
@@ -138,71 +138,71 @@ marker ~~~
 						var mv2p = Math.sqrt(bvx*bvx + bvy*bvy);
 						// 動量守恆嗎？忽略不守恆的情形，相當於交錯而過，互不影響。
 						var diff = Math.abs((mv1+mv2)-(mv1p+mv2p));
-						if(1) print("diff="+diff+" "); // [ ]
+						if(1) type("diff="+diff+" "); // [ ]
 						if(kvm.debug){kvm.jsc.prompt='222>>>';eval(kvm.jsc.xt)} // [ ]
 						// if (diff < 0.000001) {
 						//	vx = avx;  // 本球
 						//	vy = avy;  
-						//	g.balls[i].vx = bvx;  // 他球
-						//	g.balls[i].vy = bvy;  
+						//	vm.g.balls[i].vx = bvx;  // 他球
+						//	vm.g.balls[i].vy = bvy;  
 						// }
 						
 					}  
 				}     
 			}
 			this.animate = function(){
-				vy += g.gravity;  // 「力」表現為速度、方向的改變，而重力就是在 vy 上加成（加速度==重力）.
+				vy += vm.g.gravity;  // 「力」表現為速度、方向的改變，而重力就是在 vy 上加成（加速度==重力）.
 								  // vx,vy 是該 ball 的瞬時速度向量，單位是 pixcel/frame 畫素/每禎。
 								  // 靜止在地板上時照樣施以重力，往下計算 y+=vy 會陷入地板，再往下計算，撞上地板時
-								  // y 又被移回地板上，但得到一個反向(上升)的 -g.gravity 速度。下一 frame 時這個速度被
-								  // vy += g.gravity 消除，恢復原狀態。如此不斷重複。靜止的球 vy 會如此震盪，算不算
+								  // y 又被移回地板上，但得到一個反向(上升)的 -vm.g.gravity 速度。下一 frame 時這個速度被
+								  // vy += vm.g.gravity 消除，恢復原狀態。如此不斷重複。靜止的球 vy 會如此震盪，算不算
 								  // 是問題？不算。以上是 wallBounce=1 時，當 wallBounce=(0,1)之間，震盪最後 vy 會趨近
 								  // 一個負值（往上彈）的附近，但仍繼續震盪。
-				vx += vx>0 ? -g.friction : g.friction ; // 扣除摩擦係數, 每 frame 都扣，等於取一個總趨勢。
-				vy += vy>0 ? -g.friction : g.friction ;
-				vx = Math.abs(vx) < g.friction? 0 : vx ; // 比摩擦力小就是零，否則可能會抖。
-				vy = Math.abs(vy) < g.friction? 0 : vy ;
-				// vx = Math.abs(vx) > g.maxvx? g.maxvx*vx/Math.abs(vx) : vx ;
-				// vy = Math.abs(vy) > g.maxvy? g.maxvy*vy/Math.abs(vy) : vy ;
+				vx += vx>0 ? -vm.g.friction : vm.g.friction ; // 扣除摩擦係數, 每 frame 都扣，等於取一個總趨勢。
+				vy += vy>0 ? -vm.g.friction : vm.g.friction ;
+				vx = Math.abs(vx) < vm.g.friction? 0 : vx ; // 比摩擦力小就是零，否則可能會抖。
+				vy = Math.abs(vy) < vm.g.friction? 0 : vy ;
+				// vx = Math.abs(vx) > vm.g.maxvx? vm.g.maxvx*vx/Math.abs(vx) : vx ;
+				// vy = Math.abs(vy) > vm.g.maxvy? vm.g.maxvy*vy/Math.abs(vy) : vy ;
 				x += vx;  // 當 vx or vy 大於兩球半徑之合時，一次就直接穿越。這應該是 v 的上限。電腦模擬的限制。
 				y += vy;  // 所有的動量都來自 gravity，我猜要計算從上邊落下到下邊的最後速度會不會超過。
 
 				// 如果不考慮牆面，以上就是 move() 了！撞近牆面之前，先預測，並反應。
-				// vy *= -g.wallBounce;  撞牆就把分量反向，對呀！？ 但是考慮撞上上邊的情況，反彈之後
+				// vy *= -vm.g.wallBounce;  撞牆就把分量反向，對呀！？ 但是考慮撞上上邊的情況，反彈之後
 				// 開始往下加速度，這樣來回會不會越加越多？好像也不會，從地板彈回來時又都被減回去了。但是
 				// 預測到撞牆時，球被直接移置到牆面上，這個處置會不會干擾物理現實？不會，不然才反而會減損
 				// 重力加速度落下的距離，因而越彈越低，最後沉沒到地板之下！
-				if (x + radius > kvm.cv.canvas.width) {  // 超過 canvas 右邊
-					x = kvm.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
-					vx = -Math.abs(vx)*g.wallBounce;               // 牆壁的反彈力
+				if (x + radius > vm.g.cv.canvas.width) {  // 超過 canvas 右邊
+					x = vm.g.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
+					vx = -Math.abs(vx)*vm.g.wallBounce;               // 牆壁的反彈力
 				} else if (x - radius < 0) {   // 超過 canvas 左邊
 					x = radius;  
-					vx = Math.abs(vx)*g.wallBounce;               // 牆壁的反彈力
+					vx = Math.abs(vx)*vm.g.wallBounce;               // 牆壁的反彈力
 				}  
-				if (y + radius > kvm.cv.canvas.height) {  // 撞上地板
-					y = kvm.cv.canvas.height - radius;  
-					vy = -Math.abs(vy)*g.wallBounce;               // 地板的反彈力
+				if (y + radius > vm.g.cv.canvas.height) {  // 撞上地板
+					y = vm.g.cv.canvas.height - radius;  
+					vy = -Math.abs(vy)*vm.g.wallBounce;               // 地板的反彈力
 				} else if (y - radius < 0) {  // 超過 canvas 上邊
 					y = radius;  
-					vy = Math.abs(vy)*g.wallBounce;               // 天花板的反彈力
+					vy = Math.abs(vy)*vm.g.wallBounce;               // 天花板的反彈力
 				}  
 				// vx vy 要設限
 				// if (Math.abs(vx)>radius) vx = radius*Math.abs(vx)/vx;
 				// if (Math.abs(vy)>radius) vy = radius*Math.abs(vy)/vy;
 			}
 			this.display = function(){
-				kvm.cv.beginPath();
-				kvm.cv.arc (x, y, radius, 0, Math.PI*2, false);
-				kvm.cv.fillStyle=color;
-				kvm.cv.fill(); 
+				vm.g.cv.beginPath();
+				vm.g.cv.arc (x, y, radius, 0, Math.PI*2, false);
+				vm.g.cv.fillStyle=color;
+				vm.g.cv.fill(); 
 				// fill(0); // specify font color text color 
 				// text(id, x, y);  
 			}
 		}};
-		g.balls.push(new Ball(
-			g.balls.length, // id
-			Math.random()*kvm.cv.canvas.width, // x
-			Math.random()*kvm.cv.canvas.height,	// y
+		vm.g.balls.push(new Ball(
+			vm.g.balls.length, // id
+			Math.random()*vm.g.cv.canvas.width, // x
+			Math.random()*vm.g.cv.canvas.height,	// y
 			Math.random()*(50-20)+20,			// radius=[20~50]
 			(function(){
 				var r=120,g=80,b=60,range=55,c="rgba(";
@@ -218,14 +218,14 @@ marker ~~~
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function
 		clearCanvas
-		js> g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [tos()].collide()
 			balls :: [tos()].animate()
 			balls :: [pop()].display()
 		next
 	;
 	: draw2 ( -- ) \ Just draw w/o collide animate and clearCanvas
-		js> g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [pop()].display()
 		next
 	;
@@ -236,7 +236,7 @@ marker ~~~
 		balls :: [pop()].display()
 	;
 	: dump ( -- ) \ See all balls
-		js> g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [pop()].see()
 		next
 	;
@@ -245,21 +245,21 @@ marker ~~~
 	: run ( count -- ) \ draw count times
 		for draw speed nap next ;
 	: home ( -- ) \ move all balls to (0,0)
-		js> g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [pop()].move(0,0)
 		next ;
 	: onFloor ( id -- ) \ move the ball still on the floor
-		js: g.balls[tos()].move(g.balls[tos()].x,kvm.cv.canvas.height-g.balls[tos()].radius)
-		js: g.balls[tos()].vx=0
-		js: g.balls[pop()].vy=0 ;
+		js: vm.g.balls[tos()].move(vm.g.balls[tos()].x,vm.g.cv.canvas.height-vm.g.balls[tos()].radius)
+		js: vm.g.balls[tos()].vx=0
+		js: vm.g.balls[pop()].vy=0 ;
 	: freeze ( -- ) \ freeze all balls
-		js> g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [tos()].vx=0
 			balls :: [pop()].vy=0
 		next ;
 	: total-motivation ( -- f ) \ All |(vx,vy)| summation
 		0 ( sum )
-		js> g.balls.length-1 for r@ ( -- sum id ) \ where id = numBalls,...,3,2,1 
+		js> vm.g.balls.length-1 for r@ ( -- sum id ) \ where id = numBalls,...,3,2,1 
 			balls :> [tos()].vx balls :> [pop(1)].vy dup * swap dup * + 
 			js> Math.sqrt(pop()) ( -- sum Mid ) +
 		next ;
@@ -269,9 +269,9 @@ marker ~~~
 
 	
 \ start to run
-	\ newBall newBall newBall newBall newBall
-	\ newBall newBall newBall newBall newBall
-	\ cut draw interval nap rewind \ cut...rewind TIB 不斷重複
+newBall newBall newBall newBall newBall
+newBall newBall newBall newBall newBall
+[begin] draw interval nap [again]
 
 
 

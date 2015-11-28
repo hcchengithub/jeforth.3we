@@ -108,6 +108,8 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 						return (false);
 					}
 				</js> ;
+				
+true value up/down-recall-needs-alt-key? // ( -- boolean ) An optional setting. Up/Down key to recall command history needs the Alt-key?
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
 				js> event.altKey if 
@@ -116,7 +118,9 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					js> event.ctrlKey if
 						js: inputbox.value=vm.cmdhistory.up() false \ eat the key
 					else 
-						js> inputbox.value==""||inputbox.value=="\n" if
+						js> inputbox.value==""||inputbox.value=="\n" 
+						up/down-recall-needs-alt-key? not and
+						if
 							history-selector false \ eat the key
 						else
 							true \ don't eat the key, let it pass down
@@ -134,7 +138,9 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					js> event.ctrlKey if
 						js: inputbox.value=vm.cmdhistory.down() false \ eat the key
 					else 
-						js> inputbox.value==""||inputbox.value=="\n" if
+						js> inputbox.value==""||inputbox.value=="\n" 
+						up/down-recall-needs-alt-key? not and
+						if
 							history-selector false \ eat the key
 						else
 							true \ don't eat the key, let it pass down
@@ -147,32 +153,32 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
 				js> inputbox.focus();inputbox.value!=""&&inputbox.value!="\n" if 
-					true \ inputbox is not empty still don't do the norm.
+					true \ inputbox is not empty, do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
-					js> event==null||event.altKey \ So as to allow calling {backSpace} programmatically	
-					if \ erase top down
-						js> event==null||event.shiftKey \ So as to allow calling {backSpace} programmatically
-						if 30 else 1 then for
+					js> event==null||!event.altKey \ So as to allow calling {backSpace} programmatically	
+					if \ erase bottom up 
+						js> outputbox.lastChild ?dup if
+							js> tos().nodeName char BR = if removeElement else drop then
+						then				
+						js> event==null||!event.shiftKey \ So as to allow calling {backSpace} programmatically
+						if 1 else 30 then for
 							js> event&&event.ctrlKey if
-								js> outputbox.firstChild ?dup if removeElement then
+								js> outputbox.lastChild ?dup if removeElement then
 							else
-								js> outputbox.firstChild ?dup if
+								js> outputbox.lastChild ?dup if
 									js> tos().nodeName  char BR    =
 									js> tos(1).nodeName char #text =
 									or if removeElement else drop then
 								then
 							then
 						next
-					else \ erase bottom up 
-						js> outputbox.lastChild ?dup if
-							js> tos().nodeName char BR = if removeElement else drop then
-						then				
-						js> event==null||event.shiftKey \ So as to allow calling {backSpace} programmatically
-						if 30 else 1 then for
+					else \ erase top down
+						js> event==null||!event.shiftKey \ So as to allow calling {backSpace} programmatically
+						if 1 else 30 then for
 							js> event&&event.ctrlKey if
-								js> outputbox.lastChild ?dup if removeElement then
+								js> outputbox.firstChild ?dup if removeElement then
 							else
-								js> outputbox.lastChild ?dup if
+								js> outputbox.firstChild ?dup if
 									js> tos().nodeName  char BR    =
 									js> tos(1).nodeName char #text =
 									or if removeElement else drop then
@@ -458,18 +464,12 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
 		switch(keycode) {
+			case   8: /* Back space */ if(tick('{backSpace}' )){execute('{backSpace}' );return(pop());} break; // disable the [switch previous page] function
 			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
 			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
-		}
-		return (true); // pass down to following handlers
-	}
-
-	document.onkeydown = function (e) {
-		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
-		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
-		switch(keycode) {
 			case 13:
 				if (!event.shiftKey) // 想換行用 Shift-Enter 避免把命令發出去
 				if (!tick("{F2}").EditMode || event.ctrlKey) { // 在 EditMode 用 Ctrl-Enter 發出命令
@@ -481,6 +481,13 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					return(false);
 				}
 				return(true); // In EditMode
+		}
+		return (true); // pass down to following handlers
+	}
+
+	document.onkeydown = function (e) {
+		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		switch(keycode) {
 			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
 			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
 			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
@@ -497,7 +504,6 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 			case 122: /* F11 */ if(tick('{F11}')){execute('{F11}');return(pop());} break;
 			case 123: /* F12 */ if(tick('{F12}')){execute('{F12}');return(pop());} break;
 			case   3: /* ctrl-break */ if(tick('{ctrl-break}')){execute('{ctrl-break}');return(pop());} break;
-			case   8: /* Back space */ if(tick('{backSpace}' )){execute('{backSpace}' );return(pop());} break; // disable the [switch previous page] function
 		}
 		return (true); // pass down to following handlers
 	}

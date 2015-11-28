@@ -11,7 +11,9 @@
 	
 	\ shell.application :> windows() 即 ShellWindows. 
 	\ ShellWindows 有可能是 File Explorer 或 Windows Internet Explorer,
-	\ 也許還不只？用 "ie :> application ." or "list-sw-windows" 察看即知。
+	\ Control panel 也是 Network and Sharing Center 也是 Outlook 也出現
+	\ 在 ShellWindows 裡面。用 "ie :> application ." or "list-sw-windows" 
+	\ 察看即知。
 	
 	s" ie.f"	source-code-header
 
@@ -64,8 +66,8 @@
 						/// 有東西。 sw 存在,但沒有 connect 任何網址時 ReadyState 也是 4,
 						/// 也有 document, 但是 document 裡 innerHTML 是 undefined，這樣
 						/// 就 available 了, 可以 navigate() 了。sw 都是 null 時推薦用 
-						/// s" iexplore" (fork) 把 IE 先 run 起來。已經有 high level 的 
-						/// ie command 會自動搞定這些。
+						/// s" iexplore" (fork) 把 IE 先 run 起來。High level 的 ie command 
+						/// 會自動搞定這些。
 
 	: isIE?				( object -- flag ) \ Is the object IE?
 						dup if 
@@ -73,7 +75,8 @@
 							<js> pop(1).name.indexOf("Internet Explorer")!=-1</jsV> ( f f )
 							and 
 						else drop false then ;
-						\ 必須用 "Internet Explorer" 判斷，因為 FE.name 有可能是中文的"檔案總管"。
+						\ 必須用 "Internet Explorer" 判斷，因為 FE.name 有可能是中
+						\ 文的 "檔案總管"。
 
 	: ready				( -- ) \ Wait theIE to become ready
 						1200 for ( total 120 sec which is 2 minutes ) 
@@ -100,7 +103,8 @@
 						sw isIE? if else
 							<js> 
 							for (var i=0; i<vm.g.ShellWindows.count; i++){
-								if(vm.g.ShellWindows.item(i).name.indexOf("Internet Explorer")!=-1){
+								if(vm.g.ShellWindows.item(i) && 
+								   vm.g.ShellWindows.item(i).name.indexOf("Internet Explorer")!=-1){
 									vm.g.theIE = i;
 									break;
 								}
