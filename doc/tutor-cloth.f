@@ -141,7 +141,7 @@
 				網管、工程科學上的應用等，沒甚麼限制。
 				然而要在本頁面上講解，還是用【繪圖】當作實例比較方便。
 			</p>
-			<img src="playground/jeforth-demo-cloth-2015-11-201.jpg">
+			<img src="doc/jeforth-demo-cloth-2015-11-201.jpg">
 /* -------------------------------------------------------------------------- */
 			<p>
 				【交談區】初看只是上下兩塊區域，沒甚麼吧？
@@ -231,7 +231,7 @@ starting-message ending-message r g b range d draw
 			<p>
 				結果類似這樣：
 			</p>
-			<img src="playground/jeforth-demo-cloth-2015-11-202.jpg">
+			<img src="doc/jeforth-demo-cloth-2015-11-202.jpg">
 /* -------------------------------------------------------------------------- */
 			<p>
 				那麼 draw 是怎麼畫出一條色帶的呢？下這行命令就可以查看 
@@ -319,7 +319,7 @@ s" cloth.f"    source-code-header
 			<p>
 				 得到這幅舉世唯一的畫作，名喚《臥虎藏龍》。
 			</p>
-			<img src="playground/jeforth-demo-cloth-for-next_20151126111159.jpg">
+			<img src="doc/jeforth-demo-cloth-for-next_20151126111159.jpg">
 			<p>	
 				其中 <code>10 lineWidth</code> 跟 <code>3 lineWidth</code>
 				是設定色帶線條的寬度。<code>30 [for]...</code> 跟 <code>40 [for]...</code>
@@ -384,7 +384,7 @@ s" cloth.f"    source-code-header
 				查看這兩個 word 的說明。加上 -N 指定 word name 
 				要完全吻合而非相近的指令，詳閱 <code>help help -N</code>。
 			</p>
-			<img src="playground/jeforth-demo-cloth-help-b-help-g_20151126160042.png">				
+			<img src="doc/jeforth-demo-cloth-help-b-help-g_20151126160042.png">				
 			<p>
 				看出來它們的「說明」是哪兒來的嗎？
 				當初定義時寫下 Forth 慣用的註解跑到 help 裡來了。
