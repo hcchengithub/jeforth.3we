@@ -83,8 +83,10 @@
 				幾年前在 Processing.js 網站上看到過我們接下來要示範的這個 
 				demo，現在已經找不到了。
 				以下用 jeforth 來重現經典畫出這個美麗的布料圖案，
-				並且請您親手鑽進這個十分簡單的程式裡去玩一玩，
-				我們一邊操作一邊自然地熟悉 <A HREF="#3we">jeforth.3we</a> 的使用。
+				並且請您親手鑽進這個十分簡單的程式裡去玩一玩。
+				您正在看的這個網頁是互動的，它本身就是 
+				<A HREF="#3we">jeforth.3we</a> 的應用程式。
+				我們一邊操作一邊自然地熟悉它的使用方式。
 			</p></blockquote>
 			</div>
 /* -------------------------------------------------------------------------- */
@@ -154,6 +156,7 @@
 				打入 <code>help *</code> 列出所有 word 的說明。
 				打入 <code>help</code> 命令查看操作功能介紹。
 			</p>
+			<img src="doc/jeforth-demo-cloth-words-help.jpg">
 /* -------------------------------------------------------------------------- */
 			<h2>cloth.f 裡有些甚麼？</h2>
 /* -------------------------------------------------------------------------- */
@@ -246,7 +249,7 @@ starting-message ending-message r g b range d draw
 				的指令不要漏掉。
 				當時的 TOS 就是 cloth.f 整個檔案的 text string，的確很短。
 				您輸入 readTextFileAuto 這麼長的 word 時，可以只敲 
-				<code>readt</code> 然後打幾下 TAB 就會輪到它。
+				<code>readt</code> 然後打幾下 TAB key 就會輪到它。
 				您這時如果 cloth.f 距離我寫這篇文章時尚未修訂過就應該像這樣：
 				
 			</p>
@@ -307,7 +310,7 @@ s" cloth.f"    source-code-header
 				<code>[else]</code> , 
 				<code>[then]</code>
 				這幾個掌管程式流程的指令。
-				它們跟不帶方括號的相似 word 功能則完全一樣，差別在：
+				它們跟不帶方括號的相似 word 功能完全一樣，差別在：
 				帶方括號的只能用在 interpret mode; 不帶方括號的只能用在 
 				compile mode. 因為前者跑迴路時是在 Forth TIB 字串裡前後跳躍；
 				後者則是在 Forth dictionary 裡。
@@ -416,15 +419,7 @@ s" cloth.f"    source-code-header
 				其中 cv 是我們的畫布 (canvas object) 隨後的小點兒是把
 				cv 的值打印出來；緊接著是去看 cv 的說明。結果如下：
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-> cv . help cv -N
-[object CanvasRenderingContext2D]
---------- canvas.f (1 words) ---------
-cv	( -- cv ) The default cv object (CanvasRenderingContext2D) [value][canvas.f][][]
-    即 js> vm.g.cv。引入 default canvas 可以簡化 canvas 操
-    作，避免每次都得指定 canvas。若有多個 canvas 必要時用切
-    換的，看來還可以。
- OK 		</code></pre></blockquote></td></table>
+			<img src="doc/jeforth-demo-cloth-cv-help.jpg">
 			<p>
 				只要拿到 canvas object 就可以來塗鴉了，請按幾下 F10 把 inputbox 變大一點
 				(F9 把它縮小) 然後 copy-paste 以下這段命令進去執行：
@@ -474,7 +469,18 @@ pop().stroke();
 				Statements 當中有 white space 時，就必須用 
 				<code><js>...</js></code> 或
 				<code><js>...</jsV></code>
-				的原形，不要忘記。
+				的原形，不要忘記。到這裡我們可以來改寫以上的畫線程式了：
+			</p>
+			<table width=100%><td class=code><blockquote><pre><code class=source>
+cv :: beginPath()
+cv :: moveTo(0,0)
+cv :: lineTo(100,100)
+cv :: stroke()
+			</code></pre></blockquote></td></table>
+			<p>
+				這四行 statements 看起來既像 Forth 又像 JavaScript, 
+				分辨它們到底屬甚麼，不如著眼在整個行文給人的感覺，
+				而這樣寫語意通順就對了。Forth 有融合多種語言的超能力！
 			</p>
 			<h2 id="bp">jeforth.3we 的 debug</h2>
 			<p>
@@ -523,7 +529,7 @@ pop().stroke();
 
 			<h2>查看本文的 source code</h2>
 			<p>
-			本文本身就是一支 jeforth.3htm 的應用程式。
+			這篇文章本身就是一支 jeforth.3htm 的應用程式。
 			下達這段命令就可以把它讀出來放到這個網頁的最下面。
 			您也可以把 jeforth.3we 從 GitHub 上 clone 
 			下來找到 tutor-cloth.f 就是了。
