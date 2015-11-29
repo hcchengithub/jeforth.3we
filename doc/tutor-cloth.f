@@ -300,7 +300,7 @@ s" cloth.f"    source-code-header
 			<p>	
 				前面試過的 <code>draw</code> 指令這回我們用 
 				<code>[for] .. [next]</code> 重複執行。
-				jeforth.3we 在 interpret mode 有 
+				jeforth.3we 在 interpret state 有 
 				<code>[for]</code> , 
 				<code>[next]</code> , 
 				<code>[begin]</code> , 
@@ -311,8 +311,8 @@ s" cloth.f"    source-code-header
 				<code>[then]</code>
 				這幾個掌管程式流程的指令。
 				它們跟不帶方括號的相似 word 功能完全一樣，差別在：
-				帶方括號的只能用在 interpret mode; 不帶方括號的只能用在 
-				compile mode. 因為前者跑迴路時是在 Forth TIB 字串裡前後跳躍；
+				帶方括號的只能用在 interpret state; 不帶方括號的只能用在 
+				compile state. 因為前者跑迴路時是在 Forth TIB 字串裡前後跳躍；
 				後者則是在 Forth dictionary 裡。
 				整串動作一口氣下達如下：
 			</p>
@@ -327,7 +327,7 @@ s" cloth.f"    source-code-header
 				其中 <code>10 lineWidth</code> 跟 <code>3 lineWidth</code>
 				是設定色帶線條的寬度。<code>30 [for]...</code> 跟 <code>40 [for]...</code>
 				是迴圈的次數。在 
-				interpret mode 操作時，我老是會忘記給這些「流程指令」加上方括號，
+				interpret state 操作時，我老是會忘記給這些「流程指令」加上方括號，
 				所以設計了 <code>run:</code> 指令，
 				用它來執行帶有「流程指令」的命令行就不必一一給它們加上方括號。
 			</p>
@@ -375,8 +375,8 @@ s" cloth.f"    source-code-header
 				您可以用 <code>see run:</code> 以及 <code>see (run:)</code> 
 				命令來查看它的定義，實在跟「run、執行」毫無關係。
 				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的，
+				Forth words 本身性空，意義都是我們「左看右看」隨心情給的。
 				這種情形在 Forth 裡比比皆是。
-				Forth words 本身性空，它的意義都是我們給它的。
 				與中文神似，又加上「空性」使得設計得當的 
 				Forth words 意味深長到不可思議。
 			</p>

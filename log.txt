@@ -4491,72 +4491,52 @@
 [ ] This info seems a better way for ie.f to modify a web page
 	https://msdn.microsoft.com/en-us/library/jj733572.aspx#Date
 
-[ ] 寫個 word 來 escape  <code> ... </code> 裡的 HTML tag signs.
+[x] 寫個 word 來 escape  <code> ... </code> 裡的 HTML tag signs.
 	o 規定 <code> ... </code> 不能 nested, 而且要依序出現。
 	o <code>...</code> 是最裡面的, 即 <pre>..</pre> 要包在外面。
-	==> > s" a b <code>c</code> d <code>e f</code> g h <code></code> i j k" :> split(/(<code>|<\/code>)/) .
-		a b ,<code>,c,</code>, d ,<code>,e f,</code>, g h ,<code>,,</code>, i j k OK 
-		這是 split() 的結果, 合用。
-	==> replace(/&/mg,"&amp;").replace(/</mg,"&lt;").replace(/>/mg,"&gt;") 
-		這是 replace() 的用法，合用。
-	==> 先 split 成 array, 一一 unshift 出來, 看到 <code> 就幫下一格 replace, 
-		重複到底。
-	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>','&' in <code> tag.
-			var raw=pop(), result="", flag=false;
-			var aa=split(/(<code>|<\/code>)/); // array of the splited raw string
-			for (var i=0; i<aa.length; i++){
-				var ss = aa.shift();
-				if(flag){
-					ss = ss.replace(/&/mg,"&amp;")
-					    .replace(/</mg,"&lt;")
-						.replace(/>/mg,"&gt;");
-					flag = false;
-				}
-				if(ss=="<code>") flag = true;
-				result += ss;
-			}
-			push(result);
-			end-code
-	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>','&' in <code> tag.
-			var aa = (" " + pop() + " ").split(/(<code>|<\/code>)/); // array of the splited raw string
-			var result = "";
-			for(var i=0; i<aa.length; i+=4){
-				result += aa.shift()||"";
-				result += aa.shift()||"";
-				result += aa.shift().replace(/&/mg,"&amp;")
-					    .replace(/</mg,"&lt;")
-						.replace(/>/mg,"&gt;")||"";
-				result += aa.shift()||"";
-			}
-			push(result);
-			end-code
-			
-		code html-escape ( "string" -- "cooked" ) \ "&<>" to "&amp;&lt;&gt;"
-			var result = 
-				pop().replace(/&/mg,"&amp;")
-			    .replace(/</mg,"&lt;")
-				.replace(/>/mg,"&gt;")||"";
-			push(result);
-			end-code
-			
-		: (<code>escape) ( "raw" -- "cooked" ) \ foo <code>&<> to &amp;&lt;&gt;</code> bar
-			\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
-			\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,&<>,</code>,bar 的形式。
-			:> split(/(<code>|<\/code>)/) >r
-			"" ( cooked ) begin 
-				r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-				r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-				r@ :> shift() dup undefined = if drop r> drop exit then html-escape + ( cooked )
-				r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-			again ;
-			/// foo bar must be both existing
-		
-		: <code>escape ( "raw" -- "cooked" ) \ <code>"&<>" to "&amp;&lt;&gt;"</code>
-			s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
-			(<code>escape)
-			:> slice(1,-1) \ remove dummy 'x'
-			;
+	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>' in <code> tag.
+
+[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
+	facing the Access-Control-Allow-xxxxx 的問題。
+	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
+	==> study https://pages.github.com/
 	
+[ ] tutor-cloth.f source code 的美感略顯不足，有些 <code> 區段不能 indent。
+	構想是：設計一個 <trim>...</trim> tag 用來把其中的整段落往左 shift 到有某一行
+	撞到左邊了為止。Tab \t 要先換成 spaces 幾個? 可調。
+	4 value tab-spaces // ( -- value ) Tab spaces setting for <trim>..</trim> tag.
+	code all-blank? ( string-array -- T/f ) \ Are string-array lines all white spaces?
+		push(pop().join("").search(/\S/)==-1)
+		end-code
+	code <string-array	( string-array -- shifted-array ) \ Remove the 1st char of all lines
+		for(var i=0,aa=pop(); i<aa.length; i++) 
+			if (aa[i].length) aa[i] = aa[i].slice(1);
+		end-code
+		/// Sift left of the entire string-array.
+		/// Do nothing to blank lines.
+	code hit-left-end? ( string-array -- T/f ) \ Check if any \S at 1st char of any line.
+		for(var i=0,aa=pop(),flag=false; i<aa.length; i++) {
+			if (aa[i].length) {
+				if (aa[i].search(/^\S/)!=-1) {
+					flag = true;
+					break;
+				}
+			}
+		}		
+		push(flag)
+		end-code
+	
+	: tab>spaces
+		;
+	: <paragraph ( "string" -- "shifted" ) \ 往左 shift string 到有某一行撞到左邊為止。
+		dup :> split(/\r?\n\r?/) >r ( string | string-array )
+		r@ all-blank? if r> drop exit then \ leave the string, do nothing
+		drop ( R: string-array ) begin
+			r@ hit-left-end? if r> :> join('\n') exit then \ done
+			r@ <string-array 
+		again ;
+	: <<indent ( "string" -- "cooked" ) \ Shift left all <indent>..</indent> sections
+		;
 	
 	
 	
