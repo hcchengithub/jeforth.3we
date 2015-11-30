@@ -4,34 +4,8 @@
 	\ FigTaiwan http://groups.google.com/group/figtaiwan
 
 	also forth definitions
-	
-	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
-	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;
-	
-	code <>escape ( "string" -- "cooked" ) \ "<>" to "&lt;&gt;"
-		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;")||"";
-		push(result);
-		end-code
 		
-	: (<code>escape) ( "raw" -- "cooked" ) \ foo <code><> to &lt;&gt;</code> bar
-		\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
-		\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,<>,</code>,bar 的形式。
-		:> split(/(<code.*?>|<\/code>)/) >r \ <code foo=bar> 也要考慮
-		"" ( cooked ) begin 
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-			r@ :> shift() dup undefined = if drop r> drop exit then <>escape + ( cooked )
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-		again ;
-		/// foo bar must be both existing
-	
-	: <code>escape ( "raw" -- "cooked" ) \ <code>"<>" to "&lt;&gt;"</code>
-		s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
-		(<code>escape)
-		:> slice(1,-1) \ remove dummy 'x'
-		;
-		
-	include unindent.f \ 引進 <unindent >...</unindent > 
+	include unindent.f
 
 	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
@@ -48,7 +22,7 @@
 			<style type="text/css">
 				code, .code { 
 					font-family: courier new;
-					font-size: 110%;
+					font-size: 110%; /*字細所以要大一點*/
 					background: #E0E0E0;
 				}
 				table {
@@ -59,7 +33,7 @@
 					letter-spacing: 1px;
 					line-height: 160%;
 				}
-				.source {
+				.source { /*主要是把大小恢復否則 110% 太大了*/
 					font-size:100%;
 					letter-spacing:0px"
 					line-height: 100%;
@@ -95,8 +69,10 @@
 			</div>
 /* -------------------------------------------------------------------------- */
 		</o> ( eleOpening ) js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
-	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
-	<code>escape tib.insert
+	</text> 
+	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
+	<code>escape 	\ convert "<>" to "&lt;&gt;" in code sections
+	tib.insert   	\ execute the string on TOS
 	<text> 
 	
 /* ----- Playground 互動區 --------------------------------------------------------------------- */
@@ -382,8 +358,7 @@
 				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的，
 				Forth words 本身性空，意義都是我們「左看右看」隨心情給的。
 				這種情形在 Forth 裡比比皆是。
-				與中文神似，又加上「空性」使得設計得當的 
-				Forth words 意味深長到不可思議。
+				與中文神似，又加上「空性」使得設計得當的 Forth words 意味深長。
 			</p>
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
@@ -536,13 +511,14 @@
 			<h2>查看本文的 source code</h2>
 			<p>
 			這篇文章本身就是一支 jeforth.3htm 的應用程式。
-			下達這段命令就可以把它讀出來放到這個網頁的最下面。
+			下達這段命令就可以把它讀出來放到這個網頁的最下面，請試著親手操作看看。
 			您也可以把 jeforth.3we 從 GitHub 上 clone 
 			下來找到 tutor-cloth.f 就是了。
 			我盡量都寫了註解，請多指教。
 			</p>
 			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
 				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
+				^tab>spaces \ 把行首的 Tab 都換成 tab-spaces 避免過度內縮不好看。
 				<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
 				js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
 				js> article \ article 是本文最後一段的 element ID
@@ -565,7 +541,10 @@
 			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
 		</blockquote></div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
-	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
-	unindent <code>escape tib.insert
+	</text> 
+	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	unindent 		\ handle all <unindent >..</unindent > sections
+	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
+	tib.insert		\ execute the string on TOS
 \ ---------- The End -----------------
 	
