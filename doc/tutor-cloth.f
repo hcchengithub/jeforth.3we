@@ -1,8 +1,10 @@
-
+	
 	\ tutor-cloth.f 玩電腦繪圖，熟悉 jeforth.3we
 	\ H.C. Chen hcchen5600@gmail.com
 	\ FigTaiwan http://groups.google.com/group/figtaiwan
 
+	also forth definitions
+	
 	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
 	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;
 	
@@ -28,6 +30,8 @@
 		(<code>escape)
 		:> slice(1,-1) \ remove dummy 'x'
 		;
+		
+	include unindent.f \ 引進 <unindent >...</unindent > 
 
 	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
@@ -191,19 +195,20 @@
 				如此列出來的 words 就只限 canvas.f 跟 cloth.f 的。
 			</p>
 			<table><td class=code /* 影響整格的 background color */>
-			<blockquote><pre><code /* 影響 font-size 跟 font-family */ class=source>
-> only canvas.f also cloth.f words /* 在 <pre> 裡不自動排版， white spaces 會照著呈現 */
+			<blockquote><pre><code /* 影響 font-size 跟 font-family */ class=source><unindent>
+				> only canvas.f also cloth.f words /* 在 <pre> 裡不自動排版， white spaces 會照著呈現 */
 
--------- canvas.f (29 words) --------
-canvasStyle createCanvas setWorkingCanvas setCanvasSize 
-setCanvasStyle save restore translate rotate beginPath 
-moveTo lineTo closePath stroke lineWidth strokeStyle 
-clearRect fillStyle fill fillRect fillText strokeText 
-clearCanvas arc createRadialGradient createLinearGradient 
-addColorStop font move-cv-up-into-outputbox
--------- cloth.f (8 words) --------
-starting-message ending-message r g b range d draw
- OK 			</code></pre></blockquote></td></table>
+				-------- canvas.f (29 words) --------
+				canvasStyle createCanvas setWorkingCanvas setCanvasSize 
+				setCanvasStyle save restore translate rotate beginPath 
+				moveTo lineTo closePath stroke lineWidth strokeStyle 
+				clearRect fillStyle fill fillRect fillText strokeText 
+				clearCanvas arc createRadialGradient createLinearGradient 
+				addColorStop font move-cv-up-into-outputbox
+				-------- cloth.f (8 words) --------
+				starting-message ending-message r g b range d draw
+				 OK 			
+			</unindent></code></pre></blockquote></td></table>
 /* -------------------------------------------------------------------------- */
 			<p>
 				有這些指令已足夠畫畫兒需要。
@@ -253,46 +258,46 @@ starting-message ending-message r g b range d draw
 				您這時如果 cloth.f 距離我寫這篇文章時尚未修訂過就應該像這樣：
 				
 			</p>
-			<table width=100%><td class=code><blockquote>
-<pre><code class=source>> s" cloth.f" readTextFileAuto .
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> s" cloth.f" readTextFileAuto .
 
-\ Re-produce an old processing.js demo 
-\ 重現經典範例，畫出美麗的布料圖案。 
+				\ Re-produce an old processing.js demo 
+				\ 重現經典範例，畫出美麗的布料圖案。 
 
-s" cloth.f"    source-code-header 
-    include canvas.f 
-    \ 有現成的畫布就用現成的，否則變出一個來用。 
-    ' cv [if] [else] createCanvas setWorkingCanvas [then]  
+				s" cloth.f"    source-code-header 
+					include canvas.f 
+					\ 有現成的畫布就用現成的，否則變出一個來用。 
+					' cv [if] [else] createCanvas setWorkingCanvas [then]  
 
-\ setup 
-    600 300    setCanvasSize    \ ( width height -- )  
-    40        lineWidth        \ ( n -- ) 
-    100        value r            // ( -- int ) Red  
-    200        value g             // ( -- int ) green  
-    200        value b            // ( -- int ) blue 
-    55        value range        // ( -- int ) Range of colour variation 
-    90        value d            // ( -- int ) Drifting distance of the 2nd point 
-     
-\ draw 
-    : draw ( -- ) \ Mimic processing's draw() function 
-        beginPath 
-        char rgba(  
-        r js> Math.random()*pop() int + char ,  + 
-        g js> Math.random()*pop() int + char ,  + 
-        b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。 
-        js> Math.random() + char )  + 
-        ( *debug* Draw> ) strokeStyle 
-        js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。 
-        r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。 
-        stroke 
-    ; 
+				\ setup 
+					600 300    setCanvasSize    \ ( width height -- )  
+					40        lineWidth        \ ( n -- ) 
+					100        value r            // ( -- int ) Red  
+					200        value g             // ( -- int ) green  
+					200        value b            // ( -- int ) blue 
+					55        value range        // ( -- int ) Range of colour variation 
+					90        value d            // ( -- int ) Drifting distance of the 2nd point 
+					 
+				\ draw 
+					: draw ( -- ) \ Mimic processing's draw() function 
+						beginPath 
+						char rgba(  
+						r js> Math.random()*pop() int + char ,  + 
+						g js> Math.random()*pop() int + char ,  + 
+						b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。 
+						js> Math.random() + char )  + 
+						( *debug* Draw> ) strokeStyle 
+						js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。 
+						r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。 
+						stroke 
+					; 
 
-\ main 
+				\ main 
 
-    150 [for] draw [next] 
+					150 [for] draw [next] 
 
-\ The End </code><pre>
-			</blockquote></td></table>
+				\ The End 
+			</unindent></code></pre></blockquote></td></table>
 			<h2 id="play">看到甚麼都可以玩玩看</h2>
 			<p>	
 				其中 <code>\ setup</code> 這一段是在設定數值，以下可以來玩一玩。
@@ -424,14 +429,14 @@ s" cloth.f"    source-code-header
 				只要拿到 canvas object 就可以來塗鴉了，請按幾下 F10 把 inputbox 變大一點
 				(F9 把它縮小) 然後 copy-paste 以下這段命令進去執行：
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-cv <js>
-tos().beginPath();
-tos().moveTo(0,0);
-tos().lineTo(100,100);
-pop().stroke();
-</js>
-			</code></pre></blockquote></td></table>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				cv <js>
+				tos().beginPath();
+				tos().moveTo(0,0);
+				tos().lineTo(100,100);
+				pop().stroke();
+				</js>
+			</unindent></code></pre></blockquote></td></table>
 			
 			<p>
 				看到畫布上出現了一條從座標 (0,0) 到 (100,100) 的直線？
@@ -471,12 +476,12 @@ pop().stroke();
 				<code><js>...</jsV></code>
 				的原形，不要忘記。到這裡我們可以來改寫以上的畫線程式了：
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-cv :: beginPath()
-cv :: moveTo(0,0)
-cv :: lineTo(100,100)
-cv :: stroke()
-			</code></pre></blockquote></td></table>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				cv :: beginPath()
+				cv :: moveTo(0,0)
+				cv :: lineTo(100,100)
+				cv :: stroke()
+			</unindent></code></pre></blockquote></td></table>
 			<p>
 				這四行 statements 看起來既像 Forth 又像 JavaScript, 
 				分辨它們到底屬甚麼，不如著眼在整個行文給人的感覺，
@@ -514,18 +519,19 @@ cv :: stroke()
 				這用 <code>help *debug*</code> 也可以查得到。
 				
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-> draw
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> draw
 
----- Entering *debug* ----
+				---- Entering *debug* ----
 
-> .s
-      0: rgba(78,24,247,0.3767092579510063) (string)
- Draw> 
-> q
+				> .s
+					  0: rgba(78,24,247,0.3767092579510063) (string)
+				 Draw> 
+				> q
 
- ---- Leaving *debug* ----
- OK  		</code></pre></blockquote></td></table>
+				 ---- Leaving *debug* ----
+				 OK  		
+			</unindent></code></pre></blockquote></td></table>
 
 			<h2>查看本文的 source code</h2>
 			<p>
@@ -535,13 +541,13 @@ cv :: stroke()
 			下來找到 tutor-cloth.f 就是了。
 			我盡量都寫了註解，請多指教。
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
-<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
-js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
-js> article \ article 是本文最後一段的 element ID
-insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
-			</code></pre></blockquote></td></table>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
+				<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
+				js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
+				js> article \ article 是本文最後一段的 element ID
+				insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
+			</unindent></code></pre></blockquote></td></table>
 			
 			<h2 id=3we>jeforth.3we 簡介</h2>
 			<p>
@@ -560,6 +566,6 @@ insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就
 		</blockquote></div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
-	<code>escape tib.insert
+	unindent <code>escape tib.insert
 \ ---------- The End -----------------
 	
