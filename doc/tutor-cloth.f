@@ -1,8 +1,10 @@
-
+	
 	\ tutor-cloth.f 玩電腦繪圖，熟悉 jeforth.3we
 	\ H.C. Chen hcchen5600@gmail.com
 	\ FigTaiwan http://groups.google.com/group/figtaiwan
 
+	also forth definitions
+	
 	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
 	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;
 	
@@ -28,6 +30,8 @@
 		(<code>escape)
 		:> slice(1,-1) \ remove dummy 'x'
 		;
+		
+	include unindent.f \ 引進 <unindent >...</unindent > 
 
 	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
@@ -83,8 +87,10 @@
 				幾年前在 Processing.js 網站上看到過我們接下來要示範的這個 
 				demo，現在已經找不到了。
 				以下用 jeforth 來重現經典畫出這個美麗的布料圖案，
-				並且請您親手鑽進這個十分簡單的程式裡去玩一玩，
-				我們一邊操作一邊自然地熟悉 <A HREF="#3we">jeforth.3we</a> 的使用。
+				並且請您親手鑽進這個十分簡單的程式裡去玩一玩。
+				您正在看的這個網頁是互動的，它本身就是 
+				<A HREF="#3we">jeforth.3we</a> 的應用程式。
+				我們一邊操作一邊自然地熟悉它的使用方式。
 			</p></blockquote>
 			</div>
 /* -------------------------------------------------------------------------- */
@@ -141,7 +147,7 @@
 				網管、工程科學上的應用等，沒甚麼限制。
 				然而要在本頁面上講解，還是用【繪圖】當作實例比較方便。
 			</p>
-			<img src="playground/jeforth-demo-cloth-2015-11-201.jpg">
+			<img src="doc/jeforth-demo-cloth-2015-11-201.jpg">
 /* -------------------------------------------------------------------------- */
 			<p>
 				【交談區】初看只是上下兩塊區域，沒甚麼吧？
@@ -154,6 +160,7 @@
 				打入 <code>help *</code> 列出所有 word 的說明。
 				打入 <code>help</code> 命令查看操作功能介紹。
 			</p>
+			<img src="doc/jeforth-demo-cloth-words-help.jpg">
 /* -------------------------------------------------------------------------- */
 			<h2>cloth.f 裡有些甚麼？</h2>
 /* -------------------------------------------------------------------------- */
@@ -188,19 +195,20 @@
 				如此列出來的 words 就只限 canvas.f 跟 cloth.f 的。
 			</p>
 			<table><td class=code /* 影響整格的 background color */>
-			<blockquote><pre><code /* 影響 font-size 跟 font-family */ class=source>
-> only canvas.f also cloth.f words /* 在 <pre> 裡不自動排版， white spaces 會照著呈現 */
+			<blockquote><pre><code /* 影響 font-size 跟 font-family */ class=source><unindent>
+				> only canvas.f also cloth.f words /* 在 <pre> 裡不自動排版， white spaces 會照著呈現 */
 
--------- canvas.f (29 words) --------
-canvasStyle createCanvas setWorkingCanvas setCanvasSize 
-setCanvasStyle save restore translate rotate beginPath 
-moveTo lineTo closePath stroke lineWidth strokeStyle 
-clearRect fillStyle fill fillRect fillText strokeText 
-clearCanvas arc createRadialGradient createLinearGradient 
-addColorStop font move-cv-up-into-outputbox
--------- cloth.f (8 words) --------
-starting-message ending-message r g b range d draw
- OK 			</code></pre></blockquote></td></table>
+				-------- canvas.f (29 words) --------
+				canvasStyle createCanvas setWorkingCanvas setCanvasSize 
+				setCanvasStyle save restore translate rotate beginPath 
+				moveTo lineTo closePath stroke lineWidth strokeStyle 
+				clearRect fillStyle fill fillRect fillText strokeText 
+				clearCanvas arc createRadialGradient createLinearGradient 
+				addColorStop font move-cv-up-into-outputbox
+				-------- cloth.f (8 words) --------
+				starting-message ending-message r g b range d draw
+				 OK 			
+			</unindent></code></pre></blockquote></td></table>
 /* -------------------------------------------------------------------------- */
 			<p>
 				有這些指令已足夠畫畫兒需要。
@@ -231,7 +239,7 @@ starting-message ending-message r g b range d draw
 			<p>
 				結果類似這樣：
 			</p>
-			<img src="playground/jeforth-demo-cloth-2015-11-202.jpg">
+			<img src="doc/jeforth-demo-cloth-2015-11-202.jpg">
 /* -------------------------------------------------------------------------- */
 			<p>
 				那麼 draw 是怎麼畫出一條色帶的呢？下這行命令就可以查看 
@@ -246,50 +254,50 @@ starting-message ending-message r g b range d draw
 				的指令不要漏掉。
 				當時的 TOS 就是 cloth.f 整個檔案的 text string，的確很短。
 				您輸入 readTextFileAuto 這麼長的 word 時，可以只敲 
-				<code>readt</code> 然後打幾下 TAB 就會輪到它。
+				<code>readt</code> 然後打幾下 TAB key 就會輪到它。
 				您這時如果 cloth.f 距離我寫這篇文章時尚未修訂過就應該像這樣：
 				
 			</p>
-			<table width=100%><td class=code><blockquote>
-<pre><code class=source>> s" cloth.f" readTextFileAuto .
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> s" cloth.f" readTextFileAuto .
 
-\ Re-produce an old processing.js demo 
-\ 重現經典範例，畫出美麗的布料圖案。 
+				\ Re-produce an old processing.js demo 
+				\ 重現經典範例，畫出美麗的布料圖案。 
 
-s" cloth.f"    source-code-header 
-    include canvas.f 
-    \ 有現成的畫布就用現成的，否則變出一個來用。 
-    ' cv [if] [else] createCanvas setWorkingCanvas [then]  
+				s" cloth.f"    source-code-header 
+					include canvas.f 
+					\ 有現成的畫布就用現成的，否則變出一個來用。 
+					' cv [if] [else] createCanvas setWorkingCanvas [then]  
 
-\ setup 
-    600 300    setCanvasSize    \ ( width height -- )  
-    40        lineWidth        \ ( n -- ) 
-    100        value r            // ( -- int ) Red  
-    200        value g             // ( -- int ) green  
-    200        value b            // ( -- int ) blue 
-    55        value range        // ( -- int ) Range of colour variation 
-    90        value d            // ( -- int ) Drifting distance of the 2nd point 
-     
-\ draw 
-    : draw ( -- ) \ Mimic processing's draw() function 
-        beginPath 
-        char rgba(  
-        r js> Math.random()*pop() int + char ,  + 
-        g js> Math.random()*pop() int + char ,  + 
-        b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。 
-        js> Math.random() + char )  + 
-        ( *debug* Draw> ) strokeStyle 
-        js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。 
-        r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。 
-        stroke 
-    ; 
+				\ setup 
+					600 300    setCanvasSize    \ ( width height -- )  
+					40        lineWidth        \ ( n -- ) 
+					100        value r            // ( -- int ) Red  
+					200        value g             // ( -- int ) green  
+					200        value b            // ( -- int ) blue 
+					55        value range        // ( -- int ) Range of colour variation 
+					90        value d            // ( -- int ) Drifting distance of the 2nd point 
+					 
+				\ draw 
+					: draw ( -- ) \ Mimic processing's draw() function 
+						beginPath 
+						char rgba(  
+						r js> Math.random()*pop() int + char ,  + 
+						g js> Math.random()*pop() int + char ,  + 
+						b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。 
+						js> Math.random() + char )  + 
+						( *debug* Draw> ) strokeStyle 
+						js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。 
+						r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。 
+						stroke 
+					; 
 
-\ main 
+				\ main 
 
-    150 [for] draw [next] 
+					150 [for] draw [next] 
 
-\ The End </code><pre>
-			</blockquote></td></table>
+				\ The End 
+			</unindent></code></pre></blockquote></td></table>
 			<h2 id="play">看到甚麼都可以玩玩看</h2>
 			<p>	
 				其中 <code>\ setup</code> 這一段是在設定數值，以下可以來玩一玩。
@@ -297,7 +305,7 @@ s" cloth.f"    source-code-header
 			<p>	
 				前面試過的 <code>draw</code> 指令這回我們用 
 				<code>[for] .. [next]</code> 重複執行。
-				jeforth.3we 在 interpret mode 有 
+				jeforth.3we 在 interpret state 有 
 				<code>[for]</code> , 
 				<code>[next]</code> , 
 				<code>[begin]</code> , 
@@ -307,9 +315,9 @@ s" cloth.f"    source-code-header
 				<code>[else]</code> , 
 				<code>[then]</code>
 				這幾個掌管程式流程的指令。
-				它們跟不帶方括號的相似 word 功能則完全一樣，差別在：
-				帶方括號的只能用在 interpret mode; 不帶方括號的只能用在 
-				compile mode. 因為前者跑迴路時是在 Forth TIB 字串裡前後跳躍；
+				它們跟不帶方括號的相似 word 功能完全一樣，差別在：
+				帶方括號的只能用在 interpret state; 不帶方括號的只能用在 
+				compile state. 因為前者跑迴路時是在 Forth TIB 字串裡前後跳躍；
 				後者則是在 Forth dictionary 裡。
 				整串動作一口氣下達如下：
 			</p>
@@ -319,12 +327,12 @@ s" cloth.f"    source-code-header
 			<p>
 				 得到這幅舉世唯一的畫作，名喚《臥虎藏龍》。
 			</p>
-			<img src="playground/jeforth-demo-cloth-for-next_20151126111159.jpg">
+			<img src="doc/jeforth-demo-cloth-for-next_20151126111159.jpg">
 			<p>	
 				其中 <code>10 lineWidth</code> 跟 <code>3 lineWidth</code>
 				是設定色帶線條的寬度。<code>30 [for]...</code> 跟 <code>40 [for]...</code>
 				是迴圈的次數。在 
-				interpret mode 操作時，我老是會忘記給這些「流程指令」加上方括號，
+				interpret state 操作時，我老是會忘記給這些「流程指令」加上方括號，
 				所以設計了 <code>run:</code> 指令，
 				用它來執行帶有「流程指令」的命令行就不必一一給它們加上方括號。
 			</p>
@@ -372,8 +380,8 @@ s" cloth.f"    source-code-header
 				您可以用 <code>see run:</code> 以及 <code>see (run:)</code> 
 				命令來查看它的定義，實在跟「run、執行」毫無關係。
 				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的，
+				Forth words 本身性空，意義都是我們「左看右看」隨心情給的。
 				這種情形在 Forth 裡比比皆是。
-				Forth words 本身性空，它的意義都是我們給它的。
 				與中文神似，又加上「空性」使得設計得當的 
 				Forth words 意味深長到不可思議。
 			</p>
@@ -384,7 +392,7 @@ s" cloth.f"    source-code-header
 				查看這兩個 word 的說明。加上 -N 指定 word name 
 				要完全吻合而非相近的指令，詳閱 <code>help help -N</code>。
 			</p>
-			<img src="playground/jeforth-demo-cloth-help-b-help-g_20151126160042.png">				
+			<img src="doc/jeforth-demo-cloth-help-b-help-g_20151126160042.png">				
 			<p>
 				看出來它們的「說明」是哪兒來的嗎？
 				當初定義時寫下 Forth 慣用的註解跑到 help 裡來了。
@@ -416,27 +424,19 @@ s" cloth.f"    source-code-header
 				其中 cv 是我們的畫布 (canvas object) 隨後的小點兒是把
 				cv 的值打印出來；緊接著是去看 cv 的說明。結果如下：
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-> cv . help cv -N
-[object CanvasRenderingContext2D]
---------- canvas.f (1 words) ---------
-cv	( -- cv ) The default cv object (CanvasRenderingContext2D) [value][canvas.f][][]
-    即 js> vm.g.cv。引入 default canvas 可以簡化 canvas 操
-    作，避免每次都得指定 canvas。若有多個 canvas 必要時用切
-    換的，看來還可以。
- OK 		</code></pre></blockquote></td></table>
+			<img src="doc/jeforth-demo-cloth-cv-help.jpg">
 			<p>
 				只要拿到 canvas object 就可以來塗鴉了，請按幾下 F10 把 inputbox 變大一點
 				(F9 把它縮小) 然後 copy-paste 以下這段命令進去執行：
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-cv <js>
-tos().beginPath();
-tos().moveTo(0,0);
-tos().lineTo(100,100);
-pop().stroke();
-</js>
-			</code></pre></blockquote></td></table>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				cv <js>
+				tos().beginPath();
+				tos().moveTo(0,0);
+				tos().lineTo(100,100);
+				pop().stroke();
+				</js>
+			</unindent></code></pre></blockquote></td></table>
 			
 			<p>
 				看到畫布上出現了一條從座標 (0,0) 到 (100,100) 的直線？
@@ -474,7 +474,18 @@ pop().stroke();
 				Statements 當中有 white space 時，就必須用 
 				<code><js>...</js></code> 或
 				<code><js>...</jsV></code>
-				的原形，不要忘記。
+				的原形，不要忘記。到這裡我們可以來改寫以上的畫線程式了：
+			</p>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				cv :: beginPath()
+				cv :: moveTo(0,0)
+				cv :: lineTo(100,100)
+				cv :: stroke()
+			</unindent></code></pre></blockquote></td></table>
+			<p>
+				這四行 statements 看起來既像 Forth 又像 JavaScript, 
+				分辨它們到底屬甚麼，不如著眼在整個行文給人的感覺，
+				而這樣寫語意通順就對了。Forth 有融合多種語言的超能力！
 			</p>
 			<h2 id="bp">jeforth.3we 的 debug</h2>
 			<p>
@@ -508,34 +519,35 @@ pop().stroke();
 				這用 <code>help *debug*</code> 也可以查得到。
 				
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-> draw
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> draw
 
----- Entering *debug* ----
+				---- Entering *debug* ----
 
-> .s
-      0: rgba(78,24,247,0.3767092579510063) (string)
- Draw> 
-> q
+				> .s
+					  0: rgba(78,24,247,0.3767092579510063) (string)
+				 Draw> 
+				> q
 
- ---- Leaving *debug* ----
- OK  		</code></pre></blockquote></td></table>
+				 ---- Leaving *debug* ----
+				 OK  		
+			</unindent></code></pre></blockquote></td></table>
 
 			<h2>查看本文的 source code</h2>
 			<p>
-			本文本身就是一支 jeforth.3htm 的應用程式。
+			這篇文章本身就是一支 jeforth.3htm 的應用程式。
 			下達這段命令就可以把它讀出來放到這個網頁的最下面。
 			您也可以把 jeforth.3we 從 GitHub 上 clone 
 			下來找到 tutor-cloth.f 就是了。
 			我盡量都寫了註解，請多指教。
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source>
-s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
-<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
-js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
-js> article \ article 是本文最後一段的 element ID
-insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
-			</code></pre></blockquote></td></table>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
+				<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
+				js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
+				js> article \ article 是本文最後一段的 element ID
+				insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
+			</unindent></code></pre></blockquote></td></table>
 			
 			<h2 id=3we>jeforth.3we 簡介</h2>
 			<p>
@@ -554,6 +566,6 @@ insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就
 		</blockquote></div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
-	<code>escape tib.insert
+	unindent <code>escape tib.insert
 \ ---------- The End -----------------
 	

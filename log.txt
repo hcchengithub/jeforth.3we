@@ -4491,72 +4491,83 @@
 [ ] This info seems a better way for ie.f to modify a web page
 	https://msdn.microsoft.com/en-us/library/jj733572.aspx#Date
 
-[ ] 寫個 word 來 escape  <code> ... </code> 裡的 HTML tag signs.
+[x] 寫個 word 來 escape  <code> ... </code> 裡的 HTML tag signs.
 	o 規定 <code> ... </code> 不能 nested, 而且要依序出現。
 	o <code>...</code> 是最裡面的, 即 <pre>..</pre> 要包在外面。
-	==> > s" a b <code>c</code> d <code>e f</code> g h <code></code> i j k" :> split(/(<code>|<\/code>)/) .
-		a b ,<code>,c,</code>, d ,<code>,e f,</code>, g h ,<code>,,</code>, i j k OK 
-		這是 split() 的結果, 合用。
-	==> replace(/&/mg,"&amp;").replace(/</mg,"&lt;").replace(/>/mg,"&gt;") 
-		這是 replace() 的用法，合用。
-	==> 先 split 成 array, 一一 unshift 出來, 看到 <code> 就幫下一格 replace, 
-		重複到底。
-	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>','&' in <code> tag.
-			var raw=pop(), result="", flag=false;
-			var aa=split(/(<code>|<\/code>)/); // array of the splited raw string
-			for (var i=0; i<aa.length; i++){
-				var ss = aa.shift();
-				if(flag){
-					ss = ss.replace(/&/mg,"&amp;")
-					    .replace(/</mg,"&lt;")
-						.replace(/>/mg,"&gt;");
-					flag = false;
-				}
-				if(ss=="<code>") flag = true;
-				result += ss;
-			}
-			push(result);
-			end-code
-	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>','&' in <code> tag.
-			var aa = (" " + pop() + " ").split(/(<code>|<\/code>)/); // array of the splited raw string
-			var result = "";
-			for(var i=0; i<aa.length; i+=4){
-				result += aa.shift()||"";
-				result += aa.shift()||"";
-				result += aa.shift().replace(/&/mg,"&amp;")
-					    .replace(/</mg,"&lt;")
-						.replace(/>/mg,"&gt;")||"";
-				result += aa.shift()||"";
-			}
-			push(result);
-			end-code
-			
-		code html-escape ( "string" -- "cooked" ) \ "&<>" to "&amp;&lt;&gt;"
-			var result = 
-				pop().replace(/&/mg,"&amp;")
-			    .replace(/</mg,"&lt;")
-				.replace(/>/mg,"&gt;")||"";
-			push(result);
-			end-code
-			
-		: (<code>escape) ( "raw" -- "cooked" ) \ foo <code>&<> to &amp;&lt;&gt;</code> bar
-			\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
-			\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,&<>,</code>,bar 的形式。
-			:> split(/(<code>|<\/code>)/) >r
-			"" ( cooked ) begin 
-				r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-				r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-				r@ :> shift() dup undefined = if drop r> drop exit then html-escape + ( cooked )
-				r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
-			again ;
-			/// foo bar must be both existing
-		
-		: <code>escape ( "raw" -- "cooked" ) \ <code>"&<>" to "&amp;&lt;&gt;"</code>
-			s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
-			(<code>escape)
-			:> slice(1,-1) \ remove dummy 'x'
-			;
+	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>' in <code> tag.
+
+[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
+	facing the Access-Control-Allow-xxxxx 的問題。
+	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
+	==> study https://pages.github.com/
 	
+[ ] tutor-cloth.f source code 本身的美感略顯不足，因為 <pre> 區段不能 indent。
+	構想是：設計一個 <unindent>...</unindent> tag 用來把其中的整段落往左 shift 到有某一行
+	撞到左邊了為止。Tab \t 要先換成 spaces 幾個? 可調。
+	
+	\ ---------- Tab to spaces for <unindent>..</unindent> -------------------------------
+	s"     " value tab-spaces // ( -- value ) Tab spaces setting for <unindent>..</unindent> tag.
+	: ^tab>spaces ( "string" -- "cooked" ) \ Replace ^\t* with spaces
+		tab-spaces swap ( tab-spaces "input" )
+		\ 先把 "^\t*\S.*"+'x' 切開成 "^\t*", "\S.*x". Where the dummy x guarantees the pattern
+		char x + :> match(/(^\t*)(\S.*)/) ( tab-spaces [0:all][1:\t*][2:\S.*x] )
+		\ 把 [1] 全部 \t 換成 space
+		<js> tos()[1].replace(/\t/g,pop(1))</jsV> ( [0:all][1:\t*][2:\S.*x] "1:spaces" )
+		\ 把後半部接回去並去掉 dummy x
+		js> pop(1)[2] + :> slice(0,-1) ;		
+		/// Value tab-spaces specifies how many spaces to replace a TAB.
+		/// Works on a single line only.
+		/// 只針對行首的連續 \t 轉換。
+		
+	\ ---------- <unindent>...</unindent> --------------------------------------------------
+	code all-blank? ( string-array -- T/f ) \ Are string-array lines all white spaces?
+		push(pop().join("").search(/\S/)==-1)
+		end-code
+	code <string-array	( string-array -- shifted-array ) \ Remove the 1st char of all lines
+		for(var i=0,aa=pop(); i<aa.length; i++) 
+			if (aa[i].length) aa[i] = aa[i].slice(1);
+		end-code
+		/// Sift left of the entire string-array.
+		/// Do nothing to blank lines.
+	code hit-left-end? ( string-array -- T/f ) \ Check if any \S at 1st char of any line.
+		for(var i=0,aa=pop(),flag=false; i<aa.length; i++) {
+			if (aa[i].length) {
+				if (aa[i].search(/^\S/)!=-1) {
+					flag = true;
+					break;
+				}
+			}
+		}		
+		push(flag)
+		end-code
+		/// unindent 已經完成的條件。
+	: <paragraph ( "paragraph" -- "shifted" ) \ 整段 paragraph 往左 shift 到有某一行撞到左邊為止。
+		dup :> split(/\r?\n\r?/) >r ( string | string-array )
+		r@ all-blank? if r> drop exit then drop \ leave the string, do nothing
+		\ ---- 轉換行首的 TAB ------------
+		r@ :> length dup for ( total | string-array countDown )
+			dup r@ - ( total i ) 
+			js> rtos(1)[tos()] ( total i line[i] ) \ 拿出一行
+			^tab>spaces  ( total i cooked ) 	   \ 轉換 ^\t*
+			js: rtos(1)[pop(1)]=pop() ( total )    \ 放回去
+		next drop 
+		\ ---- 整段往左移 ----------------
+		begin ( R: string-array ) \ one loop shift left one char
+			r@ hit-left-end? if r> :> join('\n') exit then \ 出口
+			r@ <string-array 
+		again ;
+	: unindent ( "input" -- "cooked" ) \ Shift left all <unindent>..</unindent> sections
+		s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
+		:> split(/(<unindent>|<\/unindent>)/) >r 
+		\ split 的結果：[之前][<unindent>][中間][</unindent>][重複]...
+		"" ( cooked ) begin 
+			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ 之前
+			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ <Unindent>
+			r@ :> shift() dup undefined = if drop r> drop exit then <paragraph + ( cooked ) \ 中間
+			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ </Unindent>
+		again ;
+		:> slice(1,-1) \ remove dummy 'x'
+	;
 	
 	
 	
