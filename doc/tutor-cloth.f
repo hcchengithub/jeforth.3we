@@ -3,9 +3,8 @@
 	\ H.C. Chen hcchen5600@gmail.com
 	\ FigTaiwan http://groups.google.com/group/figtaiwan
 
-	also forth definitions
-		
 	include unindent.f
+	also forth definitions
 
 	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。

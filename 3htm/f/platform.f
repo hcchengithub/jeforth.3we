@@ -14,7 +14,7 @@ also forth definitions
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				[ last literal ] ( _me )
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
-					drop ." Output box EditMode = " 
+					drop ( remove _me from TOS ) ." Output box EditMode = " 
 					js> outputbox.contentEditable!="true" if
 						js> document.designMode="on";outputbox.contentEditable="true"
 					else
