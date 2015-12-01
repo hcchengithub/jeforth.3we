@@ -13,12 +13,22 @@ also forth definitions
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				[ last literal ] ( _me )
-				." Input box EditMode = " 
-				\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS
-				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
-				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
-				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
-				then js: styleTextareaFocus.innerHTML=pop()                
+				js> event&&event.shiftKey if ( shift+F2 for outputbox )
+					drop ." Output box EditMode = " 
+					js> outputbox.contentEditable!="true" if
+						js> document.designMode="on";outputbox.contentEditable="true"
+					else
+						js> document.designMode="off";outputbox.contentEditable="false"
+					then
+					. cr
+				else ( F2 for inputbox )
+					." Input box EditMode = " 
+					\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS
+					js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
+					if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
+					else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
+					then js: styleTextareaFocus.innerHTML=pop()
+				then
 				js: jump2endofinputbox.click();inputbox.focus();
 				false ;
 				/// return a 'false' to stop the hotkey event handler chain.

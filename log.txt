@@ -1,5 +1,4 @@
-﻿
-              ~%~%~%~%~%~%~%~  j e f o r t h . 3 w e  ~%~%~%~%~%~%~%~
+﻿              ~%~%~%~%~%~%~%~  j e f o r t h . 3 w e  ~%~%~%~%~%~%~%~
                       The jeforth with a three words engine
                  Same kernel - jeforth.js, jeforth.f, voc.f - for
                  all applications - HTA, HTM, Node.js - and more?
@@ -4460,29 +4459,10 @@
 	get-vocs js> tos().length [for] js> tos().shift() . cr [next] drop
 	get-vocs js> tos().length [for] js: order.push(tos().shift()) [next] drop rescan-word-hash
 
-[ ] how to ban hao123
-
-[ ] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be 
+[x] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be 
 	a global, and it is.
 	So cv will be a value, a global too.
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\ball.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\blowing-in-the-wind.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.txt
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\many-clocks.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3wsh\jeforth.3wsh.js
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\h2o.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\solar-system.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\processing.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\c.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth.f
-	[ ] c:\Users\hcche\Documents\GitHub\jeforth.3we\log.txt	
+	==> this is a bigger effort to modify all existing .f files. Done.
 	
 [ ] 能不能把 vm.g.cv.lineWidth 直接弄成 value?
 
@@ -4495,79 +4475,40 @@
 	o 規定 <code> ... </code> 不能 nested, 而且要依序出現。
 	o <code>...</code> 是最裡面的, 即 <pre>..</pre> 要包在外面。
 	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>' in <code> tag.
+	==> In unindent.f now
 
 [ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
 	facing the Access-Control-Allow-xxxxx 的問題。
 	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
 	==> study https://pages.github.com/
 	
-[ ] tutor-cloth.f source code 本身的美感略顯不足，因為 <pre> 區段不能 indent。
+[x] tutor-cloth.f source code 本身的美感略顯不足，因為 <pre> 區段不能 indent。
 	構想是：設計一個 <unindent>...</unindent> tag 用來把其中的整段落往左 shift 到有某一行
 	撞到左邊了為止。Tab \t 要先換成 spaces 幾個? 可調。
+	==> unindent.f done
 	
-	\ ---------- Tab to spaces for <unindent>..</unindent> -------------------------------
-	s"     " value tab-spaces // ( -- value ) Tab spaces setting for <unindent>..</unindent> tag.
-	: ^tab>spaces ( "string" -- "cooked" ) \ Replace ^\t* with spaces
-		tab-spaces swap ( tab-spaces "input" )
-		\ 先把 "^\t*\S.*"+'x' 切開成 "^\t*", "\S.*x". Where the dummy x guarantees the pattern
-		char x + :> match(/(^\t*)(\S.*)/) ( tab-spaces [0:all][1:\t*][2:\S.*x] )
-		\ 把 [1] 全部 \t 換成 space
-		<js> tos()[1].replace(/\t/g,pop(1))</jsV> ( [0:all][1:\t*][2:\S.*x] "1:spaces" )
-		\ 把後半部接回去並去掉 dummy x
-		js> pop(1)[2] + :> slice(0,-1) ;		
-		/// Value tab-spaces specifies how many spaces to replace a TAB.
-		/// Works on a single line only.
-		/// 只針對行首的連續 \t 轉換。
+[ ] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
+	--> See YNote: "在 Web browser 上直接編輯網頁內容"
+	-->	Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
+		IE and Edge can only save the original content like Chrome's "僅限網頁的HTML部分"。
+	--> jeforth.3htm 下這一行即可單獨弄出一塊 editable 的 <div> 區域。
+		s" body" <e> <div id=article contenteditable='true'>--edit me--</div></e>
+	--> 更妙的是
+		js> outputbox.contentEditable \ ==> inherit (string)
+		js: outputbox.contentEditable=true  <-------- 不妨加入 shift + {F2} editMode
 		
-	\ ---------- <unindent>...</unindent> --------------------------------------------------
-	code all-blank? ( string-array -- T/f ) \ Are string-array lines all white spaces?
-		push(pop().join("").search(/\S/)==-1)
-		end-code
-	code <string-array	( string-array -- shifted-array ) \ Remove the 1st char of all lines
-		for(var i=0,aa=pop(); i<aa.length; i++) 
-			if (aa[i].length) aa[i] = aa[i].slice(1);
-		end-code
-		/// Sift left of the entire string-array.
-		/// Do nothing to blank lines.
-	code hit-left-end? ( string-array -- T/f ) \ Check if any \S at 1st char of any line.
-		for(var i=0,aa=pop(),flag=false; i<aa.length; i++) {
-			if (aa[i].length) {
-				if (aa[i].search(/^\S/)!=-1) {
-					flag = true;
-					break;
-				}
-			}
-		}		
-		push(flag)
-		end-code
-		/// unindent 已經完成的條件。
-	: <paragraph ( "paragraph" -- "shifted" ) \ 整段 paragraph 往左 shift 到有某一行撞到左邊為止。
-		dup :> split(/\r?\n\r?/) >r ( string | string-array )
-		r@ all-blank? if r> drop exit then drop \ leave the string, do nothing
-		\ ---- 轉換行首的 TAB ------------
-		r@ :> length dup for ( total | string-array countDown )
-			dup r@ - ( total i ) 
-			js> rtos(1)[tos()] ( total i line[i] ) \ 拿出一行
-			^tab>spaces  ( total i cooked ) 	   \ 轉換 ^\t*
-			js: rtos(1)[pop(1)]=pop() ( total )    \ 放回去
-		next drop 
-		\ ---- 整段往左移 ----------------
-		begin ( R: string-array ) \ one loop shift left one char
-			r@ hit-left-end? if r> :> join('\n') exit then \ 出口
-			r@ <string-array 
-		again ;
-	: unindent ( "input" -- "cooked" ) \ Shift left all <unindent>..</unindent> sections
-		s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
-		:> split(/(<unindent>|<\/unindent>)/) >r 
-		\ split 的結果：[之前][<unindent>][中間][</unindent>][重複]...
-		"" ( cooked ) begin 
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ 之前
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ <Unindent>
-			r@ :> shift() dup undefined = if drop r> drop exit then <paragraph + ( cooked ) \ 中間
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ </Unindent>
-		again ;
-		:> slice(1,-1) \ remove dummy 'x'
-	;
-	
-	
-	
+[x] contentEditable 這麼好用, 真希望 jeforth.3htm 可以在 local 直接跑，而不必再透過 local server。
+	複習一下，Chrome 卡在這裡:
+	XMLHttpRequest cannot load file:///C:/Users/hcche/Documents/GitHub/jeforth.3we/f/jeforth.f?text. 
+	Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, 
+	https, chrome-extension-resource.
+	---
+	問 Yap ,
+	[17:14:05] h.c.chen 陳厚成: jeforth 不透過 local server 真的就不能跑嗎? 卡在 XMLHttpRequest cannot load file ... ; Cross origin requests are only supported for protocol schemes ... ,
+	[17:16:20] h.c.chen 陳厚成: 因為用 JQuery 的 $.get 讀檔案, 例如 jeforth.f 就不行了。
+	[17:18:16] h.c.chen 陳厚成: ( 在網頁上跑的 jeforth )
+	[17:36:12] h.c.chen 陳厚成: 可能找到答案了
+	http://stackoverflow.com/questions/8449716/cross-origin-requests-are-only-supported-for-http-but-its-not-cross-domain
+	我試試看. . . . .
+	[17:39:26] h.c.chen 陳厚成: 哈! 真的可以。 Chrome 有 command line switch :  --allow-file-access-from-files	
+		
