@@ -94,7 +94,7 @@
 		</table> 
 		</blockquote></o> js> eleOpening insertAfter
 /* -------------------------------------------------------------------------- */
-	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	tib.insert
 	
 	\ 以下的 js> 指令執行隨後的 JavaScript statements 直到遇上 white space 為止，最
@@ -510,7 +510,7 @@
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text>
 	:> replace(/----replace-me-with-cloth\.f----/,pop()) \ cloth.f source code 就顯示定位
-	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert		\ execute the string on TOS

@@ -138,5 +138,11 @@
 		:> slice(1,-1) \ remove dummy 'x'
 		;
 		
+	\ ----------- /* remove comment */ -----------------
+	: /*remove*/ ( "raw" -- "cooked" ) \ remove /* comments */ 
+		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") ; \ HTA 不能用 \/ 必須用 [/]
+		/// Support multiple comment lines in one pare of /* .. */
+		/// Not support nested.
+		
 	\ --- End ---
 	
