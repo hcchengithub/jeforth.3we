@@ -4518,7 +4518,9 @@
 	But it doesn't work on my desk at home:
 	C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe>MicrosoftEdge.exe --allow-file-access-from-files file:///c:/Users/hcche/Documents/GitHub/jeforth.3we/index.html
 	--
-	
+[ ] 爽哥 的 cloth_sam.f 革除原版不像 forth 的缺點。	
+[ ] shift-F2 in trouble on 3hta.
+
 [ ] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
 	--> See YNote: "在 Web browser 上直接編輯網頁內容"
 	-->	Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.

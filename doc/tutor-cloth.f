@@ -4,7 +4,7 @@
 	\ FigTaiwan http://groups.google.com/group/figtaiwan
 
 	include unindent.f
-	also forth definitions
+	also forth definitions \ 怕有甚麼東西被 only 玩掉了，都放 forth 吧!
 
 	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
@@ -105,7 +105,11 @@
 	cls eleBody ce! er \ 清除畫面上的小垃圾。
 	include processing.f
 	js> vm.g.cv :> canvas js> cvdiv replaceNode \ Place the canvas
-	include cloth.f
+	\ include cloth.f 
+	\ 〈爽哥〉把 cloth.f 改得漂亮多了!
+	\  既然接下來也要顯示 cloth.f 而且有機會修改，不如改以讀進來用 tib.insert 方式執行。
+	s" cloth.f" readTextFileAuto dup tib.insert
+	( 現在 TOS 是 cloth.f source code )
 	<text>
 		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore, replaceNode 之類的手法搬動就定位 */
 		<div id=article class=essay><blockquote>
@@ -173,16 +177,16 @@
 			<blockquote><pre><code /* 影響 font-size 跟 font-family */ class=source><unindent>
 				> only canvas.f also cloth.f words /* 在 <pre> 裡不自動排版， white spaces 會照著呈現 */
 
-				-------- canvas.f (29 words) --------
-				canvasStyle createCanvas setWorkingCanvas setCanvasSize 
-				setCanvasStyle save restore translate rotate beginPath 
-				moveTo lineTo closePath stroke lineWidth strokeStyle 
-				clearRect fillStyle fill fillRect fillText strokeText 
-				clearCanvas arc createRadialGradient createLinearGradient 
-				addColorStop font move-cv-up-into-outputbox
-				-------- cloth.f (8 words) --------
-				starting-message ending-message r g b range d draw
-				 OK 			
+				-------- canvas.f (30 words) --------
+				canvasStyle createCanvas cv setWorkingCanvas setCanvasSize 
+				setCanvasStyle save restore translate rotate beginPath moveTo 
+				lineTo closePath stroke lineWidth strokeStyle clearRect 
+				fillStyle fill fillRect fillText strokeText clearCanvas arc 
+				createRadialGradient createLinearGradient addColorStop 
+				font move-cv-up-into-outputbox 
+				-------- cloth.f (14 words) --------
+				w h r g b v d xB yB xE yE random >rgba draw 
+				 OK
 			</unindent></code></pre></blockquote></td></table>
 /* -------------------------------------------------------------------------- */
 			<p>
@@ -230,52 +234,13 @@
 				當時的 TOS 就是 cloth.f 整個檔案的 text string，的確很短。
 				您輸入 readTextFileAuto 這麼長的 word 時，可以只敲 
 				<code>readt</code> 然後打幾下 TAB key 就會輪到它。
-				您這時如果 cloth.f 距離我寫這篇文章時尚未修訂過就應該像這樣：
-				
 			</p>
 			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
-				> s" cloth.f" readTextFileAuto .
-
-				\ Re-produce an old processing.js demo 
-				\ 重現經典範例，畫出美麗的布料圖案。 
-
-				s" cloth.f"    source-code-header 
-					include canvas.f 
-					\ 有現成的畫布就用現成的，否則變出一個來用。 
-					' cv [if] [else] createCanvas setWorkingCanvas [then]  
-
-				\ setup 
-					600 300    setCanvasSize    \ ( width height -- )  
-					40        lineWidth        \ ( n -- ) 
-					100        value r            // ( -- int ) Red  
-					200        value g             // ( -- int ) green  
-					200        value b            // ( -- int ) blue 
-					55        value range        // ( -- int ) Range of colour variation 
-					90        value d            // ( -- int ) Drifting distance of the 2nd point 
-					 
-				\ draw 
-					: draw ( -- ) \ Mimic processing's draw() function 
-						beginPath 
-						char rgba(  
-						r js> Math.random()*pop() int + char ,  + 
-						g js> Math.random()*pop() int + char ,  + 
-						b range js> Math.random()*pop()+pop() int + char ,  + \ 給 blue 優待，偏藍色系。 
-						js> Math.random() + char )  + 
-						( *debug* Draw> ) strokeStyle 
-						js> Math.random()*(vm.g.cv.canvas.width+100)-50 dup >r 0 moveTo \ 上邊某一點，比 canvas 兩邊各超出 50，比較自然。 
-						r> d js> Math.random()*tos()-pop()*0.5+pop() js> vm.g.cv.canvas.height lineTo \ 下邊某一點是上一點偏移的結果。 
-						stroke 
-					; 
-
-				\ main 
-
-					150 [for] draw [next] 
-
-				\ The End 
+				----replace-me-with-cloth.f----
 			</unindent></code></pre></blockquote></td></table>
 			<h2 id="play">看到甚麼都可以玩玩看</h2>
 			<p>	
-				其中 <code>\ setup</code> 這一段是在設定數值，以下可以來玩一玩。
+				其中 <code>\ 設定</code> 這一段是在設定數值，以下可以來玩一玩。
 			</p>	
 			<p>	
 				前面試過的 <code>draw</code> 指令這回我們用 
@@ -361,7 +326,7 @@
 			</p>
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
-				上面 source code 裡 setup 區有定義 b 與 g 兩個 word。
+				上面 source code 裡 <code>\ 設定</code> 區有定義 b 與 g 兩個 word。
 				請分別輸入 <code>help b -N</code> 與 <code>help g -N</code>
 				查看這兩個 word 的說明。加上 -N 指定 word name 
 				要完全吻合而非相近的指令，詳閱 <code>help help -N</code>。
@@ -371,7 +336,7 @@
 				看出來它們的「說明」是哪兒來的嗎？
 				當初定義時寫下 Forth 慣用的註解跑到 help 裡來了。
 				還指出了它們是在 cloth.f 裡定義的，而且是個 value。
-				旁邊兩個空格說明它們不是 <code>[IMMEDIATE][COMPILE-ONLY]</code>.
+				旁邊兩個 <code>[][]</code> 說明它們不是 <code>[IMMEDIATE][COMPILE-ONLY]</code>.
 				既知是 value 即知直接 b 或 g 得其值，而 <code>123 to b</code> 
 				就是賦予 b 新值 123。我們要讓名畫《臥虎藏龍》多點春天的氣息，可將 
 				setup 區段裡定義的 
@@ -414,16 +379,16 @@
 			
 			<p>
 				看到畫布上出現了一條從座標 (0,0) 到 (100,100) 的直線？
-				cv 指令把 canvas object 留在 TOS，隨後 
+				<code>cv</code> 指令把 canvas object 留在 TOS，隨後 
 				<code> <js>...</js> </code>
-				之間的都是 JavaScript statements. 其中的 <code> tos() </code> 使用
+				之間的都是 JavaScript statements. 其中的 <code>tos()</code> 使用
 				TOS 但是不把它「用掉」，到了最後下達 stroke() 時，改用
-				<code> pop() </code> 取用 TOS 這才把它給「用掉」。這是一段最基本的 HTML5
+				<code>pop()</code> 取用 TOS 這才把它給「用掉」。這是一段最基本的 HTML5
 				canvas 繪圖。最後面的 <code> </js> </code>
 				是「不傳回最後 statement 的 Value」，如果改用
 				<code> </jsV> </code> 則會把這些 
 				JavaScript statements 中最後一條的 Value
-				放上 TOS 傳回。例如
+				放上 TOS 傳回。例如：
 				<blockquote class=code><code>cv <js> pop().canvas.width</jsV> .s</code></blockquote>
 				查出畫布的寬度，結果留在 TOS，您試試看。
 				jeforth.3we 使用 JavaScript 的機會非常頻繁，我們有簡化的寫法提供當 
@@ -432,7 +397,8 @@
 				是有傳回值的；
 				<blockquote class=code>cv <b style=font-size:120%>js:</b> pop().beginPath()</blockquote> 
 				是沒有傳回值的。
-				早期我建議 Forther 直接引用 JavaScript 如上，不要另訂「Forth 式的」寫法。
+				早期我曾建議 Forther 直接引用 JavaScript 的 Object 
+				語法如上，不要另訂「Forth 式的 object oriented 語法 」寫法。
 				結果像上面 <code>object js> pop().something</code>
 				或 <code>object js> pop()[something]</code>
 				這樣的 pattern 出現得太多了，程式裡到處都是，所以有類似於： 
@@ -464,8 +430,7 @@
 			<h2 id="bp">jeforth.3we 的 debug</h2>
 			<p>
 				draw 指令的定義裡面由 beginPath 到 
-				strokeStyle 之間視覺上比較雜亂，
-				這段是在調製顏色。請在 source code 裡 strokeStyle 之前找到
+				strokeStyle 之間是在調製顏色。請在 source code 裡 strokeStyle 之前找到
 				<code>( *debug* Draw> )</code>
 				這是個 Forth 的 comment, 
 				把括號去掉即可讓 Break point 指令 <code>*debug*</code>
@@ -481,8 +446,8 @@
 			<p>	
 				此後 draw 執行到這裡就會暫停，回到 inputbox 
 				等你的下一個命令。
-				大部分的 Forth word 應該都可以用，幫助你調查此瞬間一刻。
-				這時候下達 <code>.s</code> 
+				這時候大部分的 Forth word 應該都可以用，幫助你調查此瞬間一刻。
+				請下達 <code>.s</code> 
 				查看 stack 內容就很容易明白原來這段程式是在組合一段
 				text string 準備要餵給 strokeStyle。
 				進到 *debug* break point 的特徵是 <code>OK</code> 
@@ -490,26 +455,29 @@
 				如果一次埋下了多個 *debug* break point 就需要靠個別不同的
 				prompt 來看出是哪一個 break 到了。
 				最後要讓程式繼續跑下去，用 <code>q</code> 指令，
-				這用 <code>help *debug*</code> 也可以查得到。
+				這用 <code>also forth help *debug*</code> 也可以查得到
+				( 剛才我們亂玩下過 only 這下得要 also forth 把
+				forth vocabulary 加回 order
+				之後 help 才看得到它裡面的 *debug* )
 				
 			</p>
 			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
 				> draw
 
 				---- Entering *debug* ----
-
+				 Draw> 
 				> .s
-					  0: rgba(78,24,247,0.3767092579510063) (string)
+					  0: rgba(76,60,148,0.53) (string)
 				 Draw> 
 				> q
 
 				 ---- Leaving *debug* ----
-				 OK  		
+				 OK  
 			</unindent></code></pre></blockquote></td></table>
 
 			<h2>查看本文的 source code</h2>
 			<p>
-			這篇文章本身就是一支 jeforth.3htm 的應用程式。
+			這篇文章 tutor-cloth.f 本身就是一支 jeforth.3htm 的應用程式。
 			下達這段命令就可以把它讀出來放到這個網頁的最下面，請試著親手操作看看。
 			您也可以把 jeforth.3we 從 GitHub 上 clone 
 			下來找到 tutor-cloth.f 就是了。
@@ -536,11 +504,12 @@
 				在本網頁上呈現的是 jeforth.3htm 的應用。
 			</p>	
 			<p>--- The End ---</p>	
-			<p>H.C. Chen hcchen5600@gmail.com 2015.11.27</p>
+			<p>H.C. Chen hcchen5600@gmail.com 2015.12.02</p>
 			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
 		</blockquote></div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
-	</text> 
+	</text>
+	:> replace(/----replace-me-with-cloth\.f----/,pop()) \ cloth.f source code 就顯示定位
 	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
