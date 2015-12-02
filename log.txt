@@ -4540,36 +4540,38 @@
 		應該更好。有充分的資源可用。
 	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
 
-[ ] I was working on git.f, trying to make the article section more sexy.
-[ ] Bug ! both HTA and Chrome, why I didn't find this before?
-	==>	> : test <text> /*aabbcc*/ </text> ;
+[x] Bug ! both HTA and Chrome, why I didn't find this before?
+	==>	: test <text> /*aabbcc*/ </text> ;
+		: test s" /*aabbcc*/" ; 
 		JavaScript error on word "literal" : Invalid regular expression: missing /
 	==> 簡化到用 F12 debugger 即可複製：
 		ntib=0;tib=" /*aabbcc*/ </te>";nexttoken("</te>") --> "/*aabbcc*/ " correct
 		ntib=0;tib=" /*aabbcc*/ </text>";nexttoken("</text>") --> 也沒錯呀!
 	==> Strange, happened on 3htm Chrome.
-		> .s
-		empty
-		 OK 
-		> : test s" /*aabbcc*/" ;
-		JavaScript error on word "literal" : Invalid regular expression: missing /  <=== Problem!!??
-		 OK 
-		> .s
-		empty  <============ Was empty
-		 OK 
-		> words 
-		... snip ...
-		-------- cloth.f (15 words) --------
-		w h r g b v d xB yB xE yE random >rgba draw test 
-		 OK 
-		> forget test
-		 OK 
-		> .s
-			  0: test (string) <========== why? Because test should not be existing?
+	==> 表示 <text> 在 compiling state 有問題, and it's nothing in <text> because s" also
+		has the problem.
+	--> 
+		: s"  ( <str> -- str ) \ Get string down to the next delimiter.
+			char " word js: debugger compiling if literal then BL word drop ; immediate
+		: test ( [ js: debugger ] ) s" /*aabbcc*/" ; 
+	--> @ bp, stack=["/*aabbcc*/"]
+		tib = s" /*aabbcc*/" ; '
+		ntib ----------------^
+		compiling : true
+	--> 看到問題了! literal 會把常數用 /* */ 表達在該 function 裡，該常數
+		又是 /*...*/ 則結尾的 */ 就會被認走!! 結果出問題了!
+		> : test s" /*aabbcc*" ;
+		> see test
+		-------- Definition in dictionary --------
+		01529: function (){push(literal)/*(string)/*aabbcc* */} (function)
+		01530: RET (null)
+		---------- End of the definition -----------
+	--> 只有當含有 */ 的 string constant 被 literal compile 進 dictionary 時才有這個問題。
+	[x]	考慮 string constant 可能很長, literal 用 /*...*/ 顯示的方式還要再考慮周詳一點。
+		例如長字串要截斷，碰到 */ 要改成 *_/ 即可避免 .. Bingo!!
 
- 
-
-
+[ ] I was working on git.f, trying to make the article section more sexy.
+	Now at the 5.5 section.
 
 
 
