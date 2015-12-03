@@ -864,7 +864,13 @@ code abort      reset() end-code // ( -- ) Reset the forth system.
 
 code literal 	( n -- ) \ Compile TOS as an anonymous constant
 				var literal = pop();
-				var getLiteral = eval("var f;f=function(){push(literal)/*(" + mytypeof(literal) + ")" + literal.toString() + " */}");
+				var getLiteral = eval(
+						"var f;f=function(){push(literal)/*(" 
+						+ mytypeof(literal) + ")" 
+						// avoid all "*/" and longer string
+						+ literal.toString().slice(0,20).replace(/\*[/]/g,"*_/") 
+						+ " */}"
+					);
 				comma(getLiteral);
 				end-code
 code alias      ( Word <alias> -- ) \ Create a new name for an existing word

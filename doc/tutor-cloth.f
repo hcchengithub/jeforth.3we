@@ -94,7 +94,7 @@
 		</table> 
 		</blockquote></o> js> eleOpening insertAfter
 /* -------------------------------------------------------------------------- */
-	</text> :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	tib.insert
 	
 	\ 以下的 js> 指令執行隨後的 JavaScript statements 直到遇上 white space 為止，最
@@ -406,7 +406,7 @@
 				以及
 				<blockquote class=code>cv <b style=font-size:120%>::</b> beginPath()</blockquote> 
 				分別再簡化的寫法，縮減常用的 pattern。
-				所有的簡化寫法都只是文字 pattern 的替代而已，所以 compile 出來是一樣的。
+				以上的簡化寫法都只是文字 pattern 的替代而已，所以 compile 出來是一樣的。
 				而且像這樣一直點下去也是可以的：
 				<blockquote class=code><code>cv :> canvas.getContext('2d').canvas.getContext('2d')</code></blockquote>
 				相當於：
@@ -425,8 +425,120 @@
 			<p>
 				這四行 statements 看起來既像 Forth 又像 JavaScript, 
 				分辨它們到底屬甚麼，不如著眼在整個行文給人的感覺，
-				而這樣寫語意通順就對了。Forth 有融合多種語言的超能力！
+				而這樣寫語意通順就對了。我們已經知道 jeforth 怎麼跟 
+				JavaScript 一起混搭了，Forth 有融合多種語言的超能力！
+				然而，像上面這段例子還是接連重複出現 <code>cv :: ... </code> 
+				這樣的 pattern, 要再化簡可以把它們包裝成 forth 的 words。
+				我們做做看，順便用 <code>see</code> 指令看看 compile 
+				過後的結果，<code>see</code> 相當於 forth 的 dis-compiler 
+				反編譯指令，用來查看一個 word 的定義。以 moveTo 
+				為例一口氣完成如下：
 			</p>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> : moveTo cv :: moveTo(pop(1),pop()) ; \ 從上面這行 cv :: moveTo(0,0) 的例子，改裝成 forth word
+				> see moveTo
+							name : moveTo (string)
+							 vid : cloth.f (string)
+							 wid : 16 (number)
+							type : colon (string)
+							 cfa : 1850 (number)
+							help : ( ?? ) No help message. Use // to add one. (string)
+				-------- Definition in dictionary --------
+				01850: cv ( -- cv ) The default cv object (CanvasRenderingContext2D) (object)
+				01851: function (){pop().moveTo(pop(1),pop())} (function)
+				01852: RET (null)
+				---------- End of the definition -----------
+				 OK 			
+			</unindent></code></pre></blockquote></td></table>
+			<p>
+				這好像已經很精簡了，但是在本例 forth dictionary address 1850 
+				處先用前面介紹過的 value cv 取得 canvas object 放在 TOS，緊接著在 
+				1851 處又用第一個 <code>pop()</code> , 即總共三個 pop() 
+				當中最左邊這個 <ff>function(){<b>pop()</b>.moveTo ...</ff> 
+				來取得該 cv ——等於是同一個東西的 push(), pop() 
+				連著做——還是有點不滿，而且這種情形又很多。所以 
+				jeforth.3we 把所有的 value, variable, constant, ... etc 
+				都收納成 <code>vm.g["任意-variableName-中文也可以"]</code>, 
+				其中  <code>vm</code> object 是 jeforth.3we 的 Virtual Machine 
+				本身，<code>g</code> property 取自 global 的第一個字母，
+				請自 <code> see cv</code> 即見。所以每當我們定義一個 value x 
+				(或 constant x, 或 variable x 皆然) 就馬上有 
+				<code>vm.g.x</code> 可用，
+				其中 x 是 forth word 而 <code>vm.g.x</code> 
+				是 JavaScript variable 兩者是同一個東西。
+				可以這麼設計是一個 forth 的慣例使然：「forth 語言中，有名字的 
+				variable, value, constant 都是 global。」這不是規定，Forth 
+				沒有甚麼規定，有規定也不必遵守，
+				但是大家都這麼做的地方 jeforth.3we 也不例外。
+				在此基礎上 <code>moveTo</code> 還可以更精簡：			
+			</p>
+			<p>
+				Colon word 的寫法：
+			</p>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> : moveTo js: vm.g.cv.moveTo(pop(1),pop()) ; see moveTo
+
+							name : moveTo (string)
+							 vid : cloth.f (string)
+							 wid : 17 (number)
+							type : colon (string)
+							 cfa : 1853 (number)
+							help : ( ?? ) No help message. Use // to add one. (string)
+				-------- Definition in dictionary --------
+				01853: function (){vm.g.cv.moveTo(pop(1),pop())} (function)
+				01854: RET (null)
+				---------- End of the definition -----------
+			</unindent></code></pre></blockquote></td></table>
+			<p>
+				Code word 的寫法：
+			</p>
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
+				> code moveTo vm.g.cv.moveTo(pop(1),pop()) end-code see moveTo
+
+							name : moveTo (string)
+							 vid : cloth.f (string)
+							 wid : 18 (number)
+							type : code (string)
+							help : ( ?? ) No help message. Use // to add one. (string)
+							  xt :
+				function (_me){ /* moveTo */
+				   vm.g.cv.moveTo(pop(1),pop()) 
+				}
+			</unindent></code></pre></blockquote></td></table>
+			<p>
+				可見得執行效率 code word 會比 colon word 快一點。如果您注意到 
+				code word 的 dis-compiled listing 中有一個 <code>_me</code> 
+				argument 而心生好奇：<code>_me</code> 參考到這個 word object 
+				自己。jeforth.3we 中所有的 word 都屬 Word() object 可以自由加掛 
+				member 只要不跟現有的 name, vid, wid, type, xt, help .. etc 
+				等撞名就好。
+			</p>
+			<h2>用 forth 來塗鴉吧!</h2>
+			<p>
+				從上一節最原始的 JavaScript 寫法演變到最後的 forth 寫法，
+				我們來享受一下成果。
+				請在現有畫布上用下列命令直接畫一條從右上角到左下角的斜線:
+			</p>
+			<table width=100%><td class=code><blockquote><code>
+				beginPath w 0 moveTo 0 h lineTo stroke
+			</code></blockquote></td></table>
+			<p>
+				對其中任何 word, 比如說 h, 有疑問則 <code>help h -N</code> 
+				查它的說明。另外也可指定黃色, 畫一條從右下角到左上角的斜線, 
+				如下:
+			</p>
+			<table width=100%><td class=code><blockquote><code>
+				beginPath s" yellow" strokeStyle w h moveTo 0 0 lineTo stroke
+			</code></blockquote></td></table>
+			<p>
+				比原式簡單吧！
+			</p>
+			<p>
+				jeforth 自由自在、意味深長有發展性、
+				連變數名都可以用中文、跟 JavaScript 
+				平順地混搭、而且還另有重要的優點 —— debug 很容易。
+			</p>
+			
 			<h2 id="bp">jeforth.3we 的 debug</h2>
 			<p>
 				draw 指令的定義裡面由 beginPath 到 
@@ -504,13 +616,13 @@
 				在本網頁上呈現的是 jeforth.3htm 的應用。
 			</p>	
 			<p>--- The End ---</p>	
-			<p>H.C. Chen hcchen5600@gmail.com 2015.12.02</p>
+			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03</p>
 			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
 		</blockquote></div>
 		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
 	</text>
 	:> replace(/----replace-me-with-cloth\.f----/,pop()) \ cloth.f source code 就顯示定位
-	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert		\ execute the string on TOS

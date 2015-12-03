@@ -11,6 +11,8 @@
 
 js> vm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
+include unindent.f
+
 s" git.f"   source-code-header
 
     \   簡介
@@ -159,9 +161,10 @@ s" git.f"   source-code-header
     : (cd) ( "..." -- ) \ The DOS command 'change directory'.
         s" cd " swap + </shell> ;
         
-    : cls ( <...> -- ) \ The DOS command 'Clear screen', also clear jeforth output box.
+    : CLS ( <...> -- ) \ The DOS command 'Clear screen', also clear jeforth output box.
         <shell> cls </shell> cls ;
         /// 'er' to erase only the jeforth output box.
+		/// 改大寫避免老是誤用
 
     : dir ( <...> -- ) \ The DOS command 'View directory'.
         s" dir " char \n|\r word + </shell> ;
@@ -383,11 +386,9 @@ s" git.f"   source-code-header
 
     \ 第 08 天：關於分支的基本觀念與使用方式
 
-    : branch ( -- ) \ List all branches. Other commands work *in* a branch.
+    : list-branches ( -- ) \ List local branches 顯示出所有「本地分支」。
         s" git branch " </shell> ;
-        last alias list-branches // ( -- ) List local branches.
-		/// git branch 顯示出所有「本地分支」。
-		/// Also : list-all-branch
+		/// Also : list-all-branch 含 remote server 上的也列出來。
         
     : create-branch ( <...> -- ) \ Create a new branch e.g. 用來 commit 剛改的東西以供實驗。
         s" git branch " char \n|\r word + </shell> ;
@@ -772,100 +773,322 @@ s" git.f"   source-code-header
 </comment>      
 
 : Digest:Git分支管理策略 ( -- ) \ Digest of the article《Git 分支管理策略》from 阮一峰的網絡日誌
-	<o>
-	<p>阮一峰的網絡日誌</p>
-	<h1 id="digestgit-分支管理策略"><a href="http://www.ruanyifeng.com/blog/2012/07/git.html">Digest：Git 分支管理策略</a></h1>
-	<p>"GitHub for Windows" does not see a new branch even that is already on the cloud. Solution is: Use "list-all-branch" to review its name then "checkout the-branch-name".</p>
-	<h2 id="二開發分支-develop">二、開發分支 develop</h2>
-	<p>主分支只用來分佈重大版本，日常開發應該在另一條分支上完成。我們把開發用的分支，叫做 develop。這個分支可以用來生成代碼的最新隔夜版本（nightly）。如果想正式對外發佈，就在 Master 分支上，對 develop 分支進行」合併」（merge）。</p>
-	<p>Git 創建 develop 分支的命令：</p>
-	<pre><code>
-	git checkout -b develop master
-	</code></pre>
-	<h3 id="將-develop-分支發佈到-master-分支的命令">將 develop 分支發佈到 Master 分支的命令：</h3>
-	<p>切換到Master分支</p>
-	<pre><code>
-	git checkout master 
-	</code></pre>
-	<p><em>這不是拿 Master 來把 develop 蓋掉然後因為有衝突而做不成嗎？ 啊！沒錯，當然是已經先把 develop commit 起來了，然後再把 Master checkout 過來。</em></p>
-	<h3 id="對-develop-分支進行合併">合併 develop 分支進 master 來</h3>
-	<pre><code>
-	git merge --no-ff develop
-	</code></pre>
-	<p>這裡稍微解釋一下，上一條命令的 –no-ff 參數是什麼意思。默認情況下 Git 執行 「快進式合併」（fast-farward merge）會直接將 Master 分支指向 develop 分支(上網看圖就明白)。使用 –no-ff 參數後，會執行正常合併，在 Master 分支上生成一個新節點。為了保證版本演進的清晰，我們希望採用這種做法(以便保留 develop branch 可以繼續使用)。關於合併的更多解釋，請參考 Benjamin Sandofsky 的《Understanding the Git Workflow》。</p>
-	<h2 id="三臨時性分支">三、臨時性分支</h2>
-	<p>前面講到版本庫的兩條主要分支：Master 和 develop。前者用於正式發佈，後者用於日常開發。其實，常設分支只需要這兩條就夠了，不需要其他了。但是，除了常設分支以外，還有一些臨時性分支，用於應對一些特定目的的版本開發。臨時性分支主要有三種：</p>
-	<ul>
-	<li>功能（feature）分支</li>
-	<li>預發佈（release）分支</li>
-	<li>修補bug（fixbug）分支</li>
-	</ul>
-	<p>這三種分支都屬於臨時性需要，使用完以後，應該刪除，使得代碼庫的常設分支始終只有 Master 和 develop。</p>
-	<h2 id="四-功能分支">四、 功能分支</h2>
-	<p>接下來，一個個來看這三種」臨時性分支」。第一種是功能分支，它是為了開發某種特定功能，<strong>從 develop 分支上面分出來的。開發完成後，要再併入 develop。</strong>如果這個功能還沒出生就胎死腹中了，那樣連合到 develop 的過程都不必了。功能分支的名字，可以採用feature-*的形式命名。</p>
-	<p>創建一個功能分支：</p>
-	<pre><code>
-	git checkout -b feature-x develop
-	</code></pre>
-	<p>　　 <br>
-	開發完成後，將功能分支合併到 develop 分支：</p>
-	<pre><code>
-	git checkout develop
-	git merge --no-ff feature-x
-	</code></pre>
-	<p>刪除 feature 分支：</p>
-	<pre><code>
-	git branch -d feature-x
-	</code></pre>
-	<h2 id="五預發佈分支">五、預發佈分支</h2>
-	<p>第二種是預發佈分支，它是指發佈正式版本之前（即合併到 Master 分支之前），我們可能需要有一個預發佈的版本進行測試。<strong>預發佈分支是從 develop 分支上面分出來的，階段性的截取 develop 上階段的新功能</strong>，用來測試，並不往上面添加新功能。避免夾帶大量的 bug。一個例子：預發佈分支的功能基本沒有 bug 了，但是 devlop 可能還有正在開發的新功能還不穩定或者根本不能用，會導致沒辦法發佈。預發佈就是用來從 develop 截取下一個版本要發佈的功能，不在夾雜本次不要的功能，專注於修復 bug。<em>我想的是既想保留 develop branch 的原樣, 又要解決 merge 回 Master 會遇到的衝突，總要有個暫時工作的地方。</em></p>
-	<p>預發佈結束以後，必須合併進 Develop 和 Master 分支。它的命名，可以採用release-*的形式。創建一個預發佈分支：</p>
-	<pre><code>
-	git checkout -b release-1.2 develop
-	</code></pre>
-	<p>確認沒有問題後，合併到master分支：</p>
-	<pre><code>
-	git checkout master
-	git merge --no-ff release-1.2
-	</code></pre>
-	<p>對合併生成的新節點，做一個標籤</p>
-	<pre><code>
-	git tag -a 1.2
-	</code></pre>
-	<p>再合併到develop分支：</p>
-	<pre><code>
-	git checkout develop
-	git merge --no-ff release-1.2
-	</code></pre>
-	<p>最後，刪除預發佈分支：</p>
-	<pre><code>
-	git branch -d release-1.2
-	</code></pre>
-	<h2 id="六修補-bug-分支">六、修補 bug 分支</h2>
-	<p>最後一種是修補 bug 分支。軟件正式發佈以後，難免會出現 bug。這時就需要創建一個分支，進行 bug 修補。修補 bug 分支是從 Master 分支上面分出來的。修補結束以後，再合併進 Master 和 develop 分支。它的命名，可以採用 fixbug-* 的形式。為什麼 bugfix 分支要基於 master？基於 develop 再反合到 master，不行麼？Bugfix 之所以從 master checkout 因為遇到緊急 bug 時適用，直接在 master 修改，這樣就避免了走 develop 分支，develop 分支可能有新開發的功能和未經過測試的代碼，避免 bug 衍生 bug，所以也稱為 hotfix-bug#。Master 上的代碼都是測試後才合併的，所以緊急 bug 的場景應該在 master 分支 checkout。</p>
-	<p>創建一個修補 bug 分支：</p>
-	<pre><code>
-	git checkout -b fixbug-0.1 master
-	</code></pre>
-	<p>網友補充：我們公司內部的做法是 fixbug-(bug 跟蹤系統編號)，配合 bug 跟蹤系統使用更加完善。</p>
-	<p>修補結束後，合併到 master 分支：</p>
-	<pre><code>
-	git checkout master
-	git merge --no-ff fixbug-0.1
-	git tag -a 0.1.1
-	</code></pre>
-	<p>再合併到 develop 分支：</p>
-	<pre><code>
-	git checkout develop
-	git merge --no-ff fixbug-0.1
-	</code></pre>
-	<p>最後，刪除「修補 bug 分支」：</p>
-	<pre><code>
-	git branch -d fixbug-0.1
-	</code></pre>
-	<h1 id="完">（完）</h1>
-	<p>Written with <a href="https://stackedit.io/">StackEdit</a>.</p>
-	</o> drop ;
+	<text> 
+		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
+			<style type="text/css">
+				code, .code { 
+					font-family: courier new;
+					font-size: 110%; /*字細所以要大一點*/
+					background: #E0E0E0;
+				}
+				table {
+					width: 100%;
+				}
+				.article { 
+					font-family: Microsoft Yahei;
+					letter-spacing: 0px;
+					line-height: 160%;
+				}
+				.source { /*主要是把大小恢復否則 110% 太大了*/
+					font-size:100%;
+					letter-spacing:0px"
+					line-height: 100%;
+				}
+				
+			</style>
+		</h> drop \ /* 丟掉 <h>..</h> 留下來的 <style> element object, 用不著 */
+		char body <e>
+		<div/*整個文章*/ id=article class=article><blockquote>
+		<p>阮一峰的網絡日誌</p>
+		<h1><a href="http://www.ruanyifeng.com/blog/2012/07/git.html">Digest：Git 分支管理策略</a></h1>
+		<p>
+			"GitHub for Windows" does not see a new branch even that is already 
+			on the cloud. Solution is: Use "list-all-branch" to review its name 
+			then "checkout the-branch-name".
+		</p>
+		<h2>二、開發分支 develop</h2>
+		<p>
+			主分支只用來分佈重大版本，日常開發應該在另一條分支上完成。
+			我們把開發用的分支，叫做 develop。這個分支可以用來生成代碼的最新隔夜版本
+			（nightly）。如果想正式對外發佈，就在 Master 分支上，對 develop 分支進行「合併」
+			（merge）。
+		</p>
+		<p>
+			Git 創建 develop 分支的命令：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout -b develop master
+		</code></blockquote></td></table>
+		<h3 id="將-develop-分支發佈到-master-分支的命令">將 develop 分支發佈到 Master 分支的命令：</h3>
+		<p>切換到Master分支</p>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout master 
+		</code></blockquote></td></table>
+		<p>
+			<em>這不是拿 Master 來把 develop 蓋掉然後因為有衝突而做不成嗎？ 
+			啊！沒錯，當然是已經先把 develop commit 起來了，然後再把 
+			Master checkout 過來。</em>
+		</p>
+		<h3 id="對-develop-分支進行合併">合併 develop 分支進 master 來</h3>
+		<table width=100%><td class=code><blockquote><code>
+			git merge --no-ff develop
+		</code></blockquote></td></table>
+		<p>
+			這裡稍微解釋一下，上一條命令的 –no-ff 參數是什麼意思。默認情況下 
+			Git 執行 「快進式合併」（fast-farward merge）會直接將 
+			Master 分支指向 develop 分支(上網看圖就明白)。使用 
+			–no-ff 參數後，會執行正常合併，在 Master 分支上生成一個新節點。
+			為了保證版本演進的清晰，我們希望採用這種做法(以便保留 develop 
+			branch 可以繼續使用)。關於合併的更多解釋，請參考 Benjamin 
+			Sandofsky 的《Understanding the Git Workflow》。
+		</p>
+		<h2 id="三臨時性分支">三、臨時性分支</h2>
+		<p>
+			前面講到版本庫的兩條主要分支：Master 和 develop。
+			前者用於正式發佈，後者用於日常開發。其實，
+			常設分支只需要這兩條就夠了，不需要其他了。
+			但是，除了常設分支以外，還有一些臨時性分支，
+			用於應對一些特定目的的版本開發。臨時性分支主要有三種：
+		</p>
+		<ul>
+		<li>功能（feature）分支</li>
+		<li>預發佈（release）分支</li>
+		<li>修補bug（fixbug）分支</li>
+		</ul>
+		<p>
+			這三種分支都屬於臨時性需要，使用完以後，應該刪除，
+			使得代碼庫的常設分支始終只有 Master 和 develop。
+		</p>
+		<h2 id="四-功能分支">四、 功能分支</h2>
+		<p>
+			接下來，一個個來看這三種」臨時性分支」。
+			第一種是功能分支，它是為了開發某種特定功能，
+			<strong>從 develop 分支上面分出來的。開發完成後，
+			要再併入 develop。</strong>如果這個功能還沒出生就胎死腹中了，
+			那樣連合到 develop 的過程都不必了。功能分支的名字，
+			可以採用feature-*的形式命名。
+		</p>
+		<p>創建一個功能分支：</p>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout -b feature-x develop
+		</code></blockquote></td></table>
+		<p><br>
+			開發完成後，將功能分支合併到 develop 分支：
+		</p>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			git checkout develop
+			git merge --no-ff feature-x
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			刪除 feature 分支：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git branch -d feature-x
+		</code></blockquote></td></table>
+		<h2 id="五預發佈分支">五、預發佈分支</h2>
+		<p>
+			第二種是預發佈分支，它是指發佈正式版本之前
+			（即合併到 Master 分支之前），
+			我們可能需要有一個預發佈的版本進行測試。
+			<strong>預發佈分支是從 develop 分支上面分出來的，
+			階段性的截取 develop 上階段的新功能</strong>，
+			用來測試，並不往上面添加新功能，避免夾帶大量的 bug。
+			一個例子：預發佈分支的功能基本沒有 bug 了，但是 
+			devlop 可能還有正在開發的新功能還不穩定或者根本不能用，
+			會導致沒辦法發佈。預發佈就是用來從 develop 
+			截取下一個版本要發佈的功能，不在夾雜本次不要的功能，
+			專注於修復 bug。
+			<em>
+			簡單說就是 develop 的分支，先拿來 merge 回 master。
+			完成後，因為會有改動所以也要 merge 回 develop 然後殺掉。
+			</em>
+		</p>
+		<p>
+			預發佈結束以後，必須合併進 Develop 和 Master 分支。
+			它的命名，可以採用release-*的形式。創建一個預發佈分支：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout -b release-1.2 develop
+		</code></blockquote></td></table>
+		<p>
+			確認沒有問題後，合併到master分支：
+		</p>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			git checkout master
+			git merge --no-ff release-1.2
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			對合併生成的新節點，做一個標籤
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git tag -a 1.2
+		</code></blockquote></td></table>
+		<p>
+			再合併到develop分支：
+		</p>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			git checkout develop
+			git merge --no-ff release-1.2
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			最後，刪除預發佈分支：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git branch -d release-1.2
+		</code></blockquote></td></table>
+/* ------------------------------------------------------------------------ */		
+		<h2>五點五、預發佈分支的第二種形式</h2>
+/* ------------------------------------------------------------------------ */		
+		<p>
+			想從 develop 裡面先抽一部分出來 merge 回 master 發佈。
+			這時候要從 master 分支出來，然後從 develop 裡 checkout 
+			部分檔案出來，經測試通過之後 merge 回 master。
+			同樣也得在 merge 回 develop 然後殺掉。
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			text
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			command line
+		</code></blockquote></td></table>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			multiple command line
+			multiple command line
+		</unindent></code><pre></blockquote></td></table>
+/* ------------------------------------------------------------------------ */		
+		<h2>六、修補 bug 分支</h2>
+/* ------------------------------------------------------------------------ */		
+		<p>
+			最後一種是修補 bug 分支。軟件正式發佈以後，
+			難免會出現 bug。這時就需要創建一個分支，進行 bug 
+			修補。修補 bug 分支是從 Master 分支上面分出來的。
+			修補結束以後，再合併進 Master 和 develop 分支。
+			它的命名，可以採用 fixbug-* 的形式。為什麼 bugfix 
+			分支要基於 master？基於 develop 再反合到 
+			master，不行麼？Bugfix 之所以從 master checkout 
+			因為遇到緊急 bug 時適用，直接在 master 修改，這樣就避免了走 
+			develop 分支，develop 分支可能有新開發的功能和未經過測試的代碼，
+			避免 bug 衍生 bug，所以也稱為 hotfix-bug#。Master 
+			上的代碼都是測試後才合併的，所以緊急 bug 的場景應該在 
+			master 分支 checkout。
+		</p>
+		<p>
+			創建一個修補 bug 分支：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout -b fixbug-0.1 master
+		</code></blockquote></td></table>
+		<p>
+			網友補充：我們公司內部的做法是 fixbug-(bug 跟蹤系統編號)，
+			配合 bug 跟蹤系統使用更加完善。
+		</p>
+		<p>
+			修補結束後，合併到 master 分支：
+		</p>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			git checkout master
+			git merge --no-ff fixbug-0.1
+			git tag -a 0.1.1
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			再合併到 develop 分支：
+		</p>
+		<table width=100%><td class=code><blockquote><pre><code><unindent>
+			git checkout develop
+			git merge --no-ff fixbug-0.1
+		</unindent></code><pre></blockquote></td></table>
+		<p>
+			最後，刪除「修補 bug 分支」：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git branch -d fixbug-0.1
+		</code></blockquote></td></table>
+		<h1 id="完">（完）</h1>
+		</blockquote></div/*整個文章*/>
+		</e> drop 
+	</text> 
+	/*remove*/      \ 清除註解。
+	unindent 		\ handle all <unindent >..</unindent > sections
+	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
+	js: dictate(pop()) ;
+	/// 抹掉本文 js> $(".article")[0] removeElement
 
 
 

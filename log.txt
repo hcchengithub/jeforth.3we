@@ -1,5 +1,4 @@
-﻿
-              ~%~%~%~%~%~%~%~  j e f o r t h . 3 w e  ~%~%~%~%~%~%~%~
+﻿              ~%~%~%~%~%~%~%~  j e f o r t h . 3 w e  ~%~%~%~%~%~%~%~
                       The jeforth with a three words engine
                  Same kernel - jeforth.js, jeforth.f, voc.f - for
                  all applications - HTA, HTM, Node.js - and more?
@@ -317,94 +316,12 @@
     OK  js> self obj>keys .           \  ----- 3nw -----
     top, window, location, nwDispatcher, Intl, v8Intl, document, global,
     process, Buffer, root, require, $, jQuery, kvm, gui, revision, debug,
-    indebug, fs, screenbuffer, print, prompt, tabcompletion, keyboard,
-    forthConsoleHandler, base, stackwas, jQuery11020015018620295450091,
-    path, __nwWindowId, win, speechSynthesis, webkitNotifications,
-    localStorage, sessionStorage, applicationCache, webkitStorageInfo,
-    indexedDB, webkitIndexedDB, crypto, CSS, performance, console,
-    devicePixelRatio, styleMedia, parent, opener, frames, self,
-    defaultstatus, defaultStatus, status, name, length, closed, pageYOffset,
-    pageXOffset, scrollY, scrollX, screenTop, screenLeft, screenY, screenX,
-    innerWidth, innerHeight, outerWidth, outerHeight, offscreenBuffering,
-    frameElement, clientInformation, navigator, toolbar, statusbar,
-    scrollbars, personalbar, menubar, locationbar, history, screen,
-    postMessage, close, blur, focus, ondeviceorientation, ontouchcancel,
-    ontouchend, ontouchmove, ontouchstart, ontransitionend,
-    onwebkittransitionend, onwebkitanimationstart,
-    onwebkitanimationiteration, onwebkitanimationend, onsearch, onreset,
-    onwaiting, onvolumechange, onunload, ontimeupdate, onsuspend, onsubmit,
-    onstorage, onstalled, onselect, onseeking, onseeked, onscroll, onresize,
-    onratechange, onprogress, onpopstate, onplaying, onplay, onpause,
-    onpageshow, onpagehide, ononline, onoffline, onmousewheel, onmouseup,
-    onmouseover, onmouseout, onmousemove, onmousedown, onmessage,
-    onloadstart, onloadedmetadata, onloadeddata, onload, onkeyup,
-    onkeypress, onkeydown, oninvalid, oninput, onhashchange, onfocus,
-    onerror, onended, onemptied, ondurationchange, ondrop, ondragstart,
-    ondragover, ondragleave, ondragenter, ondragend, ondrag, ondblclick,
-    oncontextmenu, onclick, onchange, oncanplaythrough, oncanplay, onblur,
-    onbeforeunload, onabort, getSelection, stop, open, showModalDialog,
-    alert, confirm, find, scrollBy, scrollTo, scroll, moveBy, moveTo,
-    resizeBy, resizeTo, matchMedia, setTimeout, clearTimeout, setInterval,
-    clearInterval, requestAnimationFrame, cancelAnimationFrame,
-    webkitRequestAnimationFrame, webkitCancelAnimationFrame,
-    webkitCancelRequestAnimationFrame, atob, btoa, addEventListener,
-    removeEventListener, getComputedStyle, getMatchedCSSRules,
-    webkitConvertPointFromPageToNode, webkitConvertPointFromNodeToPage,
-    dispatchEvent, webkitRequestFileSystem, webkitResolveLocalFileSystemURL,
-    openDatabase, TEMPORARY, PERSISTENT
-
+	... snip ...
+	
     js> document obj>keys .      \ -------- 3HTA ----------------
     doctype, documentElement, implementation, inputEncoding, xmlEncoding,
     xmlStandalone, xmlVersion, styleSheets, defaultView, URL, activeElement,
-    alinkColor, all, anchors, applets, bgColor, body, characterSet, charset,
-    compatMode, cookie, defaultCharset, designMode, dir, domain, embeds,
-    fgColor, forms, head, images, lastModified, linkColor, links, location,
-    onabort, onblur, oncanplay, oncanplaythrough, onchange, onclick,
-    oncontextmenu, ondblclick, ondrag, ondragend, ondragenter, ondragleave,
-    ondragover, ondragstart, ondrop, ondurationchange, onemptied, onended,
-    onerror, onfocus, oninput, onkeydown, onkeypress, onkeyup, onload,
-    onloadeddata, onloadedmetadata, onloadstart, onmousedown, onmousemove,
-    onmouseout, onmouseover, onmouseup, onmousewheel, onpause, onplay,
-    onplaying, onprogress, onratechange, onreadystatechange, onreset,
-    onscroll, onseeked, onseeking, onselect, onstalled, onsubmit, onsuspend,
-    ontimeupdate, onvolumechange, onwaiting, plugins, readyState, referrer,
-    scripts, title, vlinkColor, URLUnencoded, compatible, documentMode,
-    frames, media, msCapsLockWarningOff, namespaces, onactivate,
-    onafterupdate, onbeforeactivate, onbeforedeactivate, onbeforeeditfocus,
-    onbeforeupdate, oncellchange, oncontrolselect, ondataavailable,
-    ondatasetchanged, ondatasetcomplete, ondeactivate, onerrorupdate,
-    onfocusin, onfocusout, onhelp, onmssitemodejumplistitemremoved,
-    onmsthumbnailclick, onpropertychange, onrowenter, onrowexit,
-    onrowsdelete, onrowsinserted, onselectionchange, onselectstart, onstop,
-    onstoragecommit, parentWindow, security, uniqueID, selection,
-    fileCreatedDate, fileModifiedDate, fileSize, fileUpdatedDate, mimeType,
-    nameProp, protocol, rootElement, adoptNode, createAttribute,
-    createAttributeNS, createCDATASection, createComment,
-    createDocumentFragment, createElement, createElementNS,
-    createProcessingInstruction, createTextNode, getElementById,
-    getElementsByTagName, getElementsByTagNameNS, importNode, createEvent,
-    createRange, createNodeIterator, createTreeWalker, elementFromPoint,
-    close, execCommand, getElementsByClassName, getElementsByName,
-    getSelection, hasFocus, open, queryCommandEnabled, queryCommandIndeterm,
-    queryCommandState, queryCommandSupported, queryCommandText,
-    queryCommandValue, write, writeln, attachEvent, detachEvent,
-    createEventObject, fireEvent, execCommandShowHelp, focus,
-    releaseCapture, updateSettings, createStyleSheet, removeNode,
-    replaceNode, swapNode, querySelector, querySelectorAll, attributes,
-    childNodes, firstChild, lastChild, localName, namespaceURI, nextSibling,
-    nodeName, nodeType, nodeValue, ownerDocument, parentNode, prefix,
-    previousSibling, textContent, addEventListener, dispatchEvent,
-    removeEventListener, appendChild, cloneNode, compareDocumentPosition,
-    hasAttributes, hasChildNodes, insertBefore, isDefaultNamespace,
-    isEqualNode, isSameNode, isSupported, lookupNamespaceURI, lookupPrefix,
-    normalize, removeChild, replaceChild, ATTRIBUTE_NODE,
-    CDATA_SECTION_NODE, COMMENT_NODE, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE,
-    DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_CONTAINS,
-    DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_FOLLOWING,
-    DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, DOCUMENT_POSITION_PRECEDING,
-    DOCUMENT_TYPE_NODE, ELEMENT_NODE, ENTITY_NODE, ENTITY_REFERENCE_NODE,
-    NOTATION_NODE, PROCESSING_INSTRUCTION_NODE, TEXT_NODEOK
-
+	... snip ...
 
     js: document.onmouseout=function(){alert(222)}  \ 靠！真的會在 mouse 移開時打 alert()
     js: document.onmouseout=null
@@ -567,51 +484,11 @@
     來看看 jeforth.3hta 的 outputbox element 有哪些 members ?
     js> document.body.children.jeforth.children.outputbox obj>keys .
         align, noWrap, dataFld, dataFormatAs, dataSrc, currentStyle, runtimeStyle,
-        accessKey, className, contentEditable, dir, disabled, id, innerHTML,
-        isContentEditable, lang, offsetHeight, offsetLeft, offsetParent, offsetTop,
-        offsetWidth, onabort, onblur, oncanplay, oncanplaythrough, onchange, onclick,
-        oncontextmenu, ondblclick, ondrag, ondragend, ondragenter, ondragleave,
-        ondragover, ondragstart, ondrop, ondurationchange, onemptied, onended,
-        onerror, onfocus, oninput, onkeydown, onkeypress, onkeyup, onload, onloadeddata,
-        onloadedmetadata, onloadstart, onmousedown, onmousemove, onmouseout,
-        onmouseover, onmouseup, onmousewheel, onpause, onplay, onplaying, onprogress,
-        onratechange, onreadystatechange, onreset, onscroll, onseeked, onseeking,
-        onselect, onstalled, onsubmit, onsuspend, ontimeupdate, onvolumechange,
-        onwaiting, outerHTML, style, tabIndex, title, all, behaviorUrns, canHaveChildren,
-        canHaveHTML, children, document, filters, hideFocus, innerText, isDisabled,
-        isMultiLine, isTextEdit, language, onactivate, onafterupdate, onbeforeactivate,
-        onbeforecopy, onbeforecut, onbeforedeactivate, onbeforeeditfocus, onbeforepaste,
-        onbeforeupdate, oncellchange, oncontrolselect, oncopy, oncut, ondataavailable,
-        ondatasetchanged, ondatasetcomplete, ondeactivate, onerrorupdate, onfilterchange,
-        onfocusin, onfocusout, onhelp, onlayoutcomplete, onlosecapture, onmouseenter,
-        onmouseleave, onmove, onmoveend, onmovestart, onpaste, onpropertychange, onresize,
-        onresizeend, onresizestart, onrowenter, onrowexit, onrowsdelete, onrowsinserted,
-        onselectstart, outerText, parentElement, parentTextEdit, readyState, recordNumber,
-        scopeName, sourceIndex, tagUrn, uniqueID, uniqueNumber, blur, click, focus,
-        getElementsByClassName, insertAdjacentHTML, scrollIntoView, componentFromPoint,
-        doScroll, attachEvent, detachEvent, addBehavior, addFilter, applyElement,
-        clearAttributes, contains, dragDrop, getAdjacentText, insertAdjacentElement,
-        insertAdjacentText, mergeAttributes, releaseCapture, removeBehavior, removeFilter,
-        replaceAdjacentText, setActive, setCapture, createControlRange, removeNode,
+		... snip ...
         replaceNode,
         http://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_node_replacechild
         swapNode, clientHeight, clientLeft, clientTop, clientWidth, scrollHeight,
-        scrollLeft, scrollTop, scrollWidth, tagName, childElementCount, firstElementChild,
-        lastElementChild, nextElementSibling, previousElementSibling, getAttribute,
-        getAttributeNS, getAttributeNode, getAttributeNodeNS, getBoundingClientRect,
-        getClientRects, getElementsByTagName, getElementsByTagNameNS, hasAttribute,
-        hasAttributeNS, removeAttribute, removeAttributeNS, removeAttributeNode, setAttribute,
-        setAttributeNS, setAttributeNode, setAttributeNodeNS, fireEvent, msMatchesSelector,
-        querySelector, querySelectorAll, attributes, childNodes, firstChild, lastChild,
-        localName, namespaceURI, nextSibling, nodeName, nodeType, nodeValue, ownerDocument,
-        parentNode, prefix, previousSibling, textContent, addEventListener, dispatchEvent,
-        removeEventListener, appendChild, cloneNode, compareDocumentPosition, hasAttributes,
-        hasChildNodes, insertBefore, isDefaultNamespace, isEqualNode, isSameNode, isSupported,
-        lookupNamespaceURI, lookupPrefix, normalize, removeChild, replaceChild, ATTRIBUTE_NODE,
-        CDATA_SECTION_NODE, COMMENT_NODE, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE,
-        DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_CONTAINS, DOCUMENT_POSITION_DISCONNECTED,
-        DOCUMENT_POSITION_FOLLOWING, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
-        DOCUMENT_POSITION_PRECEDING, DOCUMENT_TYPE_NODE, ELEMENT_NODE, ENTITY_NODE,
+		... snip ...
         ENTITY_REFERENCE_NODE, NOTATION_NODE, PROCESSING_INSTRUCTION_NODE, TEXT_NODE OK
 
 [x] 亂定一堆 global variable 很令人不安，例如 kernelfso 等。 乾脆全部掛給 kvm 好過掛給 window ?
@@ -4440,7 +4317,7 @@
 [x] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
 	以避免干擾其他操作。
 	
-[ ] 撰寫 cloth.md / cloth.html 
+[x] 撰寫 cloth.md / cloth.html ==> tutor-cloth.f is better !!
 
 [ ] cloth.f 發現 up/down recall command history 時,	popup menu 有點怪。
 	最好能讓 command history popup menu 真的 popup 出來，以適應不同版面。
@@ -4448,6 +4325,7 @@
 	
 [ ] help ==> How to	Run the HTML version online. Click here to run.
 	change to rawgit.com
+	
 [x] up/down 直接 recall history 有點煩, 改成 default disabled。
 	
 [x] 合併 [if][else][then][begin][again][until][for][next] 成對應的 if else ... etc 
@@ -4460,29 +4338,10 @@
 	get-vocs js> tos().length [for] js> tos().shift() . cr [next] drop
 	get-vocs js> tos().length [for] js: order.push(tos().shift()) [next] drop rescan-word-hash
 
-[ ] how to ban hao123
-
-[ ] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be 
+[x] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be 
 	a global, and it is.
 	So cv will be a value, a global too.
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\ball.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\blowing-in-the-wind.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.txt
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\many-clocks.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3wsh\jeforth.3wsh.js
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\h2o.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\solar-system.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\processing.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\c.f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
-	[x] c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth.f
-	[ ] c:\Users\hcche\Documents\GitHub\jeforth.3we\log.txt	
+	==> this is a bigger effort to modify all existing .f files. Done.
 	
 [ ] 能不能把 vm.g.cv.lineWidth 直接弄成 value?
 
@@ -4495,79 +4354,122 @@
 	o 規定 <code> ... </code> 不能 nested, 而且要依序出現。
 	o <code>...</code> 是最裡面的, 即 <pre>..</pre> 要包在外面。
 	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>' in <code> tag.
+	==> In unindent.f now
+	
+[x] tutor-cloth.f source code 本身的美感略顯不足，因為 <pre> 區段不能 indent。
+	構想是：設計一個 <unindent>...</unindent> tag 用來把其中的整段落往左 shift 到有某一行
+	撞到左邊了為止。Tab \t 要先換成 spaces 幾個? 可調。
+	==> unindent.f done
+	
+[x] 發現 HTA Regular Expression 一個問題 (Windows 10 !!) 
+	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。這樣寫在 Chrom OK, 在 HTA 不行。
+	:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 要改成 "[/]" 來表達 "/" 不能用 "\/"。
+	[x] Test tutor-cloth.f on Chrome and IE after modification --> [/] works fine.
+	
+[x] contentEditable 這麼好用, 真希望 jeforth.3htm 可以在 local 直接跑，而不必再透過 local server。
+	複習一下，Chrome 卡在這裡:
+	XMLHttpRequest cannot load file:///C:/Users/hcche/Documents/GitHub/jeforth.3we/f/jeforth.f?text. 
+	Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, 
+	https, chrome-extension-resource.
+	---
+	問 Yap ,
+	[17:14:05] h.c.chen 陳厚成: jeforth 不透過 local server 真的就不能跑嗎? 卡在 XMLHttpRequest cannot load file ... ; Cross origin requests are only supported for protocol schemes ... ,
+	[17:16:20] h.c.chen 陳厚成: 因為用 JQuery 的 $.get 讀檔案, 例如 jeforth.f 就不行了。
+	[17:18:16] h.c.chen 陳厚成: ( 在網頁上跑的 jeforth )
+	[17:36:12] h.c.chen 陳厚成: 可能找到答案了
+	http://stackoverflow.com/questions/8449716/cross-origin-requests-are-only-supported-for-http-but-its-not-cross-domain
+	http://chrome-allow-file-access-from-file.com/
+	http://joshuamcginnis.com/2011/02/28/how-to-disable-same-origin-policy-in-chrome/
+	我試試看. . . . .
+	[17:39:26] h.c.chen 陳厚成: 哈! 真的可以。 Chrome 有 command line switch :  --allow-file-access-from-files	
+	-- 
+	Answered
+	[18:04:40] yap @ Forth: file:// protocol 只能讀  .js  html, 圖片及聲音
+	[18:05:07] yap @ Forth: 除非透過 html file api ，但多了一個開檔的動作
+	[18:05:21] yap @ Forth: 選檔必須使用者手動
+	--
+	先把 執行中的 chrome process 清乾淨，然後用 
+		chrome.exe --allow-file-access-from-files 
+	執行, 如此 $.get 可以讀 local files. 我試了讀 .js 檔可以。 
+	Windows 10, Chrome 版本 46.0.2490.86 m
+	--
+	MS Edge seems has the same switch : https://social.technet.microsoft.com/Forums/en-US/8128064a-9bad-4cb3-aedc-b8a183e344f8/microsoft-edge-how-to-allowfileaccessfromfiles?forum=win10itprogeneral
+	But it doesn't work on my desk at home:
+	C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe>MicrosoftEdge.exe --allow-file-access-from-files file:///c:/Users/hcche/Documents/GitHub/jeforth.3we/index.html
+	--
+[x] 爽哥 的 cloth_sam.f 革除原版不像 forth 的缺點。	
+[x] shift-F2 in trouble on 3hta. --> fixed
 
+[x] Bug ! both HTA and Chrome, why I didn't find this before?
+	==>	: test <text> /*aabbcc*/ </text> ;
+		: test s" /*aabbcc*/" ; 
+		JavaScript error on word "literal" : Invalid regular expression: missing /
+	==> 簡化到用 F12 debugger 即可複製：
+		ntib=0;tib=" /*aabbcc*/ </te>";nexttoken("</te>") --> "/*aabbcc*/ " correct
+		ntib=0;tib=" /*aabbcc*/ </text>";nexttoken("</text>") --> 也沒錯呀!
+	==> Strange, happened on 3htm Chrome.
+	==> 表示 <text> 在 compiling state 有問題, and it's nothing in <text> because s" also
+		has the problem.
+	--> 
+		: s"  ( <str> -- str ) \ Get string down to the next delimiter.
+			char " word js: debugger compiling if literal then BL word drop ; immediate
+		: test ( [ js: debugger ] ) s" /*aabbcc*/" ; 
+	--> @ bp, stack=["/*aabbcc*/"]
+		tib = s" /*aabbcc*/" ; '
+		ntib ----------------^
+		compiling : true
+	--> 看到問題了! literal 會把常數用 /* */ 表達在該 function 裡，該常數
+		又是 /*...*/ 則結尾的 */ 就會被認走!! 結果出問題了!
+		> : test s" /*aabbcc*" ;
+		> see test
+		-------- Definition in dictionary --------
+		01529: function (){push(literal)/*(string)/*aabbcc* */} (function)
+		01530: RET (null)
+		---------- End of the definition -----------
+	--> 只有當含有 */ 的 string constant 被 literal compile 進 dictionary 時才有這個問題。
+	[x]	考慮 string constant 可能很長, literal 用 /*...*/ 顯示的方式還要再考慮周詳一點。
+		例如長字串要截斷，碰到 */ 要改成 *_/ 即可避免 .. Bingo!!
+
+[x] I was working on git.f, trying to make the article section more sexy.
+	Now at the 5.5 section.
+	--> fix shift-F2 hang issue on 3HTA first.
+		js: document.designMode="on" <=== 3HTA 一下就出問題, 合理。
+		js: outputbox.contentEditable="true" <== 3HTA 真的只針對 outputbox, Chrome 全部都 editable!
+	--> 3hta 反而好!!
+	
+[x] 照 爽哥 建議增加 tutor-cloth.f 畫線的例子。
+	hcchen5600 2015/12/03 17:09:31 
+		
 [ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
 	facing the Access-Control-Allow-xxxxx 的問題。
 	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
 	==> study https://pages.github.com/
-	
-[ ] tutor-cloth.f source code 本身的美感略顯不足，因為 <pre> 區段不能 indent。
-	構想是：設計一個 <unindent>...</unindent> tag 用來把其中的整段落往左 shift 到有某一行
-	撞到左邊了為止。Tab \t 要先換成 spaces 幾個? 可調。
-	
-	\ ---------- Tab to spaces for <unindent>..</unindent> -------------------------------
-	s"     " value tab-spaces // ( -- value ) Tab spaces setting for <unindent>..</unindent> tag.
-	: ^tab>spaces ( "string" -- "cooked" ) \ Replace ^\t* with spaces
-		tab-spaces swap ( tab-spaces "input" )
-		\ 先把 "^\t*\S.*"+'x' 切開成 "^\t*", "\S.*x". Where the dummy x guarantees the pattern
-		char x + :> match(/(^\t*)(\S.*)/) ( tab-spaces [0:all][1:\t*][2:\S.*x] )
-		\ 把 [1] 全部 \t 換成 space
-		<js> tos()[1].replace(/\t/g,pop(1))</jsV> ( [0:all][1:\t*][2:\S.*x] "1:spaces" )
-		\ 把後半部接回去並去掉 dummy x
-		js> pop(1)[2] + :> slice(0,-1) ;		
-		/// Value tab-spaces specifies how many spaces to replace a TAB.
-		/// Works on a single line only.
-		/// 只針對行首的連續 \t 轉換。
-		
-	\ ---------- <unindent>...</unindent> --------------------------------------------------
-	code all-blank? ( string-array -- T/f ) \ Are string-array lines all white spaces?
-		push(pop().join("").search(/\S/)==-1)
-		end-code
-	code <string-array	( string-array -- shifted-array ) \ Remove the 1st char of all lines
-		for(var i=0,aa=pop(); i<aa.length; i++) 
-			if (aa[i].length) aa[i] = aa[i].slice(1);
-		end-code
-		/// Sift left of the entire string-array.
-		/// Do nothing to blank lines.
-	code hit-left-end? ( string-array -- T/f ) \ Check if any \S at 1st char of any line.
-		for(var i=0,aa=pop(),flag=false; i<aa.length; i++) {
-			if (aa[i].length) {
-				if (aa[i].search(/^\S/)!=-1) {
-					flag = true;
-					break;
-				}
-			}
-		}		
-		push(flag)
-		end-code
-		/// unindent 已經完成的條件。
-	: <paragraph ( "paragraph" -- "shifted" ) \ 整段 paragraph 往左 shift 到有某一行撞到左邊為止。
-		dup :> split(/\r?\n\r?/) >r ( string | string-array )
-		r@ all-blank? if r> drop exit then drop \ leave the string, do nothing
-		\ ---- 轉換行首的 TAB ------------
-		r@ :> length dup for ( total | string-array countDown )
-			dup r@ - ( total i ) 
-			js> rtos(1)[tos()] ( total i line[i] ) \ 拿出一行
-			^tab>spaces  ( total i cooked ) 	   \ 轉換 ^\t*
-			js: rtos(1)[pop(1)]=pop() ( total )    \ 放回去
-		next drop 
-		\ ---- 整段往左移 ----------------
-		begin ( R: string-array ) \ one loop shift left one char
-			r@ hit-left-end? if r> :> join('\n') exit then \ 出口
-			r@ <string-array 
-		again ;
-	: unindent ( "input" -- "cooked" ) \ Shift left all <unindent>..</unindent> sections
-		s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
-		:> split(/(<unindent>|<\/unindent>)/) >r 
-		\ split 的結果：[之前][<unindent>][中間][</unindent>][重複]...
-		"" ( cooked ) begin 
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ 之前
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ <Unindent>
-			r@ :> shift() dup undefined = if drop r> drop exit then <paragraph + ( cooked ) \ 中間
-			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )  \ </Unindent>
-		again ;
-		:> slice(1,-1) \ remove dummy 'x'
-	;
-	
-	
-	
+
+[ ] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
+	--> See YNote: "在 Web browser 上直接編輯網頁內容"
+	-->	Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
+		IE and Edge can only save the original content like Chrome's "僅限網頁的HTML部分"。
+	--> jeforth.3htm 下這一行即可單獨弄出一塊 editable 的 <div> 區域。
+		s" body" <e> <div id=article contenteditable='true'>--edit me--</div></e>
+	--> 更妙的是
+		js> outputbox.contentEditable \ ==> inherit (string)
+	[x]	js: outputbox.contentEditable=true  <-- 不妨加入 shift + {F2} editMode ... Done!
+	--> 曾有過用 project-k 做成獨立的 template.html 實現此構想。直接執行:
+			chrome --allow-file-access-from-files
+		應該更好。有充分的資源可用。
+	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
