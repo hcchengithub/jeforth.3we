@@ -606,7 +606,7 @@
 			
 			<h2 id=3we>jeforth.3we 簡介</h2>
 			<p>
-				jeforth 是 「台灣符式協會 FitTaiwan」 兩位先進 
+				jeforth 是 「台灣符式協會 FigTaiwan」 兩位先進 
 				Yap 與 爽哥 所提示之用 JavaScript 打造 Forth 系統的方法。
 				我依法做出來的結果就稱為 jeforth.3we (3 Words Engine) 統稱同一個 
 				kernel 在不同環境的各種版本。
