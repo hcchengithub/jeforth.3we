@@ -316,94 +316,12 @@
     OK  js> self obj>keys .           \  ----- 3nw -----
     top, window, location, nwDispatcher, Intl, v8Intl, document, global,
     process, Buffer, root, require, $, jQuery, kvm, gui, revision, debug,
-    indebug, fs, screenbuffer, print, prompt, tabcompletion, keyboard,
-    forthConsoleHandler, base, stackwas, jQuery11020015018620295450091,
-    path, __nwWindowId, win, speechSynthesis, webkitNotifications,
-    localStorage, sessionStorage, applicationCache, webkitStorageInfo,
-    indexedDB, webkitIndexedDB, crypto, CSS, performance, console,
-    devicePixelRatio, styleMedia, parent, opener, frames, self,
-    defaultstatus, defaultStatus, status, name, length, closed, pageYOffset,
-    pageXOffset, scrollY, scrollX, screenTop, screenLeft, screenY, screenX,
-    innerWidth, innerHeight, outerWidth, outerHeight, offscreenBuffering,
-    frameElement, clientInformation, navigator, toolbar, statusbar,
-    scrollbars, personalbar, menubar, locationbar, history, screen,
-    postMessage, close, blur, focus, ondeviceorientation, ontouchcancel,
-    ontouchend, ontouchmove, ontouchstart, ontransitionend,
-    onwebkittransitionend, onwebkitanimationstart,
-    onwebkitanimationiteration, onwebkitanimationend, onsearch, onreset,
-    onwaiting, onvolumechange, onunload, ontimeupdate, onsuspend, onsubmit,
-    onstorage, onstalled, onselect, onseeking, onseeked, onscroll, onresize,
-    onratechange, onprogress, onpopstate, onplaying, onplay, onpause,
-    onpageshow, onpagehide, ononline, onoffline, onmousewheel, onmouseup,
-    onmouseover, onmouseout, onmousemove, onmousedown, onmessage,
-    onloadstart, onloadedmetadata, onloadeddata, onload, onkeyup,
-    onkeypress, onkeydown, oninvalid, oninput, onhashchange, onfocus,
-    onerror, onended, onemptied, ondurationchange, ondrop, ondragstart,
-    ondragover, ondragleave, ondragenter, ondragend, ondrag, ondblclick,
-    oncontextmenu, onclick, onchange, oncanplaythrough, oncanplay, onblur,
-    onbeforeunload, onabort, getSelection, stop, open, showModalDialog,
-    alert, confirm, find, scrollBy, scrollTo, scroll, moveBy, moveTo,
-    resizeBy, resizeTo, matchMedia, setTimeout, clearTimeout, setInterval,
-    clearInterval, requestAnimationFrame, cancelAnimationFrame,
-    webkitRequestAnimationFrame, webkitCancelAnimationFrame,
-    webkitCancelRequestAnimationFrame, atob, btoa, addEventListener,
-    removeEventListener, getComputedStyle, getMatchedCSSRules,
-    webkitConvertPointFromPageToNode, webkitConvertPointFromNodeToPage,
-    dispatchEvent, webkitRequestFileSystem, webkitResolveLocalFileSystemURL,
-    openDatabase, TEMPORARY, PERSISTENT
-
+	... snip ...
+	
     js> document obj>keys .      \ -------- 3HTA ----------------
     doctype, documentElement, implementation, inputEncoding, xmlEncoding,
     xmlStandalone, xmlVersion, styleSheets, defaultView, URL, activeElement,
-    alinkColor, all, anchors, applets, bgColor, body, characterSet, charset,
-    compatMode, cookie, defaultCharset, designMode, dir, domain, embeds,
-    fgColor, forms, head, images, lastModified, linkColor, links, location,
-    onabort, onblur, oncanplay, oncanplaythrough, onchange, onclick,
-    oncontextmenu, ondblclick, ondrag, ondragend, ondragenter, ondragleave,
-    ondragover, ondragstart, ondrop, ondurationchange, onemptied, onended,
-    onerror, onfocus, oninput, onkeydown, onkeypress, onkeyup, onload,
-    onloadeddata, onloadedmetadata, onloadstart, onmousedown, onmousemove,
-    onmouseout, onmouseover, onmouseup, onmousewheel, onpause, onplay,
-    onplaying, onprogress, onratechange, onreadystatechange, onreset,
-    onscroll, onseeked, onseeking, onselect, onstalled, onsubmit, onsuspend,
-    ontimeupdate, onvolumechange, onwaiting, plugins, readyState, referrer,
-    scripts, title, vlinkColor, URLUnencoded, compatible, documentMode,
-    frames, media, msCapsLockWarningOff, namespaces, onactivate,
-    onafterupdate, onbeforeactivate, onbeforedeactivate, onbeforeeditfocus,
-    onbeforeupdate, oncellchange, oncontrolselect, ondataavailable,
-    ondatasetchanged, ondatasetcomplete, ondeactivate, onerrorupdate,
-    onfocusin, onfocusout, onhelp, onmssitemodejumplistitemremoved,
-    onmsthumbnailclick, onpropertychange, onrowenter, onrowexit,
-    onrowsdelete, onrowsinserted, onselectionchange, onselectstart, onstop,
-    onstoragecommit, parentWindow, security, uniqueID, selection,
-    fileCreatedDate, fileModifiedDate, fileSize, fileUpdatedDate, mimeType,
-    nameProp, protocol, rootElement, adoptNode, createAttribute,
-    createAttributeNS, createCDATASection, createComment,
-    createDocumentFragment, createElement, createElementNS,
-    createProcessingInstruction, createTextNode, getElementById,
-    getElementsByTagName, getElementsByTagNameNS, importNode, createEvent,
-    createRange, createNodeIterator, createTreeWalker, elementFromPoint,
-    close, execCommand, getElementsByClassName, getElementsByName,
-    getSelection, hasFocus, open, queryCommandEnabled, queryCommandIndeterm,
-    queryCommandState, queryCommandSupported, queryCommandText,
-    queryCommandValue, write, writeln, attachEvent, detachEvent,
-    createEventObject, fireEvent, execCommandShowHelp, focus,
-    releaseCapture, updateSettings, createStyleSheet, removeNode,
-    replaceNode, swapNode, querySelector, querySelectorAll, attributes,
-    childNodes, firstChild, lastChild, localName, namespaceURI, nextSibling,
-    nodeName, nodeType, nodeValue, ownerDocument, parentNode, prefix,
-    previousSibling, textContent, addEventListener, dispatchEvent,
-    removeEventListener, appendChild, cloneNode, compareDocumentPosition,
-    hasAttributes, hasChildNodes, insertBefore, isDefaultNamespace,
-    isEqualNode, isSameNode, isSupported, lookupNamespaceURI, lookupPrefix,
-    normalize, removeChild, replaceChild, ATTRIBUTE_NODE,
-    CDATA_SECTION_NODE, COMMENT_NODE, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE,
-    DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_CONTAINS,
-    DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_FOLLOWING,
-    DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, DOCUMENT_POSITION_PRECEDING,
-    DOCUMENT_TYPE_NODE, ELEMENT_NODE, ENTITY_NODE, ENTITY_REFERENCE_NODE,
-    NOTATION_NODE, PROCESSING_INSTRUCTION_NODE, TEXT_NODEOK
-
+	... snip ...
 
     js: document.onmouseout=function(){alert(222)}  \ 靠！真的會在 mouse 移開時打 alert()
     js: document.onmouseout=null
@@ -566,51 +484,11 @@
     來看看 jeforth.3hta 的 outputbox element 有哪些 members ?
     js> document.body.children.jeforth.children.outputbox obj>keys .
         align, noWrap, dataFld, dataFormatAs, dataSrc, currentStyle, runtimeStyle,
-        accessKey, className, contentEditable, dir, disabled, id, innerHTML,
-        isContentEditable, lang, offsetHeight, offsetLeft, offsetParent, offsetTop,
-        offsetWidth, onabort, onblur, oncanplay, oncanplaythrough, onchange, onclick,
-        oncontextmenu, ondblclick, ondrag, ondragend, ondragenter, ondragleave,
-        ondragover, ondragstart, ondrop, ondurationchange, onemptied, onended,
-        onerror, onfocus, oninput, onkeydown, onkeypress, onkeyup, onload, onloadeddata,
-        onloadedmetadata, onloadstart, onmousedown, onmousemove, onmouseout,
-        onmouseover, onmouseup, onmousewheel, onpause, onplay, onplaying, onprogress,
-        onratechange, onreadystatechange, onreset, onscroll, onseeked, onseeking,
-        onselect, onstalled, onsubmit, onsuspend, ontimeupdate, onvolumechange,
-        onwaiting, outerHTML, style, tabIndex, title, all, behaviorUrns, canHaveChildren,
-        canHaveHTML, children, document, filters, hideFocus, innerText, isDisabled,
-        isMultiLine, isTextEdit, language, onactivate, onafterupdate, onbeforeactivate,
-        onbeforecopy, onbeforecut, onbeforedeactivate, onbeforeeditfocus, onbeforepaste,
-        onbeforeupdate, oncellchange, oncontrolselect, oncopy, oncut, ondataavailable,
-        ondatasetchanged, ondatasetcomplete, ondeactivate, onerrorupdate, onfilterchange,
-        onfocusin, onfocusout, onhelp, onlayoutcomplete, onlosecapture, onmouseenter,
-        onmouseleave, onmove, onmoveend, onmovestart, onpaste, onpropertychange, onresize,
-        onresizeend, onresizestart, onrowenter, onrowexit, onrowsdelete, onrowsinserted,
-        onselectstart, outerText, parentElement, parentTextEdit, readyState, recordNumber,
-        scopeName, sourceIndex, tagUrn, uniqueID, uniqueNumber, blur, click, focus,
-        getElementsByClassName, insertAdjacentHTML, scrollIntoView, componentFromPoint,
-        doScroll, attachEvent, detachEvent, addBehavior, addFilter, applyElement,
-        clearAttributes, contains, dragDrop, getAdjacentText, insertAdjacentElement,
-        insertAdjacentText, mergeAttributes, releaseCapture, removeBehavior, removeFilter,
-        replaceAdjacentText, setActive, setCapture, createControlRange, removeNode,
+		... snip ...
         replaceNode,
         http://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_node_replacechild
         swapNode, clientHeight, clientLeft, clientTop, clientWidth, scrollHeight,
-        scrollLeft, scrollTop, scrollWidth, tagName, childElementCount, firstElementChild,
-        lastElementChild, nextElementSibling, previousElementSibling, getAttribute,
-        getAttributeNS, getAttributeNode, getAttributeNodeNS, getBoundingClientRect,
-        getClientRects, getElementsByTagName, getElementsByTagNameNS, hasAttribute,
-        hasAttributeNS, removeAttribute, removeAttributeNS, removeAttributeNode, setAttribute,
-        setAttributeNS, setAttributeNode, setAttributeNodeNS, fireEvent, msMatchesSelector,
-        querySelector, querySelectorAll, attributes, childNodes, firstChild, lastChild,
-        localName, namespaceURI, nextSibling, nodeName, nodeType, nodeValue, ownerDocument,
-        parentNode, prefix, previousSibling, textContent, addEventListener, dispatchEvent,
-        removeEventListener, appendChild, cloneNode, compareDocumentPosition, hasAttributes,
-        hasChildNodes, insertBefore, isDefaultNamespace, isEqualNode, isSameNode, isSupported,
-        lookupNamespaceURI, lookupPrefix, normalize, removeChild, replaceChild, ATTRIBUTE_NODE,
-        CDATA_SECTION_NODE, COMMENT_NODE, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE,
-        DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_CONTAINS, DOCUMENT_POSITION_DISCONNECTED,
-        DOCUMENT_POSITION_FOLLOWING, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
-        DOCUMENT_POSITION_PRECEDING, DOCUMENT_TYPE_NODE, ELEMENT_NODE, ENTITY_NODE,
+		... snip ...
         ENTITY_REFERENCE_NODE, NOTATION_NODE, PROCESSING_INSTRUCTION_NODE, TEXT_NODE OK
 
 [x] 亂定一堆 global variable 很令人不安，例如 kernelfso 等。 乾脆全部掛給 kvm 好過掛給 window ?
@@ -4439,7 +4317,7 @@
 [x] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
 	以避免干擾其他操作。
 	
-[ ] 撰寫 cloth.md / cloth.html 
+[x] 撰寫 cloth.md / cloth.html ==> tutor-cloth.f is better !!
 
 [ ] cloth.f 發現 up/down recall command history 時,	popup menu 有點怪。
 	最好能讓 command history popup menu 真的 popup 出來，以適應不同版面。
@@ -4447,6 +4325,7 @@
 	
 [ ] help ==> How to	Run the HTML version online. Click here to run.
 	change to rawgit.com
+	
 [x] up/down 直接 recall history 有點煩, 改成 default disabled。
 	
 [x] 合併 [if][else][then][begin][again][until][for][next] 成對應的 if else ... etc 
@@ -4476,11 +4355,6 @@
 	o <code>...</code> 是最裡面的, 即 <pre>..</pre> 要包在外面。
 	==> code <code>escape ( "raw string" -- "cooked string" ) \ Escape '<','>' in <code> tag.
 	==> In unindent.f now
-
-[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
-	facing the Access-Control-Allow-xxxxx 的問題。
-	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
-	==> study https://pages.github.com/
 	
 [x] tutor-cloth.f source code 本身的美感略顯不足，因為 <pre> 區段不能 indent。
 	構想是：設計一個 <unindent>...</unindent> tag 用來把其中的整段落往左 shift 到有某一行
@@ -4523,22 +4397,8 @@
 	But it doesn't work on my desk at home:
 	C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe>MicrosoftEdge.exe --allow-file-access-from-files file:///c:/Users/hcche/Documents/GitHub/jeforth.3we/index.html
 	--
-[ ] 爽哥 的 cloth_sam.f 革除原版不像 forth 的缺點。	
-[ ] shift-F2 in trouble on 3hta.
-
-[ ] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
-	--> See YNote: "在 Web browser 上直接編輯網頁內容"
-	-->	Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
-		IE and Edge can only save the original content like Chrome's "僅限網頁的HTML部分"。
-	--> jeforth.3htm 下這一行即可單獨弄出一塊 editable 的 <div> 區域。
-		s" body" <e> <div id=article contenteditable='true'>--edit me--</div></e>
-	--> 更妙的是
-		js> outputbox.contentEditable \ ==> inherit (string)
-	[x]	js: outputbox.contentEditable=true  <-- 不妨加入 shift + {F2} editMode ... Done!
-	--> 曾有過用 project-k 做成獨立的 template.html 實現此構想。直接執行:
-			chrome --allow-file-access-from-files
-		應該更好。有充分的資源可用。
-	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
+[x] 爽哥 的 cloth_sam.f 革除原版不像 forth 的缺點。	
+[x] shift-F2 in trouble on 3hta. --> fixed
 
 [x] Bug ! both HTA and Chrome, why I didn't find this before?
 	==>	: test <text> /*aabbcc*/ </text> ;
@@ -4570,10 +4430,34 @@
 	[x]	考慮 string constant 可能很長, literal 用 /*...*/ 顯示的方式還要再考慮周詳一點。
 		例如長字串要截斷，碰到 */ 要改成 *_/ 即可避免 .. Bingo!!
 
-[ ] I was working on git.f, trying to make the article section more sexy.
+[x] I was working on git.f, trying to make the article section more sexy.
 	Now at the 5.5 section.
+	--> fix shift-F2 hang issue on 3HTA first.
+		js: document.designMode="on" <=== 3HTA 一下就出問題, 合理。
+		js: outputbox.contentEditable="true" <== 3HTA 真的只針對 outputbox, Chrome 全部都 editable!
+	--> 3hta 反而好!!
+	
+[x] 照 爽哥 建議增加 tutor-cloth.f 畫線的例子。
+	hcchen5600 2015/12/03 17:09:31 
+		
+[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
+	facing the Access-Control-Allow-xxxxx 的問題。
+	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
+	==> study https://pages.github.com/
 
-
+[ ] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
+	--> See YNote: "在 Web browser 上直接編輯網頁內容"
+	-->	Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
+		IE and Edge can only save the original content like Chrome's "僅限網頁的HTML部分"。
+	--> jeforth.3htm 下這一行即可單獨弄出一塊 editable 的 <div> 區域。
+		s" body" <e> <div id=article contenteditable='true'>--edit me--</div></e>
+	--> 更妙的是
+		js> outputbox.contentEditable \ ==> inherit (string)
+	[x]	js: outputbox.contentEditable=true  <-- 不妨加入 shift + {F2} editMode ... Done!
+	--> 曾有過用 project-k 做成獨立的 template.html 實現此構想。直接執行:
+			chrome --allow-file-access-from-files
+		應該更好。有充分的資源可用。
+	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
 
 
 

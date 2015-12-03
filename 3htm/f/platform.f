@@ -14,13 +14,9 @@ also forth definitions
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				[ last literal ] ( _me )
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
-					drop ( remove _me from TOS ) ." Output box EditMode = " 
-					js> outputbox.contentEditable!="true" if
-						js> document.designMode="on";outputbox.contentEditable="true"
-					else
-						js> document.designMode="off";outputbox.contentEditable="false"
-					then
-					. cr
+					drop ( remove _me from TOS ) cr ." Output box EditMode = " 
+					js> outputbox.contentEditable!="true" if char true else char false then
+					js> outputbox.contentEditable=pop() . cr
 				else ( F2 for inputbox )
 					." Input box EditMode = " 
 					\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS

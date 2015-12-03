@@ -867,7 +867,8 @@ code literal 	( n -- ) \ Compile TOS as an anonymous constant
 				var getLiteral = eval(
 						"var f;f=function(){push(literal)/*(" 
 						+ mytypeof(literal) + ")" 
-						+ literal.toString().slice(0,20).replace(/\*[/]/,"*_/") // avoid "*/" and longer string
+						// avoid all "*/" and longer string
+						+ literal.toString().slice(0,20).replace(/\*[/]/g,"*_/") 
 						+ " */}"
 					);
 				comma(getLiteral);
