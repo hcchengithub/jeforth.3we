@@ -381,13 +381,30 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 						456 char 123 jsEvalNo [d 456 d] [p "jsEvalNo" p]
 				</selftest>
 
-code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
+code old-jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
 				var ss=pop();
 				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
 				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
 				ss = ss.replace(/(\n|\r)*/gm,''); // merge to one line
-				ss = ss.replace(/\s*\/\*.*?\*\/\s*/gm,''); // remove /* */ comments
+				ss = ss.replace(/\s*[/]\*(.|\r|\n)*?\*[/]\s*/gm,''); // remove /* */ comments
 				ss = ss.replace(/;*\s*$/,''); // remove ending ';' from the last statement
+				var parsed=ss.match(/^(.*;)(.*)$/); // [entire string,fore part,last statement]|NULL
+				if (parsed){
+					eval("push(function(){" + parsed[1] + "push(" + parsed[2] + ")})");
+				}else{
+					eval("push(function(){push(" + ss + ")})");
+				}
+				end-code
+				
+				
+code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
+				var source = ss = pop();
+				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
+				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
+				ss = ss.replace(/\s*[/]\*(.|\r|\n)*?\*[/]\s*/gm,''); // remove /* */ comments
+				ss = ss.replace(/;*\s*;*(\n|\r)*/gm,';'); // merge to one line
+				ss = ss.replace(/;*\s*$/,''); // remove ending ';' from the last statement
+				ss = ss.match(/^(.*;)(['"].*['"])$/); 
 				var parsed=ss.match(/^(.*;)(.*)$/); // [entire string,fore part,last statement]|NULL
 				if (parsed){
 					eval("push(function(){" + parsed[1] + "push(" + parsed[2] + ")})");
@@ -1265,17 +1282,17 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				BL word (create) <js> 
 				last().type = "constant";
 				var s = 'var f;f=function(){push(vm.g["' 
-						+ last().name 
+						+ last().name.replace(/"/g,"\\\"")
 						+ '"])}';
 				last().xt = eval(s);
 				vm.g[last().name] = pop();
 				</js> reveal ; 
-: value 		( n <name> -- ) \ Create a 'value' variable, Don't use " in <name>.
+: value 		( n <name> -- ) \ Create a 'value' variable.
 				constant last :: type='value' ; 
 : to 			( n <value> -- ) \ Assign n to <value>.
 				' ( word ) <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
 				compiling if ( word ) 
-					<js> var s='var f;f=function(){/* to */ vm.g["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+					<js> var s='var f;f=function(){/* to */ vm.g["'+pop().name.replace(/"/g,"\\\"")+'"]=pop()}';push(eval(s))</js> ( f ) ,
 				else ( n word )
 					js: vm.g[pop().name]=pop()
 				then ; immediate
