@@ -381,7 +381,7 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 						456 char 123 jsEvalNo [d 456 d] [p "jsEvalNo" p]
 				</selftest>
 
-code old-jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
+code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
 				var ss=pop();
 				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
 				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
@@ -396,22 +396,22 @@ code old-jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() 
 				}
 				end-code
 				
-				
-code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
-				var source = ss = pop();
-				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
-				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
-				ss = ss.replace(/\s*[/]\*(.|\r|\n)*?\*[/]\s*/gm,''); // remove /* */ comments
-				ss = ss.replace(/;*\s*;*(\n|\r)*/gm,';'); // merge to one line
-				ss = ss.replace(/;*\s*$/,''); // remove ending ';' from the last statement
-				ss = ss.match(/^(.*;)(['"].*['"])$/); 
-				var parsed=ss.match(/^(.*;)(.*)$/); // [entire string,fore part,last statement]|NULL
-				if (parsed){
-					eval("push(function(){" + parsed[1] + "push(" + parsed[2] + ")})");
-				}else{
-					eval("push(function(){push(" + ss + ")})");
-				}
-				end-code
+\ debugging the string literal "abc;" as the last statement issue hcchen5600 2015/12/04 20:46:36 
+\ code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
+\ 				var source = ss = pop();
+\ 				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
+\ 				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
+\ 				ss = ss.replace(/\s*[/]\*(.|\r|\n)*?\*[/]\s*/gm,''); // remove /* */ comments
+\ 				ss = ss.replace(/;*\s*;*(\n|\r)*/gm,';'); // merge to one line
+\ 				ss = ss.replace(/;*\s*$/,''); // remove ending ';' from the last statement
+\ 				ss = ss.match(/^(.*;)(['"].*['"])$/); 
+\ 				var parsed=ss.match(/^(.*;)(.*)$/); // [entire string,fore part,last statement]|NULL
+\ 				if (parsed){
+\ 					eval("push(function(){" + parsed[1] + "push(" + parsed[2] + ")})");
+\ 				}else{
+\ 					eval("push(function(){push(" + ss + ")})");
+\ 				}
+\ 				end-code
 				
 code jsFuncNo	( "js code" -- function ) \ Compile JavaScript to a function()
 				eval("push(function(){" + pop() + "})"); 

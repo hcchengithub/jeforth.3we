@@ -4479,11 +4479,100 @@
 [ ] Bug found!!
 	> : test js> "123;" ;
 	JavaScript error on word "jsFunc" : Expected ';'
-	--> ok with js: "123;", only js> has the problem.
-	
+	--> ok with js: "123;", only js> has the problem. 
+	--> jsFunc is for js> that push the value of the last statement. 
+		Problem is that the last statement can be a sting literal that includes ';' !!
+		So, how to isolate *the last statement* is the challange. My recent  jsFunc is
+		not good enough for this case. -- hcchen5600 2015/12/04 20:40:13 
+	[ ]	Idea of the solution
+		--> Find all "..." and '....' literals, replace ';' to __semicolon__ 
+		--> Do the existing process to isolate the last statement.
+		--> Replace back __semicolon__ to ';' for both portion.
+		So two new words needed ;>semicolon and semicolon>;
+
+研究如何把出現在 jeforth code word definition 裡面的 JavaScript source code 當中的 "..;.." 分號都置換成 __SeMiCoLoN__ 以避免干擾最後一條 statement 的判斷。
+
+<text> aaa ' bbb "ccc;" ddd ' eee ";fff; 'ggg;hhh';" iii; </text> value source
+
+判斷 source 裡面有沒有 ['"]? 
+沒有就照本來的 jsFunc 方式處理就好了，本題結束。
+有的話繼續.....
+
+> source :> match(/['"]/) .
+' OK 
+> source :> match(/['"]/) js> JSON.stringify(pop()) .
+["'"] OK 
+> source :> match(/[&^]/) js> JSON.stringify(pop()) .
+null OK <==== 非 null 就是有了。
+
+有, 取得該 char 
+
+> dropall source :> match(/['"]/)[0] .s
+      0: ' (string)
+> :> length .
+1 OK 
+
+根據 ' or " 把 source 切成三塊
+
+RegEx 是一種 object, 首先確定可以這樣寫,
+> js> /^(.*?['])(.*?)(['].*)$/
+> .s
+      0: /^(.*?['])(.*?)(['].*)$/ (object)
+沒錯, 所以根據 ' or " 準備好恰當的 RegEx,
+
+cc char ' = if
+    js> /^(.*?['])(.*?)(['].*)$/
+else
+    js> /^(.*?["])(.*?)(["].*)$/
+then
+
+以下證實這個 RegEx 可以正確地把 source 切成三塊:
+
+> dropall
+js> /^(.*?['])(.*?)(['].*)$/
+source :> match(pop()) .s
+      0: aaa ' bbb "ccc;" ddd ' eee ";fff; 'ggg;hhh';" iii; , <== [0]整個
+aaa ', <=================================== [1] 前
+ bbb "ccc;" ddd , <======================== [2] 內
+' eee ";fff; 'ggg;hhh';" iii;  (array) <==== [3] 後, 還要再遞迴處理。
+ OK 
+
+> dropall
+js> /^(.*?["])(.*?)(["].*)$/
+source :> match(pop()) .s
+      0: aaa ' bbb "ccc;" ddd ' eee ";fff; 'ggg;hhh';" iii; , <== [0]整個
+aaa ' bbb ", <================================== [1] 前
+ccc;, <========================================= [2] 內
+" ddd ' eee ";fff; 'ggg;hhh';" iii;  (array) <=== [3] 後, 還要再遞迴處理。
+ OK 
+
+把【內】段中的 ; 置換成 __SeMiCoLoN__
+
+用 ' 處理
+
+> js> /^(.*?['])(.*?)(['].*)$/
+source :> match(pop())[2].replace(/;/,"__SeMiCoLoN__") .
+
+ bbb "ccc__SeMiCoLoN__" ddd OK 
+
+用 " 處理
+
+> js> /^(.*?["])(.*?)(["].*)$/
+source :> match(pop())[2].replace(/;/,"__SeMiCoLoN__") .
+
+ccc__SeMiCoLoN__ OK 
+
+最後整合成果:
+
+: (;>semicolon) ( source -- cooked raw ) \ 第一組 "..;.." 置換成 "..__SeMiCoLoN__.."
 
 
 
+
+/// 把 JavaScript source 當中第一組 "..;.." 置換成 "..__SeMiCoLoN__.."
+/// 之後未處理的部分以 raw 傳回, 當 raw 為 "" 表示處理完畢。
+
+		
 
 
 
