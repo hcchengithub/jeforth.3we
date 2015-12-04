@@ -819,7 +819,7 @@ s" git.f"   source-code-header
 		<table width=100%><td class=code><blockquote><code>
 			git checkout -b develop master
 		</code></blockquote></td></table>
-		<h3 id="將-develop-分支發佈到-master-分支的命令">將 develop 分支發佈到 Master 分支的命令：</h3>
+		<h3>將 develop 分支發佈到 Master 分支的命令：</h3>
 		<p>切換到Master分支</p>
 		<table width=100%><td class=code><blockquote><code>
 			git checkout master 
@@ -866,15 +866,13 @@ s" git.f"   source-code-header
 			<strong>從 develop 分支上面分出來的。開發完成後，
 			要再併入 develop。</strong>如果這個功能還沒出生就胎死腹中了，
 			那樣連合到 develop 的過程都不必了。功能分支的名字，
-			可以採用feature-*的形式命名。
+			可以採用 feature-x 的形式命名。
 		</p>
-		<p>創建一個功能分支：</p>
+		<h3>創建一個功能分支：</h3>
 		<table width=100%><td class=code><blockquote><code>
 			git checkout -b feature-x develop
 		</code></blockquote></td></table>
-		<p><br>
-			開發完成後，將功能分支合併到 develop 分支：
-		</p>
+		<h3>開發完成後，將功能分支合併到 develop 分支：</h3>
 		<table width=100%><td class=code><blockquote><pre><code><unindent>
 			git checkout develop
 			git merge --no-ff feature-x
@@ -940,18 +938,50 @@ s" git.f"   source-code-header
 		<h2>五點五、預發佈分支的第二種形式</h2>
 /* ------------------------------------------------------------------------ */		
 		<p>
-			想從 develop 裡面先抽一部分出來 merge 回 master 發佈。
-			這時候要從 master 分支出來，然後從 develop 裡 checkout 
-			部分檔案出來，經測試通過之後 merge 回 master。
-			同樣也得在 merge 回 develop 然後殺掉。
+			我覺得本形式用的更多，想從 develop 裡面先抽一部分出來 merge 回 master 發佈。
+			這時候要從 master 拉出一個暫時分支出來作為 working branch，然後從 
+			develop 裡 checkout 
+			部分檔案出來，經測試、修改通過之後 merge 回 master。
+			同樣也得在 merge 回 develop 之後殺掉。
+		</p>
+		<h3>從 master 拉出一個暫時分支</h3>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout -b <tempBranch> [master]
+		</code></blockquote></td></table>
+		<p>
+			or use git.f:
 		</p>
 		<table width=100%><td class=code><blockquote><code>
-			command line
+			checkout-to-new-branch <tempBranch> [master]			
 		</code></blockquote></td></table>
+		<p>
+			當前 working branch, 一般應該是 develop, 要先 
+			commit. 如果當前 working branch 就是 master 
+			則可以把尚未 commit 的檔案直接帶到新 tempBranch 去 commit.
+		</p>
+		<h3>從 develop 裡面挑揀要 release 的檔案：</h3>
+		<table width=100%><td class=code><blockquote><code>
+			git checkout develop path/Gruntfile.js  
+		</code></blockquote></td></table>
+		<p>
+			在 tempBranch 進行測試以及修改，最後完成
+			commit。然後 merge 上 master，且 merge 回 develop。  
+		</p>
 		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
+			commit -m "tempBranch ok now"
+			git checkout master
+			git merge --no-ff <tempBranch>
+			git checkout develop
+			git merge --no-ff <tempBranch>
 		</unindent></code><pre></blockquote></td></table>
+		<p>
+			最後，刪除 tempBranch：
+		</p>
+		<table width=100%><td class=code><blockquote><code>
+			git branch -d <tempBranch>
+		</code></blockquote></td></table>
+		
+/* ------------------------------------------------------------------------
 		<p>
 			text
 		</p>
@@ -962,77 +992,7 @@ s" git.f"   source-code-header
 			multiple command line
 			multiple command line
 		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-		<p>
-			text
-		</p>
-		<table width=100%><td class=code><blockquote><code>
-			command line
-		</code></blockquote></td></table>
-		<table width=100%><td class=code><blockquote><pre><code><unindent>
-			multiple command line
-			multiple command line
-		</unindent></code><pre></blockquote></td></table>
-/* ------------------------------------------------------------------------ */		
+------------------------------------------------------------------------ */		
 		<h2>六、修補 bug 分支</h2>
 /* ------------------------------------------------------------------------ */		
 		<p>
