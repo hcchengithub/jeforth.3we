@@ -5,7 +5,7 @@
 
 	include unindent.f
 	also forth definitions
-		
+	
 
 	<text>
 		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
@@ -33,7 +33,7 @@
 			</style>
 		</h> drop \ /* 丟掉 <h>..</h> 留下來的 <style> element object, 用不著 */
 		s" body" <e> /* 直接放到 <body> 後面 */
-		<div/*article*/ id=article class=essay><blockquote/*整篇文章*/>
+		<div/*article*/ contentEditable=true id=article class=essay><blockquote/*整篇文章*/>
 /* -------------------------------------------------------------------------- */
 			<h1>Article title</h1>
 /* -------------------------------------------------------------------------- */
@@ -71,7 +71,7 @@
 		</blockquote/*整篇文章*/></div/*article*/>
 		</e> drop /* 留下來的 element 沒用到 */
 	</text> 
-	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	/*remove*/ 		\ :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert		\ execute the string on TOS

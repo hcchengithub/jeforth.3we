@@ -87,14 +87,15 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				end-code
 
 : history-selector ( -- ) \ Popup command history for selection
-				<o> <br><select style="width:800px;padding-left:2px;font-size:16px;"></select></o> ( select )
+				<o> <br><select style="width:90%;padding-left:2px;font-size:16px;"></select></o> ( select )
 				<js> 
-					tos().size = Math.min(16,vm.cmdhistory.array.length);
 					for (var i=0; i<vm.cmdhistory.array.length; i++){
+						if(vm.cmdhistory.array[i].split('\n').length>1) continue;
 						var option = document.createElement("option");
 						option.text = vm.cmdhistory.array[i];
 						js: tos().add(option);
 					}
+					tos().size = Math.min(16,tos().length);
 					tos().selectedIndex=tos().length-1;
 					jump2endofinputbox.click();tos().focus();
 					var select = tos().onclick = function(){

@@ -4459,13 +4459,28 @@
 		應該更好。有充分的資源可用。
 	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
 
+[x] Alt-Up/Down should not recall multiple-line.
+	hcchen5600 2015/12/04 10:34:22 
+	
+[x] bug, constant name 若出現 " 就會出問題, 連帶使 value 也依樣。Variable 倒是 OK 的。
+	這個問題在 constant 的 help 裡早就提過了! 我一點印象也沒有。
+	解法應該是： replace(/"/g,"\\\"") ---> Bingo!!
+	to command 也有同樣的問題 --> Yes.
+	
+[ ] vm.g.variable 應該是 vm.g.voc.variable 才對, 
+	或者各自掛到 vocabulary object 底下去才對。
+	--> 這個問題跟 forth 本身把所有的 variable constant value 都當成 global 所造成的
+		隱憂差不多，頂多多一點。
+	[ ]	讓 value constant 檢查 the name 是否已經存在。
+	[ ] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
 
+[ ] The template.f project ==> modify.f
 
-
-
-
-
-
+[ ] Bug found!!
+	> : test js> "123;" ;
+	JavaScript error on word "jsFunc" : Expected ';'
+	--> ok with js: "123;", only js> has the problem.
+	
 
 
 
