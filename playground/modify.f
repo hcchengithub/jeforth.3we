@@ -15,12 +15,12 @@
 		
 	: ^^^==> ( -- T/f ) \ Move icommand and get pattern. Return true if found.
 		js> vm.g.command.indexOf("^^^==&gt;") ( idx )
-		dup -1 = if ( �S�ư��F ) drop false else ( idex )
-			\ ���F
+		dup -1 = if (  沒事做了 ) drop false else ( idex )
+			\  找到了
 			js> vm.g.command.slice(pop()) to command \ chop leading garbage
 			js> vm.g.command.search(/\^\^\^[+-]/) ( idx ) 
 			dup -1 = if ( idx )
-				\ �G�N�d�U idx 
+				\  故意留下 idx 
 				abort" Error! anticipating ^^^+ or ^^^- command not found!" 
 			else
 				js> vm.g.command.slice(0,tos()) to pattern \ get pattern
@@ -28,6 +28,6 @@
 			then
 			true
 		then ;
-		
+\ [ ] /* ... */ comments 當然要留著, 別破壞到, 同時也不讓它們干擾到 modification 的工作。
 		
 
