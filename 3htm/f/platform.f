@@ -11,7 +11,7 @@ also forth definitions
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
 
-: {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
+: old{F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				[ last literal ] ( _me )
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
 					drop ( remove _me from TOS ) cr ." Output box EditMode = " 
@@ -28,7 +28,29 @@ also forth definitions
 				js: jump2endofinputbox.click();inputbox.focus();
 				false ;
 				/// return a 'false' to stop the hotkey event handler chain.
-
+: {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
+				\ 以下都不能用 cr 改用 js: type('\n'); cr 中有 1 nap suspend, event handler 不能 suspend。
+				js> event&&event.shiftKey if ( shift+F2 for outputbox )
+					char toggle-outputbox-edit-mode execute false exit then \ shift-F2
+				js> event&&event.ctrlKey if ( ctrl+F2 for contentEdit )
+					char content-handler execute false exit then
+				char toggle-inputbox-edit-mode execute false \ F2 w/o shifted key
+				;
+				/// return a 'false' to stop the hotkey event handler chain.
+: toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
+				." Input box EditMode = " ['] {F2} 
+				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
+				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
+				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
+				then js: styleTextareaFocus.innerHTML=pop() ;
+: toggle-outputbox-edit-mode ( -- ) \ One of the {F2} events
+				js: type('\n') ." Output box EditMode = " 
+				js> outputbox.contentEditable!="true" if char true else char false then
+				js> outputbox.contentEditable=pop() 
+				. js: type('\n') ;
+: content-handler ( -- getSelection ) \ Get the anchorNode to ce (current element).
+				js> window.getSelection().anchorNode ce! ce ;
+				
 code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				var r = inputbox.rows;
 				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;

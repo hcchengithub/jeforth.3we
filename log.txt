@@ -4479,13 +4479,17 @@
 	[ ] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
 
 [ ] The template.f project ==> modify.f
+[ ] words and help will list the exactly same word multiple times 
+	depends on the order list. Try not. Simply check the recent i and the order
+	list if [i] appear earlier then skip it.
 
 [x] Bug found!!
 	> : test js> "123;" ;
 	JavaScript error on word "jsFunc" : Expected ';'
 	--> ok with js: "123;", only js> has the problem. 
 	--> jsFunc is for js> that push the value of the last statement. 
-		Problem is that the last statement can be a sting literal that includes ';' and causes the mess up.
+		Problem is that the last statement can be a string literal that 
+		includes ';' which is not an end of a statement!
 		So, how to isolate *the last statement* is the challange. My recent  jsFunc is
 		not good enough for this case. -- hcchen5600 2015/12/04 20:40:13 
 	--> Not only in string but also in RegEx like this,
@@ -4495,7 +4499,16 @@
 		研究如何把出現在 jeforth code word definition 裡面的 
 		JavaScript source code 當中的 "..;.." 分號都置換成 __SeMiCoLoN__ 
 		以避免干擾最後一條 statement 的判斷。
-		--> Find all "..." and '....' literals, replace ';' to __semicolon__ 
+		--> Find all ['"/].;.;.['"/] literals, replace ';' to __semicolon__ 
 		--> Do the existing process to isolate the last statement.
 		--> Replace __semicolon__ back to ';' for both portion.
 		==> Bingo!!
+		[ ] Escape characters are still a problem.
+			"ab\"cd" is ab"cd
+			Also /...\/.../ or /...[/].../ too.
+
+[ ]	重新考慮要不要這個東西
+	js: jump2endofinputbox.click();
+	contentEditable 之後很煩。
+
+

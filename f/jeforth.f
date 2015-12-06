@@ -384,7 +384,8 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
 				// 切出最後一個 statement 以傳回其值比想像中困難。
 				// 規定除了最後一行之外行末尾的 ; 不能省略。
-				// 出現在 ['"/] 當中的 ';' 會造成分辨錯亂, 必須先換掉, 然後再換回來, 這就一大段了。
+				// 出現在 ['"/] 當中的 ';' 會造成分辨錯亂, 必須先換掉, 然後再換回來, 這
+				// 就一大段了。即使如此 string 以及 RegEx 中又有 escape char 尚未周全！
 				var ss=pop();
 				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,'') // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
 				       .replace(/\s*\/\/.*$/gm,'') // remove // comments
@@ -402,7 +403,6 @@ code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that
 				}
 				function replace_semicolon_in_quotes(source) { 
 					// return ['"/]foo;bar['"/] ==> ['"/]foo__SeMiCoLoN__bar['"/]
-					// 如果有 JavaScript error : Cannot read property '1' of null 檢查輸入的 ['"/] 是否不平衡。
 					var result = "";
 					for (;;) {
 						var aa = nextQuote(source); // ["cooked","raw"]
@@ -420,9 +420,13 @@ code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that
 							default  : var re = /^(.*?)([/].*?[/])(.*)$/;
 						}
 						var pieces = source.match(re);
-						result += pieces[1];
-						result += pieces[2].replace(/;/g,"__SeMiCoLoN__");
-						return [result,pieces[3]];
+						if(pieces) {
+							result += pieces[1];
+							result += pieces[2].replace(/;/g,"__SeMiCoLoN__");
+							return [result,pieces[3]];
+						} else 
+							return([source,""]); 
+						    // 已經不平衡了,算了。因為 ['"/] 裡又可能有 escape char 目前不夠周全。
 					}
 				}
 				end-code
