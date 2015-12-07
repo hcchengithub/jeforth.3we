@@ -4519,29 +4519,49 @@
 
 [ ] 如何把很大的檔案收一部分起來，以方便操作？ 用 hide() 吧？
 
+[ ] Ctrl-F2 之後,把 anchor 所在的 element 改成 command-line style.
+	\ anchor at the target position
+	\ press Ctrl-F2
+	\ you get a #text at which is your anchor 
 
-<text> <style id=articleStyle>
-	.default { /* 整篇文章 */
-		font-family: courier new;  /* 用於 my log.html */
-		letter-spacing: 0px;
-		line-height: 160%;
-		tab-size:4; /* IE,Edge 無效(hcchen5600 2015/12/07 11:51:34); Chrome 有效  */
-	}
-	code, .code { /* in line code clause */
-		font-family: courier new;
-		font-size: 120%; /* courier 的筆畫細所以要大一點 */
-		background: #E0E0E0;
-	}
-	table { /* example command line */
-		width: 100%;
-	}
-	.source {  /* multiple lines source code block */
-		font-size:100%;
-		letter-spacing:0px"
-		line-height: 120%;
-	}
-</style></text> /*remove*/
-js: articleStyle :: outerHTML=pop()
+	[object Text] bla bla bla...
 
-js> article.innerHTML command-file writeTextFile
-js> article.outerHTML command-file writeTextFile
+	> The #text node's parentNode ==> char .. (ce)
+	> ce
+	[object HTMLParagraphElement] innerHTML=bla bla bla
+		0 : [object Text] bla bla bla...
+	--> In this case, it's a P node.
+
+	\ Now we have the target element.
+	\ Then let's create a table node. 我需要取得最內層之 <code> 的 ID 希望可以用
+	\ 暫時的 mytemp 用完就把它取消掉，能這樣做就簡單了。應該用 removeAttribute() 可
+	\ 以做到。
+
+	\ 試試看 element ID 可不可以拿掉？ 答案是可以的。
+	\ element :: removeAttribute("id") 即可。
+
+	> <o> <h1 id=abc>xxx</h1></o> constant xxx
+	> xxx :> outerHTML ==> <h1 id="abc">xxx</h1>
+	> xxx :: removeAttribute("id") 
+	 > xxx :> outerHTML ==> <h1>xxx</h1>
+
+	動手了：
+
+	<o> 
+		<table class=commandline><td>
+		<code id=tempid class=source>
+		</code></td></table>
+	</o> ( from )
+	ce@ :> nodeValue js: tempid.innerText=pop()
+	js: tempid.removeAttribute("id")
+	ce@ :> parentNode replaceNode
+
+	: change-to-code-style ( -- ) \ Change the ce@ to code style
+		<o> <table class=commandline><td>
+		<code id=tempid class=source>
+		</code></td></table></o> ( from )
+		ce@ :> nodeValue js: tempid.innerText=pop()
+		js: tempid.removeAttribute("id")
+		ce@ :> parentNode replaceNode ;
+		
+
