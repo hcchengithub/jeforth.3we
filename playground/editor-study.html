@@ -1,0 +1,61 @@
+﻿<style id="mystyle" type="text/css">
+				
+				.default { 
+					
+					
+					
+					
+					font-family: Microsoft JhengHei;  
+					letter-spacing: 0px;
+					line-height: 160%;
+					tab-size:4; 
+				}
+				
+				code { 
+					font-family: courier new;
+					font-size: 120%; 
+					background: #E0E0E0; 
+				}
+				
+				.commandline { 
+					width: 90%;
+					background: #E0E0E0; 
+				}
+				.source {  
+					font-size: 100%;   
+					line-height: 100%; 
+				}
+			</style><div class="default" id="myarticle" contentEditable="true"><blockquote>
+
+			<h1>用 jeforth 在網頁上直接編輯 HTML 文章</h1>
+
+			<img src="doc/jeforth-demo-cloth-2015-11-201.jpg">
+
+			<p>
+	規定要用 jeforth 在網頁上直接編輯的文章包括兩大部分：前一部分是一個 ID 為 mystyle 的 STYLE node：後一部分是一個名為 myarticle 的 DIV node，也就是像這樣的結構： &lt;style&gt;...&lt;/style&gt;&lt;div&gt;...&lt;/div&gt;。其他不在裡面的 node 都會被忽略掉。</p><p>雖然沒有 &lt;html&gt;, &lt;head&gt;, &lt;body&gt; 等常見的 TAG 但是所有的 WWW browser 都可以打開它沒有問題。【這樣做好像沒甚麼好處？如果說是把整個檔案讀進 jeforth 的網頁裡來進行編輯時，不必去費力氣去清除多餘的部分。其實也不費勁，既然有 ID 只抓 ID 不管其他部分就好了。】</p>
+
+			<h2>研究怎麼存檔</h2>
+
+			<p>
+取得 style element<br>js&gt; mystyle.outerHTML .<br></p><p style='font: 20px/32px "Microsoft JhengHei"; color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; font-size-adjust: none; font-stretch: normal; background-color: rgb(240, 240, 240); -webkit-text-stroke-width: 0px;'>取得本文<br>js&gt; myarticle.outerHTML .&nbsp;<br></p><p style='font: 20px/32px "Microsoft JhengHei"; color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; font-size-adjust: none; font-stretch: normal; background-color: rgb(240, 240, 240); -webkit-text-stroke-width: 0px;'>把兩個加起來存檔就可以草草成功了。因為要用到&nbsp;<span style="letter-spacing: 0px;">writeTextFile 所以必須要用到 3nw 或者 3hta。</span></p><p style='font: 20px/32px "Microsoft JhengHei"; color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; font-size-adjust: none; font-stretch: normal; background-color: rgb(240, 240, 240); -webkit-text-stroke-width: 0px;'>js&gt; mystyle.outerHTML+my<span style="letter-spacing: 0px;">article.outerHTML char playground/editor-study.html writeTextFile</span></p><p>&nbsp;&nbsp;	</p>
+
+
+			<h2>怎麼讀檔案進來編輯</h2>
+
+			<p>
+				先弄出一塊 DIV 空間放在網頁最下面，取名叫做 article：</p><p>
+s" body" &lt;e&gt; &lt;div&gt;myarticle&lt;/div&gt;&lt;/e&gt; constant article&nbsp;&nbsp;	</p><p>然後把檔案讀進來取代這塊空間：</p><p>char playground/editor-study.html readTextFile article :: innerHTML=pop()</p><p style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">本來有 article 要先清理乾淨(不是殺掉)：</p><p style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">article if article :: innerHTML="" then</p><p style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">article removeElement 是從 body 內把 article 移除，即使與 body 斷鏈&nbsp;article 整個還是存在。</p><p style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">完整的命令：</p><p><span style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; float: none; display: inline !important; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">run:&nbsp;article if article :: innerHTML="" else<span class="Apple-converted-space">&nbsp;</span></span><span style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: 0px; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">s" body" &lt;e&gt; &lt;div&gt;&lt;/div&gt;&lt;/e&gt; constant article then char playground/editor-study.html readTextFile article :: innerHTML=pop()</span><br class="Apple-interchange-newline">&nbsp;&nbsp;	</p>
+			<table class="commandline"><tbody><tr><td class="code">
+			<blockquote><pre><code class="source">
+source code
+</code></pre></blockquote></td></tr></tbody></table>
+
+			<h2>Ending</h2>
+
+			<p>
+				ending
+			</p>	
+			<p>--- The End ---</p>	
+			<p>H.C. Chen hcchen5600@gmail.com 2015.11.27</p>
+			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
+		</blockquote></div>

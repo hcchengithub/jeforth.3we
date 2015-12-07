@@ -1,13 +1,8 @@
 
-	\ unindent.f
-	\ 本 module 定義一些補充 HTML code 功能的命令。
+	s" unindent.f" source-code-header
 	
-	\ 最早是 replace(/\/\*(.|\r|\n)*?\*\//mg,"") 清除註解，使得 /* ... */ 可以用在 jeforth.3we
-	\ 的 HTML sections 裡面。後來又發現別的需求，目前有的命令是：
-	\   unindent <code>escape
-	\ 請見各自的說明。
-	\ 將來看要不要整合成一個 word 所有功能全包?
-
+	\ 本 module 定義一些補充 HTML 的命令。
+	
 	\ ----------- unindent -----------------
 	\ unindent 讓你可以在 ~.f 檔的 HTML sections 中使用 <unindent >...</unindent >
 	\ 以保持 source code 整體一致的 indention。
@@ -115,12 +110,13 @@
 	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
 	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;
 	
-	code <>escape ( "string" -- "cooked" ) \ "<>" to "&lt;&gt;"
+	code <>escape ( "lines" -- "cooked" ) \ '<' '>' to "&lt;" "&gt;"
 		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;")||"";
 		push(result);
 		end-code
+		/// Support multiple lines
 		
-	: (<code>escape) ( "raw" -- "cooked" ) \ foo <code><> to &lt;&gt;</code> bar
+	: (<code>escape) ( "raw" -- "cooked" ) \ foo <code>'<' '>' to "&lt;" "&gt;"</code> bar
 		\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
 		\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,<>,</code>,bar 的形式。
 		:> split(/(<code.*?>|<\/code>)/) >r \ <code foo=bar> 也要考慮
@@ -131,16 +127,20 @@
 			r@ :> shift() dup undefined = if drop r> drop exit then + ( cooked )
 		again ;
 		/// foo bar must be both existing
+		/// Support multiple lines
 	
-	: <code>escape ( "raw" -- "cooked" ) \ <code>"<>" to "&lt;&gt;"</code>
+	: <code>escape ( "raw" -- "cooked" ) \ <code>'<' '>' to "&lt;" "&gt;"</code>
 		s" x" swap + s" x" + \ add dummy 'x' guarantee the pattern 
 		(<code>escape)
 		:> slice(1,-1) \ remove dummy 'x'
 		;
+		/// Support multiple lines
+		/// 只針對 <code> ... </code> 裡面。
 		
 	\ ----------- /* remove comment */ -----------------
 	: /*remove*/ ( "raw" -- "cooked" ) \ remove /* comments */ 
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") ; \ HTA 不能用 \/ 必須用 [/]
+		/// 使 /* ... */ 可以用在 HTML 裡面。
 		/// Support multiple comment lines in one pare of /* .. */
 		/// Not support nested.
 		

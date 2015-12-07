@@ -28,8 +28,8 @@
 					width: 100%;
 				}
 				.essay { 
-					font-family: Microsoft Yahei;
-					letter-spacing: 1px;
+					font-family: Microsoft JhengHei;
+					letter-spacing: 0px;
 					line-height: 160%;
 				}
 				.source { /*主要是把大小恢復否則 110% 太大了*/
@@ -322,7 +322,7 @@
 				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的，
 				Forth words 本身性空，意義都是我們「左看右看」隨心情給的。
 				這種情形在 Forth 裡比比皆是。
-				與中文神似，又加上「空性」使得設計得當的 Forth words 意味深長。
+				綜合以上提醒我們：設計得當的 Forth words 意味深長、用途充滿驚喜。
 			</p>
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
