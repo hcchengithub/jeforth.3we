@@ -31,17 +31,18 @@
 	: editbox  ( -- element ) \ Create an editbox at outputbox
 		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
-			<textarea id=editboxtextarea rows=8><unindent>
-			/* <table class=commandline><td><pre><code class=source>...</code></pre></td></table> */
-			</unindent></textarea>
+			<textarea id=editboxtextarea rows=8></textarea>
 			<input type=button value=Save  onclick="kvm.execute('editbox-save')" />
 			<input type=button value=Bigger onclick="kvm.execute('editbox-bigger')" />
 			<input type=button value=Smaller onclick="kvm.execute('editbox-smaller')" />
 			<input type=button value='<' onclick="kvm.execute('editbox-before')" />
 			<input type=button value=Parent onclick="kvm.execute('editbox-parent')" />
+			<input type=button value=Back onclick="kvm.execute('editbox-pop')" />
 			<input type=button value='>' onclick="kvm.execute('editbox-after')" />
+			<input type=button value='Refresh>' onclick="kvm.execute('editbox-refresh')" />
+			<input type=button value='Example>' onclick="kvm.execute('editbox-example')" />
 			<input type=button value=Close onclick="kvm.execute('editbox-close')" />
-		</div></text> unindent </o> ;
+		</div></text> </o> ;
 	
 	: 	editbox-save ( -- ) \ ce@ is the target element.
 		js> editboxtextarea.value /*remove*/ <code>escape 
@@ -58,17 +59,29 @@
 		div-editbox js> tos()&&tos().parentNode 
 		if removeElement then null to div-editbox ;
 
+	: node-source ( node -- "source" ) \ Get outerHTML or node.toString()
+		dup :> outerHTML ?dup if ( node outerHTML ) nip 
+		else ( node ) dup :> toString() char /* swap + js> "*/\n" + 
+		( node ) :> nodeValue ?dup if + then then ;
+		
 	: 	editbox-parent ( -- ) \ Change element to ce's parent
-		char .. (ce) ce@ :> outerHTML \ 把 ce 的 outerHTML 抓進編輯區
-		js: editboxtextarea.value="/*"+editboxtextarea.value+"*/\n"+pop() ;
+		char .. (ce) node-source js: editboxtextarea.value=pop() ;
 
 	: 	editbox-before ( -- ) \ Change element to ce's sibling
-		char .. (ce) ce@ :> outerHTML \ 把 ce 的 outerHTML 抓進編輯區
-		js: editboxtextarea.value="/*"+editboxtextarea.value+"*/\n"+pop() ;
+		char < (ce) node-source js: editboxtextarea.value=pop() ;
 
 	: 	editbox-after ( -- ) \ Change element to ce's sibling
-		char .. (ce) ce@ :> outerHTML \ 把 ce 的 outerHTML 抓進編輯區
-		js: editboxtextarea.value="/*"+editboxtextarea.value+"*/\n"+pop() ;
+		char > (ce) node-source js: editboxtextarea.value=pop() ;
+
+	: 	editbox-pop ( -- ) \ Change element to the previous ce
+		char pop (ce) node-source js: editboxtextarea.value=pop() ;
+
+	: editbox-refresh ( -- ) \ Recall current element
+		ce@ node-source js: editboxtextarea.value=pop() ;
+
+	: editbox-example ( -- ) \ Show example
+		<text> /* <table class=commandline><td><pre><code class=source>...</code></pre></td></table> */</text>
+		js> '\n' + ce@ node-source + js: editboxtextarea.value=pop() ;
 
 	code editbox-smaller ( -- ) \ Smaller editbox
 		var r = editboxtextarea.rows;
@@ -82,7 +95,7 @@
 
 	: edit ( -- ) \ Edit the ce (current element) outerHTML.
 		editbox to div-editbox
-		ce@ :> outerHTML ?dup if else ce@ :> nodeValue then 
-		js: editboxtextarea.value+="\n/*--*/\n"+pop() ;
+		ce@ node-source js: editboxtextarea.value=pop() ;
 		/// [ ] [save] 過後 ce 就斷鏈了，因此不能重複實驗。有待改良。
+		/// 可以在 editbox-save 處加強
 \ -- End --
