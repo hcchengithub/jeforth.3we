@@ -4519,10 +4519,10 @@
 
 [ ] 如何把很大的檔案收一部分起來，以方便操作？ 用 hide() 吧？
 
-[ ] Ctrl-F2 之後,把 anchor 所在的 element 改成 command-line style.
-	\ anchor at the target position
+[ ] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
+	\ caret at the target position
 	\ press Ctrl-F2
-	\ you get a #text at which is your anchor 
+	\ you get a #text node ce (current element)
 
 	[object Text] bla bla bla...
 

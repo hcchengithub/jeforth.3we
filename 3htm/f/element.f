@@ -71,8 +71,6 @@
 		</js> ;
 		/// Error-proof, do nothing if given element illegal.
 
-	\ : se ce@ (se) ; // ( -- ) See the current element
-
 	: (ce) ( index -- ce@ ) \ change current-element to current-element[index] or '..' to parent element.
 		ce@ js> typeof(pop())=='object' if ( index )
 			js> tos()=='..' ( index flag ) if 
@@ -88,6 +86,28 @@
 		else ( index ) 
 			drop false
 		then ( sth )
+		js> Boolean(tos()) ( sth flag ) if else 
+			drop js> window.document \ Default, ce@ will eat one so need two 
+		then ce! ce@ ;
+		/// ce to window.document when trouble unresolvable.
+	code (ce) ( index -- ce@ ) \ change current-element to current-element[index] or '..' to parent element.
+		var index=pop(); execute("ce@");/*ce@ 有防呆*/ var ce=pop();
+		switch( index ){
+			case "..": ce = ce.parentNode; break; // can be null
+			case "<" : ce = ce.previousSibling; break; // can be null
+			case ">" : ce = ce.nextSibling; break; // can be null
+			default  : 
+				if(isNaN(index)) ce=null;
+				else ce = ce.childNodes[parseInt(index)]; // can be undefined
+		}
+
+		if (!flag) { 
+			panic("Error! illegal destination. Remaining recent ce.")
+		}
+		if (!Boolean(ce)||!flag) { 
+		} else {
+			
+		}
 		js> Boolean(tos()) ( sth flag ) if else 
 			drop js> window.document \ Default, ce@ will eat one so need two 
 		then ce! ce@ ;
