@@ -98,4 +98,42 @@
 		ce@ node-source js: editboxtextarea.value=pop() ;
 		/// [ ] [save] 過後 ce 就斷鏈了，因此不能重複實驗。有待改良。
 		/// 可以在 editbox-save 處加強
+		
+	: hide ( -- ) \ 暫時把文章 hide() 起來、 show() 回來
+		article js: $(pop()).hide() ;
+		
+	: show ( -- ) \ 暫時把文章 hide() 起來、 show() 回來
+		article js: $(pop()).show() ;
+		
+	: log.push ( -- ) \ Push outputbox to log.json.
+		js> outputbox :> innerHTML ( outputbox.innerHTML )
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		dup ( outputbox.innerHTML array array ) :: push(pop(1))
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+		/// 這個應該用得不多，要臨時把 outputbox 保存起來時有用。
+		
+	: log.pop ( -- )  \ Pop log.json back to outputbox
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		dup :> pop() char <div> swap + char </div> + </o> drop \ 取最後一個 snapshot 還原到 outputbox
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+		/// 取回臨時保存的 snapshot, log.json 裡不再保留。
+
+	: log.recall ( -- )  \ Recall the log.json[last] back to outputbox
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> slice(-1) char <div> swap + char </div> + </o> drop ; 
+		/// 讀出最後一個 snapshot 還原到 outputbox
+
+	: log.overwrite ( -- ) \ Drop older log.json, save outputbox to log.json[0]
+		<js> confirm("Overwrite the entire jason.log! Are yous sure?")</jsV> if
+		js> outputbox :> innerHTML ( outputbox.innerHTML )
+		[] dup ( outputbox.innerHTML array array ) :: push(pop(1))
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
+		/// 這個應該都用不著，要小心。
+
+	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
+		js> outputbox :> innerHTML ( outputbox.innerHTML )
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+
 \ -- End --
