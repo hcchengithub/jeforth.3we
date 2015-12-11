@@ -71,25 +71,6 @@
 		</js> ;
 		/// Error-proof, do nothing if given element illegal.
 
-	: old(ce) ( index -- ce@ ) \ change current-element to current-element[index] or '..' to parent element.
-		ce@ js> typeof(pop())=='object' if ( index )
-			js> tos()=='..' ( index flag ) if 
-				drop ce@ :> parentNode ( sth ) \ Dead ce's parentNode is null
-			else
-				( index ) ce@ children ( index array[] ) 
-				js> parseInt(tos(1))<tos().length ( index array[] flag ) if
-					:> [parseInt(pop())] ( sth )
-				else
-					2drop ce@ ( sth ) \ illegal index remain same ce
-				then
-			then 
-		else ( index ) 
-			drop false
-		then ( sth )
-		js> Boolean(tos()) ( sth flag ) if else 
-			drop js> window.document \ Default, ce@ will eat one so need two 
-		then ce! ce@ ;
-		/// ce to window.document when trouble unresolvable.
 	code (ce) ( destination -- ce@ ) \ Change element like cd does. Destination:(index,"..",'<','>','pop')
 		var index=pop(); execute("ce@");/*ce@ 有防呆*/ var ce=pop();
 		switch( index ){

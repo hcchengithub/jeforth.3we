@@ -46,9 +46,9 @@
 			<input type=button value=Close onclick="kvm.execute('editbox-close')" />
 		</div></text> </o> ;
 	
-	: 	editbox-save ( -- ) \ ce@ is the target element.
+	:  editbox-save ( -- ) \ ce@ is the target element.
 		js> editboxtextarea.value /*remove*/ <code>escape 
-		ce@ :: outerHTML=pop() ;
+		ce@ dup :> nodeValue if :: nodeValue=pop() else :: outerHTML=pop() then ;
 		
 	: 	editbox-close ( -- ) \ ce@ is the target element.
 		begin 
@@ -64,7 +64,7 @@
 	: node-source ( node -- "source" ) \ Get outerHTML or node.toString()
 		dup :> outerHTML ?dup if ( node outerHTML ) nip 
 		else ( node ) dup :> toString() char /* swap + js> "*/\n" + 
-		( node ) :> nodeValue ?dup if + then then ;
+		swap ( /*...*/ node ) :> nodeValue ?dup if + then then ;
 		
 	: 	editbox-parent ( -- ) \ Change element to ce's parent
 		char .. (ce) node-source js: editboxtextarea.value=pop() ;
@@ -78,7 +78,7 @@
 	: 	editbox-pop ( -- ) \ Change element to the previous ce
 		char pop (ce) node-source js: editboxtextarea.value=pop() ;
 
-	: editbox-refresh ( -- ) \ Recall current element
+	: editbox-refresh ( -- ) \ Reload current element
 		ce@ node-source js: editboxtextarea.value=pop() ;
 
 	: editbox-example ( -- ) \ Show example
@@ -96,6 +96,7 @@
 		editboxtextarea.rows = Math.max(r,1); end-code
 
 	: edit ( -- ) \ Edit the ce (current element) outerHTML.
+		js: outputbox.contentEditable=false \ 否則會干擾 editbox 的功效
 		editbox to div-editbox
 		ce@ node-source js: editboxtextarea.value=pop() ;
 		/// [ ] [save] 過後 ce 就斷鏈了，因此不能重複實驗。有待改良。
@@ -136,8 +137,10 @@
 		/// 取回臨時保存的 snapshot, log.json 裡不再保留。
 
 	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
+		log.save
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> [pop(1)] char <div> swap + char </div> + </o> drop ; 
+		/// Auto log.save current outputbox before recalling.
 
 	: log.overwrite ( -- ) \ Drop older log.json, save outputbox to log.json[0]
 		<js> confirm("Overwrite the entire jason.log! Are yous sure?")</jsV> if
