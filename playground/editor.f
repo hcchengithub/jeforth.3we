@@ -21,10 +21,12 @@
 	: save-as ( "path-name" -- ) \ Save the editing document to the specified pathname
 		cr ." Sorry, under constructing " cr ;
 
+
 	: open ( "path-name" -- ) \ Read the file to edit
-		article if article :: innerHTML="" ( 清除現有頁面 ) 
-		else s" body" <e> <div></div></e> to article then 
-		pathname readTextFile article :: innerHTML=pop() ;
+		article if article :: innerHTML="" ( 有的話清除現有頁面 ) else 
+		<o> <div style="background-color:white"></div></o> to article ( 沒現成就新建頁面 )
+		article js> outputbox insertBefore ( 新建的默認放在 outputbox 之前 )
+		then pathname readTextFile article :: innerHTML=pop() ;
 	
 	null value div-editbox // ( -- element ) The entire DIV node of the editbox.
 	
@@ -99,12 +101,27 @@
 		/// [ ] [save] 過後 ce 就斷鏈了，因此不能重複實驗。有待改良。
 		/// 可以在 editbox-save 處加強
 		
-	: hide ( -- ) \ 暫時把文章 hide() 起來、 show() 回來
+	: hide ( -- ) \ 暫時把文章 hide() 起來
 		article js: $(pop()).hide() ;
 		
-	: show ( -- ) \ 暫時把文章 hide() 起來、 show() 回來
+	: show ( -- ) \ 把文章 show() 回來
 		article js: $(pop()).show() ;
 		
+	: log.open ( -- )  \ Get the log.json[last] back to outputbox
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> slice(-1) char <div> swap + char </div> + </o> drop ; 
+		/// 讀出最後一個 snapshot 還原到 outputbox
+
+	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
+		js> outputbox :> innerHTML ( outputbox.innerHTML )
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+
+	: log.length ( i -- )  \ Get the log.json array length
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> length ; 
+
 	: log.push ( -- ) \ Push outputbox to log.json.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
@@ -118,10 +135,9 @@
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 		/// 取回臨時保存的 snapshot, log.json 裡不再保留。
 
-	: log.recall ( -- )  \ Recall the log.json[last] back to outputbox
+	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> slice(-1) char <div> swap + char </div> + </o> drop ; 
-		/// 讀出最後一個 snapshot 還原到 outputbox
+		:> [pop(1)] char <div> swap + char </div> + </o> drop ; 
 
 	: log.overwrite ( -- ) \ Drop older log.json, save outputbox to log.json[0]
 		<js> confirm("Overwrite the entire jason.log! Are yous sure?")</jsV> if
@@ -129,11 +145,4 @@
 		[] dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
 		/// 這個應該都用不著，要小心。
-
-	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
-		js> outputbox :> innerHTML ( outputbox.innerHTML )
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
-
 \ -- End --
