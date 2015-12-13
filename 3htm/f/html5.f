@@ -50,8 +50,9 @@ s" html5.f"		source-code-header
 : getAttribute  ( oElement "attr" -- ) \ Get an attribute value of an element
 				js> pop(1).getAttribute(pop()) ;
 
-: replaceNode	( Node targetNode -- ) \ Replace a HTML node
-				js: tos().parentElement.replaceChild(pop(1),pop()) ;
+: replaceNode  ( newNode targetNode -- ) \ Replace a HTML node
+				js> tos().nodeName=="#text" if js: pop().replaceNode(pop()) 
+				else js: tos().parentElement.replaceChild(pop(1),pop()) then ;
 				/// Try it yourself http://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_node_replacechild
 
 : insertBefore	( target ref -- ) \ *Move* the target element to before the reference element

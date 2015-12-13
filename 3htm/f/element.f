@@ -82,15 +82,16 @@
 				if(isNaN(index)) ce=null;
 				else ce = ce.childNodes[parseInt(index)]; // can be undefined
 		}
-		if (!ce) panic("Error! illegal destination. Stay recent ce.\n");
+		if (!ce) panic("Error! illegal destination: " + index + ". Stay recent ce.\n");
 		else { push(ce); execute("ce!"); }
 		execute("ce@");
 		end-code
 		/// Stay recent ce if destination 
 		
 	: ce ( [<'index'>] -- ) \ change element to current-element[index] or '..' to parent element.
-		BL word ( -- 'index' ) ?dup if (ce) else ce@ then se ;
+		BL word ( -- 'index' ) ?dup if (ce) else ce@ then se ; interpret-only
 		/// if nothing given then see current element
+		/// Use 'se' in compiling mode if that's what you want to do.
 
 	: ce< ( -- ) \ Change element to the previous current-element
 		ce-history :: pop() ce@ se ;

@@ -27,8 +27,7 @@
 
 			<img src="doc/editor.png">
 
-			<p>
-	要用 jeforth 在網頁上直接編輯的文章包括兩大部分：前一部分是一個 ID 為 "mystyle" 的 STYLE node：後一部分是一個名為 "myarticle" 的 DIV node，也就是像這樣的結構： <code>&lt;style id=mystyle&gt; ... &lt;/style&gt; &lt;div id=myarticle&gt; ... &lt;/div&gt;</code> 其他東西在 save 存檔時都會被忽略掉 (若有需要，修訂一下 save 的定義即可改變這些規定)。 雖然沒有 <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;body&gt;</code> 等常見的 Tag 但是所有的 Web browser 都可以打開它沒有問題。這樣做好處是方便拿這個檔案去別地方用 e.g. 把整個檔案讀進 jeforth 的網頁裡來進行編輯時，不必費力氣去清除多餘的部分。</p>
+			<div><p>要用 jeforth 在網頁上直接編輯的文章包括兩大部分：前一部分是一個 ID 為 "mystyle" 的 STYLE node：後一部分是一個名為 "myarticle" 的 DIV node，也就是像這樣的結構： <code>&lt;style id=mystyle&gt; ... &lt;/style&gt; &lt;div id=myarticle&gt; ... &lt;/div&gt;</code> 其他東西在 save 存檔時都會被忽略掉 (若有需要，修訂一下 save 的定義即可改變這些規定)。 雖然沒有 <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;body&gt;</code> 等常見的 Tag 但是所有的 Web browser 都可以打開它沒有問題。這樣做好處是方便拿這個檔案去別地方用 e.g. 把整個檔案讀進 jeforth 的網頁裡來進行編輯時，不必費力氣去清除多餘的部分。需要參考 HTML 極其豐富的 Tags 可以用參考【<a href="http://www.hkiwc.com/html/index.html">HKIWC 香港網頁學院</a>】的網站。</p></div>
 
 			<h2>研究怎麼存檔，分解動作</h2>
 
@@ -53,7 +52,7 @@ pathname writeTextFile</code></pre>
 
 <table class="commandline"><tbody><tr><td><pre><code class="source">article if article :: innerHTML="" then</code></pre></td></tr></tbody></table><p>完整的命令：</p><table class="commandline"><tbody><tr><td><pre><code class="source">run: ' article &lt;br&gt;if article :: innerHTML="" 
 else s" body" &lt;e&gt; &lt;div&gt;&lt;/div&gt;&lt;/e&gt; to article 
-then pathname readTextFile article :: innerHTML=pop()</code></pre></td></tr></tbody></table><h2>改變 node type 的辦法</h2><p>進 contentEditable 模式&nbsp;caret cursor 在要編輯的地方,&nbsp;Ctrl-F2 取得 anchorNode, 然後下 edit 命令。必須透過 hotkey 的 event handler 來取得caret cursor 所在之處的 anchorNode，否則來到 inputbox 要下命令時 caret cursor 已經變了。這個實驗把用 Ctrl-F2 取得的&nbsp;#text 所在之處的 P node 改成&nbsp;source code style：</p><div>
+then pathname readTextFile article :: innerHTML=pop()</code></pre></td></tr></tbody></table><h2>改變 node type 的辦法</h2><p>用 mouse mark 在要編輯處的開頭，或者進 contentEditable 模式&nbsp;caret cursor 放在要編輯的地方,&nbsp;Ctrl-F2 取得 anchorNode, 然後下 edit 命令。必須透過 hotkey 的 event handler 來取得 anchorNode，否則為了要下命令而來到 inputbox 就已經改變它了。這個實驗把用 Ctrl-F2 取得的&nbsp;#text 所在之處的 P node 改成&nbsp;source code style：</p><div>
 <table class="commandline"><tbody><tr><td><pre><code class="source">\ Change the &lt;p&gt; element of the caret cursor to code style
 &lt;o&gt; &lt;table class=commandline&gt;&lt;td&gt;&lt;code id=tempid class=source&gt;
 &lt;/code&gt;&lt;/td&gt;&lt;/table&gt;&lt;/o&gt; \ 在 TOS 做個空殼

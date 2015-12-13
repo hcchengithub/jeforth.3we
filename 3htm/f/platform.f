@@ -11,23 +11,6 @@ also forth definitions
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
 
-: old{F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
-				[ last literal ] ( _me )
-				js> event&&event.shiftKey if ( shift+F2 for outputbox )
-					drop ( remove _me from TOS ) cr ." Output box EditMode = " 
-					js> outputbox.contentEditable!="true" if char true else char false then
-					js> outputbox.contentEditable=pop() . cr
-				else ( F2 for inputbox )
-					." Input box EditMode = " 
-					\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS
-					js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
-					if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
-					else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
-					then js: styleTextareaFocus.innerHTML=pop()
-				then
-				js: jump2endofinputbox.click();inputbox.focus();
-				false ;
-				/// return a 'false' to stop the hotkey event handler chain.
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				\ 以下都不能用 cr 改用 js: type('\n'); cr 中有 1 nap suspend, event handler 不能 suspend。
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
@@ -44,12 +27,18 @@ also forth definitions
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
 				then js: styleTextareaFocus.innerHTML=pop() ;
 : toggle-outputbox-edit-mode ( -- ) \ One of the {F2} events
-				js: type('\n') ." Output box EditMode = " 
-				js> outputbox.contentEditable!="true" if char true else char false then
-				js> outputbox.contentEditable=pop() 
-				. js: type('\n') ;
-: content-handler ( -- getSelection ) \ Get the anchorNode to ce (current element).
-				js> window.getSelection().anchorNode ce! ce ;
+				js> outputbox :> style ( outputbox.style )
+				js> outputbox.contentEditable!="true" if 
+					<js> pop().border="thin solid red"</js>
+					char true 
+				else 
+					<js> pop().border="thin solid white"</js>
+					char false 
+				then
+				js: outputbox.contentEditable=pop() ;
+	
+: content-handler ( -- ) \ Get the anchorNode to ce@ (current element).
+				js> window.getSelection().anchorNode dup ce! se ;
 				
 code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				var r = inputbox.rows;

@@ -23,7 +23,7 @@
 				/* <code> 除了 style 還標示要做 < &lt; > &gt; 轉換的區域，所以一定是最內層 */
 				code { 
 					font-family: courier new;
-					font-size: 120%; /* 通常夾在字裡行間 courier 的筆畫細所以要大一點 */
+					font-size: 110%; /* 通常夾在字裡行間 courier 的筆畫細所以要大一點 */
 					background: #E0E0E0; /* <code> 夾在字裡行間時凸顯之 */
 				}
 				/* .commandline 跟 .source 能不能合併成 .code 一個就好，大家都用？ */
@@ -33,7 +33,7 @@
 				}
 				.source {  /* 用來修飾 <code class=source> */
 					font-size: 100%;   /* againt the in-line bigger font-size of <code> */
-					line-height: 100%; /* againt the default */
+					line-height: 120%; /* againt the default */
 				}
 			</style>
 		</h> drop \ /* 丟掉 <h>..</h> 留下來的 <style> element object, 用不著 */
