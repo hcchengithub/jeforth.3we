@@ -140,11 +140,14 @@
 			...
 			</code></pre></td></table> 
 		*/
+		/*
+			<span style="font:italic small-caps bold 12px/1.2em Arial;"></span>
+		*/
 		/* 貼圖
 		    <img src="doc/editor.png"> */
 		/* HTML, CSS 參考資料
 			HKIWC 香港網頁學院 www.hkiwc.com/html/index.html 
-			梦之都 www.dreamdu.com 
+			梦之都 CSS www.dreamdu.com 
 		*/
 		</unindent></text> unindent
 		js> '\n' + ce@ node-source + js: editboxtextarea.value=pop() ;
@@ -164,9 +167,15 @@
 		ce@ node-source js: editboxtextarea.value=pop() ;
 		/// [ ] [save] 過後 ce 就斷鏈了，因此不能重複實驗。有待改良。
 		/// 可以在 editbox-save 處加強
-		
-	: content-handler ( -- ) \ Get the anchorNode to ce (current element).
-		js> window.getSelection().anchorNode ce! edit ;
+
+	
+	: content-handler ( -- ) \ Launch the Editbox to edit ce@ which is the anchorNode.
+		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
+			outputbox-edit-mode-off
+			js> window.getSelection().anchorNode ce! edit 
+			false
+		else true then ;
+		/// Ctrl-F2 or Double-Click
 
 	: mark-block ( node -- ) \ Add red border to the double clicked block under outputbox
 		begin ( node' )
@@ -211,7 +220,7 @@
 		
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> slice(-1) char <div> swap + char </div> + </o> drop ; 
+		:> slice(-1) ( char <div> swap + char </div> + ) </o> drop ; 
 		/// 讀出最後一個 snapshot 還原到最後面不破壞現有的 outputbox。
 
 	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
@@ -233,15 +242,14 @@
 		
 	: log.pop ( -- )  \ Pop log.json back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		dup :> pop() char <div> swap + char </div> + </o> drop \ 取最後一個 snapshot 還原到 outputbox
+		dup :> pop() ( char <div> swap + char </div> + ) </o> drop \ 取最後一個 snapshot 還原到 outputbox
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 		/// log.json 裡不再保留最新 snapshot 還原到最後面不破壞現有的 outputbox。
 
 	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
-		log.save
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> [pop(1)] char <div> swap + char </div> + </o> drop ; 
-		/// Auto log.save current outputbox before recalling.
+		( i array ) :> [pop()] ( char <div> swap + char </div> + ) </o> drop ; 
+		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
 		/// recall 出來放到最後面不破壞現有的 outputbox。
 
 	: log.overwrite ( -- ) \ Drop older log.json, save outputbox to log.json[0]

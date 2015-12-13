@@ -16,55 +16,87 @@ also forth definitions
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
 					char toggle-outputbox-edit-mode execute false exit then \ shift-F2
 				js> event&&event.ctrlKey if ( ctrl+F2 for contentEdit )
-					char content-handler execute false exit then
+					char content-handler execute ( T/f ) exit then
 				char toggle-inputbox-edit-mode execute false \ F2 w/o shifted key
 				;
 				/// return a 'false' to stop the hotkey event handler chain.
+				
+				\ 設定讓 整個 <body> 的 double-click 都發動 content-handler 來
+				\ 處理所在的 node 等同於 Ctrl-F2。
+				<js> 
+					body.ondblclick = function(){
+						push(window.getSelection().anchorNode);
+						execute("content-handler");
+						return(pop());
+					}
+				</js>
+				
 : toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
 				." Input box EditMode = " ['] {F2} 
 				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
 				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
 				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
 				then js: styleTextareaFocus.innerHTML=pop() ;
-: toggle-outputbox-edit-mode ( -- ) \ One of the {F2} events
-				js> outputbox :> style ( outputbox.style )
-				js> outputbox.contentEditable!="true" if 
-					<js> pop().border="thin solid red"</js>
-					char true 
-				else 
-					<js> pop().border="thin solid white"</js>
-					char false 
-				then
-				js: outputbox.contentEditable=pop() ;
-	
-: content-handler ( -- ) \ Get the anchorNode to ce@ (current element).
-				js> window.getSelection().anchorNode dup ce! se ;
 
-: toggle-high-light-outputbox-children ( -- ) \ Help {backSpace} outputbox trimming.
-	js> outputbox :> highLight if \ turn border high light on
-		js> outputbox :> childNodes.length for
-			r@ 1- js> outputbox :> childNodes[pop()].style if \ no style do nothing
-			r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
-			r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
-			r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border="thin solid red"</js> \ set high lighting border
-			else
-				s' <span style="border:thin solid red">' 
-				r@ 1- js> outputbox :> childNodes[pop()].nodeValue +
-				s' </span>' + </o> 
-				r@ 1- js> outputbox :> childNodes[pop()]
-				replaceNode
-			then
-		next
-	else \ turn off border high light
-		js> outputbox :> childNodes.length for
-				r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup if \ no orig new member do nothing
-				r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
-				r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
-			else
-				r@ 1- js> outputbox :: childNodes[pop()].style.border="" \ no restore just clear
-			then
-		next
-	then ;
+: outputbox-edit-mode-on ( -- ) \ One of the {F2} events
+				js> outputbox :> style ( outputbox.style )
+				<js> pop().border="thin solid red"</js>
+				js: outputbox.contentEditable=true ;
+: outputbox-edit-mode-off ( -- ) \ One of the {F2} events
+				js> outputbox :> style ( outputbox.style )
+				<js> pop().border="thin solid white"</js>
+				js: outputbox.contentEditable=false ;
+: toggle-outputbox-edit-mode ( -- ) \ One of the {F2} events
+				js> outputbox.contentEditable!="true" 
+				if outputbox-edit-mode-on
+				else outputbox-edit-mode-off 
+				then ;
+	
+: content-handler ( -- false ) \ Get the anchorNode to ce@ (current element).
+				js> window.getSelection().anchorNode dup ce! se false ;
+				/// Ctrl-F2 handler main routine. Initial version.
+				/// Will be replaced by actual application.
+				/// Return false to break the event handler chain.
+
+s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
+: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style do nothing
+					r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+					r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+					outputbox-high-light-style
+					r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
+					else
+						s' <span style="border:' 
+						outputbox-high-light-style + s' ">' +
+						r@ 1- js> outputbox :> childNodes[pop()].nodeValue +
+						s' </span>' + </o> 
+						r@ 1- js> outputbox :> childNodes[pop()]
+						replaceNode
+					then
+				next ; compile-only 
+				/// Don't use me directly, for not to destroy original style.border.
+				/// Use outputbox-high-light-toggle instead
+: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
+					if \ restore
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+					else \ no restore just clean
+						r@ 1- js> outputbox :> childNodes[pop()].style if
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+						then
+					then
+				next ; 
+: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+				js> outputbox :> highLight if \ check recent state
+					outputbox-high-light-off
+					js> outputbox :: highLight=false \ Yes, we can add properties to an element
+				else
+					outputbox-high-light-on
+					js> outputbox :: highLight=true
+				then ;
 
 
 code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
