@@ -39,7 +39,34 @@ also forth definitions
 	
 : content-handler ( -- ) \ Get the anchorNode to ce@ (current element).
 				js> window.getSelection().anchorNode dup ce! se ;
-				
+
+: toggle-high-light-outputbox-children ( -- ) \ Help {backSpace} outputbox trimming.
+	js> outputbox :> highLight if \ turn border high light on
+		js> outputbox :> childNodes.length for
+			r@ 1- js> outputbox :> childNodes[pop()].style if \ no style do nothing
+			r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+			r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+			r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border="thin solid red"</js> \ set high lighting border
+			else
+				s' <span style="border:thin solid red">' 
+				r@ 1- js> outputbox :> childNodes[pop()].nodeValue +
+				s' </span>' + </o> 
+				r@ 1- js> outputbox :> childNodes[pop()]
+				replaceNode
+			then
+		next
+	else \ turn off border high light
+		js> outputbox :> childNodes.length for
+				r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup if \ no orig new member do nothing
+				r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+				r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+			else
+				r@ 1- js> outputbox :: childNodes[pop()].style.border="" \ no restore just clear
+			then
+		next
+	then ;
+
+
 code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				var r = inputbox.rows;
 				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
