@@ -27,4 +27,8 @@
 	/// -- Delete registry value --
 	/// 刪除實驗遺跡：
 	/// s" HKCU\Keyboard Layout\" s" test" au3 :: RegDeleteVal(pop(1),pop())
+    /// au3 :: send("abc")	send key abc
+    /// au3 :: send("{!}")	send key !
+    /// au3 :: Shutdown(32) bring the system into standby power saving mode.
+	/// au3 :: sleep(1000)  pause autoit script for a second
 	
