@@ -57,7 +57,7 @@
 			js> mystyle.length \ 可能跟 editor.f 的重複定義了
 			if js> mystyle[mystyle.length-1] \ 用最後一個
 			else js> mystyle then 
-			:> outerHTML+myarticle.outerHTML
+			( mystyle ) :> outerHTML+myarticle.outerHTML
 			pathname writeTextFile 
 		then ;
 
@@ -99,7 +99,8 @@
 	:  editbox-save ( -- ) \ ce@ is the target element.
 		js> editboxtextarea.value 
 		/*remove*/ <code>escape
-		</o> dup ce@ replaceNode ce! ;  
+		</o> dup ce@ replaceNode ce! 
+		jump-to-ce@ ;  
 		
 	: 	editbox-close ( -- ) \ ce@ is the target element.
 		begin 
@@ -110,7 +111,8 @@
 			else true then 
 		until
 		div-editbox js> tos()&&tos().parentNode 
-		if removeElement then null to div-editbox ;
+		if removeElement then null to div-editbox 
+		jump-to-ce@ ;
 
 	: node-source ( node -- "source" ) \ Get outerHTML or nodeValue
 		dup :> outerHTML ?dup if ( node outerHTML ) nip 
@@ -163,11 +165,11 @@
 		editboxtextarea.rows = Math.max(r,1); end-code
 
 	: edit ( -- ) \ Edit the ce (current element) outerHTML.
-		editbox to div-editbox
-		ce@ node-source js: editboxtextarea.value=pop() ;
-		/// [ ] [save] 過後 ce 就斷鏈了，因此不能重複實驗。有待改良。
-		/// 可以在 editbox-save 處加強
-
+		editbox to div-editbox \ create editbox and get its object
+		ce@ node-source js: editboxtextarea.value=pop() \ target source code
+		div-editbox js> $(pop()).offset().top \ get editbox position
+		js: window.scrollTo(0,pop()) \ jump to editbox
+		;
 	
 	: content-handler ( -- ) \ Launch the Editbox to edit ce@ which is the anchorNode.
 		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
@@ -176,41 +178,6 @@
 			false
 		else true then ;
 		/// Ctrl-F2 or Double-Click
-
-	: mark-block ( node -- ) \ Add red border to the double clicked block under outputbox
-		begin ( node' )
-			dup :> parentNode dup ( node' parent parent ) 
-			js> outputbox <> ( node' parent ? ) 
-		while ( node' parent ) \ 不是 outputbox 還要再上升
-			nip ( parent )
-		( parent ) repeat ( node' parent )
-		drop ( node )
-		js> tos().style if ( node )
-			<js> pop().style.border="thin solid red" </js>
-		else ( node ) \ 沒有 style 的打賭是 #text 
-			s' <span style="border:thin solid red">' 
-			js> tos(1).nodeValue +
-			s' </span>' + </o> swap ( span node ) replaceNode
-		then ;
-	: mark-block ( node -- ) \ Add red border to the double clicked block under outputbox
-		begin ( node' )
-			dup :> parentNode dup ( node' parent parent ) 
-			js> outputbox <> ( node' parent ? ) 
-		while ( node' parent ) \ 不是 outputbox 還要再上升
-			nip ( parent )
-		( parent ) repeat ( node' parent )
-		drop ( node )
-		js> tos().style if ( node )
-			<js> 
-			if (tos().style.border=="thin solid red") pop().style.border="";
-			else pop().style.border="thin solid red";
-			</js>
-		else ( node ) \ 沒有 style 的打賭是 #text 
-			s' <span style="border:thin solid red">' 
-			js> tos(1).nodeValue +
-			s' </span>' + </o> swap ( span node ) replaceNode
-		then ;
-
 		
 	: hide ( -- ) \ 暫時把文章 hide() 起來
 		article js: $(pop()).hide() ;

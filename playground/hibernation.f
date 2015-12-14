@@ -3,7 +3,7 @@ include autoit.f
 
 cls
 <o> <h2> 十分抱歉，這台電腦入睡之後會被無故喚醒，用 jeforth.3hta 來簡單解決。
-萬一被無故喚醒之後 count down 一段時間讓 user 有機會關掉本程式，否則過後繼續睡。</h2></o>
+萬一被喚醒之後 count down 一段時間讓 user 有機會關掉本程式，否則過後繼續睡。</h2></o>
 <o> <h1>Bringing the system into sleep .... </h1></o> drop
 [begin]
 \ run shutdown /h  ( shutdown.exe is a Windows built-in utility)
