@@ -64,19 +64,17 @@
 	: save-as ( "path-name" -- ) \ Save the editing document to the specified pathname
 		cr ." Sorry, under constructing " cr ;
 
-
-	: old-open ( "path-name" -- ) \ Read the file to edit
-		article if article :: innerHTML="" ( 有的話清除現有頁面 ) else 
-		<o> <div style="background-color:white"></div></o> to article ( 沒現成就新建頁面 )
-		article js> outputbox insertBefore ( 新建的默認放在 outputbox 之前 )
-		then pathname readTextFile article :: innerHTML=pop() ;
 	: open ( "path-name" -- ) \ Read the file to edit
 		pathname readTextFile ( file ) js> tos().length if
 			article if article :: innerHTML="" ( 有的話清除現有頁面 ) else 
 			<o> <div style="background-color:white"></div></o> to article ( 沒現成就新建頁面 )
 			article js> outputbox insertBefore ( 新建的默認放在 outputbox 之前 )
 			then article :: innerHTML=pop() 
-		else ." Warning! can't read the file: " pathname . cr then ;
+		else 
+			." Warning! can't read the file: " pathname . cr 
+			article if article :: innerHTML="" ( 有的話清除現有頁面 ) then
+			null to article 
+		then ;
 	
 	null value div-editbox // ( -- element ) The entire DIV node of the editbox.
 	
@@ -96,11 +94,24 @@
 			<input type=button value=Close onclick="kvm.execute('editbox-close')" />
 		</div></text> </o> ;
 
+	: unenvelope ( element -- firstNode ) \ Break an element into its children nodes
+		( ele ) js> tos().childNodes.length ?dup if ( ele length ) 
+			( ele length ) js> tos(1).firstChild -rot ( first0 ele length ) 
+			for ( first0 ele )
+				js> tos().firstChild over ( first0 ele first ele ) 
+				insertBefore ( first0 ele )
+			next ( first0 ele )
+			removeElement ( first0 )
+		then ;
+		/// if the given element has no child then leave itself on the TOS.
+		/// Return the first node to be the new ce@ after editbox-save.
+	
 	:  editbox-save ( -- ) \ ce@ is the target element.
 		js> editboxtextarea.value 
 		/*remove*/ <code>escape
-		</o> dup ce@ replaceNode ce! 
-		jump-to-ce@ ;  
+		char <span> swap + char </span> + </o> \ 套一圈 <span> 保證它是 one node
+		dup ce@ replaceNode unenvelope ce! \ New nodes replace the old one then 解套
+		jump-to-ce@ ;  \ jump to it
 		
 	: 	editbox-close ( -- ) \ ce@ is the target element.
 		begin 
