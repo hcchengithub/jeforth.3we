@@ -236,4 +236,15 @@
 		[] dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
 		/// 這個應該都用不著，要小心。
+
+\ log.html iframe
+
+	: log-content-handler ( -- ) \ Launch the Editbox to edit log iframe node
+		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
+			outputbox-edit-mode-off
+			js> vm.g["log-document"].getSelection().anchorNode ce! edit 
+			false
+		else true then ;
+		/// Double-Click
+
 \ -- End --
