@@ -115,7 +115,7 @@
 		push(result);
 		end-code
 		/// Support multiple lines
-		
+
 	: (<code>escape) ( "raw" -- "cooked" ) \ foo <code>'<' '>' to "&lt;" "&gt;"</code> bar
 		\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
 		\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,<>,</code>,bar 的形式。
@@ -136,6 +136,7 @@
 		;
 		/// Support multiple lines
 		/// 只針對 <code> ... </code> 裡面。
+
 		
 	\ ----------- /* remove comment */ -----------------
 	: /*remove*/ ( "raw" -- "cooked" ) \ remove /* comments */ 

@@ -44,13 +44,15 @@
 
 	:  jump-to-ce@  ( -- ) \ Jump to the target position
 		ce@ :> nodeName=="#text" if
-			s" <span id=tempSpan>" ce@ :> nodeValue + char </span> + </o> ( tempElement )
+			s" <span id=tempSpan>" ce@ :> nodeValue + char </span> + 
+			<o>escape </o> ( tempElement )
 			dup ce@ replaceNode ce!
 		then \ 以上很成功，把原 #text 改裝成 <span> 這樣才 scrollTo() 得過去
 		ce@ js> $(pop()).offset().top \ get target position
 		js: window.scrollTo(0,pop()) \ jump to target
 		ce@ :> id=="tempSpan" if
-			ce@ :> innerText </o> ( original#text ) ce@ insertAfter \ 原 #text 接在後面
+			ce@ :> innerText ( <o>escape impossible having them ) </o> 
+			( original#text ) ce@ insertAfter \ 原 #text 接在後面
 			ce@ :> nextSibling ce@ removeElement ce! \ 以接在後面的原 #text 取代 ce 把暫時的 <span> 移除。
 		then \ 一番於迴轉進以上也成功了
 		;  

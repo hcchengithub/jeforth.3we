@@ -111,6 +111,17 @@ s" html5.f"		source-code-header
 				char #outputbox compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
+				
+code 			<o>escape ( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabrabra
+				var ss = pop()||"";
+				var result = ss
+					.replace(/<o>/mg,"&lt;o&gt;")
+					.replace(/<[/]o>/mg,"&lt;/o&gt;")
+					||"";
+				push(result);
+				end-code
+				/// Support multiple lines
+				/// Usage: "string" </o> when "string" contains <o></o>.
 
 : </h>			( "html" -- element ) \ Delimiter of <h>, (H)ead section.
 				char head compiling 

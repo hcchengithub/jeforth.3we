@@ -64,7 +64,8 @@
 	: save-as ( "path-name" -- ) \ Save the editing document to the specified pathname
 		cr ." Sorry, under constructing " cr ;
 
-	: open ( "path-name" -- ) \ Read the file to edit
+	: open ( -- ) \ Prompt for a file to edit
+		pickFile to pathname
 		pathname readTextFile ( file ) js> tos().length if
 			article if article :: innerHTML="" ( 有的話清除現有頁面 ) else 
 			<o> <div style="background-color:white"></div></o> to article ( 沒現成就新建頁面 )
@@ -109,7 +110,7 @@
 	:  editbox-save ( -- ) \ ce@ is the target element.
 		js> editboxtextarea.value 
 		/*remove*/ <code>escape
-		char <span> swap + char </span> + </o> \ 套一圈 <span> 保證它是 one node
+		char <span> swap + char </span> + <o>escape </o> \ 套一圈 <span> 保證它是 one node
 		dup ce@ replaceNode unenvelope ce! \ New nodes replace the old one then 解套
 		jump-to-ce@ ;  \ jump to it
 		
@@ -197,8 +198,9 @@
 		article js: $(pop()).show() ;
 		
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> slice(-1) ( char <div> swap + char </div> + ) </o> drop ; 
+		\ 把整個 log.json 讀回來成一個 array。
+		char log.json readTextFile js> JSON.parse(pop()) 
+		:> slice(-1)[0] <o>escape </o> drop ; 
 		/// 讀出最後一個 snapshot 還原到最後面不破壞現有的 outputbox。
 
 	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
@@ -220,13 +222,13 @@
 		
 	: log.pop ( -- )  \ Pop log.json back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		dup :> pop() ( char <div> swap + char </div> + ) </o> drop \ 取最後一個 snapshot 還原到 outputbox
+		dup :> pop() <o>escape </o> drop \ 取最後一個 snapshot 還原到 outputbox
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 		/// log.json 裡不再保留最新 snapshot 還原到最後面不破壞現有的 outputbox。
 
 	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		( i array ) :> [pop()] ( char <div> swap + char </div> + ) </o> drop ; 
+		( i array ) :> [pop()] <o>escape </o> drop ; 
 		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
 		/// recall 出來放到最後面不破壞現有的 outputbox。
 
