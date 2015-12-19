@@ -29,6 +29,7 @@
 	J a v a S c r i p t   c o n s o l e
 	  for jeforth.[3nw|3htm|3hta]
 
+	g : Go on, Continue running.
 	t : Toggle displaying the status.
 	s : Single step. (bp=-1)
 	p : Run until next IP. (bp=ip+1)
@@ -37,7 +38,8 @@
 	erase : Erase debug message at bottom.
 	bye : Terminate the program.
 	help : you are reading me.
-	g, q, exit, quit, or <Esc> : Stop debugging.
+	g, q, exit, quit : Disable bp, Continue.
+	reset, <Esc> : Disable bp, Reset, and Continue.
 
 	Put this line,
 	> if(vm.debug){vm.jsc.prompt="msg";eval(vm.jsc.xt)}
@@ -76,15 +78,16 @@
 			jump2endofinputbox.click();
 			vm.jsc.cmd = // static variable so as to reuse last command
 				prompt("JavaScript console", vm.jsc.cmd||""); // Press Enter repeat last command
-			vm.jsc.cmd = vm.jsc.cmd==null ? 'quit' : vm.jsc.cmd; // Press Esc equals to 'quit'
+			vm.jsc.cmd = vm.jsc.cmd==null ? 'reset' : vm.jsc.cmd; // Press Esc equals to 'reset' ['quit']
 			vm.type("\n > " + vm.jsc.cmd + "\n");
 			switch(vm.jsc.cmd){
+				case "reset" : reset();
+				case "exit" : case "q" : case "quit": 
+					execute("bd"); 
+				case "g" : return;
 				case "t" : 
 					vm.jsc.statusToggle=Boolean(vm.jsc.statusToggle^true); 
 					break;
-				case "exit" : case "q" : case "quit": 
-					execute("bd"); 
-					return;
 				case "s"  : 
 					vm.jsc.bp=-1; 
 					vm.jsc.enable = true; 

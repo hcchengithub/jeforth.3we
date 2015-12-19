@@ -25,14 +25,14 @@ also forth definitions
 				\ 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
 				<js> 
 					body.ondblclick = function(){
-						push(window.getSelection().anchorNode);
-						execute("double-click"); // do nothing if there's no double-click
-						return(pop());
+						push(true); // in case "double-click" undefined yet
+						execute("double-click"); // do nothing if there's no "double-click"
+						return(pop()); // double-click ( flag -- ... flag' )
 					}
 					body.onclick = function(){
-						push(window.getSelection().anchorNode);
-						execute("single-click"); // do nothing if there's no single-click
-						return(pop());
+						push(true); // in case "single-click" undefined yet 
+						execute("single-click"); // do nothing if there's no "single-click"
+						return(pop()); // single-click ( flag -- ... flag' )
 					}
 				</js>
 				

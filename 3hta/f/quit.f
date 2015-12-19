@@ -76,6 +76,7 @@
 	include excel.f
 	include canvas.f
 	include mytools.f
+	include editor.f
 	marker ---
 	
 \ ----------------- run the command line -------------------------------------

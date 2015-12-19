@@ -79,7 +79,7 @@
 	
 	null value div-editbox // ( -- element ) The entire DIV node of the editbox.
 	
-	: editbox  ( -- element ) \ Create an editbox at outputbox
+	: editbox  ( -- ) \ Create an editbox at outputbox
 		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
 			<textarea id=editboxtextarea rows=8></textarea>
@@ -176,25 +176,29 @@
 		editboxtextarea.rows = Math.max(r,1); end-code
 
 	: edit-node ( node -- ) \ Edit the node.
+		ce! \ leverage ce for moving around among neighbours
+		outputbox-edit-mode-off
 		editbox \ create div-editbox
-		node-source js: editboxtextarea.value=pop() \ target source code
+		ce@ node-source js: editboxtextarea.value=pop() \ target source code
 		div-editbox js> $(pop()).offset().top \ get editbox position
 		js: window.scrollTo(0,pop()) \ jump to editbox
 		;
 	
-	: single-click ( -- node ) \ Alt-click : get the node
-		js> event&&event.altKey if \ Alt-click
-			<js> alert("The node you clicked is on TOS")</js>
-			js> window.getSelection().anchorNode
-			false \ Stop the handler chain
-		else true then ;
+	: single-click ( flag -- flag' )
+		( do nothing ) ;
+		\ <js> alert("You made a single-click")</js>
+		\ js> event&&event.altKey if \ Alt-click
+		\ 	<js> alert("The node you clicked is on TOS")</js>
+		\ 	js> window.getSelection().anchorNode
+		\ 	false \ Stop the handler chain
+		\ else true then 
 		
-	: double-click ( -- ) \ Launch the Editbox to edit ce@ which is the anchorNode.
-		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
-			outputbox-edit-mode-off
-			js> window.getSelection().anchorNode ce! ce@ edit-node
-			false
-		else true then ;
+	: double-click ( flag -- flag' ) \ Launch the Editbox to edit ce@ which is the anchorNode.
+		drop \ the default return value. True to let the river run.
+		js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
+		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> 
+		if ce@ edit-node false
+		else true ( let the river run ) then ;
 		
 	: hide ( -- ) \ 暫時把文章 hide() 起來
 		article js: $(pop()).hide() ;
