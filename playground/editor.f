@@ -93,7 +93,7 @@
 			<input type=button value='Refresh' onclick="kvm.execute('editbox-refresh')" />
 			<input type=button value='Example' onclick="kvm.execute('editbox-example')" />
 			<input type=button value=Close onclick="kvm.execute('editbox-close')" />
-		</div></text> </o> ;
+		</div></text> </o> to div-editbox ;
 
 	: unenvelope ( element -- firstNode ) \ Break an element into its children nodes
 		( ele ) js> tos().childNodes.length ?dup if ( ele length ) 
@@ -122,9 +122,8 @@
 				false 
 			else true then 
 		until
-		div-editbox js> tos()&&tos().parentNode 
-		if removeElement then null to div-editbox 
-		jump-to-ce@ ;
+		div-editbox if div-editbox removeElement then 
+		null to div-editbox jump-to-ce@ ;
 
 	: node-source ( node -- "source" ) \ Get outerHTML or nodeValue
 		dup :> outerHTML ?dup if ( node outerHTML ) nip 
@@ -176,20 +175,26 @@
 		if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
 		editboxtextarea.rows = Math.max(r,1); end-code
 
-	: edit ( -- ) \ Edit the ce (current element) outerHTML.
-		editbox to div-editbox \ create editbox and get its object
-		ce@ node-source js: editboxtextarea.value=pop() \ target source code
+	: edit-node ( node -- ) \ Edit the node.
+		editbox \ create div-editbox
+		node-source js: editboxtextarea.value=pop() \ target source code
 		div-editbox js> $(pop()).offset().top \ get editbox position
 		js: window.scrollTo(0,pop()) \ jump to editbox
 		;
 	
-	: content-handler ( -- ) \ Launch the Editbox to edit ce@ which is the anchorNode.
+	: single-click ( -- node ) \ Alt-click : get the node
+		js> event&&event.altKey if \ Alt-click
+			<js> alert("The node you clicked is on TOS")</js>
+			js> window.getSelection().anchorNode
+			false \ Stop the handler chain
+		else true then ;
+		
+	: double-click ( -- ) \ Launch the Editbox to edit ce@ which is the anchorNode.
 		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
 			outputbox-edit-mode-off
-			js> window.getSelection().anchorNode ce! edit 
+			js> window.getSelection().anchorNode ce! ce@ edit-node
 			false
 		else true then ;
-		/// Ctrl-F2 or Double-Click
 		
 	: hide ( -- ) \ 暫時把文章 hide() 起來
 		article js: $(pop()).hide() ;
@@ -244,7 +249,7 @@
 	: log-content-handler ( -- ) \ Launch the Editbox to edit log iframe node
 		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
 			outputbox-edit-mode-off
-			js> vm.g["log-document"].getSelection().anchorNode ce! edit 
+			js> vm.g["log-document"].getSelection().anchorNode ce! ce@ edit-node
 			false
 		else true then ;
 		/// Double-Click

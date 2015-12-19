@@ -15,18 +15,23 @@ also forth definitions
 				\ 以下都不能用 cr 改用 js: type('\n'); cr 中有 1 nap suspend, event handler 不能 suspend。
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
 					char toggle-outputbox-edit-mode execute false exit then \ shift-F2
-				js> event&&event.ctrlKey if ( ctrl+F2 for contentEdit )
-					char content-handler execute ( T/f ) exit then
+				js> event&&event.ctrlKey if ( ctrl+f2 for contentEdit )
+					char ctrl-f2 execute ( T/f ) exit then
 				char toggle-inputbox-edit-mode execute false \ F2 w/o shifted key
 				;
 				/// return a 'false' to stop the hotkey event handler chain.
 				
-				\ 設定讓 整個 <body> 的 double-click 都發動 content-handler 來
-				\ 處理所在的 node 等同於 Ctrl-F2。
+				\ 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
+				\ 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
 				<js> 
 					body.ondblclick = function(){
 						push(window.getSelection().anchorNode);
-						execute("content-handler");
+						execute("double-click"); // do nothing if there's no double-click
+						return(pop());
+					}
+					body.onclick = function(){
+						push(window.getSelection().anchorNode);
+						execute("single-click"); // do nothing if there's no single-click
 						return(pop());
 					}
 				</js>
@@ -51,9 +56,9 @@ also forth definitions
 				if outputbox-edit-mode-on
 				else outputbox-edit-mode-off 
 				then ;
-	
-: content-handler ( -- false ) \ Get the anchorNode to ce@ (current element).
-				js> window.getSelection().anchorNode dup ce! se false ;
+: ctrl-f2 		( -- false ) \ Get the anchorNode to ce@ (current element).
+				<js> alert("You pressed Ctrl-F2") </js>
+				true ( by pass ) ;
 				/// Ctrl-F2 handler main routine. Initial version.
 				/// Will be replaced by actual application.
 				/// Return false to break the event handler chain.
