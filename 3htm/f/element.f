@@ -42,19 +42,33 @@
 		then ;
 		/// Error proof, return previous history ce, or window.document if history is empty.
 
+	code <>escape ( "lines" -- "cooked" ) \ '<' '>' to "&lt;" "&gt;"
+		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;");
+		push(result);
+		end-code
+		/// Support multiple lines
+
 	:  jump-to-ce@  ( -- ) \ Jump to the target position
 		ce@ :> nodeName=="#text" if
-			s" <span id=tempSpan>" ce@ :> nodeValue + char </span> + 
-			<o>escape </o> ( tempElement )
-			dup ce@ replaceNode ce!
+			\ 以下步驟把 #text 改裝成暫時的 <span>
+			s" <span id=tempSpan>" 
+			ce@ :> nodeValue <>escape + 
+			char </span> + </o>
+			dup  ( tempElement tempElement )
+			ce@ replaceNode \ 替換原來的 #text
+			ce! \ ce 改成替換過的
 		then \ 以上很成功，把原 #text 改裝成 <span> 這樣才 scrollTo() 得過去
 		ce@ js> $(pop()).offset().top \ get target position
 		js: window.scrollTo(0,pop()) \ jump to target
 		ce@ :> id=="tempSpan" if
-			ce@ :> innerText <o>escape </o> 
-			( original#text ) ce@ insertAfter \ 原 #text 接在後面
-			ce@ :> nextSibling ce@ removeElement ce! \ 以接在後面的原 #text 取代 ce 把暫時的 <span> 移除。
-		then \ 一番於迴轉進以上也成功了
+			\ 以下步驟剝除暫時的 <span>
+			ce@ :> innerHTML <>escape \ #text 交給 </o> 要避免 <東西> 被翻譯
+			</o> ( original#text ) 
+			ce@ insertAfter \ 原 #text 接在 ce@ 後面
+			ce@ :> nextSibling \ 取得原 #text 
+			ce@ ( 暫時的 <span> ) removeElement 
+			ce! \ 以接在後面的原 #text 取代 ce 
+		then \ 一番迂迴轉進以上成功了
 		;  
 
 	: se ( element -- ) \ See the element

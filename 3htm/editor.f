@@ -79,7 +79,7 @@
 	
 	null value div-editbox // ( -- element ) The entire DIV node of the editbox.
 	
-	: editbox  ( -- ) \ Create an editbox at outputbox
+	: create-editbox  ( -- ) \ Create an editbox at outputbox
 		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
 			<textarea id=editboxtextarea rows=8></textarea>
@@ -122,7 +122,10 @@
 				false 
 			else true then 
 		until
-		div-editbox if div-editbox removeElement then 
+		div-editbox if 
+			div-editbox :> parentNode 
+			if div-editbox removeElement then 
+		then
 		null to div-editbox jump-to-ce@ ;
 
 	: node-source ( node -- "source" ) \ Get outerHTML or nodeValue
@@ -178,7 +181,7 @@
 	: edit-node ( node -- ) \ Edit the node.
 		ce! \ leverage ce for moving around among neighbours
 		outputbox-edit-mode-off
-		editbox \ create div-editbox
+		create-editbox \ create div-editbox
 		ce@ node-source js: editboxtextarea.value=pop() \ target source code
 		div-editbox js> $(pop()).offset().top \ get editbox position
 		js: window.scrollTo(0,pop()) \ jump to editbox
@@ -194,7 +197,7 @@
 		\ else true then 
 		
 	: double-click ( flag -- flag' ) \ Launch the Editbox to edit ce@ which is the anchorNode.
-		drop \ the default return value. True to let the river run.
+		div-editbox if ( Already editing, use the Default flag ) exit else drop then
 		js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
 		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> 
 		if ce@ edit-node false

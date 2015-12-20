@@ -110,12 +110,6 @@
 	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
 	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;
 	
-	code <>escape ( "lines" -- "cooked" ) \ '<' '>' to "&lt;" "&gt;"
-		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;")||"";
-		push(result);
-		end-code
-		/// Support multiple lines
-
 	: (<code>escape) ( "raw" -- "cooked" ) \ foo <code>'<' '>' to "&lt;" "&gt;"</code> bar
 		\ 規定 <code> ... </code> 不能 nested, 而且要成對依序出現。
 		\ foo bar 都存在時，經此 split() 之後一定是 foo,<code>,<>,</code>,bar 的形式。

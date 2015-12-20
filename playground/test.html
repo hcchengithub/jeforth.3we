@@ -1,1 +1,13 @@
-﻿<h1>This is a test, I add something into it.</h1>
+﻿<html>
+<body>
+<p>This is another paragraph, that will unaffected by the scoped style and remain black.</p> 
+<div class=demo>
+  <style scoped>
+    h1 { color: FireBrick;   }
+    p  { color: blue; }
+  </style>
+  <h1>This is an H1 in a scoped div. Regardless of global styles the text should be "FireBrick".</h1>
+  <p>This is a paragraph in a scoped div. The text should be "blue".</p>
+</div>
+</body>
+</html>
