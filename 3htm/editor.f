@@ -257,5 +257,59 @@
 			false
 		else true then ;
 		/// Double-Click
+		
+\ edit-zone		
+
+	{} constant edit-zone  // ( -- hash ) edit-zone hash table.
+						/// Can be closed don't use array.
+						/// {id:div1, id2:div2, ... }
+
+	: edit-zone-load ( id -- ) \ Load the editing file
+		( id ) dup char -pathname + ( id id-pathname )
+		js> window[pop()].innerText ( id pathname ) readTextFile ( id file )
+		js: window[pop(1)].innerHTML=pop() ;
+	   
+	: edit-zone-save ( id -- ) \ Save the editing file
+		( id ) dup char -pathname + ( id id-pathname ) 
+		js> window[pop()].innerText  ( id pathname )  
+		swap ( pathname id ) js> window[pop()].innerHTML ( pathname HTML ) 
+		swap  ( HTML pathname ) writeTextFile ;
+
+	: edit-zone-close ( id -- ) \ Delete the edit-zone, drop the data
+		dup edit-zone :> [pop()] ( id DIV ) removeElement 
+		( id ) edit-zone js: delete(pop()[pop()]) ;
+		
+	: edit-zone-moveup ( id -- ) \ Move the edit-zone up before its previousSibling
+		edit-zone :> [pop()] ( DIV ) 
+		dup :> previousSibline ( DIV previous ) 
+		?dup if insertBefore else drop then ;
+
+	: edit-zone-movedown ( id -- ) \ Move the edit-zone down under its nextSibling
+		edit-zone :> [pop()] ( DIV ) 
+		dup :> nextSibline ( DIV next ) 
+		?dup if insertAfter else drop then ;
+
+	: create-edit-zone ( pathname -- ) \ Create an edit-zone
+		GetAbsolutePathName dup GetFileName dup char edit-zone- swap + -rot ( id pathname filename )
+		<text> <div style="border: 1px solid black;">
+			<p><span style="font-size:2em">_filename_ </span>
+			/* <span> to make it an element avoid being erased by er */ 
+			<input type=button value=Save  onclick="vm.push('_id_');vm.execute('edit-zone-save')" />
+			<input type=button value=Close onclick="vm.push('_id_');vm.execute('edit-zone-close')" />
+			<input type=button value=MoveUp onclick="vm.push('_id_');vm.execute('edit-zone-moveup')" />
+			<input type=button value=MoveDown onclick="vm.push('_id_');vm.execute('edit-zone-movedown')" />
+			<span id="_id_-pathname" style="font-size:0.8em">_pathname_</span></p>
+			<div id="_id_" contentEditable=true></div>
+		</div></text> /*remove*/
+		:> replace(/_filename_/gm,pop()).replace(/_pathname_/gm,pop()).replace(/_id_/gm,tos()) ( id )
+		</o> 
+		ce! er ce@ swap ( ce@ id ) edit-zone :: [tos()]=pop(1) 
+		ce@ js> outputbox insertBefore ( id ) edit-zone-load ;
+		/// id is the editing <div>
+		
+	: open ( -- ) \ Open a HTML file to edit
+		pickFile ?dup if create-edit-zone then ;
 
 \ -- End --
+
+

@@ -585,7 +585,17 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				///     s" where name = 'ExCeL.ExE'" list-them
 				///     s" where name like 'chrom%'" list-them 
 
-: see-process ( s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" -- obj ) \ See into a process 
+: count-process ( s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" -- count ) \ Count matched process 
+				0 swap objEnumWin32_Process >r  ( 0 | obj )
+				begin
+					r@  ( 0 obj | obj)
+					js> !pop().atEnd() ( 0 NotAtEnd? )
+				while ( count | obj )
+					1+ 
+				r@ js: pop().moveNext() repeat 
+				r> drop ;
+
+: see-process ( s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" -- count ) \ See into a process 
 				0 swap objEnumWin32_Process >r  ( 0 | obj )
 				begin
 					r@  ( 0 obj | obj)
