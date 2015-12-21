@@ -269,12 +269,12 @@
 
 	: edit-zone-load ( id -- ) \ Load the editing file
 		( id ) dup char -pathname + ( id id-pathname )
-		js> window[pop()].innerText ( id pathname ) readTextFile ( id file )
+		js> window[pop()].innerText trim ( id pathname ) readTextFile ( id file )
 		js: window[pop(1)].innerHTML=pop() ;
 	   
 	: edit-zone-save ( id -- ) \ Save the editing file
 		( id ) dup char -pathname + ( id id-pathname ) 
-		js> window[pop()].innerText  ( id pathname )  
+		js> window[pop()].innerText trim ( id pathname )  
 		swap ( pathname id ) js> window[pop()].innerHTML ( pathname HTML ) 
 		swap  ( HTML pathname ) writeTextFile ;
 
@@ -295,17 +295,25 @@
 	: create-edit-zone ( pathname -- ) \ Create an edit-zone
 		GetAbsolutePathName dup GetFileName dup char edit-zone- swap + -rot ( id pathname filename )
 		<text> <div style="border: 1px solid black;">
-			<p><span style="font-size:2em">_filename_ </span>
+			<p>
+			<span style="font-size:2em">_filename_</span>
 			/* <span> to make it an element avoid being erased by er */ 
 			<input type=button value=Save  onclick="vm.push('_id_');vm.execute('edit-zone-save')" />
 			<input type=button value=Close onclick="vm.push('_id_');vm.execute('edit-zone-close')" />
 			<input type=button value=MoveUp onclick="vm.push('_id_');vm.execute('edit-zone-moveup')" />
 			<input type=button value=MoveDown onclick="vm.push('_id_');vm.execute('edit-zone-movedown')" />
-			<span id="_id_-pathname" style="font-size:0.8em">_pathname_</span></p>
-			<div id="_id_" contentEditable=true></div>
+			<span id="_id_-pathname" style="font-size:0.8em"> _pathname_</span>
+			</p>
+			<hr><div id="_id_" contentEditable=true></div><hr>
+			<p>&nbsp;
+			<input type=button value=Save  onclick="vm.push('_id_');vm.execute('edit-zone-save')" />
+			<input type=button value=Close onclick="vm.push('_id_');vm.execute('edit-zone-close')" />
+			<input type=button value=MoveUp onclick="vm.push('_id_');vm.execute('edit-zone-moveup')" />
+			<input type=button value=MoveDown onclick="vm.push('_id_');vm.execute('edit-zone-movedown')" />
+			</p>
 		</div></text> /*remove*/
 		:> replace(/_filename_/gm,pop()).replace(/_pathname_/gm,pop()).replace(/_id_/gm,tos()) ( id )
-		</o> 
+		</o>
 		ce! er ce@ swap ( ce@ id ) edit-zone :: [tos()]=pop(1) 
 		ce@ js> outputbox insertBefore ( id ) edit-zone-load ;
 		/// id is the editing <div>
