@@ -1,13 +1,27 @@
-﻿<html>
-<body>
-<p>This is another paragraph, that will unaffected by the scoped style and remain black.</p> 
-<div class=demo>
-  <style scoped>
-    h1 { color: FireBrick;   }
-    p  { color: blue; }
+﻿
+
+<blockquote>
+<p>This is a paragraph out side of the scoped style <code>&lt;DIV&gt;</code>and remain black.</p> 
+<div class="demo" style="border: 2px solid white;">
+  <style>
+    .demo h1 { color: FireBrick;   }
+    .demo p  { color: blue; }
   </style>
   <h1>This is an H1 in a scoped div. Regardless of global styles the text should be "FireBrick".</h1>
   <p>This is a paragraph in a scoped div. The text should be "blue".</p>
 </div>
-</body>
-</html>
+<p>This is another paragraph out side of the scoped style <code>&lt;DIV&gt;</code> and remain black.</p> 
+</blockquote>
+<table class="commandline" style="margin-left: 2em;"><tbody><tr><td><pre><code class="source">&lt;blockquote&gt;
+&lt;p&gt;This is a paragraph out side of the scoped style &lt;code&gt;&lt;DIV&gt;&lt;/code&gt; and remain black.&lt;/p&gt; 
+&lt;div class="demo" style="border: 2px solid white;"&gt;
+  &lt;style&gt;
+    .demo h1 { color: FireBrick;   }
+    .demo p  { color: blue; }
+  &lt;/style&gt;
+  &lt;h1&gt;This is an H1 in a scoped div. Regardless of global styles the text should be "FireBrick".&lt;/h1&gt;
+  &lt;p&gt;This is a paragraph in a scoped div. The text should be "blue".&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;This is another paragraph out side of the scoped style &lt;code&gt;&lt;DIV&gt;&lt;/code&gt; and remain black.&lt;/p&gt; 
+&lt;/blockquote&gt;
+</code></pre></td></tr></tbody></table> 

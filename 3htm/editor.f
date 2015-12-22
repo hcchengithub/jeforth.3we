@@ -294,7 +294,7 @@
 
 	: create-edit-zone ( pathname -- ) \ Create an edit-zone
 		GetAbsolutePathName dup GetFileName dup char edit-zone- swap + -rot ( id pathname filename )
-		<text> <div style="border: 1px solid black;">
+		<text> <div style="border: 2px solid white;">
 			<p>
 			<span style="font-size:2em">_filename_</span>
 			/* <span> to make it an element avoid being erased by er */ 
