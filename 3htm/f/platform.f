@@ -558,7 +558,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					var cmd = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					vm.cmdhistory.push(cmd);
-					if (tick("{F2}").EditMode) {execute('{F2}');pop()} // 自動恢復
+					if (tick("{F2}").EditMode) execute('toggle-inputbox-edit-mode'); // 自動恢復
 					vm.forthConsoleHandler(cmd);
 					return(false);
 				}

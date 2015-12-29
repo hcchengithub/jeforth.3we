@@ -4462,6 +4462,9 @@
 			chrome --allow-file-access-from-files
 		應該更好。有充分的資源可用。
 	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
+[ ] 應用 chrome --allow-file-access-from-files 之前要把所有執行中的 chrome.exe 都停掉。
+	不如來寫一個命令叫做 powoer-chrome (引用 power user 的用法) 來一口氣完成。
+	: power-chrome ( -- ) \ Run chrome that
 
 [x] Alt-Up/Down should not recall multiple-line.
 	hcchen5600 2015/12/04 10:34:22

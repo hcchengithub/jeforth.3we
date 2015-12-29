@@ -83,7 +83,8 @@
 		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
 			<textarea id=editboxtextarea rows=8></textarea>
-			<input type=button value=Save  onclick="kvm.execute('editbox-save')" />
+			<input type=button value="Save & Close"  onclick="kvm.execute('editbox-save&close')" />
+			<input type=button value="Save w/o close" onclick="kvm.execute('editbox-save')" />
 			<input type=button value=Bigger onclick="kvm.execute('editbox-bigger')" />
 			<input type=button value=Smaller onclick="kvm.execute('editbox-smaller')" />
 			<input type=button value='<' onclick="kvm.execute('editbox-before')" />
@@ -107,14 +108,13 @@
 		/// if the given element has no child then leave itself on the TOS.
 		/// Return the first node to be the new ce@ after editbox-save.
 	
-	:  editbox-save ( -- ) \ ce@ is the target element.
+	:  editbox-save ( -- ) \ Save editbox to ce@ which is the target element.
 		js> editboxtextarea.value 
 		/*remove*/ <code>escape
 		char <span> swap + char </span> + <o>escape </o> \ 套一圈 <span> 保證它是 one node
-		dup ce@ replaceNode unenvelope ce! \ New nodes replace the old one then 解套
-		jump-to-ce@ ;  \ jump to it
+		dup ce@ replaceNode unenvelope ce! ; \ New nodes replace the old one then 解套
 		
-	: 	editbox-close ( -- ) \ ce@ is the target element.
+	: 	editbox-close ( -- ) \ Close the editbox
 		begin 
 			js> document.getElementById("editboxtextarea") if 
 				\ 這個 id 必須唯一，還看得見就是有例外狀況了，可能是之前的還沒有 close。
@@ -127,6 +127,9 @@
 			if div-editbox removeElement then 
 		then
 		null to div-editbox jump-to-ce@ ;
+		
+	:  editbox-save&close  ( -- ) \ Save editbox to ce@ which is the target element.
+		editbox-save editbox-close ;
 
 	: node-source ( node -- "source" ) \ Get outerHTML or nodeValue
 		dup :> outerHTML ?dup if ( node outerHTML ) nip 
@@ -293,7 +296,10 @@
 		?dup if insertAfter else drop then ;
 
 	: create-edit-zone ( pathname -- ) \ Create an edit-zone
-		GetAbsolutePathName dup GetFileName dup char edit-zone- swap + -rot ( id pathname filename )
+		GetAbsolutePathName dup GetFileName ( pathname filename )
+		dup char edit-zone- swap + ( pathname filename edit-zone-filename )
+		random 1000 * int + ( pathname filename edit-zone-filename999 )
+		-rot ( id pathname filename )
 		<text> <div style="border: 2px solid white;">
 			<p>
 			<span style="font-size:2em">_filename_</span>

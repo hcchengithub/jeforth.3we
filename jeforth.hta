@@ -183,7 +183,7 @@
 	// When used in forth words, inner() handles the try{}catch{} thing.
 	function writeTextFile_ado (pathname, data) {
 		var objStream = kvm.ado;
-		try{objStream.Close()}catch(err){}
+		// try{objStream.Close()}catch(err){}
 		objStream.CharSet="utf-8"
 		objStream.Open();
 		objStream.WriteText(data); // option: adWriteChar=0(default), adWriteLine=1(\r\n)
