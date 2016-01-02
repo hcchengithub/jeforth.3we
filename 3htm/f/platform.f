@@ -6,6 +6,30 @@ s" platform.f"		source-code-header
 
 also forth definitions
 
+\ 既然這種東西都是應用相關的，platform.f 裡面就不再預先設定了，但保留以下範例。
+<comment>
+	<js>
+	// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
+	body.ondblclick = function(){
+		push(true); // true let the river run, false stop bubbling
+		execute("double-click"); // execute() does nothing if undefined yet
+		return(pop()); // double-click ( flag -- ... flag' )
+	}
+	// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
+	body.onclick = function(){
+		push(true);  // true let the river run, false stop bubbling
+		execute("single-click"); // execute() does nothing if undefined yet
+		return(pop()); // single-click ( flag -- ... flag' )
+	}
+	// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
+	body.oncontextmenu = function(){
+		push(true); // true let the river run, false stop bubbling
+		execute("right-click"); // execute() does nothing if undefined yet
+		return(pop()); // right-click ( flag -- ... flag' )
+	}
+	</js>
+</comment>
+
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
 				<js> confirm("Really want to restart?") </jsV> ;
 				/// Return a false to stop the hotkey event handler chain.
@@ -20,21 +44,6 @@ also forth definitions
 				char toggle-inputbox-edit-mode execute false \ F2 w/o shifted key
 				;
 				/// return a 'false' to stop the hotkey event handler chain.
-				
-				\ 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
-				\ 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
-				<js> 
-					body.ondblclick = function(){
-						push(true); // in case "double-click" undefined yet
-						execute("double-click"); // do nothing if there's no "double-click"
-						return(pop()); // double-click ( flag -- ... flag' )
-					}
-					body.onclick = function(){
-						push(true); // in case "single-click" undefined yet 
-						execute("single-click"); // do nothing if there's no "single-click"
-						return(pop()); // single-click ( flag -- ... flag' )
-					}
-				</js>
 				
 : toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
 				." Input box EditMode = " ['] {F2} 
@@ -57,7 +66,7 @@ also forth definitions
 				else outputbox-edit-mode-off 
 				then ;
 : ctrl-f2 		( -- false ) \ Get the anchorNode to ce@ (current element).
-				<js> alert("You pressed Ctrl-F2") </js>
+				<js> alert("You pressed Ctrl-F2 and I am doing nothing.") </js>
 				true ( by pass ) ;
 				/// Ctrl-F2 handler main routine. Initial version.
 				/// Will be replaced by actual application.

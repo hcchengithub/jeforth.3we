@@ -7,6 +7,7 @@
 	
 	s" editor.f" source-code-header
 	
+<comment> old code 看甚麼時候通通丟掉	
 	char %HOMEDRIVE%%HOMEPATH%\Documents\GitHub\jeforth.3we\playground\ env@
 	value working-directory // ( -- "path" ) 
 
@@ -59,7 +60,8 @@
 			else js> mystyle then 
 			( mystyle ) :> outerHTML+myarticle.outerHTML
 			pathname writeTextFile 
-		then ;
+		then 
+		;
 
 	: save-as ( "path-name" -- ) \ Save the editing document to the specified pathname
 		cr ." Sorry, under constructing " cr ;
@@ -76,23 +78,37 @@
 			article if article :: innerHTML="" ( 有的話清除現有頁面 ) then
 			null to article 
 		then ;
+		
+	: hide ( -- ) \ 暫時把文章 hide() 起來
+		article js: $(pop()).hide() ;
+		
+	: show ( -- ) \ 把文章 show() 回來
+		article js: $(pop()).show() ;
+		
+</comment>
 	
 	null value div-editbox // ( -- element ) The entire DIV node of the editbox.
-	
+	<js>
+		body.onclick = function(){
+			push(true); // true let the river run, false stop bubbling
+			execute("single-click"); // execute() does nothing if undefined yet
+			return(pop()); // right-click ( flag -- ... flag' )
+		}
+	</js>
 	: create-editbox  ( -- ) \ Create an editbox at outputbox
 		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
 			<textarea id=editboxtextarea rows=8></textarea>
-			<input type=button value="Save & Close"  onclick="kvm.execute('editbox-save&close')" />
-			<input type=button value="Save w/o close" onclick="kvm.execute('editbox-save')" />
-			<input type=button value=Bigger onclick="kvm.execute('editbox-bigger')" />
-			<input type=button value=Smaller onclick="kvm.execute('editbox-smaller')" />
 			<input type=button value='<' onclick="kvm.execute('editbox-before')" />
 			<input type=button value=Parent onclick="kvm.execute('editbox-parent')" />
 			<input type=button value=Back onclick="kvm.execute('editbox-pop')" />
 			<input type=button value='>' onclick="kvm.execute('editbox-after')" />
 			<input type=button value='Refresh' onclick="kvm.execute('editbox-refresh')" />
 			<input type=button value='Example' onclick="kvm.execute('editbox-example')" />
+			<input type=button value=Smaller onclick="kvm.execute('editbox-smaller')" />
+			<input type=button value=Bigger onclick="kvm.execute('editbox-bigger')" />
+			<input type=button value="Save w/o close" onclick="kvm.execute('editbox-save')" />
+			<input type=button value="Save & Close"  onclick="kvm.execute('editbox-save&close')" />
 			<input type=button value=Close onclick="kvm.execute('editbox-close')" />
 		</div></text> </o> to div-editbox ;
 
@@ -190,27 +206,12 @@
 		js: window.scrollTo(0,pop()) \ jump to editbox
 		;
 	
-	: single-click ( flag -- flag' )
-		( do nothing ) ;
-		\ <js> alert("You made a single-click")</js>
-		\ js> event&&event.altKey if \ Alt-click
-		\ 	<js> alert("The node you clicked is on TOS")</js>
-		\ 	js> window.getSelection().anchorNode
-		\ 	false \ Stop the handler chain
-		\ else true then 
-		
-	: double-click ( flag -- flag' ) \ Launch the Editbox to edit ce@ which is the anchorNode.
-		div-editbox if ( Already editing, use the Default flag ) exit else drop then
-		js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
-		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> 
-		if ce@ edit-node false
-		else true ( let the river run ) then ;
-		
-	: hide ( -- ) \ 暫時把文章 hide() 起來
-		article js: $(pop()).hide() ;
-		
-	: show ( -- ) \ 把文章 show() 回來
-		article js: $(pop()).show() ;
+	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
+		['] {F2} :> EditMode div-editbox not and if ( flag ) 
+			drop toggle-inputbox-edit-mode
+			js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
+			ce@ edit-node false ( stop bubbling )
+		then ;
 		
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
 		\ 把整個 log.json 讀回來成一個 array。
@@ -253,16 +254,6 @@
 		[] dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
 		/// 這個應該都用不著，要小心。
-
-\ log.html iframe
-
-	: log-content-handler ( -- ) \ Launch the Editbox to edit log iframe node
-		<js> confirm("jeforth: You double-clicked at a node, want to Edit it?")</jsV> if
-			outputbox-edit-mode-off
-			js> vm.g["log-document"].getSelection().anchorNode ce! ce@ edit-node
-			false
-		else true then ;
-		/// Double-Click
 		
 \ edit-zone		
 
