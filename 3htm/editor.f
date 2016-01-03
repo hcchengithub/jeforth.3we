@@ -130,17 +130,17 @@
 			<input type=button value=Close            class="editbox_close     " />
 		</div></text> </o> to div-editbox 
 		<js>
-			$(".editbox_before    ")[0].addEventListener('click',tick("editbox_before    ").xt)
-			$(".editbox_parent    ")[0].addEventListener('click',tick("editbox_parent    ").xt)
-			$(".editbox_pop       ")[0].addEventListener('click',tick("editbox_pop       ").xt)
-			$(".editbox_after     ")[0].addEventListener('click',tick("editbox_after     ").xt)
-			$(".editbox_refresh   ")[0].addEventListener('click',tick("editbox_refresh   ").xt)
-			$(".editbox_example   ")[0].addEventListener('click',tick("editbox_example   ").xt)
-			$(".editbox_smaller   ")[0].addEventListener('click',tick("editbox_smaller   ").xt)
-			$(".editbox_bigger    ")[0].addEventListener('click',tick("editbox_bigger    ").xt)
-			$(".editbox_save      ")[0].addEventListener('click',tick("editbox_save      ").xt)
-			$(".editbox_saveclose ")[0].addEventListener('click',tick("editbox_saveclose").xt)
-			$(".editbox_close     ")[0].addEventListener('click',tick("editbox_close     ").xt)
+			$(".editbox_before    ")[0].onclick=function(){execute("editbox_before    ")}
+			$(".editbox_parent    ")[0].onclick=function(){execute("editbox_parent    ")}
+			$(".editbox_pop       ")[0].onclick=function(){execute("editbox_pop       ")}
+			$(".editbox_after     ")[0].onclick=function(){execute("editbox_after     ")}
+			$(".editbox_refresh   ")[0].onclick=function(){execute("editbox_refresh   ")}
+			$(".editbox_example   ")[0].onclick=function(){execute("editbox_example   ")}
+			$(".editbox_smaller   ")[0].onclick=function(){execute("editbox_smaller   ")}
+			$(".editbox_bigger    ")[0].onclick=function(){execute("editbox_bigger    ")}
+			$(".editbox_save      ")[0].onclick=function(){execute("editbox_save      ")}
+			$(".editbox_saveclose ")[0].onclick=function(){execute("editbox_saveclose ")}
+			$(".editbox_close     ")[0].onclick=function(){execute("editbox_close     ")}
 		</js> ;
 
 	: edit-node ( node -- ) \ Edit the node.
