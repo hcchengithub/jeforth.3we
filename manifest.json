@@ -1,15 +1,15 @@
 {
 	"app": {
 		"launch": {
-			"local_path": "jeforth.3chrome.html"
+			"local_path": "index.html"
 		}
 	},
 	"icons": {
 		"128": "nico.png"
 	},
 	"manifest_version": 2,
-	"name": "jeforth.3chrome.html",
-	"description": "jeforth for Chrome app",
+	"name": "jeforth.3chrome",
+	"description": "jeforth.3we for Chrome App",
 	"version": "1.0",
 	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 	"permissions" : [

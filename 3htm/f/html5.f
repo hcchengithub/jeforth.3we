@@ -50,10 +50,9 @@ s" html5.f"		source-code-header
 : getAttribute  ( oElement "attr" -- ) \ Get an attribute value of an element
 				js> pop(1).getAttribute(pop()) ;
 
-: replaceNode  ( newNode targetNode -- ) \ Replace a HTML node
-				js> tos().nodeName=="#text" if js: pop().replaceNode(pop()) 
-				else js: tos().parentElement.replaceChild(pop(1),pop()) then ;
-				/// Try it yourself http://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_node_replacechild
+: replaceNode  ( newNode targetNode -- ) \ Replace a HTML node or element
+				js: $(pop()).replaceWith(pop()) ;
+				/// jQuery replaceWith() http://api.jquery.com/replaceWith/
 
 : insertBefore	( target ref -- ) \ *Move* the target element to before the reference element
 				js: tos().parentElement.insertBefore(pop(1),pop()) ;
@@ -112,7 +111,7 @@ s" html5.f"		source-code-header
 				if literal compile doElement 
 				else doElement then ; immediate
 				
-code 			<o>escape ( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabrabra
+code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabrabra
 				var ss = pop()||"";
 				var result = ss
 					.replace(/<o>/mg,"&lt;o&gt;")

@@ -287,7 +287,9 @@
 		?dup if insertAfter else drop then ;
 
 	: create-edit-zone ( pathname -- ) \ Create an edit-zone
-		GetAbsolutePathName dup GetFileName ( pathname filename )
+		\ GetAbsolutePathName dup GetFileName ( pathname filename )
+		dup :> match(/(.*[\\/])(.+)$/) ( pathname [orig,path,name] )
+		?dup if js> pop()[2] else dup then ( pathname filename )
 		dup char edit-zone- swap + ( pathname filename edit-zone-filename )
 		random 1000 * int + ( pathname filename edit-zone-filename999 )
 		-rot ( id pathname filename )
