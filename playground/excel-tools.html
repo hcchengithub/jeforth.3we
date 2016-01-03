@@ -1,0 +1,76 @@
+﻿<style id="mystyle" type="text/css">
+				
+				.default { 
+					
+					
+					
+					
+					font-family: Microsoft JhengHei;  
+					letter-spacing: 0px;
+					line-height: 160%;
+					tab-size:4; 
+				}
+				
+				code { 
+					font-family: courier new;
+					font-size: 120%; 
+					background: #E0E0E0; 
+				}
+				
+				.commandline { 
+					width: 90%;
+					background: #E0E0E0; 
+				}
+				.source {  
+					font-size: 100%;   
+					line-height: 100%; 
+				}
+			</style><div class="default" id="myarticle" contentEditable="true"><blockquote>
+
+			
+			<h1>用 jeforth 處理 Excel 應用</h1>
+
+			<img src="doc/editor.png">
+
+			<p>
+	要用 jeforth 在網頁上直接編輯的文章包括兩大部分：前一部分是一個 ID 為 "mystyle" 的 STYLE node：後一部分是一個名為 </p>
+
+			<h2>把一個 Excel 檔案按 worksheets 拆分成多個</h2>
+
+			<div>
+<p>現有的範例，來自 3hta/excel/split.f</p>
+<table class="commandline"><tbody><tr><td><p><code class="source">&nbsp;: 各部門的worksheet存成xls檔 ( -- )<br>&nbsp;&nbsp;excel.app dup js&gt; pop().workbooks.count 1+&nbsp; \ new workbook's ID <br>&nbsp;&nbsp;objSourceWorkbook js&gt; pop().path&nbsp; <br>&nbsp;&nbsp;( excel.app )&nbsp; ( workbook# )&nbsp; ( path )&nbsp; objSourceWorkbook&nbsp; keyHashTable<br>&nbsp;&nbsp;&lt;js&gt;<br>&nbsp;&nbsp;&nbsp;for (var i in tos() ) { /* i 是 worksheet 的 name */<br>&nbsp;&nbsp;&nbsp;&nbsp;var pathname = tos(2)/* path */&nbsp;+ "\\" + i /* name */ + ".xls";<br>&nbsp;&nbsp;&nbsp;&nbsp;tos(1).worksheets(i).copy; /* copy the worksheet to a new xls file in memory */<br>&nbsp;&nbsp;&nbsp;&nbsp;var workbook = tos(4).workbooks(tos(3));<br>&nbsp;&nbsp;&nbsp;&nbsp;push(workbook); push(pathname); <br>&nbsp;&nbsp;&nbsp;&nbsp;dictate("over excel.save-as swap excel.close and [if] [else] char Panic&gt;&gt; *debug* [then]");<br>&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&lt;/js&gt; 5 drops ;<br></code></p><p><code class="source"></code>&nbsp;</p></td></tr></tbody></table>
+</div><div><p>取得本文</p><p>一上來直接看 ActiveSheet</p>
+<table class="commandline"><tbody><tr><td><code class="source">js&gt; myarticle.outerHTML .</code></td></tr></tbody></table></div>
+
+<p style='font: 20px/32px "Microsoft JhengHei"; color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; font-size-adjust: none; font-stretch: normal; background-color: rgb(240, 240, 240); -webkit-text-stroke-width: 0px;'>把兩個加起來存檔就可以草草成功了。因為要用到&nbsp;<span style="letter-spacing: 0px;">writeTextFile 所以必須要用 jeforth.3nw 或者 jeforth.3hta 另一個本來可能用的 jeforth.3htm 暫時還無法寫檔案。</span></p><table class="commandline"><tbody><tr><td>
+<pre><code class="source">js&gt; mystyle.outerHTML+myarticle.outerHTML ( 抓到 mystyle 跟 myarticle 加起來 )<br>pathname writeTextFile</code></pre>
+</td></tr></tbody></table>
+
+
+			<h2>研究怎麼讀檔案進來編輯，分解動作</h2>
+
+			<p>
+				先弄出一塊 DIV node 空間放在 jeforth 頁面 &lt;body&gt; 最下面，取名叫做 article：</p>
+
+<table class="commandline"><tbody><tr><td><pre><code class="source">s" body" &lt;e&gt; &lt;div&gt;&lt;/div&gt;&lt;/e&gt; value article // ( -- element ) 整篇文章</code></pre></td></tr></tbody></table><p>然後把檔案讀進來取代這塊空間：</p><table class="commandline"><tbody><tr><td><pre><code class="source">pathname readTextFile article :: innerHTML=pop()</code></pre></td></tr></tbody></table><p style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">考慮若本來有 article 已經在頁面上則要先抹乾淨 (不是殺掉，怎麼殺？) 不要占用版面：</p>
+
+<table class="commandline"><tbody><tr><td><pre><code class="source">article if article :: innerHTML="" then</code></pre></td></tr></tbody></table><p style="color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; widows: 1; -webkit-text-stroke-width: 0px;">article removeElement 是從 &lt;body&gt; 內把 article 移除，即使與 &lt;body&gt; 斷鏈&nbsp;article value 還是指向它，它不會消失。雖然新的 DIV 馬上會取代 article 但我仍覺得本來的要先清掉，杜絕浪費、隱患。</p><p>完整的命令：</p><table class="commandline"><tbody><tr><td><pre><code class="source">run: ' article <br>if article :: innerHTML="" 
+else s" body" &lt;e&gt; &lt;div&gt;&lt;/div&gt;&lt;/e&gt; to article 
+then pathname readTextFile article :: innerHTML=pop()</code></pre></td></tr></tbody></table><h2>改變 node type 的辦法</h2><p>先進 contentEditable 模式&nbsp;anchor&nbsp;在要編輯的地方,&nbsp;Ctrl-F2 取得 anchorNode, 然後下 edit 命令。</p><code class="source">[ ] href=#anchor 可以放在任何 TAG 嗎?</code><div>
+<p>這個實驗把用 Ctrl-F2 取得的&nbsp;#text 所在之處的 P node 改成&nbsp;source code style </p>
+<table class="commandline"><tbody><tr><td><pre><code class="source">\ Change the &lt;p&gt; element of the anchor to code style<br>&lt;o&gt; &lt;table class=commandline&gt;&lt;td&gt;&lt;code id=tempid class=source&gt;<br>&lt;/code&gt;&lt;/td&gt;&lt;/table&gt;&lt;/o&gt; \ 在 TOS 做個空殼<br>ce@ :&gt; nodeValue js: tempid.innerText=pop() \ 把本 #text 的值抄過去<br>js: tempid.removeAttribute("id") \ 只用一次,過河拆橋以免將來 id 撞名<br>ce@ :&gt; parentNode replaceNode \ 把這個 #text 所在的 element 換掉</code></pre></td></tr></tbody></table></div><h3>變出一個 &lt;textarea&gt;直接編輯該element的outerHTML</h3><table class="commandline"><tbody><tr><td><code class="source"></code></td></tr></tbody></table><h3><p>--</p><table class="commandline"><tbody><tr><td><code class="source">sdffsfsdjfsldfj</code></td></tr></tbody></table></h3><h3>Alt-I 在本 node 之前插入空白編輯</h3><p>Ctrl-F2 的 handler 目前稱為 content-handler 應該由 element.f 提供，而且稱為 get-anchor-node 更恰當。用 get-anchor-node 取得本 node, 用 me.parentElement.insertBefore(&lt;div&gt;textarea,buttons&lt;/div&gt;,me) 的方式插入編輯框。之前要先變出編輯框，先暫放在 outputbox。</p><p>--<br></p><h3>生效編輯過的新 outerHTML</h3><table class="commandline"><tbody><tr><td><pre><code class="source">ce@ :: outerHTML=temptextarea.value
+js&gt; temptextarea dup :: removeAttribute("id") removeElement
+</code></pre></td></tr></tbody></table>
+
+			
+
+			<h2>Ending</h2>
+
+			<p>
+				ending
+			</p>	
+			<p>--- The End ---</p>	
+			<p>H.C. Chen hcchen5600@gmail.com 2015.11.27</p>
+			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
+		</blockquote></div>

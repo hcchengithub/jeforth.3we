@@ -42,6 +42,35 @@
 		then ;
 		/// Error proof, return previous history ce, or window.document if history is empty.
 
+	code <>escape ( "lines" -- "cooked" ) \ '<' '>' to "&lt;" "&gt;"
+		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;");
+		push(result);
+		end-code
+		/// Support multiple lines
+
+	:  jump-to-ce@  ( -- ) \ Jump to the target position
+		ce@ :> nodeName=="#text" if
+			\ 以下步驟把 #text 改裝成暫時的 <span>
+			s" <span id=tempSpan>" 
+			ce@ :> nodeValue <>escape + 
+			char </span> + </o>
+			dup  ( tempElement tempElement )
+			ce@ replaceNode \ 替換原來的 #text
+			ce! \ ce 改成替換過的
+		then \ 以上很成功，把原 #text 改裝成 <span> 這樣才 scrollTo() 得過去
+		ce@ js> $(pop()).offset().top \ get target position
+		js: window.scrollTo(0,pop()) \ jump to target
+		ce@ :> id=="tempSpan" if
+			\ 以下步驟剝除暫時的 <span>
+			ce@ :> innerHTML <>escape \ #text 交給 </o> 要避免 <東西> 被翻譯
+			</o> ( original#text ) 
+			ce@ insertAfter \ 原 #text 接在 ce@ 後面
+			ce@ :> nextSibling \ 取得原 #text 
+			ce@ ( 暫時的 <span> ) removeElement 
+			ce! \ 以接在後面的原 #text 取代 ce 
+		then \ 一番迂迴轉進以上成功了
+		;  
+
 	: se ( element -- ) \ See the element
 		dup children ( -- element array ) <js> 
 			var i=0, a=pop(), element=pop(); if (typeof(element)=='object') {
@@ -71,31 +100,27 @@
 		</js> ;
 		/// Error-proof, do nothing if given element illegal.
 
-	\ : se ce@ (se) ; // ( -- ) See the current element
-
-	: (ce) ( index -- ce@ ) \ change current-element to current-element[index] or '..' to parent element.
-		ce@ js> typeof(pop())=='object' if ( index )
-			js> tos()=='..' ( index flag ) if 
-				drop ce@ :> parentNode ( sth ) \ Dead ce's parentNode is null
-			else
-				( index ) ce@ children ( index array[] ) 
-				js> parseInt(tos(1))<tos().length ( index array[] flag ) if
-					:> [parseInt(pop())] ( sth )
-				else
-					2drop ce@ ( sth ) \ illegal index remain same ce
-				then
-			then 
-		else ( index ) 
-			drop false
-		then ( sth )
-		js> Boolean(tos()) ( sth flag ) if else 
-			drop js> window.document \ Default, ce@ will eat one so need two 
-		then ce! ce@ ;
-		/// ce to window.document when trouble unresolvable.
+	code (ce) ( destination -- ce@ ) \ Change element like cd does. Destination:(index,"..",'<','>','pop')
+		var index=pop(); execute("ce@");/*ce@ 有防呆*/ var ce=pop();
+		switch( index ){
+			case "..": ce = ce.parentNode; break; // can be null
+			case "<" : ce = ce.previousSibling; break; // can be null
+			case ">" : ce = ce.nextSibling; break; // can be null
+			case "pop" : dictate("ce-history :: pop() ce@");ce=pop(); break; // can be null
+			default  : 
+				if(isNaN(index)) ce=null;
+				else ce = ce.childNodes[parseInt(index)]; // can be undefined
+		}
+		if (!ce) panic("Error! illegal destination: " + index + ". Stay recent ce.\n");
+		else { push(ce); execute("ce!"); }
+		execute("ce@");
+		end-code
+		/// Stay recent ce if destination 
 		
 	: ce ( [<'index'>] -- ) \ change element to current-element[index] or '..' to parent element.
-		BL word ( -- 'index' ) ?dup if (ce) else ce@ then se ;
+		BL word ( -- 'index' ) ?dup if (ce) else ce@ then se ; interpret-only
 		/// if nothing given then see current element
+		/// Use 'se' in compiling mode if that's what you want to do.
 
 	: ce< ( -- ) \ Change element to the previous current-element
 		ce-history :: pop() ce@ se ;

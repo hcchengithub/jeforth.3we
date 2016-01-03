@@ -28,8 +28,8 @@
 					width: 100%;
 				}
 				.essay { 
-					font-family: Microsoft Yahei;
-					letter-spacing: 1px;
+					font-family: Microsoft JhengHei;
+					letter-spacing: 0px;
 					line-height: 160%;
 				}
 				.source { /*主要是把大小恢復否則 110% 太大了*/
@@ -322,7 +322,7 @@
 				看吧！ run: 就是根據「我這時候覺得它是甚麼」來命名的，
 				Forth words 本身性空，意義都是我們「左看右看」隨心情給的。
 				這種情形在 Forth 裡比比皆是。
-				與中文神似，又加上「空性」使得設計得當的 Forth words 意味深長。
+				綜合以上提醒我們：設計得當的 Forth words 意味深長、用途充滿驚喜。
 			</p>
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
@@ -398,7 +398,7 @@
 				<blockquote class=code>cv <b style=font-size:120%>js:</b> pop().beginPath()</blockquote> 
 				是沒有傳回值的。
 				早期我曾建議 Forther 直接引用 JavaScript 的 Object 
-				語法如上，不要另訂「Forth 式的 object oriented 語法 」寫法。
+				語法如上，不要另訂「Forth 式的 object oriented 語法 」。
 				結果像上面 <code>object js> pop().something</code>
 				或 <code>object js> pop()[something]</code>
 				這樣的 pattern 出現得太多了，程式裡到處都是，所以有類似於： 
@@ -606,7 +606,7 @@
 			
 			<h2 id=3we>jeforth.3we 簡介</h2>
 			<p>
-				jeforth 是 「台灣符式協會 FitTaiwan」 兩位先進 
+				jeforth 是 「台灣符式協會 FigTaiwan」 兩位先進 
 				Yap 與 爽哥 所提示之用 JavaScript 打造 Forth 系統的方法。
 				我依法做出來的結果就稱為 jeforth.3we (3 Words Engine) 統稱同一個 
 				kernel 在不同環境的各種版本。

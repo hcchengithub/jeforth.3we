@@ -6,28 +6,112 @@ s" platform.f"		source-code-header
 
 also forth definitions
 
+\ 既然這種東西都是應用相關的，platform.f 裡面就不再預先設定了，但保留以下範例。
+<comment>
+	<js>
+	// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
+	body.ondblclick = function(){
+		push(true); // true let the river run, false stop bubbling
+		execute("double-click"); // execute() does nothing if undefined yet
+		return(pop()); // double-click ( flag -- ... flag' )
+	}
+	// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
+	body.onclick = function(){
+		push(true);  // true let the river run, false stop bubbling
+		execute("single-click"); // execute() does nothing if undefined yet
+		return(pop()); // single-click ( flag -- ... flag' )
+	}
+	// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
+	body.oncontextmenu = function(){
+		push(true); // true let the river run, false stop bubbling
+		execute("right-click"); // execute() does nothing if undefined yet
+		return(pop()); // right-click ( flag -- ... flag' )
+	}
+	</js>
+</comment>
+
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
 				<js> confirm("Really want to restart?") </jsV> ;
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
-				[ last literal ] ( _me )
+				\ 以下都不能用 cr 改用 js: type('\n'); cr 中有 1 nap suspend, event handler 不能 suspend。
 				js> event&&event.shiftKey if ( shift+F2 for outputbox )
-					drop ( remove _me from TOS ) cr ." Output box EditMode = " 
-					js> outputbox.contentEditable!="true" if char true else char false then
-					js> outputbox.contentEditable=pop() . cr
-				else ( F2 for inputbox )
-					." Input box EditMode = " 
-					\ 以下這行不能用 cr, 因其中有 1 nap suspend, event handler 不能 suspend! 否則此處會吃掉 TOS
-					js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
-					if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
-					else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
-					then js: styleTextareaFocus.innerHTML=pop()
-				then
-				js: jump2endofinputbox.click();inputbox.focus();
-				false ;
+					char toggle-outputbox-edit-mode execute false exit then \ shift-F2
+				js> event&&event.ctrlKey if ( ctrl+f2 for contentEdit )
+					char ctrl-f2 execute ( T/f ) exit then
+				char toggle-inputbox-edit-mode execute false \ F2 w/o shifted key
+				;
 				/// return a 'false' to stop the hotkey event handler chain.
+				
+: toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
+				." Input box EditMode = " ['] {F2} 
+				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
+				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
+				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
+				then js: styleTextareaFocus.innerHTML=pop() ;
+
+: outputbox-edit-mode-on ( -- ) \ One of the {F2} events
+				js> outputbox :> style ( outputbox.style )
+				<js> pop().border="thin solid red"</js>
+				js: outputbox.contentEditable=true ;
+: outputbox-edit-mode-off ( -- ) \ One of the {F2} events
+				js> outputbox :> style ( outputbox.style )
+				<js> pop().border="thin solid white"</js>
+				js: outputbox.contentEditable=false ;
+: toggle-outputbox-edit-mode ( -- ) \ One of the {F2} events
+				js> outputbox.contentEditable!="true" 
+				if outputbox-edit-mode-on
+				else outputbox-edit-mode-off 
+				then ;
+: ctrl-f2 		( -- false ) \ Get the anchorNode to ce@ (current element).
+				<js> alert("You pressed Ctrl-F2 and I am doing nothing.") </js>
+				true ( by pass ) ;
+				/// Ctrl-F2 handler main routine. Initial version.
+				/// Will be replaced by actual application.
+				/// Return false to break the event handler chain.
+
+s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
+: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style do nothing
+					r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+					r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+					outputbox-high-light-style
+					r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
+					else
+						s' <span style="border:' 
+						outputbox-high-light-style + s' ">' +
+						r@ 1- js> outputbox :> childNodes[pop()].nodeValue +
+						s' </span>' + </o> 
+						r@ 1- js> outputbox :> childNodes[pop()]
+						replaceNode
+					then
+				next ; compile-only 
+				/// Don't use me directly, for not to destroy original style.border.
+				/// Use outputbox-high-light-toggle instead
+: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
+					if \ restore
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+					else \ no restore just clean
+						r@ 1- js> outputbox :> childNodes[pop()].style if
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+						then
+					then
+				next ; 
+: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+				js> outputbox :> highLight if \ check recent state
+					outputbox-high-light-off
+					js> outputbox :: highLight=false \ Yes, we can add properties to an element
+				else
+					outputbox-high-light-on
+					js> outputbox :: highLight=true
+				then ;
+
 
 code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				var r = inputbox.rows;
@@ -87,14 +171,15 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				end-code
 
 : history-selector ( -- ) \ Popup command history for selection
-				<o> <br><select style="width:800px;padding-left:2px;font-size:16px;"></select></o> ( select )
+				<o> <br><select style="width:90%;padding-left:2px;font-size:16px;"></select></o> ( select )
 				<js> 
-					tos().size = Math.min(16,vm.cmdhistory.array.length);
 					for (var i=0; i<vm.cmdhistory.array.length; i++){
+						if(vm.cmdhistory.array[i].split('\n').length>1) continue;
 						var option = document.createElement("option");
 						option.text = vm.cmdhistory.array[i];
 						js: tos().add(option);
 					}
+					tos().size = Math.min(16,tos().length);
 					tos().selectedIndex=tos().length-1;
 					jump2endofinputbox.click();tos().focus();
 					var select = tos().onclick = function(){
@@ -482,7 +567,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					var cmd = inputbox.value; // w/o the '\n' character ($10).
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 					vm.cmdhistory.push(cmd);
-					if (tick("{F2}").EditMode) {execute('{F2}');pop()} // 自動恢復
+					if (tick("{F2}").EditMode) execute('toggle-inputbox-edit-mode'); // 自動恢復
 					vm.forthConsoleHandler(cmd);
 					return(false);
 				}

@@ -145,6 +145,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				\ otherwise the extra \n may pollute the command line.
 				/// See also run, (run), fork, (fork), dos, (dos).
 				/// Use run or dos if want the return value. 
+				/// Ex. fork chrome --chrome --allow-file-access-from-files
 
 : (dos) 		( "command-line" -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
 				s" cmd /c " swap + (run) ;

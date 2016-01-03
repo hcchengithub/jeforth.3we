@@ -382,20 +382,55 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 				</selftest>
 
 code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that returns last statement
+				// 切出最後一個 statement 以傳回其值比想像中困難。
+				// 規定除了最後一行之外行末尾的 ; 不能省略。
+				// 出現在 ['"/] 當中的 ';' 會造成分辨錯亂, 必須先換掉, 然後再換回來, 這
+				// 就一大段了。即使如此 string 以及 RegEx 中又有 escape char 尚未周全！
 				var ss=pop();
-				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,''); // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
-				ss = ss.replace(/\s*\/\/.*$/gm,''); // remove // comments
-				ss = ss.replace(/(\n|\r)*/gm,''); // merge to one line
-				ss = ss.replace(/\s*\/\*.*?\*\/\s*/gm,''); // remove /* */ comments
-				ss = ss.replace(/;*\s*$/,''); // remove ending ';' from the last statement
+				ss = ss.replace(/(^( |\t)*)|(( |\t)*$)/mg,'') // remove 頭尾 whitespaces. .trim() 舊 JScript v5.6 未 support				
+				       .replace(/\s*\/\/.*$/gm,'') // remove // comments
+				       .replace(/(\n|\r)*/gm,'') // merge to one line
+				       .replace(/\s*[/]\*(.|\r|\n)*?\*[/]\s*/gm,'') // remove /* */ comments
+				       .replace(/;*\s*$/,''); // remove ending ';' from the last statement
+				ss = replace_semicolon_in_quotes(ss); 
 				var parsed=ss.match(/^(.*;)(.*)$/); // [entire string,fore part,last statement]|NULL
 				if (parsed){
+					parsed[1] = parsed[1].replace(/__SeMiCoLoN__/g,";");
+					parsed[2] = parsed[2].replace(/__SeMiCoLoN__/g,";"); 
 					eval("push(function(){" + parsed[1] + "push(" + parsed[2] + ")})");
 				}else{
 					eval("push(function(){push(" + ss + ")})");
 				}
+				function replace_semicolon_in_quotes(source) { 
+					// return ['"/]foo;bar['"/] ==> ['"/]foo__SeMiCoLoN__bar['"/]
+					var result = "";
+					for (;;) {
+						var aa = nextQuote(source); // ["cooked","raw"]
+						result += aa[0];
+						if (!aa[1]) return (result);
+						source = aa[1];
+					}
+					function nextQuote(source) { 
+						// return ["cooked","raw"]
+						var result="", aa=source.match(/['"/]/);
+						if (!aa) return([source,""]); // Done
+						switch(aa[0]){
+							case "'" : var re = /^(.*?)(['].*?['])(.*)$/; break;
+							case '"' : var re = /^(.*?)(["].*?["])(.*)$/; break;
+							default  : var re = /^(.*?)([/].*?[/])(.*)$/;
+						}
+						var pieces = source.match(re);
+						if(pieces) {
+							result += pieces[1];
+							result += pieces[2].replace(/;/g,"__SeMiCoLoN__");
+							return [result,pieces[3]];
+						} else 
+							return([source,""]); 
+						    // 已經不平衡了,算了。因為 ['"/] 裡又可能有 escape char 目前不夠周全。
+					}
+				}
 				end-code
-				
+
 code jsFuncNo	( "js code" -- function ) \ Compile JavaScript to a function()
 				eval("push(function(){" + pop() + "})"); 
 				end-code
@@ -513,11 +548,11 @@ code !          dictionary[pop()]=pop() end-code // ( n a -- ) 將 n 存入位�
 code @          push(dictionary[pop()]) end-code // ( a -- n ) 從位址 a 取出 n
 code >r         rstack.push(pop()) end-code  // ( n -- ) Push n into the return stack.
 code r>         push(rstack.pop()) end-code  // ( -- n ) Pop the return stack
-code r@         push(rstack[rstack.length-1 ]) end-code // ( -- r0 ) Get a copy of the TOS of return stack
+code r@         push(rtos()) end-code // ( -- r0 ) Get a copy of the TOS of return stack
 code drop       pop(); end-code // ( x -- ) Remove TOS.
-code dup        push(tos()); end-code // ( a -- a a ) Duplicate TOS.
-code swap       var t=stack.length-1;var b=stack[t];stack[t]=stack[t-1];stack[t-1]=b end-code // ( a b -- b a ) stack operation
-code over       push(stack[stack.length-2]); end-code // ( a b -- a b a ) Stack operation.
+code dup        push(tos()) end-code // ( a -- a a ) Duplicate TOS.
+code swap       push(pop(1)) end-code // ( a b -- b a ) stack operation
+code over       push(tos(1)) end-code // ( a b -- a b a ) Stack operation.
 code 0<         push(pop()<0) end-code // ( a -- f ) 比較 a 是否小於 0
 
 				<selftest>
@@ -625,7 +660,7 @@ code 2-         push(pop()-2) end-code // ( a -- a-2 ) TOS - 2
 				</selftest>
 
 code mod        push(pop(1)%pop()) end-code // ( a b -- c ) 計算 a 與 b 兩數相除的餘 c
-code div        var b=pop();var a=pop();push((a-(a%b))/b) end-code // ( a b -- c ) 計算 a 與 b 兩數相除的整數商 c
+code div        push(parseInt(pop(1)/pop())) end-code // ( a b -- c ) 計算 a 與 b 兩數相除的整數商 c
 
 				<selftest>
 					*** mod 7 mod 3 is 1
@@ -1265,17 +1300,17 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				BL word (create) <js> 
 				last().type = "constant";
 				var s = 'var f;f=function(){push(vm.g["' 
-						+ last().name 
+						+ last().name.replace(/"/g,"\\\"")
 						+ '"])}';
 				last().xt = eval(s);
 				vm.g[last().name] = pop();
 				</js> reveal ; 
-: value 		( n <name> -- ) \ Create a 'value' variable, Don't use " in <name>.
+: value 		( n <name> -- ) \ Create a 'value' variable.
 				constant last :: type='value' ; 
 : to 			( n <value> -- ) \ Assign n to <value>.
 				' ( word ) <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
 				compiling if ( word ) 
-					<js> var s='var f;f=function(){/* to */ vm.g["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+					<js> var s='var f;f=function(){/* to */ vm.g["'+pop().name.replace(/"/g,"\\\"")+'"]=pop()}';push(eval(s))</js> ( f ) ,
 				else ( n word )
 					js: vm.g[pop().name]=pop()
 				then ; immediate

@@ -22,7 +22,7 @@
 	
 	{} value excel.app 	// ( -- obj ) The Excel.Application object or undefined if no excel exists.
 						/// "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
-						see-excel ( count ) 
+						s" where name = 'ExCeL.ExE'" count-process ( count ) 
 						js> tos()>1 [if] 
 							." Warning: Multiple Excel.Application are running." *debug* Multiple-Excel-error>>> 
 						[then] value excel.app.count // ( -- count ) excel.exe instance count, I can only handle 1. 
@@ -425,7 +425,11 @@
 	</selftest>
 	
 	[else]
-		excel.app.count [if] ." The excel.exe running in this system does not response to COM requests. Try fix it by the kill-excel command." [then]
+		excel.app.count [if] 
+		." The excel.exe running in this system "
+		." does not response to COM requests. "
+		." Try fix it by the kill-excel command." 
+		[then]
 	[then] \ excel.app exists
 
 	\ -- end of source code --
