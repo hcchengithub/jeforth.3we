@@ -6,88 +6,12 @@
 	include unindent.f
 	
 	s" editor.f" source-code-header
-	
-<comment> old code 看甚麼時候通通丟掉	
-	char %HOMEDRIVE%%HOMEPATH%\Documents\GitHub\jeforth.3we\playground\ env@
-	value working-directory // ( -- "path" ) 
 
-	char c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\editor-study.html 
-	value pathname // ( -- "pathname" ) Path/Filename of the working document
+\ editbox 
 
-	null value article // ( -- objArticle ) The DIV world of the file to be edited.
-	<text>
-		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
-			<style id=mystyle type="text/css">
-				/* 整篇文章的默認設定 */
-				.default { 
-					/* https://zh.wikipedia.org/zh-tw/Font_family_(HTML) */
-					/* https://zh.wikipedia.org/wiki/%E9%BB%91%E4%BD%93_(%E5%AD%97%E4%BD%93) */
-					/* 微軟正黑(tw) Microsoft JhengHei; 微軟雅黑(cn) Microsoft Yahei; */
-					/* 標楷體(tw) DFKai-SB;  courier new; */
-					font-family: Microsoft JhengHei;  /* 微軟正黑(tw) */
-					letter-spacing: 0px;
-					line-height: 160%;
-					tab-size:4; /* IE,Edge 無效(hcchen5600 2015/12/07 11:51:34); Chrome 有效  */
-				}
-				/* <code> 除了 style 還標示要做 < &lt; > &gt; 轉換的區域，所以一定是最內層 */
-				code { 
-					font-family: courier new;
-					font-size: 110%; /* 通常夾在字裡行間 courier 的筆畫細所以要大一點 */
-					background: #E0E0E0; /* <code> 夾在字裡行間時凸顯之 */
-				}
-				/* .commandline 跟 .source 能不能合併成 .code 一個就好，大家都用？ */
-				.commandline { /* 用來修飾 <table class=commandline> */
-					width: 90%;
-					background: #E0E0E0; /* <code> */
-				}
-				.source {  /* 用來修飾 <code class=source> */
-					font-size: 100%;   /* againt the in-line bigger font-size of <code> */
-					line-height: 120%; /* againt the default */
-				}
-			</style>
-		</h> drop \ /* 丟掉 <h>..</h> 留下來的 <style> element object, 用不著 */
-	</text> 
-	/*remove*/ 		\ :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
-	unindent 		\ handle all <unindent >..</unindent > sections
-	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
-	tib.insert		\ execute the string on TOS
-
-	: save ( -- ) \ Save the editing document
-		char log.save execute \ also save the recent outputbox
-		article if \ avoid destroy the file with empty
-			js> mystyle.length \ 可能跟 editor.f 的重複定義了
-			if js> mystyle[mystyle.length-1] \ 用最後一個
-			else js> mystyle then 
-			( mystyle ) :> outerHTML+myarticle.outerHTML
-			pathname writeTextFile 
-		then 
-		;
-
-	: save-as ( "path-name" -- ) \ Save the editing document to the specified pathname
-		cr ." Sorry, under constructing " cr ;
-
-	: open ( -- ) \ Prompt for a file to edit
-		pickFile to pathname
-		pathname readTextFile ( file ) js> tos().length if
-			article if article :: innerHTML="" ( 有的話清除現有頁面 ) else 
-			<o> <div style="background-color:white"></div></o> to article ( 沒現成就新建頁面 )
-			article js> outputbox insertBefore ( 新建的默認放在 outputbox 之前 )
-			then article :: innerHTML=pop() 
-		else 
-			." Warning! can't read the file: " pathname . cr 
-			article if article :: innerHTML="" ( 有的話清除現有頁面 ) then
-			null to article 
-		then ;
-		
-	: hide ( -- ) \ 暫時把文章 hide() 起來
-		article js: $(pop()).hide() ;
-		
-	: show ( -- ) \ 把文章 show() 回來
-		article js: $(pop()).show() ;
-		
-</comment>
-	
 	null value div-editbox // ( -- element ) The entire DIV node of the editbox.
+	
+	\ Setup the handler of clicks that are poping up the editbox.
 	<js>
 		body.onclick = function(){
 			push(true); // true let the river run, false stop bubbling
@@ -95,22 +19,6 @@
 			return(pop()); // right-click ( flag -- ... flag' )
 		}
 	</js>
-	: create-editbox  ( -- ) \ Create an editbox at outputbox
-		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
-		<text> <div>
-			<textarea id=editboxtextarea rows=8></textarea>
-			<input type=button value='<' onclick="kvm.execute('editbox-before')" />
-			<input type=button value=Parent onclick="kvm.execute('editbox-parent')" />
-			<input type=button value=Back onclick="kvm.execute('editbox-pop')" />
-			<input type=button value='>' onclick="kvm.execute('editbox-after')" />
-			<input type=button value='Refresh' onclick="kvm.execute('editbox-refresh')" />
-			<input type=button value='Example' onclick="kvm.execute('editbox-example')" />
-			<input type=button value=Smaller onclick="kvm.execute('editbox-smaller')" />
-			<input type=button value=Bigger onclick="kvm.execute('editbox-bigger')" />
-			<input type=button value="Save w/o close" onclick="kvm.execute('editbox-save')" />
-			<input type=button value="Save & Close"  onclick="kvm.execute('editbox-save&close')" />
-			<input type=button value=Close onclick="kvm.execute('editbox-close')" />
-		</div></text> </o> to div-editbox ;
 
 	: unenvelope ( element -- firstNode ) \ Break an element into its children nodes
 		( ele ) js> tos().childNodes.length ?dup if ( ele length ) 
@@ -124,13 +32,14 @@
 		/// if the given element has no child then leave itself on the TOS.
 		/// Return the first node to be the new ce@ after editbox-save.
 	
-	:  editbox-save ( -- ) \ Save editbox to ce@ which is the target element.
+	:  (editbox_save) ( -- ) \ Save editbox to ce@ which is the target element.
 		js> editboxtextarea.value 
 		/*remove*/ <code>escape
 		char <span> swap + char </span> + <o>escape </o> \ 套一圈 <span> 保證它是 one node
 		dup ce@ replaceNode unenvelope ce! ; \ New nodes replace the old one then 解套
+	code editbox_save execute("(editbox_save)") end-code
 		
-	: 	editbox-close ( -- ) \ Close the editbox
+	: (editbox_close) ( -- ) \ Close the editbox
 		begin 
 			js> document.getElementById("editboxtextarea") if 
 				\ 這個 id 必須唯一，還看得見就是有例外狀況了，可能是之前的還沒有 close。
@@ -143,31 +52,37 @@
 			if div-editbox removeElement then 
 		then
 		null to div-editbox jump-to-ce@ ;
+	code editbox_close execute("(editbox_close)") end-code
 		
-	:  editbox-save&close  ( -- ) \ Save editbox to ce@ which is the target element.
-		editbox-save editbox-close ;
+	code editbox_saveclose ( -- ) \ Save editbox to ce@ which is the target element.
+		dictate("editbox_save editbox_close") end-code
 
 	: node-source ( node -- "source" ) \ Get outerHTML or nodeValue
 		dup :> outerHTML ?dup if ( node outerHTML ) nip 
 		else ( node ) dup :> toString() char /* swap + js> "*/\n" + 
 		swap ( /*...*/ node ) :> nodeValue ?dup if + then then ;
 		
-	: 	editbox-parent ( -- ) \ Change element to ce's parent
+	: (editbox_parent) ( -- ) \ Change element to ce's parent
 		char .. (ce) node-source js: editboxtextarea.value=pop() ;
+	code editbox_parent execute("(editbox_parent)") end-code
 
-	: 	editbox-before ( -- ) \ Change element to ce's sibling
+	: (editbox_before) ( -- ) \ Change element to ce's sibling
 		char < (ce) node-source js: editboxtextarea.value=pop() ;
+	code editbox_before execute("(editbox_before)") end-code
 
-	: 	editbox-after ( -- ) \ Change element to ce's sibling
+	: (editbox_after) ( -- ) \ Change element to ce's sibling
 		char > (ce) node-source js: editboxtextarea.value=pop() ;
+	code editbox_after execute("(editbox_after)") end-code
 
-	: 	editbox-pop ( -- ) \ Change element to the previous ce
+	: (editbox_pop)	( -- ) \ Change element to the previous ce
 		char pop (ce) node-source js: editboxtextarea.value=pop() ;
+	code editbox_pop execute("(editbox_pop)") end-code
 
-	: editbox-refresh ( -- ) \ Reload current element
+	: (editbox_refresh) ( -- ) \ Reload current element
 		ce@ node-source js: editboxtextarea.value=pop() ;
+	code editbox_refresh execute("(editbox_refresh)") end-code
 
-	: editbox-example ( -- ) \ Show example
+	: (editbox_example) ( -- ) \ Show example
 		<text> <unindent>
 		/* Source code 區塊
 			<table class=commandline style="margin-left: 2em;">
@@ -186,16 +101,47 @@
 		*/
 		</unindent></text> unindent
 		js> '\n' + ce@ node-source + js: editboxtextarea.value=pop() ;
+	code editbox_example execute("(editbox_example)") end-code
 
-	code editbox-smaller ( -- ) \ Smaller editbox
+	code editbox_smaller ( -- ) \ Smaller editbox
 		var r = editboxtextarea.rows;
 		if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
 		editboxtextarea.rows = Math.max(r,1); end-code
 
-	code editbox-bigger ( -- ) \ Bigger editbox
+	code editbox_bigger ( -- ) \ Bigger editbox
 		var r = editboxtextarea.rows;
 		if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
 		editboxtextarea.rows = Math.max(r,1); end-code
+
+	: create-editbox  ( -- ) \ Create an editbox at outputbox
+		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
+		<text> <div>
+			<textarea id=editboxtextarea rows=8></textarea>
+			<input type=button value='<'              class="editbox_before    " />
+			<input type=button value=Parent           class="editbox_parent    " />
+			<input type=button value=Back             class="editbox_pop       " />
+			<input type=button value='>'              class="editbox_after     " />
+			<input type=button value='Refresh'        class="editbox_refresh   " />
+			<input type=button value='Example'        class="editbox_example   " />
+			<input type=button value=Smaller          class="editbox_smaller   " />
+			<input type=button value=Bigger           class="editbox_bigger    " />
+			<input type=button value="Save w/o close" class="editbox_save      " />
+			<input type=button value="Save & Close"   class="editbox_saveclose " />
+			<input type=button value=Close            class="editbox_close     " />
+		</div></text> </o> to div-editbox 
+		<js>
+			$(".editbox_before    ")[0].addEventListener('click',tick("editbox_before    ").xt)
+			$(".editbox_parent    ")[0].addEventListener('click',tick("editbox_parent    ").xt)
+			$(".editbox_pop       ")[0].addEventListener('click',tick("editbox_pop       ").xt)
+			$(".editbox_after     ")[0].addEventListener('click',tick("editbox_after     ").xt)
+			$(".editbox_refresh   ")[0].addEventListener('click',tick("editbox_refresh   ").xt)
+			$(".editbox_example   ")[0].addEventListener('click',tick("editbox_example   ").xt)
+			$(".editbox_smaller   ")[0].addEventListener('click',tick("editbox_smaller   ").xt)
+			$(".editbox_bigger    ")[0].addEventListener('click',tick("editbox_bigger    ").xt)
+			$(".editbox_save      ")[0].addEventListener('click',tick("editbox_save      ").xt)
+			$(".editbox_saveclose ")[0].addEventListener('click',tick("editbox_saveclose").xt)
+			$(".editbox_close     ")[0].addEventListener('click',tick("editbox_close     ").xt)
+		</js> ;
 
 	: edit-node ( node -- ) \ Edit the node.
 		ce! \ leverage ce for moving around among neighbours
@@ -212,7 +158,9 @@
 			js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
 			ce@ edit-node false ( stop bubbling )
 		then ;
-		
+
+\ log outputbox
+
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
 		\ 把整個 log.json 讀回來成一個 array。
 		char log.json readTextFile js> JSON.parse(pop()) 
@@ -323,3 +271,82 @@
 \ -- End --
 
 
+<comment> old code 看甚麼時候通通丟掉	
+	char %HOMEDRIVE%%HOMEPATH%\Documents\GitHub\jeforth.3we\playground\ env@
+	value working-directory // ( -- "path" ) 
+
+	char c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\editor-study.html 
+	value pathname // ( -- "pathname" ) Path/Filename of the working document
+
+	null value article // ( -- objArticle ) The DIV world of the file to be edited.
+	<text>
+		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
+			<style id=mystyle type="text/css">
+				/* 整篇文章的默認設定 */
+				.default { 
+					/* https://zh.wikipedia.org/zh-tw/Font_family_(HTML) */
+					/* https://zh.wikipedia.org/wiki/%E9%BB%91%E4%BD%93_(%E5%AD%97%E4%BD%93) */
+					/* 微軟正黑(tw) Microsoft JhengHei; 微軟雅黑(cn) Microsoft Yahei; */
+					/* 標楷體(tw) DFKai-SB;  courier new; */
+					font-family: Microsoft JhengHei;  /* 微軟正黑(tw) */
+					letter-spacing: 0px;
+					line-height: 160%;
+					tab-size:4; /* IE,Edge 無效(hcchen5600 2015/12/07 11:51:34); Chrome 有效  */
+				}
+				/* <code> 除了 style 還標示要做 < &lt; > &gt; 轉換的區域，所以一定是最內層 */
+				code { 
+					font-family: courier new;
+					font-size: 110%; /* 通常夾在字裡行間 courier 的筆畫細所以要大一點 */
+					background: #E0E0E0; /* <code> 夾在字裡行間時凸顯之 */
+				}
+				/* .commandline 跟 .source 能不能合併成 .code 一個就好，大家都用？ */
+				.commandline { /* 用來修飾 <table class=commandline> */
+					width: 90%;
+					background: #E0E0E0; /* <code> */
+				}
+				.source {  /* 用來修飾 <code class=source> */
+					font-size: 100%;   /* againt the in-line bigger font-size of <code> */
+					line-height: 120%; /* againt the default */
+				}
+			</style>
+		</h> drop \ /* 丟掉 <h>..</h> 留下來的 <style> element object, 用不著 */
+	</text> 
+	/*remove*/ 		\ :> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除註解。
+	unindent 		\ handle all <unindent >..</unindent > sections
+	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
+	tib.insert		\ execute the string on TOS
+
+	: save ( -- ) \ Save the editing document
+		char log.save execute \ also save the recent outputbox
+		article if \ avoid destroy the file with empty
+			js> mystyle.length \ 可能跟 editor.f 的重複定義了
+			if js> mystyle[mystyle.length-1] \ 用最後一個
+			else js> mystyle then 
+			( mystyle ) :> outerHTML+myarticle.outerHTML
+			pathname writeTextFile 
+		then 
+		;
+
+	: save-as ( "path-name" -- ) \ Save the editing document to the specified pathname
+		cr ." Sorry, under constructing " cr ;
+
+	: open ( -- ) \ Prompt for a file to edit
+		pickFile to pathname
+		pathname readTextFile ( file ) js> tos().length if
+			article if article :: innerHTML="" ( 有的話清除現有頁面 ) else 
+			<o> <div style="background-color:white"></div></o> to article ( 沒現成就新建頁面 )
+			article js> outputbox insertBefore ( 新建的默認放在 outputbox 之前 )
+			then article :: innerHTML=pop() 
+		else 
+			." Warning! can't read the file: " pathname . cr 
+			article if article :: innerHTML="" ( 有的話清除現有頁面 ) then
+			null to article 
+		then ;
+		
+	: hide ( -- ) \ 暫時把文章 hide() 起來
+		article js: $(pop()).hide() ;
+		
+	: show ( -- ) \ 把文章 show() 回來
+		article js: $(pop()).show() ;
+		
+</comment>
