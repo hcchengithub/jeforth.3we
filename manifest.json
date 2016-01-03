@@ -5,10 +5,10 @@
 		}
 	},
 	"icons": {
-		"128": "nico.png"
+		"128": "3ca/fig.tw.png"
 	},
 	"manifest_version": 2,
-	"name": "jeforth.3chrome",
+	"name": "jeforth.3ca",
 	"description": "jeforth.3we for Chrome App",
 	"version": "1.0",
 	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",

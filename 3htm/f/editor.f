@@ -32,14 +32,13 @@
 		/// if the given element has no child then leave itself on the TOS.
 		/// Return the first node to be the new ce@ after editbox-save.
 	
-	:  (editbox_save) ( -- ) \ Save editbox to ce@ which is the target element.
+	: editbox_save ( -- ) \ Save editbox to ce@ which is the target element.
 		js> editboxtextarea.value 
 		/*remove*/ <code>escape
 		char <span> swap + char </span> + <o>escape </o> \ 套一圈 <span> 保證它是 one node
 		dup ce@ replaceNode unenvelope ce! ; \ New nodes replace the old one then 解套
-	code editbox_save execute("(editbox_save)") end-code
 		
-	: (editbox_close) ( -- ) \ Close the editbox
+	: editbox_close ( -- ) \ Close the editbox
 		begin 
 			js> document.getElementById("editboxtextarea") if 
 				\ 這個 id 必須唯一，還看得見就是有例外狀況了，可能是之前的還沒有 close。
@@ -52,37 +51,31 @@
 			if div-editbox removeElement then 
 		then
 		null to div-editbox jump-to-ce@ ;
-	code editbox_close execute("(editbox_close)") end-code
 		
-	code editbox_saveclose ( -- ) \ Save editbox to ce@ which is the target element.
-		dictate("editbox_save editbox_close") end-code
+	: editbox_saveclose ( -- ) \ Save editbox to ce@ which is the target element.
+		editbox_save editbox_close ;
 
 	: node-source ( node -- "source" ) \ Get outerHTML or nodeValue
 		dup :> outerHTML ?dup if ( node outerHTML ) nip 
 		else ( node ) dup :> toString() char /* swap + js> "*/\n" + 
 		swap ( /*...*/ node ) :> nodeValue ?dup if + then then ;
 		
-	: (editbox_parent) ( -- ) \ Change element to ce's parent
+	: editbox_parent ( -- ) \ Change element to ce's parent
 		char .. (ce) node-source js: editboxtextarea.value=pop() ;
-	code editbox_parent execute("(editbox_parent)") end-code
 
-	: (editbox_before) ( -- ) \ Change element to ce's sibling
+	: editbox_before ( -- ) \ Change element to ce's sibling
 		char < (ce) node-source js: editboxtextarea.value=pop() ;
-	code editbox_before execute("(editbox_before)") end-code
 
-	: (editbox_after) ( -- ) \ Change element to ce's sibling
+	: editbox_after ( -- ) \ Change element to ce's sibling
 		char > (ce) node-source js: editboxtextarea.value=pop() ;
-	code editbox_after execute("(editbox_after)") end-code
 
-	: (editbox_pop)	( -- ) \ Change element to the previous ce
+	: editbox_pop ( -- ) \ Change element to the previous ce
 		char pop (ce) node-source js: editboxtextarea.value=pop() ;
-	code editbox_pop execute("(editbox_pop)") end-code
 
-	: (editbox_refresh) ( -- ) \ Reload current element
+	: editbox_refresh ( -- ) \ Reload current element
 		ce@ node-source js: editboxtextarea.value=pop() ;
-	code editbox_refresh execute("(editbox_refresh)") end-code
 
-	: (editbox_example) ( -- ) \ Show example
+	: editbox_example	( -- ) \ Show example
 		<text> <unindent>
 		/* Source code 區塊
 			<table class=commandline style="margin-left: 2em;">
@@ -101,7 +94,6 @@
 		*/
 		</unindent></text> unindent
 		js> '\n' + ce@ node-source + js: editboxtextarea.value=pop() ;
-	code editbox_example execute("(editbox_example)") end-code
 
 	code editbox_smaller ( -- ) \ Smaller editbox
 		var r = editboxtextarea.rows;

@@ -45,7 +45,8 @@
 	include 3htm/f/element.f		\ HTML element manipulation
 	include 3htm/f/platform.f		
 	include f/mytools.f		
-
+	include 3htm/f/editor.f
+	
 \ ----------------- run the command line -------------------------------------
 	args tib.insert
 
