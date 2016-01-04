@@ -165,7 +165,7 @@
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 
-	: log.length ( i -- )  \ Get the log.json array length
+	: log.length ( -- length )  \ Get the log.json array length
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> length ; 
 

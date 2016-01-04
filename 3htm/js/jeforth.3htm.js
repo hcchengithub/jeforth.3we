@@ -94,7 +94,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					jump2endofinputbox.click(); inputbox.focus();
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				}
 			})();
 		}

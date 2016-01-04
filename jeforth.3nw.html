@@ -80,7 +80,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					jump2endofinputbox.click(); inputbox.focus();
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				}
 			})();
 		}
@@ -131,7 +131,7 @@
 	</div>
 	</div>
 	<div id="outputbox"></div>
-	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div>
+	<textarea id="inputbox" cols=100 rows=1></textarea></a><div id=endofinputbox></div>
 </body>
 </html>
 

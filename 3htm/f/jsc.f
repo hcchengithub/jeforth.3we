@@ -75,7 +75,7 @@
 					);
 			}
 			type(vm.jsc.prompt ); 
-			jump2endofinputbox.click();
+			window.scrollTo(0,endofinputbox.offsetTop);
 			vm.jsc.cmd = // static variable so as to reuse last command
 				prompt("JavaScript console", vm.jsc.cmd||""); // Press Enter repeat last command
 			vm.jsc.cmd = vm.jsc.cmd==null ? 'reset' : vm.jsc.cmd; // Press Esc equals to 'reset' ['quit']
@@ -149,7 +149,7 @@
 				execute('{backSpace}'); pop();
 			} 
 		}
-		vm.jsc.bottom = function() { jump2endofinputbox.click() }
+		vm.jsc.bottom = function() { window.scrollTo(0,endofinputbox.offsetTop) }
 		vm.jsc.status = function() { 
 			console.log(
 				" -------- See IP --------\n" +

@@ -1389,7 +1389,7 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				/// nap 不用 vm.g.setTimeout 故不能中止，也不會堆積在 vm.g.setTimeout.registered() 裡。
 
 : cr         	js: type("\n") ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
-				\ 個別 quit.f 裡重定義成 : cr js: type("\n") 1 nap js: jump2endofinputbox.click() ;
+				\ 個別 quit.f 裡重定義成 : cr js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop) ;
 
 code cut		( -- ) \ Cut off used TIB.
 				tib=tib.slice(ntib);ntib=0 end-code

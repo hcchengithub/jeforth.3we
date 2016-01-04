@@ -118,7 +118,7 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
 				inputbox.rows = Math.max(r,1);
 				if (!r) $("#inputbox").hide();
-				jump2endofinputbox.click();inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -130,7 +130,7 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				var r = 1 * inputbox.rows;
 				if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
 				inputbox.rows = Math.max(r,1);
-				jump2endofinputbox.click();inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -158,7 +158,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 					}
 					document.getElementById("inputbox").value += " " + ss;
 				}
-				jump2endofinputbox.click();inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -166,7 +166,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 
 code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				inputbox.value="";
-				jump2endofinputbox.click(); inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(true); // 別的 handler 還可以收得到 Esc key。
 				end-code
 
@@ -181,7 +181,7 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					}
 					tos().size = Math.min(16,tos().length);
 					tos().selectedIndex=tos().length-1;
-					jump2endofinputbox.click();tos().focus();
+					window.scrollTo(0,endofinputbox.offsetTop);tos().focus();
 					var select = tos().onclick = function(){
 						inputbox.value = tos().value;
 						execute("removeElement");

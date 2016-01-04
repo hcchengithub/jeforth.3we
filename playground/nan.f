@@ -80,13 +80,13 @@
 \ 	10 nap refresh verify 
 \ 	[if] ." Bingo!!" r> drop 0 >r 
 \ 	[else] ." ." [then] 
-\ 	js: jump2endofinputbox.click() 
+\ 	js: window.scrollTo(0,endofinputbox.offsetTop);
 \ [next]
 
 20 to range 
 [begin] 
 	10 nap 
-	\ char . . js: jump2endofinputbox.click() 
+	\ char . . js: jump2endofinputbox.click() --> js: window.scrollTo(0,endofinputbox.offsetTop);
 	refresh verify 
 [until] ." Bingo!!!" cr
 	

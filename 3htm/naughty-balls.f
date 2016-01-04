@@ -55,7 +55,7 @@
 		js: vm.g.balls[2].x=200;vm.g.balls[2].y=101; draw
 		js: kvm.debug=false
 		js: vm.g.balls[1].vx=1 \ move one ball
-		cut draw js: jump2endofinputbox.click() 20 nap rewind \ check 
+		cut draw js: window.scrollTo(0,endofinputbox.offsetTop) 20 nap rewind \ check 
 	==> 避免 atan2(dy,dx) 程式要改寫 --> naughty-balls2.f
 	
 </comment>
