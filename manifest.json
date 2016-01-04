@@ -1,16 +1,16 @@
 {
-	"app": {
-		"launch": {
-			"local_path": "index.html"
-		}
-	},
+	"name": "jeforth.3caaaaa",
+	"description": "jeforth.3we for Chrome App",
+	"version": "1.0",
+	"manifest_version": 2,
 	"icons": {
 		"128": "3ca/fig.tw128x128.png",
 		"16": "3ca/fig.tw16x16.png"
 	},
-	"manifest_version": 2,
-	"name": "jeforth.3ca",
-	"description": "jeforth.3we for Chrome App",
-	"version": "1.0",
+	"app": {
+		"background": {
+		  "scripts": ["3ca/main.js"]
+		}
+	},
 	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
