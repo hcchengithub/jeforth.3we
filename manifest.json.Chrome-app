@@ -1,5 +1,5 @@
 {
-	"name": "jeforth.3caaaaa",
+	"name": "jeforth.3ca",
 	"description": "jeforth.3we for Chrome App",
 	"version": "1.0",
 	"manifest_version": 2,
@@ -11,6 +11,6 @@
 		"background": {
 		  "scripts": ["3ca/main.js"]
 		}
-	},
-	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+	}
+	// ,"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

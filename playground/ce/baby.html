@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title class=appname>jeforth baby</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="common.css">
+    <style id=styleTextareaFocus type="text/css">
+            textarea:focus {
+                background:#E0E0E0;
+            }
+    </style>
+	<script type="text/javascript" src="http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js"></script>	
+    <Script src="jeforth.js"></Script>
+    <Script src="baby.js"></Script>
+</head>
+<body>
+    <div><b>jeForth sample code baby.html -- FigTaiwan H.C.Chen 2015</b></div><hr>
+    <div id="outputbox"><i>Output area, 'cls' command to clear</i>
+	<div id="source_box">Forth source code. Just a few demo, scroll to view all of them. This area is disposable because definitions are read already.<textarea id="source_code" cols=100 rows=10>
+code //     var s = nexttoken('\n|\r'); last().help = s; end-code 
+            // ( <comment> -- ) Give help message to the last word.
+code cls    vm.clearScreen() end-code // ( -- ) Clear output area
+code words  for(var i=1; i<words.forth.length; i++) type(words.forth[i].name+" ") end-code 
+            // ( -- ) List all words
+code help   for(var i=1; i<words.forth.length; i++) 
+            type(words.forth[i].name+" "+words.forth[i].help+'\n') 
+            end-code // ( -- ) List all words' help message
+code hide   $("#source_box").hide() end-code // ( -- ) Hide the source code box by jQuery.
+code show   $("#source_box").show() end-code // ( -- ) Show the source code box by jQuery.
+code hi     type("Hello World!\n") end-code // ( -- ) Print hello world
+code .      type(pop()) end-code // ( n -- ) Print the TOS top of the Forth data stack.
+code +      push(pop(1)+pop()) end-code // ( a b -- a+b ) Add two numbers or strings
+code .s     for(var i=0; i<stack.length; i++) type(i + ": " + stack[i] + '\n') end-code // ( -- ) Dump data stack
+code s"     push(nexttoken('"'));nexttoken() end-code // ( <string> -- "string" ) String
+    </textarea></div></div><hr>
+    <div><i>Input box -- Ctrl-Enter to execute. Try 'help' command.</i><br>
+	<textarea id="inputbox" cols=100 rows=4></textarea>
+	<a id=jump2endofinputbox href="#endofinputbox"></a>
+	<div id=endofinputbox></div>
+	</div>
+</body>
+</html>
+

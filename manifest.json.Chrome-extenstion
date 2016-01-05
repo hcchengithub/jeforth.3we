@@ -1,0 +1,15 @@
+{
+	"name": "jeforth.3ce",
+	"version": "1.0",
+	"description": "jeforth.3we for Chrome Extension",
+	"browser_action": { // https://developer.chrome.com/extensions/browserAction
+		"default_icon": "3ca/fig.tw16x16.png",
+		"default_popup": "index.html" // "jeforth-chrome-extension.html"
+	},
+	"icons": {
+		"128": "3ca/fig.tw128x128.png",
+		"16": "3ca/fig.tw16x16.png"
+	},
+	"manifest_version": 2
+	//, "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

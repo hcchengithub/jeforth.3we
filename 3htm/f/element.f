@@ -34,11 +34,11 @@
 	: ce@ ( -- element ) \ Get current-element
 		ce-history :> length if else js> window.document ce! then \ guarantee history is not empty
 		ce-history js> tos()[pop().length-1] ( history.tos )
-		js> typeof(tos())=='object'&&tos().parentNode  ( history.tos flag ) if else \ element may be destroyed 
-		js> tos()==window.document if else 
-			cr ." Warning! Abnormal current-element. Go back to previous ce." cr cr
-			drop ce-history js> tos().pop();tos()[pop().length-1] 
-		then
+		js> mytypeof(tos())=='object'&&tos().parentNode  ( history.tos flag ) if else \ element may be destroyed 
+			js> tos()==window.document if else 
+				cr ." Warning! Abnormal current-element." cr
+				\ drop ce-history js> tos().pop();tos()[pop().length-1] 
+			then
 		then ;
 		/// Error proof, return previous history ce, or window.document if history is empty.
 
