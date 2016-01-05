@@ -8,7 +8,7 @@
 		var cmd = inputbox.value;
 		inputbox.value=""; 
 		vm.exec(cmd) ;
-		jump2endofinputbox.click();
+		window.scrollTo(0,endofinputbox.offsetTop);
 		inputbox.focus();
 		end-code
 	

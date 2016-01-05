@@ -34,7 +34,7 @@
 				/// ado is newer method and is prefereed. But has compatible issues on older Windows. 
 				
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-				js: type("\n") 1 nap js: jump2endofinputbox.click();inputbox.focus() ;
+				js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
 				/// redefined in quit.f, 1 nap 使輸出流暢。
 				/// Focus the display around the inputbox.
 				\ 早一點 redefine 以便流暢 include 諸 ~.f 時的 selftest messages.
@@ -85,4 +85,4 @@
 \ ------------ End of jeforth.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
-	js: jump2endofinputbox.click();inputbox.focus()
+	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()

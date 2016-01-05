@@ -37,20 +37,31 @@ also forth definitions
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				\ 以下都不能用 cr 改用 js: type('\n'); cr 中有 1 nap suspend, event handler 不能 suspend。
-				js> event&&event.shiftKey if ( shift+F2 for outputbox )
-					char toggle-outputbox-edit-mode execute false exit then \ shift-F2
-				js> event&&event.ctrlKey if ( ctrl+f2 for contentEdit )
-					char ctrl-f2 execute ( T/f ) exit then
+				js> event&&event.shiftKey if char {shift-f2} execute ( T/f ) exit then
+				js> event&&event.ctrlKey if char {ctrl-f2} execute ( T/f ) exit then
+				js> event&&event.altKey if char {alt-f2} execute ( T/f ) exit then
 				char toggle-inputbox-edit-mode execute false \ F2 w/o shifted key
 				;
 				/// return a 'false' to stop the hotkey event handler chain.
 				
+: inputbox-edit-mode-on ( -- ) 
+				['] {F2} :: EditMode=true
+				<text> textarea:focus { 
+					border: 0px solid; background:#FFE0E0; /* pink indicating edit mode */
+				}</text> js: styleTextareaFocus.innerHTML=pop() ;
+
+: inputbox-edit-mode-off ( -- ) 
+				['] {F2} :: EditMode=false
+				<text> textarea:focus { 
+					border: 0px solid; background:##E0E0E0;
+				}</text> js: styleTextareaFocus.innerHTML=pop() ;
+
 : toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
-				." Input box EditMode = " ['] {F2} 
-				js> tos().EditMode=Boolean(tos().EditMode^true) nip dup . js: type('\n')
-				if   <text> textarea:focus { border: 0px solid; background:#FFE0E0; }</text> \ pink as a warning of edit mode
-				else <text> textarea:focus { border: 0px solid; background:#E0E0E0; }</text> \ grey
-				then js: styleTextareaFocus.innerHTML=pop() ;
+				." Input box EditMode = " ['] {F2} :> EditMode dup . 
+				js: type('\n') \ can't use cr in event handler
+				if inputbox-edit-mode-off 
+				else inputbox-edit-mode-on
+				then ;
 
 : outputbox-edit-mode-on ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
@@ -60,17 +71,17 @@ also forth definitions
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid white"</js>
 				js: outputbox.contentEditable=false ;
-: toggle-outputbox-edit-mode ( -- ) \ One of the {F2} events
+: {shift-f2}	( -- ) \ One of the {F2} events, toggle-outputbox-edit-mode
 				js> outputbox.contentEditable!="true" 
 				if outputbox-edit-mode-on
 				else outputbox-edit-mode-off 
-				then ;
-: ctrl-f2 		( -- false ) \ Get the anchorNode to ce@ (current element).
+				then false ( true by pass, false terminate ) ;
+: {ctrl-f2}		( -- false )
 				<js> alert("You pressed Ctrl-F2 and I am doing nothing.") </js>
-				true ( by pass ) ;
-				/// Ctrl-F2 handler main routine. Initial version.
-				/// Will be replaced by actual application.
-				/// Return false to break the event handler chain.
+				true ( true by pass, false terminate ) ;
+: {alt-f2}		( -- false )
+				<js> alert("You pressed alt-F2 and I am doing nothing.") </js>
+				true ( true by pass, false terminate ) ;
 
 s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
 : outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
@@ -118,7 +129,7 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
 				inputbox.rows = Math.max(r,1);
 				if (!r) $("#inputbox").hide();
-				jump2endofinputbox.click();inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -130,7 +141,7 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				var r = 1 * inputbox.rows;
 				if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
 				inputbox.rows = Math.max(r,1);
-				jump2endofinputbox.click();inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -158,7 +169,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 					}
 					document.getElementById("inputbox").value += " " + ss;
 				}
-				jump2endofinputbox.click();inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -166,7 +177,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 
 code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				inputbox.value="";
-				jump2endofinputbox.click(); inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 				push(true); // 別的 handler 還可以收得到 Esc key。
 				end-code
 
@@ -181,7 +192,7 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					}
 					tos().size = Math.min(16,tos().length);
 					tos().selectedIndex=tos().length-1;
-					jump2endofinputbox.click();tos().focus();
+					window.scrollTo(0,endofinputbox.offsetTop);tos().focus();
 					var select = tos().onclick = function(){
 						inputbox.value = tos().value;
 						execute("removeElement");

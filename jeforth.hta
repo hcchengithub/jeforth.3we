@@ -36,7 +36,7 @@
 	</div>
 	<p>
 	<div id="outputbox"></div>
-	<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div>
+	<textarea id="inputbox" cols=100 rows=1></textarea><div id=endofinputbox></div>
 </body>
 <!-- moved to html5.f script src="js/jquery-1.10.2.js"></script -->
 <Script src="project-k/jeforth.js"></Script>
@@ -222,7 +222,7 @@
 				setTimeout(retry,100); 
 			else {
 				kvm.type(" " + kvm.prompt + " ");
-				jump2endofinputbox.click(); inputbox.focus();
+				window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
 			}
 		})();
 	}

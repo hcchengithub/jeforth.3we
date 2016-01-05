@@ -1,0 +1,15 @@
+body,textarea {
+    color:black;
+    font-family: courier new;
+    font-size: 20px;
+    padding:20px;
+    word-wrap:break-word;
+    border: 1px ridge;
+    background:#F0F0F0;
+}
+textarea {
+    width:100%;
+    padding:4px;
+    border: 0px solid;
+    background:#BBBBBB;
+}

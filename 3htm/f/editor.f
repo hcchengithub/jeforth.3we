@@ -135,22 +135,31 @@
 			$(".editbox_close     ")[0].onclick=function(){execute("editbox_close     ")}
 		</js> ;
 
-	: edit-node ( node -- ) \ Edit the node.
+	: edit-node ( node -- ) \ Open the editbox to edit the given node.
+		?dup if
 		ce! \ leverage ce for moving around among neighbours
 		outputbox-edit-mode-off
 		create-editbox \ create div-editbox
 		ce@ node-source js: editboxtextarea.value=pop() \ target source code
 		div-editbox js> $(pop()).offset().top \ get editbox position
 		js: window.scrollTo(0,pop()) \ jump to editbox
-		;
+		then ;
 	
 	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
 		['] {F2} :> EditMode div-editbox not and if ( flag ) 
-			drop toggle-inputbox-edit-mode
+			drop inputbox-edit-mode-off
 			js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
 			ce@ edit-node false ( stop bubbling )
 		then ;
 
+	: #text>html ( -- ) \ convert HTML tags in the ce #text node
+		ce@ if create-editbox \ create div-editbox
+		ce@ node-source js: editboxtextarea.value=pop() \ target source code
+		editbox_saveclose then ;
+	
+	: {ctrl-f2} ( -- false ) \ Event handler, convert HTML tags at the #text anchorNode
+		js> window.getSelection().anchorNode ce! #text>html false ;
+	
 \ log outputbox
 
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
@@ -165,7 +174,7 @@
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 
-	: log.length ( i -- )  \ Get the log.json array length
+	: log.length ( -- length )  \ Get the log.json array length
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> length ; 
 
