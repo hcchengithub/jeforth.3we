@@ -34,7 +34,7 @@ function init(){
 	vm.clearScreen = clearScreen;
 
 	// System initialization
-	jQuery(document).ready(
+	$(document).ready( // jQuery is unknown in Chrome extension [ ]
 		function() {
 			document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
 			// vm.dictate() is the Forth command interface.

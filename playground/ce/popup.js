@@ -92,9 +92,8 @@ function getImageUrl(searchTerm, callback, errorCallback) {
 function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-alert(window);
+function init(){
+debugger;
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
     renderStatus('Performing Google Image search for ' + url);
@@ -115,6 +114,7 @@ alert(window);
 
     }, function(errorMessage) {
       renderStatus('Cannot display image. ' + errorMessage);
-    });
-  });
-});
+    })
+  })
+}
+document.addEventListener('DOMContentLoaded', init);

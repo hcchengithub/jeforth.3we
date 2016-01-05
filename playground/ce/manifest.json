@@ -1,16 +1,15 @@
 {
   "manifest_version": 2,
-
   "name": "project-k baby",
   "description": "jeforth proejct-k baby example",
   "version": "1.0",
-
   "browser_action": {
-    "default_icon": "fig.tw16x16.png",
-    "default_popup": "popup.html"
+    "default_title": "project-k baby default title",
+    "default_icon": {"fig.tw16x16.png"},
+    "default_popup": "baby.html" // "popup.html"
   },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",  
   "permissions": [
-    "activeTab",
-    "https://ajax.googleapis.com/"
+    "activeTab","http://*/*","https://*/*"
   ]
 }
