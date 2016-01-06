@@ -1,7 +1,7 @@
 ﻿
 js> vm.appname=="jeforth.3hta" [if]
 	include autoit.f
-	cls <o> <h2> 十分抱歉，這台電腦入睡之後會被無故喚醒，用 jeforth.3hta 來簡單解決。
+	cls <o> <h2> 十分抱歉，這台電腦入睡之後會被無故喚醒，用 jeforth 來簡單解決。
 	萬一被喚醒之後 count down 一段時間讓 user 有機會關掉本程式，否則過後繼續睡。</h2></o>
 	<o> <h1>Bringing the system into sleep .... </h1></o> drop
 	[begin]
@@ -15,8 +15,14 @@ js> vm.appname=="jeforth.3hta" [if]
 	[again]
 
 [else] \ assume it's jeforth.3nd
+	include child_process.f
+	<text>
+	十分抱歉，這台電腦入睡之後會被無故喚醒，用 jeforth 來簡單解決。
+	萬一被喚醒之後 count down 一段時間讓 user 有機會關掉本程式，否
+	則過後繼續睡。
+	</text> .
 	[begin]
-	run shutdown /h  ( shutdown.exe is a Windows built-in utility)
+	exec :: ('shutdown/h')  ( shutdown.exe is a Windows built-in utility)
 	." 5. wait 20 seconds .... then go back to sleep." cr 20000 nap
 	." 4. wait 20 seconds .... then go back to sleep." cr 20000 nap
 	." 3. wait 20 seconds .... then go back to sleep." cr 20000 nap
@@ -29,7 +35,10 @@ js> vm.appname=="jeforth.3hta" [if]
 
 	<comment>
 
+		How to put computer into standby/suspend? 
+		
 		Copy from autoit help
+		
 		The shutdown code is a combination of the following values:
 			$SD_LOGOFF (0) = Logoff
 			$SD_SHUTDOWN (1) = Shutdown

@@ -58,8 +58,7 @@
 			ce@ replaceNode \ 替換原來的 #text
 			ce! \ ce 改成替換過的
 		then \ 以上很成功，把原 #text 改裝成 <span> 這樣才 scrollTo() 得過去
-		ce@ js> $(pop()).offset().top \ get target position
-		js: window.scrollTo(0,pop()) \ jump to target
+		ce@ js: window.scrollTo(0,pop().offsetTop) \ jump to ce@'s position
 		ce@ :> id=="tempSpan" if
 			\ 以下步驟剝除暫時的 <span>
 			ce@ :> innerHTML <>escape \ #text 交給 </o> 要避免 <東西> 被翻譯
@@ -70,6 +69,8 @@
 			ce! \ 以接在後面的原 #text 取代 ce 
 		then \ 一番迂迴轉進以上成功了
 		;  
+		/// 沒有 jump-to-node 因為過程中原 #text node 會發生變
+		/// 化，所也要靠 ce 來保持聯繫。
 
 	: se ( element -- ) \ See the element
 		dup children ( -- element array ) <js> 

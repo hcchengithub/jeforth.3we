@@ -102,7 +102,7 @@
 
 	code editbox_bigger ( -- ) \ Bigger editbox
 		var r = editboxtextarea.rows;
-		if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
+		if(r<4) r+=1; else if(r>8) r+=8; else r+=4;
 		editboxtextarea.rows = Math.max(r,1); end-code
 
 	: create-editbox  ( -- ) \ Create an editbox at outputbox
@@ -115,12 +115,13 @@
 			<input type=button value='>'              class="editbox_after     " />
 			<input type=button value='Refresh'        class="editbox_refresh   " />
 			<input type=button value='Example'        class="editbox_example   " />
-			<input type=button value=Smaller          class="editbox_smaller   " />
 			<input type=button value=Bigger           class="editbox_bigger    " />
+			<input type=button value=Smaller          class="editbox_smaller   " />
 			<input type=button value="Save w/o close" class="editbox_save      " />
 			<input type=button value="Save & Close"   class="editbox_saveclose " />
 			<input type=button value=Close            class="editbox_close     " />
-		</div></text> </o> to div-editbox 
+			<input type=button value=Jump             class="editbox_jump      " />
+		</div></text> </o> dup to div-editbox js> inputbox insertBefore
 		<js>
 			$(".editbox_before    ")[0].onclick=function(){execute("editbox_before    ")}
 			$(".editbox_parent    ")[0].onclick=function(){execute("editbox_parent    ")}
@@ -133,21 +134,21 @@
 			$(".editbox_save      ")[0].onclick=function(){execute("editbox_save      ")}
 			$(".editbox_saveclose ")[0].onclick=function(){execute("editbox_saveclose ")}
 			$(".editbox_close     ")[0].onclick=function(){execute("editbox_close     ")}
+			$(".editbox_jump      ")[0].onclick=function(){execute("jump-to-ce@       ")}
 		</js> ;
 
 	: edit-node ( node -- ) \ Open the editbox to edit the given node.
 		?dup if
-		ce! \ leverage ce for moving around among neighbours
-		outputbox-edit-mode-off
-		create-editbox \ create div-editbox
-		ce@ node-source js: editboxtextarea.value=pop() \ target source code
-		div-editbox js> $(pop()).offset().top \ get editbox position
-		js: window.scrollTo(0,pop()) \ jump to editbox
+			ce! \ leverage ce for moving around among neighbours
+			create-editbox
+			ce@ node-source js: editboxtextarea.value=pop() \ target source code
+			div-editbox js: window.scrollTo(0,pop().offsetTop) \ jump to editbox
 		then ;
+		/// Having an input is for easier debug. ce@ will be used afterall.
 	
 	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
 		['] {F2} :> EditMode div-editbox not and if ( flag ) 
-			drop inputbox-edit-mode-off
+			drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
 			js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
 			ce@ edit-node false ( stop bubbling )
 		then ;
