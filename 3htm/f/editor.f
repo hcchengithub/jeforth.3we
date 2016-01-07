@@ -3,7 +3,7 @@
 	\ Editor commands for 3hta and 3nw to edit HTML documents directly
 	\ in jeforth window.
 	
-	include unindent.f
+	include 3htm/f/unindent.f
 	
 	s" editor.f" source-code-header
 

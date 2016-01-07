@@ -178,7 +178,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				inputbox.value="";
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
-				push(true); // 別的 handler 還可以收得到 Esc key。
+				push(false); // Stop bubbling
 				end-code
 
 : history-selector ( -- ) \ Popup command history for selection
