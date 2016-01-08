@@ -1,0 +1,37 @@
+﻿
+<div class="anual">
+<style id="mystyle" type="text/css" scoped="">
+	.anual { 
+		font-family: Courier New;  
+		letter-spacing: 0px;
+		line-height: 160%;
+		tab-size:4; 
+	}
+	.anual code { 
+		font-family: courier new;
+		font-size: 110%; 
+		background: #E0E0E0; 
+	}
+	.anual .commandline { 
+		width: 90%;
+		background: #E0E0E0; 
+	}
+	.anual .source {  
+		font-size: 100%;   
+		line-height: 120%; 
+	}
+	.anual tab  { padding-left:2.4em; }
+	.anual tab2 { padding-left:4.8em; }
+	.anual tab3 { padding-left:7.2em; }
+	.anual tab4 { padding-left:9.6em; }
+	.anual blockquote { margin-left:2.4em;margin-right:0em;margin-top:0em;margin-bottom:0em; }
+	
+</style>
+&nbsp;<h2>2016/1/16 年會報告摘要:&nbsp;jeforth 的根源</h2><p></p><ol><li>動手玩 jeforth kernel<br>已經有裝 node.js 只需 project-k jeforth.js 即可。<li> Project-k 的定義</li><ol><li>不同環境的 jeforth 使用同一支可抽換的 project-k kernel。<li>考慮 proejct-k 可能有 python 版、 rust 版等。</li><li>中心 kernel 定義。<br><img width="809" height="771" style="width: 457px; height: 382px;" src="2016-01-081.jpg"><br></li></ol><li>討論現有的建議。</li></ol><blockquote><p>[ ] Words(a[]) &lt;--- why a[] ?<br>&nbsp;&nbsp;&nbsp; A:&nbsp;這是很老的 code 了。把 word name, xt 等等所有的 properties 用一個 array 送進去。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;這個機關現在看來有點多餘， JavaScript object 的 properties 可以隨時加掛，不需要用<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;這樣的技巧。位置在 project-k 的 jeforth.js 裡面，(誰貢獻時間)有空把它改掉。<br>[ ] panic() &lt;---- why not simply type() ?<br>&nbsp;&nbsp;&nbsp; A:&nbsp;jeforth engine or kernel is supposed to be used in embeded systems too.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In that case, panic() is still necessary while type() has no meaning.<br>[ ] nexttoken("RegEx") 收 string. 怎麼不直接收 RegEx ? </p>
+<div>
+&nbsp;&nbsp;&nbsp; A:&nbsp;既然已經寫好收 string 了，可以不去動它。收 RegEx 感覺怕怕的，string 比較自由。<br>[ ] value, constant, variable 等都把其值放在 vm.g 之下與 <br>&nbsp;&nbsp;&nbsp; javascript 共享──沒有任何管理。 <br>&nbsp;&nbsp;&nbsp; A: 爽哥 解答：把不同 type 再細分擺放。 &lt;== Good idea! 準備有空照這樣改。<br>[x] 直接執行螢幕上 mark 起來的區塊文字。 </div>
+
+<div>
+<tab></tab>A: 不屬 project-k 的工作。 jeforth.3we 的 F4 有類似功能。<br><tab></tab>&nbsp;&nbsp; 直接執行不太好，讓 user 有機會 edit 補按 <enter> 才執行。</enter><br>[ ] 使用 localStorage<br><tab></tab>A: jeforth.3we 諸應用可以多多愛用。 </div>
+</blockquote>
+</div>
