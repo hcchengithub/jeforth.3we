@@ -361,7 +361,7 @@
 
 </div>
 [x] edit-zone 外框用白線吧! 比較高雅。<br>[x] Editbox 需要區份 [Save][Save &amp; Close] 兩個 button。因為 Editbox 比較特殊，它會跳到 target 處去,所以然。<br>[x] 同一個 file open 多次會怎樣? 因為 edit-zone 是以 filename 產生 id 所以無法重複管理。<br>&nbsp;&nbsp;&nbsp; 考慮 open 的過程，還是會把 edit-zone 開出來, 裡面是空的——看起來就很可怕了。<br><strong>&nbsp;&nbsp;&nbsp;&nbsp;一律為 id 加上3位數字亂數 --&gt; 這樣就可以重複開檔</strong>&nbsp; <br>&nbsp;&nbsp;&nbsp; : create-edit-zone ( pathname -- ) \ Create an edit-zone<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GetAbsolutePathName dup GetFileName ( pathname filename )<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dup char edit-zone- swap +&nbsp;( pathname filename edit-zone-filename )<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; random 1000 * int&nbsp;+ ( pathname filename edit-zone-filename999 )<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -rot ( id pathname filename ) .... snip .....<br>-- <br>[x] Sat Jan 2 13:20:26 UTC+0800 2016 <br>&nbsp;&nbsp;&nbsp; why F2 switch to inputbox edit mode can turn pink. But after a click on outputbox<br>&nbsp;&nbsp;&nbsp; then F2 can't pink anymore? --&gt; pink only when focused. Not a problem.<br>--<br>[x] Chrome's #text node does not have replaceNode() method?! jump-to-ce@ uses it.<br>&nbsp;&nbsp;&nbsp; --&gt; Yeap, only IE/HTA support replaceNode(), use replaceChild instead.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; But IE #text does not have parentElement but parentNode while Chrome has<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; both. Use jQuery . . . <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --&gt; $(target).replaceWith(new) works fine.<br>-- <br>[x] <span style='font: 20px/normal "courier new"; color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; float: none; display: inline !important; white-space: normal; widows: 1; font-size-adjust: none; font-stretch: normal; background-color: rgb(240, 240, 240); -webkit-text-stroke-width: 0px;'>&lt;o&gt;&nbsp;&lt;input&nbsp;type=button&nbsp;onclick="alert(1)"&gt;&lt;/input&gt;&lt;/o&gt; works fine everywhere<br>&nbsp;&nbsp;&nbsp; but not <strong>Chrome App</strong>. unsafe-inline is ignored in Chrome App too. So I need to<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i><a href="https://developer.chrome.com/extensions/contentSecurityPolicy">https://developer.chrome.com/extensions/contentSecurityPolicy</a></i><br>&nbsp;&nbsp;&nbsp; avoid using inline event handler. ---&gt; Done! simply <strong>remove onclock=...</strong> from the tag<br>&nbsp;&nbsp;&nbsp; but use <strong>element.onclock=function(){execute("forth-word")}</strong>, it works!!<br>-- <br>[x] Resolve this problem: #endofinputbox. This line&nbsp;scrolls to inputbox:<br>&nbsp;&nbsp;&nbsp; 5000 nap js&gt; window.scrollTo(0,endofinputbox.offsetTop)<br>&nbsp;&nbsp;&nbsp; [x] so we don't need&nbsp;the click() on the &lt;a&gt; tag. ---&gt; Done! Mon Jan 4 13:18:21 UTC+0800 2016<br>-- <br>[/] env@ 只有 3hta 能用, 致使 editor.f 在 3nw 暫時還不能用。<br>&nbsp;&nbsp;&nbsp; 其實 3nw 也可以 access environment variables.&nbsp;&nbsp;&nbsp; --&gt; 用不著了。<br>--<br><span>[x] When <strong><em>in edit-zone</em></strong>
-,&nbsp;<font color="blue" size="5"><strong>{ctrl-f2}</strong></font> to convert #text anchorNode with HTML tags. <blockquote>Tue Jan 5 14:41:09 UTC+0800 2016 <br>[ ] Consider to support outputbox too. Actually it works partialy now.</blockquote></span>----<br>-- <br>[x] Wed Jan 6 07:32:55 UTC+0800 2016&nbsp;,&nbsp;3nd needs improvements.<blockquote><strong>1.</strong> &nbsp;OK run dir <br>Error! run unknown. &lt;---- 3nd uses node.js <strong>child_process</strong> module, the function is <strong>exec</strong>.<br>Directory of c:\Users\hcche\Documents\GitHub\jeforth.3we <strong>&lt;---- problem! should not proceed after an error.</strong><br>2016-01-06 06:18:56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 [.git]<br>2015-09-06 12:57:41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 505 .gitattributes<br>2015-10-12 20:26:44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 128 .gitignore<br>2016-01-05 19:15:38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 [3ca]<br>2016-01-03 23:16:53&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 [3hta]<br><strong>2.</strong> need run and fork command to run <strong>shutdown.exe /h</strong> &lt;----- Done! hibernations.f supports <br>both 3hta and 3nd.&nbsp; </blockquote>--<br>[x] editbox [save w/o close] need to jump to the target node too, to see the effect.<br>&nbsp;&nbsp;&nbsp; --&gt; Actually a [Jump] buttom is added.<br>[x] New bug now, single-click jump to edit-box and jump back the the node immediately&lt;--- problem.<br>&nbsp;&nbsp;&nbsp; --&gt; ok after restart. <div>--  </div><div>[x] Outputbox log 的 &lt;div&gt; 越套越多層,如果要解決可以考慮從裡面加套一個有 id 的 &lt;div&gt; 然後只 log.push 這個 &lt;div&gt;。<br>&nbsp;&nbsp;&nbsp; --&gt; Use Notepad++ with plugin "HTML tag" to clear them already.<br>--<br>[ ]&nbsp;這個好用! <strong>article :&gt; style :: backgroundColor="white"</strong>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;[ ]&nbsp;Canvas.f 裡面我為了改 style 所用的方法很笨。<br>&nbsp;&nbsp;&nbsp; [ ]&nbsp;index.html, jeforth.htm,&nbsp;jeforth.3nw.html 好像都很笨。<b><br>&nbsp;&nbsp;&nbsp; </b>[ ] {F2} toggle-inputbox-edit-mode 也是。<br>&nbsp;&nbsp;&nbsp; [ ] &lt;div style="margin-left: <strong>2em</strong>;"&gt;OK&lt;/div&gt; \ <strong>em 是當時 font-size 的倍數，可正負&amp;小數</strong>。<table class="commandline" style="margin-left: 2em;"><tbody><tr><td>&gt; ce@ :&gt; style :&gt; fontSize . \ ==&gt; 10px OK<br>&gt; ce@ :&gt; style :&gt; getPropertyValue("font-size") . \ ==&gt; 10px OK<br>&gt; ce@ :&gt; style :&gt; fontSize=""<br>&gt; ce@ :&gt; style :&gt; getPropertyValue("font-size") . \ ==&gt; ""</td></tr></tbody></table>--<br>[ ] unindent.f should be merged to html5.f. also element.f and canvas.f ... maybe someday.<br>[ ] Use iframe for article, log, and more separatedly.<br>&nbsp;&nbsp;&nbsp; 幾乎所有的 iframe attributes do not work on HTA but work fine on Chrome. See w3schools regarding iframe,<br>&nbsp;&nbsp;&nbsp; HTML5 actually droped many of them. Note, Can be width=100% or width=100 (pixels); but can only be<br>&nbsp;&nbsp;&nbsp; height=500 (pixels) no height=80%, no. Align does not work, so my workaround is to use a &lt;div&gt; to<br>&nbsp;&nbsp;&nbsp; align.<br>[ ] Edit-zone MoveUp, MoveDown 怎麼無效?
+,&nbsp;<font color="blue" size="5"><strong>{ctrl-f2}</strong></font> to convert #text anchorNode with HTML tags. <blockquote>Tue Jan 5 14:41:09 UTC+0800 2016 <br>[ ] Consider to support outputbox too. Actually it works partialy now.</blockquote></span>----<br>-- <br>[x] Wed Jan 6 07:32:55 UTC+0800 2016&nbsp;,&nbsp;3nd needs improvements.<blockquote><strong>1.</strong> &nbsp;OK run dir <br>Error! run unknown. &lt;---- 3nd uses node.js <strong>child_process</strong> module, the function is <strong>exec</strong>.<br>Directory of c:\Users\hcche\Documents\GitHub\jeforth.3we <strong>&lt;---- problem! should not proceed after an error.</strong><br>2016-01-06 06:18:56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 [.git]<br>2015-09-06 12:57:41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 505 .gitattributes<br>2015-10-12 20:26:44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 128 .gitignore<br>2016-01-05 19:15:38&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 [3ca]<br>2016-01-03 23:16:53&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 [3hta]<br><strong>2.</strong> need run and fork command to run <strong>shutdown.exe /h</strong> &lt;----- Done! hibernations.f supports <br>both 3hta and 3nd.&nbsp; </blockquote>--<br>[x] editbox [save w/o close] need to jump to the target node too, to see the effect.<br>&nbsp;&nbsp;&nbsp; --&gt; Actually a [Jump] buttom is added.<br>[x] New bug now, single-click jump to edit-box and jump back the the node immediately&lt;--- problem.<br>&nbsp;&nbsp;&nbsp; --&gt; ok after restart. <div>--  </div><div>[x] Outputbox log 的 &lt;div&gt; 越套越多層,如果要解決可以考慮從裡面加套一個有 id 的 &lt;div&gt; 然後只 log.push 這個 &lt;div&gt;。<br>&nbsp;&nbsp;&nbsp; --&gt; Use Notepad++ with plugin "HTML tag" to clear them already.<br>--<br>[x] editbox 增加用 alt-F2 啟動。 Ctrl-f2 不要跳, 故 editbox-close 不要自動跳。<br>--<br>[ ]&nbsp;這個好用! <strong>article :&gt; style :: backgroundColor="white"</strong>&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;[ ]&nbsp;Canvas.f 裡面我為了改 style 所用的方法很笨。<br>&nbsp;&nbsp;&nbsp; [ ]&nbsp;index.html, jeforth.htm,&nbsp;jeforth.3nw.html 好像都很笨。<b><br>&nbsp;&nbsp;&nbsp; </b>[ ] {F2} toggle-inputbox-edit-mode 也是。<br>&nbsp;&nbsp;&nbsp; [ ] &lt;div style="margin-left: <strong>2em</strong>;"&gt;OK&lt;/div&gt; \ <strong>em 是當時 font-size 的倍數，可正負&amp;小數</strong>。<table class="commandline" style="margin-left: 2em;"><tbody><tr><td>&gt; ce@ :&gt; style :&gt; fontSize . \ ==&gt; 10px OK<br>&gt; ce@ :&gt; style :&gt; getPropertyValue("font-size") . \ ==&gt; 10px OK<br>&gt; ce@ :&gt; style :&gt; fontSize=""<br>&gt; ce@ :&gt; style :&gt; getPropertyValue("font-size") . \ ==&gt; ""</td></tr></tbody></table>--<br>[ ] unindent.f should be merged to html5.f. also element.f and canvas.f ... maybe someday.<br>[ ] Use iframe for article, log, and more separatedly.<br>&nbsp;&nbsp;&nbsp; 幾乎所有的 iframe attributes do not work on HTA but work fine on Chrome. See w3schools regarding iframe,<br>&nbsp;&nbsp;&nbsp; HTML5 actually droped many of them. Note, Can be width=100% or width=100 (pixels); but can only be<br>&nbsp;&nbsp;&nbsp; height=500 (pixels) no height=80%, no. Align does not work, so my workaround is to use a &lt;div&gt; to<br>&nbsp;&nbsp;&nbsp; align.<br>[ ] Edit-zone MoveUp, MoveDown 怎麼無效?
 
 
 </div><div>
@@ -379,21 +379,23 @@
 </div>
 
 <div>
-[ ] Words(a[]) &lt;--- why a[] ?<br>&nbsp;&nbsp;&nbsp; A:&nbsp;這是很老的 code 了。把 word name, xt, 等一切 properties 用一個 array 送進去。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;這個機關現在看來有點多餘， JavaScript object 的 properties 可以隨時加掛，不需要用<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;這樣的技巧，平添讀者困難。位置在 project-k 的 jeforth.js 裡面，誰願意貢獻時間有空把它改掉。<br>[ ] panic() &lt;---- why not simply type() ?<br>&nbsp;&nbsp;&nbsp; A:&nbsp;jeforth engine or kernel is supposed to be used in embeded systems too.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In that case, panic() is still necessary while type() has no meaning.<br>[ ] nexttoken("RegEx") 收 string. 怎麼不直接收 RegEx ?
+[ ] Words(a[]) &lt;--- why a[] ?<br>&nbsp;&nbsp;&nbsp; A:&nbsp;這是很老的 code 了。把 word name, xt, 等一切 properties 用一個 array 送進去。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;這個機關現在看來有點多餘， JavaScript object 的 properties 可以隨時加掛，不需要用<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;這樣的技巧。位置在 project-k 的 jeforth.js 裡面，誰願意貢獻時間有空把它改掉。<br>[ ] panic() &lt;---- why not simply type() ?<br>&nbsp;&nbsp;&nbsp; A:&nbsp;jeforth engine or kernel is supposed to be used in embeded systems too.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In that case, panic() is still necessary while type() has no meaning.<br>[ ] nexttoken("RegEx") 收 string. 怎麼不直接收 RegEx ?
 </div>
 
 <div>
-&nbsp;&nbsp;&nbsp; A:&nbsp;既然已經寫好收 string 了，可以不去動它。收 RegEx 感覺怕怕的，string 比較熟悉。<br>[ ] 補記一條： value, constant, variable 等都把其值放在 vm.g 之下與 <br>&nbsp;&nbsp;&nbsp; javascript 共享──沒有任何管理。 爽哥 解答：把不同 type 再細分擺放。<br>&nbsp;&nbsp;&nbsp; A:&nbsp;Good idea! 準備有空照這樣改。<br>[x] 直接執行螢幕上 mark 起來的區塊文字
+&nbsp;&nbsp;&nbsp; A:&nbsp;既然已經寫好收 string 了，可以不去動它。收 RegEx 感覺怕怕的，string 比較自由。<br>[ ] value, constant, variable 等都把其值放在 vm.g 之下與 <br>&nbsp;&nbsp;&nbsp; javascript 共享──沒有任何管理。 <br>&nbsp;&nbsp;&nbsp; A: 爽哥 解答：把不同 type 再細分擺放。 &lt;== Good idea! 準備有空照這樣改。<br>[x] 直接執行螢幕上 mark 起來的區塊文字。
 </div>
 
 <div>
-&nbsp;&nbsp;&nbsp; A:&nbsp;F4 有類似功能。直接執行不太好，讓 user 有機會 edit 補按 &lt;enter&gt; 才執行。<br>--
-</div>
+
+<tab></tab>A: 不屬 project-k 的工作。 jeforth.3we 的 F4 有類似功能。<br>
+<tab></tab>&nbsp;&nbsp; 直接執行不太好，讓 user 有機會 edit 補按 <enter> 才執行。</enter><br>
 
 
 
-<div>
-[ ] 使用 localStorage<br>-- 
+
+[ ] 使用 localStorage<br>
+<tab></tab>A: jeforth.3we 諸應用可以多多愛用。<br>-- 
 </div>
 
 
@@ -410,7 +412,7 @@ My questions
 </div>
 
 <div>
---<br>[ ] Thu Dec 31 09:42:18 UTC+0800 2015 <br>&nbsp;&nbsp;&nbsp; JeForth 既然已經是成品了，就稍作整理後，放上 Chrome 的網路商店，讓國際間的朋友也能分享，並給點意見。<br>&nbsp;&nbsp;&nbsp; <a href="https://developer.chrome.com/apps/about_apps">根據 Google 的教材</a>著手先試試看 <a href="https://developer.chrome.com/apps/first_app">Create your first App</a>, also&nbsp;view&nbsp;<a href="https://github.com/hcchengithub/chrome-app-samples">chrome app 的&nbsp;samples</a>,&nbsp;and&nbsp;to <a href="https://developer.chrome.com/apps/publish_app">publish the app</a>.&nbsp;
+--<br>[x] Thu Dec 31 09:42:18 UTC+0800 2015 <br>&nbsp;&nbsp;&nbsp; JeForth 既然已經是成品了，就稍作整理後，放上 Chrome 的網路商店，讓國際間的朋友也能分享，並給點意見。<br>&nbsp;&nbsp;&nbsp; <a href="https://developer.chrome.com/apps/about_apps">根據 Google 的教材</a>著手先試試看 <a href="https://developer.chrome.com/apps/first_app">Create your first App</a>, also&nbsp;view&nbsp;<a href="https://github.com/hcchengithub/chrome-app-samples">chrome app 的&nbsp;samples</a>,&nbsp;and&nbsp;to <a href="https://developer.chrome.com/apps/publish_app">publish the app</a>.&nbsp;
 </div>
 
 <div>
@@ -423,7 +425,8 @@ My questions
 
 <tab2></tab2>--&gt; <font color="green">manufast.json 裡面的設定可以解決這個問題。</font>&nbsp;--&gt; jeforth.3htm works on Chrome extension now!! <br>
 <tab2></tab2>Thu Jan 7 15:38:34 UTC+0800 2016&nbsp;
-<blockquote><p>[ ] Use 3htm directly, but modified by include 3ce.f. for example js: body.style.width="660px";header.style.fontSize="0.6em";outputbox.style.fontSize="0.8em"<br>[ ] I want to use ?include xxxx.f when launching 3htm in Chrome extensions. How? Try studying chrome.bowserAction --&gt;&nbsp;browserAction.setPopup is hopefully the answer , or background.html?<br>[ ] show msg on the icon js: chrome.browserAction.setBadgeText({text:"ok"})</p></blockquote> <br>--<br>[ ] Mon Jan 4 15:15:24 UTC+0800 2016 想要把 jeforth.3we upload 上 Google web store 時出問題如下,
+<blockquote><p>
+[x] Use <strike>3htm directly, but modified by include 3ce.f. for example js:</strike> jefroth.3ce.html like other applications. Its quit.f modifies the appearances:&nbsp;body.style.width="660px"; header.style.fontSize="0.6em"; outputbox.style.fontSize="0.8em".<br>[x] I want to use ?include xxxx.f when launching 3htm in Chrome extensions. How? Try studying chrome.bowserAction --&gt;&nbsp;browserAction.setPopup is hopefully the answer , or background.html? 以上通通失敗。--&gt; 都已經用上 jeforth.3ce.html, 這就不是問題了。<br>[x] Chrome extension ok now Fri Jan 8 19:22:42 UTC+0800 2016 OK </p></blockquote>--<br>[ ] Mon Jan 4 15:15:24 UTC+0800 2016 想要把 jeforth.3we upload 上 Google web store 時出問題如下,
 
 </div>
 <blockquote><table class="dm" role="banner" style="font: 13px/normal arial, sans-serif; margin: 0px 0px 10px; padding: 0px; border: 0px currentColor; width: 969.6px; height: 40px; color: rgb(0, 0, 0); text-transform: none; text-indent: 0px; letter-spacing: normal; word-spacing: 0px; white-space: normal; border-collapse: collapse; widows: 1; empty-cells: show; font-size-adjust: none; font-stretch: normal; background-color: rgb(255, 255, 255); -webkit-text-stroke-width: 0px;"><tbody style="margin: 0px; padding: 0px; border: 0px currentColor;"><tr style="margin: 0px; padding: 0px; border: 0px currentColor;"><td style="margin: 0px; padding: 0px; border: 0px currentColor;">
@@ -498,25 +501,10 @@ My questions
 <div>
 
 <tab></tab>---&gt; index.html of the game does not work. The ROC flag works fine --&gt; see log.json.<br>-- <br>[ ] Chrome debugger catch a webserver.bat problem,
-</div>
-
-<div>
-
-</div><blockquote>Resource interpreted as Stylesheet but transferred with MIME type text/plain: "<a href="http://localhost:8888/common.css">http://localhost:8888/common.css</a>" &lt;----- webserver.f too rough.</blockquote>-- <br>[ ] 2016/1/16 年會報告摘要&nbsp;jeforth Fri Jan 8 09:36:08 UTC+0800 2016<blockquote>
-<ol><li>動手玩 jeforth kernel : Project-k jeforth.js —— 只需要 node.js <li>
-Project-k 的定義</li><ol><li>不同環境的 jeforth 使用同一支可抽換的 project-k kernel。<li>考慮 proejct-k 可能有 python 版、 rust 版等。</li><li>中心 kernel 定義。<br><img width="809" height="771" style="width: 457px; height: 382px;" src="doc/2016-01-081.jpg"><br></li></ol><li>報告現有的建議</li></ol><br>-- 
-</blockquote>
-
-<div>
--- 
-</div>
-
-<div>
--- 
-</div>
-
-<div>
--- 
+</div><blockquote>Resource interpreted as Stylesheet but transferred with MIME type text/plain: "<a href="http://localhost:8888/common.css">http://localhost:8888/common.css</a>" &lt;----- webserver.f too rough.</blockquote>-- <br>[x] 2016/1/16 年會報告摘要&nbsp;jeforth Fri Jan 8 09:36:08 UTC+0800 2016 <br>
+<tab></tab>to Sam Suan Chen alredy also on playground that can be read through rawgit.com.<br>[ ] Suggest to use Team Viewer.<br>[ ]
+Also <a href="https://mail.google.com/mail/u/0/#sent/151ec94d5839e403">https://mail.google.com/mail/u/0/#sent/151ec94d5839e403</a> Yuan Yuan's project.<div>
+-- <br>-- 
 </div>
 
 <div>

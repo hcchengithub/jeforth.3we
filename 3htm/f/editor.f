@@ -50,7 +50,7 @@
 			div-editbox :> parentNode 
 			if div-editbox removeElement then 
 		then
-		null to div-editbox jump-to-ce@ ;
+		null to div-editbox ;
 		
 	: editbox_saveclose ( -- ) \ Save editbox to ce@ which is the target element.
 		editbox_save editbox_close ;
@@ -106,7 +106,7 @@
 		editboxtextarea.rows = Math.max(r,1); end-code
 
 	: create-editbox  ( -- ) \ Create an editbox at outputbox
-		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
+		char editbox_close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
 			<textarea id=editboxtextarea rows=8></textarea>
 			<input type=button value='<'              class="editbox_before    " />
@@ -132,9 +132,9 @@
 			$(".editbox_smaller   ")[0].onclick=function(){execute("editbox_smaller   ")}
 			$(".editbox_bigger    ")[0].onclick=function(){execute("editbox_bigger    ")}
 			$(".editbox_save      ")[0].onclick=function(){execute("editbox_save      ")}
-			$(".editbox_saveclose ")[0].onclick=function(){execute("editbox_saveclose ")}
-			$(".editbox_close     ")[0].onclick=function(){execute("editbox_close     ")}
 			$(".editbox_jump      ")[0].onclick=function(){execute("jump-to-ce@       ")}
+			$(".editbox_saveclose ")[0].onclick=function(){dictate("editbox_saveclose jump-to-ce@")}
+			$(".editbox_close     ")[0].onclick=function(){dictate("editbox_close jump-to-ce@")}
 		</js> ;
 
 	: edit-node ( node -- ) \ Open the editbox to edit the given node.
@@ -146,11 +146,14 @@
 		then ;
 		/// Having an input is for easier debug. ce@ will be used afterall.
 	
+	: {alt-f2} ( -- bubbling? ) \ Launch editbox
+		js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
+		ce@ edit-node false ( stop bubbling ) ;
+
 	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
 		['] {F2} :> EditMode div-editbox not and if ( flag ) 
 			drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
-			js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
-			ce@ edit-node false ( stop bubbling )
+			{alt-f2} \ Launch editbox
 		then ;
 
 	: #text>html ( -- ) \ convert HTML tags in the ce #text node
