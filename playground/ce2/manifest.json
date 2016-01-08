@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "jQuery DOM",
+  "version": "1",
+  "description": "Manipulate the DOM when the page is done loading",
+  // "background_page": "background.html",
+  "browser_action": {
+    "name": "Manipulate DOM",
+    "icons": ["icon.png"],
+    "default_icon": "icon.png",
+    "default_popup": "sample.html"
+  },
+  "content_scripts": [ {
+    "js": [ "jquery-1.11.2.js", "background.js" ],
+    "matches": [ "http://*/*", "https://*/*"]
+  }],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",  
+  "permissions": [
+    "activeTab","http://*/*","https://*/*"
+  ]
+}

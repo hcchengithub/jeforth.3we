@@ -3,7 +3,7 @@
 	\ Editor commands for 3hta and 3nw to edit HTML documents directly
 	\ in jeforth window.
 	
-	include unindent.f
+	include 3htm/f/unindent.f
 	
 	s" editor.f" source-code-header
 
@@ -50,7 +50,7 @@
 			div-editbox :> parentNode 
 			if div-editbox removeElement then 
 		then
-		null to div-editbox jump-to-ce@ ;
+		null to div-editbox ;
 		
 	: editbox_saveclose ( -- ) \ Save editbox to ce@ which is the target element.
 		editbox_save editbox_close ;
@@ -102,11 +102,11 @@
 
 	code editbox_bigger ( -- ) \ Bigger editbox
 		var r = editboxtextarea.rows;
-		if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
+		if(r<4) r+=1; else if(r>8) r+=8; else r+=4;
 		editboxtextarea.rows = Math.max(r,1); end-code
 
 	: create-editbox  ( -- ) \ Create an editbox at outputbox
-		char editbox-close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
+		char editbox_close execute \ editbox 只能有一個，因為其中的 editboxtextarea id 必須唯一。
 		<text> <div>
 			<textarea id=editboxtextarea rows=8></textarea>
 			<input type=button value='<'              class="editbox_before    " />
@@ -115,12 +115,13 @@
 			<input type=button value='>'              class="editbox_after     " />
 			<input type=button value='Refresh'        class="editbox_refresh   " />
 			<input type=button value='Example'        class="editbox_example   " />
-			<input type=button value=Smaller          class="editbox_smaller   " />
 			<input type=button value=Bigger           class="editbox_bigger    " />
+			<input type=button value=Smaller          class="editbox_smaller   " />
 			<input type=button value="Save w/o close" class="editbox_save      " />
 			<input type=button value="Save & Close"   class="editbox_saveclose " />
 			<input type=button value=Close            class="editbox_close     " />
-		</div></text> </o> to div-editbox 
+			<input type=button value=Jump             class="editbox_jump      " />
+		</div></text> </o> dup to div-editbox js> inputbox insertBefore
 		<js>
 			$(".editbox_before    ")[0].onclick=function(){execute("editbox_before    ")}
 			$(".editbox_parent    ")[0].onclick=function(){execute("editbox_parent    ")}
@@ -131,26 +132,38 @@
 			$(".editbox_smaller   ")[0].onclick=function(){execute("editbox_smaller   ")}
 			$(".editbox_bigger    ")[0].onclick=function(){execute("editbox_bigger    ")}
 			$(".editbox_save      ")[0].onclick=function(){execute("editbox_save      ")}
-			$(".editbox_saveclose ")[0].onclick=function(){execute("editbox_saveclose ")}
-			$(".editbox_close     ")[0].onclick=function(){execute("editbox_close     ")}
+			$(".editbox_jump      ")[0].onclick=function(){execute("jump-to-ce@       ")}
+			$(".editbox_saveclose ")[0].onclick=function(){dictate("editbox_saveclose jump-to-ce@")}
+			$(".editbox_close     ")[0].onclick=function(){dictate("editbox_close jump-to-ce@")}
 		</js> ;
 
-	: edit-node ( node -- ) \ Edit the node.
-		ce! \ leverage ce for moving around among neighbours
-		outputbox-edit-mode-off
-		create-editbox \ create div-editbox
-		ce@ node-source js: editboxtextarea.value=pop() \ target source code
-		div-editbox js> $(pop()).offset().top \ get editbox position
-		js: window.scrollTo(0,pop()) \ jump to editbox
-		;
+	: edit-node ( node -- ) \ Open the editbox to edit the given node.
+		?dup if
+			ce! \ leverage ce for moving around among neighbours
+			create-editbox
+			ce@ node-source js: editboxtextarea.value=pop() \ target source code
+			div-editbox js: window.scrollTo(0,pop().offsetTop) \ jump to editbox
+		then ;
+		/// Having an input is for easier debug. ce@ will be used afterall.
 	
+	: {alt-f2} ( -- bubbling? ) \ Launch editbox
+		js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
+		ce@ edit-node false ( stop bubbling ) ;
+
 	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
 		['] {F2} :> EditMode div-editbox not and if ( flag ) 
-			drop toggle-inputbox-edit-mode
-			js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
-			ce@ edit-node false ( stop bubbling )
+			drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
+			{alt-f2} \ Launch editbox
 		then ;
 
+	: #text>html ( -- ) \ convert HTML tags in the ce #text node
+		ce@ if create-editbox \ create div-editbox
+		ce@ node-source js: editboxtextarea.value=pop() \ target source code
+		editbox_saveclose then ;
+	
+	: {ctrl-f2} ( -- false ) \ Event handler, convert HTML tags at the #text anchorNode
+		js> window.getSelection().anchorNode ce! #text>html false ;
+	
 \ log outputbox
 
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
@@ -165,7 +178,7 @@
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 
-	: log.length ( i -- )  \ Get the log.json array length
+	: log.length ( -- length )  \ Get the log.json array length
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> length ; 
 

@@ -145,7 +145,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				\ otherwise the extra \n may pollute the command line.
 				/// See also run, (run), fork, (fork), dos, (dos).
 				/// Use run or dos if want the return value. 
-				/// Ex. fork chrome --chrome --allow-file-access-from-files
+				/// Ex. fork chrome --allow-file-access-from-files
 
 : (dos) 		( "command-line" -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
 				s" cmd /c " swap + (run) ;
@@ -413,3 +413,9 @@ code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given fol
 
 : precise-timer ( -- float ) \ Get precise timer value from VBS's Timer global variable.
 				<vb> vm.push(Timer)</vb> ;
+
+: super_chrome ( -- ) \ Run Chrome by fork chrome --allow-file-access-from-files
+				10 for s" where name like 'chrom.exe'" count-process if
+					s" where name like 'chrom.exe'" kill-them
+				then 500 nap next \ 好像一次殺不乾淨?
+				s" chrome --allow-file-access-from-files" (fork) ;

@@ -1,18 +1,20 @@
 {
-	"app": {
-		"launch": {
-			"local_path": "index.html"
-		}
+	"manifest_version" : 2,
+	"name" : "jeforth.3ce",
+	"description" : "jeforth.3we for Chrome Extension",
+	"version" : "1.0",
+	"browser_action" : {
+		"default_icon" : "3ce/fig.tw16x16.png",
+		"default_popup" : "jeforth.3ce.html"
 	},
-	"icons": {
-		"128": "3ca/fig.tw.png"
-	},
-	"manifest_version": 2,
-	"name": "jeforth.3ca",
-	"description": "jeforth.3we for Chrome App",
-	"version": "1.0",
-	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+	"content_security_policy" : "script-src 'self' 'unsafe-eval'; object-src 'self'",
 	"permissions" : [
-		"tabs"
+		"activeTab", "http://*/*", "https://*/*"
 	]
 }
+
+// This doesn't work at all.
+//  "content_scripts": [ { // 這應該是白名單，實際還得看該怎麼啟動 <-- 錯! 本 field 根本沒用。
+//    "js": [ "js/jquery-1.11.2.js", "3ce/background.js" ],
+//    "matches": [ "http://*/*", "https://*/*"]
+//  }],

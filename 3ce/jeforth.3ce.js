@@ -3,9 +3,9 @@
 	(function(){
 		kvm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
-		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
-		kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+		kvm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
+		kvm.host = window; // DOM window is the root for 3ce. global 掛那裡的根據。
+		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true; // type() refers to it.
 		
@@ -64,7 +64,7 @@
 				document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
 				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
-				var q = "3htm/f/quit.f";
+				var q = "3ce/quit.f";
 				var kk = $.get(k,'text'); // callback only when success, not suitable, 
 				var rr = $.get(r,'text');
 				var qq = $.get(q,'text');
@@ -128,11 +128,11 @@
 		
 		// Called from jsEvalRaw, it will handle the try{}catch{} thing. 
 		kvm.writeTextFile = function(pathname,data) { // Write string to text file.
-			panic("Error writing " + pathname + ", jeforth.3htm doesn't know how to wrtieTextFile yet.\n"); 
+			panic("Error writing " + pathname + ", jeforth.3ce doesn't know how to wrtieTextFile yet.\n"); 
 		}
 
 		kvm.readTextFile = function(pathname){
-			panic("Error reading " + pathname + ", jeforth.3htm doesn't know how to readTextFile."+
+			panic("Error reading " + pathname + ", jeforth.3ce doesn't know how to readTextFile."+
 					  " Please use $.get(pathname,callback,'text') instead.\n");
 		}
 	})();

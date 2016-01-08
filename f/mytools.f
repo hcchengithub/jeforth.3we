@@ -73,7 +73,7 @@ code .longwords ( length -- ) \ type long words. I designed this word for fun to
 
 code precise-time(mS)	( -- mS ) \ JavaScript's precise recent time in mini seconds
 						push((new Date()).getTime()) end-code
-				
+
 <comment>
 \ 已經有更好的方法： mySetTimeout() mySetInterval()
 \ setTimout timers & setInterval timers. Idea was from Sam Suan Chen's jeforth HTML5 clock demo.

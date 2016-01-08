@@ -33,7 +33,7 @@
 	0 value count cut 
 	draw total-motivation . space \ 畫一禎印總動量
 	count 1+ dup to count 3000 > [if] cls 0 to count [then] \ 避免網頁太長怕 browser 受不了。
-	js: jump2endofinputbox.click() 20 nap \ 畫面跳到 inputbox 下，喘口氣讓 browser 工作。
+	js: window.scrollTo(0,endofinputbox.offsetTop); 40 nap \ 畫面跳到 inputbox 下，喘口氣讓 browser 工作。
 	rewind \ 在 TIB 內重複以上 cut 之後的動作
 
 	==> Name it h2o.f 
@@ -212,7 +212,7 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 	0 value count cut 
 	draw \ total-motivation . space \ 畫一禎印總動量
 	count 1+ dup to count 3000 > [if] cls 0 to count [then] \ 避免網頁太長怕 browser 受不了。
-	js: jump2endofinputbox.click() 20 nap \ 畫面跳到 inputbox 下，喘口氣讓 browser 工作。
+	js: window.scrollTo(0,endofinputbox.offsetTop) 40 nap \ 畫面跳到 inputbox 下，喘口氣讓 browser 工作。
 	rewind \ 在 TIB 內重複以上 cut 之後的動作
 
 

@@ -12,7 +12,7 @@
 		inputbox.value=""; 
 		kvm.cmdhistory.push(cmd);
 		g.vm.exec(cmd) ;
-		jump2endofinputbox.click();
+		window.scrollTo(0,endofinputbox.offsetTop);
 		inputbox.focus();
 		push(false);
 		end-code

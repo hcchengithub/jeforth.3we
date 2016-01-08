@@ -5,6 +5,11 @@
 \ applications. quit.f is the good place to define propritary features of each application.
 \  
 
+\ ------------ initial Chrome extension popup appearance --------------------------------
+js:	$("#body")[0].style.width="660px"; 
+js:	$("#header")[0].style.fontSize="0.6em"; 
+js:	$("#outputbox")[0].style.fontSize="0.8em";
+
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 				js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
 				/// redefined in quit.f, 1 nap 使輸出流暢。

@@ -56,7 +56,7 @@
 		js: vm.g.balls[2].x=200;vm.g.balls[2].y=101; draw
 		js: kvm.debug=true
 		js: vm.g.balls[1].vx=1 \ move one ball
-		cut draw js: jump2endofinputbox.click() 20 nap rewind \ check 
+		cut draw js: window.scrollTo(0,endofinputbox.offsetTop) 20 nap rewind \ check 
 	==> 避免 atan2(dy,dx) 程式要改寫 --> naughty-balls2.f
 	==> 改用 45度 角撞撞看 100*Math.cos(45*Math.PI/180)
 		newBall newBall newBall 1 to spring 1 to wallBounce ( 100% 彈性 ) 
@@ -68,7 +68,7 @@
 		js: b.x=200;b.y=100+(a.radius+b.radius)*Math.cos(45*Math.PI/180);
 		js: kvm.debug=false
 		js: a.vx=1 \ move one ball
-		cut draw js: jump2endofinputbox.click() 20 nap rewind \ check 
+		cut draw js: window.scrollTo(0,endofinputbox.offsetTop) 20 nap rewind \ check 
 	==> 意外發現很好玩的現象，一整沱的球會結合在一起，居然還會旋轉！
 		newBall newBall newBall newBall newBall newBall newBall newBall newBall 
 		newBall newBall newBall newBall newBall newBall newBall newBall newBall 
@@ -76,7 +76,7 @@
 		0 to friction 0 to gravity ( 為了做碰撞實驗，去掉重力 )
 		400 400 setCanvasSize	\ ( width height -- ) 
 		js: kvm.debug=false;vm.g.balls[1].vx=10
-		cut draw js: jump2endofinputbox.click() 20 nap rewind \ check 
+		cut draw js: window.scrollTo(0,endofinputbox.offsetTop) 20 nap rewind \ check 
 	==> Name it H2O.f 
 </comment>
 
