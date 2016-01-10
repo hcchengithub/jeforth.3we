@@ -9,12 +9,8 @@
 	},
 	"content_security_policy" : "script-src 'self' 'unsafe-eval'; object-src 'self'",
 	"permissions" : [
-		"activeTab", "http://*/*", "https://*/*"
+		"tabs", "notifications", "http://*/*", "https://*/*"
 	]
 }
 
-// This doesn't work at all.
-//  "content_scripts": [ { // 這應該是白名單，實際還得看該怎麼啟動 <-- 錯! 本 field 根本沒用。
-//    "js": [ "js/jquery-1.11.2.js", "3ce/background.js" ],
-//    "matches": [ "http://*/*", "https://*/*"]
-//  }],
+
