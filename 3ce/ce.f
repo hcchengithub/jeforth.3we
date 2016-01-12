@@ -1,10 +1,12 @@
 
+s" ce.f" source-code-header
 
 : tabs.query ( -- array ) \ Get an array of all tabs of the current window
 	<js> chrome.tabs.query({},function(tabs){
 		push(tabs);
 		execute('stopSleeping')
 	})</js> 10000 sleep ;
+	/// tabs.query js> JSON.stringify(pop(),"\n","\t") . /* to see them */
 	
 : list-tabs ( -- ) \ List Tabs in the current window
 	tabs.query ( array ) dup :> length ( array length )
@@ -23,4 +25,10 @@
 	//}
 	)</js>
 	;
+	
+: get-manifest ( -- obj ) \ Get the Chrome extension/app manifest hash table.
+	js> chrome.runtime.getManifest() ;
+	
+: see-manifest ( -- ) \ See the Chrome extension/app manifest hash table.
+	get-manifest js> JSON.stringify(pop(),"\n","\t") . ;
 	
