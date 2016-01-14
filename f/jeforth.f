@@ -44,6 +44,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					for(var members in obj) i++;
 					return i;
 				}
+
 				// This is a useful common tool. Compare two arrays.
 				vm.g.isSameArray = function (a,b) {
 					if (a.length != b.length) {
@@ -64,6 +65,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 						return true;
 					}
 				}
+
 				// Tool, check if the item exists in the array or is it a member in the hash.
 				// return {flag, key}
 				vm.g.isMember = function (item, thing){
@@ -87,6 +89,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					}
 					return result; // {flag:boolean, value:(index of the array or value of the obj member)}
 				}
+
 				// How to clear all setInterval() and setTimeOut() without knowing their ID?
 				// http://stackoverflow.com/questions/8769598/how-to-clear-all-setinterval-and-settimeout-without-knowing-their-id
 				// 缺點是 vm.g.setTimeout.registered() 會大量堆積，需 delete(vm.g.setTimeout.registered()[id.toString()]) 既然還得記住
@@ -106,6 +109,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					f.registered = function(){return(registered)};
 					return f;    
 				})();
+
 				vm.g.setTimeout = (function(){
 					var registered={};
 					f = function(a,b){
@@ -120,32 +124,8 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					f.registered = function(){return(registered)};
 					return f;    
 				})();
-				// This is a useful common tool. Help to recursively see an object or forth Word.
-				// For forth Words, view the briefing. For other objects, try to see into it.
-				vm.g.see = function (obj,tab){
-					if (tab==undefined) tab = "  "; else tab += "  ";
-					switch(mytypeof(obj)){
-						case "object" :
-						case "array" :
-							if (obj.constructor != Word) {
-								if (obj&&obj.toString) 
-									type(obj.toString() + '\n');
-								else 
-									type(Object.prototype.toString.apply(obj) + '\n');
-								for(var i in obj) {
-									type(tab + i + " : ");  // Entire array already printed here.
-									if (obj[i] && obj[i].toString || obj[i]===0) 
-										type(tab + obj[i].toString() + '\n');
-									else
-										type(tab + Object.prototype.toString.apply(obj[i]) + '\n');
-								}
-								break;  // if is Word then do default
-							}
-						default : // Word(), Constant(), number, string, null, undefined
-							var ss = obj + ''; // Print-able test
-							type(ss + " (" + mytypeof(obj) + ")\n");
-					}
-				}
+				
+				// jeforth inner interpreter debugger mode opposed to performance mode
 				vm.g.debugInner = function (entry, resuming) {
 					var w = phaseA(entry); // 翻譯成恰當的 w.
 					do{
@@ -1925,12 +1905,12 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 					<js> vm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
 					[d true d] [p 'dump', 'd' p]
 				</selftest>
-
+				
 code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
 				var w=pop();
 				var basewas = vm.g.base; vm.g.base = 10;
 				if (!(w instanceof Word)) {
-					vm.g.see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
+					type(JSON.stringify(w,"\n","\t"));  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
 				}else{
 					for(var i in w){
 						if (typeof(w[i])=="function") continue;
@@ -1959,6 +1939,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 				}
 				vm.g.base = basewas;
 				end-code
+
 : see           ' (see) ; // ( <name> -- ) See definition of the word
 
 				<selftest>

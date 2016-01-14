@@ -6,7 +6,7 @@ s" ce.f" source-code-header
 		push(tabs);
 		execute('stopSleeping')
 	})</js> 10000 sleep ;
-	/// tabs.query js> JSON.stringify(pop(),"\n","\t") . /* to see them */
+	/// tabs.query (see) to see them.
 	
 : list-tabs ( -- ) \ List Tabs in the current window
 	tabs.query ( array ) dup :> length ( array length )
@@ -15,6 +15,7 @@ s" ce.f" source-code-header
 	dup :> id . space ( array tab )
 	:> title . cr ( array )
 	next drop then ;
+	/// tabs.query (see) to see them in details.
 
 : tab.console.log ( tabid "message" -- ) \ For exparimental fun
 	<js> chrome.tabs.executeScript(pop(1)/*tabid*/,

@@ -151,10 +151,11 @@
 		ce@ edit-node false ( stop bubbling ) ;
 
 	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
-		['] {F2} :> EditMode div-editbox not and if ( flag ) 
-			drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
-			{alt-f2} \ Launch editbox
-		then ;
+		\ ['] {F2} :> EditMode div-editbox not and if ( flag ) 
+		\ 	drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
+		\ 	{alt-f2} \ Launch editbox
+		\ then 
+		; /// alt-f2 is good enough, single-click is annoying.
 
 	: #text>html ( -- ) \ convert HTML tags in the ce #text node
 		ce@ if create-editbox \ create div-editbox
