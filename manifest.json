@@ -8,6 +8,10 @@
 		"default_icon" : "3ce/fig.tw16x16.png",
 		"default_popup" : "jeforth.3ce.html"
 	},
+	"content_scripts": [{
+		"matches":["http://*/*", "https://*/*"],
+		"js": ["3ce/content_script.js"]
+	}],
 	"content_security_policy" : "script-src 'self' 'unsafe-eval'; object-src 'self'",
 	"permissions" : [
 		"tabs", "notifications", "http://*/*", "https://*/*"
