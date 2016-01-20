@@ -75,7 +75,6 @@ tabs.getCurrent [if] [else]
 		js> confirm(pop()) 
 	until ;
 	
-	
 : tab.console.log ( tabid "message" -- ) \ For exparimental fun
 	<js> chrome.tabs.executeScript(pop(1)/*tabid*/,
 	{code:'console.log("Hello")'}
@@ -100,39 +99,28 @@ code inject-project-k-kernel ( tabid -- ) \ Inject project-k kernel to the Tab.
 		}
 	) end-code
 
+: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
+	char </ce>|</ceV> word ; immediate
+
+code </ce> ( "statements" -- ) \ No return value
+	execute('tabid');
+	chrome.tabs.executeScript(pop(),{"code": pop()}); 
+	end-code immediate
+
+: </ceV> ( "statements" -- ) \ Retrun the value of last statement
+	tabid <js> chrome.tabs.executeScript(pop(),{"code": pop()},
+	function(result){push(result);execute('stopSleeping')}) </js> 
+	50000 sleep ; immediate
+
 [then]
 
 <comment>
-	<text>
-	chrome.runtime.onMessage.addListener(
-		function(request, sender, sendResponse) {
-			console.log(request);
-			console.log(sender);
-			sendResponse("This is my response"); // <----- make a response string.
-		}
-	)
-	</text> <js> 
-	chrome.tabs.executeScript (
-		225,{
-			"code": pop()
-		},
-		function(result){push(result)}
-	) </js> . // <----- See result
-		
 
+: inject ( pathname -- ) \ Inject a JavaScript file to tabid
+	tabid <js> chrome.tabs.executeScript(pop(), {file:pop()}, 
+	function(result){push(result);execute('stopSleeping')}) </js> 
+	50000 sleep ;
 
-
-	: <chrome.tabs.executeScript> ( <js statements> -- result ) \ Execute Script statements on itab
-					char </js>|</jsV>|</jsN>|</jsRaw> word ; immediate
-
-	: </jsN> 		( "statements" -- ) \ No return value
-					compiling if jsFuncNo , else jsEvalNo then ; immediate
-					/// 可以用來組合 JavaScript function
-					last alias </js>  immediate
-
-	: </jsV> 		( "statements" -- ) \ Retrun the value of last statement
-					compiling if jsFunc , else jsEval then ; immediate
-					/// 可以用來組合 JavaScript function
 
 </comment>
 
