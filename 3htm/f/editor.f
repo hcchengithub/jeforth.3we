@@ -167,21 +167,24 @@
 	
 \ log outputbox
 
-	: log.open ( -- )  \ Get the log.json[last] back to outputbox
-		\ 把整個 log.json 讀回來成一個 array。
-		char log.json readTextFile js> JSON.parse(pop()) 
-		:> slice(-1)[0] <o>escape </o> drop ; 
-		/// 讀出最後一個 snapshot 還原到最後面不破壞現有的 outputbox。
+	: log.length ( -- length )  \ Get the log.json array length
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> length ; 
 
+	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		( i array ) over log.length swap ( i array log.length i ) 
+		s" --<br><h1> jeforth.3we developing log section " swap 
+		+ s"  of " + swap + s" </h1>--<br>" + </o> drop
+		( i array ) :> [pop()] <o>escape </o> drop ; 
+		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
+		/// recall 出來放到最後面不破壞現有的 outputbox。
+		
 	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
-
-	: log.length ( -- length )  \ Get the log.json array length
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> length ; 
 
 	: log.push ( -- ) \ Push outputbox to log.json.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
@@ -190,17 +193,29 @@
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
 		/// 這個應該用得不多，要臨時把 outputbox 保存起來時有用。
 		
-	: log.pop ( -- )  \ Pop log.json back to outputbox
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		dup :> pop() <o>escape </o> drop \ 取最後一個 snapshot 還原到 outputbox
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
-		/// log.json 裡不再保留最新 snapshot 還原到最後面不破壞現有的 outputbox。
+	: old.log.open ( -- )  \ Get the log.json[last] back to outputbox
+		\ 把整個 log.json 讀回來成一個 array。
+		char log.json readTextFile js> JSON.parse(pop()) 
+		:> slice(-1)[0] <o>escape </o> drop ; 
+		/// 讀出最後一個 snapshot 還原到最後面不破壞現有的 outputbox。
 
-	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
+	: log.open ( -- )  \ Get the log.json[last] back to outputbox
+		log.length ?dup if 1- log.recall then ;
+		
+	: log.dump ( -- ) \ Recall all log history
+		log.length ?dup if dup for 
+			dup r@ - ( COUNT i ) 
+			log.recall 
+			( COUNT ) 
+		next drop then 
+		s" <h1> ----- The end of jeforth.3we developing log ----- </h1><hr>" </o> drop ;
+		
+	: log.drop ( -- )  \ Drop the TOS of log.json array.
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		( i array ) :> [pop()] <o>escape </o> drop ; 
-		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
-		/// recall 出來放到最後面不破壞現有的 outputbox。
+		dup :> pop() drop ( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+
+	: log.pop ( -- )  \ Pop log.json back to outputbox
+		log.open log.drop ;
 
 	: log.overwrite ( -- ) \ Drop older log.json, save outputbox to log.json[0]
 		<js> confirm("Overwrite the entire jason.log! Are yous sure?")</jsV> if
