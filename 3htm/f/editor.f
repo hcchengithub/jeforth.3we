@@ -173,7 +173,7 @@
 
 	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		( i array ) over log.length swap ( i array log.length i ) 
+		( i array ) over log.length swap 1+ ( i array log.length i ) 
 		s" --<br><h1> jeforth.3we developing log section " swap 
 		+ s"  of " + swap + s" </h1>--<br>" + </o> drop
 		( i array ) :> [pop()] <o>escape </o> drop ; 

@@ -86,7 +86,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	: inject ( pathname -- result ) \ Inject a JavaScript file to tabid
 		tabid <js> chrome.tabs.executeScript(pop(), {file:pop()}, 
 		function(result){push(result);execute('stopSleeping')}) </js> 
-		50000 sleep ;
+		120000 sleep ;
 		/// Have content script to include project-k:
 		/// > char project-k/jeforth.js indect drop 
 		/// The CallBack returns an array which is "The result of the script in every injected frame."
@@ -97,43 +97,78 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
 		char </ce>|</ceV> word ; immediate
 
-	code </ce> ( "statements" -- ) \ No return value
+	code (/ce) ( "statements" -- ) \ No return value
 		execute('tabid');
 		chrome.tabs.executeScript(pop(),{"code": pop()}); 
-		end-code immediate
+		end-code
 
-	: </ceV> ( "statements" -- ) \ Retrun the value of last statement
+	: </ce> ( "statements" -- ) \ Execute 3ce statements on target tabid. No return value.
+		compiling if literal compile (/ce) else (/ce) then ; immediate
+
+	: (/ceV) ( "statements" -- ) \ Retrun the value of last statement
 		tabid <js> chrome.tabs.executeScript(pop(),{"code": pop()},
 		function(result){push(result);execute('stopSleeping')}) </js> 
-		50000 sleep ; immediate
+		50000 sleep ;
+
+	: </ceV> ( "statements" -- ) \ Execute 3ce statements on target tabid. Retrun the value of last statement
+		compiling if literal compile (/ceV) else (/ceV) then ; immediate
 
 	\ Receive messages from content scripts
 		{}		value sender // ( -- obj ) Refer to obj.url or obj.tab.title for who sent the message.
 		null	value sendResponse // ( -- function ) Use sendResponse({response}) to reply the sender.
 		<js>
 			var f = function(_request, _sender, _sendResponse) {
-				type(_request);
 				vm.g.sender = _sender;
 				vm.g.sendResponse = _sendResponse;
+				type(_request);
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 			};f
-		</jsV> value ce_messageHandler // ( -- function ) Chrome extension handler who receives messages from content scripts.
-		js: chrome.runtime.onMessage.addListener(vm.g.ce_messageHandler)
+		</jsV> value messageHandler // ( -- function ) Chrome extension handler who receives messages from content scripts.
+		js: chrome.runtime.onMessage.addListener(vm.g.messageHandler)
+		
+	: {F7} ( -- ) \ Send inputbox to content script of tabid.
+		tabid <js>
+			push(inputbox.value);
+			inputbox.value="";
+			chrome.tabs.sendMessage(pop(1),pop())
+		</js> false ( terminiate event bubbling ) ;
+		/// 若用 F8 則無效, 好像是 Chrome debugger 自己要用?
 
-	<comment>
+	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
+		tabid <js>
+			chrome.tabs.sendMessage(pop(),pop())
+		</js> false ( terminiate event bubbling ) ;
+		/// Usage: <text> ... </text> (dictate)
+		
+	: (install) ( "pathname" -- ) \ Install forth source code to tabid.
+		\ readTextFileAuto (dictate) ;
+		readTextFileAuto char shooo! swap + (dictate) ;
+		/// shooo! avoid echoing the entire source code.
+	
+	: install ( <pathname> -- )  \ Install forth source code to tabid.
+		char \n|\r word (install) ;
 
-	: attach	( -- ) \ Attach 3ce to a tab.
-		tabs.select \ tabid is the target tab.
+	: attach	( -- ) \ Attach 3ce to the first tab.
+		js: push({"index":0}) tabs.query :> [0].id tabid!
+		\ tabs.select \ tabid is the target tab.
+		\ Install project-k to target tab.
+		<ce> typeof(jeForth)</ceV> char function != if char project-k/jeforth.js inject drop then
+		\ Install the main program of jeforrth.3ce
 		<ce> typeof(jeforth_project_k_virtual_machine_object)</ceV> char object != if
-			\ Install project-k to target tab.
 			<ce>
 				var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 				var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
-
 				// kvm is now the jeforth virtual machine object. It has no idea about the outside world
 				// that can be variant applications: HTML, HTA, Node.js, Node-webkit, .. etc.
 				// We need to help it a little as the following example:
 				
 				(function(){
+					kvm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+					var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
+					kvm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
+					kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
+					kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
+					kvm.selftest_visible = true; // type() refers to it.
 
 					var cmd, sender, sendResponse;
 					chrome.runtime.onMessage.addListener(
@@ -149,8 +184,29 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 					// Forth vm doesn't know how to 'type'. We need teach it by defining the kvm.type().
 					// kvm.type() is the only mandatory I/O jeforth VM needs to know. 
 					var type = kvm.type = function (s) {
-						chrome.runtime.sendMessage("", s) 		
+						try {
+							var ss = s + ''; // Print-able test
+						} catch(err) {
+							ss = Object.prototype.toString.apply(s);
+						}
+						if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
+						if(kvm.selftest_visible) chrome.runtime.sendMessage("", s);
 					};
+					
+					// kvm.panic() is the master panic handler. The panic() function defined in 
+					// project-k kernel jeforth.js is the one called in code ... end-code.
+					kvm.panic = function(state){ 
+						type(state.msg);
+						if (state.serious) debugger;
+					}
+					// We need the panic() function below but we can't see the one in jeforth.js
+					// so one is defined here for convenience.
+					function panic(msg,level) {
+						var state = {
+								msg:msg, level:level
+							};
+						if(kvm.panic) kvm.panic(state);
+					}
 					
 					// The Forth traditional prompt 'OK' is defined and used in this application main program.
 					// Forth vm has no idea about kvm.prompt but your program may want to know.
@@ -158,7 +214,11 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 					kvm.prompt = "OK";
 
 					function forthConsoleHandler(cmd) {
-						type((cmd?'\n' + document.title + '> ':"")+cmd+'\n');
+						// Avoid responding the ~.f source code when installing.
+						if(cmd.indexOf("shooo!")!=0)
+							type((cmd?'\n' + document.title + '> ':"")+cmd+'\n');
+						else
+						 	cmd = cmd.slice(6); // remove "shooo!"
 						kvm.dictate(cmd);  // Pass the command line to jeForth VM
 						type(" " + kvm.prompt + " ");
 					}
@@ -173,20 +233,41 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 						ss = ss.replace(/\n/g,'<br>');
 						return ss;
 					}
+		
+					kvm.greeting = function(){
+						type("j e f o r t h . 3 c e -- v"+version+'\n');
+						type("source code http://github.com/hcchengithub/jeforth.3we\n");
+						return(version);
+					}
+					
+					kvm.bye = function(){window.close()};
+					
+					// Called from jsEvalRaw, it will handle the try{}catch{} thing. 
+					kvm.writeTextFile = function(pathname,data) { // Write string to text file.
+						panic("Error writing " + pathname + ", jeforth.3htm doesn't know how to wrtieTextFile yet.\n"); 
+					}
+
+					kvm.readTextFile = function(pathname){
+						panic("Error reading " + pathname + ", jeforth.3htm doesn't know how to readTextFile."+
+								  " Please use $.get(pathname,callback,'text') instead.\n");
+					}
+					
 				})();
 			</ce>
-			
-		then ;
+		then 
+		\ quit.f
+		char f/jeforth.f (install)
+		<text>
+		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
+		js: tick('<selftest>').buffer="" \ recycle the memory
+		</text> (dictate)
 		
-		\ Then send the command through messag,
-		: {F8} ( -- ) \ Send inputbox to content script of tabid.
-			tabid js: chrome.tabs.sendMessage(pop(),inputbox.value) ;
+		char f/voc.f (install)
+		char 3htm/f/html5.f (install)
+		char 3htm/f/element.f (install)
+		<text> .( jeforth.3ce is ready on the target tab. ) </text> (dictate)
+		;
 
-		
-		\ So, try to send baby examples over...
-		<js> chrome.tabs.sendMessage(287,"code . kvm.type(pop()) end-code 123 . ") </js>
-		
-	</comment>
 		
 [then]
 

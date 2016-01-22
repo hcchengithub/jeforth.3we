@@ -133,7 +133,7 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
-				last alias {F6} // ( -- flase ) Hotkey handler, Smaller the input box
+				\ last alias {F6} // ( -- flase ) Hotkey handler, Smaller the input box
 								/// Duplicated to recover PowerCam conflict.
 
 code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
@@ -146,7 +146,7 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				end-code
 				/// return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
-				last alias {F7} // ( -- flase ) Hotkey handler, Bigger the input box
+				\ last alias {F7} // ( -- flase ) Hotkey handler, Bigger the input box
 								/// Duplicated to recover PowerCam conflict.
 
 code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
