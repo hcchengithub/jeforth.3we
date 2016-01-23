@@ -1,4 +1,4 @@
-var isBackgroundPage = true;
+var isBackgroundPage = "Yes, I am the only statement in background.js as a minimal condition.";
 //	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 //	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 //	var request, sender, response;

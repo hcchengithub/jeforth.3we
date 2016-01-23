@@ -7,24 +7,23 @@ s" ce.f" source-code-header
 \
 \ Skip everything if is not running in Chrome extension.
 \
-js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
-
+js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chrome extension environment.
 
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
 
-	: new-3ce-tab ( -- ) \ Open a new jeforth.3ce tab.
+	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
 		js> window.open("index.html") background-page :: lastTab=pop() ;
 		
 	: tabs.getCurrent ( -- objTab ) \ Get the current tab object.
 		js: chrome.tabs.getCurrent(function(tab){push(tab);execute('stopSleeping')}) 
 		1000 sleep ;
-		/// Returns an 'undefined' if used in the popup page or background page.
-		/// Normally used in an extension page. Yet can be used in content script 
-		/// too if it has jeforth.3ce injected.
+		/// Used in an extension page or content script in target pages. 
+		/// Returns 'undefined' if used in the popup page or background page.
 
 	tabs.getCurrent [if] [else]
 		\
-		\ ------------ initial Chrome extension popup page appearance --------------------------------
+		\ In Chrome extension/app is sure.
+		\ Initial Chrome extension popup page appearance. The font size better be smaller.
 		\
 		js:	$("#body")[0].style.width="660px"; 
 		js:	$("#header")[0].style.fontSize="0.6em"; 
@@ -36,7 +35,6 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 			push(tabs);
 			execute('stopSleeping')
 		})</js> 10000 sleep ;
-		/// tabs.query (see) to see them.
 		/// The input is a hash table, like :
 		/// {} tabs.query -- get all tabs.
 		/// js: push({active:true}) tabs.query -- get active tabs of every window.
@@ -113,7 +111,10 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	: </ceV> ( "statements" -- ) \ Execute 3ce statements on target tabid. Retrun the value of last statement
 		compiling if literal compile (/ceV) else (/ceV) then ; immediate
 
-	\ Receive messages from content scripts
+	\
+	\ Host side setup to receiving messages from content scripts
+	\ Only text is allowed, everything you see is in content script of the target tab. 
+	\
 		{}		value sender // ( -- obj ) Refer to obj.url or obj.tab.title for who sent the message.
 		null	value sendResponse // ( -- function ) Use sendResponse({response}) to reply the sender.
 		<js>
@@ -123,7 +124,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 				type(_request);
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 			};f
-		</jsV> value messageHandler // ( -- function ) Chrome extension handler who receives messages from content scripts.
+		</jsV> value messageHandler // ( -- function ) Host side Chrome extension handler who receives messages from content scripts.
 		js: chrome.runtime.onMessage.addListener(vm.g.messageHandler)
 		
 	: {F7} ( -- ) \ Send inputbox to content script of tabid.
@@ -132,7 +133,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 			inputbox.value="";
 			chrome.tabs.sendMessage(pop(1),pop())
 		</js> false ( terminiate event bubbling ) ;
-		/// 若用 F8 則無效, 好像是 Chrome debugger 自己要用?
+		/// 若用 F8 則無效, Chrome debugger 自己要用。
 
 	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
 		tabid <js>
@@ -141,7 +142,6 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 		/// Usage: <text> ... </text> (dictate)
 		
 	: (install) ( "pathname" -- ) \ Install forth source code to tabid.
-		\ readTextFileAuto (dictate) ;
 		readTextFileAuto char shooo! swap + (dictate) ;
 		/// shooo! avoid echoing the entire source code.
 	
@@ -254,22 +254,21 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 					
 				})();
 			</ce>
+			\ quit.f equivalent 
+			char f/jeforth.f (install)
+			<text>
+			js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
+			js: tick('<selftest>').buffer="" \ recycle the memory
+			</text> (dictate)
+			char f/voc.f (install)
+			char 3htm/f/html5.f (install)
+			char 3htm/f/element.f (install)
+			<text> .( jeforth.3ce is ready on the target tab. ) </text> (dictate)
 		then 
-		\ quit.f
-		char f/jeforth.f (install)
-		<text>
-		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
-		js: tick('<selftest>').buffer="" \ recycle the memory
-		</text> (dictate)
-		
-		char f/voc.f (install)
-		char 3htm/f/html5.f (install)
-		char 3htm/f/element.f (install)
-		<text> .( jeforth.3ce is ready on the target tab. ) </text> (dictate)
 		;
 
 		
-[then]
+[then] \ Not Chrome extension environment.
 
 
 				
