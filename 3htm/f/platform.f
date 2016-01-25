@@ -254,7 +254,7 @@ true value up/down-recall-needs-alt-key? // ( -- boolean ) An optional setting. 
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
-				js> inputbox.focus();inputbox.value!=""&&inputbox.value!="\n" if 
+				js> inputbox.value!=""&&inputbox.value!="\n" if 
 					true \ inputbox is not empty, do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
 					js> event==null||!event.altKey \ So as to allow calling {backSpace} programmatically	
@@ -572,7 +572,8 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
 			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
-			case 13:
+			case  83: /* s    */ if(tick('{ios}' )){execute('{ios}' );return(pop());} break; // 's' in inputbox or outputbox
+			case  13:
 				if (!event.shiftKey) // 想換行用 Shift-Enter 避免把命令發出去
 				if (!tick("{F2}").EditMode || event.ctrlKey) { // 在 EditMode 用 Ctrl-Enter 發出命令
 					var cmd = inputbox.value; // w/o the '\n' character ($10).
@@ -583,6 +584,14 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 					return(false);
 				}
 				return(true); // In EditMode
+		}
+		return (true); // pass down to following handlers
+	}
+	$("#outputbox")[0].onkeydown = function(e){
+		e = (e) ? e : event; 
+		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		switch(keycode) {
+			case  83: /* s */ if(tick('{ios}')){execute('{ios}');return(pop());} break;  // 's' in inputbox or outputbox
 		}
 		return (true); // pass down to following handlers
 	}

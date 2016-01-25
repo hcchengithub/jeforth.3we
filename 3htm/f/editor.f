@@ -173,18 +173,31 @@
 
 	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		( i array ) over log.length swap 1+ ( i array log.length i ) 
+		( i array ) over log.length swap ( i array log.length i ) 
 		s" --<br><h1> jeforth.3we developing log section " swap 
-		+ s"  of " + swap + s" </h1>--<br>" + </o> drop
+		+ s"  of 0~" + swap 1- + s" </h1>--<br>" + </o> drop
+		( i array 留下防呆線索 ) [ last literal ] :: lastrecalled=tos(1) 
 		( i array ) :> [pop()] <o>escape </o> drop ; 
 		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
+		/// log.recall 是 read log 的基本命令, 其他的都靠它。
 		/// recall 出來放到最後面不破壞現有的 outputbox。
+		/// log.save or Ctrl-s 有危險性, 靠這裡留下防呆的機關: lastrecalled 與 log.length-1 要吻合。
 		
 	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
+		['] log.recall :> lastrecalled 1+ log.length = if \ lastrecalled 與 log.length-1 要吻合
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
+		else cr ." 觸發防呆機制：lastrecalled 與 log.length-1 不吻合!" cr then ;
+		
+	: {ios} ( -- ) \ Same as log.save but is a Hotkey handler.
+		js> event&&event.ctrlKey if 
+			log.save 
+			false ( terminate bubbleing ) 
+		else 
+			true ( pass down the 's' key ) 
+		then ;
 
 	: log.push ( -- ) \ Push outputbox to log.json.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
