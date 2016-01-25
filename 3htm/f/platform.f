@@ -67,18 +67,26 @@ also forth definitions
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid red"</js>
 				js: outputbox.contentEditable=true ;
+				
 : outputbox-edit-mode-off ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid white"</js>
 				js: outputbox.contentEditable=false ;
+				
+: toggle-outputbox-edit-mode ( -- ) \ Toggle outputbox edit mode.
+				js> outputbox.contentEditable!="true" if 
+					outputbox-edit-mode-on
+				else 
+					outputbox-edit-mode-off 
+				then ;
+
 : {shift-f2}	( -- ) \ One of the {F2} events, toggle-outputbox-edit-mode
-				js> outputbox.contentEditable!="true" 
-				if outputbox-edit-mode-on
-				else outputbox-edit-mode-off 
-				then false ( true by pass, false terminate ) ;
+				toggle-outputbox-edit-mode false ( false terminate bubbling ) ;
+				
 : {ctrl-f2}		( -- false )
 				<js> alert("You pressed Ctrl-F2 and I am doing nothing.") </js>
 				true ( true by pass, false terminate ) ;
+
 : {alt-f2}		( -- false )
 				<js> alert("You pressed alt-F2 and I am doing nothing.") </js>
 				true ( true by pass, false terminate ) ;

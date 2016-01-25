@@ -185,11 +185,15 @@
 		
 	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
 		['] log.recall :> lastrecalled 1+ log.length = if \ lastrecalled 與 log.length-1 要吻合
+		toggle-outputbox-edit-mode 50 nap ( 視覺效果 )
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
 		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
-		else cr ." 觸發防呆機制：lastrecalled 與 log.length-1 不吻合!" cr then ;
+		toggle-outputbox-edit-mode 50 nap ( 視覺效果 )
+		cr ." log.saved :)" cr 
+		else cr ." log.save canceled, lastrecalled and log.length-1 mismatch!" cr 
+		then ;
 		
 	: {ios} ( -- ) \ Same as log.save but is a Hotkey handler.
 		js> event&&event.ctrlKey if 
@@ -198,6 +202,10 @@
 		else 
 			true ( pass down the 's' key ) 
 		then ;
+		
+	: cls ( -- ) \ Clear jeforth console screen
+		['] log.recall :: lastrecalled=0 cls ;
+		/// Modified in editor.f to also clear log.recall :: lastrecalled.
 
 	: log.push ( -- ) \ Push outputbox to log.json.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
