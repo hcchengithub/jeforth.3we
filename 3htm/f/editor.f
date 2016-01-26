@@ -1,7 +1,7 @@
 
-	\ editor.f 
-	\ Editor commands for 3hta and 3nw to edit HTML documents directly
-	\ in jeforth window.
+\ editor.f 
+\ Editor commands for 3hta and 3nw to edit HTML documents directly
+\ in jeforth window.
 	
 	include 3htm/f/unindent.f
 	
@@ -232,8 +232,9 @@
 		s" <h1> ----- The end of jeforth.3we developing log ----- </h1><hr>" </o> drop ;
 		
 	: log.drop ( -- )  \ Drop the TOS of log.json array.
+		<js> confirm("Top of log.json will be deleted, are you sure?")</jsV> if
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		dup :> pop() drop ( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+		dup :> pop() drop ( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
 
 	: log.pop ( -- )  \ Pop log.json back to outputbox
 		log.open log.drop ;
@@ -309,6 +310,48 @@
 		
 	: open ( -- ) \ Open a HTML file to edit
 		pickFile ?dup if create-edit-zone then ;
+		
+	\ -----------------
+	\ HTML editing has a problem. HTML tags can be arranged in strangely that make the document
+	\ difficult to edit. This solution is making every element's border visible so as to reduce the
+	\ difficulty.
+
+	s" thin solid black" constant border-style // ( -- "style" ) CSS style to mark on all elements
+	js> outputbox value bordered-div  // ( -- element ) The target DIV to be bordered
+
+	: border-on ( -- ) \ Mark bordered-div's children with border-style.
+					bordered-div :> childNodes.length for
+						r@ 1- bordered-div :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
+							r@ 1- bordered-div :> childNodes[pop()].style.border \ get original border
+							r@ 1- bordered-div :: childNodes[pop()].orig_border=pop() \ save to orig_border
+							border-style r@ 1- bordered-div :: childNodes[pop()].style.border=pop()
+						then
+					next ; compile-only 
+					/// Don't use this command directly, avoid disterbing save-restore orig_border.
+					/// So I make it a compile-only. Use ~-toggle instead.
+
+	: border-off ( -- ) \ Unmark outputbox's children
+					bordered-div :> childNodes.length for
+						r@ 1- bordered-div :> childNodes[pop()].orig_border ?dup 
+						if \ restore
+							r@ 1- bordered-div :: childNodes[pop()].style.border=pop() \ restore orig_border
+							r@ 1- bordered-div :: childNodes[pop()].orig_border="" \ clear orig_border
+						else \ no restore just clean
+							r@ 1- bordered-div :> childNodes[pop()].style if
+							r@ 1- bordered-div :: childNodes[pop()].style.border=""
+							then
+						then
+					next ; 
+
+	: border-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+					bordered-div :> bordered if \ check recent state
+						border-off
+						bordered-div :: bordered=false \ Yes, we can add properties to an element
+					else
+						border-on
+						bordered-div :: bordered=true
+					then ;
+
 
 \ -- End --
 
@@ -359,7 +402,6 @@
 	tib.insert		\ execute the string on TOS
 
 	: save ( -- ) \ Save the editing document
-		char log.save execute \ also save the recent outputbox
 		article if \ avoid destroy the file with empty
 			js> mystyle.length \ 可能跟 editor.f 的重複定義了
 			if js> mystyle[mystyle.length-1] \ 用最後一個
