@@ -236,6 +236,11 @@
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		dup :> pop() drop ( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
 
+	: log.roll ( i -- )  \ Roll the specified item up to the top of the log.json stack.
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		( i array ) dup :> splice(pop(1),1) over :: push(pop()[0]) ( array' )
+		js> JSON.stringify(pop()) char log.json writeTextFile log.open ;
+
 	: log.pop ( -- )  \ Pop log.json back to outputbox
 		log.open log.drop ;
 

@@ -90,43 +90,6 @@ also forth definitions
 : {alt-f2}		( -- false )
 				<js> alert("You pressed alt-F2 and I am doing nothing.") </js>
 				true ( true by pass, false terminate ) ;
-<comment>
-s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
-
-: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
-						r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
-						outputbox-high-light-style
-						r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
-					then
-				next ; compile-only 
-				/// Don't use this command directly, avoid disterbing save-restore orig_border.
-				/// So I make it a compile-only. Use ~-toggle instead.
-
-: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
-					if \ restore
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
-					else \ no restore just clean
-						r@ 1- js> outputbox :> childNodes[pop()].style if
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
-						then
-					then
-				next ; 
-
-: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
-				js> outputbox :> highLight if \ check recent state
-					outputbox-high-light-off
-					js> outputbox :: highLight=false \ Yes, we can add properties to an element
-				else
-					outputbox-high-light-on
-					js> outputbox :: highLight=true
-				then ;
-</comment>				
 
 \ -----------------
 
@@ -627,3 +590,42 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 </js>
 
 previous definitions
+
+
+<comment>
+s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
+
+: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
+						r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+						r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+						outputbox-high-light-style
+						r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
+					then
+				next ; compile-only 
+				/// Don't use this command directly, avoid disterbing save-restore orig_border.
+				/// So I make it a compile-only. Use ~-toggle instead.
+
+: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
+					if \ restore
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+					else \ no restore just clean
+						r@ 1- js> outputbox :> childNodes[pop()].style if
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+						then
+					then
+				next ; 
+
+: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+				js> outputbox :> highLight if \ check recent state
+					outputbox-high-light-off
+					js> outputbox :: highLight=false \ Yes, we can add properties to an element
+				else
+					outputbox-high-light-on
+					js> outputbox :: highLight=true
+				then ;
+</comment>				
