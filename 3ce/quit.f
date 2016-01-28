@@ -1,4 +1,44 @@
 
+				\ quit.f equivalent 
+				char f/jeforth.f (install)
+				<text>
+				js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
+				js: tick('<selftest>').buffer="" \ recycle the memory
+				</text> (dictate)
+				char f/voc.f (install)
+				char 3htm/f/html5.f (install)
+				<text>
+					char body <e> 
+						<div id=console3ce class=ce3>
+						<style>
+							.ce3 {
+								color:black;
+								word-wrap:break-word;
+								border: 1px ridge;
+								background:#F0F0F0;
+								padding:20px;
+							}
+							.ce3 div {
+								font: 20px "courier new";
+							}
+							.ce3 textarea {
+								width:100%;
+								font: 20px "courier new";
+								padding:4px;
+								border: 0px solid;
+								background:#BBBBBB;
+							}
+						</style>
+						<div id=outputbox>this is the outputbox</div>
+						<textarea id=inputbox>I am the inputbox id is inputbox</textarea>
+						</div>
+					</e> drop				
+				</text> (dictate)
+				char 3htm/f/element.f (install)
+				<text> .( jeforth.3ce is ready on the target tab. ) </text> (dictate)
+
+
+
 stop
 
 \ quit.f for jeforth.3ce
