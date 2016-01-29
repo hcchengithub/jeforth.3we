@@ -111,19 +111,20 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		compiling if literal compile (/ceV) else (/ceV) then ; immediate
 
 	\
-	\ Host side setup to receiving messages from content scripts
-	\ Only text is allowed, everything you see is in content script of the target tab. 
+	\ Host side setup to receiving messages (forth commands) from content scripts
+	\ Extension page <==> Content Script or Target page 之間雙向的 message 都是 forth command string.
 	\
 		{}		value sender // ( -- obj ) Refer to obj.url or obj.tab.title for who sent the message.
 		null	value sendResponse // ( -- function ) Use sendResponse({response}) to reply the sender.
 		<js>
-			var f = function(_request, _sender, _sendResponse) {
+			var f = function(message, _sender, _sendResponse) {
 				vm.g.sender = _sender;
 				vm.g.sendResponse = _sendResponse;
-				type(_request);
+				if (message.isCommand) dictate(message.text);
+				else type(message.text);
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 			};f
-		</jsV> value messageHandler // ( -- function ) Host side Chrome extension handler who receives messages from content scripts.
+		</jsV> value messageHandler // ( -- function ) Host side Chrome extension handler that receives messages from content scripts.
 		js: chrome.runtime.onMessage.addListener(vm.g.messageHandler)
 		
 	: {F7} ( -- ) \ Send inputbox to content script of tabid.
@@ -176,8 +177,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 			
 						var cmd, sender, sendResponse;
 						chrome.runtime.onMessage.addListener(
-							function(_request, _sender, _sendResponse) {
-								cmd = _request;
+							function(message, _sender, _sendResponse) {
+								cmd = message;
 								sender = _sender;
 								sendResponse = _sendResponse;
 								forthConsoleHandler(cmd);
@@ -194,7 +195,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 								ss = Object.prototype.toString.apply(s);
 							}
 							if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-							if(kvm.selftest_visible) chrome.runtime.sendMessage("", s);
+							if(kvm.selftest_visible) chrome.runtime.sendMessage({text:s});
 						};
 						
 						// kvm.panic() is the master panic handler. The panic() function defined in 
