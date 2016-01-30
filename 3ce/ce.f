@@ -112,7 +112,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 
 	\
 	\ Host side setup to receiving messages (forth commands) from content scripts
-	\ Extension page <==> Content Script or Target page 之間雙向的 message 都是 forth command string.
+	\ Extension page <==> Content Script or Target page 之間雙向的 message 都是 
+	\ .sendMessage({isCommand:true,text:"forth words"})
 	\
 		{}		value sender // ( -- obj ) Refer to obj.url or obj.tab.title for who sent the message.
 		null	value sendResponse // ( -- function ) Use sendResponse({response}) to reply the sender.
@@ -120,8 +121,10 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 			var f = function(message, _sender, _sendResponse) {
 				vm.g.sender = _sender;
 				vm.g.sendResponse = _sendResponse;
-				if (message.isCommand) dictate(message.text);
-				else type(message.text);
+				if (message.isCommand) {
+					dictate(message.text);
+					_sendResponse({aa:11,bb:22});
+				} else type(message.text);
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 			};f
 		</jsV> value messageHandler // ( -- function ) Host side Chrome extension handler that receives messages from content scripts.

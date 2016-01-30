@@ -39,6 +39,23 @@
 
 stop
 
+: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce package.
+    s" <text> " swap + s" </text> readTextFileAuto" + \ command line 以下讓 Extention page 執行
+    <js> 
+		chrome.runtime.sendMessage(
+			{isCommand:true,text:pop()},
+			function(result){
+				type("readTextFileAuto responded\n"+result);
+				push(result);
+				execute('stopSleeping')
+			}
+		)
+	</js>
+    1000000 sleep ;
+
+
+
+
 \ quit.f for jeforth.3ce
 \
 \ QUIT is the traditional forth system's CLI loop. jeforth.f kernel is common for all
