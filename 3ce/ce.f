@@ -123,8 +123,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				vm.g.sendResponse = _sendResponse;
 				if (message.isCommand) {
 					dictate(message.text);
-					_sendResponse({aa:11,bb:22});
 				} else type(message.text);
+				_sendResponse();
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
 			};f
 		</jsV> value messageHandler // ( -- function ) Host side Chrome extension handler that receives messages from content scripts.
@@ -198,7 +198,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 								ss = Object.prototype.toString.apply(s);
 							}
 							if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-							if(kvm.selftest_visible) chrome.runtime.sendMessage({text:s});
+							if(kvm.selftest_visible) chrome.runtime.sendMessage(
+								{text:s},
+								function(){
+									console.log('Target page type() callBack has got called\n');
+								}
+							);
 						};
 						
 						// kvm.panic() is the master panic handler. The panic() function defined in 
