@@ -4482,11 +4482,8 @@
 	[ ] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
 
 [ ] The template.f project ==> modify.f
-[ ] words and help will list the exactly same word multiple times
-	depends on the order list. Try not. Simply check the recent i and the order
-	list if [i] appear earlier then skip it.
 
-[x] Bug found!!
+[x] Bug found!! 這個難解的問題已經解了, 但留有較罕見的情況仍有問題，如下。
 	> : test js> "123;" ;
 	JavaScript error on word "jsFunc" : Expected ';'
 	--> ok with js: "123;", only js> has the problem.
@@ -4510,19 +4507,16 @@
 			"ab\"cd" is ab"cd
 			Also /...\/.../ or /...[/].../ too.
 
-[ ]	重新考慮要不要這個東西
-	js: jump2endofinputbox.click();
-	contentEditable 之後很煩。
+[x]	重新考慮要不要這個東西	js: jump2endofinputbox.click(); contentEditable 之後很煩。
+	--> Done.
 
-[ ] 立志要用 jeforth 來編輯 log.txt
+[x] 立志要用 jeforth 來編輯 log.txt
 	js> vm.plain(vm.g["log.txt"]) js: article.innerHTML=pop()
 	[x] CSS tab-size IE/Edge 皆無效, 3hta either . . . 
 		證實: char log.html readTextFile js: article.innerHTML=pop()
 		[ ]	先別想用 3hta 寫 log.html 吧!
 
-[ ] 如何把很大的檔案收一部分起來，以方便操作？ 用 hide() 吧？
-
-[ ] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
+[x] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
 	\ caret at the target position
 	\ press Ctrl-F2
 	\ you get a #text node ce (current element)
@@ -4568,5 +4562,17 @@
 		ce@ :> parentNode replaceNode ;
 		
 [ ] jeforth 分析 考勤 刷卡紀錄 上班時數 分析
-[ ] private folder is a new project
+[x] private folder is a new project 
+	--> GitHub is not for private use unless pay the money. Use and Dropbox Yun.Baidu instead.
+	
+[ ] 昨天忘了 sync GitHub at home. Today, in my office, I don't edit log.json and 3ce folder
+    so as to remain easy-to-sync of the project. Like maintained by two different people on
+	different topics.
+	
+[ ] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone 
+    取代，因為 outputbox 只接 log 起來太正點了。保留現有 log.json 的 stack 架構, 但是擴充 random
+	access 的功能。讓它跟 outputbox 結合地更自然、更好用。
 
+[ ] words and help will list the exactly same word multiple times
+	depends on the order list. Try not. Simply check the recent i and the order
+	list if [i] appear earlier then skip it.
