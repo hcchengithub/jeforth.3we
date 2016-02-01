@@ -180,7 +180,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 						chrome.runtime.onMessage.addListener(
 							function(message, sender, sendResponse) {
 								forthConsoleHandler(message);
-								sendResponse(kvm.stack()); // experiment
+								sendResponse(kvm.stack()); // [ ] experiment
 							}
 						)
 						
