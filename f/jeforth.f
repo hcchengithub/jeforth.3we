@@ -1905,7 +1905,7 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 					<js> vm.screenbuffer.indexOf('00000: 0 (number)') !=-1 </jsV> \ true
 					[d true d] [p 'dump', 'd' p]
 				</selftest>
-				
+
 code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
 				var w=pop();
 				var basewas = vm.g.base; vm.g.base = 10;
@@ -2003,6 +2003,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				/// If no address is given then show the recent breakPoint and 
 				/// its status.
 				/// work with 'jsc' debug console, jsc is application dependent.
+
 : (*debug*) 	( msg -- ) \ Suspend to command prompt, 'q' to quit debugging.
 				cr ." ---- Entering *debug* ----" cr
 				[ last literal ] ( _me )

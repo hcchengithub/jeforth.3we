@@ -93,6 +93,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 
 	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
 		char </ce>|</ceV> word ; immediate
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
+		/// 必須是【別人的】web page。
 
 	code (/ce) ( "statements" -- ) \ No return value
 		execute('tabid');
@@ -106,6 +108,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		tabid <js> chrome.tabs.executeScript(pop(),{"code": pop()},
 		function(result){push(result);execute('stopSleeping')}) </js> 
 		50000 sleep ;
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
 	: </ceV> ( "statements" -- ) \ Execute 3ce statements on target tabid. Retrun the value of last statement
 		compiling if literal compile (/ceV) else (/ceV) then ; immediate
@@ -115,20 +118,18 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	\ Extension page <==> Content Script or Target page 之間雙向的 message 都是 
 	\ .sendMessage({isCommand:true,text:"forth words"})
 	\
-		{}		value sender // ( -- obj ) Refer to obj.url or obj.tab.title for who sent the message.
-		null	value sendResponse // ( -- function ) Use sendResponse({response}) to reply the sender.
+		\ Host side Chrome extension handler that receives messages from content scripts on target pages.
 		<js>
-			var f = function(message, _sender, _sendResponse) {
-				vm.g.sender = _sender;
-				vm.g.sendResponse = _sendResponse;
-				if (message.isCommand) {
-					dictate(message.text);
-				} else type(message.text);
-				_sendResponse();
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
-			};f
-		</jsV> value messageHandler // ( -- function ) Host side Chrome extension handler that receives messages from content scripts.
-		js: chrome.runtime.onMessage.addListener(vm.g.messageHandler)
+			chrome.runtime.onMessage.addListener(
+				function(message, sender, sendResponse) {
+					if (message.isCommand) {
+						dictate(message.text); // 一定要在 host forth stack 留下一個東西。
+						sendResponse(pop()); // 從 target page 向 host forth 下命令的協定。
+					} else type(message.text);
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				}
+			)
+		</js> 
 		
 	: {F7} ( -- ) \ Send inputbox to content script of tabid.
 		tabid <js>
@@ -140,10 +141,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		/// 若用 F8 則無效, 猜測是 Chrome debugger 自己要用。
 
 
-	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
-		tabid <js>
-			chrome.tabs.sendMessage(pop(),pop())
-		</js> false ( terminiate event bubbling ) ;
+	code (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
+		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
 		/// Usage: <text> ... </text> (dictate)
 		
 	: (install) ( "pathname" -- ) \ Install forth source code to tabid.
@@ -178,13 +177,10 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 						kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 						kvm.selftest_visible = true; // type() refers to it.
 			
-						var cmd, sender, sendResponse;
 						chrome.runtime.onMessage.addListener(
-							function(message, _sender, _sendResponse) {
-								cmd = message;
-								sender = _sender;
-								sendResponse = _sendResponse;
-								forthConsoleHandler(cmd);
+							function(message, sender, sendResponse) {
+								forthConsoleHandler(message);
+								sendResponse(kvm.stack()); // experiment
 							}
 						)
 						
@@ -199,10 +195,11 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 							}
 							if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
 							if(kvm.selftest_visible) chrome.runtime.sendMessage(
-								{text:s},
-								function(){
-									console.log('Target page type() callBack has got called\n');
-								}
+								{text:s}
+								// , function(result){
+								// 	console.log('Target page type() callBack has got called\n');
+								// 	kvm.push(result);
+								// }
 							);
 						};
 						
