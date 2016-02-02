@@ -124,6 +124,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				function(message, sender, sendResponse) {
 					if (message.isCommand) {
 						dictate(message.text); // 一定要在 host forth stack 留下一個東西。
+						debugger;
 						sendResponse(pop()); // 從 target page 向 host forth 下命令的協定。
 					} else type(message.text);
 					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
