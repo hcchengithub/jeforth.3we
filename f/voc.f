@@ -243,7 +243,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					[d true,false d] [p '(marker)','marker' p]
 				</selftest>
 
-code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
+code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
 				var spec = nexttoken("\r|\n").replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 					push(order[j]); // vocabulary
@@ -275,14 +275,14 @@ code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screene
 					---
 				</selftest>
 
-: help			( <[pattern [switch]]> -- )  \ Print help message of screened words
+: help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
 				char \r|\n word ( spec )
 				js> tos().length if 
 					<js>
 					var spec = pop();
 					for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 						push(order[j]); // vocabulary
-						push(spec=='*'?"":spec); // "[pattern [switch]]" or "" if spec is '*'
+						push(spec=='*'?"":spec); // "[pattern [-t|-T|-n|-f]]]" or "" if spec is '*'
 						execute("(help)");
 						if (tos()){
 							type("\n-------- " + order[j] + " --------\n"); 

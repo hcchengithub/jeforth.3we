@@ -1634,7 +1634,7 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 				var word_list = words[pop()];
 				var result = [];
 				for(var i=1;i<word_list.length;i++) {
-					if (!pattern) { result.push(word_list[i]); continue; }
+					if (!pattern) { result.push(word_list[i]); continue; } // 沒有 pattern 就是全部
 					switch(option){ 
 						// 這樣寫表示這些 option 都是唯一的。
 						case "-t": // -t for matching type pattern, case insensitive.
@@ -1652,30 +1652,31 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 								result.push(word_list[i]);
 							}
 							break;
-						case "-N": // -N for exactly name only, case sensitive.
-							if (word_list[i].name==pattern) {
-								result.push(word_list[i]);
-							}
-							break;
-						default:
+						case "-f": // -f for fuzzy search in name, help, and comment.
 							var flag = 	(word_list[i].name.toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
 										((word_list[i].help||"").toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
 										((word_list[i].comment||"").toLowerCase().indexOf(pattern.toLowerCase()) != -1);
 							if (flag) {
 								result.push(word_list[i]);
 							}
+							break;
+
+						default: // any other option, includes -N, for exactly name only, case sensitive.
+							if (word_list[i].name==pattern) {
+								result = [word_list[i]];
+							}
 					}
 				}
 				push(result);
 				end-code
 				/// Options: 
-				/// -n pattern in name
-				/// -N pattern is exact name 
-				/// -t pattern in type 
-				/// -T pattern is exact type
-				/// If no option given then pattern matches all names, helps and comments.
+				/// -f pattern matches all names, helps and comments. Case insensitive.
+				/// -n pattern in name. Case insensitive.
+				/// -t pattern in type. Case insensitive. 
+				/// -T pattern is exact type.
+				/// "" pattern is exact name. 
 
-: words			( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
+: words			( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
 				js> context char \r|\n word ( forth line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip (words) <js>
@@ -1684,11 +1685,11 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 					for (var i=0; i<word_list.length; i++) w += word_list[i].name + " ";
 					type(w);
 				</js> ;
-				/// Original version
+				/// Original version in jeforth.f
 				last :: comment+=tick("(words)").comment
 				/// An empty pattern matches all words.
 
-: (help)		( "word-list" "[pattern [switch]]" -- "msg" ) \ Get help message of screened words
+: (help)		( "word-list" "[pattern [-t|-T|-n|-f]]" -- "msg" ) \ Get help message of screened words
 				\ js> context swap ( voc line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
@@ -1699,10 +1700,10 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 						if (typeof(word_list[i].comment) != "undefined") ss += word_list[i].comment;
 					};ss
 				</jsV> ;
-				/// Original version
+				/// Original version in jeforth.f
 				last :: comment+=tick("(words)").comment
 
-: help			( <["pattern" [-n|-N|-t|-T]]> -- ) \ Print the help of screened words
+: help			( <["pattern" [-t|-T|-n|-f]]> -- ) \ Print the help of screened words
 				js> context char \n|\r word ( voc pattern )
 				js> tos().length if 
 					dup char * = if drop "" then (help) .
@@ -1717,7 +1718,7 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 							Try 'words' command to view all words. It has following options:
 							> words [<pattern> [-n|-N|-t|-T]] 
 							that prints not all but matched words. Try,
-							> help words -N
+							> help words
 							to view more help of 'words' command. 
 							
 							-- help --
@@ -1735,12 +1736,13 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 						last literal
 					] :> general_help . cr
 				then ;
-				/// Original version
+				/// Original version in jeforth.f
 				last :: comment+=tick("(words)").comment
 				/// A pattern of star '*' matches all words.
 				/// Example: 
 				///   help * <-- show help of all words
 				///   help * -N <-- show help of '*' command
+				\ 2016/2/2 改成以原來 -N 為默認 option. -N 未定義屬 default 結果還是原來 -N 的效果。
 				
 				<selftest>
 					<text>
@@ -1753,12 +1755,13 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 					: test ; // testing help words and (words) 32974974
 					/// 9247329474 comment
 					js: vm.selftest_visible=false;vm.screenbuffer=""
-					help test -N
+					\ help test -N
+					help test
 					<js> vm.screenbuffer.indexOf('32974974') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('9247329474') !=-1 </jsV> \ true
-					words 9247329474
+					words 9247329474 -f
 					<js> vm.screenbuffer.indexOf('test') !=-1 </jsV> \ true
-					words test
+					words test -f
 					<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
 					js: vm.selftest_visible=true

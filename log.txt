@@ -4565,14 +4565,30 @@
 [x] private folder is a new project 
 	--> GitHub is not for private use unless pay the money. Use and Dropbox Yun.Baidu instead.
 	
-[ ] 昨天忘了 sync GitHub at home. Today, in my office, I don't edit log.json and 3ce folder
+[x] 昨天忘了 sync GitHub at home. Today, in my office, I don't edit log.json and 3ce folder
     so as to remain easy-to-sync of the project. Like maintained by two different people on
 	different topics.
+	--> 照這樣安排只 click 一下 [Sync] 按鈕, 兩邊這樣都成功了。
 	
 [ ] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone 
     取代，因為 outputbox 只接 log 起來太正點了。保留現有 log.json 的 stack 架構, 但是擴充 random
 	access 的功能。讓它跟 outputbox 結合地更自然、更好用。
 
-[ ] words and help will list the exactly same word multiple times
+[x] words and help will list the exactly same word multiple times
 	depends on the order list. Try not. Simply check the recent i and the order
 	list if [i] appear earlier then skip it.
+[x] words , help 取消 -N 把 -N 變成 default, 改用 -f 代表 fuzzy search 取代本來的 default。
+    --> modify (words) in jeforth.f , 同時讓 -N (now default) 只列出最高 priority 的一個 word。
+	--> Modified jeforth.f, easy. Try on 3ce host page ... fail at selftest. Skip it.
+	--> 連 comments 都改好了. (words), (help), help in jeforth.f, voc.f, and platform.f.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

@@ -333,7 +333,7 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 				</js> 
 				</o> 2drop ;
 
-code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened words
+code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screened words
 				// execute("parser(words,help)"); var option = pop();
 				var spec = pop().replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
@@ -351,16 +351,16 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 				} 
 				end-code
 				/// Modified by platform.f for HTML table.
-				/// Pattern matches name, help and comment.
-				/// It can be qualified by an option of:
-				///	  -n matches name pattern, case insensitive.
-				///	  -N matches exact name, case sensitive.
-				///   -t matches type pattern, case insensitive.
+				/// By default, pattern matches exact name, case sensitive.
+				/// Pattern can be qualified by an option of:
+				///	  -n matches only name, case insensitive.
+				///	  -f matches name, help and comment, case insensitive.
+				///   -t matches type, case insensitive.
 				///   -T matches exact type, case sensitive.
 				/// Example: 
 				///   help ! -n  shows words with '!' in their name
 
-: help			( <[pattern [-t|-T|-n|-N]]> -- )  \ Print help message of screened words
+: help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
                 char \n|\r word js> tos().length if 
 					js> tos()=='*' if drop "" then
 					(help) 
@@ -465,7 +465,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 						<tr>
 						  <td>help [*|pattern [-t|-T|-n|-N]]</td>
 						  <td>You are reading me. 'help' is also an useful command, 
-						  "help *" lists all words' help. "help help -N" to see options.
+						  "help *" lists all words' help. "help help" to see options.
 						  <a href="http://www.camdemy.com/media/19270">Video: Help is helpful</a>.
 						  </td>
 						</tr>
