@@ -1680,7 +1680,7 @@
 	1. Use code word itself to be a call back function.
 		code tt print(Date());this.timer=setTimeout(arguments.callee,1000) end-code
 		js: clearTimeout(tick('rr').timer)
-	This example works file. But it can't stop. The this.timer was refer to tick('tt') at first
+	This example works fine. But it can't stop. The this.timer was refer to tick('tt') at first
 	time only! For all the rest triggers, 'this' is the DOM window object. So we change it to,
 		code rr print(Date());tick('rr').timer=setTimeout(arguments.callee,1000) end-code
 	and it's perfect. It passed the : test 1111 3000 sleep 22222 ; test too.
