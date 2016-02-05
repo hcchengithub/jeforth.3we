@@ -1358,7 +1358,6 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				<js>
 					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-					// setTimeout(resume,delay);
 					var timeoutId = vm.g.setTimeout(resume,delay);
 					function resume() { 
 						delete(vm.g.setTimeout.registered()[timeoutId.toString()]);
@@ -1366,7 +1365,7 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}
 				</js> ;
-				/// nap 不用 vm.g.setTimeout 故不能中止，也不會堆積在 vm.g.setTimeout.registered() 裡。
+				/// nap 沒有保留外顯的 timeoutId 故不能中止，但也不會堆積在 vm.g.setTimeout.registered() 裡。
 
 : cr         	js: type("\n") ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
 				\ 個別 quit.f 裡重定義成 : cr js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop) ;

@@ -327,7 +327,14 @@
 	js: document.onmouseout=null
 	js: document.onmouseout=function(){fortheval('hi')} \ It works!!
 	: test begin 80 for char * . 100 sleep next cr again ; \ 弄一個印 * 的 long run 程式。
-	jeforth.hta inputbox 本身就是個最兇的 event 他會改 stack. 別的 event handler 都得負責恢復 stack.
+	
+	用 forth colon word 當 event handler, interrupt service routine 的要領：
+	o  jeforth.hta inputbox 本身就是個最兇的 event 他會改 stack. 別的 event handler 都得
+	   balance data stack and return stack.
+	o  所有的 event handler 都要【接地】也就是直接回到 JavaScript host 也就是 idle state 去。
+	   不能在 dictate() 或 execute() 之後放別的 JavaScript code 還以為是前面做好了才下來的，
+	   錯! dictate() 或 execute() 裡面很可能有 nap 或 sleep 那時候它就衝下來了！ sleep 才可
+	   以 stopSleeping 所以應該是它。
 
 [/] Found a bug!! This bug is still in ~.3wsh and ~.3nw
 	wsh.f run command reads the whole line as a command line. The old definition
@@ -3425,10 +3432,6 @@
 		其實當時我就覺得用 elementObject.toString()=='[object Text]' 有點太過神奇。
 [x] autoit.f 不必寫甚麼在包裝過一層的命令, 給 au3 的使用例子就好了。
 	直接查 autoitx.hlp 看其他命令。多半是 keyboard / mouse 的命令。
-[x] 寫 S7 方便改 keyboard registry 的命令。
-	==> registry.f , autoit.f 都可以 access registry, 但是要改 REG_BINARY for s7 keyboard re-layout 還是用
-		reg.exe 配合 export -> edit -> import 的方法。因為 REG_BINARY 問題太多。
-
 [ ] ie.f 裡 ready not-busy 常常等很久, 有時 readyStatus 卡在 1 不變 4, 配合收 event 可能較好。
 
 [x] hcchen5600 2015/06/29 14:08:57
@@ -4581,7 +4584,17 @@
     --> modify (words) in jeforth.f , 同時讓 -N (now default) 只列出最高 priority 的一個 word。
 	--> Modified jeforth.f, easy. Try on 3ce host page ... fail at selftest. Skip it.
 	--> 連 comments 都改好了. (words), (help), help in jeforth.f, voc.f, and platform.f.
-	
+[x] 寫 S7 方便改 keyboard registry 的命令。
+	==> registry.f , autoit.f 都可以 access registry, 但是要改 REG_BINARY for s7 keyboard
+    	re-layout 還是用 reg.exe 配合 export -> edit -> import 的方法, 3hta dos command can help.
+		因為 REG_BINARY 問題太多。
+	[x] Review registry.f, notes of S7 keyboard remapping. If only I can read registry through
+		3hta then it's convenient enough. 
+	Conclusion is : run the 1 key and 5 key ~.reg files (attached below on this page) to remap 
+	the Acer S7 keyboard. 1 key is the Caps Lock changed to be Mute toggle. 5 keys are Caps Lock 
+	become 'delete', AltGr/Del become Home/End, Fn-Home/Fn-End become Pad-/Pad+ for Windows 10 
+	Zoom in and Zoom out. Refer to my Youdao YNote.
+
 	
 	
 	
