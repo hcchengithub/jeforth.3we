@@ -9,6 +9,7 @@ s" ce.f" source-code-header
 \
 js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chrome extension environment.
 
+	\ Background page is the common part of the 3ce isolated world.
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
 
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
