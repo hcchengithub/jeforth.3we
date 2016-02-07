@@ -1,4 +1,7 @@
 ﻿
+
+?dup [if] ." Sleep after " dup . ."  minutes." cr 1000 60 * * nap  [then]
+
 js> vm.appname=="jeforth.3hta" [if]
 	include autoit.f
 	cls <o> <h2> 十分抱歉，這台電腦入睡之後會被無故喚醒，用 jeforth 來簡單解決。
