@@ -33,7 +33,14 @@
 		</e> drop				
 	</text> (dictate)
 	char 3htm/f/element.f (install)
-	<text> .( jeforth.3ce is ready on the target tab. ) </text> (dictate)
+
+	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+		s" s' " swap + s" ' readTextFileAuto " + \ command line 以下讓 Extention page (the host page) 執行
+		s" {} js: tos().forth='stopSleeping' js: tos().tos=pop() " + \ host side packing the message object
+		s" message->tabid " + \ host commands after resume from file I/O
+		<js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
+		function(result){push(result);execute('stopSleeping')}) </js>
+		10000 sleep ;   
 
 
 

@@ -117,35 +117,43 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	\
 	\ Host side setup to receiving messages (forth commands) from content scripts
 	\ Extension page <==> Content Script or Target page 之間雙向的 message 都是 
-	\ .sendMessage({isCommand:true,text:"forth words"})
+	\ 3ce SPEC of sendMessage({forth:".s",type:"hello world!",tos:anything})
 	\
 		\ Host side Chrome extension handler that receives messages from content scripts on target pages.
 		<js>
 			chrome.runtime.onMessage.addListener(
-				function(message, sender, sendResponse) {
-					if (message.isCommand) {
-						dictate(message.text); // 一定要在 host forth stack 留下一個東西。
-						debugger;
-						sendResponse(pop()); // 從 target page 向 host forth 下命令的協定。
-					} else type(message.text);
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+					if (message.forth) {
+						dictate(message.forth);
+					}
+					if (message.type) {
+						type(message.type);
+						window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					} 
+					if (message.tos) {
+						push(message.tos);
+					} 
 				}
 			)
 		</js> 
+		
+	code message->tabid ( anything -- ) \ Send a message of anything to tabid
+		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
+		/// Usage: anything message->tabid
+		
+	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
+		js: push({forth:pop()}) message->tabid ;
+		/// Usage: <text> ... </text> (dictate)
 		
 	: {F7} ( -- ) \ Send inputbox to content script of tabid.
 		tabid <js>
 			vm.cmdhistory.push(inputbox.value);
 			push(inputbox.value);
 			inputbox.value="";
-			chrome.tabs.sendMessage(pop(1),pop())
+			// chrome.tabs.sendMessage(pop(1),{forth:pop()})
+			execute("(dictate)");
 		</js> false ( terminiate event bubbling ) ;
 		/// 若用 F8 則無效, 猜測是 Chrome debugger 自己要用。
-
-
-	code (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
-		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
-		/// Usage: <text> ... </text> (dictate)
 		
 	: (install) ( "pathname" -- ) \ Install forth source code to tabid.
 		readTextFileAuto char shooo! swap + (dictate) ;
@@ -180,9 +188,13 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 						kvm.selftest_visible = true; // type() refers to it.
 			
 						chrome.runtime.onMessage.addListener(
-							function(message, sender, sendResponse) {
-								forthConsoleHandler(message);
-								sendResponse(kvm.stack()); // [ ] experiment
+							function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+								if (message.tos) {
+									kvm.push(message.tos);
+								} 
+								if (message.forth) {
+									forthConsoleHandler(message.forth);
+								}
 							}
 						)
 						
@@ -196,13 +208,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 								ss = Object.prototype.toString.apply(s);
 							}
 							if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-							if(kvm.selftest_visible) chrome.runtime.sendMessage(
-								{text:s}
-								// , function(result){
-								// 	console.log('Target page type() callBack has got called\n');
-								// 	kvm.push(result);
-								// }
-							);
+							if(kvm.selftest_visible) chrome.runtime.sendMessage({type:s});
 						};
 						
 						// kvm.panic() is the master panic handler. The panic() function defined in 

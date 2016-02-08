@@ -1,6 +1,6 @@
 ﻿
 
-?dup [if] ." Sleep after " dup . ."  minutes." cr 1000 60 * * nap  [then]
+?dup [if] [else] 2 [then] ." Sleep after " dup . ."  minutes." cr 1000 60 * * nap
 
 js> vm.appname=="jeforth.3hta" [if]
 	include autoit.f
