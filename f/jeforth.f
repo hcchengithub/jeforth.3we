@@ -1784,10 +1784,11 @@ code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 
 : readTextFileAuto ( "pathname" -- string ) \ Search and read, panic if failed.
 				js> vm.path.slice(0) \ this is the way javascript copy array by value
-				over readTextFile js> tos()!="" if nip nip exit then drop
+				over char readTextFile execute ( call by name for 3ce's reDef'ed readTextFile )
+				js> tos()!="" if nip nip exit then drop
 				js> tos().length for aft ( -- fname [path] )
 					js> tos().pop()+'/'+tos(1) 
-					readTextFile js> tos()!=""
+					char readTextFile execute js> tos()!=""
 					if ( -- fname [path] file )
 						nip nip r> drop exit \ for..next loop 裡面不能光 exit !!!
 					then drop ( -- fname [path] )
