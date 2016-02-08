@@ -145,14 +145,13 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		js: push({forth:pop()}) message->tabid ;
 		/// Usage: <text> ... </text> (dictate)
 		
-	: {F7} ( -- ) \ Send inputbox to content script of tabid.
-		tabid <js>
-			vm.cmdhistory.push(inputbox.value);
-			push(inputbox.value);
-			inputbox.value="";
-			// chrome.tabs.sendMessage(pop(1),{forth:pop()})
-			execute("(dictate)");
-		</js> false ( terminiate event bubbling ) ;
+	code {F7} ( -- ) \ Send inputbox to content script of tabid.
+		vm.cmdhistory.push(inputbox.value);  // save command line into command history
+		push(inputbox.value); // command line 
+		inputbox.value=""; // clear the inputbox
+		execute("(dictate)"); // Let target page the execute the command line(s)
+		push(false); // terminiate event bubbling
+		end-code
 		/// 若用 F8 則無效, 猜測是 Chrome debugger 自己要用。
 		
 	: (install) ( "pathname" -- ) \ Install forth source code to tabid.

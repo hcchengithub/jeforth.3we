@@ -1,5 +1,38 @@
 
 	\ quit.f equivalent 
+	
+	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+		s" s' " swap + s" ' readTextFileAuto " + \ command line 以下讓 Extention page (the host page) 執行
+		s" {} js: tos().forth='stopSleeping' js: tos().tos=pop() " + \ host side packing the message object
+		s" message->tabid " + \ host commands after resume from file I/O
+		js: chrome.runtime.sendMessage({forth:pop()}) 
+		10000 sleep ;   
+
+	: test1 ( -- "text" ) \ experiment : Read text file from jeforth.3ce host page.
+		s" s' 3hta.bat' readTextFileAuto {} js: tos().forth='version' message->tabid "
+		js: chrome.runtime.sendMessage({forth:pop()}) 
+		10000 sleep ;   
+		/// ok, 'version' really run on target page. Next step try to send something to target page.
+		
+	: test2 ( -- "text" ) \ experiment : Read text file from jeforth.3ce host page.
+		s" s' 3hta.bat' readTextFileAuto {} js: tos().forth='version' js: tos().tos=1122334455 message->tabid"
+		js: chrome.runtime.sendMessage({forth:pop()}) 
+		10000 sleep ;   
+		/// Ok! Target page stack become [1122334455, 3.1 (TOS)] as anticipated.
+		/// the file has read too. But a 239 appear in host stack unexpectedly.
+		/// try manual do the same thing on host.
+		
+	s' 3hta.bat' readTextFileAuto {} js: tos().tos=5566 <js> tos().forth='version .s' </js>  message->tabid		
+	\ This line works fine 
+		
+	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+		s" s' " swap + s" ' readTextFileAuto .s " + \ command line 以下讓 Extention page (the host page) 執行
+		s" {} js: tos().forth='stopSleeping' js: tos().tos=pop(1) " + \ host side packing the message object
+		s" message->tabid " + \ host commands after resume from file I/O
+		js: chrome.runtime.sendMessage({forth:pop()}) 
+		10000 sleep ;   
+stop
+	
 	js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	js: tick('<selftest>').buffer="" \ recycle the memory
 
@@ -34,17 +67,6 @@
 	</text> (dictate)
 	char 3htm/f/element.f (install)
 
-	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
-		s" s' " swap + s" ' readTextFileAuto " + \ command line 以下讓 Extention page (the host page) 執行
-		s" {} js: tos().forth='stopSleeping' js: tos().tos=pop() " + \ host side packing the message object
-		s" message->tabid " + \ host commands after resume from file I/O
-		<js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
-		function(result){push(result);execute('stopSleeping')}) </js>
-		10000 sleep ;   
-
-
-
-stop
 
 : readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce package.
     s" <text> " swap + s" </text> readTextFileAuto" + \ command line 以下讓 Extention page 執行
