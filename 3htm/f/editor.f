@@ -13,7 +13,7 @@
 	
 	\ Setup the handler of clicks that are poping up the editbox.
 	<js>
-		body.onclick = function(){
+		document.body.onclick = function(){
 			push(true); // true let the river run, false stop bubbling
 			execute("single-click"); // execute() does nothing if undefined yet
 			return(pop()); // right-click ( flag -- ... flag' )

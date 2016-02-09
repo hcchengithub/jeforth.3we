@@ -10,19 +10,19 @@ also forth definitions
 <comment>
 	<js>
 	// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
-	body.ondblclick = function(){
+	document.body.ondblclick = function(){
 		push(true); // true let the river run, false stop bubbling
 		execute("double-click"); // execute() does nothing if undefined yet
 		return(pop()); // double-click ( flag -- ... flag' )
 	}
 	// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
-	body.onclick = function(){
+	document.body.onclick = function(){
 		push(true);  // true let the river run, false stop bubbling
 		execute("single-click"); // execute() does nothing if undefined yet
 		return(pop()); // single-click ( flag -- ... flag' )
 	}
 	// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
-	body.oncontextmenu = function(){
+	document.body.oncontextmenu = function(){
 		push(true); // true let the river run, false stop bubbling
 		execute("right-click"); // execute() does nothing if undefined yet
 		return(pop()); // right-click ( flag -- ... flag' )

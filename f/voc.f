@@ -135,15 +135,15 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 					*** also current order vocs
 					js: vm.selftest_visible=false
 					also vvv
-					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
+					js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stops working if is null.
+					js> vm.screenbuffer.length constant start-here // ( -- n ) 
 					cr only forth also vvv also vvv000 definitions current char vvv000 = \ true
 					order 
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("search: forth,vvv,vvv000")!=-1 </jsV> \ true true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("define: vvv000")!=-1 </jsV> \ true true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("search: forth,vvv,vvv000")!=-1 </jsV> \ true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("define: vvv000")!=-1 </jsV> \ true true true
 					vocs
 					js: vm.selftest_visible=true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("vocs: forth,vvv,vvv000")!=-1 </jsV> \ true true true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("vocs: forth,vvv,vvv000")!=-1 </jsV> \ true true true true
 					[d true,true,true,true d] [p 'current','definitions','order','vocs',
 					'get-current','get-order','get-vocs','forth' p]
 				</selftest>
@@ -265,12 +265,12 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				<selftest>
 					marker ---
 					*** words modified for volcabulary
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
+					js> vm.screenbuffer.length constant start-here // ( -- n ) 
 					js: vm.selftest_visible=false
 					words \ 
 					js: vm.selftest_visible=true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("-------- forth (")!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("words) --------")!=-1 </jsV> \ true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("-------- forth (")!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("words) --------")!=-1 </jsV> \ true true
 					[d true,true d] [p "words" p]
 					---
 				</selftest>

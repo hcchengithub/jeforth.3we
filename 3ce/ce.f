@@ -127,8 +127,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 						dictate(message.forth);
 					}
 					if (message.type) {
-						type(message.type);
-						window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+						vm.type(message.type);
+						window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
 					} 
 					if (message.tos) {
 						push(message.tos);
@@ -171,50 +171,52 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		\ Install the main program of jeforrth.3ce
 		<ce> typeof(jeforth_project_k_virtual_machine_object)</ceV> char object != if <ce>
 			var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
-			var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
-			// kvm is now the jeforth virtual machine object. It has no idea about the outside world
+			var vm = jeforth_project_k_virtual_machine_object; // "vm" may not be so permanent.
+			// vm is now the jeforth virtual machine object. It has no idea about the outside world
 			// that can be variant applications: HTML, HTA, Node.js, Node-webkit, .. etc.
 			// We need to help it a little as the following example:
 			
 			(function(){
-				kvm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
-				var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
-				kvm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
-				kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-				kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
-				kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
-				kvm.selftest_visible = true; // type() refers to it.
-	
+				vm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
+				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
+				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
+				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
+				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
+				vm.selftest_visible = true; // type() refers to it.
+				vm.debug = false;
+				
+				// Message (command) from the host page needs an event handler
 				chrome.runtime.onMessage.addListener(
 					function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
 						// 先收 data
 						if (message.tos) {
-							kvm.push(message.tos);
+							vm.push(message.tos);
 						} 
 						// 再執行命令
 						if (message.forth) {
-							forthConsoleHandler(message.forth);
+							vm.forthConsoleHandler(message.forth);
 						}
 					}
 				)
 				
 				// I/O  
-				// Forth vm doesn't know how to 'type'. We need teach it by defining the kvm.type().
-				// kvm.type() is the only mandatory I/O jeforth VM needs to know. 
-				var type = kvm.type = function (s) {
+				// Forth vm doesn't know how to 'type'. We need teach it by defining the vm.type().
+				// vm.type() is the only mandatory I/O jeforth VM needs to know. 
+				vm.type = function (s) {
 					try {
 						var ss = s + ''; // Print-able test
 					} catch(err) {
 						ss = Object.prototype.toString.apply(s);
 					}
-					if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-					if(kvm.selftest_visible) chrome.runtime.sendMessage({type:s});
+					if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
+					if(vm.selftest_visible) chrome.runtime.sendMessage({type:s});
 				};
 				
-				// kvm.panic() is the master panic handler. The panic() function defined in 
+				// vm.panic() is the master panic handler. The panic() function defined in 
 				// project-k kernel jeforth.js is the one called in code ... end-code.
-				kvm.panic = function(state){ 
-					type(state.msg);
+				vm.panic = function(state){ 
+					vm.type(state.msg);
 					if (state.serious) debugger;
 				}
 				// We need the panic() function below but we can't see the one in jeforth.js
@@ -223,26 +225,46 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 					var state = {
 							msg:msg, level:level
 						};
-					if(kvm.panic) kvm.panic(state);
+					if(vm.panic) vm.panic(state);
+				}
+				
+				vm.clearScreen = function () {
+					vm.screenbuffer = "";
+					$('#outputbox').empty();
 				}
 				
 				// The Forth traditional prompt 'OK' is defined and used in this application main program.
-				// Forth vm has no idea about kvm.prompt but your program may want to know.
-				// In that case, as an example, use kvm property to store the vm global variables and functions.
-				kvm.prompt = "OK";
+				// Forth vm has no idea about vm.prompt but your program may want to know.
+				// In that case, as an example, use vm property to store the vm global variables and functions.
+				vm.prompt = "OK";
 	
-				function forthConsoleHandler(cmd) {
+				vm.forthConsoleHandler = function(cmd) {
+					var rlwas = vm.rstack().length; // r)stack l)ength was
 					// Avoid responding the ~.f source code when installing.
 					if(cmd.indexOf("shooo!")!=0)
-						type((cmd?'\n' + document.title + '> ':"")+cmd+'\n');
+						// vm.type((cmd?'\n' + document.title + '> ':"")+cmd+'\n'); // before input/outputbox ready
+						vm.type((cmd?'\n> ':"")+cmd+'\n');
 					else
 						cmd = cmd.slice(6); // remove "shooo!"
-					kvm.dictate(cmd);  // Pass the command line to jeForth VM
-					type(" " + kvm.prompt + " ");
+					vm.dictate(cmd);  // Pass the command line to jeForth VM
+					(function retry(){
+						// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+						// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+						// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+						if(vm.rstack().length!=rlwas)
+							setTimeout(retry,100); 
+						else {
+							vm.type(" " + vm.prompt + " ");
+							if (typeof(endofinputbox)!="undefined"){
+								window.scrollTo(0,endofinputbox.offsetTop);
+								inputbox.focus();
+							}
+						}
+					})();
 				}
-	
+				
 				// Take care of HTML special characters
-				var plain = kvm.plain = function (s) {
+				var plain = vm.plain = function (s) {
 					var ss = s + ""; // avoid numbers to fail at s.replace()
 					ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
 					ss = ss.replace(/ /g,'&nbsp;');
@@ -252,21 +274,21 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 					return ss;
 				}
 	
-				kvm.greeting = function(){
-					type("j e f o r t h . 3 c e -- v"+version+'\n');
-					type("source code http://github.com/hcchengithub/jeforth.3we\n");
+				vm.greeting = function(){
+					vm.type("j e f o r t h . 3 c e -- v"+version+'\n');
+					vm.type("source code http://github.com/hcchengithub/jeforth.3we\n");
 					return(version);
 				}
 				
-				kvm.bye = function(){window.close()};
+				vm.bye = function(){window.close()};
 				
 				// Called from jsEvalRaw, it will handle the try{}catch{} thing. 
-				kvm.writeTextFile = function(pathname,data) { // Write string to text file.
+				vm.writeTextFile = function(pathname,data) { // Write string to text file.
 					panic("Error writing " + pathname + ", jeforth.3ce doesn't know how to wrtieTextFile yet.\n"); 
 				}
 	
-				kvm.readTextFile = function(pathname){
-					panic("jeforth.3ce does not have kvm.readTextFile(), please use readTextFile directly.\n");
+				vm.readTextFile = function(pathname){
+					panic("jeforth.3ce does not have vm.readTextFile(), please use readTextFile directly.\n");
 				}
 			})();
 			</ce>
