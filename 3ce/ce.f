@@ -189,12 +189,15 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				// Message (command) from the host page needs an event handler
 				chrome.runtime.onMessage.addListener(
 					function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+if(vm.debug) debugger; // [ ]
 						// 先收 data
-						if (message.tos) {
+						if (message.tos!=undefined) { // Can be "" when readTextFile failed
+if(vm.debug) debugger; // [ ]
 							vm.push(message.tos);
 						} 
 						// 再執行命令
 						if (message.forth) {
+if(vm.debug) debugger; // [ ]
 							vm.forthConsoleHandler(message.forth);
 						}
 					}
@@ -296,7 +299,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 			<text> shooo!
 				: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 					s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
-					s" {} js: tos().forth='shooo!stopSleeping' js: tos().tos=pop(1) " + \ host side packing the message object
+					s" {} js: tos().forth='shooo!stopSleeping';tos().tos=pop(1) " + \ host side packing the message object
 					s" message->tabid " + \ host commands after resume from file I/O
 					js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
 					10000 sleep ;   
