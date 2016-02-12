@@ -100,7 +100,6 @@
 
 	\ ------------ End of jeforth.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
-	.(  OK ) \ The first prompt after system start up.
 	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()
 
 
