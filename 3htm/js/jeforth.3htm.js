@@ -50,7 +50,6 @@
 			return(version);
 		}
 		kvm.debug = false;
-		kvm.inputbox = "";
  		kvm.prompt = "OK";
 		kvm.bye = function(){window.close()};
 		
@@ -106,9 +105,9 @@
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */
-					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
+					var cmd = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.forthConsoleHandler(kvm.inputbox);
+					kvm.forthConsoleHandler(cmd);
 					return(false); 
 			}
 			return (true); // pass down to following handlers 
