@@ -1451,7 +1451,12 @@ code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpre
 				/// to merge them is difficult to me so far. So I defined this word.
 : run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
 				char \r|\n word (run:) ;
-				/// To run multiple lines use <text>...</text> (run:)
+				/// To run multiple lines use <text>...</text> (run:) or "run>" instead of "run:".
+				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
+: run> 			( <string> -- ... ) \ Run multiple lines with "if","begin","for", in interpret mode
+				js> push(ntib);ntib=tib.length;tib.slice(pop()) (run:) ;
+				/// run> go through all the rest of the inputbox; 
+				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
