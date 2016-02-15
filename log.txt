@@ -4594,8 +4594,7 @@
 	the Acer S7 keyboard. 1 key is the Caps Lock changed to be Mute toggle. 5 keys are Caps Lock 
 	become 'delete', AltGr/Del become Home/End, Fn-Home/Fn-End become Pad-/Pad+ for Windows 10 
 	Zoom in and Zoom out. Refer to my Youdao YNote.
-[ ] Improve readTextFile
-
+[x] 3ce Improve readTextFile 
 	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 			s" s' " swap + s" ' readTextFileAuto " + \ command line 以下讓 Extention page (the host page) 執行
 			s" {} js: tos().forth='stopSleeping' js: tos().tos=pop() " + \ host side packing the message object
@@ -4604,11 +4603,11 @@
 			<js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
 			function(result){push(result);execute('stopSleeping')}) </js>
 			10000 sleep ;   
-	
-[ ] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f	
-	
-	
-	
+[x] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f	
+[x] Popup page can attach 3ce to target page now, so 3ce default tabid should be the 'active' tab.
+	js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number) must be only one
+    js: push({active:true}) tabs.query :> [0] (see)
+	--> modiyf ce.f tabid command --> ok now!
 	
 	
 	

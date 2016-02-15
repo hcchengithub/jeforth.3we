@@ -74,6 +74,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 			s" It's '" tabid tabs.get :> title + s" ' right?" +
 			js> confirm(pop()) 
 		until ;
+		/// Sometimes we can't use "the active tab" as the working tab 
+		/// because it is the 3ce page. BTW, to get the active tab:
+		/// js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number)
 		
 	: get-manifest ( -- obj ) \ Get the Chrome extension/app manifest hash table.
 		js> chrome.runtime.getManifest() ;
@@ -161,8 +164,11 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	: install ( <pathname> -- )  \ Install forth source code to tabid.
 		char \n|\r word (install) ;
 
-	: attach	( -- ) \ Attach 3ce to the first tab.
-		js: push({"index":0}) tabs.query :> [0].id tabid!
+	: attach ( -- ) \ Attach 3ce to the active tab.
+		\ Specify the tab to attach
+		\ ( use the first tab as the working tab )  js: push({"index":0})
+		  ( use the active tab as the working tab ) js: push({active:true})
+		  tabs.query :> [0].id tabid!
 		\ Install jQuery and project-k to target tab.
 		<ce> typeof(jeForth)</ceV> char function != if 	
 			char js/jquery-1.11.2.js inject drop			
@@ -189,15 +195,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				// Message (command) from the host page needs an event handler
 				chrome.runtime.onMessage.addListener(
 					function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
-if(vm.debug) debugger; // [ ]
 						// 先收 data
 						if (message.tos!=undefined) { // Can be "" when readTextFile failed
-if(vm.debug) debugger; // [ ]
 							vm.push(message.tos);
 						} 
 						// 再執行命令
 						if (message.forth) {
-if(vm.debug) debugger; // [ ]
 							vm.forthConsoleHandler(message.forth);
 						}
 					}
