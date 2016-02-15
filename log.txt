@@ -4608,8 +4608,17 @@
 	js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number) must be only one
     js: push({active:true}) tabs.query :> [0] (see)
 	--> modiyf ce.f tabid command --> ok now!
-	
-	
-	
+[x] 3ce attach works fine, but it has to check if the target page has been loaded!
+	Experiment: 0 [begin] active-tab :> status . space 500 nap 1+ dup 100 > [until]	
+	--> Correct, get 3 complete in a row to make sure it's really completed. I saw a complete
+		among "loading" that's why.
+	--> works fine now.
+		
+[ ] This line does not print 50 stars, unless remove the 'cr' Bug!!
+	run: 50 for char * . cr next
+	This is ok --> 0 [begin] char * . cr 500 nap 1+ dup 10 > [until] 
+	so [for] ... [next] in trouble? or run: for ... next in trouble?
+	--> try 50 [for] char * . cr 50 nap [next] ----> it works fine!
+	--> So, run: for ... next in trouble!
 	
 	

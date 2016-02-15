@@ -164,11 +164,28 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	: install ( <pathname> -- )  \ Install forth source code to tabid.
 		char \n|\r word (install) ;
 
+	: first-tab ( -- objTab ) \ Get first tab (the leftest) of Chrome browser.
+		js: push({"index":0}) tabs.query :> [0] ;
+		/// Uncertain which 'leftest tab' if there're multiple Chrome windows.
+		
+	: active-tab  ( -- objTab ) \ Get the active tab of Chrome browser.
+		js: push({active:true}) tabs.query :> [0] ;
+		/// Used by 3ce popup page.
+	
 	: attach ( -- ) \ Attach 3ce to the active tab.
 		\ Specify the tab to attach
-		\ ( use the first tab as the working tab )  js: push({"index":0})
-		  ( use the active tab as the working tab ) js: push({active:true})
-		  tabs.query :> [0].id tabid!
+		  active-tab :> id tabid!
+		\ Wait for the target page to be loaded
+		  500 nap active-tab :> status!="complete" if  
+			." Still loading " active-tab :> title . space
+			0 begin
+				active-tab :> status=="complete" if 1+ then
+				dup 5 > if else \ 5 complete to make sure it's very ready.
+					js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					char . . 300 nap false
+				then 
+			until
+		  then 
 		\ Install jQuery and project-k to target tab.
 		<ce> typeof(jeForth)</ceV> char function != if 	
 			char js/jquery-1.11.2.js inject drop			
