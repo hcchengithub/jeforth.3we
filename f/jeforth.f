@@ -1444,17 +1444,17 @@ code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpre
 					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3")
 					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3");
 					// 連做兩次解決 if else then 翻成 [if] else [then] 的現象。 
-				dictate(result);
+				push(result);execute("tib.insert"); // 不能用 dictate(), 多重 suspend 時，會有怪現象。
 				end-code
 				/// Replace "if", "for", "begin", .. etc to "[if]", "[for]", "[beign]" .. etc
 				/// I like to use "if" in interpret mode directly instead of "[if]" and
 				/// to merge them is difficult to me so far. So I defined this word.
 : run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
-				char \r|\n word (run:) ;
+				char \r|\n word (run:) ; interpret-only
 				/// To run multiple lines use <text>...</text> (run:) or "run>" instead of "run:".
 				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 : run> 			( <string> -- ... ) \ Run multiple lines with "if","begin","for", in interpret mode
-				js> push(ntib);ntib=tib.length;tib.slice(pop()) (run:) ;
+				js> push(ntib);ntib=tib.length;tib.slice(pop()) (run:) ; interpret-only
 				/// run> go through all the rest of the inputbox; 
 				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 

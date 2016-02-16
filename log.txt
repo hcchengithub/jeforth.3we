@@ -4614,11 +4614,13 @@
 		among "loading" that's why.
 	--> works fine now.
 		
-[ ] This line does not print 50 stars, unless remove the 'cr' Bug!!
+[x] This line does not print 50 stars, unless remove the 'cr' Bug!!
 	run: 50 for char * . cr next
 	This is ok --> 0 [begin] char * . cr 500 nap 1+ dup 10 > [until] 
 	so [for] ... [next] in trouble? or run: for ... next in trouble?
 	--> try 50 [for] char * . cr 50 nap [next] ----> it works fine!
+	--> <text> 50 for char * . cr next </text> (run:) <--- works fine too!
 	--> So, run: for ... next in trouble!
+	==> (run:) uses 'dictate()' to run the string, change to use 'tib.insert'.
 	
 	
