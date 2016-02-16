@@ -4623,4 +4623,63 @@
 	--> So, run: for ... next in trouble!
 	==> (run:) uses 'dictate()' to run the string, change to use 'tib.insert'.
 	
+	利用別的軟體來畫表格, 例如 excel 可能是最好的辦法。可以 copy-paste 給 3hta 
+	然後用 js> $('table')[0].outerHTML . 取得 HTML 放到 Notepad++ 去整理。
+
+: new-TR ( -- ) \ Create a table of tracking record into the outputbox
+	<text>
+	<o>
+	<table border=1 align=center width=99% cellspacing=0 cellpadding=4 bordercolor=grey> /* 利用 width,align 讓兩邊留點白,美觀 */
+	<tbody>
+	<tr>
+	/* id */
+			<td	style="border-width:1px 0px 1px 1px;/*top right bottom left*/" align=right><strong>ID</strong></td>
+			<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" align=center>001</td>/* 暫時先手動填寫或乾脆留白 */
+	/* Abstract */ 
+			<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" align=center><strong>Abstract</strong></td>
+			<td style="border-width:1px 1px 1px 0px;/*top right bottom left*/" align=left width=80%>type subject of this issue</td>
+	/* Created  */ 
+			<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" align=center>Created</td>
+			<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" align=center>[]</td>/* 暫時先手動填寫或乾脆留白 */
+	/* Saved    */ 
+			<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" align=center>Saved</td>
+			<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" align=center>[]</td>/* 暫時先手動填寫或乾脆留白 */
+	/* Changed  */ 
+			<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" align=center>Changed</td>
+			<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" align=center>[]</td>/* 暫時先手動填寫或乾脆留白 */
+	</tr>
+	<tr><td align=center colspan=2>[ ]</td><td colspan=8></td></tr>
+	<tr><td align=center colspan=2>[ ]</td><td colspan=8></td></tr> /* 用 editBox 添加 */
+	</tbody>
+	</table></o>
+	</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
+	tib.insert ; interpret-only
 	
+<text>
+<o>
+<table border=2 width=99%> /* 利用 width,align 讓兩邊留點白,美觀 */
+<tbody>
+<tr>
+/* id */
+<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" align=right><strong>ID</strong></td>
+<td style="border-width:1px 1px 1px 0px;/*top right bottom left*/">001</td>/* 暫時先手動填寫或乾脆留白 */
+/* Abstract */
+<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" width=1% ><strong> Abstract </strong></td>
+<td style="border-width:1px 1px 1px 0px;/*top right bottom left*/" width=80%>type subject of this issue</td>
+/* Created  */
+<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" width=1%>Created</td>
+<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" width=1%>[]</td>/* 暫時先手動填寫或乾脆留白 */
+/* Saved    */
+<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" width=1%>Saved</td>
+<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" width=1%>[]</td>/* 暫時先手動填寫或乾脆留白 */
+/* Changed  */
+<td style="border-width:1px 0px 1px 1px;/*top right bottom left*/" width=1%>Changed</td>
+<td	style="border-width:1px 1px 1px 0px;/*top right bottom left*/" width=1%>[]</td>/* 暫時先手動填寫或乾脆留白 */
+</tr>
+<tr><td style="border:0px" align=center colspan=2>[ ]</td><td style="border-width:1px" colspan=8></td></tr>
+<tr><td style="border:0px" align=center colspan=2>[ ]</td><td style="border-width:1px" colspan=8></td></tr> /* 用 editBox 添加 */
+</tbody>
+</table></o>
+</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
+tib.insert
+
