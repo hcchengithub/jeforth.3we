@@ -357,6 +357,52 @@
 						bordered-div :: bordered=true
 					then ;
 
+	: tr.table ( -- ) \ Create a Tracking Record (tr) table on outputbox
+		<text>
+			<o>
+			<div class=tr>
+				<style>
+					.tr table, .tr td { border:_borderSize_ solid gray;} /* HTA 省略 "solid black" 結果怪異 */
+					/* 
+						看到表格邊線怪異時,不要急著改參數, Zoom in/Zoom out 可能就好了， 或者試試別
+						的 Web Browser。_borderSize_ 用 0.075em 似乎比較能避免 HTA zoom in/out 邊線
+						變樣，Chrome 沒有這個問題。
+					*/
+				</style>
+				<table align=center width=99% cellspacing=0 cellpadding=4>
+					/*
+						利用 width,align 讓兩邊留點白,美觀
+						style="align:center" no body support, not Chrome nor HTA.
+					*/
+					<tbody>
+					<tr>
+					/* id */
+					/* border-width: top right bottom left 用來消除部分邊框 */
+					<td	style="border-width:_borderSize_ 0 _borderSize_ _borderSize_;" align=right><strong>ID</strong></td>
+					<td	style="border-width:_borderSize_ _borderSize_ _borderSize_ 0;" align=center>001</td>/* 暫時先手動填寫或乾脆留白 */
+					/* Abstract */
+					<td style="border-width:_borderSize_ 0 _borderSize_ _borderSize_;" align=center><strong>Abstract</strong></td>
+					<td style="border-width:_borderSize_ _borderSize_ _borderSize_ 0;" align=left width=80%>type subject of this issue</td>
+					/* Created  */
+					<td style="border-width:_borderSize_ 0 _borderSize_ _borderSize_;" align=center width=1%>Created</td>
+					<td	style="border-width:_borderSize_ 0 _borderSize_ 0;" align=center width=1%>[]</td>/* 暫時先手動填寫或乾脆留白 */
+					/* Saved    */
+					<td style="border-width:_borderSize_ 0 _borderSize_ 0;" align=center width=1%>Saved</td>
+					<td	style="border-width:_borderSize_ 0 _borderSize_ 0;" align=center width=1%>[]</td>/* 暫時先手動填寫或乾脆留白 */
+					/* Changed  */
+					<td style="border-width:_borderSize_ 0 _borderSize_ 0;" align=center width=1%>Changed</td>
+					<td	style="border-width:_borderSize_ _borderSize_ _borderSize_ 0;" align=center width=1%>[]</td>/* 暫時先手動填寫或乾脆留白 */
+					</tr>
+					<tr><td align=center colspan=2>[ ]</td><td colspan=8><textarea rows=1></textarea><br>--<br></td></tr> /* 用 editBox 添加 */
+					</tbody>
+				</table>
+			</div>
+			</o>
+		</text> 
+		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
+		:> replace(/_borderSize_/mg,"0.075em")   \ 設定表格邊線的 size
+		tib.insert ; interpret-only
+
 
 \ -- End --
 

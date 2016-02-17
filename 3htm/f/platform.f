@@ -92,31 +92,45 @@ also forth definitions
 				true ( true by pass, false terminate ) ;
 
 \ -----------------
-
-code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
-				var r = inputbox.rows;
-				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
-				inputbox.rows = Math.max(r,1);
-				if (!r) $("#inputbox").hide();
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
-				push(false);
+code active-textarea ( -- objElement ) \ Get the recent active textarea element or null
+				var them = $("textarea"); // An array
+				for ( var i=0; i<them.length; i++){
+					if ($(them[i]).is(":focus")){
+						push(them[i]);
+						return;
+					}
+				}
+				push(null);
 				end-code
-				/// return a false to stop the hotkey event handler chain.
+
+code {F9}		( -- false ) \ Hotkey handler, Smaller the active textarea or the inputbox.
+				execute("active-textarea"); var ta = pop() || inputbox;
+				var r = ta.rows;
+				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
+				ta.rows = Math.max(r,1);
+				if (ta==inputbox) {
+					if (!r) $(ta).hide();
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				}
+				push(false); // Stop event bubbling
+				end-code
 				\ last alias {F6} // ( -- flase ) Hotkey handler, Smaller the input box
-								/// Duplicated to recover PowerCam conflict.
+				\ /// Duplicated to recover PowerCam conflict.
 
 code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
-				$("#inputbox").show()
-				var r = 1 * inputbox.rows;
+				execute("active-textarea"); var ta = pop() || inputbox;
+				var r = 1 * ta.rows;
 				if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
-				inputbox.rows = Math.max(r,1);
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
-				push(false);
+				ta.rows = Math.max(r,1);
+				if (ta==inputbox) {
+					$(ta).show() // 縮到最後是 $.hide() 起來的。
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				}
+				push(false); // Stop event bubbling
 				end-code
-				/// return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
 				\ last alias {F7} // ( -- flase ) Hotkey handler, Bigger the input box
-								/// Duplicated to recover PowerCam conflict.
+				\ /// Duplicated to recover PowerCam conflict.
 
 code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				var selection = getSelection();
