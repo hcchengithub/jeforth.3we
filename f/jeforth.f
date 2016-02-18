@@ -1460,11 +1460,14 @@ code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpre
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
-: trim			( string -- string' ) \ Remove leading&ending white spaces on one line.
+: trim			( string -- string' ) \ Remove leading&ending white spaces of the multiple line string.
 				\ remove 頭尾 whitespaces. 但 .trim() 舊 JScript v5.6 未 support
-				dup if <js> pop().toString().replace(/(^( |\t)*)|(( |\t)*$)/mg,'') </jsV> 
+				dup if <js> pop().toString().replace(/(^\s*)/,'').replace(/(\s*$)/,'') </jsV>
 				then ;
-				/// if TOS is not a string then do nothing.
+				/// If TOS is not a string then do nothing.
+				/// NOT every line of a multiple line string, only the begin/end of it.
+				/// Work with </o> </h> </e> 前置 white spaces 會變成 [object Text] 必須消除。
+				
 code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
 

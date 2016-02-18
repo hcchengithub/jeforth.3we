@@ -8,6 +8,7 @@
 		border: 0px solid white;
 		background:#F0F0F0;
 	}
+	
 	.console3we textarea {
 		width:99%; /* 這個會壓過 textarea 的 cols=n */
 		padding:4px; 
