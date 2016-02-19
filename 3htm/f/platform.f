@@ -30,6 +30,13 @@ also forth definitions
 	</js>
 </comment>
 
+code run-inputbox ( -- ) \ Used in onKeyDown event handler.
+				var cmd = inputbox.value; // w/o the '\n' character ($10).
+				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+				vm.cmdhistory.push(cmd);
+				vm.forthConsoleHandler(cmd);
+				end-code
+
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
 				<js> confirm("Really want to restart?") </jsV> ;
 				/// Return a false to stop the hotkey event handler chain.
@@ -557,19 +564,16 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
 			case  83: /* s    */ if(tick('{ios}' )){execute('{ios}' );return(pop());} break; // 's' in inputbox or outputbox
 			case  13:
-				if (!event.shiftKey) // 想換行用 Shift-Enter 避免把命令發出去
-				if (!tick("{F2}").EditMode || event.ctrlKey) { // 在 EditMode 用 Ctrl-Enter 發出命令
-					var cmd = inputbox.value; // w/o the '\n' character ($10).
-					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					vm.cmdhistory.push(cmd);
-					if (tick("{F2}").EditMode) execute('toggle-inputbox-edit-mode'); // 自動恢復
-					vm.forthConsoleHandler(cmd);
-					return(false);
+				if (!event.shiftKey && !tick("{F2}").EditMode) {
+					execute("run-inputbox");
+					return(false); // stop bubbling
 				}
-				return(true); // In EditMode
+				return(true); // could be Ctrl-Enter, let document check
 		}
 		return (true); // pass down to following handlers
 	}
+	// {ios} 是 's' pressed when in inputbox or outputbox. Ctrl-s 要 save 存檔。
+	// [ ] 有了 console3we 之後, 可以把它簡化，不用兩處都各寫一套 handler。
 	$("#outputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; 
 		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
@@ -582,6 +586,7 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 	document.onkeydown = function (e) {
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
+			case  13: /* CR  */ if(event.ctrlKey){execute("run-inputbox");return(false)}return(true);
 			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
 			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
 			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;

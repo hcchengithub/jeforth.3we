@@ -86,7 +86,7 @@ s" fs.f"		source-code-header
 						if(!vm.fso.existsSync(path+'/'+dir[i])) continue;
 						// s += vm.fso.statSync(path+'/'+dir[i]).mtime + " "; 
 						push(vm.fso.statSync(path+'/'+dir[i]).mtime);
-						execute('t.dateTime');
+						dictate('t.dateTime .');
 						push(vm.fso.statSync(path+'/'+dir[i]).size);
 						dictate("13 .r");
 						if(vm.fso.statSync(path+'/'+dir[i]).isDirectory()){

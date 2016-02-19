@@ -397,9 +397,9 @@
 						<td align=left width=90%><strong class=trabstract> Abstract </strong></td>
 					/* Time Stamps  */
 						<td align=center width=1%>
-							<spam class=trcreate> [Create] </spam>
-							<spam class=trsave  > [Save]   </spam>
-							<spam class=trmodify> [Modify] </spam>
+							<span class=trcreate> [Create] </span>
+							<span class=trsave  > [Save]   </span>
+							<span class=trmodify> [Modify] </span>
 						</td>
 				</tr>
 				<tr class=trtask>
@@ -412,6 +412,12 @@
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
 		</o> ; interpret-only
 
+	: paste-string ( "string" -- ) \ Paste the string to anchorNode if it's a #text
+		js> getSelection() ( "string" selection )
+		dup :> anchorNode.nodeName=="#text" if ( "string" selection )
+		js> tos().anchorNode.nodeValue.slice(0,tos().anchorOffset)+pop(1)+tos().anchorNode.nodeValue.slice(tos().anchorOffset) ( selection "new string" )
+		js: pop(1).anchorNode.nodeValue=pop() 
+		else ( "string" selection ) 2drop then ;
 
 \ -- End --
 

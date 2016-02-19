@@ -44,14 +44,14 @@ code t.year 	( Time -- year ) \ Get year number
 : t.mS			( Time -- mS ) \ Get mS number 
 				js> pop().getMilliseconds() ;
 
-: t.dateTime	( Time -- "yyyy-mm-dd HH:mm:ss" ) \ Print Date time
-				>r 
-				r@ t.year . char - .
-				r@ t.month  2 .0r char - .
-				r@ t.date   2 .0r space
-				r@ t.hour   2 .0r char : .
-				r@ t.minute 2 .0r char : .
-				r@ t.second 2 .0r ;
+: t.dateTime    ( Time -- "yyyy-mm-dd HH:mm:ss" ) \ Get "yyyy-mm-dd HH:mm:ss" string
+				>r
+				r@ t.year char - +
+				r@ t.month  2 (.0r) char - + +
+				r@ t.date   2 (.0r) (space) + +
+				r@ t.hour   2 (.0r) char : + +
+				r@ t.minute 2 (.0r) char : + +
+				r> t.second 2 (.0r) + ;
 
 code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do anything.
 				var ms=pop();

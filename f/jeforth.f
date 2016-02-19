@@ -1508,7 +1508,7 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 \ .0r. So I simply use a workaround that prints higher 16 bits and then lower 16 bits respectively.
 \ So JavaScript's opinion about hex won't bother me anymore.
 
-code .r         ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+code (.r)		( num|str n -- "  num|str" ) \ Right adjusted num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				if(typeof i == 'number') {
 					if(vm.g.base == 10){
@@ -1522,10 +1522,12 @@ code .r         ( num|str n -- ) \ Right adjusted print num|str in n characters 
 					i=" "+i;
 					n--;
 				} while(n>0);
-				type(i);
+				push(i);
 				end-code
-
-code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+: .r			( num|str n -- ) \ Print right adjusted num|str in n characters (FigTaiwan SamSuanChen)
+				(.r) . ;
+				
+code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
@@ -1541,11 +1543,12 @@ code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters 
 					i="0"+i;
 					n--;
 				} while (n>0);
-				type(minus+i);
+				// type(minus+i);
+				push(minus+i);
 				end-code
 				/// Limitation: Negative numbers are printed in a strange way. e.g. "0000-123".
 				/// We need to take care of that separately.
-
+: .0r (.0r) . ;
 				<selftest>
 					<comment> .r 是 FigTaiwan 爽哥那兒抄來的。 JavaScript 本身就有 
 					number.toString(base) 可以任何 base 印出數值。base@ base! hex 
