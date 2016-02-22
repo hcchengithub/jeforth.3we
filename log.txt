@@ -4626,3 +4626,34 @@
 	利用別的軟體來畫表格, 例如 excel 可能是最好的辦法。可以 copy-paste 給 3hta 
 	然後用 js> $('table')[0].outerHTML . 取得 HTML 放到 Notepad++ 去整理。
 
+
+[ ] Now I hope that I can use some script in tr.table. So I can click and run scripts.
+    That requires a Security Policy:
+		Refused to execute inline event handler because it violates the following Content 
+		Security Policy directive: "script-src 'self' 'unsafe-eval'". Either the 'unsafe-inline' 
+		keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline 
+		execution.
+	But after added 'unsafe-inline' into "content_security_policy", reload manifest.json gets
+	this error :
+		嘗試安裝這項擴充功能時顯示警告訊息：
+		Ignored insecure CSP value "'unsafe-inline'" in directive 'script-src'.
+	So, the only way is to use a function directly.
+	--> 奇怪了, 那 jeforth.3ce 已經在用的 script 是怎麼能跑的?
+		--> inputbox 是收 element.onkeydown , defined in jeforth.3htm.js and platform.f
+			只要不是 inline 形式的 onclick="blabla" 就可以了。(嗎)
+		--> 那對 jeforth 很簡單哪! 先取得 element 再幫他掛上 element.onxxxx=function 即可。
+			element.onxxxx=debugger; <--- Failed, 'degugger' unknown.
+			element.onxxxx="dictate('blabla')" <--- no error, but element.onxxxx will be null.
+			element.onxxxx=function(){debugger} <--- OK!! 'this' is the element.
+			h1 :: onclick=function(e){dictate('.s')} <--- OK!!! it works fine.
+	==> 結論就是不要寫成 inline script 就行了, 那沒問題呀!
+	--> See Ynote: jeforth.3ce let tr.table to have script, do-able!
+	
+[ ] is#text? paste-string erase-#text-anchorNode
+	==> See Ynote: jeforth.3ce window.getSelection() 得到的 Selection object 是揮發性的！不能留下來以後用。
+	
+			
+			
+	
+	
+	

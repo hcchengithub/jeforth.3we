@@ -412,12 +412,21 @@
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
 		</o> ; interpret-only
 
+	: is#text? ( -- selection true|false ) \ Is the anchorNode a #text? Also return the selection object.
+		js> getSelection() ( selection-object )
+		dup :> anchorNode.nodeName=="#text" if true else drop false then ;
+		/// selection object is from 
+		
 	: paste-string ( "string" -- ) \ Paste the string to anchorNode if it's a #text
-		js> getSelection() ( "string" selection )
-		dup :> anchorNode.nodeName=="#text" if ( "string" selection )
+		is#text? if ( "string" selection )
 		js> tos().anchorNode.nodeValue.slice(0,tos().anchorOffset)+pop(1)+tos().anchorNode.nodeValue.slice(tos().anchorOffset) ( selection "new string" )
 		js: pop(1).anchorNode.nodeValue=pop() 
-		else ( "string" selection ) 2drop then ;
+		then ;
+		
+	: erase-#text-anchorNode ( -- flag ) \ Erase the anchorNode if it's a #text, return true.
+		is#text? if ( selection )
+			:: anchorNode.nodeValue="" true
+		else false then ;
 
 \ -- End --
 
