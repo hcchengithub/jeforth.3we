@@ -412,21 +412,22 @@
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
 		</o> ; interpret-only
 
-	: is#text? ( -- selection true|false ) \ Is the anchorNode a #text? Also return the selection object.
+	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return selection object
 		js> getSelection() ( selection-object )
-		dup :> anchorNode.nodeName=="#text" if true else drop false then ;
-		/// selection object is from 
+		dup :> anchorNode.nodeName=="#text" if
+			( selection ) js: push({node:tos().anchorNode,offset:pop().anchorOffset}) true
+		else drop false then ;
+		/// Selection object from getSelection() is volatile, return its subset instead.
 		
-	: paste-string ( "string" -- ) \ Paste the string to anchorNode if it's a #text
-		is#text? if ( "string" selection )
-		js> tos().anchorNode.nodeValue.slice(0,tos().anchorOffset)+pop(1)+tos().anchorNode.nodeValue.slice(tos().anchorOffset) ( selection "new string" )
-		js: pop(1).anchorNode.nodeValue=pop() 
-		then ;
-		
-	: erase-#text-anchorNode ( -- flag ) \ Erase the anchorNode if it's a #text, return true.
-		is#text? if ( selection )
-			:: anchorNode.nodeValue="" true
-		else false then ;
+    : paste-string ( "string" -- ) \ Paste the string to anchorNode if it's a #text
+        is#text? if ( "string" select' )
+        js> tos().node.nodeValue.slice(0,tos().offset)+pop(1)+tos().node.nodeValue.slice(tos().offset) ( select' "new string" )
+        js: pop(1).node.nodeValue=pop() 
+        then ;
+
+    : erase-#text-anchorNode ( -- flag ) \ Erase the anchorNode if it's a #text, return true.
+        is#text? if ( select' ) :: node.nodeValue="" true
+        else false then ;
 
 \ -- End --
 
