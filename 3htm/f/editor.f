@@ -376,41 +376,37 @@
 			[ last literal ] :> style=pop()
 		then ; interpret-only
 		/// Return the styleElement in case we want to modify it.
-	last execute \ setup the TR style in the <head>
+	last execute drop \ setup the TR style in the <head>
 	
-	: tr.table ( -- tableElement ) \ Create a Tracking Record (tr) table on outputbox
-		<text> <div class=tr>
-			/*
-				<table> 利用 width,align 讓兩邊留點白,以求美觀。
-				style="align:center" no body support, not Chrome nor HTA.
-			*/
-			<table align=center width=99% cellspacing=0 cellpadding=4>
-				<tbody>
-				<tr>
-					/* id */          /* style="border-width: top right bottom left;" 用來消除部分邊框 */
-						<td	align=center width=8em><strong class=trid> ID </strong></td>
-					/* Severity */
-						<td	align=center width=6em><strong class=trseverity> Severity </strong></td>
-					/* Status */
-						<td	align=center width=14em><strong class=trstatus> Open </strong></td>
-					/* Abstract */
-						<td align=left width=90%><strong class=trabstract> Abstract </strong></td>
-					/* Time Stamps  */
-						<td align=center width=1%>
-							<span class=trcreate> [Create] </span>
-							<span class=trsave  > [Save]   </span>
-							<span class=trmodify> [Modify] </span>
-						</td>
-				</tr>
-				<tr class=trtask>
-					/* 用 editBox 添加 */
-					<td align=center>[ ]</td><td colspan=4>Subject<br><textarea></textarea><br>Attachments<br></td>
-				</tr>
-				</tbody>
-			</table>
-		</div></text> 
-		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
-		</o> ; interpret-only
+	: trbody++ ( trElement -- ) \ Add a [Description][textarea][attachments] section.
+		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
+		<js> pop().innerHTML+='Description<br><textarea class="trtextarea"></textarea><br>Attachments<br>'</js> ;
+
+	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
+		<text> <br>--<br><div class=tr><table align=center width=98% cellspacing=0 cellpadding=4>
+			<tbody>
+			<tr class=trheader>
+				<td align=center width=15% class=trcreated style="font-size:0.6em;">0000-00-00 00:00:00</td>
+				<td align=left class=trabstract>Abstract</td>
+				<td align=center width=15% class=trmodified style="font-size:0.6em">0000-00-00 00:00:00</td>
+			</tr>
+			<tr>
+				<td colspan=3 class=trbody> </td>
+			</tr>
+			<tr class=trbuttons>
+				<td colspan=3>
+					<input type=button value='Add' class=tradd>
+					<input type=button value='Edit' class=tredit>
+					<input type=button value='Read-only' class=trreadonly>
+				</td>
+			</tr>
+			</tbody>
+		</table></div></text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
+		</o> dup trbody++ 
+		js: $(".tradd",tos())[0].onclick=function(e){vm.execute("trbody++");return(false)}
+		js: $(".tredit",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.disabled=false});return(false)}
+		js: $(".trreadonly",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.disabled=true});return(false)}
+		; interpret-only
 
 	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return selection object
 		js> getSelection() ( selection-object )
