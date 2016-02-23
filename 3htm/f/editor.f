@@ -418,17 +418,14 @@
 			( selection ) js: push({node:tos().anchorNode,offset:pop().anchorOffset}) true
 		else drop false then ;
 		/// Selection object from getSelection() is volatile, return its subset instead.
+
+    : paste-string ( "string" {node,offset} -- ) \ Paste the string to anchorNode if it's a #text
+        js> tos().node.nodeValue.slice(0,tos().offset)+pop(1)+tos().node.nodeValue.slice(tos().offset) ( {node,offset} "new string" )
+        js: pop(1).node.nodeValue=pop() ;
+		/// Example:  
+		///   <o> <h1>test</h1></o> <js>
+		///   pop().onclick=function(e){dictate('is#text? [if] dup :: node.nodeValue="" now t.dateTime swap paste-string [then]')} </js>
 		
-    : paste-string ( "string" -- ) \ Paste the string to anchorNode if it's a #text
-        is#text? if ( "string" select' )
-        js> tos().node.nodeValue.slice(0,tos().offset)+pop(1)+tos().node.nodeValue.slice(tos().offset) ( select' "new string" )
-        js: pop(1).node.nodeValue=pop() 
-        then ;
-
-    : erase-#text-anchorNode ( -- flag ) \ Erase the anchorNode if it's a #text, return true.
-        is#text? if ( select' ) :: node.nodeValue="" true
-        else false then ;
-
 \ -- End --
 
 
