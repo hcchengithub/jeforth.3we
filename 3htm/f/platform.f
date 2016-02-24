@@ -109,6 +109,7 @@ code active-textarea ( -- objElement ) \ Get the recent active textarea element 
 				}
 				push(null);
 				end-code
+				/// For {F9}/{F10} to change the active textarea rows size.
 
 code {F9}		( -- false ) \ Hotkey handler, Smaller the active textarea or the inputbox.
 				execute("active-textarea"); var ta = pop() || inputbox;
@@ -562,7 +563,6 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
 			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
-			case  83: /* s    */ if(tick('{ios}' )){execute('{ios}' );return(pop());} break; // 's' in inputbox or outputbox
 			case  13:
 				if (!event.shiftKey && !tick("{F2}").EditMode) {
 					execute("run-inputbox");
@@ -572,9 +572,11 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 		}
 		return (true); // pass down to following handlers
 	}
+	
 	// {ios} 是 's' pressed when in inputbox or outputbox. Ctrl-s 要 save 存檔。
-	// [ ] 有了 console3we 之後, 可以把它簡化，不用兩處都各寫一套 handler。
-	$("#outputbox")[0].onkeydown = function(e){
+	// [x] 有了 console3we 之後, 可以把它簡化，不用兩處都各寫一套 handler。
+	// [ ] 這樣一來，console3weconsole3we 還可以有更多 hotkey !!
+	$(".console3we")[0].onkeydown = function(e){
 		e = (e) ? e : event; 
 		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {

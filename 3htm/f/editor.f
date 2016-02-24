@@ -178,10 +178,10 @@
 		+ s"  of 0~" + swap 1- + s" </h1>--<br>" + </o> drop
 		( i array 留下防呆線索 ) [ last literal ] :: lastrecalled=tos(1) 
 		( i array ) :> [pop()] <o>escape </o> drop ; 
-		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
 		/// log.recall 是 read log 的基本命令, 其他的都靠它。
 		/// recall 出來放到最後面不破壞現有的 outputbox。
 		/// log.save or Ctrl-s 有危險性, 靠這裡留下防呆的機關: lastrecalled 與 log.length-1 要吻合。
+		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
 		
 	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
 		['] log.recall :> lastrecalled 1+ log.length = if \ lastrecalled 與 log.length-1 要吻合
@@ -195,7 +195,7 @@
 		else cr ." log.save canceled, lastrecalled and log.length-1 mismatch!" cr 
 		then ;
 		
-	: {ios} ( -- ) \ Same as log.save but is a Hotkey handler.
+	: {ios}	( -- ) \ Same as log.save but is a Hotkey handler.
 		js> event&&event.ctrlKey if 
 			log.save 
 			false ( terminate bubbleing ) 
@@ -211,14 +211,10 @@
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
+		<js> confirm("Want to confirm by recalling the last log section?")</jsV>
+		if log.length 1- log.recall then ;
 		/// 這個應該用得不多，要臨時把 outputbox 保存起來時有用。
-		
-	: old.log.open ( -- )  \ Get the log.json[last] back to outputbox
-		\ 把整個 log.json 讀回來成一個 array。
-		char log.json readTextFile js> JSON.parse(pop()) 
-		:> slice(-1)[0] <o>escape </o> drop ; 
-		/// 讀出最後一個 snapshot 還原到最後面不破壞現有的 outputbox。
 
 	: log.open ( -- )  \ Get the log.json[last] back to outputbox
 		log.length ?dup if 1- log.recall then ;
@@ -380,15 +376,17 @@
 	
 	: trbody++ ( trElement -- ) \ Add a [Description][textarea][attachments] section.
 		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
-		<js> pop().innerHTML+='Description<br><textarea class="trtextarea"></textarea><br>Attachments<br>'</js> ;
+		js> tos().innerHTML ( trbody html )
+		s" Description<br><textarea class=trtextarea></textarea><br>Attachments<br>" + ( trbody html' )
+		js: pop(1).innerHTML=pop() ;
 
 	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
-		<text> <br>--<br><div class=tr><table align=center width=98% cellspacing=0 cellpadding=4>
+		<text> --<br><table class=tr width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
 			<tbody>
 			<tr class=trheader>
-				<td align=center width=15% class=trcreated style="font-size:0.6em;">0000-00-00 00:00:00</td>
+				<td align=center width=15% class=trcreated style="font-size:0.6em;">_now_</td>
 				<td align=left class=trabstract>Abstract</td>
-				<td align=center width=15% class=trmodified style="font-size:0.6em">0000-00-00 00:00:00</td>
+				<td align=center width=15% class=trmodified style="font-size:0.6em">[ ]</td>
 			</tr>
 			<tr>
 				<td colspan=3 class=trbody> </td>
@@ -401,27 +399,45 @@
 				</td>
 			</tr>
 			</tbody>
-		</table></div></text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
+		</table></text> 
+		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
+		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
 		</o> dup trbody++ 
 		js: $(".tradd",tos())[0].onclick=function(e){vm.execute("trbody++");return(false)}
 		js: $(".tredit",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.disabled=false});return(false)}
 		js: $(".trreadonly",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.disabled=true});return(false)}
 		; interpret-only
 
-	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return selection object
+	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return a subset of the selection object
 		js> getSelection() ( selection-object )
 		dup :> anchorNode.nodeName=="#text" if
 			( selection ) js: push({node:tos().anchorNode,offset:pop().anchorOffset}) true
 		else drop false then ;
 		/// Selection object from getSelection() is volatile, return its subset instead.
+		/// Example:
+		///   run: now t.dateTime is#text? if paste-string then \ Ctrl-enter to paste date-time
 
-    : paste-string ( "string" {node,offset} -- ) \ Paste the string to anchorNode if it's a #text
+    : paste-string ( "string" {node,offset} -- ) \ Paste the string to a #text anchorNode
         js> tos().node.nodeValue.slice(0,tos().offset)+pop(1)+tos().node.nodeValue.slice(tos().offset) ( {node,offset} "new string" )
         js: pop(1).node.nodeValue=pop() ;
 		/// Example:  
 		///   <o> <h1>test</h1></o> <js>
 		///   pop().onclick=function(e){dictate('is#text? [if] dup :: node.nodeValue="" now t.dateTime swap paste-string [then]')} </js>
-		
+		/// Example:
+		///   run: now t.dateTime is#text? if paste-string then \ Ctrl-enter to paste date-time
+
+	: textarea.disable ( -- ) \ Disable all <textarea> except inputbox, they become read-only.
+		js> $('textarea').length for 
+			r@ js> $('textarea')[pop()-1].disabled=true 
+		next js: inputbox.disabled=false ;
+		/// textarea.disabled=true
+
+	: textarea.enable ( -- ) \ Enable all <textarea>, they become editable.
+		js> $('textarea').length for 
+			r@ js> $('textarea')[pop()-1].disabled=false
+		next ;
+		/// textarea.disabled=false
+
 \ -- End --
 
 
