@@ -218,6 +218,27 @@
 		~selftest~
 	</selftest>
 
+	: showdup ( "sorted string" -- "cont:line..." ) \ Show duplicated lines with count.
+		\ split the string to an array
+		:> split('\n') ( array )
+		<js>
+			var aa=pop(), hash={}, ss=""; 
+			for (var i=0; i<aa.length; i++){ // for each line
+				aa[i] = aa[i].trim();
+				if (aa[i].length==0) continue; // skip blank lines
+				if (hash[aa[i]]) hash[aa[i]] += 1; // duplicated line, count++
+				else hash[aa[i]] = 1; // Unique line, count=1;
+			}
+			for (i in hash) {
+				push(i); push(hash[i]);
+				dictate('4 (.r) s"  : " + swap + js> "\\n" +');
+				ss += pop();
+			}
+			push(ss);
+		</js>
+	;
+	/// A new design of my old tool.
+
 <comment>
 	 
 	舊筆記、想法, debug log
