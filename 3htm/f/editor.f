@@ -404,8 +404,8 @@
 		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
 		</o> dup trbody++ 
 		js: $(".tradd",tos())[0].onclick=function(e){vm.execute("trbody++");return(false)}
-		js: $(".tredit",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.disabled=false});return(false)}
-		js: $(".trreadonly",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.disabled=true});return(false)}
+		js: $(".tredit",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.readOnly=false});return(false)}
+		js: $(".trreadonly",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.readOnly=true});return(false)}
 		; interpret-only
 
 	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return a subset of the selection object
@@ -426,17 +426,19 @@
 		/// Example:
 		///   run: now t.dateTime is#text? if paste-string then \ Ctrl-enter to paste date-time
 
-	: textarea.disable ( -- ) \ Disable all <textarea> except inputbox, they become read-only.
+	: textarea.readonly ( -- ) \ Make all <textarea>, except inputbox, read-only.
 		js> $('textarea').length for 
-			r@ js> $('textarea')[pop()-1].disabled=true 
-		next js: inputbox.disabled=false ;
-		/// textarea.disabled=true
+			r@ js> $('textarea')[pop()-1].readOnly=true 
+		next js: inputbox.readOnly=false ;
+		/// See also textarea.editable.
+		/// textarea.readOnly=true
 
-	: textarea.enable ( -- ) \ Enable all <textarea>, they become editable.
+	: textarea.editable ( -- ) \ Let all <textarea> editable.
 		js> $('textarea').length for 
-			r@ js> $('textarea')[pop()-1].disabled=false
+			r@ js> $('textarea')[pop()-1].readOnly=false
 		next ;
-		/// textarea.disabled=false
+		/// See also textarea.readonly.
+		/// textarea.readOnly=false
 
 \ -- End --
 
