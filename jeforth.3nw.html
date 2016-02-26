@@ -79,7 +79,8 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					if ($(inputbox).is(":focus"))
+						window.scrollTo(0,endofinputbox.offsetTop);
 				}
 			})();
 		}

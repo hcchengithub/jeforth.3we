@@ -93,7 +93,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					if ($(inputbox).is(":focus")) window.scrollTo(0,endofinputbox.offsetTop);
 				}
 			})();
 		}
@@ -102,6 +102,8 @@
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		function hotKeyHandler(e) {
+			// document.onkeydown() initial version defined in jeforth.3thm.js
+			// will be reDef by platform.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */

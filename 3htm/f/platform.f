@@ -554,7 +554,7 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 				return(cmd);
 			},
 	};
-
+console.log("111");debugger;
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
@@ -572,6 +572,7 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 		}
 		return (true); // pass down to following handlers
 	}
+console.log("222");debugger;
 	
 	// {ios} 是 's' pressed when in inputbox or outputbox. Ctrl-s 要 save 存檔。
 	// [x] 有了 console3we 之後, 可以把它簡化，不用兩處都各寫一套 handler。
@@ -584,8 +585,10 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 		}
 		return (true); // pass down to following handlers
 	}
+console.log("333");debugger;
 
 	document.onkeydown = function (e) {
+	    // document.onkeydown() reDef in 3htm/f/platform.f 
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
 			case  13: /* CR  */ if(event.ctrlKey){execute("run-inputbox");return(false)}return(true);

@@ -18,19 +18,19 @@
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 
 	char body <e> 
-		<div id=console3ce class=ce3>
+		<div class=console3we>
 		<style>
-			.ce3 {
+			.console3we {
 				color:black;
 				word-wrap:break-word;
 				border: 1px ridge;
 				background:#F0F0F0;
 				padding:20px;
 			}
-			.ce3 div {
+			.console3we div {
 				font: 20px "courier new";
 			}
-			.ce3 textarea {
+			.console3we textarea {
 				width:100%;
 				font: 20px "courier new";
 				padding:4px;
@@ -47,8 +47,10 @@
 				Program path <span id=location>location</span><br>
 				</div>
 			</div>
-		</div><div id="outputbox"></div>
-		<textarea id="inputbox" cols=100 rows=1></textarea><a id=jump2endofinputbox href="#endofinputbox"></a><div id=endofinputbox></div>
+		</div>
+		<div id="outputbox"></div>
+		<textarea id="inputbox" cols=100 rows=1></textarea>
+		<span id=endofinputbox></span>
 		</div>
 	</e> drop				
 	
@@ -76,6 +78,7 @@
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		document.onkeydown = function(e) {
+			// Initial version defined in 3ce/quit.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */

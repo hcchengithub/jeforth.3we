@@ -9,9 +9,8 @@
 		js> document.getElementsByTagName('head')[0] swap ( -- eleHead eleScript ) appendChild
 
 		<js>
-			// replace the vm.plain() defined in jeforth.hta.
 			vm.plain = function (s) {
-				// redefined to use jQuery. in html5.f.
+				// Modified in jquery.f for new type() that uses jQuery.
 				var ss = s + ""; // avoid numbers to fail at s.replace()
 				ss = ss.replace(/&/g,'&amp;')
 				       .replace(/\t/g,' &nbsp; &nbsp;')
@@ -21,15 +20,36 @@
 				       .replace(/\r?\n\r?/g,'<br>');
 				return ss;
 			}
+
 			vm.type = function (s) { 
-				// redefined to use jQuery. -- html5.f	
+				// Modified in jquery.f for new type() that uses jQuery.
 				try {
 					var ss = s + ''; // Print-able test
 				} catch(err) {
 					ss = Object.prototype.toString.apply(s);
 				}
 				if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
-				if(kvm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
+				if(vm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
 			};
+			
+			vm.forthConsoleHandler = function (cmd) {
+				// Modified in jquery.f
+				var rlwas = vm.rstack().length; // r)stack l)ength was
+				vm.type((cmd?'\n> ':"")+cmd+'\n');
+				vm.dictate(cmd);  // Pass the command line to jeForth VM
+				(function retry(){
+					// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+					// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+					// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+					if(vm.rstack().length!=rlwas)
+						setTimeout(retry,100); 
+					else {
+						vm.type(" " + vm.prompt + " ");
+						if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
+							window.scrollTo(0,endofinputbox.offsetTop);
+					}
+				})();
+			}
+			
 		</js>
 	[then]

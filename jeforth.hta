@@ -213,6 +213,7 @@
 
 	// There's no main loop, event driven call back function is this.
 	kvm.forthConsoleHandler = function (cmd) {
+		// Original version in jeforth.hta, will be reDef in jquery.f
 		var rlwas = kvm.rstack().length; // r)stack l)ength was
 		kvm.type((cmd?'\n> ':"")+cmd+'\n');
 		kvm.dictate(cmd);  // Pass the command line to jeForth VM
@@ -224,7 +225,8 @@
 				setTimeout(retry,100); 
 			else {
 				kvm.type(" " + kvm.prompt + " ");
-				window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+				// if ($(inputbox).is(":focus")) <-- do this reDef in jquery.f
+				window.scrollTo(0,endofinputbox.offsetTop);
 			}
 		})();
 	}
@@ -233,6 +235,7 @@
 	// event.shiftKey event.ctrlKey event.altKey event.metaKey
 	// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 	function hotKeyHandler(e) {
+	    // document.onkeydown() initial version defined in jeforth.hta, will be reDef by platform.f
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
 			case 13: /* Enter */

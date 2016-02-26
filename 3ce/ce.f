@@ -1,8 +1,8 @@
 
-\ jeforth.3ce for Google Chrome extension 
-\ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
+	\ jeforth.3ce for Google Chrome extension 
+	\ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
 
-s" ce.f" source-code-header
+	s" ce.f" source-code-header
 
 \
 \ Skip everything if is not running in Chrome extension.
@@ -209,7 +209,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
 				
-				// Message (command) from the host page needs an event handler
+				// Message (command) from the host page, {F7} command line.
+				// needs an event handler
 				chrome.runtime.onMessage.addListener(
 					function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
 						// 先收 data
@@ -265,7 +266,6 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 					var rlwas = vm.rstack().length; // r)stack l)ength was
 					// Avoid responding the ~.f source code when installing.
 					if(cmd.indexOf("shooo!")!=0)
-						// vm.type((cmd?'\n' + document.title + '> ':"")+cmd+'\n'); // before input/outputbox ready
 						vm.type((cmd?'\n> ':"")+cmd+'\n');
 					else
 						cmd = cmd.slice(6); // remove "shooo!"
@@ -279,8 +279,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 						else {
 							vm.type(" " + vm.prompt + " ");
 							if (typeof(endofinputbox)!="undefined"){
-								window.scrollTo(0,endofinputbox.offsetTop);
-								inputbox.focus();
+								if ($(inputbox).is(":focus"))
+									window.scrollTo(0,endofinputbox.offsetTop);
 							}
 						}
 					})();

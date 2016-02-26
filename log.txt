@@ -4626,6 +4626,26 @@
 	利用別的軟體來畫表格, 例如 excel 可能是最好的辦法。可以 copy-paste 給 3hta 
 	然後用 js> $('table')[0].outerHTML . 取得 HTML 放到 Notepad++ 去整理。
 
+[x] forget to sync, now I have to use log.txt -- 15:02 2016/02/20
+[x] Try Ctrl-Enter application, I already know textarea does not return correct element for 
+    anchorNode, how about other things? Try 3ce directly....
+	返回本站首页hao123网址之家www.hao123.com
+	To study 
+	> js> getSelection() tib. <--------- Alt-F2 gets the same result.
+	js> getSelection() \ ==>  (object) inputbox, null
+	 OK 
+	> js> getSelection() tib.
+	js> getSelection() \ ==>  (object) textarea, null 
+	 OK 
+
+	textarea 內不管在哪裡 getSelection() 都是拿到最近的 div parent
+	js> getSelection() js> getSelection()==pop() \ ==> true (boolean)
+	js> getSelection().length .
+	js> getSelection().anchorNode.outerHTML \ ==> <div id="console3ce" class="ce3"> ...
+
+	Drag and drop a picture to 3ce outputbox ==>
+	<div><img src="http://www.hao123.com/images/return.gif" width="60" height="30" alt="返回本站首页" border="0" data-pin-nopin="true"><img src="http://www.hao123.com/images/logo.gif" alt="hao123网址之家www.hao123.com" width="168" height="63" border="0" data-pin-nopin="true"></div>
+
 
 [ ] Now I hope that I can use some script in tr.table. So I can click and run scripts.
     That requires a Security Policy:
