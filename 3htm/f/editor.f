@@ -353,17 +353,20 @@
 						bordered-div :: bordered=true
 					then ;
 
+\ TR Tracking Record System
+
 	: tr.style ( -- styleElement ) \ Setup Tracking Record (tr) table style in <head>
 		[ last literal ] :> style ?dup if ( return the style element ) else
 			<text>
 				<style>
 					.tr table, .tr td { 
 						border:_borderSize_ solid gray; /* HTA 省略 "solid black" 結果怪異 */
-					}/* 
+					}
+					/* 
 						看到表格邊線怪異時,不要急著改參數, Zoom in/Zoom out 可能就好了， 或者試試別
 						的 Web Browser。_borderSize_ 用 0.075em 似乎比較能避免 HTA zoom in/out 邊線
 						變樣，Chrome 沒有這個問題。
-				*/
+					*/
 				</style>
 			</text> 
 			:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
@@ -417,19 +420,23 @@
 		/// Click anywhere in a TR, this command gets you the TR object.
 		
 	: trbutton.edit ( btn -- ) \ In the TR, all span.contentEditable true, and all textarea editable.
+	    \ The input object is usually the [edit] button, but it can be any node of the TR.
 		(tr.parent) ( tr ) 
 		<js> 
-		$('span',tos()).each(function(e){
-			this.contentEditable=true;
-			if(!this.isContentEditable) alert("Failed to contentEditable!\n"+this.outerHTML);
-		})
-		$('textarea',pop()).each(function(e){
-			this.readOnly=false;
-			if(this.readOnly) alert("Failed NOT to be read-only!\n"+this.outerHTML);
-		})
+		if (tos().disabled) { pop() } else {
+			$('span',tos()).each(function(e){
+				this.contentEditable=true;
+				if(!this.isContentEditable) alert("Failed to contentEditable!\n"+this.outerHTML);
+			})
+			$('textarea',pop()).each(function(e){
+				this.readOnly=false;
+				if(this.readOnly) alert("Failed NOT to be read-only!\n"+this.outerHTML);
+			})
+		}
 		</js> ;
 		
 	: trbutton.readonly ( btn -- ) \ In the TR, all span.contentEditable false, and all textarea read-only.
+	    \ The input object is usually the [readonly] button, but it can be any node of the TR.
 		(tr.parent) ( tr ) 
 		<js> 
 		$('span',tos()).each(function(e){
@@ -443,17 +450,27 @@
 		</js> ;
 
 	: trbutton.add ( btn -- ) \ Add a [Description][textarea][attachments] section.
-		(tr.parent) ( tr ) 
+	    \ The input object is usually the [add] button, but it can be any node of the TR.
+		(tr.parent) ( tr ) dup :> disabled if drop exit then
 		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
 		js> tos().innerHTML ( trbody html )
 		s" <span>Description</span><textarea class=trtextarea></textarea><span>Attachments<br></span>" + ( trbody html' )
 		js: pop(1).innerHTML=pop() ;
 
+	: trbutton.close ( btn -- ) \ Close the TR.
+	    \ The input object is usually the [close] button, but it can be any node of the TR.
+		dup trbutton.readonly (tr.parent) ( tr ) :: disabled=true ;
+		/// 把 contentEditable 都關掉, textarea 都 read-only 然後把 tr disable.
+
+	: trbutton.reopen ( btn -- ) \ Reopen the TR.
+	    \ The input object is usually the [reopen] button, but it can be any node of the TR.
+		dup trbutton.edit (tr.parent) ( tr ) :: disabled=false ;
+		/// 把 contentEditable=true textarea read-only=false tr disabled=false.
+
 	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
 		<text> --<br><table class=tr width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
 			<tbody>
-			<tr class=trheader>
-				<td align=center width=15% class=trcreated style="font-size:0.6em;"><span>_now_</span></td>
+			<tr class=trheader>				<td align=center width=15% class=trcreated style="font-size:0.6em;"><span>_now_</span></td>
 				<td align=left class=trabstract><span>Abstract</span></td>
 				<td align=center width=15% class=trmodified style="font-size:0.6em"><span>[ ]</span></td>
 			</tr>
