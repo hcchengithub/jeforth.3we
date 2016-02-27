@@ -454,7 +454,7 @@
 		(tr.parent) ( tr ) dup :> disabled if drop exit then
 		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
 		js> tos().innerHTML ( trbody html )
-		s" <span>Description</span><textarea class=trtextarea></textarea><span>Attachments<br></span>" + ( trbody html' )
+		s" <p><span>Description</span><textarea class=trtextarea></textarea><span>Attachments</span>" + ( trbody html' )
 		js: pop(1).innerHTML=pop() ;
 
 	: trbutton.close ( btn -- ) \ Close the TR.
@@ -467,12 +467,28 @@
 		dup trbutton.edit (tr.parent) ( tr ) :: disabled=false ;
 		/// 把 contentEditable=true textarea read-only=false tr disabled=false.
 
+	: trbutton.stamp ( btn -- ) \ Stamp the modified date-time of the TR.
+	    \ The input object is usually the [stamp] button, but it can be any node of the TR.
+		(tr.parent) ( tr ) dup :> disabled if drop exit then
+		now t.dateTime js: $(".trmodified",pop(1))[0].innerHTML=pop() ;
+
+	: tr.init-buttons ( tr -- tr ) \ Initialize buttons of the TR table.
+		<js> $(".tradd",     tos())[0].onclick=function(e){push(this);vm.execute("trbutton.add");     return(false)}</js>
+		<js> $(".tredit",    tos())[0].onclick=function(e){push(this);vm.execute("trbutton.edit");    return(false)}</js>
+		<js> $(".trreadonly",tos())[0].onclick=function(e){push(this);vm.execute("trbutton.readonly");return(false)}</js>
+		<js> $(".trclose",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.close");   return(false)}</js>
+		<js> $(".trreopen",  tos())[0].onclick=function(e){push(this);vm.execute("trbutton.reopen");  return(false)}</js>
+		<js> $(".trstamp",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.stamp");   return(false)}</js>
+		;
+		/// TOS is the TR element
+		
 	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
-		<text> --<br><table class=tr width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
+		<text> <div class=tr><table width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
 			<tbody>
-			<tr class=trheader>				<td align=center width=15% class=trcreated style="font-size:0.6em;"><span>_now_</span></td>
+			<tr class=trheader>				
+				<td align=center width=12% class=trcreated style="font-size:0.8em;"><span>_now_</span></td>
 				<td align=left class=trabstract><span>Abstract</span></td>
-				<td align=center width=15% class=trmodified style="font-size:0.6em"><span>[ ]</span></td>
+				<td align=center width=12% class=trmodified style="font-size:0.8em"><span>[ ]</span></td>
 			</tr>
 			<tr>
 				<td colspan=3 class=trbody> </td>
@@ -484,18 +500,14 @@
 					<input type=button value='Read only' class=trreadonly>
 					<input type=button value='Close' class=trclose>
 					<input type=button value='Reopen' class=trreopen>
+					<input type=button value='Stamp' class=trstamp>
 				</td>
 			</tr>
 			</tbody>
-		</table></text> 
+		</table></div></text> 
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
 		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
-		</o> ( tr-element )
-		<js> $(".tradd",     tos())[0].onclick=function(e){push(this);vm.execute("trbutton.add");     return(false)}</js>
-		<js> $(".tredit",    tos())[0].onclick=function(e){push(this);vm.execute("trbutton.edit");    return(false)}</js>
-		<js> $(".trreadonly",tos())[0].onclick=function(e){push(this);vm.execute("trbutton.readonly");return(false)}</js>
-		<js> $(".trclose",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.close");   return(false)}</js>
-		<js> $(".trreopen",  tos())[0].onclick=function(e){push(this);vm.execute("trbutton.reopen");  return(false)}</js>
+		</o> ( tr-element ) tr.init-buttons
 		js: $(".tradd",pop())[0].click() \ init 順便 balance the stack
 		; interpret-only
 
