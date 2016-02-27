@@ -373,40 +373,6 @@
 		then ; interpret-only
 		/// Return the styleElement in case we want to modify it.
 	last execute drop \ setup the TR style in the <head>
-	
-	: trbody++ ( trElement -- ) \ Add a [Description][textarea][attachments] section.
-		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
-		js> tos().innerHTML ( trbody html )
-		s" Description<br><textarea class=trtextarea></textarea><br>Attachments<br>" + ( trbody html' )
-		js: pop(1).innerHTML=pop() ;
-
-	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
-		<text> --<br><table class=tr width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
-			<tbody>
-			<tr class=trheader>
-				<td align=center width=15% class=trcreated style="font-size:0.6em;">_now_</td>
-				<td align=left class=trabstract>Abstract</td>
-				<td align=center width=15% class=trmodified style="font-size:0.6em">[ ]</td>
-			</tr>
-			<tr>
-				<td colspan=3 class=trbody> </td>
-			</tr>
-			<tr class=trbuttons>
-				<td colspan=3>
-					<input type=button value='Add' class=tradd>
-					<input type=button value='Edit' class=tredit>
-					<input type=button value='Read-only' class=trreadonly>
-				</td>
-			</tr>
-			</tbody>
-		</table></text> 
-		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
-		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
-		</o> dup trbody++ 
-		js: $(".tradd",tos())[0].onclick=function(e){vm.execute("trbody++");return(false)}
-		js: $(".tredit",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.readOnly=false});return(false)}
-		js: $(".trreadonly",tos())[0].onclick=function(e){$('textarea',$(this).parents('.tr')[0]).each(function(){this.readOnly=true});return(false)}
-		; interpret-only
 
 	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return a subset of the selection object
 		js> getSelection() ( selection-object )
@@ -439,6 +405,82 @@
 		next ;
 		/// See also textarea.readonly.
 		/// textarea.readOnly=false
+
+	: (tr.parent) ( node -- tr ) \ Get the parent TR object of the given node/element.
+		js> $(pop()).parents('.tr')[0] ( tr ) ;
+
+	: tr.parent ( -- ele ) \ Get the parent TR object of the recent anchorNode
+		js> getSelection().anchorNode ?dup if ( anchorNode )
+		else  ( empty ) \ Must be in a textarea I guess
+			js> $("textarea:focus")[0] ( textarea==anchorNode )
+		then ( anchorNode ) (tr.parent) ( tr ) ;
+		/// Click anywhere in a TR, this command gets you the TR object.
+		
+	: trbutton.edit ( btn -- ) \ In the TR, all span.contentEditable true, and all textarea editable.
+		(tr.parent) ( tr ) 
+		<js> 
+		$('span',tos()).each(function(e){
+			this.contentEditable=true;
+			if(!this.isContentEditable) alert("Failed to contentEditable!\n"+this.outerHTML);
+		})
+		$('textarea',pop()).each(function(e){
+			this.readOnly=false;
+			if(this.readOnly) alert("Failed NOT to be read-only!\n"+this.outerHTML);
+		})
+		</js> ;
+		
+	: trbutton.readonly ( btn -- ) \ In the TR, all span.contentEditable false, and all textarea read-only.
+		(tr.parent) ( tr ) 
+		<js> 
+		$('span',tos()).each(function(e){
+			this.contentEditable=false;
+			if(this.isContentEditable) alert("Failed to ~contentEditable!\n"+this.outerHTML);
+		})
+		$('textarea',pop()).each(function(e){
+			this.readOnly=true;
+			if(!this.readOnly) alert("Failed to be read-only!\n"+this.outerHTML);
+		})
+		</js> ;
+
+	: trbutton.add ( btn -- ) \ Add a [Description][textarea][attachments] section.
+		(tr.parent) ( tr ) 
+		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
+		js> tos().innerHTML ( trbody html )
+		s" <span>Description</span><textarea class=trtextarea></textarea><span>Attachments<br></span>" + ( trbody html' )
+		js: pop(1).innerHTML=pop() ;
+
+	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
+		<text> --<br><table class=tr width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
+			<tbody>
+			<tr class=trheader>
+				<td align=center width=15% class=trcreated style="font-size:0.6em;"><span>_now_</span></td>
+				<td align=left class=trabstract><span>Abstract</span></td>
+				<td align=center width=15% class=trmodified style="font-size:0.6em"><span>[ ]</span></td>
+			</tr>
+			<tr>
+				<td colspan=3 class=trbody> </td>
+			</tr>
+			<tr class=trbuttons>
+				<td colspan=3>
+					<input type=button value='Add' class=tradd>
+					<input type=button value='Edit' class=tredit>
+					<input type=button value='Read only' class=trreadonly>
+					<input type=button value='Close' class=trclose>
+					<input type=button value='Reopen' class=trreopen>
+				</td>
+			</tr>
+			</tbody>
+		</table></text> 
+		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
+		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
+		</o> ( tr-element )
+		<js> $(".tradd",     tos())[0].onclick=function(e){push(this);vm.execute("trbutton.add");     return(false)}</js>
+		<js> $(".tredit",    tos())[0].onclick=function(e){push(this);vm.execute("trbutton.edit");    return(false)}</js>
+		<js> $(".trreadonly",tos())[0].onclick=function(e){push(this);vm.execute("trbutton.readonly");return(false)}</js>
+		<js> $(".trclose",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.close");   return(false)}</js>
+		<js> $(".trreopen",  tos())[0].onclick=function(e){push(this);vm.execute("trbutton.reopen");  return(false)}</js>
+		js: $(".tradd",pop())[0].click() \ init 順便 balance the stack
+		; interpret-only
 
 \ -- End --
 
