@@ -478,9 +478,18 @@
 		<js> $(".trreadonly",tos())[0].onclick=function(e){push(this);vm.execute("trbutton.readonly");return(false)}</js>
 		<js> $(".trclose",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.close");   return(false)}</js>
 		<js> $(".trreopen",  tos())[0].onclick=function(e){push(this);vm.execute("trbutton.reopen");  return(false)}</js>
-		<js> $(".trstamp",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.stamp");   return(false)}</js>
-		;
-		/// TOS is the TR element
+		<js> $(".trstamp",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.stamp");   return(false)}</js> 
+		drop ;
+		/// TOS is the TR element. Click anywhere in the TR, Ctrl-Enter 
+		/// to execute tr.parent, then you get the TR element.
+
+	code tr.init ( -- ) \ Initialize all TRs
+		var aa = $('.tr');
+		for (var i=0; i<aa.length; i++) { 
+			push(aa[i]);
+			execute("tr.init-buttons");
+		}
+		end-code
 		
 	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
 		<text> <div class=tr><table width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
@@ -507,8 +516,8 @@
 		</table></div></text> 
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
 		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
-		</o> ( tr-element ) tr.init-buttons
-		js: $(".tradd",pop())[0].click() \ init 順便 balance the stack
+		</o> ( tr-element ) dup tr.init-buttons
+		js: $(".tradd",pop())[0].click()
 		; interpret-only
 
 \ -- End --
