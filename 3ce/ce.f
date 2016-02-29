@@ -124,8 +124,14 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	\
 		\ Host side Chrome extension handler that receives messages from content scripts on target pages.
 		<js>
+		    // Host side onMessage event hander 
+			// Not only install, but also over-install.
+			// May not be useful for host side, you can re-define the handler however.
+		    if (chrome.runtime.onMessage.hasListeners())
+				chrome.runtime.onMessage.removeListener(ce3_host_onmessage);
 			chrome.runtime.onMessage.addListener(
-				function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+				function ce3_host_onmessage (message, sender, sendResponse) { 
+				    // see "3ce SPEC of sendMessage"
 					if (message.forth) {
 						dictate(message.forth);
 					}
@@ -209,10 +215,11 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
 				
-				// Message (command) from the host page, {F7} command line.
-				// needs an event handler
+				// Event handler for messages ( F7 command lines) from the host page.
+				if (chrome.runtime.onMessage.hasListeners())
+					chrome.runtime.onMessage.removeListener(target_f7_handler);
 				chrome.runtime.onMessage.addListener(
-					function(message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+					function target_f7_handler (message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
 						// 先收 data
 						if (message.tos!=undefined) { // Can be "" when readTextFile failed
 							vm.push(message.tos);
@@ -326,6 +333,336 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 			</text> (dictate)
 			char 3ce/quit.f	(install) \ [ ] 不能放上面直接用 inclde quit.f 原因待查
 		then 
+		;
+
+	: attach2 ( -- ) \ Attach 3ce to the active tab.
+		\ Specify the tab to attach
+		  active-tab :> id tabid!
+		\ Wait for the target page to be loaded
+		  500 nap active-tab :> status!="complete" if  
+			." Still loading " active-tab :> title . space
+			0 begin
+				active-tab :> status=="complete" if 1+ then
+				dup 5 > if else \ 5 complete to make sure it's very ready.
+					js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					char . . 300 nap false
+				then 
+			until
+		  then 
+		\ Install jQuery and project-k to target tab.
+		<ce> typeof(jeForth)</ceV> char function != if 	
+			char js/jquery-1.11.2.js inject drop			
+		then
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		\ Install the main program of jeforrth.3ce
+		<ce> typeof(jeforth_project_k_virtual_machine_object)</ceV> char object != if <ce>
+			var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
+			var vm = jeforth_project_k_virtual_machine_object; // "vm" may not be so permanent.
+			// vm is now the jeforth virtual machine object. It has no idea about the outside world
+			// that can be variant applications: HTML, HTA, Node.js, Node-webkit, .. etc.
+			// We need to help it a little as the following example:
+			
+			(function(){
+				vm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
+				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
+				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
+				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
+				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
+				vm.selftest_visible = true; // type() refers to it.
+				vm.debug = false;
+				
+				// Message (command) from the host page, {F7} command line.
+				// needs an event handler
+				if (chrome.runtime.onMessage.hasListeners())
+					chrome.runtime.onMessage.removeListener(target_f7_handler);
+				chrome.runtime.onMessage.addListener(
+					function target_f7_handler (message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+						// 先收 data
+						if (message.tos!=undefined) { // Can be "" when readTextFile failed
+							vm.push(message.tos);
+						} 
+						// 再執行命令
+						if (message.forth) {
+							vm.forthConsoleHandler(message.forth);
+						}
+					}
+				)
+				
+				// I/O  
+				// Forth vm doesn't know how to 'type'. We need teach it by defining the vm.type().
+				// vm.type() is the only mandatory I/O jeforth VM needs to know. 
+				vm.type = function (s) {
+					try {
+						var ss = s + ''; // Print-able test
+					} catch(err) {
+						ss = Object.prototype.toString.apply(s);
+					}
+					if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
+					if(vm.selftest_visible) chrome.runtime.sendMessage({type:s});
+				};
+				
+				// vm.panic() is the master panic handler. The panic() function defined in 
+				// project-k kernel jeforth.js is the one called in code ... end-code.
+				vm.panic = function(state){ 
+					vm.type(state.msg);
+					if (state.serious) debugger;
+				}
+				// We need the panic() function below but we can't see the one in jeforth.js
+				// so one is defined here for convenience.
+				function panic(msg,level) {
+					var state = {
+							msg:msg, level:level
+						};
+					if(vm.panic) vm.panic(state);
+				}
+				
+				vm.clearScreen = function () {
+					vm.screenbuffer = "";
+					$('#outputbox').empty();
+				}
+				
+				// The Forth traditional prompt 'OK' is defined and used in this application main program.
+				// Forth vm has no idea about vm.prompt but your program may want to know.
+				// In that case, as an example, use vm property to store the vm global variables and functions.
+				vm.prompt = "OK";
+	
+				vm.forthConsoleHandler = function(cmd) {
+					var rlwas = vm.rstack().length; // r)stack l)ength was
+					// Avoid responding the ~.f source code when installing.
+					if(cmd.indexOf("shooo!")!=0)
+						vm.type((cmd?'\n> ':"")+cmd+'\n');
+					else
+						cmd = cmd.slice(6); // remove "shooo!"
+					vm.dictate(cmd);  // Pass the command line to jeForth VM
+					(function retry(){
+						// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+						// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+						// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+						if(vm.rstack().length!=rlwas)
+							setTimeout(retry,100); 
+						else {
+							vm.type(" " + vm.prompt + " ");
+							if (typeof(endofinputbox)!="undefined"){
+								if ($(inputbox).is(":focus"))
+									window.scrollTo(0,endofinputbox.offsetTop);
+							}
+						}
+					})();
+				}
+				
+				// Take care of HTML special characters
+				var plain = vm.plain = function (s) {
+					var ss = s + ""; // avoid numbers to fail at s.replace()
+					ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
+					ss = ss.replace(/ /g,'&nbsp;');
+					ss = ss.replace(/</g,'&lt;');
+					ss = ss.replace(/>/g,'&gt;');
+					ss = ss.replace(/\n/g,'<br>');
+					return ss;
+				}
+	
+				vm.greeting = function(){
+					vm.type("j e f o r t h . 3 c e -- v"+version+'\n');
+					vm.type("source code http://github.com/hcchengithub/jeforth.3we\n");
+					return(version);
+				}
+				
+				vm.bye = function(){window.close()};
+				
+				// Called from jsEvalRaw, it will handle the try{}catch{} thing. 
+				vm.writeTextFile = function(pathname,data) { // Write string to text file.
+					panic("Error writing " + pathname + ", jeforth.3ce doesn't know how to wrtieTextFile yet.\n"); 
+				}
+	
+				vm.readTextFile = function(pathname){
+					panic("jeforth.3ce does not have vm.readTextFile(), please use readTextFile directly.\n");
+				}
+			})();
+			</ce>
+			char f/jeforth.f (install)
+			<text> shooo!
+				: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+					s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
+					s" {} js: tos().forth='shooo!stopSleeping';tos().tos=pop(1) " + \ host side packing the message object
+					s" message->tabid " + \ host commands after resume from file I/O
+					js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
+					10000 sleep ;   
+			</text> (dictate)
+			char 3ce/quit.f	(install) \ [ ] 不能放上面直接用 inclde quit.f 原因待查
+		then 
+		;
+
+: attach3 ( -- ) \ Attach 3ce to the active tab.
+		\ Specify the tab to attach
+		  active-tab :> id tabid!
+		\ Wait for the target page to be loaded
+		  500 nap active-tab :> status!="complete" if  
+			." Still loading " active-tab :> title . space
+			0 begin
+				active-tab :> status=="complete" if 1+ then
+				dup 5 > if else \ 5 complete to make sure it's very ready.
+					js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					char . . 300 nap false
+				then 
+			until
+		  then 
+		\ Install jQuery and project-k to target tab.
+		<ce> typeof(jeForth)</ceV> char function != if 	
+			char js/jquery-1.11.2.js inject drop			
+		then
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		char project-k/jeforth.js inject drop 
+		\ Install the main program of jeforrth.3ce
+		<ce>
+			var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
+			var vm = jeforth_project_k_virtual_machine_object; // "vm" may not be so permanent.
+			// vm is now the jeforth virtual machine object. It has no idea about the outside world
+			// that can be variant applications: HTML, HTA, Node.js, Node-webkit, .. etc.
+			// We need to help it a little as the following example:
+			
+			(function(){
+				vm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
+				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
+				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
+				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
+				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
+				vm.selftest_visible = true; // type() refers to it.
+				vm.debug = false;
+				
+				// Message (command) from the host page, {F7} command line.
+				// needs an event handler
+				if (chrome.runtime.onMessage.hasListeners())
+					chrome.runtime.onMessage.removeListener(target_f7_handler);
+				chrome.runtime.onMessage.addListener(
+					function target_f7_handler (message, sender, sendResponse) { // see "3ce SPEC of sendMessage"
+						// 先收 data
+						if (message.tos!=undefined) { // Can be "" when readTextFile failed
+							vm.push(message.tos);
+						} 
+						// 再執行命令
+						if (message.forth) {
+							vm.forthConsoleHandler(message.forth);
+						}
+					}
+				)
+				
+				// I/O  
+				// Forth vm doesn't know how to 'type'. We need teach it by defining the vm.type().
+				// vm.type() is the only mandatory I/O jeforth VM needs to know. 
+				vm.type = function (s) {
+					try {
+						var ss = s + ''; // Print-able test
+					} catch(err) {
+						ss = Object.prototype.toString.apply(s);
+					}
+					if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
+					if(vm.selftest_visible) chrome.runtime.sendMessage({type:s});
+				};
+				
+				// vm.panic() is the master panic handler. The panic() function defined in 
+				// project-k kernel jeforth.js is the one called in code ... end-code.
+				vm.panic = function(state){ 
+					vm.type(state.msg);
+					if (state.serious) debugger;
+				}
+				// We need the panic() function below but we can't see the one in jeforth.js
+				// so one is defined here for convenience.
+				function panic(msg,level) {
+					var state = {
+							msg:msg, level:level
+						};
+					if(vm.panic) vm.panic(state);
+				}
+				
+				vm.clearScreen = function () {
+					vm.screenbuffer = "";
+					$('#outputbox').empty();
+				}
+				
+				// The Forth traditional prompt 'OK' is defined and used in this application main program.
+				// Forth vm has no idea about vm.prompt but your program may want to know.
+				// In that case, as an example, use vm property to store the vm global variables and functions.
+				vm.prompt = "OK";
+	
+				vm.forthConsoleHandler = function(cmd) {
+					var rlwas = vm.rstack().length; // r)stack l)ength was
+					// Avoid responding the ~.f source code when installing.
+					if(cmd.indexOf("shooo!")!=0)
+						vm.type((cmd?'\n> ':"")+cmd+'\n');
+					else
+						cmd = cmd.slice(6); // remove "shooo!"
+					vm.dictate(cmd);  // Pass the command line to jeForth VM
+					(function retry(){
+						// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+						// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+						// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+						if(vm.rstack().length!=rlwas)
+							setTimeout(retry,100); 
+						else {
+							vm.type(" " + vm.prompt + " ");
+							if (typeof(endofinputbox)!="undefined"){
+								if ($(inputbox).is(":focus"))
+									window.scrollTo(0,endofinputbox.offsetTop);
+							}
+						}
+					})();
+				}
+				
+				// Take care of HTML special characters
+				var plain = vm.plain = function (s) {
+					var ss = s + ""; // avoid numbers to fail at s.replace()
+					ss = ss.replace(/\t/g,' &nbsp; &nbsp;');
+					ss = ss.replace(/ /g,'&nbsp;');
+					ss = ss.replace(/</g,'&lt;');
+					ss = ss.replace(/>/g,'&gt;');
+					ss = ss.replace(/\n/g,'<br>');
+					return ss;
+				}
+	
+				vm.greeting = function(){
+					vm.type("j e f o r t h . 3 c e -- v"+version+'\n');
+					vm.type("source code http://github.com/hcchengithub/jeforth.3we\n");
+					return(version);
+				}
+				
+				vm.bye = function(){window.close()};
+				
+				// Called from jsEvalRaw, it will handle the try{}catch{} thing. 
+				vm.writeTextFile = function(pathname,data) { // Write string to text file.
+					panic("Error writing " + pathname + ", jeforth.3ce doesn't know how to wrtieTextFile yet.\n"); 
+				}
+	
+				vm.readTextFile = function(pathname){
+					panic("jeforth.3ce does not have vm.readTextFile(), please use readTextFile directly.\n");
+				}
+			})();
+		</ce>
+		char f/jeforth.f (install)
+		<text> shooo!
+			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+				s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
+				s" {} js: tos().forth='shooo!stopSleeping';tos().tos=pop(1) " + \ host side packing the message object
+				s" message->tabid " + \ host commands after resume from file I/O
+				js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
+				10000 sleep ;   
+		</text> (dictate)
+		char 3ce/quit.f	(install) \ [ ] 不能放上面直接用 inclde quit.f 原因待查
+		
 		;
 
 [then] \ Not Chrome extension environment.
