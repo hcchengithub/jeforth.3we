@@ -543,7 +543,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
-				
+console.log(111);debugger;				
 				// Message (command) from the host page, {F7} command line.
 				// needs an event handler
 				if (chrome.runtime.onMessage.hasListeners())
@@ -560,6 +560,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 						}
 					}
 				)
+console.log(222);debugger;				
 				
 				// I/O  
 				// Forth vm doesn't know how to 'type'. We need teach it by defining the vm.type().
@@ -573,6 +574,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 					if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
 					if(vm.selftest_visible) chrome.runtime.sendMessage({type:s});
 				};
+console.log(333);debugger;				
 				
 				// vm.panic() is the master panic handler. The panic() function defined in 
 				// project-k kernel jeforth.js is the one called in code ... end-code.
@@ -652,7 +654,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				}
 			})();
 		</ce>
+*debug* 555>>>	\ OK	
 		char f/jeforth.f (install)
+*debug* 666>>>	\ OK, it works, 271 words included.	
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 				s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
@@ -661,8 +665,11 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
 				10000 sleep ;   
 		</text> (dictate)
-		char 3ce/quit.f	(install) \ [ ] 不能放上面直接用 inclde quit.f 原因待查
-		
+*debug* 777>>>		
+		\ [ ] 不能放上面直接用 include quit.f 原因待查
+*debug* 888>>>		
+		char 3ce/quit.f	(install) 
+*debug* 999>>>		
 		;
 
 [then] \ Not Chrome extension environment.
