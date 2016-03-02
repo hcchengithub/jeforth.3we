@@ -17,6 +17,7 @@
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 
+	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
 	char body <e> 
 		<div class=console3we>
 		<style>
