@@ -9,8 +9,41 @@
 \
 js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chrome extension environment.
 
+	\
 	\ Background page is the common part of the 3ce isolated world.
+	\
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
+	background-page :> jeforth_project_k_virtual_machine_object [if] [else] \ 不能重複 init background page
+		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
+		dup :: setAttribute("src","project-k/jeforth.js")    ( [object HTMLScriptElement] )
+		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
+		background-page <js> pop().jeforth_project_k_virtual_machine_object = new jeForth()</jsV> \ TOS
+		background-page :: vm=pop()
+		background-page :: vm.screenbuffer=""
+		background-page :: vm.prompt="OK"
+		background-page <js>
+			(function(backgroundPage){
+				
+				var bg = backgroundPage;
+				
+				bg.vm.type = function (s) {
+					var ss;
+					try {
+						ss = s + ''; // Print-able test
+					} catch(err) {
+						ss = Object.prototype.toString.apply(s);
+					}
+					bg.vm.screenbuffer += ss;
+				};
+				
+				bg.vm.panic = function(state) {
+					bg.vm.type(state.msg);
+					if (state.serious) debugger;
+				};
+			})(pop());
+		</js>
+		char f/jeforth.f readTextFile ( file ) background-page :: vm.dictate(pop()) \ <-- include jeforth.f
+	[then]
 
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
 		js> window.open("index.html") background-page :: lastTab=pop() ;
@@ -95,7 +128,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		/// A result is the value of the last statement of the script file.
 		/// In case of project-k it returns an array: ["uses strict"].
 		/// In case of 3ce/background.js it returns an array: [null].
-
+		
 	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
 		char </ce>|</ceV> word ; immediate
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
