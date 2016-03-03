@@ -4672,8 +4672,12 @@
 [ ] is#text? paste-string erase-#text-anchorNode
 	==> See Ynote: jeforth.3ce window.getSelection() 得到的 Selection object 是揮發性的！不能留下來以後用。
 	
-			
-			
+[ ] project-k baby.html, sample.html 突然 run 起來之後 Ctrl-enter 沒有作用, F12 debugger 才看得見
+	問題, 原來是 jQuery 掛不起來：
+	Failed to load resource: net::ERR_NAME_NOT_RESOLVED http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js
+	baby.html:48 Uncaught ReferenceError: jQuery is not defined
+	這常有, 應該要有警告。
+	這是 GFW 的問題, 透過 VPN 就好了。中國境內有沒有 jQuery 的 mirror?
 	
 	
 	

@@ -26,6 +26,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		\ In Chrome extension/app is sure.
 		\ Initial Chrome extension popup page appearance. The font size better be smaller.
 		\
+	\   js:	$("#body")[0].style.width="100%"; \ 不如 660px 大
 		js:	$("#body")[0].style.width="660px"; 
 		js:	$("#header")[0].style.fontSize="0.6em"; 
 		js:	$("#outputbox")[0].style.fontSize="0.8em";
