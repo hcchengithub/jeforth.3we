@@ -10,21 +10,48 @@
 js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chrome extension environment.
 
 	\
-	\ Background page is the common part of the 3ce isolated world.
+	\ Setup the Background page 
+	\ which is the common part of the 3ce isolated world.
 	\
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
-	background-page :> jeforth_project_k_virtual_machine_object [if] [else] \ 不能重複 init background page
+	background-page :> jeforth_project_k_virtual_machine_object [if] 
+		\ 不能重複 init background page
+		\ 因為 background page 一直都在, popup & 3ce extension page can have multiple instances.
+		\ 如果每個 instance 都來 init background page 會怎樣?
+		\ 若要重複 init 只要 jeforth_project_k_virtual_machine_object=null 然後 refresh 
+		\ 3ce ext page 即可。 
+	[else] 
+	
+	    \ include jQuery
+		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
+		dup :: setAttribute("src","js/jquery-2.1.4.min.js")    ( [object HTMLScriptElement] )
+		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
+		
+	    \ include project-k kernel jeforth.js 
 		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
 		dup :: setAttribute("src","project-k/jeforth.js")    ( [object HTMLScriptElement] )
 		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
+		
+		\ init jeforth VM
 		background-page <js> pop().jeforth_project_k_virtual_machine_object = new jeForth()</jsV> \ TOS
 		background-page :: vm=pop()
-		background-page :: vm.screenbuffer=""
-		background-page :: vm.prompt="OK"
 		background-page <js>
 			(function(backgroundPage){
-				
+				// 這時候是在 host page (可以是任何一個 3ce extension page 或 the popup page) 
+				// 幫 background page setup jeforth, 所以都要冠以 bg.vm.something. 到了 background 
+				// page 本身時 scripts 當然只需自稱 vm 即可。
 				var bg = backgroundPage;
+				bg.vm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+				var version = parseFloat(bg.vm.major_version+"."+bg.vm.minor_version);
+				bg.vm.appname = "jeforth.3ce.backgroundpage"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
+				bg.vm.host = bg; // DOM window is the root for 3HTM. global 掛那裡的根據。
+				bg.vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
+				bg.vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
+				bg.vm.selftest_visible = true; // type() refers to it.
+				bg.vm.debug = false;
+				bg.vm.prompt = "OK";
+				bg.vm.bye = function(){bg.close()}; // Does this work? [ ] background page 應該是關不掉的。
+				bg.vm.clearScreen = function(){ bg.vm.screenbuffer = ""; }
 				
 				bg.vm.type = function (s) {
 					var ss;
@@ -40,9 +67,22 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 					bg.vm.type(state.msg);
 					if (state.serious) debugger;
 				};
+				
+				bg.vm.greeting = function(){
+					type("j e f o r t h . 3 c e -- v"+version+'\n');
+					type("source code http://github.com/hcchengithub/jeforth.3we\n");
+					type("Program path " + window.location.toString());
+					return(version);
+				}
+				
 			})(pop());
 		</js>
-		char f/jeforth.f readTextFile ( file ) background-page :: vm.dictate(pop()) \ <-- include jeforth.f
+		
+		\ include jeforth.f
+		char f/jeforth.f         readTextFile ( file ) background-page :: vm.dictate(pop()) 
+		\ include readtextfile.f
+		char f/readtextfile.f    readTextFile ( file ) background-page :: vm.dictate(pop()) 
+		
 	[then]
 
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
