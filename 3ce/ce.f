@@ -1,8 +1,8 @@
 
-	\ jeforth.3ce for Google Chrome extension 
-	\ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
+\ jeforth.3ce for Google Chrome extension 
+\ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
 
-	s" ce.f" source-code-header
+s" ce.f" source-code-header
 
 \
 \ Skip everything if is not running in Chrome extension.
@@ -14,7 +14,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	\ which is the common part of the 3ce isolated world.
 	\
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
-	background-page :> jeforth_project_k_virtual_machine_object [if] 
+<comment>
+	background-page :> jeforth_project_k_virtual_machine_object 
+	[if] 
 		\ 不能重複 init background page
 		\ 因為 background page 一直都在, popup & 3ce extension page can have multiple instances.
 		\ 如果每個 instance 都來 init background page 會怎樣?
@@ -24,7 +26,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	
 	    \ include jQuery
 		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
-		dup :: setAttribute("src","js/jquery-2.1.4.min.js")    ( [object HTMLScriptElement] )
+		dup :: setAttribute("src","js/jquery-1.11.2.js")    ( [object HTMLScriptElement] )
 		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
 		
 	    \ include project-k kernel jeforth.js 
@@ -69,9 +71,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				};
 				
 				bg.vm.greeting = function(){
-					type("j e f o r t h . 3 c e -- v"+version+'\n');
-					type("source code http://github.com/hcchengithub/jeforth.3we\n");
-					type("Program path " + window.location.toString());
+					bg.vm.type("j e f o r t h . 3 c e (background page) -- v"+version+'\n');
+					bg.vm.type("source code http://github.com/hcchengithub/jeforth.3we\n");
+					bg.vm.type("Program path " + bg.window.location.toString());
 					return(version);
 				}
 				
@@ -84,7 +86,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		char f/readtextfile.f    readTextFile ( file ) background-page :: vm.dictate(pop()) 
 		
 	[then]
-
+</comment>
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
 		js> window.open("index.html") background-page :: lastTab=pop() ;
 		
