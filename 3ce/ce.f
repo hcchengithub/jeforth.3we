@@ -26,7 +26,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	
 	    \ include jQuery
 		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
-		dup :: setAttribute("src","js/jquery-1.11.2.js")    ( [object HTMLScriptElement] )
+		dup :: setAttribute("src","js/jquery-1.10.2.js")    ( [object HTMLScriptElement] )
 		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
 		
 	    \ include project-k kernel jeforth.js 
@@ -83,7 +83,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 		\ include jeforth.f
 		char f/jeforth.f         readTextFile ( file ) background-page :: vm.dictate(pop()) 
 		\ include readtextfile.f
-		char f/readtextfile.f    readTextFile ( file ) background-page :: vm.dictate(pop()) 
+		char 3htm/f/readtextfile.f    readTextFile ( file ) background-page :: vm.dictate(pop()) 
 		
 	[then]
 </comment>
