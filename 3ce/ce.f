@@ -7,98 +7,61 @@ s" ce.f" source-code-header
 \
 \ Skip everything if is not running in Chrome extension.
 \
-js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chrome extension environment.
+js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] 
+    \ Chrome extension environment. May be the popup page, the background page, or 3ce extension pages.
 
 	\
-	\ Setup the Background page 
-	\ which is the common part of the 3ce isolated world.
+	\ Get the background page which is the common part of the 3ce isolated world.
 	\
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
-<comment>
-	background-page :> jeforth_project_k_virtual_machine_object 
-	[if] 
-		\ 不能重複 init background page
-		\ 因為 background page 一直都在, popup & 3ce extension page can have multiple instances.
-		\ 如果每個 instance 都來 init background page 會怎樣?
-		\ 若要重複 init 只要 jeforth_project_k_virtual_machine_object=null 然後 refresh 
-		\ 3ce ext page 即可。 
-	[else] 
-	
-	    \ include jQuery
-		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
-		dup :: setAttribute("src","js/jquery-1.10.2.js")    ( [object HTMLScriptElement] )
-		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
-		
-	    \ include project-k kernel jeforth.js 
-		background-page :> document.createElement("script")  ( [object HTMLScriptElement] )
-		dup :: setAttribute("src","project-k/jeforth.js")    ( [object HTMLScriptElement] )
-		background-page :> document.getElementsByTagName('head')[0] :: appendChild(pop())
-		
-		\ init jeforth VM
-		background-page <js> pop().jeforth_project_k_virtual_machine_object = new jeForth()</jsV> \ TOS
-		background-page :: vm=pop()
-		background-page <js>
-			(function(backgroundPage){
-				// 這時候是在 host page (可以是任何一個 3ce extension page 或 the popup page) 
-				// 幫 background page setup jeforth, 所以都要冠以 bg.vm.something. 到了 background 
-				// page 本身時 scripts 當然只需自稱 vm 即可。
-				var bg = backgroundPage;
-				bg.vm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
-				var version = parseFloat(bg.vm.major_version+"."+bg.vm.minor_version);
-				bg.vm.appname = "jeforth.3ce.backgroundpage"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
-				bg.vm.host = bg; // DOM window is the root for 3HTM. global 掛那裡的根據。
-				bg.vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
-				bg.vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
-				bg.vm.selftest_visible = true; // type() refers to it.
-				bg.vm.debug = false;
-				bg.vm.prompt = "OK";
-				bg.vm.bye = function(){bg.close()}; // Does this work? [ ] background page 應該是關不掉的。
-				bg.vm.clearScreen = function(){ bg.vm.screenbuffer = ""; }
-				
-				bg.vm.type = function (s) {
-					var ss;
-					try {
-						ss = s + ''; // Print-able test
-					} catch(err) {
-						ss = Object.prototype.toString.apply(s);
-					}
-					bg.vm.screenbuffer += ss;
-				};
-				
-				bg.vm.panic = function(state) {
-					bg.vm.type(state.msg);
-					if (state.serious) debugger;
-				};
-				
-				bg.vm.greeting = function(){
-					bg.vm.type("j e f o r t h . 3 c e (background page) -- v"+version+'\n');
-					bg.vm.type("source code http://github.com/hcchengithub/jeforth.3we\n");
-					bg.vm.type("Program path " + bg.window.location.toString());
-					return(version);
-				}
-				
-			})(pop());
-		</js>
-		
-		\ include jeforth.f
-		char f/jeforth.f         readTextFile ( file ) background-page :: vm.dictate(pop()) 
-		\ include readtextfile.f
-		char 3htm/f/readtextfile.f    readTextFile ( file ) background-page :: vm.dictate(pop()) 
-		
-	[then]
-</comment>
+
+	<js>
+	//	Host side onMessage event hander that receives messages from content scripts on target pages.
+	//	3ce SPEC of sendMessage({
+	//		forth: ".s", /* for background page only */
+	//		type : "hello world!", /* for all 3ce pages include the popup and the background */
+	//		tos  : anything /* goes with forth: I guess */
+	//	})
+	//
+	chrome.runtime.onMessage.addListener(
+		function ce3_host_onmessage (message, sender, sendResponse) { 
+			// see "3ce SPEC of sendMessage"
+		//	if (message.forth) { // only for background page 
+		//		dictate(message.forth);
+		//	}
+			if (message.type) {
+				vm.type(message.type);
+				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
+			} 
+		//	if (message.tos) { // only for background page, I guess so.
+		//		push(message.tos);
+		//	} 
+		}
+	)
+	</js> 
+
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
 		js> window.open("index.html") background-page :: lastTab=pop() ;
 		
-	: tabs.getCurrent ( -- objTab ) \ Get the current tab object.
+	: tabs.getCurrent ( -- objTab ) \ Get the current Chrome extension tab object.
 		js: chrome.tabs.getCurrent(function(tab){push(tab);execute('stopSleeping')}) 
 		1000 sleep ;
 		/// Used in an extension page or content script in target pages. 
 		/// Returns 'undefined' if used in the popup page or background page.
 
-	tabs.getCurrent [if] [else]
+	: isPopup? ( -- boolean ) \ Is this page the 3ce popup page?
+		\ In Chrome extension/app is sure or this word won't be included at all.
+		tabs.getCurrent boolean if 
+			\ A 3ce extension page or a target page.
+			false
+		else
+			\ it's either the popup page or the background page.
+			\ background page does not have this word so it's the popup page.
+			true
+		then ;
+	
+	isPopup? [if]
 		\
-		\ In Chrome extension/app is sure.
 		\ Initial Chrome extension popup page appearance. The font size better be smaller.
 		\
 	\   js:	$("#body")[0].style.width="100%"; \ 不如 660px 大
@@ -193,31 +156,6 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 	: </ceV> ( "statements" -- ) \ Execute 3ce statements on target tabid. Retrun the value of last statement
 		compiling if literal compile (/ceV) else (/ceV) then ; immediate
 
-	\
-	\ Host side setup to receiving messages (forth commands) from content scripts
-	\ Extension page <==> Content Script or Target page 之間雙向的 message 都是 
-	\ 3ce SPEC of sendMessage({forth:".s",type:"hello world!",tos:anything})
-	\
-		\ Host side Chrome extension handler that receives messages from content scripts on target pages.
-		<js>
-		    // Host side onMessage event hander 
-			chrome.runtime.onMessage.addListener(
-				function ce3_host_onmessage (message, sender, sendResponse) { 
-				    // see "3ce SPEC of sendMessage"
-					if (message.forth) {
-						dictate(message.forth);
-					}
-					if (message.type) {
-						vm.type(message.type);
-						window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
-					} 
-					if (message.tos) {
-						push(message.tos);
-					} 
-				}
-			)
-		</js> 
-		
 	code message->tabid ( anything -- ) \ Send a message of anything to tabid
 		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
 		/// Usage: anything message->tabid
@@ -252,7 +190,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 
 	: attach ( -- ) \ Attach 3ce to the active tab.
 		\ Specify the tab to attach
-		  active-tab :> id tabid!
+		  isPopup? if active-tab :> id tabid! else tabs.select then
 		\ Wait for the target page to be loaded
 		  500 nap active-tab :> status!="complete" if  
 			." Still loading " active-tab :> title . space
@@ -396,6 +334,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 			})();
 		</ceV>  drop \ Use /ceV for synchronous
 		char f/jeforth.f (install)
+*debug* 2233>>
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 				s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
@@ -404,8 +343,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] \ Chro
 				js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
 				10000 sleep ;   
 		</text> (dictate)
+*debug* 2244>>
 		\ [ ] 不能放上面直接用 include quit.f 原因待查 <-- try attach3
-		char 3ce/quit.f	(install) 
+		char 3ce/target.f	(install) 
 		;
 
 [then] \ Not Chrome extension environment.

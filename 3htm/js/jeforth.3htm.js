@@ -64,9 +64,11 @@
 				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
 				var q = "3htm/f/quit.f";
-				var kk = $.get(k,'text'); // callback only when success, not suitable, 
+				var kk = $.get(k,'text');
 				var rr = $.get(r,'text');
 				var qq = $.get(q,'text');
+				// $.get() callback only when success, so it's not suitable.
+				// this is my workaround:
 				(function retry(){
 					if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
 						setTimeout(retry,100); 
