@@ -11,7 +11,7 @@
 		vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
 		vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
 		vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
-		vm.selftest_visible = true; // type() refers to it.
+		vm.selftest_visible = true; // Dummy, background page does not have a display.
 		
 		// vm.type() is the master typing or printing function.
 		// The type() called in code ... end-code is defined in the kernel jeforth.js.
@@ -22,7 +22,7 @@
 			} catch(err) {
 				ss = Object.prototype.toString.apply(s);
 			}
-			if(vm.screenbuffer!=null && vm.selftest_visible) 
+			if(vm.screenbuffer!=null) 
 				vm.screenbuffer += ss; // 填 null 就可以關掉。
 		}
 		
@@ -82,7 +82,7 @@
 
 				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
-				var q = "3ce/quit.f";
+				var q = "3ce/background.f";
 				var kk = $.get(k,'text'); 
 				var rr = $.get(r,'text');
 				var qq = $.get(q,'text');

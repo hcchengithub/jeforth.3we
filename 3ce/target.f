@@ -18,6 +18,7 @@
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 
 	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
+	
 	char body <e> 
 		<div class=console3we>
 		<style>
@@ -55,6 +56,11 @@
 		</div>
 	</e> drop				
 	
+	js> vm.type            value original.type       // ( -- function ) type to host
+	js> document.onkeydown value original.onkeydown  // ( -- function ) original
+	null value target.type         // ( -- function ) type to outputbox
+	null value target.onkeydown    // ( -- function ) Fire inputbox command
+	
 	<js>
 		$('#rev').html(vm.version); // also .commandLine, .applicationName, ...
 		$('#location').html(window.location.toString()); // it's built-in in DOM
@@ -62,10 +68,10 @@
 		
 		// vm.type() is the master typing or printing function.
 		// The type() called in code ... end-code is defined in the kernel jeforth.js.
-		// We need to use type() below, and we can't see the jeforth.js' type() so one 
-		// is also defined here, even just for a few convenience. The two type() functions 
-		// are both calling the same vm.type().
-		var type = vm.type = function (s) { 
+		// target_type(s) types to the target page outputbox, instead of to the host page 
+		// that may be the popup page or a 3ce extension page.
+		// vm.type = target_type;
+		function target_type(s) { 
 			try {
 				var ss = s + ''; // Print-able test
 			} catch(err) {
@@ -74,11 +80,13 @@
 			if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
 			if(vm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
 		}
+		vm.g["target.type"] = target_type;
 
 		// onkeydown,onkeypress,onkeyup
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
-		document.onkeydown = function(e) {
+		// document.onkeydown = target_onkeydown;
+		function target_onkeydown(e) {
 			// Initial version defined in 3ce/quit.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
@@ -90,19 +98,24 @@
 			}
 			return (true); // pass down to following handlers 
 		}
-		
+		vm.g["target.onkeydown"] = target_onkeydown;
 	</js>
+	target.type      	js: vm.type=pop()
+	target.onkeydown 	js: document.onkeydown=pop()
+\	original.type       js: vm.type=pop()
+\	original.onkeydown  js: document.onkeydown=pop()
+	
 	: cr ( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 		js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
 		/// redefined in quit.f, 1 nap 使輸出流暢。
 		/// Focus the display around the inputbox.
-
+	
 	include 3htm/f/element.f		\ HTML element manipulation
 	include 3htm/f/platform.f		
 	include f/mytools.f		
 	include 3htm/f/editor.f
 
-	\ ------------ End of jeforth.f -------------------
+	\ ------------ End of target.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
 	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()
 

@@ -9,7 +9,11 @@
 	\ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	js: tick('<selftest>').buffer="" \ recycle the memory
-
+	
+	: tabid ( -- tabid ) \ The working tab's id.
+		js> window.workingTabId ;
+		
 	code message->tabid ( anything -- ) \ Send a message of anything to tabid
 		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
 		/// Usage: anything message->tabid
+

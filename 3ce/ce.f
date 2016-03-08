@@ -25,7 +25,6 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	//
 	chrome.runtime.onMessage.addListener(
 		function ce3_host_onmessage (message, sender, sendResponse) { 
-			// see "3ce SPEC of sendMessage"
 		//	if (message.forth) { // only for background page 
 		//		dictate(message.forth);
 		//	}
@@ -33,9 +32,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 				vm.type(message.type);
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
 			} 
-		//	if (message.tos) { // only for background page, I guess so.
-		//		push(message.tos);
-		//	} 
+			if (message.tos) { // Receving data from target page
+				push(message.tos);
+			} 
 		}
 	)
 	</js> 
@@ -188,9 +187,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 		js: push({active:true}) tabs.query :> [0] ;
 		/// Used by 3ce popup page.
 
-	: attach ( -- ) \ Attach 3ce to the active tab.
-		\ Specify the tab to attach
-		  isPopup? if active-tab :> id tabid! else tabs.select then
+	: attach ( tabid -- ) \ Attach 3ce to the specified target tab.
+		\ Activate the target tab
+		depth if ( Tab ID ) else
+			isPopup? if active-tab else tabid then ( Tab ID )
+		then ( Tab ID ) tabid! 
+		tabid js: chrome.tabs.update(pop(),{active:true})
 		\ Wait for the target page to be loaded
 		  500 nap active-tab :> status!="complete" if  
 			." Still loading " active-tab :> title . space
@@ -334,7 +336,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 			})();
 		</ceV>  drop \ Use /ceV for synchronous
 		char f/jeforth.f (install)
-*debug* 2233>>
+
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 				s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
@@ -343,10 +345,14 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 				js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
 				10000 sleep ;   
 		</text> (dictate)
-*debug* 2244>>
+
 		\ [ ] 不能放上面直接用 include quit.f 原因待查 <-- try attach3
 		char 3ce/target.f	(install) 
 		;
+		/// Usage : 
+		/// 237 ( tabid ) attach
+		/// tabs.select tabid attach
+		/// ( empty, tabid by default or active-tab if from popup ) attach 
 
 [then] \ Not Chrome extension environment.
 
