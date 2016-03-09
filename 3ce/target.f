@@ -60,7 +60,7 @@
 	js> document.onkeydown value original.onkeydown  // ( -- function ) original
 	null value target.type         // ( -- function ) type to outputbox
 	null value target.onkeydown    // ( -- function ) Fire inputbox command
-	
+
 	<js>
 		$('#rev').html(vm.version); // also .commandLine, .applicationName, ...
 		$('#location').html(window.location.toString()); // it's built-in in DOM
@@ -100,11 +100,16 @@
 		}
 		vm.g["target.onkeydown"] = target_onkeydown;
 	</js>
-	target.type      	js: vm.type=pop()
-	target.onkeydown 	js: document.onkeydown=pop()
-\	original.type       js: vm.type=pop()
-\	original.onkeydown  js: document.onkeydown=pop()
-	
+
+	: display->host ( -- ) \ Target page forth console display output to host page.
+		cr ." Target page display switch to 3ce extension pages." cr
+		original.type js: vm.type=pop() ;
+	: display->local ( -- ) \ Target page forth console display output to local outputbox.
+		cr ." Target page display switch to local outputbox." cr
+		target.type js: vm.type=pop() ;
+	last execute \ Switch jeforth console to target page's local outputbox/inputbox.
+	target.onkeydown js: document.onkeydown=pop() \ May conflict with target page's original settings.
+
 	: cr ( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 		js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
 		/// redefined in quit.f, 1 nap 使輸出流暢。

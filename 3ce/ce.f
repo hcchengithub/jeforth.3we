@@ -25,9 +25,16 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	//
 	chrome.runtime.onMessage.addListener(
 		function ce3_host_onmessage (message, sender, sendResponse) { 
-		//	if (message.forth) { // only for background page 
-		//		dictate(message.forth);
-		//	}
+			kvm.push(message);kvm.push(sender);kvm.push(sendResponse);
+			kvm.execute("host-message-handler");
+		}
+	)
+	</js> 
+	
+	: host-message-handler ( message sender sendResponse -- ) \ 
+		2drop \ sender and sendResponse are not used so far
+		<js>
+			var message = pop();
 			if (message.type) {
 				vm.type(message.type);
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
@@ -35,10 +42,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 			if (message.tos) { // Receving data from target page
 				push(message.tos);
 			} 
-		}
-	)
-	</js> 
-
+		</js> ;
+		/// 
+		
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
 		js> window.open("index.html") background-page :: lastTab=pop() ;
 		
@@ -190,7 +196,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	: attach ( tabid -- ) \ Attach 3ce to the specified target tab.
 		\ Activate the target tab
 		depth if ( Tab ID ) else
-			isPopup? if active-tab else tabid then ( Tab ID )
+			isPopup? if active-tab :> id else tabid then ( Tab ID )
 		then ( Tab ID ) tabid! 
 		tabid js: chrome.tabs.update(pop(),{active:true})
 		\ Wait for the target page to be loaded
