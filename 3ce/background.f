@@ -13,7 +13,7 @@
 	: tabid ( -- tabid ) \ The working tab's id.
 		js> window.workingTabId ;
 		
-	code message->tabid ( anything -- ) \ Send a message of anything to tabid
+	code message->tabid ( {3ce SPEC of message} -- ) \ Send a message of anything to tabid
 		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
 		/// Usage: anything message->tabid
 

@@ -60,22 +60,21 @@
 			// jQuery convention, learned from W3School, make sure web page is ready.
 			function() {
 				// Background page onMessage event hander 
-				// 3ce SPEC of sendMessage({
-				//	forth: ".s", /* for background page only */
-				//	type : "hello world!", /* for all 3ce pages include the popup and the background */
-				//	tos  : anything /* goes with forth: I guess */
-				// })
+				// See log.json "3ce SPEC of sendMessage".
 				chrome.runtime.onMessage.addListener(
 					function ce3_background_onmessage (message, sender, sendResponse) { 
 						// see "3ce SPEC of sendMessage"
+						if (message.addr!="background") return;
+						if (message.tos!=undefined) {
+							vm.push(message.tos);
+						} 
 						if (message.forth) {
 							vm.dictate(message.forth);
 						}
-						if (message.type) { // type to vm.screenbuffer, although background page has no display.
+						if (message.type) { 
+							// type to vm.screenbuffer, although background page has no display.
+							// this is useful for debugging and experiments I think
 							vm.type(message.type);
-						} 
-						if (message.tos) {
-							vm.push(message.tos);
 						} 
 					}
 				)

@@ -30,11 +30,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 		}
 	)
 	</js> 
-	
+		
 	: host-message-handler ( message sender sendResponse -- ) \ 
 		2drop \ sender and sendResponse are not used so far
 		<js>
 			var message = pop();
+			if (message.addr && message.addr!=vm.g.myTabId) return;
 			if (message.type) {
 				vm.type(message.type);
 				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
@@ -42,6 +43,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 			if (message.tos) { // Receving data from target page
 				push(message.tos);
 			} 
+			if (message.forth) { // For fun or for tests, execute commands from target page
+				vm.dictate(message.forth);
+			}
 		</js> ;
 		/// 
 		
@@ -53,6 +57,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 		1000 sleep ;
 		/// Used in an extension page or content script in target pages. 
 		/// Returns 'undefined' if used in the popup page or background page.
+
+	tabs.getCurrent :> id value myTabId // ( -- tabid ) 3ce extension page's Tab ID.
 
 	: isPopup? ( -- boolean ) \ Is this page the 3ce popup page?
 		\ In Chrome extension/app is sure or this word won't be included at all.
@@ -234,9 +240,10 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
 
-				// Message (or F7 forth command line) from the host page needs an event handler
+				// Message (or F7 forth command line) from the host page needs an 
+				// event handler on this target page
 				function target_f7_handler (message, sender, sendResponse) { 
-					// see "3ce SPEC of sendMessage"
+					// 不用管 addr: field, 本來就只有指定的 target page 才會收到這個 message。
 					// 先收 data
 					if (message.tos!=undefined) { // Can be "" when readTextFile failed
 						vm.push(message.tos);
@@ -343,13 +350,32 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 		</ceV>  drop \ Use /ceV for synchronous
 		char f/jeforth.f (install)
 
+		s" js: vm.g.myTabId=" tabid + (dictate) \ equivalent to "tabs.getCurrent :> id" on target page
+		
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 				s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
 				s" {} js: tos().forth='shooo!stopSleeping';tos().tos=pop(1) " + \ host side packing the message object
 				s" message->tabid " + \ host commands after resume from file I/O
-				js: chrome.runtime.sendMessage({forth:pop()}) \ dictate host page to execute the above statements.
+				\
+				\ Above lines composed the TOS command string:
+				\ stack["
+				\	s' pathname' readTextFile \ background page read the file
+				\	{} js: tos().forth='shooo!stopSleeping';tos().tos=pop(1) 
+				\   /* packup an 3ce message object that will wake up the target page 
+				\   ** and its TOS is the text file
+				\   */
+				\   message->tabid /* instruct the target page to do the above task */
+				\ "]
+				
+				\ dictate background page to execute the above statements.
+				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
+				/// 這個 word 很曲折，先由 target page 下令請 background page 讀檔，同時
+				/// 還交代 background page 在讀好該檔之後打一個 message 給 target page, 該
+				///	message 使 target page stopSleeping 並且把讀好的 text file 塞進 target
+				/// page 的 TOS, 因此它一旦 resume 回來 TOS 就是讀回來的 text file 了。
+
 		</text> (dictate)
 
 		\ [ ] 不能放上面直接用 include quit.f 原因待查 <-- try attach3
