@@ -99,7 +99,7 @@ s" html5.f"		source-code-header
 				\ Must use jQuery append(), because HTMLelement.appendChild(node) is not suitable
 				
 : <e>			( "jQuery selector" <html> -- "html" ) \ HTML section header. Get HTML tags.
-				char \s*(</e>|</o>|</h>) word \ 前置空白會變成 [object Text] 必須消除。
+				char (</e>|</o>|</h>) word
 				compiling if literal then ; immediate
 				last dup alias <o> immediate // ( <html> -- "html" ) Starting a HTML section append to output box.
 				alias <h> immediate // ( <html> -- "html" ) Starting a HTML section append to <HEAD>. 
@@ -107,6 +107,7 @@ s" html5.f"		source-code-header
 				/// respectively, so far. 分開寫也可以，併成一個只是圖方便。
 
 : </o>			( "html" -- element ) \ Delimiter of <o>, (O)utputbox.
+				compiling if compile trim else trim then
 				char #outputbox compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
@@ -123,11 +124,13 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				/// Usage: "string" </o> when "string" contains <o></o>.
 
 : </h>			( "html" -- element ) \ Delimiter of <h>, (H)ead section.
+				compiling if compile trim else trim then
 				char head compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
 
 : </e>			( "jQuery selector" "html" -- element ) \ Delimiter of <e>, general purpose.
+				compiling if compile trim else trim then 
 				compiling if compile swap compile doElement 
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>

@@ -30,7 +30,9 @@
 	: ce! ce-history js: pop().push(pop()) ; // ( element -- ) Set current-element
 		/// 非 element 的雜物可以放進去,但 ce@ 有防呆會把它丟掉。
 	
-	js> outputbox ce! \ Default current-element points to the display area of the forth console
+	\ Default current-element points to outputbox if existing.
+	js> document.getElementById("outputbox") ?dup [if] [else] js> document [then] ce! 
+	
 	: ce@ ( -- element ) \ Get current-element
 		ce-history :> length if else js> window.document ce! then \ guarantee history is not empty
 		ce-history js> tos()[pop().length-1] ( history.tos )

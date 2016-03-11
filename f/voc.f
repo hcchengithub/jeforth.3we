@@ -135,15 +135,15 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 					*** also current order vocs
 					js: vm.selftest_visible=false
 					also vvv
-					js: kvm.screenbuffer=kvm.screenbuffer?kvm.screenbuffer:""; \ enable kvm.screenbuffer, it stops working if is null.
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
+					js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stops working if is null.
+					js> vm.screenbuffer.length constant start-here // ( -- n ) 
 					cr only forth also vvv also vvv000 definitions current char vvv000 = \ true
 					order 
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("search: forth,vvv,vvv000")!=-1 </jsV> \ true true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("define: vvv000")!=-1 </jsV> \ true true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("search: forth,vvv,vvv000")!=-1 </jsV> \ true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("define: vvv000")!=-1 </jsV> \ true true true
 					vocs
 					js: vm.selftest_visible=true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("vocs: forth,vvv,vvv000")!=-1 </jsV> \ true true true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("vocs: forth,vvv,vvv000")!=-1 </jsV> \ true true true true
 					[d true,true,true,true d] [p 'current','definitions','order','vocs',
 					'get-current','get-order','get-vocs','forth' p]
 				</selftest>
@@ -243,7 +243,7 @@ code (marker)   ( "name" -- ) \ Create a word named <name>. Run <name> to forget
 					[d true,false d] [p '(marker)','marker' p]
 				</selftest>
 
-code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
+code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
 				var spec = nexttoken("\r|\n").replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 					push(order[j]); // vocabulary
@@ -265,24 +265,24 @@ code words		( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screene
 				<selftest>
 					marker ---
 					*** words modified for volcabulary
-					js> kvm.screenbuffer.length constant start-here // ( -- n ) 
+					js> vm.screenbuffer.length constant start-here // ( -- n ) 
 					js: vm.selftest_visible=false
 					words \ 
 					js: vm.selftest_visible=true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("-------- forth (")!=-1 </jsV> \ true
-					start-here <js> kvm.screenbuffer.slice(pop()).indexOf("words) --------")!=-1 </jsV> \ true true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("-------- forth (")!=-1 </jsV> \ true
+					start-here <js> vm.screenbuffer.slice(pop()).indexOf("words) --------")!=-1 </jsV> \ true true
 					[d true,true d] [p "words" p]
 					---
 				</selftest>
 
-: help			( <[pattern [switch]]> -- )  \ Print help message of screened words
+: help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
 				char \r|\n word ( spec )
 				js> tos().length if 
 					<js>
 					var spec = pop();
 					for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 						push(order[j]); // vocabulary
-						push(spec=='*'?"":spec); // "[pattern [switch]]" or "" if spec is '*'
+						push(spec=='*'?"":spec); // "[pattern [-t|-T|-n|-f]]]" or "" if spec is '*'
 						execute("(help)");
 						if (tos()){
 							type("\n-------- " + order[j] + " --------\n"); 

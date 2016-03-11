@@ -1,7 +1,7 @@
 
-	\ editor.f 
-	\ Editor commands for 3hta and 3nw to edit HTML documents directly
-	\ in jeforth window.
+\ editor.f 
+\ Editor commands for 3hta and 3nw to edit HTML documents directly
+\ in jeforth window.
 	
 	include 3htm/f/unindent.f
 	
@@ -13,7 +13,7 @@
 	
 	\ Setup the handler of clicks that are poping up the editbox.
 	<js>
-		body.onclick = function(){
+		document.body.onclick = function(){
 			push(true); // true let the river run, false stop bubbling
 			execute("single-click"); // execute() does nothing if undefined yet
 			return(pop()); // right-click ( flag -- ... flag' )
@@ -151,10 +151,11 @@
 		ce@ edit-node false ( stop bubbling ) ;
 
 	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch editbox
-		['] {F2} :> EditMode div-editbox not and if ( flag ) 
-			drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
-			{alt-f2} \ Launch editbox
-		then ;
+		\ ['] {F2} :> EditMode div-editbox not and if ( flag ) 
+		\ 	drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
+		\ 	{alt-f2} \ Launch editbox
+		\ then 
+		; /// alt-f2 is good enough, single-click is annoying.
 
 	: #text>html ( -- ) \ convert HTML tags in the ce #text node
 		ce@ if create-editbox \ create div-editbox
@@ -166,40 +167,78 @@
 	
 \ log outputbox
 
-	: log.open ( -- )  \ Get the log.json[last] back to outputbox
-		\ 把整個 log.json 讀回來成一個 array。
-		char log.json readTextFile js> JSON.parse(pop()) 
-		:> slice(-1)[0] <o>escape </o> drop ; 
-		/// 讀出最後一個 snapshot 還原到最後面不破壞現有的 outputbox。
-
-	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
-		js> outputbox :> innerHTML ( outputbox.innerHTML )
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
-
 	: log.length ( -- length )  \ Get the log.json array length
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> length ; 
+
+	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		( i array ) over log.length swap ( i array log.length i ) 
+		s" --<br><h1> jeforth.3we developing log section " swap 
+		+ s"  of 0~" + swap 1- + s" </h1>--<br>" + </o> drop
+		( i array 留下防呆線索 ) [ last literal ] :: lastrecalled=tos(1) 
+		( i array ) :> [pop()] <o>escape </o> drop ; 
+		/// log.recall 是 read log 的基本命令, 其他的都靠它。
+		/// recall 出來放到最後面不破壞現有的 outputbox。
+		/// log.save or Ctrl-s 有危險性, 靠這裡留下防呆的機關: lastrecalled 與 log.length-1 要吻合。
+		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
+		
+	: log.save ( -- ) \ Save outputbox to log.json[last] replace the older.
+		['] log.recall :> lastrecalled 1+ log.length = if \ lastrecalled 與 log.length-1 要吻合
+		toggle-outputbox-edit-mode 50 nap ( 視覺效果 )
+		js> outputbox :> innerHTML ( outputbox.innerHTML )
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
+		toggle-outputbox-edit-mode 50 nap ( 視覺效果 )
+		cr ." log.saved :)" cr 
+		else cr ." log.save canceled, lastrecalled and log.length-1 mismatch!" cr 
+		then ;
+		
+	: {ios}	( -- ) \ Same as log.save but is a Hotkey handler.
+		js> event&&event.ctrlKey if 
+			log.save 
+			false ( terminate bubbleing ) 
+		else 
+			true ( pass down the 's' key ) 
+		then ;
+		
+	: cls ( -- ) \ Clear jeforth console screen
+		['] log.recall :: lastrecalled=0 cls ;
+		/// Modified in editor.f to also clear log.recall :: lastrecalled.
 
 	: log.push ( -- ) \ Push outputbox to log.json.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
+		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
+		<js> confirm("Want to confirm by recalling the last log section?")</jsV>
+		if log.length 1- log.recall then ;
 		/// 這個應該用得不多，要臨時把 outputbox 保存起來時有用。
-		
-	: log.pop ( -- )  \ Pop log.json back to outputbox
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		dup :> pop() <o>escape </o> drop \ 取最後一個 snapshot 還原到 outputbox
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile ;
-		/// log.json 裡不再保留最新 snapshot 還原到最後面不破壞現有的 outputbox。
 
-	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
+	: log.open ( -- )  \ Get the log.json[last] back to outputbox
+		log.length ?dup if 1- log.recall then ;
+		
+	: log.dump ( -- ) \ Recall all log history
+		log.length ?dup if dup for 
+			dup r@ - ( COUNT i ) 
+			log.recall 
+			( COUNT ) 
+		next drop then 
+		s" <h1> ----- The end of jeforth.3we developing log ----- </h1><hr>" </o> drop ;
+		
+	: log.drop ( -- )  \ Drop the TOS of log.json array.
+		<js> confirm("Top of log.json will be deleted, are you sure?")</jsV> if
 		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		( i array ) :> [pop()] <o>escape </o> drop ; 
-		/// No No No! Auto log.save current outputbox before recalling is a terrible idea.
-		/// recall 出來放到最後面不破壞現有的 outputbox。
+		dup :> pop() drop ( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
+
+	: log.roll ( i -- )  \ Roll the specified item up to the top of the log.json stack.
+		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		( i array ) dup :> splice(pop(1),1) over :: push(pop()[0]) ( array' )
+		js> JSON.stringify(pop()) char log.json writeTextFile log.open ;
+
+	: log.pop ( -- )  \ Pop log.json back to outputbox
+		log.open log.drop ;
 
 	: log.overwrite ( -- ) \ Drop older log.json, save outputbox to log.json[0]
 		<js> confirm("Overwrite the entire jason.log! Are yous sure?")</jsV> if
@@ -272,6 +311,214 @@
 		
 	: open ( -- ) \ Open a HTML file to edit
 		pickFile ?dup if create-edit-zone then ;
+		
+	\ -----------------
+	\ HTML editing has a problem. HTML tags can be arranged in strangely that make the document
+	\ difficult to edit. This solution is making every element's border visible so as to reduce the
+	\ difficulty.
+
+	s" thin solid black" constant border-style // ( -- "style" ) CSS style to mark on all elements
+	js> outputbox value bordered-div  // ( -- element ) The target DIV to be bordered
+
+	: border-on ( -- ) \ Mark bordered-div's children with border-style.
+					bordered-div :> childNodes.length for
+						r@ 1- bordered-div :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
+							r@ 1- bordered-div :> childNodes[pop()].style.border \ get original border
+							r@ 1- bordered-div :: childNodes[pop()].orig_border=pop() \ save to orig_border
+							border-style r@ 1- bordered-div :: childNodes[pop()].style.border=pop()
+						then
+					next ; compile-only 
+					/// Don't use this command directly, avoid disterbing save-restore orig_border.
+					/// So I make it a compile-only. Use ~-toggle instead.
+
+	: border-off ( -- ) \ Unmark outputbox's children
+					bordered-div :> childNodes.length for
+						r@ 1- bordered-div :> childNodes[pop()].orig_border ?dup 
+						if \ restore
+							r@ 1- bordered-div :: childNodes[pop()].style.border=pop() \ restore orig_border
+							r@ 1- bordered-div :: childNodes[pop()].orig_border="" \ clear orig_border
+						else \ no restore just clean
+							r@ 1- bordered-div :> childNodes[pop()].style if
+							r@ 1- bordered-div :: childNodes[pop()].style.border=""
+							then
+						then
+					next ; 
+
+	: border-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+					bordered-div :> bordered if \ check recent state
+						border-off
+						bordered-div :: bordered=false \ Yes, we can add properties to an element
+					else
+						border-on
+						bordered-div :: bordered=true
+					then ;
+
+\ TR Tracking Record System
+
+	: tr.style ( -- styleElement ) \ Setup Tracking Record (tr) table style in <head>
+		[ last literal ] :> style ?dup if ( return the style element ) else
+			<text>
+				<style>
+					.tr table, .tr td { 
+						border:_borderSize_ solid gray; /* HTA 省略 "solid black" 結果怪異 */
+					}
+					/* 
+						看到表格邊線怪異時,不要急著改參數, Zoom in/Zoom out 可能就好了， 或者試試別
+						的 Web Browser。_borderSize_ 用 0.075em 似乎比較能避免 HTA zoom in/out 邊線
+						變樣，Chrome 沒有這個問題。
+					*/
+				</style>
+			</text> 
+			:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除 /* 註解 */
+			:> replace(/_borderSize_/mg,"0.075em")   \ 設定表格邊線的 size
+			</h> 
+			[ last literal ] :> style=pop()
+		then ; interpret-only
+		/// Return the styleElement in case we want to modify it.
+	last execute drop \ setup the TR style in the <head>
+
+	: is#text? ( -- {node,offset} true|false ) \ If the anchorNode is #text return a subset of the selection object
+		js> getSelection() ( selection-object )
+		dup :> anchorNode.nodeName=="#text" if
+			( selection ) js: push({node:tos().anchorNode,offset:pop().anchorOffset}) true
+		else drop false then ;
+		/// Selection object from getSelection() is volatile, return its subset instead.
+		/// Example:
+		///   run: now t.dateTime is#text? if paste-string then \ Ctrl-enter to paste date-time
+
+    : paste-string ( "string" {node,offset} -- ) \ Paste the string to a #text anchorNode
+        js> tos().node.nodeValue.slice(0,tos().offset)+pop(1)+tos().node.nodeValue.slice(tos().offset) ( {node,offset} "new string" )
+        js: pop(1).node.nodeValue=pop() ;
+		/// Example:  
+		///   <o> <h1>test</h1></o> <js>
+		///   pop().onclick=function(e){dictate('is#text? [if] dup :: node.nodeValue="" now t.dateTime swap paste-string [then]')} </js>
+		/// Example:
+		///   run: now t.dateTime is#text? if paste-string then \ Ctrl-enter to paste date-time
+
+	: textarea.readonly ( -- ) \ Make all <textarea>, except inputbox, read-only.
+		js> $('textarea').length for 
+			r@ js> $('textarea')[pop()-1].readOnly=true 
+		next js: inputbox.readOnly=false ;
+		/// See also textarea.editable.
+		/// textarea.readOnly=true
+
+	: textarea.editable ( -- ) \ Let all <textarea> editable.
+		js> $('textarea').length for 
+			r@ js> $('textarea')[pop()-1].readOnly=false
+		next ;
+		/// See also textarea.readonly.
+		/// textarea.readOnly=false
+
+	: (tr.parent) ( node -- tr ) \ Get the parent TR object of the given node/element.
+		js> $(pop()).parents('.tr')[0] ( tr ) ;
+
+	: tr.parent ( -- ele ) \ Get the parent TR object of the recent anchorNode
+		js> getSelection().anchorNode ?dup if ( anchorNode )
+		else  ( empty ) \ Must be in a textarea I guess
+			js> $("textarea:focus")[0] ( textarea==anchorNode )
+		then ( anchorNode ) (tr.parent) ( tr ) ;
+		/// Click anywhere in a TR, this command gets you the TR object.
+		
+	: trbutton.edit ( btn -- ) \ In the TR, all span.contentEditable true, and all textarea editable.
+	    \ The input object is usually the [edit] button, but it can be any node of the TR.
+		(tr.parent) ( tr ) 
+		<js> 
+		if (tos().disabled) { pop() } else {
+			$('span',tos()).each(function(e){
+				this.contentEditable=true;
+				if(!this.isContentEditable) alert("Failed to contentEditable!\n"+this.outerHTML);
+			})
+			$('textarea',pop()).each(function(e){
+				this.readOnly=false;
+				if(this.readOnly) alert("Failed NOT to be read-only!\n"+this.outerHTML);
+			})
+		}
+		</js> ;
+		
+	: trbutton.readonly ( btn -- ) \ In the TR, all span.contentEditable false, and all textarea read-only.
+	    \ The input object is usually the [readonly] button, but it can be any node of the TR.
+		(tr.parent) ( tr ) 
+		<js> 
+		$('span',tos()).each(function(e){
+			this.contentEditable=false;
+			if(this.isContentEditable) alert("Failed to ~contentEditable!\n"+this.outerHTML);
+		})
+		$('textarea',pop()).each(function(e){
+			this.readOnly=true;
+			if(!this.readOnly) alert("Failed to be read-only!\n"+this.outerHTML);
+		})
+		</js> ;
+
+	: trbutton.add ( btn -- ) \ Add a [Description][textarea][attachments] section.
+	    \ The input object is usually the [add] button, but it can be any node of the TR.
+		(tr.parent) ( tr ) dup :> disabled if drop exit then
+		js> $(".trbody",pop())[0] \ Assume only one trbody in the tr.table
+		js> tos().innerHTML ( trbody html )
+		s" <p><span>Description</span><textarea class=trtextarea></textarea><span>Attachments</span>" + ( trbody html' )
+		js: pop(1).innerHTML=pop() ;
+
+	: trbutton.close ( btn -- ) \ Close the TR.
+	    \ The input object is usually the [close] button, but it can be any node of the TR.
+		dup trbutton.readonly (tr.parent) ( tr ) :: disabled=true ;
+		/// 把 contentEditable 都關掉, textarea 都 read-only 然後把 tr disable.
+
+	: trbutton.reopen ( btn -- ) \ Reopen the TR.
+	    \ The input object is usually the [reopen] button, but it can be any node of the TR.
+		dup trbutton.edit (tr.parent) ( tr ) :: disabled=false ;
+		/// 把 contentEditable=true textarea read-only=false tr disabled=false.
+
+	: trbutton.stamp ( btn -- ) \ Stamp the modified date-time of the TR.
+	    \ The input object is usually the [stamp] button, but it can be any node of the TR.
+		(tr.parent) ( tr ) dup :> disabled if drop exit then
+		now t.dateTime js: $(".trmodified",pop(1))[0].innerHTML=pop() ;
+
+	: tr.init-buttons ( tr -- tr ) \ Initialize buttons of the TR table.
+		<js> $(".tradd",     tos())[0].onclick=function(e){push(this);vm.execute("trbutton.add");     return(false)}</js>
+		<js> $(".tredit",    tos())[0].onclick=function(e){push(this);vm.execute("trbutton.edit");    return(false)}</js>
+		<js> $(".trreadonly",tos())[0].onclick=function(e){push(this);vm.execute("trbutton.readonly");return(false)}</js>
+		<js> $(".trclose",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.close");   return(false)}</js>
+		<js> $(".trreopen",  tos())[0].onclick=function(e){push(this);vm.execute("trbutton.reopen");  return(false)}</js>
+		<js> $(".trstamp",   tos())[0].onclick=function(e){push(this);vm.execute("trbutton.stamp");   return(false)}</js> 
+		drop ;
+		/// TOS is the TR element. Click anywhere in the TR, Ctrl-Enter 
+		/// to execute tr.parent, then you get the TR element.
+
+	code tr.init ( -- ) \ Initialize all TRs
+		var aa = $('.tr');
+		for (var i=0; i<aa.length; i++) { 
+			push(aa[i]);
+			execute("tr.init-buttons");
+		}
+		end-code
+		
+	: tr.table ( -- trElement ) \ Create a Tracking Record (tr) table on outputbox
+		<text> <div class=tr><table width=96%/*留白供touch screen scrolling*/ cellspacing=0 cellpadding=4>
+			<tbody>
+			<tr class=trheader>				
+				<td align=center width=12% class=trcreated style="font-size:0.8em;"><span>_now_</span></td>
+				<td align=left class=trabstract><span>Abstract</span></td>
+				<td align=center width=12% class=trmodified style="font-size:0.8em"><span>[ ]</span></td>
+			</tr>
+			<tr>
+				<td colspan=3 class=trbody> </td>
+			</tr>
+			<tr class=trbuttons>
+				<td colspan=3>
+					<input type=button value='Add' class=tradd>
+					<input type=button value='Edit' class=tredit>
+					<input type=button value='Read only' class=trreadonly>
+					<input type=button value='Close' class=trclose>
+					<input type=button value='Reopen' class=trreopen>
+					<input type=button value='Stamp' class=trstamp>
+				</td>
+			</tr>
+			</tbody>
+		</table></div></text> 
+		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
+		now t.dateTime swap :> replace(/_now_/mg,pop()) \ Created date-time
+		</o> ( tr-element ) dup tr.init-buttons
+		js: $(".tradd",pop())[0].click()
+		; interpret-only
 
 \ -- End --
 
@@ -322,7 +569,6 @@
 	tib.insert		\ execute the string on TOS
 
 	: save ( -- ) \ Save the editing document
-		char log.save execute \ also save the recent outputbox
 		article if \ avoid destroy the file with empty
 			js> mystyle.length \ 可能跟 editor.f 的重複定義了
 			if js> mystyle[mystyle.length-1] \ 用最後一個

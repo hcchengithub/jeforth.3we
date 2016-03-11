@@ -327,7 +327,14 @@
 	js: document.onmouseout=null
 	js: document.onmouseout=function(){fortheval('hi')} \ It works!!
 	: test begin 80 for char * . 100 sleep next cr again ; \ 弄一個印 * 的 long run 程式。
-	jeforth.hta inputbox 本身就是個最兇的 event 他會改 stack. 別的 event handler 都得負責恢復 stack.
+	
+	用 forth colon word 當 event handler, interrupt service routine 的要領：
+	o  jeforth.hta inputbox 本身就是個最兇的 event 他會改 stack. 別的 event handler 都得
+	   balance data stack and return stack.
+	o  所有的 event handler 都要【接地】也就是直接回到 JavaScript host 也就是 idle state 去。
+	   不能在 dictate() 或 execute() 之後放別的 JavaScript code 還以為是前面做好了才下來的，
+	   錯! dictate() 或 execute() 裡面很可能有 nap 或 sleep 那時候它就衝下來了！ sleep 才可
+	   以 stopSleeping 所以應該是它。
 
 [/] Found a bug!! This bug is still in ~.3wsh and ~.3nw
 	wsh.f run command reads the whole line as a command line. The old definition
@@ -1680,7 +1687,7 @@
 	1. Use code word itself to be a call back function.
 		code tt print(Date());this.timer=setTimeout(arguments.callee,1000) end-code
 		js: clearTimeout(tick('rr').timer)
-	This example works file. But it can't stop. The this.timer was refer to tick('tt') at first
+	This example works fine. But it can't stop. The this.timer was refer to tick('tt') at first
 	time only! For all the rest triggers, 'this' is the DOM window object. So we change it to,
 		code rr print(Date());tick('rr').timer=setTimeout(arguments.callee,1000) end-code
 	and it's perfect. It passed the : test 1111 3000 sleep 22222 ; test too.
@@ -3425,10 +3432,6 @@
 		其實當時我就覺得用 elementObject.toString()=='[object Text]' 有點太過神奇。
 [x] autoit.f 不必寫甚麼在包裝過一層的命令, 給 au3 的使用例子就好了。
 	直接查 autoitx.hlp 看其他命令。多半是 keyboard / mouse 的命令。
-[x] 寫 S7 方便改 keyboard registry 的命令。
-	==> registry.f , autoit.f 都可以 access registry, 但是要改 REG_BINARY for s7 keyboard re-layout 還是用
-		reg.exe 配合 export -> edit -> import 的方法。因為 REG_BINARY 問題太多。
-
 [ ] ie.f 裡 ready not-busy 常常等很久, 有時 readyStatus 卡在 1 不變 4, 配合收 event 可能較好。
 
 [x] hcchen5600 2015/06/29 14:08:57
@@ -4482,11 +4485,8 @@
 	[ ] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
 
 [ ] The template.f project ==> modify.f
-[ ] words and help will list the exactly same word multiple times
-	depends on the order list. Try not. Simply check the recent i and the order
-	list if [i] appear earlier then skip it.
 
-[x] Bug found!!
+[x] Bug found!! 這個難解的問題已經解了, 但留有較罕見的情況仍有問題，如下。
 	> : test js> "123;" ;
 	JavaScript error on word "jsFunc" : Expected ';'
 	--> ok with js: "123;", only js> has the problem.
@@ -4510,19 +4510,16 @@
 			"ab\"cd" is ab"cd
 			Also /...\/.../ or /...[/].../ too.
 
-[ ]	重新考慮要不要這個東西
-	js: jump2endofinputbox.click();
-	contentEditable 之後很煩。
+[x]	重新考慮要不要這個東西	js: jump2endofinputbox.click(); contentEditable 之後很煩。
+	--> Done.
 
-[ ] 立志要用 jeforth 來編輯 log.txt
+[x] 立志要用 jeforth 來編輯 log.txt
 	js> vm.plain(vm.g["log.txt"]) js: article.innerHTML=pop()
 	[x] CSS tab-size IE/Edge 皆無效, 3hta either . . . 
 		證實: char log.html readTextFile js: article.innerHTML=pop()
 		[ ]	先別想用 3hta 寫 log.html 吧!
 
-[ ] 如何把很大的檔案收一部分起來，以方便操作？ 用 hide() 吧？
-
-[ ] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
+[x] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
 	\ caret at the target position
 	\ press Ctrl-F2
 	\ you get a #text node ce (current element)
@@ -4568,5 +4565,119 @@
 		ce@ :> parentNode replaceNode ;
 		
 [ ] jeforth 分析 考勤 刷卡紀錄 上班時數 分析
-[ ] private folder is a new project
+[x] private folder is a new project 
+	--> GitHub is not for private use unless pay the money. Use and Dropbox Yun.Baidu instead.
+	
+[x] 昨天忘了 sync GitHub at home. Today, in my office, I don't edit log.json and 3ce folder
+    so as to remain easy-to-sync of the project. Like maintained by two different people on
+	different topics.
+	--> 照這樣安排只 click 一下 [Sync] 按鈕, 兩邊這樣都成功了。
+	
+[ ] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone 
+    取代，因為 outputbox 只接 log 起來太正點了。保留現有 log.json 的 stack 架構, 但是擴充 random
+	access 的功能。讓它跟 outputbox 結合地更自然、更好用。
 
+[x] words and help will list the exactly same word multiple times
+	depends on the order list. Try not. Simply check the recent i and the order
+	list if [i] appear earlier then skip it.
+[x] words , help 取消 -N 把 -N 變成 default, 改用 -f 代表 fuzzy search 取代本來的 default。
+    --> modify (words) in jeforth.f , 同時讓 -N (now default) 只列出最高 priority 的一個 word。
+	--> Modified jeforth.f, easy. Try on 3ce host page ... fail at selftest. Skip it.
+	--> 連 comments 都改好了. (words), (help), help in jeforth.f, voc.f, and platform.f.
+[x] 寫 S7 方便改 keyboard registry 的命令。
+	==> registry.f , autoit.f 都可以 access registry, 但是要改 REG_BINARY for s7 keyboard
+    	re-layout 還是用 reg.exe 配合 export -> edit -> import 的方法, 3hta dos command can help.
+		因為 REG_BINARY 問題太多。
+	[x] Review registry.f, notes of S7 keyboard remapping. If only I can read registry through
+		3hta then it's convenient enough. 
+	Conclusion is : run the 1 key and 5 key ~.reg files (attached below on this page) to remap 
+	the Acer S7 keyboard. 1 key is the Caps Lock changed to be Mute toggle. 5 keys are Caps Lock 
+	become 'delete', AltGr/Del become Home/End, Fn-Home/Fn-End become Pad-/Pad+ for Windows 10 
+	Zoom in and Zoom out. Refer to my Youdao YNote.
+[x] 3ce Improve readTextFile 
+	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+			s" s' " swap + s" ' readTextFileAuto " + \ command line 以下讓 Extention page (the host page) 執行
+			s" {} js: tos().forth='stopSleeping' js: tos().tos=pop() " + \ host side packing the message object
+			s" " \ host commands after resume from file I/O
+			
+			<js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
+			function(result){push(result);execute('stopSleeping')}) </js>
+			10000 sleep ;   
+[x] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f	
+[x] Popup page can attach 3ce to target page now, so 3ce default tabid should be the 'active' tab.
+	js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number) must be only one
+    js: push({active:true}) tabs.query :> [0] (see)
+	--> modiyf ce.f tabid command --> ok now!
+[x] 3ce attach works fine, but it has to check if the target page has been loaded!
+	Experiment: 0 [begin] active-tab :> status . space 500 nap 1+ dup 100 > [until]	
+	--> Correct, get 3 complete in a row to make sure it's really completed. I saw a complete
+		among "loading" that's why.
+	--> works fine now.
+		
+[x] This line does not print 50 stars, unless remove the 'cr' Bug!!
+	run: 50 for char * . cr next
+	This is ok --> 0 [begin] char * . cr 500 nap 1+ dup 10 > [until] 
+	so [for] ... [next] in trouble? or run: for ... next in trouble?
+	--> try 50 [for] char * . cr 50 nap [next] ----> it works fine!
+	--> <text> 50 for char * . cr next </text> (run:) <--- works fine too!
+	--> So, run: for ... next in trouble!
+	==> (run:) uses 'dictate()' to run the string, change to use 'tib.insert'.
+	
+	利用別的軟體來畫表格, 例如 excel 可能是最好的辦法。可以 copy-paste 給 3hta 
+	然後用 js> $('table')[0].outerHTML . 取得 HTML 放到 Notepad++ 去整理。
+
+[x] forget to sync, now I have to use log.txt -- 15:02 2016/02/20
+[x] Try Ctrl-Enter application, I already know textarea does not return correct element for 
+    anchorNode, how about other things? Try 3ce directly....
+	返回本站首页hao123网址之家www.hao123.com
+	To study 
+	> js> getSelection() tib. <--------- Alt-F2 gets the same result.
+	js> getSelection() \ ==>  (object) inputbox, null
+	 OK 
+	> js> getSelection() tib.
+	js> getSelection() \ ==>  (object) textarea, null 
+	 OK 
+
+	textarea 內不管在哪裡 getSelection() 都是拿到最近的 div parent
+	js> getSelection() js> getSelection()==pop() \ ==> true (boolean)
+	js> getSelection().length .
+	js> getSelection().anchorNode.outerHTML \ ==> <div id="console3ce" class="ce3"> ...
+
+	Drag and drop a picture to 3ce outputbox ==>
+	<div><img src="http://www.hao123.com/images/return.gif" width="60" height="30" alt="返回本站首页" border="0" data-pin-nopin="true"><img src="http://www.hao123.com/images/logo.gif" alt="hao123网址之家www.hao123.com" width="168" height="63" border="0" data-pin-nopin="true"></div>
+
+
+[ ] Now I hope that I can use some script in tr.table. So I can click and run scripts.
+    That requires a Security Policy:
+		Refused to execute inline event handler because it violates the following Content 
+		Security Policy directive: "script-src 'self' 'unsafe-eval'". Either the 'unsafe-inline' 
+		keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline 
+		execution.
+	But after added 'unsafe-inline' into "content_security_policy", reload manifest.json gets
+	this error :
+		嘗試安裝這項擴充功能時顯示警告訊息：
+		Ignored insecure CSP value "'unsafe-inline'" in directive 'script-src'.
+	So, the only way is to use a function directly.
+	--> 奇怪了, 那 jeforth.3ce 已經在用的 script 是怎麼能跑的?
+		--> inputbox 是收 element.onkeydown , defined in jeforth.3htm.js and platform.f
+			只要不是 inline 形式的 onclick="blabla" 就可以了。(嗎)
+		--> 那對 jeforth 很簡單哪! 先取得 element 再幫他掛上 element.onxxxx=function 即可。
+			element.onxxxx=debugger; <--- Failed, 'degugger' unknown.
+			element.onxxxx="dictate('blabla')" <--- no error, but element.onxxxx will be null.
+			element.onxxxx=function(){debugger} <--- OK!! 'this' is the element.
+			h1 :: onclick=function(e){dictate('.s')} <--- OK!!! it works fine.
+	==> 結論就是不要寫成 inline script 就行了, 那沒問題呀!
+	--> See Ynote: jeforth.3ce let tr.table to have script, do-able!
+	
+[ ] is#text? paste-string erase-#text-anchorNode
+	==> See Ynote: jeforth.3ce window.getSelection() 得到的 Selection object 是揮發性的！不能留下來以後用。
+	
+[ ] project-k baby.html, sample.html 突然 run 起來之後 Ctrl-enter 沒有作用, F12 debugger 才看得見
+	問題, 原來是 jQuery 掛不起來：
+	Failed to load resource: net::ERR_NAME_NOT_RESOLVED http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js
+	baby.html:48 Uncaught ReferenceError: jQuery is not defined
+	這常有, 應該要有警告。
+	這是 GFW 的問題, 透過 VPN 就好了。中國境內有沒有 jQuery 的 mirror?
+	
+	
+	

@@ -22,8 +22,8 @@
 </head>
 <body id=body onload="init();">
 	<div id=header>
-	<!-- div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
-	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div-->
+	<div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
+	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div>
 	<div style="font-family:verdana;">
 	<b><div class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
 	<div style="color:#40B3DF;">
@@ -35,8 +35,11 @@
 	</div>
 	</div>
 	<p>
+	<div class=console3we>
 	<div id="outputbox"></div>
-	<textarea id="inputbox" cols=100 rows=1></textarea><div id=endofinputbox></div>
+	<textarea id="inputbox" rows=1></textarea>
+	<span id=endofinputbox></span>
+	</div>
 </body>
 <!-- moved to html5.f script src="js/jquery-1.10.2.js"></script -->
 <Script src="project-k/jeforth.js"></Script>
@@ -96,7 +99,6 @@
 	}
 	kvm.debug = false;
 	kvm.screenbuffer = ""; // kvm.type() to screenbuffer before I/O ready
-	kvm.inputbox = "";
 	kvm.prompt = "OK";
 	kvm.ado = new ActiveXObject("ADODB.Stream");
 	kvm.fso = new ActiveXObject("Scripting.FileSystemObject");
@@ -211,6 +213,7 @@
 
 	// There's no main loop, event driven call back function is this.
 	kvm.forthConsoleHandler = function (cmd) {
+		// Original version in jeforth.hta, will be reDef in jquery.f
 		var rlwas = kvm.rstack().length; // r)stack l)ength was
 		kvm.type((cmd?'\n> ':"")+cmd+'\n');
 		kvm.dictate(cmd);  // Pass the command line to jeForth VM
@@ -222,7 +225,8 @@
 				setTimeout(retry,100); 
 			else {
 				kvm.type(" " + kvm.prompt + " ");
-				window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+				// if ($(inputbox).is(":focus")) <-- do this reDef in jquery.f
+				window.scrollTo(0,endofinputbox.offsetTop);
 			}
 		})();
 	}
@@ -231,12 +235,13 @@
 	// event.shiftKey event.ctrlKey event.altKey event.metaKey
 	// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 	function hotKeyHandler(e) {
+	    // document.onkeydown() initial version defined in jeforth.hta, will be reDef by platform.f
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
 			case 13: /* Enter */
-				kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
+				var cmd = inputbox.value; // w/o the '\n' character ($10). 
 				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-				kvm.forthConsoleHandler(kvm.inputbox);
+				kvm.forthConsoleHandler(cmd);
 				return(false); 
 		}
 		return (true); // pass down to following handlers 

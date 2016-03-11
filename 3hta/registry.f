@@ -7,6 +7,12 @@
 				/// regkey :> getItem(8) \ ==> 6
 				/// regkey :> lbound() \ ==> 0 OK 
 				/// regkey :> ubound() \ ==> 35 OK 
+				/// <js> // Dump the entire regkey
+				/// 	for(var i=0; i<=vm.g.regkey.ubound(); i++){
+				/// 		push(vm.g.regkey.getItem(i));
+				/// 		dictate(".b space");
+				/// 	}
+				/// </js>				
 
 	: regWrite 	( "strKey[\]"|"value-name" value "type" -- ) \  Write Windows registry 參 SCRIPT56.CHM 
 				WshShell :: regWrite(pop(2),pop(1),pop(0)) ;
@@ -142,7 +148,7 @@
 			[ { 1A 00 
 			\ | 2B 00 
 			] } 1B 00 
-			` ~ 29 00 
+			` ~ 29 00 \ `
 			= + 0D 00 
 			0 ) 0B 00 
 			1 ! 02 00 

@@ -44,6 +44,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					for(var members in obj) i++;
 					return i;
 				}
+
 				// This is a useful common tool. Compare two arrays.
 				vm.g.isSameArray = function (a,b) {
 					if (a.length != b.length) {
@@ -64,6 +65,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 						return true;
 					}
 				}
+
 				// Tool, check if the item exists in the array or is it a member in the hash.
 				// return {flag, key}
 				vm.g.isMember = function (item, thing){
@@ -87,6 +89,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					}
 					return result; // {flag:boolean, value:(index of the array or value of the obj member)}
 				}
+
 				// How to clear all setInterval() and setTimeOut() without knowing their ID?
 				// http://stackoverflow.com/questions/8769598/how-to-clear-all-setinterval-and-settimeout-without-knowing-their-id
 				// 缺點是 vm.g.setTimeout.registered() 會大量堆積，需 delete(vm.g.setTimeout.registered()[id.toString()]) 既然還得記住
@@ -106,6 +109,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					f.registered = function(){return(registered)};
 					return f;    
 				})();
+
 				vm.g.setTimeout = (function(){
 					var registered={};
 					f = function(a,b){
@@ -120,32 +124,8 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 					f.registered = function(){return(registered)};
 					return f;    
 				})();
-				// This is a useful common tool. Help to recursively see an object or forth Word.
-				// For forth Words, view the briefing. For other objects, try to see into it.
-				vm.g.see = function (obj,tab){
-					if (tab==undefined) tab = "  "; else tab += "  ";
-					switch(mytypeof(obj)){
-						case "object" :
-						case "array" :
-							if (obj.constructor != Word) {
-								if (obj&&obj.toString) 
-									type(obj.toString() + '\n');
-								else 
-									type(Object.prototype.toString.apply(obj) + '\n');
-								for(var i in obj) {
-									type(tab + i + " : ");  // Entire array already printed here.
-									if (obj[i] && obj[i].toString || obj[i]===0) 
-										type(tab + obj[i].toString() + '\n');
-									else
-										type(tab + Object.prototype.toString.apply(obj[i]) + '\n');
-								}
-								break;  // if is Word then do default
-							}
-						default : // Word(), Constant(), number, string, null, undefined
-							var ss = obj + ''; // Print-able test
-							type(ss + " (" + mytypeof(obj) + ")\n");
-					}
-				}
+				
+				// jeforth inner interpreter debugger mode opposed to performance mode
 				vm.g.debugInner = function (entry, resuming) {
 					var w = phaseA(entry); // 翻譯成恰當的 w.
 					do{
@@ -1378,7 +1358,6 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				<js>
 					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-					// setTimeout(resume,delay);
 					var timeoutId = vm.g.setTimeout(resume,delay);
 					function resume() { 
 						delete(vm.g.setTimeout.registered()[timeoutId.toString()]);
@@ -1386,7 +1365,7 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}
 				</js> ;
-				/// nap 不用 vm.g.setTimeout 故不能中止，也不會堆積在 vm.g.setTimeout.registered() 裡。
+				/// nap 沒有保留外顯的 timeoutId 故不能中止，但也不會堆積在 vm.g.setTimeout.registered() 裡。
 
 : cr         	js: type("\n") ; // ( -- ) 到下一列繼續輸出 *** 20111224 sam
 				\ 個別 quit.f 裡重定義成 : cr js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop) ;
@@ -1465,22 +1444,30 @@ code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpre
 					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3")
 					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3");
 					// 連做兩次解決 if else then 翻成 [if] else [then] 的現象。 
-				dictate(result);
+				push(result);execute("tib.insert"); // 不能用 dictate(), 多重 suspend 時，會有怪現象。
 				end-code
 				/// Replace "if", "for", "begin", .. etc to "[if]", "[for]", "[beign]" .. etc
 				/// I like to use "if" in interpret mode directly instead of "[if]" and
 				/// to merge them is difficult to me so far. So I defined this word.
 : run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
-				char \r|\n word (run:) ;
-				/// To run multiple lines use <text>...</text> (run:)
+				char \r|\n word (run:) ; interpret-only
+				/// To run multiple lines use <text>...</text> (run:) or "run>" instead of "run:".
+				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
+: run> 			( <string> -- ... ) \ Run multiple lines with "if","begin","for", in interpret mode
+				js> push(ntib);ntib=tib.length;tib.slice(pop()) (run:) ; interpret-only
+				/// run> go through all the rest of the inputbox; 
+				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 
 \ ------------------ Tools  ----------------------------------------------------------------------
 
-: trim			( string -- string' ) \ Remove leading&ending white spaces on one line.
+: trim			( string -- string' ) \ Remove leading&ending white spaces of the multiple line string.
 				\ remove 頭尾 whitespaces. 但 .trim() 舊 JScript v5.6 未 support
-				dup if <js> pop().toString().replace(/(^( |\t)*)|(( |\t)*$)/mg,'') </jsV> 
+				dup if <js> pop().toString().replace(/(^\s*)/,'').replace(/(\s*$)/,'') </jsV>
 				then ;
-				/// if TOS is not a string then do nothing.
+				/// If TOS is not a string then do nothing.
+				/// NOT every line of a multiple line string, only the begin/end of it.
+				/// Work with </o> </h> </e> 前置 white spaces 會變成 [object Text] 必須消除。
+				
 code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
 
@@ -1521,7 +1508,7 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 \ .0r. So I simply use a workaround that prints higher 16 bits and then lower 16 bits respectively.
 \ So JavaScript's opinion about hex won't bother me anymore.
 
-code .r         ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+code (.r)		( num|str n -- "  num|str" ) \ Right adjusted num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				if(typeof i == 'number') {
 					if(vm.g.base == 10){
@@ -1535,10 +1522,12 @@ code .r         ( num|str n -- ) \ Right adjusted print num|str in n characters 
 					i=" "+i;
 					n--;
 				} while(n>0);
-				type(i);
+				push(i);
 				end-code
-
-code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+: .r			( num|str n -- ) \ Print right adjusted num|str in n characters (FigTaiwan SamSuanChen)
+				(.r) . ;
+				
+code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
@@ -1554,11 +1543,12 @@ code .0r        ( num|str n -- ) \ Right adjusted print num|str in n characters 
 					i="0"+i;
 					n--;
 				} while (n>0);
-				type(minus+i);
+				// type(minus+i);
+				push(minus+i);
 				end-code
 				/// Limitation: Negative numbers are printed in a strange way. e.g. "0000-123".
 				/// We need to take care of that separately.
-
+: .0r (.0r) . ;
 				<selftest>
 					<comment> .r 是 FigTaiwan 爽哥那兒抄來的。 JavaScript 本身就有 
 					number.toString(base) 可以任何 base 印出數值。base@ base! hex 
@@ -1654,7 +1644,7 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 				var word_list = words[pop()];
 				var result = [];
 				for(var i=1;i<word_list.length;i++) {
-					if (!pattern) { result.push(word_list[i]); continue; }
+					if (!pattern) { result.push(word_list[i]); continue; } // 沒有 pattern 就是全部
 					switch(option){ 
 						// 這樣寫表示這些 option 都是唯一的。
 						case "-t": // -t for matching type pattern, case insensitive.
@@ -1672,30 +1662,31 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 								result.push(word_list[i]);
 							}
 							break;
-						case "-N": // -N for exactly name only, case sensitive.
-							if (word_list[i].name==pattern) {
-								result.push(word_list[i]);
-							}
-							break;
-						default:
+						case "-f": // -f for fuzzy search in name, help, and comment.
 							var flag = 	(word_list[i].name.toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
 										((word_list[i].help||"").toLowerCase().indexOf(pattern.toLowerCase()) != -1 ) ||
 										((word_list[i].comment||"").toLowerCase().indexOf(pattern.toLowerCase()) != -1);
 							if (flag) {
 								result.push(word_list[i]);
 							}
+							break;
+
+						default: // any other option, includes -N, for exactly name only, case sensitive.
+							if (word_list[i].name==pattern) {
+								result = [word_list[i]];
+							}
 					}
 				}
 				push(result);
 				end-code
 				/// Options: 
-				/// -n pattern in name
-				/// -N pattern is exact name 
-				/// -t pattern in type 
-				/// -T pattern is exact type
-				/// If no option given then pattern matches all names, helps and comments.
+				/// -f pattern matches all names, helps and comments. Case insensitive.
+				/// -n pattern in name. Case insensitive.
+				/// -t pattern in type. Case insensitive. 
+				/// -T pattern is exact type.
+				/// "" pattern is exact name. 
 
-: words			( <["pattern" [-t|-T|-n|-N]]> -- ) \ List all words or words screened by spec.
+: words			( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
 				js> context char \r|\n word ( forth line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip (words) <js>
@@ -1704,11 +1695,11 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 					for (var i=0; i<word_list.length; i++) w += word_list[i].name + " ";
 					type(w);
 				</js> ;
-				/// Original version
+				/// Original version in jeforth.f
 				last :: comment+=tick("(words)").comment
 				/// An empty pattern matches all words.
 
-: (help)		( "word-list" "[pattern [switch]]" -- "msg" ) \ Get help message of screened words
+: (help)		( "word-list" "[pattern [-t|-T|-n|-f]]" -- "msg" ) \ Get help message of screened words
 				\ js> context swap ( voc line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
@@ -1719,10 +1710,10 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 						if (typeof(word_list[i].comment) != "undefined") ss += word_list[i].comment;
 					};ss
 				</jsV> ;
-				/// Original version
+				/// Original version in jeforth.f
 				last :: comment+=tick("(words)").comment
 
-: help			( <["pattern" [-n|-N|-t|-T]]> -- ) \ Print the help of screened words
+: help			( <["pattern" [-t|-T|-n|-f]]> -- ) \ Print the help of screened words
 				js> context char \n|\r word ( voc pattern )
 				js> tos().length if 
 					dup char * = if drop "" then (help) .
@@ -1737,7 +1728,7 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 							Try 'words' command to view all words. It has following options:
 							> words [<pattern> [-n|-N|-t|-T]] 
 							that prints not all but matched words. Try,
-							> help words -N
+							> help words
 							to view more help of 'words' command. 
 							
 							-- help --
@@ -1755,12 +1746,13 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 						last literal
 					] :> general_help . cr
 				then ;
-				/// Original version
+				/// Original version in jeforth.f
 				last :: comment+=tick("(words)").comment
 				/// A pattern of star '*' matches all words.
 				/// Example: 
 				///   help * <-- show help of all words
 				///   help * -N <-- show help of '*' command
+				\ 2016/2/2 改成以原來 -N 為默認 option. -N 未定義屬 default 結果還是原來 -N 的效果。
 				
 				<selftest>
 					<text>
@@ -1773,12 +1765,13 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 					: test ; // testing help words and (words) 32974974
 					/// 9247329474 comment
 					js: vm.selftest_visible=false;vm.screenbuffer=""
-					help test -N
+					\ help test -N
+					help test
 					<js> vm.screenbuffer.indexOf('32974974') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('9247329474') !=-1 </jsV> \ true
-					words 9247329474
+					words 9247329474 -f
 					<js> vm.screenbuffer.indexOf('test') !=-1 </jsV> \ true
-					words test
+					words test -f
 					<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
 					js: vm.selftest_visible=true
@@ -1802,10 +1795,12 @@ code readTextFile ( "pathname" -- string ) \ Return a string, "" if failed
 
 : readTextFileAuto ( "pathname" -- string ) \ Search and read, panic if failed.
 				js> vm.path.slice(0) \ this is the way javascript copy array by value
-				over readTextFile js> tos()!="" if nip nip exit then drop
+				over char readTextFile execute ( call by name for 3ce's reDef'ed readTextFile )
+				js> tos()!="" if nip nip exit then drop
 				js> tos().length for aft ( -- fname [path] )
 					js> tos().pop()+'/'+tos(1) 
-					readTextFile js> tos()!=""
+					char readTextFile execute 
+					js> tos()!=""
 					if ( -- fname [path] file )
 						nip nip r> drop exit \ for..next loop 裡面不能光 exit !!!
 					then drop ( -- fname [path] )
@@ -1930,7 +1925,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 				var w=pop();
 				var basewas = vm.g.base; vm.g.base = 10;
 				if (!(w instanceof Word)) {
-					vm.g.see(w);  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
+					type(JSON.stringify(w,"\n","\t"));  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
 				}else{
 					for(var i in w){
 						if (typeof(w[i])=="function") continue;
@@ -1959,6 +1954,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 				}
 				vm.g.base = basewas;
 				end-code
+
 : see           ' (see) ; // ( <name> -- ) See definition of the word
 
 				<selftest>
@@ -2022,6 +2018,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				/// If no address is given then show the recent breakPoint and 
 				/// its status.
 				/// work with 'jsc' debug console, jsc is application dependent.
+
 : (*debug*) 	( msg -- ) \ Suspend to command prompt, 'q' to quit debugging.
 				cr ." ---- Entering *debug* ----" cr
 				[ last literal ] ( _me )

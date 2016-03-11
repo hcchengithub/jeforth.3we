@@ -1,4 +1,7 @@
 ﻿
+
+?dup [if] [else] 2 [then] ." Sleep after " dup . ."  minutes." cr 1000 60 * * nap
+
 js> vm.appname=="jeforth.3hta" [if]
 	include autoit.f
 	cls <o> <h2> 十分抱歉，這台電腦入睡之後會被無故喚醒，用 jeforth 來簡單解決。
@@ -7,11 +10,11 @@ js> vm.appname=="jeforth.3hta" [if]
 	[begin]
 	\ run shutdown /h  ( shutdown.exe is a Windows built-in utility)
 	au3 :: Shutdown(32) \ Bring the system into 'Standby' power saving mode.
-	<o> <h3>5. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>4. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>3. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>2. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>1. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
+	<o> <h3>5. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>4. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>3. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>2. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>1. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
 	[again]
 [then]
 js> vm.appname=="jeforth.3nw" [if]
@@ -21,11 +24,11 @@ js> vm.appname=="jeforth.3nw" [if]
 	<o> <h1>Bringing the system into sleep .... </h1></o> drop
 	[begin]
     exec :: ('shutdown/h')  ( shutdown.exe is a Windows built-in utility)
-	<o> <h3>5. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>4. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>3. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>2. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
-	<o> <h3>1. wait 20 seconds .... "stop" me?</h3></o> drop cr 20000 nap
+	<o> <h3>5. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>4. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>3. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>2. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
+	<o> <h3>1. wait 120 seconds .... "stop" me?</h3></o> drop cr 120000 nap
 	[again]
 [then]
 
@@ -38,11 +41,11 @@ js> vm.appname=="jeforth.3nd" [if]
 	</text> .
 	[begin]
 	exec :: ('shutdown/h')  ( shutdown.exe is a Windows built-in utility)
-	." 5. wait 20 seconds .... then go back to sleep." cr 20000 nap
-	." 4. wait 20 seconds .... then go back to sleep." cr 20000 nap
-	." 3. wait 20 seconds .... then go back to sleep." cr 20000 nap
-	." 2. wait 20 seconds .... then go back to sleep." cr 20000 nap
-	." 1. wait 20 seconds .... then go back to sleep." cr 20000 nap
+	." 5. wait 120 seconds .... then go back to sleep." cr 120000 nap
+	." 4. wait 120 seconds .... then go back to sleep." cr 120000 nap
+	." 3. wait 120 seconds .... then go back to sleep." cr 120000 nap
+	." 2. wait 120 seconds .... then go back to sleep." cr 120000 nap
+	." 1. wait 120 seconds .... then go back to sleep." cr 120000 nap
 	[again]
 
 [then]

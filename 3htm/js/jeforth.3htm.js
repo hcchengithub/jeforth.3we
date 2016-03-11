@@ -5,7 +5,7 @@
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+		kvm.path = ["dummy", "3ce", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true; // type() refers to it.
 		
@@ -50,7 +50,6 @@
 			return(version);
 		}
 		kvm.debug = false;
-		kvm.inputbox = "";
  		kvm.prompt = "OK";
 		kvm.bye = function(){window.close()};
 		
@@ -65,9 +64,11 @@
 				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
 				var q = "3htm/f/quit.f";
-				var kk = $.get(k,'text'); // callback only when success, not suitable, 
+				var kk = $.get(k,'text');
 				var rr = $.get(r,'text');
 				var qq = $.get(q,'text');
+				// $.get() callback only when success, so it's not suitable.
+				// this is my workaround:
 				(function retry(){
 					if(kk.state()=="pending"||rr.state()=="pending"||qq.state()=="pending")
 						setTimeout(retry,100); 
@@ -94,7 +95,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					if ($(inputbox).is(":focus")) window.scrollTo(0,endofinputbox.offsetTop);
 				}
 			})();
 		}
@@ -103,12 +104,14 @@
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		function hotKeyHandler(e) {
+			// document.onkeydown() initial version defined in jeforth.3thm.js
+			// will be reDef by platform.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */
-					kvm.inputbox = inputbox.value; // w/o the '\n' character ($10). 
+					var cmd = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.forthConsoleHandler(kvm.inputbox);
+					kvm.forthConsoleHandler(cmd);
 					return(false); 
 			}
 			return (true); // pass down to following handlers 

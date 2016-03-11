@@ -10,25 +10,32 @@ also forth definitions
 <comment>
 	<js>
 	// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
-	body.ondblclick = function(){
+	document.body.ondblclick = function(){
 		push(true); // true let the river run, false stop bubbling
 		execute("double-click"); // execute() does nothing if undefined yet
 		return(pop()); // double-click ( flag -- ... flag' )
 	}
 	// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
-	body.onclick = function(){
+	document.body.onclick = function(){
 		push(true);  // true let the river run, false stop bubbling
 		execute("single-click"); // execute() does nothing if undefined yet
 		return(pop()); // single-click ( flag -- ... flag' )
 	}
 	// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
-	body.oncontextmenu = function(){
+	document.body.oncontextmenu = function(){
 		push(true); // true let the river run, false stop bubbling
 		execute("right-click"); // execute() does nothing if undefined yet
 		return(pop()); // right-click ( flag -- ... flag' )
 	}
 	</js>
 </comment>
+
+code run-inputbox ( -- ) \ Used in onKeyDown event handler.
+				var cmd = inputbox.value; // w/o the '\n' character ($10).
+				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+				vm.cmdhistory.push(cmd);
+				vm.forthConsoleHandler(cmd);
+				end-code
 
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
 				<js> confirm("Really want to restart?") </jsV> ;
@@ -67,87 +74,71 @@ also forth definitions
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid red"</js>
 				js: outputbox.contentEditable=true ;
+				
 : outputbox-edit-mode-off ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid white"</js>
 				js: outputbox.contentEditable=false ;
+				
+: toggle-outputbox-edit-mode ( -- ) \ Toggle outputbox edit mode.
+				js> outputbox.contentEditable!="true" if 
+					outputbox-edit-mode-on
+				else 
+					outputbox-edit-mode-off 
+				then ;
+
 : {shift-f2}	( -- ) \ One of the {F2} events, toggle-outputbox-edit-mode
-				js> outputbox.contentEditable!="true" 
-				if outputbox-edit-mode-on
-				else outputbox-edit-mode-off 
-				then false ( true by pass, false terminate ) ;
+				toggle-outputbox-edit-mode false ( false terminate bubbling ) ;
+				
 : {ctrl-f2}		( -- false )
 				<js> alert("You pressed Ctrl-F2 and I am doing nothing.") </js>
 				true ( true by pass, false terminate ) ;
+
 : {alt-f2}		( -- false )
 				<js> alert("You pressed alt-F2 and I am doing nothing.") </js>
 				true ( true by pass, false terminate ) ;
 
-s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
-: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style do nothing
-					r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
-					r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
-					outputbox-high-light-style
-					r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
-					else
-						s' <span style="border:' 
-						outputbox-high-light-style + s' ">' +
-						r@ 1- js> outputbox :> childNodes[pop()].nodeValue +
-						s' </span>' + </o> 
-						r@ 1- js> outputbox :> childNodes[pop()]
-						replaceNode
-					then
-				next ; compile-only 
-				/// Don't use me directly, for not to destroy original style.border.
-				/// Use outputbox-high-light-toggle instead
-: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
-					if \ restore
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
-					else \ no restore just clean
-						r@ 1- js> outputbox :> childNodes[pop()].style if
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
-						then
-					then
-				next ; 
-: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
-				js> outputbox :> highLight if \ check recent state
-					outputbox-high-light-off
-					js> outputbox :: highLight=false \ Yes, we can add properties to an element
-				else
-					outputbox-high-light-on
-					js> outputbox :: highLight=true
-				then ;
-
-
-code {F9}		( -- false ) \ Hotkey handler, Smaller the input box
-				var r = inputbox.rows;
-				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
-				inputbox.rows = Math.max(r,1);
-				if (!r) $("#inputbox").hide();
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
-				push(false);
+\ -----------------
+code active-textarea ( -- objElement ) \ Get the recent active textarea element or null
+				var them = $("textarea"); // An array
+				for ( var i=0; i<them.length; i++){
+					if ($(them[i]).is(":focus")){
+						push(them[i]);
+						return;
+					}
+				}
+				push(null);
 				end-code
-				/// return a false to stop the hotkey event handler chain.
-				last alias {F6} // ( -- flase ) Hotkey handler, Smaller the input box
-								/// Duplicated to recover PowerCam conflict.
+				/// For {F9}/{F10} to change the active textarea rows size.
+
+code {F9}		( -- false ) \ Hotkey handler, Smaller the active textarea or the inputbox.
+				execute("active-textarea"); var ta = pop() || inputbox;
+				var r = ta.rows;
+				if(r<=4) r-=1; else if(r>8) r-=4; else r-=2;
+				ta.rows = Math.max(r,1);
+				if (ta==inputbox) {
+					if (!r) $(ta).hide();
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				}
+				push(false); // Stop event bubbling
+				end-code
+				\ last alias {F6} // ( -- flase ) Hotkey handler, Smaller the input box
+				\ /// Duplicated to recover PowerCam conflict.
 
 code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
-				$("#inputbox").show()
-				var r = 1 * inputbox.rows;
+				execute("active-textarea"); var ta = pop() || inputbox;
+				var r = 1 * ta.rows;
 				if(r<4) r+=1; else if(r>8) r+=4; else r+=2;
-				inputbox.rows = Math.max(r,1);
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
-				push(false);
+				ta.rows = Math.max(r,1);
+				if (ta==inputbox) {
+					$(ta).show() // 縮到最後是 $.hide() 起來的。
+					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				}
+				push(false); // Stop event bubbling
 				end-code
-				/// return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
-				last alias {F7} // ( -- flase ) Hotkey handler, Bigger the input box
-								/// Duplicated to recover PowerCam conflict.
+				\ last alias {F7} // ( -- flase ) Hotkey handler, Bigger the input box
+				\ /// Duplicated to recover PowerCam conflict.
 
 code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 				var selection = getSelection();
@@ -254,7 +245,7 @@ true value up/down-recall-needs-alt-key? // ( -- boolean ) An optional setting. 
 				/// Use Ctrl-M instead of 'Enter' when you want a 'Carriage Return' in none EditMode.
 
 : {backSpace}	( -- boolean ) \ Inputbox keydown handler, erase output box when input box is empty
-				js> inputbox.focus();inputbox.value!=""&&inputbox.value!="\n" if 
+				js> inputbox.value!=""&&inputbox.value!="\n" if 
 					true \ inputbox is not empty, do the norm.
 				else \ inputbox is empty, clear outputbox bottom up
 					js> event==null||!event.altKey \ So as to allow calling {backSpace} programmatically	
@@ -364,7 +355,7 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 				</js> 
 				</o> 2drop ;
 
-code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened words
+code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screened words
 				// execute("parser(words,help)"); var option = pop();
 				var spec = pop().replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
@@ -382,16 +373,16 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 				} 
 				end-code
 				/// Modified by platform.f for HTML table.
-				/// Pattern matches name, help and comment.
-				/// It can be qualified by an option of:
-				///	  -n matches name pattern, case insensitive.
-				///	  -N matches exact name, case sensitive.
-				///   -t matches type pattern, case insensitive.
+				/// By default, pattern matches exact name, case sensitive.
+				/// Pattern can be qualified by an option of:
+				///	  -n matches only name, case insensitive.
+				///	  -f matches name, help and comment, case insensitive.
+				///   -t matches type, case insensitive.
 				///   -T matches exact type, case sensitive.
 				/// Example: 
 				///   help ! -n  shows words with '!' in their name
 
-: help			( <[pattern [-t|-T|-n|-N]]> -- )  \ Print help message of screened words
+: help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
                 char \n|\r word js> tos().length if 
 					js> tos()=='*' if drop "" then
 					(help) 
@@ -496,7 +487,7 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 						<tr>
 						  <td>help [*|pattern [-t|-T|-n|-N]]</td>
 						  <td>You are reading me. 'help' is also an useful command, 
-						  "help *" lists all words' help. "help help -N" to see options.
+						  "help *" lists all words' help. "help help" to see options.
 						  <a href="http://www.camdemy.com/media/19270">Video: Help is helpful</a>.
 						  </td>
 						</tr>
@@ -563,7 +554,6 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 				return(cmd);
 			},
 	};
-
 	$("#inputbox")[0].onkeydown = function(e){
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		if(tick('{Tab}')){if(keycode!=9)tick('{Tab}').index=0} // 按過別的 key 就重來
@@ -572,24 +562,33 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 			case   9: /* Tab  */ if(tick('{Tab}' )){execute('{Tab}' );return(pop());} break;
 			case  38: /* Up   */ if(tick('{up}'  )){execute('{up}'  );return(pop());} break;
 			case  40: /* Down */ if(tick('{down}')){execute('{down}');return(pop());} break;
-			case 13:
-				if (!event.shiftKey) // 想換行用 Shift-Enter 避免把命令發出去
-				if (!tick("{F2}").EditMode || event.ctrlKey) { // 在 EditMode 用 Ctrl-Enter 發出命令
-					var cmd = inputbox.value; // w/o the '\n' character ($10).
-					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					vm.cmdhistory.push(cmd);
-					if (tick("{F2}").EditMode) execute('toggle-inputbox-edit-mode'); // 自動恢復
-					vm.forthConsoleHandler(cmd);
-					return(false);
+			case  13:
+				if (!event.shiftKey && !tick("{F2}").EditMode) {
+					execute("run-inputbox");
+					return(false); // stop bubbling
 				}
-				return(true); // In EditMode
+				return(true); // could be Ctrl-Enter, let document check
+		}
+		return (true); // pass down to following handlers
+	}
+	
+	// {ios} 是 's' pressed when in inputbox or outputbox. Ctrl-s 要 save 存檔。
+	// [x] 有了 console3we 之後, 可以把它簡化，不用兩處都各寫一套 handler。
+	// [ ] 這樣一來，console3weconsole3we 還可以有更多 hotkey !!
+	$(".console3we")[0].onkeydown = function(e){
+		e = (e) ? e : event; 
+		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+		switch(keycode) {
+			case  83: /* s */ if(tick('{ios}')){execute('{ios}');return(pop());} break;  // 's' in inputbox or outputbox
 		}
 		return (true); // pass down to following handlers
 	}
 
 	document.onkeydown = function (e) {
+	    // document.onkeydown() reDef in 3htm/f/platform.f 
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
+			case  13: /* CR  */ if(event.ctrlKey){execute("run-inputbox");return(false)}return(true);
 			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
 			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
 			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
@@ -612,3 +611,42 @@ code (help)		( "[pattern [-t|-T|-n|-N]]" -- )  \ Print help message of screened 
 </js>
 
 previous definitions
+
+
+<comment>
+s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
+
+: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
+						r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+						r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+						outputbox-high-light-style
+						r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
+					then
+				next ; compile-only 
+				/// Don't use this command directly, avoid disterbing save-restore orig_border.
+				/// So I make it a compile-only. Use ~-toggle instead.
+
+: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
+				js> outputbox :> childNodes.length for
+					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
+					if \ restore
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+					else \ no restore just clean
+						r@ 1- js> outputbox :> childNodes[pop()].style if
+						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+						then
+					then
+				next ; 
+
+: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+				js> outputbox :> highLight if \ check recent state
+					outputbox-high-light-off
+					js> outputbox :: highLight=false \ Yes, we can add properties to an element
+				else
+					outputbox-high-light-on
+					js> outputbox :: highLight=true
+				then ;
+</comment>				
