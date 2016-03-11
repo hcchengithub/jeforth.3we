@@ -8,21 +8,15 @@ s" ce.f" source-code-header
 \ Skip everything if is not running in Chrome extension.
 \
 js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] 
-    \ Chrome extension environment. May be the popup page, the background page, or 3ce extension pages.
+    \ Chrome extension environment. May be the popup page, 
+	\ the background page, or 3ce extension pages.
 
-	\
 	\ Get the background page which is the common part of the 3ce isolated world.
-	\
 	js> chrome.extension.getBackgroundPage() value background-page // ( -- window ) Get the background page's window object.
 
 	<js>
-	//	Host side onMessage event hander that receives messages from content scripts on target pages.
-	//	3ce SPEC of sendMessage({
-	//		forth: ".s", /* for background page only */
-	//		type : "hello world!", /* for all 3ce pages include the popup and the background */
-	//		tos  : anything /* goes with forth: I guess */
-	//	})
-	//
+	//	Host side onMessage event hander that receives messages from 
+	//  content scripts on target pages. See 3ce SPEC of sendMessage() defined in log.json.
 	chrome.runtime.onMessage.addListener(
 		function ce3_host_onmessage (message, sender, sendResponse) { 
 			kvm.push(message);kvm.push(sender);kvm.push(sendResponse);
@@ -75,8 +69,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 		\
 		\ Initial Chrome extension popup page appearance. The font size better be smaller.
 		\
-	\   js:	$("#body")[0].style.width="100%"; \ 不如 660px 大
-		js:	$("#body")[0].style.width="660px"; 
+		js:	$("#body")[0].style.width="660px"; \ "100%" 不如 "660px" 大
 		js:	$("#header")[0].style.fontSize="0.6em"; 
 		js:	$("#outputbox")[0].style.fontSize="0.8em";
 	[then]
@@ -108,6 +101,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	 
 	: tabid! ( tabid -- ) \ Set working tab id.
 		background-page :: workingTabId=pop() ;
+		
 	: tabs.get ( tabid -- tabObj ) \ Get the specified tab object.
 		<js> chrome.tabs.get(pop(),function(tab){
 			push(tab);
@@ -134,35 +128,30 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 	: see-manifest ( -- ) \ See the Chrome extension/app manifest hash table.
 		get-manifest js> JSON.stringify(pop(),"\n","\t") . ;
 		
-	: inject ( pathname -- result ) \ Inject a JavaScript file to tabid
-		tabid <js> chrome.tabs.executeScript(pop(), {file:pop()}, 
+	: inject ( tabid {(file|code):source} -- [array] ) \ Inject a JavaScript source code or file to the tab.
+		<js> chrome.tabs.executeScript(pop(1), pop(), 
 		function(result){push(result);execute('stopSleeping')}) </js> 
 		120000 sleep ;
-		/// Have content script to include project-k:
-		/// > char project-k/jeforth.js indect drop 
-		/// The CallBack returns an array which is "The result of the script in every injected frame."
+		/// This word is the base of <ce> (Chrome Extension) commends.
+		/// The result is an array which is "The result of the script in every injected frame."
 		/// A result is the value of the last statement of the script file.
-		/// In case of project-k it returns an array: ["uses strict"].
-		/// In case of 3ce/background.js it returns an array: [null].
 		
 	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
 		char </ce>|</ceV> word ; immediate
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 		/// 必須是【別人的】web page。
 
-	code (/ce) ( "statements" -- ) \ No return value
-		execute('tabid');
-		chrome.tabs.executeScript(pop(),{"code": pop()}); 
-		end-code
+	: (/ceV) ( "statements" -- ) \ Retrun the value of last statement
+		{} js: tos().code=pop(1) tabid swap inject ;
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
+		
+	: (/ce) ( "statements" -- ) \ No return value
+		(/ceV) drop ;
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
 	: </ce> ( "statements" -- ) \ Execute 3ce statements on target tabid. No return value.
 		compiling if literal compile (/ce) else (/ce) then ; immediate
 
-	: (/ceV) ( "statements" -- ) \ Retrun the value of last statement
-		tabid <js> chrome.tabs.executeScript(pop(),{"code": pop()},
-		function(result){push(result);execute('stopSleeping')}) </js> 
-		50000 sleep ;
-		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
 	: </ceV> ( "statements" -- ) \ Execute 3ce statements on target tabid. Retrun the value of last statement
 		compiling if literal compile (/ceV) else (/ceV) then ; immediate
@@ -216,13 +205,13 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 				then 
 			until
 		  then 
-		\ Install jQuery and project-k to target tab.
+		\ Inject jQuery and project-k to target tab.
 		<ce> typeof(jeForth)</ceV> char function != if 	
-			char js/jquery-1.11.2.js inject drop			
+			tabid {} js: tos().file="js/jquery-1.11.2.js" inject drop			
 		then
-		char project-k/jeforth.js inject drop 
+		tabid {} js: tos().file="project-k/jeforth.js" inject drop 
 		
-		\ Install the main program of jeforrth.3ce (jeforth.3htm.js equivalent)
+		\ Inject the main program of jeforrth.3ce (jeforth.3htm.js equivalent)
 		<ce>
 			var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 			var vm = jeforth_project_k_virtual_machine_object; // "vm" may not be so permanent.
@@ -349,11 +338,14 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 			})();
 		</ceV>  drop \ Use /ceV for synchronous
 		char f/jeforth.f (install)
-
 		s" js: vm.g.myTabId=" tabid + (dictate) \ equivalent to "tabs.getCurrent :> id" on target page
-		
+
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
+				\ 這個 word 很曲折，先由 target page 下令請 background page 讀檔，同時
+				\ 還交代 background page 在讀好該檔之後打一個 message 回來, 該 message 
+				\ 使 target page stopSleeping 並且把讀好的 text file 塞進 target page 
+				\ 的 TOS, 因此它一旦 resume 回來 TOS 就是讀回來的 text file 了。
 				s" s' " swap + s" ' readTextFile " + \ command line 以下讓 Extention page (the host page) 執行
 				s" {} js: tos().forth='shooo!stopSleeping';tos().tos=pop(1) " + \ host side packing the message object
 				s" message->tabid " + \ host commands after resume from file I/O
@@ -367,20 +359,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if]
 				\   */
 				\   message->tabid /* instruct the target page to do the above task */
 				\ "]
-				
 				\ dictate background page to execute the above statements.
 				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
-				/// 這個 word 很曲折，先由 target page 下令請 background page 讀檔，同時
-				/// 還交代 background page 在讀好該檔之後打一個 message 給 target page, 該
-				///	message 使 target page stopSleeping 並且把讀好的 text file 塞進 target
-				/// page 的 TOS, 因此它一旦 resume 回來 TOS 就是讀回來的 text file 了。
-
-		</text> (dictate)
-
-		\ [ ] 不能放上面直接用 include quit.f 原因待查 <-- try attach3
-		char 3ce/target.f	(install) 
-		;
+			\ 準備好 readTextFile 就可以 include 了	
+			include 3ce/target.f
+		</text> (dictate) ;
 		/// Usage : 
 		/// 237 ( tabid ) attach
 		/// tabs.select tabid attach

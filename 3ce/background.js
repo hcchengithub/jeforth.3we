@@ -59,26 +59,6 @@
 		jQuery(document).ready(
 			// jQuery convention, learned from W3School, make sure web page is ready.
 			function() {
-				// Background page onMessage event hander 
-				// See log.json "3ce SPEC of sendMessage".
-				chrome.runtime.onMessage.addListener(
-					function ce3_background_onmessage (message, sender, sendResponse) { 
-						// see "3ce SPEC of sendMessage"
-						if (message.addr!="background") return;
-						if (message.tos!=undefined) {
-							vm.push(message.tos);
-						} 
-						if (message.forth) {
-							vm.dictate(message.forth);
-						}
-						if (message.type) { 
-							// type to vm.screenbuffer, although background page has no display.
-							// this is useful for debugging and experiments I think
-							vm.type(message.type);
-						} 
-					}
-				)
-
 				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
 				var q = "3ce/background.f";
