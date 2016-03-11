@@ -93,7 +93,7 @@ s" git.f"   source-code-header
     char ASROCK-P8H61 char COMPUTERNAME proc-env@ = [if] s" C:\Users\hchen\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
     char WKS-38EN3476 char COMPUTERNAME proc-env@ = [if] s" C:\Users\8304018\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
     char DESKTOP-Q94AC8A char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcche\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
-    char T550 char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcche\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
+    char WKS-4AEN0404 char COMPUTERNAME proc-env@ = [if] s" C:\Users\hcche\AppData\Local\GitHub\GitHub.appref-ms --open-shell" [then]
     
     value git-shell-path // ( -- str ) Command line to launch Git Shell.
     /// Something like this:
@@ -182,7 +182,7 @@ s" git.f"   source-code-header
         <shell>  git gc --prune </shell> ;
         /// Git 的垃圾回收機制，其實就是那些殘留在檔案系統中的無用檔案，這
         /// 個垃圾回收機制只會在這些無用的物件累積一段時間後自動執行，或你
-        /// 也可以自行下達指令清空它。例如: git gc --prune
+        /// 也可以自行下達指令清空它。例如: git gc --prune 或單 git gc 亦可。
 
     : 重新封裝 ( -- ) \ Archive 老舊的 objects (files) 封裝進一個封裝檔 packfile 中。
         <shell>  git gc </shell> ;
@@ -371,8 +371,9 @@ s" git.f"   source-code-header
     : file-system-check ( -- ) \ check repository file system integity
         <shell> git fsck</shell> ;
         /// 檢查 Git 維護的檔案系統是否完整。我上回搞亂整個 repo 之後再
-        /// clone 回來成功，但 fsck 看到一些 dangling commit, 如下者數行：
+        /// clone 回來成功，但 git fsck 看到一些 dangling commit, 如下者數行：
         /// dangling commit 0b8054b68a13d6e3effad469070d9535583e248c
+		/// 可用 git gc 把它們清掉。
 
     \ 第 07 天：解析 Git 資料結構 - 索引結構 
     \ 了解 tracked/untracked, modified/unmodified, staged/unstaged 必讀。
