@@ -7,7 +7,7 @@ s" ce.f" source-code-header
 \
 \ Skip everything if is not running in Chrome extension.
 \
-js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] 
+js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if] 
     \ Chrome extension environment. May be the popup page, 
 	\ the background page, or 3ce extension pages.
 
