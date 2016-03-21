@@ -2,12 +2,13 @@
 \ jeforth.3ce for Google Chrome extension 
 \ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
 
-s" ce.f" source-code-header
-
 \
 \ Skip everything if is not running in Chrome extension.
 \
-js> typeof(chrome)!='undefined'&&typeof(chrome.runtime)!='undefined' [if] 
+js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if] 
+
+	s" ce.f" source-code-header
+
     \ Chrome extension environment. May be the popup page, 
 	\ the background page, or 3ce extension pages.
 
