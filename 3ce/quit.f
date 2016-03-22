@@ -1,5 +1,5 @@
 
-\ quit.f for jeforth.3htm
+\ quit.f for jeforth.3ce popup page and extenstion pages
 \
 \ QUIT is the traditional forth system's CLI loop. jeforth.f kernel is common for all
 \ applications. quit.f is the good place to define propritary features of each application.
@@ -46,6 +46,7 @@
 	include 3htm/f/platform.f		
 	include f/mytools.f		
 	include 3htm/f/editor.f
+	include 3ce/ce.f
 	
 \ ----------------- run the command line -------------------------------------
 	args tib.insert

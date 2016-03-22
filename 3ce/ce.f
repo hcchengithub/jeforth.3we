@@ -1,5 +1,6 @@
 
-\ jeforth.3ce for Google Chrome extension 
+\ jeforth.3ce Google Chrome extension 
+\ For 3ce popup page and extension pages.
 \ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
 
 \
@@ -45,7 +46,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// 
 		
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
-		js> window.open("index.html") background-page :: lastTab=pop() ;
+		js> window.open("jeforth.3ce.html") background-page :: lastTab=pop() ;
 		
 	: tabs.getCurrent ( -- objTab ) \ Get the current Chrome extension tab object.
 		js: chrome.tabs.getCurrent(function(tab){push(tab);execute('stopSleeping')}) 
@@ -53,7 +54,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// Used in an extension page or content script in target pages. 
 		/// Returns 'undefined' if used in the popup page or background page.
 
-	tabs.getCurrent :> id value myTabId // ( -- tabid ) 3ce extension page's Tab ID.
+
 
 	: isPopup? ( -- boolean ) \ Is this page the 3ce popup page?
 		\ In Chrome extension/app is sure or this word won't be included at all.
@@ -66,6 +67,9 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 			true
 		then ;
 	
+	char popup value myTabId // ( -- tabid ) 3ce extension page's Tab ID.
+							 \ assume it's the popup page at first.
+
 	isPopup? [if]
 		\
 		\ Initial Chrome extension popup page appearance. The font size better be smaller.
@@ -73,6 +77,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		js:	$("#body")[0].style.width="660px"; \ "100%" 不如 "660px" 大
 		js:	$("#header")[0].style.fontSize="0.6em"; 
 		js:	$("#outputbox")[0].style.fontSize="0.8em";
+	[else]
+		tabs.getCurrent :> id to myTabId
 	[then]
 
 	: tabs.query ( {title:"*anual*"} -- array ) \ Get an array of tabs that match the given hash.
