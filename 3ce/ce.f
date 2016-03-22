@@ -1,8 +1,7 @@
 
-\ jeforth.3ce for Google Chrome extension 
+\ jeforth.3ce Google Chrome extension 
+\ For 3ce popup page and extension pages.
 \ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
-
-\ For the popup page and extension pages.
 
 \
 \ Skip everything if is not running in Chrome extension.
