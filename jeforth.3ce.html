@@ -1,0 +1,43 @@
+<!-- 
+// jeforth.3ce.html is the index.html home page of popup page and extension pages, 
+// jeforth.3ce.js   is the Javascript portion of the jeforth.3ce.html home page.
+// jeforth.3ce.background.html is the index.html of the background page 
+-->
+
+<!DOCTYPE html>
+<html>
+<head id=head>
+	<title class=appname>appname</title> 
+	<meta charset="utf-8" />
+	<link rel="stylesheet" type="text/css" href="common.css">
+	<!-- 分別定義 textarea:focus 才可以隨時修改，隨 editMode 改變顏色 -->
+    <style id=styleTextareaFocus type="text/css"> 
+			textarea:focus {
+				background:#E0E0E0;
+			}
+    </style>
+    <script src="js/jquery-1.11.2.js"></script>
+	<script src="project-k/jeforth.js"></script>
+	<script src="3ce/jeforth.3ce.js"></script>
+</head>
+<body id=body>
+	<div id=header>
+		<div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
+		<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div>
+		<div style="font-family:verdana;">
+			<b><div class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
+			<div style="color:#40B3DF;">
+			Revision <span id=rev style="background-color:#B4009E;color:#ffffff;">rev</span><br>
+			Source code http://github.com/hcchengithub/jeforth.3we<br>
+			Program path <span id=location>location</span><br>
+			</div>
+		</div>
+	</div>
+	<div class=console3we>
+	<div id="outputbox"></div>
+	<textarea id="inputbox" rows=1></textarea>
+	<span id=endofinputbox></span>
+	</div>
+</body>
+</html>
+
