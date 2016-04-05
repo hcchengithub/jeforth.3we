@@ -268,7 +268,7 @@
 			
 		\ 照這樣一 click 下去, 被 click 到的 element 以及它的 parents 全部都
 		\ 被一一執行到。似乎像這樣類似氣泡向上擴散到 parents 上去叫做 bubbling? 
-		\ 有了 flag 就可以終止 bubbling。不知這個方法好不好？
+		\ 有了 flag 就可以終止 bubbling。不知這個方法好不好？ --> 不好 return(false) 即可
 
 			false value flag // ( -- boolean ) 控制不讓 bubble 擴散上去的開關。
 			document <js> 
@@ -610,6 +610,83 @@ if(vm.debug){vm.jsc.prompt='4444';eval(vm.jsc.xt)}
 			[x] sw :: GoHome() 
 			[ ] sw :: navigate
 		
+	</comment>
+	<comment>
+		\ for 3ce target page
+		\ 完整功能 Hover 打紅框, Freeze, Select, Delete, Unselect, View, Clear
+		\ 能用 [<][>] 倒退前進就不怕 event 順序不靈的問題。
+		--- marker ---
+		[] value track // ( -- [node,..] ) The history track array of visited DOM nodes
+		0 value itrack // ( -- int ) index of the track array
+		0 value freeze // ( -- boolean ) The freezing flag
+		<js> 
+			var GoOn=false;
+			
+			$(document).keydown(function(e){
+				e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+				switch(keycode) {
+					case 67: /* [c]lear */
+						for(var i=0; i<vm.g.track.length; i++){
+							$(vm.g.track[i])
+							.removeAttr('style')
+							.removeClass("_selected_");
+						}
+						return(false); 
+					case 68: /* [d]elete the highlighted node */
+						push(vm.g.track[vm.g.itrack]);
+						execute("removeElement");
+						return(false); 
+					case 70: /* [f]reeze */
+						vm.g.freeze = !vm.g.freeze;
+						type("The freezing flag : " + vm.g.freeze); execute("cr");
+						return(false); 
+					case 83: /* [s]elect */
+						$(vm.g.track[vm.g.itrack])
+						.removeAttr('style')
+						.css("border","2px solid lime")
+						.addClass("_selected_");
+						return(false); 
+					case 85: /* [u]nselect */
+						$(vm.g.track[vm.g.itrack])
+						.removeAttr('style')
+						.removeClass("_selected_");
+						return(false); 
+					case 86: /* [v]iew selected nodes */
+						for(var i=0; i<vm.g.track.length; i++){
+							$(vm.g.track[i]).removeAttr('style');
+							if($(vm.g.track[i]).hasClass("_selected_"))
+								$(vm.g.track[i]).css("border","2px solid lime");
+						}
+						return(false); 
+					case 188: /* < , */
+						$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+						vm.g.itrack = Math.max(0,vm.g.itrack-1);
+						$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
+						return(false); 
+					case 190: /* > . */
+						$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+						vm.g.itrack = Math.min(vm.g.track.length-1,vm.g.itrack+1);
+						$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
+						return(false); 
+				}
+				return (true);
+			});
+			$("*").mouseenter(function(){
+				type("Enter " + this.nodeName + ". ");
+				if (vm.g.freeze) return;
+				$(vm.g.track[vm.g.itrack]).removeAttr('style'); // 無須防呆
+				if (vm.g.track[vm.g.track.length-1]!=this) vm.g.track.push(this);
+				vm.g.itrack = vm.g.track.length-1;
+				$(vm.g.track[vm.g.itrack]).css("border","4px dashed red");						
+			});
+
+			$("*").mouseleave(function(){
+				type("Leave " + this.nodeName + ". ");
+				if (vm.g.freeze) return;
+				$(this).removeAttr('style'); // 無須防呆
+			});
+
+		</js>	
 	</comment>
 
 
