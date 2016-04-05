@@ -5,6 +5,8 @@
 
 \
 \ Skip everything if is not running in Chrome extension.
+\ 早期讓 3htm, 3ce 共用 index.html home page was a mistake. 分開之後這種情況不會有了。
+\ 所以這段防呆只是 nice to have 其實不需要了。
 \
 js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if] 
 

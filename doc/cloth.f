@@ -8,8 +8,8 @@ include canvas.f
 s" cloth.f" source-code-header
 
 \ 設定
-  600   value w         // ( -- int ) 畫布寬
-  300   value h         // ( -- int ) 畫布高
+  440   value w         // ( -- int ) 畫布寬
+  280   value h         // ( -- int ) 畫布高
   w h   setCanvasSize   \ 設定 畫布寬高  
    40   lineWidth       \ 畫線寬度 
   100   value r         // ( -- int ) 紅光亮度
