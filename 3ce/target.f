@@ -1,8 +1,8 @@
 
-	\ quit.f for jeforth.3ce
+	\ quit.f for jeforth.3ce target page
 	\
 	\ QUIT is the traditional forth system's CLI loop. jeforth.f kernel is common for all
-	\ applications. quit.f is the good place to define propritary features of each application.
+	\ applications. quit.f is the good place to define proprietary features of each application.
 	\  
 
 	\ ------------------ Self-test of the jeforth.f kernel --------------------------------------
