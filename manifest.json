@@ -5,7 +5,7 @@
 	,"version" : "1.0"
 	,"browser_action" : {
 		"default_title": "Popup of jeforth.3ce",
-		"default_icon" : "3ce/fig.tw16x16.png",
+		"default_icon" : "3ce/fig.tw.green.16x16.png",
 		"default_popup" : "jeforth.3ce.html"
 	 }
 	,"background": {
@@ -15,6 +15,9 @@
 	,"permissions" : [
 		"tabs", "notifications", "http://*/*", "https://*/*", "file://*/*"
 	 ]
+	,"web_accessible_resources": [
+      "js/jquery.tabletojson.js"
+    ]
 }
 
 
