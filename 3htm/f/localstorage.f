@@ -27,3 +27,9 @@
 	: type ( -- ) \ Type local storage source code
 		js> localStorage.sourcecode . ;
 
+	: cls  ( -- ) \ Clear all #text in the outputbox elements are remained.
+		ce@ ( save ) js> outputbox ce! er ce! ( restore ) ;
+		/// Auto save-restore ce@ so it won't be changed.
+		
+		
+		
