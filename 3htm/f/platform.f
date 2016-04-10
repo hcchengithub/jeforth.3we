@@ -572,14 +572,14 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 		return (true); // pass down to following handlers
 	}
 	
-	// {ios} 是 's' pressed when in inputbox or outputbox. Ctrl-s 要 save 存檔。
+	// {s} was named {ios} where 's' pressed when in inputbox or outputbox. Ctrl-s 要 save 存檔。
 	// [x] 有了 console3we 之後, 可以把它簡化，不用兩處都各寫一套 handler。
-	// [ ] 這樣一來，console3weconsole3we 還可以有更多 hotkey !!
+	// [ ] 這樣一來，console3we 還可以有更多 hotkey !!
 	$(".console3we")[0].onkeydown = function(e){
 		e = (e) ? e : event; 
 		var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
-			case  83: /* s */ if(tick('{ios}')){execute('{ios}');return(pop());} break;  // 's' in inputbox or outputbox
+			case  83: /* s */if(tick('{s}')){execute('{s}');return(pop());}break;  // 's' in inputbox or outputbox
 		}
 		return (true); // pass down to following handlers
 	}
