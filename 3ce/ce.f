@@ -145,16 +145,16 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// The result is an array which is "The result of the script in every injected frame."
 		/// A result is the value of the last statement of the script file.
 		
-	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
+	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements to run on tabid target page 
 		char </ce>|</ceV> word ; immediate
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 		/// 必須是【別人的】web page。
 
-	: (/ceV) ( "statements" -- ) \ Retrun the value of last statement
+	: (/ceV) ( "statements" -- [last statement] ) \ Retrun the value of last statement from each iframe and the target page
 		{} js: tos().code=pop(1) tabid swap inject ;
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 		
-	: (/ce) ( "statements" -- ) \ No return value
+	: (/ce) ( "statements" -- ) \ Get JavaScript statements to run on tabid target page, no return value.
 		(/ceV) drop ;
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
