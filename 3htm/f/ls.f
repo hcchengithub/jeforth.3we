@@ -3,7 +3,7 @@
 
 	s" ls.f"		source-code-header
 
-	: init ( -- ) \ Initialize local source
+	: init ( -- ) \ Initialize local source 1) create textarea, 2) init textarea with localStorage.sourcecode.
 		<o> <textarea id=sourcecode></textarea></o>
 		js> localStorage.sourcecode if
 			js: pop().value=localStorage.sourcecode
@@ -39,5 +39,9 @@
 		then ;
 		/// Ctrl-s 一定會被 Chrome 收到 for "save the web page" 加上
 		/// Shift key 即可避免之。
-		
+	
+	: list ( -- ) \ List all localStorage field keys
+		js> localStorage obj>keys . ;
+		/// To delete a field,
+		/// js: delete(localStorage.<key>)
 		
