@@ -11,6 +11,18 @@
 \      228 除權除息表-依股號
 \    > 228 tabid! \ setup tabid 
 
+	: dump-all-<td>  ( -- ) \ Dump all <td> table cells of tabid target page
+	  js> $("td").length ( length )
+	  ?dup if dup for dup r@ - ( COUNT i ) 
+		 >r
+		 js> $("td")[rtos()].innerText \ cell value
+		 js> $("td")[rtos()].getAttribute("class")
+		 js> $("td")[rtos()].id
+		 r>
+		 ." index:" . ."  ID: " . ."  Class: " . space . cr \ the cr provides an important nap time 
+	  ( COUNT ) next drop then ; 
+	  /// Run on jeforth.3ce target page
+	
     : Refresh_the_target_page ( -- ) \ Refresh the tabid target page.
         tabid js: chrome.tabs.reload(pop())
         500 nap tabid tabs.get :> status!="complete" if
@@ -96,7 +108,7 @@
     run: begin Refresh_the_target_page check_updated 1000 60 * 60 * nap again
 
 <comment>
-	
+
 	\ Obloleted words
 	
     : count_oAddCheckbox ( -- n ) \ Get the company count of 台銀除權除息表。
