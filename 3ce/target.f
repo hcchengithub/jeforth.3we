@@ -17,10 +17,17 @@
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 
+	vocabulary target.f also target.f definitions
+	
 	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
+
+	\ console3we outputbox 有需要, 很多 words 都需要它, 所以即使不
+	\ 想讓 console3we 干擾 target page 的畫面也得用藏的而不是完全沒有。
+	\ js> $(".console3we")[0].style.visibility="hidden"
+	\ js> $(".console3we")[0].style.visibility="visible"
 	
 	char body <e> 
-		<div class=console3we>
+		<div class=console3we style="visibility:visible">
 		<style>
 			.console3we {
 				color:black;
@@ -56,21 +63,25 @@
 		</div>
 	</e> drop				
 	
-	js> vm.type            value original.type       // ( -- function ) type to host
-	js> document.onkeydown value original.onkeydown  // ( -- function ) original
-	null value target.type         // ( -- function ) type to outputbox
-	null value target.onkeydown    // ( -- function ) Fire inputbox command
+	js> vm.type    value host.type // ( -- function ) work on target page type to host
+	null ( dummy ) value target.type // ( -- function ) Target page type to outputbox
 
 	<js>
 		$('#rev').html(vm.version); // also .commandLine, .applicationName, ...
 		$('#location').html(window.location.toString()); // it's built-in in DOM
 		$('.appname').html(vm.appname); // 一次填好所有 appname
 		
+		// To enable target page console3we, 
+		//     vm.type = target_type;
+		//     js: $(".console3we")[0].style.visibility="visible"
+		// To disable target page console3we, 
+		//     vm.type = host.type;
+		//     js: $(".console3we")[0].style.visibility="hidden"
+		
 		// vm.type() is the master typing or printing function.
 		// The type() called in code ... end-code is defined in the kernel jeforth.js.
 		// target_type(s) types to the target page outputbox, instead of to the host page 
 		// that may be the popup page or a 3ce extension page.
-		// vm.type = target_type;
 		function target_type(s) { 
 			try {
 				var ss = s + ''; // Print-able test
@@ -85,7 +96,6 @@
 		// onkeydown,onkeypress,onkeyup
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
-		// document.onkeydown = target_onkeydown;
 		function target_onkeydown(e) {
 			// Initial version defined in 3ce/quit.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
@@ -98,18 +108,27 @@
 			}
 			return (true); // pass down to following handlers 
 		}
-		vm.g["target.onkeydown"] = target_onkeydown;
+		// 這個 keybaord handler 很兇地強塞給 document.onkeydown 可能會 conflict 
+		// with target page's original settings, 但這樣做最簡單。下面的 platform.f 還會
+		// 在條件成熟後用更完整的 keyboard handler 重新設定。
+		document.onkeydown = target_onkeydown; 	
 	</js>
-
-	: display->host ( -- ) \ Target page forth console display output to host page.
+	
+		
+	// 因為 console3we 不用時會 hidden 所以 console-host 切換時只需切換 display 如
+	// 果切換 keyboard handler 是多此一舉。
+	: console-host ( -- ) \ Target page console switch to host 3ce extension pages.
 		cr ." Target page display switch to 3ce extension pages." cr
-		original.type js: vm.type=pop() ;
-	: display->local ( -- ) \ Target page forth console display output to local outputbox.
+		host.type js: vm.type=pop() 
+		js: $(".console3we")[0].style.visibility="hidden"
+		;
+	: console-target ( -- ) \ Target page console use local outputbox and inputbox.
 		cr ." Target page display switch to local outputbox." cr
-		target.type js: vm.type=pop() ;
-	last execute \ Switch jeforth console to target page's local outputbox/inputbox.
-	target.onkeydown js: document.onkeydown=pop() \ May conflict with target page's original settings.
-
+		target.type js: vm.type=pop() 
+		js: $(".console3we")[0].style.visibility="visible"
+		;
+	last execute
+	
 	: cr ( -- ) \ 到下一列繼續輸出 *** 20111224 sam
 		js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
 		/// redefined in quit.f, 1 nap 使輸出流暢。
@@ -117,6 +136,18 @@
 	
 	include 3htm/f/element.f		\ HTML element manipulation
 	include 3htm/f/platform.f		
+	
+
+	code run-inputbox ( -- ) \ Used in onKeyDown event handler.
+		// 當命令來自 local 就把 display 切回 local target page
+	    if(tick("target.type")) vm.type = vm.g["target.type"];
+		var cmd = inputbox.value; // w/o the '\n' character ($10).
+		inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
+		vm.cmdhistory.push(cmd);
+		vm.forthConsoleHandler(cmd);
+		end-code
+		/// modified by 3ce target.f to auto switch dispaly back to local.
+	
 	include f/mytools.f		
 	include 3htm/f/editor.f
 

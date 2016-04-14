@@ -10,16 +10,28 @@
 \    > list-tabs \ get tabid
 \      228 除權除息表-依股號
 \    > 228 tabid! \ setup tabid 
-
+	  
 	: dump-all-<td>  ( -- ) \ Dump all <td> table cells of tabid target page
 	  js> $("td").length ( length )
 	  ?dup if dup for dup r@ - ( COUNT i ) 
 		 >r
 		 js> $("td")[rtos()].innerText \ cell value
-		 js> $("td")[rtos()].getAttribute("class")
-		 js> $("td")[rtos()].id
+		 js> $("td")[rtos()].getAttribute("class") dup if char _note_ + then
+		 js> $("td")[rtos()].id dup if char _note_ + then
 		 r>
 		 ." index:" . ."  ID: " . ."  Class: " . space . cr \ the cr provides an important nap time 
+	  ( COUNT ) next drop then ; 
+	  /// Run on jeforth.3ce target page
+
+	: dump-all-<tr>  ( -- ) \ Dump all <tr> table rows of tabid target page
+	  js> $("tr").length ( length )
+	  ?dup if dup for dup r@ - ( COUNT i ) 
+		 >r
+		 js> $("tr")[rtos()].outerHTML remove-script-from-HTML  remove-select-from-HTML \ row HTML
+		 js> $("tr")[rtos()].getAttribute("class") dup if char _note_ + then
+		 js> $("tr")[rtos()].id dup if char _note_ + then
+		 r>
+		 ." index:" . ."  ID: " . ."  Class: " . space </o> drop cr \ the cr provides an important nap time 
 	  ( COUNT ) next drop then ; 
 	  /// Run on jeforth.3ce target page
 	

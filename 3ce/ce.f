@@ -174,10 +174,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// Usage: <text> ... </text> (dictate)
 		
 	code {F7} ( -- ) \ Send inputbox to content script of tabid.
+		// 當命令來自 host page 就盡可能把 display 切向 host page
+		dictate('<ce> if(vm.tick("host.type")) vm.type = vm.g["host.type"];</ce>');
 		vm.cmdhistory.push(inputbox.value);  // Share the same command history with the host
 		push(inputbox.value); // command line 
 		inputbox.value=""; // clear the inputbox
-		execute("(dictate)"); // Let target page the execute the command line(s)
+		execute("(dictate)"); // Let target page to execute the command line(s)
 		push(false); // terminiate event bubbling
 		end-code
 		/// 若用 F8 則無效, 猜測是 Chrome debugger 自己要用。
