@@ -23,7 +23,7 @@
 
 	\ console3we outputbox 有需要, 很多 words 都需要它, 所以即使不
 	\ 想讓 console3we 干擾 target page 的畫面也得用藏的而不是完全沒有。
-	\ js> $(".console3we")[0].style.visibility="hidden"
+	\ js> $(".console3we")[0].style.visibility="hidden" or "collapse"
 	\ js> $(".console3we")[0].style.visibility="visible"
 	
 	char body <e> 
@@ -97,7 +97,7 @@
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		function target_onkeydown(e) {
-			// Initial version defined in 3ce/quit.f
+			// Initial version defined in 3ce/system/quit.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */
@@ -120,7 +120,7 @@
 	: console-host ( -- ) \ Target page console switch to host 3ce extension pages.
 		cr ." Target page display switch to 3ce extension pages." cr
 		host.type js: vm.type=pop() 
-		js: $(".console3we")[0].style.visibility="hidden"
+		js: $(".console3we")[0].style.visibility="collapse" \ 用 "collapse" 希望收掉留下的空間但同 "hidden" 無效
 		;
 	: console-target ( -- ) \ Target page console use local outputbox and inputbox.
 		cr ." Target page display switch to local outputbox." cr
@@ -150,6 +150,7 @@
 	
 	include f/mytools.f		
 	include 3htm/f/editor.f
+	include 3htm/f/ls.f
 
 	\ ------------ End of target.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging

@@ -235,7 +235,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
+				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce/system", "3ce/f", "3ce", "playground"];
 				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
@@ -374,7 +374,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
 			\ 準備好 readTextFile 就可以 include 了	
-			include 3ce/target.f
+			include 3ce/system/target.f
 		</text> (dictate) ;
 		/// Usage : 
 		/// 237 ( tabid ) attach
