@@ -142,19 +142,19 @@
 	char r value reset/clear // ( -- 'r'/'c' ) Toggle state of the reset/clear button
     code alarmReset
         execute('intervalId'); clearInterval(pop()); 
-		fortheval("alarmOff 0 to intervalId false to alarmPause alarmStart");
+		dictate("alarmOff 0 to intervalId false to alarmPause alarmStart");
 		execute('reset/clear'); if(pop()=='c'){
 			almSecond.innerHTML = '00';
 			almMinute.innerHTML = '00';
 			almHour.innerHTML   = '00';
-			fortheval('char r to reset/clear');
+			dictate('char r to reset/clear');
 			reset_button.setAttribute('style','color:black')
 			clear_button.setAttribute('style','color:gray')
 		} else {
 			execute('setting.sec'); almSecond.innerHTML = pop();
 			execute('setting.min'); almMinute.innerHTML = pop();
 			execute('setting.hur'); almHour.innerHTML   = pop();
-			fortheval('char c to reset/clear');
+			dictate('char c to reset/clear');
 			reset_button.setAttribute('style','color:gray')
 			clear_button.setAttribute('style','color:black')
 		}

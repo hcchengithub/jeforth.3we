@@ -35,6 +35,7 @@
 	include path.f
 	include fs.f
 	include editor.f
+	include ls.f
 
 \ ----------------- run the command line -------------------------------------
 	<js> (vm.argv.slice()).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.

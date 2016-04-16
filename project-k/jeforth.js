@@ -478,6 +478,7 @@ function jeForth() {
 	vm.pop = pop;   // interface for getting data out of the VM.
 	vm.tos = tos;   // interface for getting data out of the VM.
 	vm.reset = reset; // Recovery from a crash
+	vm.tick = tick; // get a word object
 }
 if (typeof exports!='undefined') exports.jeForth = jeForth;	// export for node.js APP
 

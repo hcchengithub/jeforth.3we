@@ -3409,11 +3409,7 @@
 
 [x]	JavaScript "Table to JSON" http://lightswitch05.github.io/table-to-json/
 	works fine.
-	<h> <script src="js/jquery.tabletojson.js"></script></h> drop
-	"table HTML" </o> constant table table er
-	js> JSON.stringify(g.table)
-
-	Computer name : ASRock-P8H61 is my desktop at home.
+	See YNote "Js Tutorial - Table to JSON _table_to_JSON_"
 
 [x] 希望能把整個網頁都抓進來 jquery 搜尋/控制 其中的東西
 	http://stackoverflow.com/questions/18145273/how-to-load-an-external-webpage-into-a-div-of-a-html-page
@@ -4679,5 +4675,28 @@
 	這常有, 應該要有警告。
 	這是 GFW 的問題, 透過 VPN 就好了。中國境內有沒有 jQuery 的 mirror?
 	
+[ ] 14:21 2016-04-12 jeforth.3ce startup page to advertise itself. Use YNote directly.
+    cls <o> <iframe src="http://note.youdao.com/share/?id=b76172957fccf6a35b31dd7936327c3f&type=note#/" 
+	name="An introduction to jeforth.3ce" align="center" width="96%" height="6800px" 
+	marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> er	
+
+[ ]	This line works fine on the published jeforth.3ce which was installed from Chrome Web Store,
+    include http://rawgit.com/hcchengithub/jeforth.3we/develop/3htm/f/ls.f 
 	
+	In example of jeforth.3we\js\numeric-1.2.6.js, it does not work to:
+	include.js http://rawgit.com/hcchengithub/jeforth.3we/develop/js/numeric-1.2.6.js 
+	because the module assumes itself is included by HTML head while it's not in this case.
+	Note: It does not work due to that <js></js> is volatile in 3nw, 3htm, 3ce and 3hta, 
+	while it's under global in Node.js.
+
+	Workaround is:
+	char http://rawgit.com/hcchengithub/jeforth.3we/develop/js/numeric-1.2.6.js 
+	readTextFile \ 先讀取 .js 檔, 但不能直接用
+	<text> 
+	window.numeric = numeric;  // 先對 source 做一點必要的加工, 把 numeric 掛上 global 
+	</text> + </js> \ 然後才執行	
+	
+[ ]	tutor-cloth.f console3we strange. 
+	[ ] Improve the scrollto position. 
+	[ ] Font size not consistant either.
 	

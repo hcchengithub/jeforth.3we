@@ -232,14 +232,17 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				:> replace(/<script.*?script>/g,"")		\ remove all <script>
 				:> replace(/{_cr_}/g,"\n") ;
 				/// See also remove-script-from-element in ie.f.
+				/// Use RexEx word processing method.
 				
 : remove-select-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				:> replace(/<select.*?select>/g,"")		\ remove all <select>
 				:> replace(/{_cr_}/g,"\n") ;
+				/// Use RexEx word processing method.
 				
 : remove-onmouse-from-HTML ( "HTML" -- "HTML'" ) \ Remove onmouseXX="dothis"  onmouseXX=dothat onmouseXX='dowhat' listenings.
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				<js> pop().replace(/\s+onmouse.+?=\s?\S+/g,"")</jsV> 
 				:> replace(/{_cr_}/g,"\n") ;
+				/// Use RexEx word processing method.
 				

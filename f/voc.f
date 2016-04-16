@@ -127,6 +127,10 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 
 : get-vocs		js> words obj>keys ; // ( -- vocs[] ) Get all vocabulary names.
 
+: not-only 		( -- ) \ Bring back all vocabulary 
+				only get-vocs <js> pop().join(" also ")</jsV> tib.insert ;
+				/// Does not change the current.
+
 : vocs       	." vocs: " get-vocs . cr ; // ( -- ) List all vocabulary names.
 
 				<selftest>
