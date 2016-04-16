@@ -127,8 +127,8 @@
 		<text> <unindent><br>
 			Local storage field '<code>autoexec</code>' is run when start-up.
 			'<code>run <field name></code>' to run the local storage field.
-			'<code>ed</code>' opens local storage editor.
-			Hotkey <code>{F9} {F10}</code> to resize the textarea. <code>{Ctrl-S}</code> saves
+			'<code>ed</code>' opens local storage editor and when in this editor,
+			hotkey <code>{F9},{F10}</code> resize the textarea and <code>{Ctrl-S}</code> saves
 			the textarea to local storage.
 			'<code>export-all</code>' exports the entire local storage in JSON format.
 			<br><br>
@@ -168,7 +168,46 @@
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
 		null js> JSON.stringify(localStorage,"\n","\t") (export) ;
 	
-	autoexec \ 啟動時自動執行 localStorage.autoexec 
+	js> localStorage.autoexec [if] [else] \ Default autoexec if it's not existing
+		<text>
+			js: outputbox.style.fontSize="1.5em"
+			cr cr 
+			." Hello world!! says 'autoexec' field" cr
+			." from published jeforth.3ce. "
+			cr cr cr cr cr cr cr 
+			\ Launch the briefing 
+			<o> <iframe src="http://note.youdao.com/share/?id=79f8bd1b7d0a6174ff52e700dbadd1b2&type=note"
+			name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
+			marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
+			cr cr list
+		</text> js: localStorage.autoexec=pop() 
+	[then]
+	js> localStorage.ad [if] [else] \ Default ad if it's not existing
+		<text>
+			\ Remove all annoying floating ad boxes. 刪除所有惱人的廣告框。
+			active-tab :> id tabid! <ce>
+			var divs = document.getElementsByTagName("div");
+			for (var i=divs.length-1; i>=0; i--){
+			  if(divs[i].style.position){
+				divs[i].parentNode.removeChild(divs[i]);
+			  }
+			}
+			for (var i=divs.length-1; i>=0; i--){
+			  if(parseInt(divs[i].style.width)<600){ // <---- 任意修改
+				divs[i].parentNode.removeChild(divs[i]);
+			  }
+			}
+			</ce>
+		</text> js: localStorage.ad=pop() 
+	[then]
+	js> localStorage.pruning [if] [else] \ Default pruning if it's not existing
+		<text>
+			\ Make the target page editable for pruning. 把 target page 搞成 editable 以便修剪。
+			active-tab :> id tabid! <ce> document.getElementsByTagName("body")[0].contentEditable=true </ce>
+		</text> js: localStorage.pruning=pop() 
+	[then]
+
+	autoexec \ Run localStorage.autoexec when jeforth starting up
 	
 	
 	
