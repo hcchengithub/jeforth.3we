@@ -5,7 +5,6 @@
 
 	: (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
 		js> $(pop()).parents('.eb')[0] ( eb ) ;
-		/// local storage edit box 
 
 	: eb.edit ( btn -- ) \ Make the textarea and the name editable.
 		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -24,20 +23,22 @@
 		js: localStorage[pop(1)]=pop() ( eb )
 		js: $('.ebsave',pop())[0].value="Saved" ;
 		
-	: eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
-		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
-		js> $('.ebname',tos())[0].innerText trim ( eb name )
-		js> localStorage[pop()]  ( eb text|undefined ) 
-		js> tos()==undefined if  ( eb text|undefined ) 
-			<js> alert("Error! can't find that local storage field.")</js>
+	: (eb.read) ( eb field_name -- ) \  Read the localStorate[name] to textarea of the given edit box.
+		js> localStorage[tos()]  ( eb name text|undefined ) 
+		js> tos()==undefined if  ( eb name text|undefined ) 
+			<js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
 			2drop exit
-		then  ( eb text )
+		then  nip ( eb text )
 		js> $('.ebsave',tos(1))[0].value=="Save" if  ( eb text )
 			<js> confirm("Unsaved local storage edit box will be overwritten, are you sure?") </jsV> 
 			if else 2drop exit then
 		then  ( eb text )
 		js: $('textarea',tos(1))[0].value=pop()
 		js: $('.ebsave',pop())[0].value="Saved" ;
+	
+	: eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
+		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
+		js> $('.ebname',tos())[0].innerText trim ( eb name ) (eb.read) ;
 		
 	: eb.close ( btn -- ) \ Close the local storage edit box to stop editing.
 		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -59,23 +60,40 @@
 		
 	: eb.onchange ( btn -- ) \ Event handler on local storage edit box has changed
 		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
-		js: $(".ebsave",pop())[0].value="Save" ;
+		<js> $(".ebsave",pop())[0].value="Don't forget to SAVE !"</js> ;
 
-	: init-buttons ( eb -- ) \ Initialize buttons of the local storage edit box.
-		<js> $(".ebsave",    tos())[0].onclick=function(e){push(this);vm.execute("eb.save");    return(false)}</js>
-		<js> $(".ebread",    tos())[0].onclick=function(e){push(this);vm.execute("eb.read");    return(false)}</js>
-		<js> $(".ebedit",    tos())[0].onclick=function(e){push(this);vm.execute("eb.edit");    return(false)}</js>
-		<js> $(".ebreadonly",tos())[0].onclick=function(e){push(this);vm.execute("eb.readonly");return(false)}</js>
-		<js> $(".ebclose",   tos())[0].onclick=function(e){push(this);vm.execute("eb.close");   return(false)}</js>
-		<js> $(".ebrun",     tos())[0].onclick=function(e){push(this);vm.execute("eb.run");     return(false)}</js> 
-		<js> $(".ebdelete",  tos())[0].onclick=function(e){push(this);vm.execute("eb.delete");  return(false)}</js> 
-		<js> $(".ebtextarea",tos())[0].onchange=function(e){push(this);vm.execute("eb.onchange");  return(false)}</js> 
-		drop ;
-	
-	: eb ( -- element ) \ Create an HTML5 local storage edit box in outputbox
+	: init-buttons ( eb -- eb ) \ Initialize buttons of the local storage edit box.
+		<js> $(".ebsave",    tos())[0].onclick =function(e){push(this);execute("eb.save");    return(false)}</js>
+		<js> $(".ebread",    tos())[0].onclick =function(e){push(this);execute("eb.read");    return(false)}</js>
+		<js> $(".ebedit",    tos())[0].onclick =function(e){push(this);execute("eb.edit");    return(false)}</js>
+		<js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
+		<js> $(".ebclose",   tos())[0].onclick =function(e){push(this);execute("eb.close");   return(false)}</js>
+		<js> $(".ebrun",     tos())[0].onclick =function(e){push(this);execute("eb.run");     return(false)}</js> 
+		<js> $(".ebdelete",  tos())[0].onclick =function(e){push(this);execute("eb.delete");  return(false)}</js> 
+		<js> $(".ebtextarea",tos())[0].onchange=function(e){push(this);execute("eb.onchange");return(false)}</js> 
+		<js> 
+			$(".ebtextarea",tos())[0].onkeydown = function(e) {
+				e = (e) ? e : event; 
+				var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+				switch(keycode) {
+					case  83: /* s */
+						if (e&&e.ctrlKey) {
+							push(this); // ( textarea ) 
+							execute("eb.save");
+							var temp=this.value;this.value="";this.value=temp; // Saved already so clear the onchange status
+							e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
+							return(false);
+						}
+					default: return (true); // pass down to following handlers
+				}
+			}
+		</js> ;
+
+	: (ed) ( -- edit_box_element ) \ Create an HTML5 local storage edit box in outputbox
 		<text> <div class=eb style="width:90%;border:1px solid black;">
-			<p class=ebname style="display:inline;padding-left:2px;font-size:1.25em;border:0.75px solid gray;" contentEditable> Edit the title of this textarea </p>
-			<p style="display:inline;margin-left:2em">
+			<p style="display:inline;">Local Storage Field </p>
+			<p class=ebname style="display:inline;padding-left:2px;font-size:1.2em;border:0.75px solid gray;" contentEditable> Edit field name </p>
+			<p style="display:inline;">
 			<input type=button value='Saved' class=ebsave>
 			<input type=button value='Read' class=ebread>
 			<input type=button value='Edit' class=ebedit>
@@ -86,47 +104,72 @@
 			<textarea class=ebtextarea style="margin-top:1em;"></textarea>
 		</div></text> 
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
-		</o> ( eb ) init-buttons ; interpret-only
+		</o> ( eb ) init-buttons ;
 	
-	: init ( -- ) \ Initialize local source 1) create textarea, 2) init textarea with localStorage.sourcecode.
-		<o> <textarea id=sourcecode></textarea></o>
-		js> localStorage.sourcecode if
-			js: pop().value=localStorage.sourcecode
-		else
-			js: localStorage.sourcecode=""
-			js> localStorage.sourcecode==="" if else
-				abort" Error! localStorage is not supported." cr
-			then
+	: ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
+	
+	: autoexec ( -- ) \ Run localStorage.autoexec
+		js> localStorage.autoexec js> tos() if  ( autoexec )
+			tib.insert
 		then ;
 
-	: save ( -- ) \ Save textarea source code to localStorage
-		js: localStorage.sourcecode=sourcecode.value 
-		\ Don't use cr in event handler!! 
-		\ 又被 event handler 再電一次!! cr 有用到 nap 所以不能用。
-		<js> type("\nSaved source code textarea to local storage.\n");</js> 
-		;
-
-	: run ( -- ) \ Run text area source code (that may not saved to local storage yet)
-		js> sourcecode.value tib.append ;
-
-	: type ( -- ) \ Type local storage source code
-		js> localStorage.sourcecode . ;
+	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
+		js> localStorage[pop()] tib.append ;
+		
+	: run ( <local storage field name> -- ) \ Run local storage source code.
+		char \n|\r word trim (run) ;
 
 	: cls  ( -- ) \ Clear all #text in the outputbox elements are remained.
 		ce@ ( save ) js> outputbox ce! er ce! ( restore ) ;
 		/// Auto save-restore ce@ so it won't be changed.
-		
-	: {s} ( -- bubbling ) \ Ctrl-Shift-s like 'save' but is a Hotkey handler.
-		js> event&&event.ctrlKey if 
-			save false ( terminate bubbling )
-		else 
-			true ( pass down the 's' key ) 
-		then ;
-		/// Ctrl-s 一定會被 Chrome 收到 for "save the web page" 加上
-		/// Shift key 即可避免之。
 	
-	: list ( -- ) \ List all localStorage field keys
-		js> localStorage obj>keys . ;
-		/// To delete a field,
-		/// js: delete(localStorage.<key>)
+	: list ( -- ) \ List all localStorage fields, click to open
+		<text> <unindent><br>
+			Local storage field '<code>autoexec</code>' is run when start-up.
+			'<code>run <field name></code>' to run the local storage field.
+			'<code>ed</code>' opens local storage editor.
+			Hotkey <code>{F9} {F10}</code> to resize the textarea. <code>{Ctrl-S}</code> saves
+			the textarea to local storage.
+			'<code>export-all</code>' exports the entire local storage in JSON format.
+			<br><br>
+		</unindent></text> <code>escape </o> drop
+		js> localStorage obj>keys ( array )
+		begin js> tos().length while ( array )
+			js> tos().pop()  ( array- fieldname )
+			<text>
+				<li> _fieldname_ 
+				<input class=lsfieldopen fieldname='_fieldname_' type=button value=Open> 
+				<input class=lsfieldexport fieldname='_fieldname_' type=button value=Export>
+				</li>
+			</text>	( array- fieldname HTML )
+			:> replace(/_fieldname_/mg,pop()) </o> drop
+		repeat drop cr
+		<js> 
+			$("input.lsfieldopen").click(function(){
+				execute("(ed)"); 
+				push(this.getAttribute("fieldname")); // ( eb name ) 
+				$('.ebname',tos(1))[0].innerHTML=tos();
+				execute("(eb.read)");
+			})
+			$("input.lsfieldexport").click(function(){
+				push(null); // ( null ) 
+				push(localStorage[this.getAttribute("fieldname")]); // ( null text ) 
+				execute("(export)");
+			})
+		</js> ;
 		
+	: (export) ( null|window "text" -- ) \ Export the given text string to a window
+		js> tos(1) if else nip js> window.open() swap then ( window "text" )
+		js: pop(1).document.write("<html><body><pre>"+pop()+"</pre></body></html>") ;
+		
+	: export ( <field> -- ) \ Create a window to export a local storage field.
+		null char \n|\r word trim js> localStorage[pop()] (export) ;
+		
+	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
+		null js> JSON.stringify(localStorage,"\n","\t") (export) ;
+	
+	autoexec \ 啟動時自動執行 localStorage.autoexec 
+	
+	
+	
+	

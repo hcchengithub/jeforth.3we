@@ -1,14 +1,14 @@
 \ 
-\ jeforth.3ce Åª¨ú¡u»OÆW»È¦æ¡vªº¡u°£Åv°£®§ªí¡v¨Ã¤ñ¹ï¾ú¥v¡A¦pªG¦³·sªº´Nµo¥X alert¡C
-\ À³¥Î localStorage ¶J¦s¤½¥q¦Cªí¡A©Ò¥HÃö¾÷­«¶]ÁÙ¬O°O±oÅª¨ì¹Lªº¤½¥q¡C
+\ jeforth.3ce è®€å–ã€Œè‡ºç£éŠ€è¡Œã€çš„ã€Œé™¤æ¬Šé™¤æ¯è¡¨ã€ä¸¦æ¯”å°æ­·å²ï¼Œå¦‚æœæœ‰æ–°çš„å°±ç™¼å‡º alertã€‚
+\ æ‡‰ç”¨ localStorage è²¯å­˜å…¬å¸åˆ—è¡¨ï¼Œæ‰€ä»¥é—œæ©Ÿé‡è·‘é‚„æ˜¯è¨˜å¾—è®€åˆ°éçš„å…¬å¸ã€‚
 \
-\ ­n¤â°Ê¥ı·Ç³Æªº³¡¤À
+\ è¦æ‰‹å‹•å…ˆæº–å‚™çš„éƒ¨åˆ†
 \ 1. open the data page 
 \    > js: window.open("http://fund.bot.com.tw/z/ze/zeb/zeba.djhtm")
 \ 2. open 3ce page
 \ 3. Assign tabid
 \    > list-tabs \ get tabid
-\      228 °£Åv°£®§ªí-¨ÌªÑ¸¹
+\      228 é™¤æ¬Šé™¤æ¯è¡¨-ä¾è‚¡è™Ÿ
 \    > 228 tabid! \ setup tabid 
 	  
 	: dump-all-<td>  ( -- ) \ Dump all <td> table cells of tabid target page
@@ -42,20 +42,20 @@
             ." Still loading " tabid tabs.get :> title . space
             0 begin
                 tabid tabs.get :> status=="complete" if 1+ then
-                dup 5 > if ( TOS Áıµ¹ until ) else \ 5 complete to make sure it's very ready.
+                dup 5 > if ( TOS é¤µçµ¦ until ) else \ 5 complete to make sure it's very ready.
                     char . . 300 nap false
                 then
             until ."  done! " cr
         then ;
         /// Improve this if the target page is unstable then we need to timeout and retry.
 
-    : find-next-company ( i -- i' ) \ Find next ¤w¤½¥¬°£Åv®§¤éªº¤½¥q in ¥x»È°£Åv°£®§ªí return index or zero.
+    : find-next-company ( i -- i' ) \ Find next å·²å…¬å¸ƒé™¤æ¬Šæ¯æ—¥çš„å…¬å¸ in å°éŠ€é™¤æ¬Šé™¤æ¯è¡¨ return index or zero.
         s" var last_index = " swap + [compile] </ce> \ setup variable for the target page
         <ce>
         var next_index = 0;
         var array_td = document.getElementsByTagName("td");
         for (var i=last_index+1; i<array_td.length; i++){
-            if (array_td[i].id == "oAddCheckbox") { // »OÆW»È¦æªº°£Åv°£®§ªí¤~¦³³o­Ó id 
+            if (array_td[i].id == "oAddCheckbox") { // è‡ºç£éŠ€è¡Œçš„é™¤æ¬Šé™¤æ¯è¡¨æ‰æœ‰é€™å€‹ id 
                 next_index = i;
                 break;
             }
@@ -68,7 +68,7 @@
         char array_td[ swap + char ].innerText + 
         [compile] </ceV> :> [0] ;
 
-    : get-company-hash ( -- hash count ) \ Get the company names of ¥x»È°£Åv°£®§ªí¡C
+    : get-company-hash ( -- hash count ) \ Get the company names of å°éŠ€é™¤æ¬Šé™¤æ¯è¡¨ã€‚
         <ce> var array_td = document.getElementsByTagName("td");</ce>
         {} ( hash ) 0 ( count ) 0 ( index ) begin 
             find-next-company dup ( hash count idx' idx' ) 
@@ -91,16 +91,16 @@
     : isSameHash ( h1 h2 -- boolean ) \ Compare two hash table
         <js> 
         var flag = true;
-        for (var i in tos(1)){ // ¨âÀY¦U¤ñ¤@¦¸
+        for (var i in tos(1)){ // å…©é ­å„æ¯”ä¸€æ¬¡
             if (tos()[i]!==true) flag = false;
             break;
         }; 
-        for (var i in tos()){ // ¨âÀY¦U¤ñ¤@¦¸
+        for (var i in tos()){ // å…©é ­å„æ¯”ä¸€æ¬¡
             if (tos(1)[i]!==true) flag = false;
             break;
         }; execute("2drop"); flag </jsV> ;
 
-    : check_updated ( -- ) \ Check if ¥x»È°£Åv°£®§ªí is updated
+    : check_updated ( -- ) \ Check if å°éŠ€é™¤æ¬Šé™¤æ¯è¡¨ is updated
         restore-company-hash ( hash0 ) obj>keys :> length if \ Init check
             now t.dateTime . ."  localStorage company hash = " restore-company-hash dup (see)
             get-company-hash drop dup -rot isSameHash if ( company-hash )
@@ -123,7 +123,7 @@
 
 	\ Obloleted words
 	
-    : count_oAddCheckbox ( -- n ) \ Get the company count of ¥x»È°£Åv°£®§ªí¡C
+    : count_oAddCheckbox ( -- n ) \ Get the company count of å°éŠ€é™¤æ¬Šé™¤æ¯è¡¨ã€‚
         0 ( count ) 0 ( index ) begin 
             find-next-company dup ( count idx' idx' ) 
         while 
@@ -132,7 +132,7 @@
         /// Item count does not mean much, because the table cuts items 
         /// before yesterday.
 
-    : check_oAddCheckbox_count ( -- ) \ Check if ¥x»È°£Åv°£®§ªí is updated <== obsoleted
+    : check_oAddCheckbox_count ( -- ) \ Check if å°éŠ€é™¤æ¬Šé™¤æ¯è¡¨ is updated <== obsoleted
         js> localStorage.oAddCheckbox_count ( init check ) if
             now t.dateTime . ."  localStorage.oAddCheckbox_count = " js> localStorage.oAddCheckbox_count .
             count_oAddCheckbox js> localStorage.oAddCheckbox_count int = if

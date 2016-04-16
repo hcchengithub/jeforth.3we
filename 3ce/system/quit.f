@@ -47,6 +47,7 @@
 	include f/mytools.f		
 	include 3htm/f/editor.f
 	include 3ce/system/ce.f
+	include 3htm/f/ls.f
 	
 \ ----------------- run the command line -------------------------------------
 	args tib.insert
