@@ -5,7 +5,7 @@
 	,"version" : "1.1"
 	,"browser_action" : {
 		"default_title": "Popup of jeforth.3ce",
-		"default_icon" : "3ce/system/fig.tw.green.16x16.png",
+		"default_icon" : "3ce/system/fig.tw.black.16x16.png",
 		"default_popup" : "jeforth.3ce.html"
 	 }
 	,"background": {
