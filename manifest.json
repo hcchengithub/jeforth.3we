@@ -1,11 +1,11 @@
 {
 	 "manifest_version" : 2
 	,"name" : "jeforth.3ce"
-	,"description" : "jeforth for Chrome Extension"
-	,"version" : "1.0"
+	,"description" : "A FORTH programming language console lets you manipulate web pages interactively and programmatically."
+	,"version" : "1.1"
 	,"browser_action" : {
 		"default_title": "Popup of jeforth.3ce",
-		"default_icon" : "3ce/fig.tw.green.16x16.png",
+		"default_icon" : "3ce/system/fig.tw.black.16x16.png",
 		"default_popup" : "jeforth.3ce.html"
 	 }
 	,"background": {
@@ -15,9 +15,6 @@
 	,"permissions" : [
 		"tabs", "notifications", "http://*/*", "https://*/*", "file://*/*"
 	 ]
-	,"web_accessible_resources": [
-      "js/jquery.tabletojson.js"
-    ]
 }
 
 

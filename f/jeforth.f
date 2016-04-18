@@ -35,7 +35,7 @@ code code       push(nexttoken()); // name of the word
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
 
-code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js which is thus kept pure.
+code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js which is thus kept pure.
 				// An array's length is array.length but there's no such thing of hash.length for hash{}.
 				// memberCount(object) gets the given object's member count which is also a hash table's length.
 				vm.g = {}; // The global hash
@@ -145,7 +145,7 @@ code init		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js w
 						if(resuming) w = dictionary[ip];
 					} while(ip && resuming); // ip==0 means resuming has done
 				}
-				end-code init
+				end-code _init_
 
 code version    ( -- revision ) \ print the greeting message and return the revision code
 				push(vm.greeting()) end-code

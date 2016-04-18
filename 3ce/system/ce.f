@@ -145,16 +145,16 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// The result is an array which is "The result of the script in every injected frame."
 		/// A result is the value of the last statement of the script file.
 		
-	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements
+	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements to run on tabid target page 
 		char </ce>|</ceV> word ; immediate
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 		/// 必須是【別人的】web page。
 
-	: (/ceV) ( "statements" -- ) \ Retrun the value of last statement
+	: (/ceV) ( "statements" -- [last statement] ) \ Retrun the value of last statement from each iframe and the target page
 		{} js: tos().code=pop(1) tabid swap inject ;
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 		
-	: (/ce) ( "statements" -- ) \ No return value
+	: (/ce) ( "statements" -- ) \ Get JavaScript statements to run on tabid target page, no return value.
 		(/ceV) drop ;
 		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
@@ -174,10 +174,12 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// Usage: <text> ... </text> (dictate)
 		
 	code {F7} ( -- ) \ Send inputbox to content script of tabid.
+		// 當命令來自 host page 就盡可能把 display 切向 host page
+		dictate('<ce> if(vm.tick("host.type")) vm.type = vm.g["host.type"];</ce>');
 		vm.cmdhistory.push(inputbox.value);  // Share the same command history with the host
 		push(inputbox.value); // command line 
 		inputbox.value=""; // clear the inputbox
-		execute("(dictate)"); // Let target page the execute the command line(s)
+		execute("(dictate)"); // Let target page to execute the command line(s)
 		push(false); // terminiate event bubbling
 		end-code
 		/// 若用 F8 則無效, 猜測是 Chrome debugger 自己要用。
@@ -233,7 +235,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
+				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce/system", "3ce/f", "3ce", "playground"];
 				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
@@ -372,7 +374,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
 			\ 準備好 readTextFile 就可以 include 了	
-			include 3ce/target.f
+			include 3ce/system/target.f
 		</text> (dictate) ;
 		/// Usage : 
 		/// 237 ( tabid ) attach

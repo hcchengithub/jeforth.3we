@@ -167,12 +167,14 @@
 	
 \ log outputbox
 
+	char ./log.json value log.json // ( -- pathname ) log.json pathname string as a variable. So we can change it.
+
 	: log.length ( -- length )  \ Get the log.json array length
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> length ; 
 
 	: log.recall ( i -- )  \ Recall the log.json[i] back to outputbox
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		( i array ) over log.length swap ( i array log.length i ) 
 		s" --<br><h1> jeforth.3we developing log section " swap 
 		+ s"  of 0~" + swap 1- + s" </h1>--<br>" + </o> drop
@@ -187,18 +189,18 @@
 		['] log.recall :> lastrecalled 1+ log.length = if \ lastrecalled 與 log.length-1 要吻合
 		toggle-outputbox-edit-mode 50 nap ( 視覺效果 )
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		:> slice(0,-1) dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
+		( array ) js> JSON.stringify(pop()) log.json writeTextFile 
 		toggle-outputbox-edit-mode 50 nap ( 視覺效果 )
 		cr ." log.saved :)" cr 
 		else cr ." log.save canceled, lastrecalled and log.length-1 mismatch!" cr 
 		then ;
 		
-	: {ios}	( -- ) \ Same as log.save but is a Hotkey handler.
+	: {s} ( -- bubbling ) \ Same as log.save but is a Hotkey handler.
 		js> event&&event.ctrlKey if 
 			log.save 
-			false ( terminate bubbleing ) 
+			false ( terminate bubbling ) 
 		else 
 			true ( pass down the 's' key ) 
 		then ;
@@ -209,9 +211,9 @@
 
 	: log.push ( -- ) \ Push outputbox to log.json.
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile 
+		( array ) js> JSON.stringify(pop()) log.json writeTextFile 
 		<js> confirm("Want to confirm by recalling the last log section?")</jsV>
 		if log.length 1- log.recall then ;
 		/// 這個應該用得不多，要臨時把 outputbox 保存起來時有用。
@@ -229,13 +231,13 @@
 		
 	: log.drop ( -- )  \ Drop the TOS of log.json array.
 		<js> confirm("Top of log.json will be deleted, are you sure?")</jsV> if
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
-		dup :> pop() drop ( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
+		log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		dup :> pop() drop ( array ) js> JSON.stringify(pop()) log.json writeTextFile then ;
 
 	: log.roll ( i -- )  \ Roll the specified item up to the top of the log.json stack.
-		char log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
+		log.json readTextFile js> JSON.parse(pop()) \ 把整個 log.json 讀回來成一個 array。
 		( i array ) dup :> splice(pop(1),1) over :: push(pop()[0]) ( array' )
-		js> JSON.stringify(pop()) char log.json writeTextFile log.open ;
+		js> JSON.stringify(pop()) log.json writeTextFile log.open ;
 
 	: log.pop ( -- )  \ Pop log.json back to outputbox
 		log.open log.drop ;
@@ -244,7 +246,7 @@
 		<js> confirm("Overwrite the entire jason.log! Are yous sure?")</jsV> if
 		js> outputbox :> innerHTML ( outputbox.innerHTML )
 		[] dup ( outputbox.innerHTML array array ) :: push(pop(1))
-		( array ) js> JSON.stringify(pop()) char log.json writeTextFile then ;
+		( array ) js> JSON.stringify(pop()) log.json writeTextFile then ;
 		/// 這個應該都用不著，要小心。
 		
 \ edit-zone		
