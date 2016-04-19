@@ -10,6 +10,9 @@
 \    > list-tabs \ get tabid
 \      228 除權除息表-依股號
 \    > 228 tabid! \ setup tabid 
+
+\ 看到這個 error 表示讀不到「臺灣銀行」的「除權除息表」網頁。
+\ JavaScript error on word "stopSleeping" : Cannot read property '0' of undefined
 	  
 	: dump-all-<td>  ( -- ) \ Dump all <td> table cells of tabid target page
 	  js> $("td").length ( length )
@@ -117,7 +120,7 @@
 
 \ Check every hour
 
-    run: begin Refresh_the_target_page check_updated 1000 60 * 60 * nap again
+    \ run: begin Refresh_the_target_page check_updated 1000 60 * 60 * nap again
 
 <comment>
 

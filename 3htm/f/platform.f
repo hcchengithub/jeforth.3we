@@ -4,38 +4,26 @@
 
 s" platform.f"		source-code-header
 
-also forth definitions
+also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
 
-\ 既然這種東西都是應用相關的，platform.f 裡面就不再預先設定了，但保留以下範例。
-<comment>
-	<js>
-	// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
-	document.body.ondblclick = function(){
-		push(true); // true let the river run, false stop bubbling
-		execute("double-click"); // execute() does nothing if undefined yet
-		return(pop()); // double-click ( flag -- ... flag' )
-	}
-	// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
-	document.body.onclick = function(){
-		push(true);  // true let the river run, false stop bubbling
-		execute("single-click"); // execute() does nothing if undefined yet
-		return(pop()); // single-click ( flag -- ... flag' )
-	}
-	// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
-	document.body.oncontextmenu = function(){
-		push(true); // true let the river run, false stop bubbling
-		execute("right-click"); // execute() does nothing if undefined yet
-		return(pop()); // right-click ( flag -- ... flag' )
-	}
-	</js>
-</comment>
+\ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
+    js> window.storage==undefined [if]
+		js: window.storage={}
+		js: window.storage.set=function(key,data){localStorage[key]=data}
+		js: window.storage.get=function(key){return(localStorage[key])}
+		js: window.storage.all=function(){return(localStorage)}
+		js: window.storage.del=function(key){delete(localStorage[key])}
+	[then]
 
-code run-inputbox ( -- ) \ Used in onKeyDown event handler.
+code run-inputbox ( -- ) \ <Enter> key's run time.
 				var cmd = inputbox.value; // w/o the '\n' character ($10).
 				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 				vm.cmdhistory.push(cmd);
 				vm.forthConsoleHandler(cmd);
 				end-code
+				/// 抽出本命令有很多用途，首先是 support Ctrl-Enter 用來執行 inputbox, 這除了
+				/// 原來 edit mode 時需要, 且可用於 focus 在別地方時下達執行命令, 因為 focus 本
+				/// 身要指著某東西；這個 word 還可以改寫，在 3ce 中用來加強分辨看命令是誰下達的。
 
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
 				<js> confirm("Really want to restart?") </jsV> ;
@@ -614,39 +602,62 @@ previous definitions
 
 
 <comment>
-s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
 
-: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
-						r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
-						outputbox-high-light-style
-						r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
-					then
-				next ; compile-only 
-				/// Don't use this command directly, avoid disterbing save-restore orig_border.
-				/// So I make it a compile-only. Use ~-toggle instead.
+	\ 既然這種東西都是應用相關的，platform.f 裡面就不再預先設定了，但保留以下範例。
+		<js>
+		// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
+		document.body.ondblclick = function(){
+			push(true); // true let the river run, false stop bubbling
+			execute("double-click"); // execute() does nothing if undefined yet
+			return(pop()); // double-click ( flag -- ... flag' )
+		}
+		// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
+		document.body.onclick = function(){
+			push(true);  // true let the river run, false stop bubbling
+			execute("single-click"); // execute() does nothing if undefined yet
+			return(pop()); // single-click ( flag -- ... flag' )
+		}
+		// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
+		document.body.oncontextmenu = function(){
+			push(true); // true let the river run, false stop bubbling
+			execute("right-click"); // execute() does nothing if undefined yet
+			return(pop()); // right-click ( flag -- ... flag' )
+		}
+		</js>
 
-: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
-					if \ restore
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
-					else \ no restore just clean
-						r@ 1- js> outputbox :> childNodes[pop()].style if
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+	s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
+
+	: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
+					js> outputbox :> childNodes.length for
+						r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
+							r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+							r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+							outputbox-high-light-style
+							r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
 						then
-					then
-				next ; 
+					next ; compile-only 
+					/// Don't use this command directly, avoid disterbing save-restore orig_border.
+					/// So I make it a compile-only. Use ~-toggle instead.
 
-: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
-				js> outputbox :> highLight if \ check recent state
-					outputbox-high-light-off
-					js> outputbox :: highLight=false \ Yes, we can add properties to an element
-				else
-					outputbox-high-light-on
-					js> outputbox :: highLight=true
-				then ;
+	: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
+					js> outputbox :> childNodes.length for
+						r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
+						if \ restore
+							r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+							r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+						else \ no restore just clean
+							r@ 1- js> outputbox :> childNodes[pop()].style if
+							r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+							then
+						then
+					next ; 
+
+	: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+					js> outputbox :> highLight if \ check recent state
+						outputbox-high-light-off
+						js> outputbox :: highLight=false \ Yes, we can add properties to an element
+					else
+						outputbox-high-light-on
+						js> outputbox :: highLight=true
+					then ;
 </comment>				

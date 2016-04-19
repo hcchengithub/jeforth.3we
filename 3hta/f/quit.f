@@ -77,6 +77,7 @@
 	include canvas.f
 	include mytools.f
 	include editor.f
+	include ls.f
 	marker ---
 	
 \ ----------------- run the command line -------------------------------------

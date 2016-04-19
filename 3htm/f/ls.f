@@ -2,7 +2,7 @@
 	\ Maintain source code in HTML5 local storage directly
 
 	s" ls.f"		source-code-header
-
+	
 	: (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
 		js> $(pop()).parents('.eb')[0] ( eb ) ;
 
@@ -20,11 +20,11 @@
 		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $('.ebname',tos())[0].innerText trim ( eb name )
 		js> $('textarea',tos(1))[0].value ( eb name text )
-		js: localStorage[pop(1)]=pop() ( eb )
+		js: storage.set(pop(1),pop()) ( eb )
 		js: $('.ebsave',pop())[0].value="Saved" ;
 		
 	: (eb.read) ( eb field_name -- ) \  Read the localStorate[name] to textarea of the given edit box.
-		js> localStorage[tos()]  ( eb name text|undefined ) 
+		js> storage.get(tos())  ( eb name text|undefined ) 
 		js> tos()==undefined if  ( eb name text|undefined ) 
 			<js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
 			2drop exit
@@ -52,7 +52,7 @@
 		<js> $('textarea',tos())[0].value.indexOf("delete me no regret")!=0</jsV>
 		if <js> alert('Place "delete me no regret" at the very beginning of the textarea to demonstrate yor guts.') </js> drop exit then
 		js> $('.ebname',tos())[0].innerText trim ( eb name ) 
-		js: delete(localStorage[pop()]) ( eb ) removeElement ;
+		js: storage.del(pop()) ( eb ) removeElement ;
 
 	: eb.run ( btn -- ) \ Run FORTH source code of the local storage edit box.
 		(eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -109,12 +109,12 @@
 	: ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
 	
 	: autoexec ( -- ) \ Run localStorage.autoexec
-		js> localStorage.autoexec js> tos() if  ( autoexec )
+		js> storage.get("autoexec") js> tos() if  ( autoexec )
 			tib.insert
 		then ;
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
-		js> localStorage[pop()] tib.append ;
+		js> storage.get(pop()) tib.append ;
 		
 	: run ( <local storage field name> -- ) \ Run local storage source code.
 		char \n|\r word trim (run) ;
@@ -133,7 +133,7 @@
 			'<code>export-all</code>' exports the entire local storage in JSON format.
 			<br><br>
 		</unindent></text> <code>escape </o> drop
-		js> localStorage obj>keys ( array )
+		js> storage.all() obj>keys ( array )
 		begin js> tos().length while ( array )
 			js> tos().pop()  ( array- fieldname )
 			<text>
@@ -153,7 +153,7 @@
 			})
 			$("input.lsfieldexport").click(function(){
 				push(null); // ( null ) 
-				push(localStorage[this.getAttribute("fieldname")]); // ( null text ) 
+				push(storage.get(this.getAttribute("fieldname"))); // ( null text ) 
 				execute("(export)");
 			})
 		</js> ;
@@ -163,52 +163,55 @@
 		js: pop(1).document.write("<html><body><pre>"+pop()+"</pre></body></html>") ;
 		
 	: export ( <field> -- ) \ Create a window to export a local storage field.
-		null char \n|\r word trim js> localStorage[pop()] (export) ;
+		null char \n|\r word trim js> storage.get(pop()) (export) ;
 		
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
-		null js> JSON.stringify(localStorage,"\n","\t") (export) ;
+		null js> JSON.stringify(storage.all(),"\n","\t") (export) ;
 	
-	js> localStorage.autoexec [if] [else] \ Default autoexec if it's not existing
-		<text>
+	\ Setup default autoexec, ad, and pruning if autoexec is not existing
+	js> storage.get("autoexec") [if] [else] 
+		<text> <unindent>
 			js: outputbox.style.fontSize="1.5em"
 			cr cr 
 			." Hello world!! says 'autoexec' field" cr
 			." from published jeforth.3ce. "
-			cr cr cr cr cr cr cr 
-			\ Launch the briefing 
+			cr cr 
+			.( Launch the briefing ) cr
 			<o> <iframe src="http://note.youdao.com/share/?id=79f8bd1b7d0a6174ff52e700dbadd1b2&type=note"
 			name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
 			marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
-			cr cr list
-		</text> js: localStorage.autoexec=pop() 
-	[then]
-	js> localStorage.ad [if] [else] \ Default ad if it's not existing
-		<text>
-			\ Remove all annoying floating ad boxes. 刪除所有惱人的廣告框。
-			active-tab :> id tabid! <ce>
-			var divs = document.getElementsByTagName("div");
-			for (var i=divs.length-1; i>=0; i--){
-			  if(divs[i].style.position){
-				divs[i].parentNode.removeChild(divs[i]);
-			  }
-			}
-			for (var i=divs.length-1; i>=0; i--){
-			  if(parseInt(divs[i].style.width)<600){ // <---- 任意修改
-				divs[i].parentNode.removeChild(divs[i]);
-			  }
-			}
-			</ce>
-		</text> js: localStorage.ad=pop() 
-	[then]
-	js> localStorage.pruning [if] [else] \ Default pruning if it's not existing
-		<text>
-			\ Make the target page editable for pruning. 把 target page 搞成 editable 以便修剪。
-			active-tab :> id tabid! <ce> document.getElementsByTagName("body")[0].contentEditable=true </ce>
-		</text> js: localStorage.pruning=pop() 
+			cr cr 
+			.( execute the 'list' command ) cr
+			list
+		</unindent></text> unindent js: storage.set("autoexec",pop())
+
+ 		js> storage.get("ad") [if] [else] \ Default ad if it's not existing
+			<text> <unindent>
+				\ Remove all annoying floating ad boxes. 刪除所有惱人的廣告框。
+				active-tab :> id tabid! <ce>
+				var divs = document.getElementsByTagName("div");
+				for (var i=divs.length-1; i>=0; i--){
+				  if(divs[i].style.position){
+					divs[i].parentNode.removeChild(divs[i]);
+				  }
+				}
+				for (var i=divs.length-1; i>=0; i--){
+				  if(parseInt(divs[i].style.width)<600){ // <---- 任意修改
+					divs[i].parentNode.removeChild(divs[i]);
+				  }
+				}
+				</ce>
+			</unindent></text> unindent js: storage.set("ad",pop())
+		[then]
+
+		js> storage.get("pruning") [if] [else] \ Default pruning if it's not existing
+			<text> <unindent>
+				\ Make the target page editable for pruning. 把 target page 搞成 editable 以便修剪。
+				active-tab :> id tabid! <ce> document.getElementsByTagName("body")[0].contentEditable=true </ce>
+			</unindent></text> unindent js: storage.set("pruning",pop())
+		[then]
 	[then]
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
-	
-	
 	
 	
