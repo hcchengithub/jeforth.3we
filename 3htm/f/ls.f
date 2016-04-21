@@ -101,10 +101,11 @@
 			<input type=button value='Read only' class=ebreadonly>
 			<input type=button value='Close' class=ebclose>
 			<input type=button value='Run' class=ebrun></p>
-			<textarea class=ebtextarea style="margin-top:1em;"></textarea>
+			<textarea class=ebtextarea style="margin-top:1em;" rows=20 wrap="off"></textarea>
 		</div></text> 
 		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ clean /* comments */ 
-		</o> ( eb ) init-buttons ;
+		</o> ( eb ) js: window.scrollTo(0,tos().offsetTop-50) ( eb )
+		init-buttons ;
 	
 	: ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
 	

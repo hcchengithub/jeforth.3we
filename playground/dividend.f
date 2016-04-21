@@ -11,33 +11,44 @@
 \      228 除權除息表-依股號
 \    > 228 tabid! \ setup tabid 
 
-\ 看到這個 error 表示讀不到「臺灣銀行」的「除權除息表」網頁。
-\ JavaScript error on word "stopSleeping" : Cannot read property '0' of undefined
-	  
-	: dump-all-<td>  ( -- ) \ Dump all <td> table cells of tabid target page
-	  js> $("td").length ( length )
-	  ?dup if dup for dup r@ - ( COUNT i ) 
-		 >r
-		 js> $("td")[rtos()].innerText \ cell value
-		 js> $("td")[rtos()].getAttribute("class") dup if char _note_ + then
-		 js> $("td")[rtos()].id dup if char _note_ + then
-		 r>
-		 ." index:" . ."  ID: " . ."  Class: " . space . cr \ the cr provides an important nap time 
-	  ( COUNT ) next drop then ; 
-	  /// Run on jeforth.3ce target page
+s" http://fund.bot.com.tw/z/ze/zeb/zeba.djhtm" constant 除權除息表網址 // ( -- "url" )
+除權除息表網址 js: push({url:pop()}) tabs.query ( [tabs] )
+js> tos().length>=1 [if] [else] 
+    除權除息表網址 js: window.open(pop()) \ 想取得該 tab 的 window object? No way! 別想了。
+    cr .( 上網讀取【台灣銀行--除權除息表】網頁 ) cr 
+    [begin] 
+        除權除息表網址 js: push({url:pop()}) tabs.query ( [tabs] ) 
+        char . . 500 nap 
+        js> tos().length>=1 [if] true [else] false [then]
+    [until] cr
+[then]
+js> pop()[0].id tabid! 
+cr .( 已成功讀取【台灣銀行--除權除息表】網頁 ) cr 
+      
+    : dump-all-<td>  ( -- ) \ Dump all <td> table cells of tabid target page
+      js> $("td").length ( length )
+      ?dup if dup for dup r@ - ( COUNT i ) 
+         >r
+         js> $("td")[rtos()].innerText \ cell value
+         js> $("td")[rtos()].getAttribute("class") dup if char _note_ + then
+         js> $("td")[rtos()].id dup if char _note_ + then
+         r>
+         ." index:" . ."  ID: " . ."  Class: " . space . cr \ the cr provides an important nap time 
+      ( COUNT ) next drop then ; 
+      /// Run on jeforth.3ce target page
 
-	: dump-all-<tr>  ( -- ) \ Dump all <tr> table rows of tabid target page
-	  js> $("tr").length ( length )
-	  ?dup if dup for dup r@ - ( COUNT i ) 
-		 >r
-		 js> $("tr")[rtos()].outerHTML remove-script-from-HTML  remove-select-from-HTML \ row HTML
-		 js> $("tr")[rtos()].getAttribute("class") dup if char _note_ + then
-		 js> $("tr")[rtos()].id dup if char _note_ + then
-		 r>
-		 ." index:" . ."  ID: " . ."  Class: " . space </o> drop cr \ the cr provides an important nap time 
-	  ( COUNT ) next drop then ; 
-	  /// Run on jeforth.3ce target page
-	
+    : dump-all-<tr>  ( -- ) \ Dump all <tr> table rows of tabid target page
+      js> $("tr").length ( length )
+      ?dup if dup for dup r@ - ( COUNT i ) 
+         >r
+         js> $("tr")[rtos()].outerHTML remove-script-from-HTML  remove-select-from-HTML \ row HTML
+         js> $("tr")[rtos()].getAttribute("class") dup if char _note_ + then
+         js> $("tr")[rtos()].id dup if char _note_ + then
+         r>
+         ." index:" . ."  ID: " . ."  Class: " . space </o> drop cr \ the cr provides an important nap time 
+      ( COUNT ) next drop then ; 
+      /// Run on jeforth.3ce target page
+    
     : Refresh_the_target_page ( -- ) \ Refresh the tabid target page.
         tabid js: chrome.tabs.reload(pop())
         500 nap tabid tabs.get :> status!="complete" if
@@ -120,12 +131,14 @@
 
 \ Check every hour
 
-    \ run: begin Refresh_the_target_page check_updated 1000 60 * 60 * nap again
+    \    run: begin Refresh_the_target_page check_updated 1000 60 * 60 * nap again
+         Refresh_the_target_page check_updated 
+
 
 <comment>
 
-	\ Obloleted words
-	
+    \ Obloleted words
+    
     : count_oAddCheckbox ( -- n ) \ Get the company count of 台銀除權除息表。
         0 ( count ) 0 ( index ) begin 
             find-next-company dup ( count idx' idx' ) 

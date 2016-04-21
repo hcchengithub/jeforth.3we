@@ -96,7 +96,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// <scheme>://<host><path> see http://chrome-apps-doc2.appspot.com/trunk/extensions/match_patterns.html
 		/// Should return an array, 'undefined' indicates invalid pattern.
 		
-	: list-tabs ( -- ) \ List Tabs in the current window
+	: list-tabs ( -- ) \ List all tabs in all window
 		{} tabs.query ( array ) dup :> length ( array length )
 		?dup if for ( array )
 		r@ 1- js> tos(1) :> [pop()] ( array tab )
