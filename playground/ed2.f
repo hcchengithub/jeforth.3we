@@ -33,7 +33,7 @@
 			js:	$(".ebhtmlarea",tos()).hide()
 			js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",tos()).html()
 			js:	$(".ebtextarea",tos()).show()
-		then ;
+		then drop ;
 
     : eb.save ( btn -- ) \ Save the textarea to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -56,7 +56,8 @@
         js: $('.ebsave',pop())[0].value="Saved" ;
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
-        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
+        (eb.parent) dup ( eb eb ) \ The input object can be any node of the editbox.
+		js: $(".ebmodeflag",tos())[0].checked=false eb.mode
         js> $('.ebname',tos())[0].value trim ( eb name ) (eb.read) ;
         
     : eb.close ( btn -- ) \ Close the local storage edit box to stop editing.
@@ -185,20 +186,14 @@ false OK
 
 stop
 > js> $("textarea",$(".eb")).attr("readOnly",true)
- OK 
 > js> $("textarea",$(".eb")).attr("readOnly",false)
- OK 
  
 stop
 h2  { visibility:hidden;  } <--------- 還是會占空間, 只是所站的空間呈現一片空白
 > js> $("textarea",$(".eb")).hide()
- OK 
 > js> $("textarea",$(".eb")).show()
- OK 
 > js> $(".ebhtmlarea",$(".eb")).hide()
- OK 
 > js> $(".ebhtmlarea",$(".eb")).show()
- OK   
 
 stop
 在 .ebtextareea $().hide() 時把它改掉，
@@ -206,8 +201,10 @@ stop
 > js> $(".ebtextarea")[0].value ==> <h3> header 333333<h3> OK 
 > <js> $(".ebtextarea")[0].value="1111111111"</js>
 > js> $(".ebtextarea")[0].value \ ==> 1111111111 OK 
-切回 
+切回 .ebtextareea $().show() 當然會把 .ebhtmlarea 蓋回去
 > js> $(".ebtextarea")[0].value \ ==>  <h3> header 333333<h3></h3> OK 
+所以 $().hide() 偷改 .ebtextareea 沒有意義。
+
 
 
  
