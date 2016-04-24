@@ -8,11 +8,6 @@
     : (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
         js> $(pop()).parents('.eb')[0] ( eb ) ;
 
-    : eb.edit ( btn -- ) \ Make the textarea and the name editable.
-        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        \ js: $('.ebname',tos())[0].contentEditable=true
-        js: $('textarea',pop())[0].readOnly=false ;
-        
     : eb.readonly ( btn -- ) \  Toggle read-only of the edit box.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebreadonlyflag",tos())[0].checked if
@@ -26,21 +21,24 @@
 		then
 		;
 		
-	: eb.source ( btn -- ) \ Toggle edit box mode between source and HTML
+	: eb.mode ( btn -- ) \ Toggle edit box mode between source and HTML
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-		js> $(".ebsourceflag",tos())[0].checked if
-			js: $(".ebsourceflag",tos())[0].checked=false
+		js> $(".ebmodeflag",tos())[0].checked if
+			js: $(".ebmodeflag",tos())[0].checked=false
 			js:	$(".ebtextarea",tos()).hide()
+			js: $(".ebhtmlarea",tos()).html($(".ebtextarea",tos())[0].value)
 			js:	$(".ebhtmlarea",tos()).show()
 		else
-			js: $(".ebsourceflag",tos())[0].checked=true
-			js:	$(".ebtextarea",tos()).show()
+			js: $(".ebmodeflag",tos())[0].checked=true
 			js:	$(".ebhtmlarea",tos()).hide()
+			js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",tos()).html()
+			js:	$(".ebtextarea",tos()).show()
 		then ;
+
     : eb.save ( btn -- ) \ Save the textarea to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value trim ( eb name )
-        js> $('textarea',tos(1))[0].value ( eb name text )
+        js> $('.ebtextarea',tos(1))[0].value ( eb name text )
         js: storage.set(pop(1),pop()) ( eb )
         js: $('.ebsave',pop())[0].value="Saved" ;
         
@@ -54,7 +52,7 @@
             <js> confirm("Unsaved local storage edit box will be overwritten, are you sure?") </jsV> 
             if else 2drop exit then
         then  ( eb text )
-        js: $('textarea',tos(1))[0].value=pop()
+        js: $('.ebtextarea',tos(1))[0].value=pop()
         js: $('.ebsave',pop())[0].value="Saved" ;
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
@@ -85,7 +83,7 @@
 
     : init-buttons ( eb -- eb ) \ Initialize buttons of the local storage edit box.
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
-        <js> $(".ebsource",  tos())[0].onclick =function(e){push(this);execute("eb.source");  return(false)}</js>
+        <js> $(".ebmode",    tos())[0].onclick =function(e){push(this);execute("eb.mode");    return(false)}</js>
         <js> $(".ebsave",    tos())[0].onclick =function(e){push(this);execute("eb.save");    return(false)}</js>
         <js> $(".ebread",    tos())[0].onclick =function(e){push(this);execute("eb.read");    return(false)}</js>
         <js> $(".ebclose",   tos())[0].onclick =function(e){push(this);execute("eb.close");   return(false)}</js>
@@ -100,7 +98,7 @@
 				$('textarea',tos()).attr("readOnly",false);
 				$('.ebhtmlarea',tos())[0].contentEditable=true;
 			}
-			if ($(".ebsourceflag",tos())[0].checked){
+			if ($(".ebmodeflag",tos())[0].checked){
 				$(".ebtextarea",tos()).show();
 				$(".ebhtmlarea",tos()).hide();
 			} else {
@@ -138,7 +136,7 @@
             <input class=ebname type=text value=""></input>
             <p>
             <input type=checkbox class=ebreadonlyflag disabled="disabled"><input type=button value='Readonly' class=ebreadonly>
-            <input type=checkbox class=ebsourceflag disabled="disabled"><input type=button value='</>' class=ebsource>
+            <input type=checkbox class=ebmodeflag disabled="disabled"><input type=button value='</>' class=ebmode>
             <input type=button value='Saved' class=ebsave>
             <input type=button value='Read' class=ebread>
             <input type=button value='Delete' class=ebdelete>
@@ -201,4 +199,15 @@ h2  { visibility:hidden;  } <--------- 還是會占空間, 只是所站的空間
  OK 
 > js> $(".ebhtmlarea",$(".eb")).show()
  OK   
-  
+
+stop
+在 .ebtextareea $().hide() 時把它改掉，
+> js> $(".ebtextarea").length \ ==> 1 OK 
+> js> $(".ebtextarea")[0].value ==> <h3> header 333333<h3> OK 
+> <js> $(".ebtextarea")[0].value="1111111111"</js>
+> js> $(".ebtextarea")[0].value \ ==> 1111111111 OK 
+切回 
+> js> $(".ebtextarea")[0].value \ ==>  <h3> header 333333<h3></h3> OK 
+
+
+ 
