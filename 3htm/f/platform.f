@@ -13,6 +13,7 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 		js: window.storage.get=function(key){return(localStorage[key])}
 		js: window.storage.all=function(){return(localStorage)}
 		js: window.storage.del=function(key){delete(localStorage[key])}
+		js: window.storage.field=function(key){return(localStorage[key])} \ 
 	[then]
 
 code run-inputbox ( -- ) \ <Enter> key's run time.

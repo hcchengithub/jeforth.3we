@@ -19,7 +19,7 @@
 		then
 		;
 		
-	: eb.mode ( btn -- ) \ Toggle edit box mode between source and HTML
+	: eb.mode ( btn -- ) \ Toggle edit box between code mode and brows mode
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebmodeflag",tos())[0].checked if
 			js: $(".ebmodeflag",tos())[0].checked=false
@@ -33,26 +33,31 @@
 			js:	$(".ebtextarea",tos()).show()
 		then drop ;
 
-    : eb.save ( btn -- ) \ Save the textarea to localStorate[name].
+    : eb.save ( btn -- ) \ Save the edit box to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        js> $('.ebname',tos())[0].value trim ( eb name )
-        js> $('.ebtextarea',tos(1))[0].value ( eb name text )
-        js: storage.set(pop(1),pop()) ( eb )
-        js: $('.ebsave',pop())[0].value="Saved" ;
+		\ Overwrite all textarea innerHTML with its own value
+		js: $("textarea",tos()).each(function(){this.innerHTML=this.value}) ( eb )
+		\ Switch to source mode to get borwser mode's value
+		js> $(".ebmodeflag",tos())[0].checked dup if else over eb.mode then swap ( mode eb )
+        js> $('.ebname',tos())[0].value trim ( mode eb name ) \ get field name
+        js> $('.ebtextarea',tos(1))[0].value ( mode eb name text ) \ get code
+        js: storage.set(pop(1),pop()) ( mode eb ) \ save code to field
+		js: $(".ebsaveflag",tos())[0].checked=true ( mode eb ) 
+		swap if else eb.mode then ;
         
     : (eb.read) ( eb field_name -- ) \  Read the localStorate[name] to textarea of the given edit box.
-		over js: $(".ebmodeflag",tos())[0].checked=false eb.mode
+		over js: $(".ebmodeflag",tos())[0].checked=false eb.mode \ use code mode
         js> storage.get(tos())  ( eb name text|undefined ) 
         js> tos()==undefined if  ( eb name text|undefined ) 
             <js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
             2drop exit
         then  nip ( eb text )
-        js> $('.ebsave',tos(1))[0].value=="Save" if  ( eb text )
+        js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb text )
             <js> confirm("Unsaved local storage edit box will be overwritten, are you sure?") </jsV> 
             if else 2drop exit then
         then  ( eb text )
-        js: $('.ebtextarea',tos(1))[0].value=pop()
-        js: $('.ebsave',pop())[0].value="Saved" ;
+        js: $('.ebtextarea',tos(1))[0].value=pop() 
+		js: $(".ebsaveflag",pop())[0].checked=true ;
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -60,7 +65,7 @@
         
     : eb.close ( btn -- ) \ Close the local storage edit box to stop editing.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        js> $('.ebsave',tos())[0].value=="Save" if 
+        js> $(".ebsaveflag",tos())[0].checked not if 
             <js> confirm("Are you sure you want to clsoe the unsaved local storage edit box?") </jsV> 
             if else exit then
         then ( eb ) removeElement ;
@@ -78,7 +83,7 @@
         
     : eb.onchange ( btn -- ) \ Event handler on local storage edit box has changed
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        <js> $(".ebsave",pop())[0].value="Don't forget to SAVE !"</js> ;
+        js: $(".ebsaveflag",pop())[0].checked=false ;
 
     : init-buttons ( eb -- eb ) \ Initialize buttons of the local storage edit box.
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
@@ -90,6 +95,7 @@
         <js> $(".ebdelete",  tos())[0].onclick =function(e){push(this);execute("eb.delete");  return(false)}</js> 
         <js> $(".ebtextarea",tos())[0].onchange=function(e){push(this);execute("eb.onchange");return(false)}</js> 
         <js> 
+			$(".ebsaveflag",tos())[0].checked = true;
 			if ($(".ebreadonlyflag",tos())[0].checked){
 				$('textarea',tos()).attr("readOnly",true);
 				$('.ebhtmlarea',tos())[0].contentEditable=false;
@@ -112,7 +118,7 @@
                         if (e&&e.ctrlKey) {
                             push(this); // ( textarea ) 
                             execute("eb.save");
-                            var temp=this.value;this.value="";this.value=temp; // Saved already so clear the onchange status
+                            this.innerHTML=this.value;this.value=this.innerHTML; // Saved already so clear the onchange status
                             e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
                             return(false);
                         }
@@ -127,16 +133,16 @@
             <style type="text/css">
                 .eb .box { width:90%; }
                 .eb .box, .eb .ebhtmlarea { border:1px solid black; }
-                .eb p { display:inline; }
-				.eb .ebbody { margin: 0 0 0 0;}
+                .eb p { display:inline; } /* [ ] <P> 不該有套疊,故多餘的很容易可以消除 */
+				.eb .ebname { font-size: 1.2em; }
             </style>
             <div class=box>
-            <p>Local Storage Field </p>
+            <p>Local Storage</p>
             <input class=ebname type=text value=""></input>
             <p>
-            <input type=checkbox class=ebreadonlyflag disabled="disabled"><input type=button value='Readonly' class=ebreadonly>
+            <input type=checkbox class=ebreadonlyflag disabled="disabled"><input type=button value='R/O' class=ebreadonly>
             <input type=checkbox class=ebmodeflag disabled="disabled"><input type=button value='</>' class=ebmode>
-            <input type=button value='Saved' class=ebsave>
+            <input type=checkbox class=ebsaveflag disabled="disabled"><input type=button value='Saved' class=ebsave>
             <input type=button value='Read' class=ebread>
             <input type=button value='Delete' class=ebdelete>
             <input type=button value='Close' class=ebclose>
@@ -149,7 +155,9 @@
 			</div>
 			</div>
 		</text> /*remove*/
-        </o> ( eb ) js: window.scrollTo(0,tos().offsetTop-50) ( eb )
+        </o> ( eb ) 
+		dup js> outputbox insertBefore
+		js: window.scrollTo(0,tos().offsetTop-50) ( eb )
         init-buttons ;
     
     : ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
@@ -165,9 +173,9 @@
 	: run ( <local storage field name> -- ) \ Run local storage source code.
 		char \n|\r word trim (run) ;
 
-	: cls  ( -- ) \ Clear all #text in the outputbox elements are remained.
-		ce@ ( save ) js> outputbox ce! er ce! ( restore ) ;
-		/// Auto save-restore ce@ so it won't be changed.
+	\ : cls  ( -- ) \ Clear all #text in the outputbox elements are remained.
+	\ 	ce@ ( save ) js> outputbox ce! er ce! ( restore ) ;
+	\ 	/// Auto save-restore ce@ so it won't be changed.
 	
 	: list ( -- ) \ List all localStorage fields, click to open
 		<text> <unindent><br>
@@ -261,3 +269,18 @@
 	autoexec \ Run localStorage.autoexec when jeforth starting up
 	
 	
+<comment>
+storage {
+
+
+}
+js> window.storage==undefined [if]
+    js: window.storage={}
+    js: window.storage.set=function(key,data){localStorage[key]=data}
+    js: window.storage.get=function(key){return(localStorage[key])}
+    js: window.storage.all=function(){return(localStorage)}
+    js: window.storage.del=function(key){delete(localStorage[key])}
+    js: window.storage.field=function(key){return(localStorage[key])} \ 
+[then]
+
+</comment>
