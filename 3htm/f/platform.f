@@ -7,13 +7,34 @@ s" platform.f"		source-code-header
 also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
 
 \ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
+\ 為了讓 localStorage 放 object 令它整個都是 JSON:
+\ localStorage[field] = JSON.stringify({data:"data",aa,bb,cc,...}); 
+\ 其中 data 是原來搬過來的, 其他 properties 是擴充出來的。
+
     js> window.storage==undefined [if]
-		js: window.storage={}
-		js: window.storage.set=function(key,data){localStorage[key]=data}
-		js: window.storage.get=function(key){return(localStorage[key])}
-		js: window.storage.all=function(){return(localStorage)}
-		js: window.storage.del=function(key){delete(localStorage[key])}
-		js: window.storage.field=function(key){return(localStorage[key])} \ 
+		<js>
+		window.storage = {};
+		window.storage.new = function(key){localStorage[key]=JSON.stringify({"data":""})} // initialize the field
+		window.storage.set = function(key,data){
+				var field = JSON.parse(localStorage[key]); 
+				field.data = data;
+				localStorage[key] = JSON.stringify(field);
+			}
+		window.storage.get = function(key){
+				var field = JSON.parse(localStorage[key]); 
+				return(field.data)
+			}
+		window.storage.all = function(){return(localStorage)}
+		window.storage.del = function(key){delete(localStorage[key])}
+		window.storage.property = function(key,property,value){
+				var field = JSON.parse(localStorage[key]); 
+				if (arguments.length==3) {
+					field.property = value;
+					localStorage[key] = JSON.stringify(field);
+				}
+				if (arguments.length==2) return(field.property)
+			}
+		</js>
 	[then]
 
 code run-inputbox ( -- ) \ <Enter> key's run time.

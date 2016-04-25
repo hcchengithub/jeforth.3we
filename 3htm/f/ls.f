@@ -96,6 +96,8 @@
         <js> $(".ebtextarea",tos())[0].onchange=function(e){push(this);execute("eb.onchange");return(false)}</js> 
         <js> 
 			$(".ebsaveflag",tos())[0].checked = true;
+			$(".ebmodeflag",tos())[0].checked = true;
+			$(".ebreadonlyflag",tos())[0].checked = false;
 			if ($(".ebreadonlyflag",tos())[0].checked){
 				$('textarea',tos()).attr("readOnly",true);
 				$('.ebhtmlarea',tos())[0].contentEditable=false;
@@ -134,11 +136,11 @@
                 .eb .box { width:90%; }
                 .eb .box, .eb .ebhtmlarea { border:1px solid black; }
                 .eb p { display:inline; } /* [ ] <P> 不該有套疊,故多餘的很容易可以消除 */
-				.eb .ebname { font-size: 1.2em; }
+				.eb .ebname { font-size: 1.1em; }
             </style>
             <div class=box>
             <p>Local Storage</p>
-            <input class=ebname type=text value=""></input>
+            <input class=ebname type=text placeholder="field name"></input> /* HTA not support 'placeholder' yet */
             <p>
             <input type=checkbox class=ebreadonlyflag disabled="disabled"><input type=button value='R/O' class=ebreadonly>
             <input type=checkbox class=ebmodeflag disabled="disabled"><input type=button value='</>' class=ebmode>
@@ -221,7 +223,8 @@
 		
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
 		null js> JSON.stringify(storage.all(),"\n","\t") (export) ;
-	
+stop
+
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
