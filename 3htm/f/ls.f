@@ -1,6 +1,5 @@
 
 	\ Maintain source code in HTML5 local storage directly
-
 	s" ls.f"		source-code-header
 	
     : (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
@@ -19,49 +18,60 @@
 		then
 		;
 		
-	: eb.mode ( btn -- ) \ Toggle edit box between code mode and brows mode
+	code textarea.value->innerhtml ( scope -- ) \ Copy all textarea.value to its own innerHTML
+		$("textarea",pop()).each(
+			function()this.innerHTML = this.value;
+		) end-code
+		/// Only HTA textarea.innerHTML always catches up with its value.
+
+	: eb.appearance.code ( eb -- ) \ Switch edit box appearance
+		js: $(".ebmodeflag",tos())[0].checked=true
+		js:	$(".ebhtmlarea",tos()).hide()
+		js:	$(".ebtextarea",tos()).show()
+		drop ;
+		/// only appearance, content as is.
+	
+	: eb.appearance.browse ( eb -- ) \ Switch edit box appearance
+		js: $(".ebmodeflag",tos())[0].checked=false
+		js:	$(".ebtextarea",tos()).hide()
+		js:	$(".ebhtmlarea",tos()).show()
+		drop ;
+		/// only appearance, content as is.
+		
+	: eb.content.browse ( eb -- ) \ Switch edit box to use browse mode content
+	
+	code eb.content.code ( eb -- ) \ Switch edit box to use code mode content
+		$(".ebhtmlarea",pop()).html($(".ebtextarea",tos())[0].value)
+		end-code
+	
+
+	: eb.mode.toggle ( btn -- ) \ Toggle edit box between code mode and browse mode
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebmodeflag",tos())[0].checked if
-			js: $(".ebmodeflag",tos())[0].checked=false
-			js:	$(".ebtextarea",tos()).hide()
-			js: $(".ebhtmlarea",tos()).html($(".ebtextarea",tos())[0].value)
-			js:	$(".ebhtmlarea",tos()).show()
+			
+			eb.mode.browse
 		else
-			js: $(".ebmodeflag",tos())[0].checked=true
-			js:	$(".ebhtmlarea",tos()).hide()
+			\ Overwrite all textarea innerHTML with its own value
+			js: $("textarea",tos()).each(function(){this.innerHTML=this.value})
 			js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",tos()).html()
-			js:	$(".ebtextarea",tos()).show()
+			eb.mode.code
 		then drop ;
-
+		
+	
     : eb.save ( btn -- ) \ Save the edit box to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-		\ Overwrite all textarea innerHTML with its own value
-		js: $("textarea",tos()).each(function(){this.innerHTML=this.value}) ( eb )
 		\ Switch to source mode to get borwser mode's value
 		js> $(".ebmodeflag",tos())[0].checked dup if else over eb.mode then swap ( mode eb )
         js> $('.ebname',tos())[0].value trim ( mode eb name ) \ get field name
         js> $('.ebtextarea',tos(1))[0].value ( mode eb name text ) \ get code
+		js> storage.get(tos(1)) ( mode eb name text hash )
+		js: tos().data=pop(1) ( mode eb name hash' )
+		js: tos().mode=tos(3) ( mode eb name hash' )
+		js: tos().readonly=$(".ebmodeflag",tos(2))[0].checked
         js: storage.set(pop(1),pop()) ( mode eb ) \ save code to field
 		js: $(".ebsaveflag",tos())[0].checked=true ( mode eb ) 
 		swap if else eb.mode then ;
-        
-    : (eb.read) ( eb field_name -- ) \  Read the localStorate[name] to textarea of the given edit box.
-		over js: $(".ebmodeflag",tos())[0].checked=false eb.mode \ use code mode
-        js> storage.get(tos())  ( eb name text|undefined ) 
-        js> tos()==undefined if  ( eb name text|undefined ) 
-            <js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
-            2drop exit
-        then  nip ( eb text )
-        js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb text )
-            <js> confirm("Unsaved local storage edit box will be overwritten, are you sure?") </jsV> 
-            if else 2drop exit then
-        then  ( eb text )
-        js: $('.ebtextarea',tos(1))[0].value=pop() 
-		js: $(".ebsaveflag",pop())[0].checked=true ;
-    
-    : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
-        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        js> $('.ebname',tos())[0].value trim ( eb name ) (eb.read) ;
+		/// localStorage['fieldname']=JSON.stringify({data:string,mode:boolean,readonly:boolean})
         
     : eb.close ( btn -- ) \ Close the local storage edit box to stop editing.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -85,7 +95,24 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js: $(".ebsaveflag",pop())[0].checked=false ;
 
-    : init-buttons ( eb -- eb ) \ Initialize buttons of the local storage edit box.
+    code eb.init-modes ( eb -- eb ) \ Initialize modes of the edit box.
+		if ($(".ebreadonlyflag",tos())[0].checked){
+			$('textarea',tos()).attr("readOnly",true);
+			$('.ebhtmlarea',tos())[0].contentEditable=false;
+		} else {
+			$('textarea',tos()).attr("readOnly",false);
+			$('.ebhtmlarea',tos())[0].contentEditable=true;
+		}
+		if ($(".ebmodeflag",tos())[0].checked){
+			$(".ebtextarea",tos()).show();
+			$(".ebhtmlarea",tos()).hide();
+		} else {
+			$(".ebtextarea",tos()).hide();
+			$(".ebhtmlarea",tos()).show();
+		}
+		end-code
+	
+    : eb.init-buttons ( eb -- eb ) \ Initialize buttons of the local storage edit box.
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
         <js> $(".ebmode",    tos())[0].onclick =function(e){push(this);execute("eb.mode");    return(false)}</js>
         <js> $(".ebsave",    tos())[0].onclick =function(e){push(this);execute("eb.save");    return(false)}</js>
@@ -98,20 +125,6 @@
 			$(".ebsaveflag",tos())[0].checked = true;
 			$(".ebmodeflag",tos())[0].checked = true;
 			$(".ebreadonlyflag",tos())[0].checked = false;
-			if ($(".ebreadonlyflag",tos())[0].checked){
-				$('textarea',tos()).attr("readOnly",true);
-				$('.ebhtmlarea',tos())[0].contentEditable=false;
-			} else {
-				$('textarea',tos()).attr("readOnly",false);
-				$('.ebhtmlarea',tos())[0].contentEditable=true;
-			}
-			if ($(".ebmodeflag",tos())[0].checked){
-				$(".ebtextarea",tos()).show();
-				$(".ebhtmlarea",tos()).hide();
-			} else {
-				$(".ebtextarea",tos()).hide();
-				$(".ebhtmlarea",tos()).show();
-			}
             $(".ebtextarea",tos())[0].onkeydown = function(e) {
                 e = (e) ? e : event; 
                 var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
@@ -160,9 +173,31 @@
         </o> ( eb ) 
 		dup js> outputbox insertBefore
 		js: window.scrollTo(0,tos().offsetTop-50) ( eb )
-        init-buttons ;
+        eb.init-buttons eb.init-modes ;
     
     : ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
+	
+    : (eb.read) ( eb field_name -- ) \  Read the localStorate[name] to textarea of the given edit box.
+		over js: $(".ebmodeflag",tos())[0].checked=false eb.mode \ use code mode
+        js> storage.get(tos())  ( eb name hash|undefined ) 
+        js> tos()==undefined if  ( eb name hash|undefined ) 
+            <js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
+            2drop exit
+        then  nip ( eb hash )
+        js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb hash )
+            <js> confirm("Unsaved edit box will be overwritten, are you sure?") </jsV> 
+            if else 2drop exit then
+        then  ( eb hash )
+        js: $('.ebtextarea',tos(1))[0].value=tos().data 
+		js: $(".ebsaveflag",tos(1))[0].checked=true 
+		js: $(".ebreadonlyflag",tos(1))[0].checked=tos().readonly
+		js: $(".ebmodeflag",tos(1))[0].checked=tos().mode
+		eb.init-modes ;
+		/// 讀進來固定用 code mode 顯示
+    
+    : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
+        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
+        js> $('.ebname',tos())[0].value trim ( eb name ) (eb.read) ;
 	
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec") js> tos() if  ( autoexec )
