@@ -19,7 +19,8 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 				localStorage[key] = JSON.stringify(hash);
 			}
 		window.storage.get = function(key){
-				var field = JSON.parse(localStorage[key]); 
+				var s = localStorage[key];
+				var field = s ? JSON.parse(s) : undefined; 
 				return(field)
 			}
 		window.storage.all = function(){return(localStorage)}

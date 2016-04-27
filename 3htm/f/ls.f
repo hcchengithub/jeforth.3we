@@ -1,7 +1,8 @@
 
 	\ Maintain source code in HTML5 local storage directly
+
 	s" ls.f"		source-code-header
-	
+
     : (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
         js> $(pop()).parents('.eb')[0] ( eb ) ;
 
@@ -23,24 +24,24 @@
 		js:	$(".ebhtmlarea",tos()).hide()
 		js:	$(".ebtextarea",pop()).show() ;
 		/// only appearance, content as is.
-	
+
 	: eb.appearance.browse ( eb -- ) \ Switch edit box appearance
 		js: $(".ebmodeflag",tos())[0].checked=false
 		js:	$(".ebtextarea",tos()).hide()
 		js:	$(".ebhtmlarea",pop()).show() ;
 		/// only appearance, content as is.
-		
+
 	code textarea.value->innerhtml ( scope -- ) \ Copy all textarea.value to its own innerHTML
 		$("textarea",pop()).each(function(){this.innerHTML = this.value}) 
 		end-code
 		/// Only HTA textarea.innerHTML always catches up with its value.
 		/// Other browsers need this word. HTA do this is redundant but ok.
-		
+
 	: eb.content.browse ( eb -- ) \ Use browse mode content
 		dup textarea.value->innerhtml
 		js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",pop()).html() 
 		;
-	
+
 	code eb.content.code ( eb -- ) \ Use code mode content
 		$(".ebhtmlarea",tos()).html($(".ebtextarea",tos())[0].value);
 		pop();
@@ -57,7 +58,7 @@
 			dup eb.content.browse \ use current, browse mode's content
 			eb.appearance.code
 		then ;
-	
+
     : eb.save ( btn -- ) \ Save the edit box to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		\ Use recent mode's content
@@ -66,6 +67,7 @@
 		\ Get object ready
 			js> $('.ebname',tos())[0].value trim ( eb name ) \ get field name
 			js> $('.ebtextarea',tos(1))[0].value ( eb name text ) \ get code
+			js: if(!storage.get(tos(1)))storage.new(tos(1))
 			js> storage.get(tos(1)) ( eb name text hash ) \ get target object
 		\ Start modifying the object
 			js: tos().data=pop(1) ( eb name hash' ) \ code 
@@ -80,7 +82,7 @@
 		/// localStorage['fieldname'] = JSON.stringify (
 		///   { data:string, mode:boolean, readonly:boolean }
 		/// )
-        
+
     : eb.close ( btn -- ) \ Close the local storage edit box to stop editing.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $(".ebsaveflag",tos())[0].checked not if 
@@ -174,14 +176,14 @@
 			</div>
 			</div>
 		</text> /*remove*/ </o> ( eb ) 
-		dup js> outputbox insertBefore
-		js: window.scrollTo(0,tos().offsetTop-50) ( eb )
         dup eb.init-buttons 
 		js:	$(".ebsaveflag",tos())[0].checked=true;
 		js:	$(".ebmodeflag",tos())[0].checked=true;
 		js:	$(".ebreadonlyflag",tos())[0].checked=false;
-		eb.settings
-		;
+		dup eb.settings 
+		dup js> outputbox insertBefore
+		js: window.scrollTo(0,tos().offsetTop-50) ( eb )
+		1000 nap ;
     
     : ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
 	
@@ -193,16 +195,28 @@
 			then  ( eb name )
 		\ over js: $(".ebmodeflag",tos())[0].checked=false eb.mode.toggle \ use code mode
 		\ Read the field from local storage
-			js> storage.get(tos())  ( eb name hash ) 
-			js> tos()==undefined if  ( eb name hash ) 
+			( eb name ) js> storage.get(tos()) js> Boolean(tos()) not if  ( eb name field ) 
+				( eb name field ) 
 				<js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
 				2drop exit
-			then nip ( eb hash )
+			then nip 		
+			( eb field ) <js>
+				var hash = {};
+				try {
+					hash = JSON.parse(tos());
+				} catch(err) {
+					hash = {data:tos(),mode:true,readonly:false};
+				}
+				pop(); // drop
+				push(hash);
+			</js> ( eb hash )
 		\ Load the edit box with the hash
-			js: $('.ebtextarea',tos(1))[0].value=tos().data 
-			js: $(".ebsaveflag",tos(1))[0].checked=true 
-			js: $(".ebreadonlyflag",tos(1))[0].checked=tos().readonly
-			js: $(".ebmodeflag",tos(1))[0].checked=tos().mode
+			<js>
+			$(".ebsaveflag",tos(1))[0].checked = true; 
+			$('.ebtextarea',tos(1))[0].value = tos().data;
+			$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+			$(".ebmodeflag",tos(1))[0].checked = pop().mode;
+			</js>  ( eb )
 		\ Activate settings
 			eb.settings ;
     
@@ -260,9 +274,10 @@
 	: (export) ( null|window "text" -- ) \ Export the given text string to a window
 		js> tos(1) if else nip js> window.open() swap then ( window "text" )
 		js: pop(1).document.write("<html><body><pre>"+pop()+"</pre></body></html>") ;
+		/// if no given window object then create a new window
 		
 	: export ( <field> -- ) \ Create a window to export a local storage field.
-		null char \n|\r word trim js> storage.get(pop()) (export) ;
+		null char \n|\r word trim js> storage.get(pop()).data (export) ;
 		
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
 		null js> JSON.stringify(storage.all(),"\n","\t") (export) ;
@@ -312,8 +327,7 @@
 	[then]
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
-	
-	
+
 <comment>
 storage {
 
