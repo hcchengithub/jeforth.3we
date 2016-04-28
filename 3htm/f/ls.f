@@ -298,7 +298,7 @@
 			.( execute the 'list' command ) cr
 			list
 		</unindent></text> unindent 
-		{} js: tos().doc=pop() js: tos().readonly=true js: tos().mode=true
+		{} js: tos().doc=pop(1) js: tos().readonly=true js: tos().mode=true
 		js: storage.set("autoexec",pop())
 
  		js> storage.get("ad") [if] [else] \ Default ad if it's not existing
@@ -318,7 +318,7 @@
 				}
 				</ce>
 			</unindent></text> unindent 
-			{} js: tos().doc=pop() js: tos().readonly=true js: tos().mode=true
+			{} js: tos().doc=pop(1) js: tos().readonly=true js: tos().mode=true
 			js: storage.set("ad",pop())
 		[then]
 
@@ -327,7 +327,7 @@
 				\ Make the target page editable for pruning. 把 target page 搞成 editable 以便修剪。
 				active-tab :> id tabid! <ce> document.getElementsByTagName("body")[0].contentEditable=true </ce>
 			</unindent></text> unindent 
-			{} js: tos().doc=pop() js: tos().readonly=true js: tos().mode=true
+			{} js: tos().doc=pop(1) js: tos().readonly=true js: tos().mode=true
 			js: storage.set("pruning",pop())
 		[then]
 	[then]
