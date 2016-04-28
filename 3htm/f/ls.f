@@ -271,6 +271,7 @@
 				execute("(export)");
 			})
 		</js> ;
+
 	: (export) ( null|window "text" -- ) \ Export the given text string to a window
 		js> tos(1) if else nip js> window.open() swap then ( window "text" )
 		<js> 
@@ -289,18 +290,16 @@
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
 			js: outputbox.style.fontSize="1.5em"
-			cr cr 
-			." Hello world!! says 'autoexec' field" cr
-			." from published jeforth.3ce. "
-			cr cr 
-			.( Launch the briefing ) cr
+			cr .( Launch the briefing ) cr
 			<o> <iframe src="http://note.youdao.com/share/?id=79f8bd1b7d0a6174ff52e700dbadd1b2&type=note"
 			name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
 			marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
 			cr cr 
 			.( execute the 'list' command ) cr
 			list
-		</unindent></text> unindent js: storage.set("autoexec",pop())
+		</unindent></text> unindent 
+		{} js: tos().doc=pop() js: tos().readonly=true js: tos().mode=true
+		js: storage.set("autoexec",pop())
 
  		js> storage.get("ad") [if] [else] \ Default ad if it's not existing
 			<text> <unindent>
@@ -318,31 +317,19 @@
 				  }
 				}
 				</ce>
-			</unindent></text> unindent js: storage.set("ad",pop())
+			</unindent></text> unindent 
+			{} js: tos().doc=pop() js: tos().readonly=true js: tos().mode=true
+			js: storage.set("ad",pop())
 		[then]
 
 		js> storage.get("pruning") [if] [else] \ Default pruning if it's not existing
 			<text> <unindent>
 				\ Make the target page editable for pruning. 把 target page 搞成 editable 以便修剪。
 				active-tab :> id tabid! <ce> document.getElementsByTagName("body")[0].contentEditable=true </ce>
-			</unindent></text> unindent js: storage.set("pruning",pop())
+			</unindent></text> unindent 
+			{} js: tos().doc=pop() js: tos().readonly=true js: tos().mode=true
+			js: storage.set("pruning",pop())
 		[then]
 	[then]
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
-
-<comment>
-storage {
-
-
-}
-js> window.storage==undefined [if]
-    js: window.storage={}
-    js: window.storage.set=function(key,doc){localStorage[key]=doc}
-    js: window.storage.get=function(key){return(localStorage[key])}
-    js: window.storage.all=function(){return(localStorage)}
-    js: window.storage.del=function(key){delete(localStorage[key])}
-    js: window.storage.field=function(key){return(localStorage[key])} \ 
-[then]
-
-</comment>
