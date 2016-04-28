@@ -63,24 +63,27 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		\ Use recent mode's content
 			dup js> $(".ebmodeflag",tos())[0].checked
-			if else eb.content.browse then ( eb ) \ now .ebtextarea is what to be saved
+			if else eb.content.browse then \ now .ebtextarea is what to be saved
+			( eb ) 
 		\ Get object ready
 			js> $('.ebname',tos())[0].value trim ( eb name ) \ get field name
 			js> $('.ebtextarea',tos(1))[0].value ( eb name text ) \ get code
-			js: if(!storage.get(tos(1)))storage.new(tos(1))
 			js> storage.get(tos(1)) ( eb name text hash ) \ get target object
+			js: if(!tos()||typeof(tos())!="object"){pop();push({})} \ in case the field is not existing nor an object
+			( eb name text hash ) 
 		\ Start modifying the object
-			js: tos().data=pop(1) ( eb name hash' ) \ code 
+			js: tos().doc=pop(1) ( eb name hash' ) \ code 
 			js: tos().mode=$(".ebmodeflag",tos(2))[0].checked ( eb name hash' ) \ mode flag
-			js: tos().readonly=$(".ebreadonlyflag",tos(2))[0].checked ( eb name hash' ) \ read only flag
+			js: tos().readonly=$(".ebreadonlyflag",tos(2))[0].checked \ read only flag
+			( eb name hash' ) 
 		\ Write back the object back to local storage
 			js: storage.set(pop(1),pop()) ( eb ) \ save code to field
-		\ Adjust the flag
+		\ Adjust the saved flag
 			js: $(".ebsaveflag",pop())[0].checked=true 
 		;
 		/// Data structure of a local storage field:
 		/// localStorage['fieldname'] = JSON.stringify (
-		///   { data:string, mode:boolean, readonly:boolean }
+		///   { doc:string, mode:boolean, readonly:boolean }
 		/// )
 
     : eb.close ( btn -- ) \ Close the local storage edit box to stop editing.
@@ -187,50 +190,48 @@
     
     : ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
 	
-    : (eb.read) ( eb field_name -- ) \  Read the localStorate[name] to textarea of the given edit box.
+    : (eb.read) ( eb name -- ) \  Read the localStorate[name] to textarea of the given edit box.
 		\ Idiot-proof first of all
 			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb name )
 				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
 				if else 2drop exit then
-			then  ( eb name )
-		\ over js: $(".ebmodeflag",tos())[0].checked=false eb.mode.toggle \ use code mode
+			then  
+			( eb name )
 		\ Read the field from local storage
-			( eb name ) js> storage.get(tos()) js> Boolean(tos()) not if  ( eb name field ) 
-				( eb name field ) 
+			js> storage.get(tos()) js> Boolean(tos()) 
+			( eb name field ) 
+			if else
 				<js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
 				2drop exit
-			then nip 		
-			( eb field ) <js>
-				var hash = {};
-				try {
-					hash = JSON.parse(tos());
-				} catch(err) {
-					hash = {data:tos(),mode:true,readonly:false};
-				}
-				pop(); // drop
-				push(hash);
-			</js> ( eb hash )
+			then nip 
+			( eb field ) 
 		\ Load the edit box with the hash
 			<js>
-			$(".ebsaveflag",tos(1))[0].checked = true; 
-			$('.ebtextarea',tos(1))[0].value = tos().data;
-			$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
-			$(".ebmodeflag",tos(1))[0].checked = pop().mode;
+				$(".ebsaveflag",tos(1))[0].checked = true; 
+				if(typeof tos() == 'object') {
+					$('.ebtextarea',tos(1))[0].value = tos().doc;
+					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+					$(".ebmodeflag",tos(1))[0].checked = pop().mode;
+				} else {
+					$(".ebreadonlyflag",tos(1))[0].checked = false;
+					$(".ebmodeflag",tos(1))[0].checked = true;					
+					$('.ebtextarea',tos(1))[0].value = pop();
+				}
 			</js>  ( eb )
 		\ Activate settings
-			eb.settings ;
+			dup eb.content.code eb.settings ;
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value trim ( eb name ) (eb.read) ;
 	
 	: autoexec ( -- ) \ Run localStorage.autoexec
-		js> storage.get("autoexec").data js> tos() if  ( autoexec )
+		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
 			tib.insert
 		then ;
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
-		js> storage.get(pop()).data tib.append ;
+		js> storage.get(pop()).doc tib.append ;
 		
 	: run ( <local storage field name> -- ) \ Run local storage source code.
 		char \n|\r word trim (run) ;
@@ -266,18 +267,20 @@
 			})
 			$("input.lsfieldexport").click(function(){
 				push(null); // ( null ) 
-				push(storage.get(this.getAttribute("fieldname")).data); // ( null text ) 
+				push(storage.get(this.getAttribute("fieldname")).doc); // ( null text ) 
 				execute("(export)");
 			})
 		</js> ;
-		
 	: (export) ( null|window "text" -- ) \ Export the given text string to a window
 		js> tos(1) if else nip js> window.open() swap then ( window "text" )
-		js: pop(1).document.write("<html><body><pre>"+pop()+"</pre></body></html>") ;
+		<js> 
+			tos(1).document.write('<html><body><textarea id=exportbox style="width:100%;font-size:1.3em" rows=28></textarea></body></html>');
+			pop(1).document.getElementById("exportbox").value=pop();
+		</js> ;
 		/// if no given window object then create a new window
 		
 	: export ( <field> -- ) \ Create a window to export a local storage field.
-		null char \n|\r word trim js> storage.get(pop()).data (export) ;
+		null char \n|\r word trim js> storage.get(pop()).doc (export) ;
 		
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
 		null js> JSON.stringify(storage.all(),"\n","\t") (export) ;
@@ -335,7 +338,7 @@ storage {
 }
 js> window.storage==undefined [if]
     js: window.storage={}
-    js: window.storage.set=function(key,data){localStorage[key]=data}
+    js: window.storage.set=function(key,doc){localStorage[key]=doc}
     js: window.storage.get=function(key){return(localStorage[key])}
     js: window.storage.all=function(){return(localStorage)}
     js: window.storage.del=function(key){delete(localStorage[key])}

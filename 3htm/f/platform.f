@@ -6,27 +6,32 @@ s" platform.f"		source-code-header
 
 also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
 
-\ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
-\ 為了讓 localStorage 放 object 令它整個都是 JSON:
-\ set: localStorage[field] = JSON.stringify({aa,bb,cc,...}); 
-\ get: return(JSON.parse(localStorage[key]))
+	\ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
+	\ 為了讓 localStorage 也能放 object 故看到就要翻成 JSON, 若非 object 則照放, 除了 object 都沒問題。
+	\ set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
 
-    js> window.storage==undefined [if]
-		<js>
+    js> window.storage==undefined [if] <js>
 		window.storage = {};
-		window.storage.new = function(key){localStorage[key]=JSON.stringify({})} // initialize the field
-		window.storage.set = function(key,hash){
-				localStorage[key] = JSON.stringify(hash);
+		window.storage.set = function(key,data){
+				if(typeof data == "object") {
+					localStorage[key] = JSON.stringify(data);
+				} else {
+					localStorage[key] = data; // Assume it's a string
+				}
 			}
 		window.storage.get = function(key){
-				var s = localStorage[key];
-				var field = s ? JSON.parse(s) : undefined; 
-				return(field)
+				var ss = localStorage[key];
+				if(!ss) return (undefined); // the field is not existing
+				try {
+					var data = JSON.parse(ss); // The field is an object
+				} catch(err) {
+					data = ss; // Not an object
+				}
+				return(data)
 			}
 		window.storage.all = function(){return(localStorage)}
 		window.storage.del = function(key){delete(localStorage[key])}
-		</js>
-	[then]
+	</js> [then]
 
 code run-inputbox ( -- ) \ <Enter> key's run time.
 				var cmd = inputbox.value; // w/o the '\n' character ($10).
