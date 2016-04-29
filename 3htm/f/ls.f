@@ -31,15 +31,15 @@
 		js:	$(".ebhtmlarea",pop()).show() ;
 		/// only appearance, content as is.
 
-	code textarea.value->innerhtml ( scope -- ) \ Copy all textarea.value to its own innerHTML
-		$("textarea",pop()).each(function(){this.innerHTML = this.value}) 
+	code textarea.value->innertext ( scope -- ) \ Copy all textarea.value to its own innerText
+		$("textarea",pop()).each(function(){this.innerText = this.value}) 
 		end-code
 		/// Only HTA textarea.innerHTML always catches up with its value.
 		/// Other browsers need this word. HTA do this is redundant but ok.
 
 	: eb.content.browse ( eb -- ) \ Use browse mode content
-		dup textarea.value->innerhtml
-		js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",pop()).html() 
+		dup textarea.value->innertext \ browse mode 之下萬一有 textarea 通通生效到 innerText 去。
+		js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",pop())[0].innerHTML
 		;
 
 	code eb.content.code ( eb -- ) \ Use code mode content
@@ -51,6 +51,8 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebmodeflag",tos())[0].checked if
 			\ switch to browse mode
+			<js> confirm("Have you saved? HTML Browsing mode may clutter your code. Continue?") </jsV> 
+			if else exit then		
 			dup eb.content.code \ use current, code mode's content
 			eb.appearance.browse
 		else
@@ -58,6 +60,8 @@
 			dup eb.content.browse \ use current, browse mode's content
 			eb.appearance.code
 		then ;
+		/// Some GT LT will be changed to &gt; &lt; unexpectedly 
+		/// when switched to HTML borwsing mode. Save is suggested.
 
     : eb.save ( btn -- ) \ Save the edit box to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -142,7 +146,8 @@
                         if (e&&e.ctrlKey) {
                             push(this); // ( textarea ) 
                             execute("eb.save");
-                            this.innerHTML=this.value;this.value=this.innerHTML; // Saved already so clear the onchange status
+							// Saved already so clear the onchange status
+                            this.innerText=this.value;this.value=this.innerText; 
                             e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
                             return(false);
                         }
@@ -185,10 +190,7 @@
 		js:	$(".ebreadonlyflag",tos())[0].checked=false;
 		dup eb.settings 
 		dup js> outputbox insertBefore
-		js: window.scrollTo(0,tos().offsetTop-50) ( eb )
-		1000 nap ;
-    
-    : ed (ed) drop ; // ( -- ) Create an HTML5 local storage edit box in outputbox
+		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
 	
     : (eb.read) ( eb name -- ) \  Read the localStorate[name] to textarea of the given edit box.
 		\ Idiot-proof first of all
@@ -225,6 +227,12 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value trim ( eb name ) (eb.read) ;
 	
+    : ed ( <field name> -- ) \ Edit local storage field
+		(ed) ( eb ) char \n|\r word trim ( eb name ) 
+		js> tos()!="" if 
+			js: $('.ebname',tos(1))[0].value=tos() ( eb name ) (eb.read) 
+		then ; 
+
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
 			tib.insert
@@ -275,7 +283,14 @@
 	: (export) ( null|window "text" -- ) \ Export the given text string to a window
 		js> tos(1) if else nip js> window.open() swap then ( window "text" )
 		<js> 
-			tos(1).document.write('<html><body><textarea id=exportbox style="width:100%;font-size:1.3em" rows=28></textarea></body></html>');
+			tos(1).document.write(
+				'<html><body>' +
+				'<textarea ' +
+				'id=exportbox ' +
+				'style="width:100%;font-size:1.3em"' +
+				'wrap="off" rows=28>' +
+				'</textarea></body></html>'
+			);
 			pop(1).document.getElementById("exportbox").value=pop();
 		</js> ;
 		/// if no given window object then create a new window
