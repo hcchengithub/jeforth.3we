@@ -51,7 +51,7 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebmodeflag",tos())[0].checked if
 			\ switch to browse mode
-			<js> confirm("Have you saved? HTML Browsing mode may clutter your code. Continue?") </jsV> 
+			<js> confirm("HTML Browsing mode may clutter your code, e.g. '>' become '&gt;', Continue?") </jsV> 
 			if else exit then		
 			dup eb.content.code \ use current, code mode's content
 			eb.appearance.browse
@@ -191,7 +191,20 @@
 		dup eb.settings 
 		dup js> outputbox insertBefore
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
-	
+
+	: local-storage-field-editable? ( name -- name field boolean ) \ Check if the object is a local storage editable document
+		js> storage.get(tos()) >r 
+		js> typeof(rtos())=="object" if
+			js> typeof(rtos().doc)=="string"
+			js> typeof(rtos().mode)=="boolean"
+			js> typeof(rtos().readonly)=="boolean"
+			and and ( boolean )
+		else 
+			false ( boolean )
+		then r> swap ;
+		/// eb.open check it out, if not editable JSON.stringify() 
+		/// can make it a string and show. and by the way check readonly.
+
     : (eb.read) ( eb name -- ) \  Read the localStorate[name] to textarea of the given edit box.
 		\ Idiot-proof first of all
 			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb name )
@@ -199,27 +212,28 @@
 				if else 2drop exit then
 			then  
 			( eb name )
-		\ Read the field from local storage
-			js> storage.get(tos()) js> Boolean(tos()) 
-			( eb name field ) 
-			if else
-				<js> alert("Error! can't find '" + pop(1) + "' in local storage.")</js>
-				2drop exit
-			then nip 
-			( eb field ) 
+		\ check the field name 	
+			local-storage-field-editable? ( eb name field editable? )
+			rot ( eb field editable? name ) js> Boolean(tos(2)) if else
+				<js> alert("Error! can't find '" + pop() + "' in local storage.")</js>
+				drop 2drop exit
+			then drop
+			( eb field editable? )
 		\ Load the edit box with the hash
-			<js>
-				$(".ebsaveflag",tos(1))[0].checked = true; 
-				if(typeof tos() == 'object') {
-					$('.ebtextarea',tos(1))[0].value = tos().doc;
-					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
-					$(".ebmodeflag",tos(1))[0].checked = pop().mode;
-				} else {
-					$(".ebreadonlyflag",tos(1))[0].checked = false;
-					$(".ebmodeflag",tos(1))[0].checked = true;					
-					$('.ebtextarea',tos(1))[0].value = pop();
-				}
-			</js>  ( eb )
+			js: $(".ebsaveflag",tos(2))[0].checked=true
+			if ( eb field )
+				<js>
+				$('.ebtextarea',tos(1))[0].value = tos().doc;
+				$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+				$(".ebmodeflag",tos(1))[0].checked = pop().mode;
+				</js>
+			else ( eb field )
+				<js>
+				$(".ebreadonlyflag",tos(1))[0].checked = true;
+				$(".ebmodeflag",tos(1))[0].checked = true;					
+				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
+				</js>
+			then  ( eb )
 		\ Activate settings
 			dup eb.content.code eb.settings ;
     
@@ -244,6 +258,32 @@
 	: run ( <local storage field name> -- ) \ Run local storage source code.
 		char \n|\r word trim (run) ;
 		/// 一整行都當 field name 可以有空格。
+
+	: (export) ( field -- ) \ Export the given local storage field to a window
+		\ HTA can open only one window, don't know why. Use that one anyway.
+		js> window.open('about:blank','export') ( field window )
+		js> tos().document.getElementsByTagName("html").length ( field window count )
+		if js: tos().document.removeChild(tos().document.getElementsByTagName("html")[0]) then 
+		( field window )
+		<js> 
+			// 如果不弄個 textarea 來顯示, 恐怕有些東西會被翻譯成 HTML。
+			tos().document.write(
+				'<html><body>' +
+				'<textarea ' +
+				'id=exportbox ' +
+				'style="width:100%;font-size:1.3em"' +
+				'rows=20>' +
+				'</textarea></body></html>'
+			);
+			pop().document.getElementById("exportbox").value=JSON.stringify(pop());
+		</js> ;
+		/// if no given window object then create a new window
+		
+	: export ( <field> -- ) \ Create a window to export a local storage field.
+		char \n|\r word trim js> storage.get(pop()) (export) ;
+		
+	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
+		js> JSON.stringify(storage.all()) (export) ;
 
 	: list ( -- ) \ List all localStorage fields, click to open
 		<text> <unindent><br>
@@ -275,31 +315,10 @@
 			})
 			$("input.lsfieldexport").click(function(){
 				push(null); // ( null ) 
-				push(storage.get(this.getAttribute("fieldname")).doc); // ( null text ) 
+				push(storage.get(this.getAttribute("fieldname"))); // ( null text ) 
 				execute("(export)");
 			})
 		</js> ;
-
-	: (export) ( null|window "text" -- ) \ Export the given text string to a window
-		js> tos(1) if else nip js> window.open() swap then ( window "text" )
-		<js> 
-			tos(1).document.write(
-				'<html><body>' +
-				'<textarea ' +
-				'id=exportbox ' +
-				'style="width:100%;font-size:1.3em"' +
-				'wrap="off" rows=28>' +
-				'</textarea></body></html>'
-			);
-			pop(1).document.getElementById("exportbox").value=pop();
-		</js> ;
-		/// if no given window object then create a new window
-		
-	: export ( <field> -- ) \ Create a window to export a local storage field.
-		null char \n|\r word trim js> storage.get(pop()).doc (export) ;
-		
-	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
-		null js> JSON.stringify(storage.all(),"\n","\t") (export) ;
 
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
 	js> storage.get("autoexec") [if] [else] 
