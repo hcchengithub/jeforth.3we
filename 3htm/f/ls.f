@@ -99,8 +99,12 @@
 
     : eb.delete ( btn -- ) \ Delete the local storage edit box and the local storage field.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        <js> $('textarea',tos())[0].value.indexOf("delete me no regret")!=0</jsV>
-        if <js> alert('Place "delete me no regret" at the very beginning of the textarea to demonstrate yor guts.') </js> drop exit then
+        <js> 
+			var guts = "delete me no regret";
+			$('.ebtextarea',tos())[0].value.indexOf(guts)<0 &&
+		    $('.ebhtmlarea',tos())[0].innerText.indexOf(guts)<0
+		</jsV> ( eb flag )
+        if <js> alert('Place "delete me no regret" in the document to demonstrate yor guts.') </js> drop exit then
         js> $('.ebname',tos())[0].value trim ( eb name ) 
         js: storage.del(pop()) ( eb ) removeElement ;
 
@@ -156,7 +160,7 @@
             }
         </js> ;
 
-    : (ed) ( -- edit_box_element ) \ Create an HTML5 local storage edit box in outputbox
+    : (ed) ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
         <text>
             <div class=eb>
             <style type="text/css">
@@ -247,11 +251,6 @@
 			js: $('.ebname',tos(1))[0].value=tos() ( eb name ) (eb.read) 
 		then ; 
 
-	: autoexec ( -- ) \ Run localStorage.autoexec
-		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
-			tib.insert
-		then ;
-
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
 		js> storage.get(pop()).doc tib.append ;
 		
@@ -284,6 +283,11 @@
 		
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
 		js> JSON.stringify(storage.all()) (export) ;
+
+	: autoexec ( -- ) \ Run localStorage.autoexec
+		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
+			tib.insert
+		then ;
 
 	: list ( -- ) \ List all localStorage fields, click to open
 		<text> <unindent><br>
@@ -319,6 +323,12 @@
 				execute("(export)");
 			})
 		</js> ;
+
+	: snapshot ( -- ) \ Save outputbox to a ed
+		(ed) ( eb ) now t.dateTime ( eb now ) js: $(".ebname",tos(1))[0].value=pop()
+		js: $(".ebtextarea",tos())[0].value=outputbox.innerHTML ( eb ) \ load the content
+		dup eb.content.code dup eb.appearance.browse ( eb ) \ correct appearance mode
+		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
 
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
 	js> storage.get("autoexec") [if] [else] 
