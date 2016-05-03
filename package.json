@@ -5,7 +5,6 @@
   "main": "jeforth.3nw.html",
   "window": {
 	"icon":"3nw/img/icon.png",
-    "toolbar": true,
     "width": 860,
     "height": 500
   }
