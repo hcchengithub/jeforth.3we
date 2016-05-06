@@ -132,7 +132,7 @@
 		}
 		end-code
 	
-    : eb.init-buttons ( eb -- eb ) \ Initialize buttons of the local storage edit box.
+    : eb.init-buttons ( eb -- ) \ Initialize buttons of the local storage edit box.
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
         <js> $(".ebmode",    tos())[0].onclick =function(e){push(this);execute("eb.mode.toggle");    return(false)}</js>
         <js> $(".ebsave",    tos())[0].onclick =function(e){push(this);execute("eb.save");    return(false)}</js>

@@ -1,63 +1,176 @@
 
-
-----------------------------------------------------
 	: mde-include ( -- ok? ) \ Inclde MDE editor 
 		js> typeof(SimpleMDE)!="function" if
 			<text>
+			/*
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"> 
 			<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-			</text> </h> drop 
+			*/
+			<link href="http://cdn.bootcss.com/simplemde/1.10.0/simplemde.min.css" rel="stylesheet">
+			<script src="http://cdn.bootcss.com/simplemde/1.10.0/simplemde.min.js"></script>
+			</text> /*remove*/ </h> drop 
 		then
 		false ( assume include failed )  
-		30 ( seconds ) for 
+		( seconds * 1000 / nap ) js> 60*1000/200 for 
 			js> typeof(SimpleMDE)=="function" if 
 				r> drop 0 >r \ break the loop
 				drop true ( include OK )
 			else 
-				20 nap ." ." \ wait a while
+				200 nap ." ." \ wait a while
 			then 
 		next ;
 		/// Now window.SimpleMDE() is available
+		
+    : (md.parent) ( node -- md ) \ Get the parent MDEditor object of the given node/element.
+        js> $(pop()).parents('.md')[0] ( md ) ;
+		
+    : md.file ( btn -- ) \ Pick a file pathname through GUI
+		(md.parent) ( md )
+		s" test.md" trim ( md pathname )
+		js: $('.mdpathname',pop(1))[0].value=pop() ;
+		\ pickFile can work on 3htm, 3nw, 3hta but only 3hta gets the pathname string, 
+		\ others are "" due to security restrictions I believe. Is there a workaround?
+		
+    : md.load ( btn -- ) \ Load the pathname to MDE
+		(md.parent) ( md )
+		js> $('.mdpathname',tos())[0].value trim ( md pathname )
+		readTextFile ( md article ) js: pop(1).mde.value(pop()) ;
 
-    : (mde) ( -- mde_element ) \ Create a SimpleMDE window
-        <text>
-            <div class=md> /* md is Mark Down */
+    : md.save ( btn -- ) \ Save the article to pathname
+		(md.parent) ( md )
+		js> tos().mde.value() ( md article )
+		js> $('.mdpathname',pop(1))[0].value trim ( article pathname )
+		writeTextFile ; 
+
+    : md.close ( btn -- ) \ Close the entire MDEditor DIV
+		<js> confirm("Confirm the closing?")</jsV> if 
+			(md.parent) ( md ) removeElement
+		else drop then ;
+
+	: md.div(init-buttons) ( md -- ) \ Initialize buttons of the MDEditor DIV element
+        <js> $(".mdfile", tos())[0].onclick =function(e){push(this);execute("md.file" );return(false)}</js>
+        <js> $(".mdload", tos())[0].onclick =function(e){push(this);execute("md.load" );return(false)}</js>
+        <js> $(".mdsave", tos())[0].onclick =function(e){push(this);execute("md.save" );return(false)}</js>
+        <js> $(".mdclose",tos())[0].onclick =function(e){push(this);execute("md.close");return(false)}</js>
+		;
+	
+	code md.div(init-editor) ( md -- ) \ Initialize the SimpleMDE instance on the DIV element
+		// ( md )
+		var textarea = $(".mdtextarea",tos())[0];
+		var mde = new SimpleMDE({
+			element: textarea,
+			autofocus: true,
+			autosave: {
+				enabled: true,
+				uniqueId: "MyUniqueID",
+				delay: 1000,
+			},
+			// blockStyles: {
+			// 	bold: "__",
+			// 	italic: "_"
+			// },
+			// forceSync: true,
+			// hideIcons: ["guide", "heading"],
+			// indentWithTabs: false,
+			initialValue: "Hello world!",
+			insertTexts: {
+				horizontalRule: ["", "\n\n-----\n\n"],
+				image: ["![](http://", ")"],
+				link: ["[", "](http://)"],
+				table: ["", "\n\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Text     | Text      | Text     |\n\n"],
+			},
+			// lineWrapping: false,
+			// parsingConfig: {
+			// 	allowAtxHeaderWithoutSpace: true,
+			// 	strikethrough: false,
+			// 	underscoresBreakWords: true,
+			// },
+			placeholder: "Type here...",
+			// previewRender: function(plainText) {
+			// 	return customMarkdownParser(plainText); // Returns HTML from a custom parser
+			// },
+			// previewRender: function(plainText, preview) { // Async method
+			// 	setTimeout(function(){
+			// 		preview.innerHTML = customMarkdownParser(plainText);
+			// 	}, 250);
+            // 
+			// 	return "Loading...";
+			// },
+			// promptURLs: true,
+			// renderingConfig: {
+			// 	singleLineBreaks: false,
+			// 	codeSyntaxHighlighting: true,
+			// },
+			// shortcuts: {
+			// 	drawTable: "Cmd-Alt-T"
+			// },
+			showIcons: [
+				"code", 
+				"table", 
+				"strikethrough", 
+				"quote", 
+				"clean-block", 
+				"horizontal-rule",
+				],
+			tabSize: 4,
+			// status: false,
+			// status: ["autosave", "lines", "words", "cursor"], // Optional usage
+			// status: ["autosave", "lines", "words", "cursor", {
+			// 	className: "keystrokes",
+			// 	defaultValue: function(el) {
+			// 		this.keystrokes = 0;
+			// 		el.innerHTML = "0 Keystrokes";
+			// 	},
+			// 	onUpdate: function(el) {
+			// 		el.innerHTML = ++this.keystrokes + " Keystrokes";
+			// 	}
+			// }], // Another optional usage, with a custom status bar item that counts keystrokes
+			// toolbar: false,
+			// toolbarTips: false,
+			spellChecker: false // 會使讀取時反應很慢，很長一段時間文章只出現一小部分，恐引 User 會誤會。
+		}); 
+		pop().mde = mde;
+		end-code
+		/// md.mde is the SimpleMDE object
+	
+    : md.div ( -- md ) \ Create a SimpleMDE window, return the md DIV.
+		mde-include not ?abort" Fatal! SimpleMDE are not included."
+        <text> <div class=md> /* md is the [M]ark [D]own Editor */
             <style type="text/css">
-                .md .box {  /* The width setting needs a box */
-					width:90%;
+                .md .mdbox {  /* The width setting needs a box */
+					width:80%;
 					border:1px solid black; 
+					color:black; /* font color */
+					font-family: Microsoft Yahei;
+					font-size: 20px; /* 合理 */
+					padding:20px; /* 合理，頁面四周留白, border 到文字的距離 */ 
 				}
-				.md .file p { display:inline; }
-				.md .pathname { font-size: 1.1em; }
+				.md .mdpathname { font-size: 1.1em; width:30em;}
             </style>
-            <div class=box>
-            <p class=file>
-				<input type=button value='Read' class=ebread>
-				<input type=checkbox class=ebreadonlyflag disabled="disabled"><input type=button value='R/O' class=ebreadonly>
-				<input class=pathname type=text placeholder="path/file name"></input> /* HTA not support 'placeholder' yet */
-				<input type=checkbox class=ebmodeflag disabled="disabled"><input type=button value='</>' class=ebmode>
-				<input type=checkbox class=ebsaveflag disabled="disabled"><input type=button value='Saved' class=ebsave>
-				<input type=button value='Delete' class=ebdelete>
-				<input type=button value='Close' class=ebclose>
-				<input type=button value='Run' class=ebrun>
-			</p>
-			<div class=ebbody>
-            <textarea class=ebtextarea rows=12 wrap="off"></textarea>
-			<div class=ebhtmlarea></div>
+            <div class=mdbox>
+				<p align=center>
+					<input type=button value='File' class=mdfile>
+					<input type=text class=mdpathname placeholder="path/file name"></input>
+					<input type=button value='Load' class=mdload>
+					<input type=button value='Save' class=mdsave>
+					<input type=button value='Close' class=mdclose>
+				</p>
+				<textarea class=mdtextarea></textarea>
 			</div>
-			</div>
-			</div>
-		</text> /*remove*/ </o> ( eb ) 
-        dup eb.init-buttons 
-		js:	$(".ebsaveflag",tos())[0].checked=true;
-		js:	$(".ebmodeflag",tos())[0].checked=true;
-		js:	$(".ebreadonlyflag",tos())[0].checked=false;
-		dup eb.settings 
-		dup js> outputbox insertBefore
-		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
+		</div></text> /*remove*/ </o> ( md ) 
+        dup md.div(init-buttons) dup js> $(".console3we")[0] insertBefore ( md )
+		dup md.div(init-editor) ( md )
+		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( md ) ; 
+		/// TOS is the DIV of the entire MDEditor. We need it so as to give the pathname.
 
-	
-	
+	: md ( <pathname> -- ) \ Edit the given Mark Down article
+		md.div ( md )
+		char \n|\r word trim ( md pathname ) 
+		js: $('.mdpathname',tos(1))[0].value=pop() ( md )
+		js> $('.mdpathname',pop())[0] md.load ;
+		
+stop 
+
 \ execute the word does not work. But run on interpret mode always ok. Why?
 \ Even when it's not work, check the elements of link and script, they are existing:
     js> $("head")[0] ce! ce 09 ce@ :> outerHTML .
