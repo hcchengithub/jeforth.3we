@@ -28,12 +28,11 @@
     : (md.parent) ( node -- md ) \ Get the parent MDEditor object of the given node/element.
         js> $(pop()).parents('.md')[0] ( md ) ;
 		
-    : md.file ( btn -- ) \ Pick a file pathname through GUI
+    : md.file ( btn -- ) \ Get a file pathname through GUI, not loaded yet.
 		(md.parent) ( md )
-		s" test.md" trim ( md pathname )
-		js: $('.mdpathname',pop(1))[0].value=pop() ;
-		\ pickFile can work on 3htm, 3nw, 3hta but only 3hta gets the pathname string, 
-		\ others are "" due to security restrictions I believe. Is there a workaround?
+		pickFile trim ( md pathname )
+		js: $('.mdpathname',tos(1))[0].value=pop() ( md )
+		js: inputbox.blur();window.scrollTo(0,pop().offsetTop-50) ;
 		
     : md.load ( btn -- ) \ Load the pathname to MDE
 		(md.parent) ( md )

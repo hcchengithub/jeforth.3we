@@ -1,32 +1,34 @@
 j e f o r t h . 3 w e
-==============
+======
 **Forth** is the simplest computer programming language ever. **jeforth.3we** is an implementation with a **3 Words Engine** *jeforth.js* from [project-k](http://github.com/hcchengithub/project-k) (another project) for all applications: *HTA*, *HTM*, *Node.js*, *Node-webkit*, and can be more. Let's call them *jeforth.3hta*, *jeforth.3htm*, *jeforth.3nd*, and *jeforth.3nw*. They are tested on Windows operating systems, I believe the same kernel can be also working on Linux, iOS, Android, and any where JavaScript is available with a minimal porting efforts.
 
 Play now
-===========
+====
 
-####[Solar system](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_solar-system.f)
+#### [Solar system](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_solar-system.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png)
 
-####[H2O](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_h2o.f)
+#### [H2O](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_h2o.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/h2o.png)
 
-####[Alarm clock](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_alarm.f_er)
+#### [Alarm clock](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_alarm.f_er)
  ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-alarm.png)
  
-####[Box2Dweb Physics Engine demo - Arrows](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_box2dweb-arrow.f)
+#### [Box2Dweb Physics Engine demo - Arrows](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_box2dweb-arrow.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-arrow.png)
 
-####[Chipmunk Physics Engine demo - Pyramid Stack](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_chipmunk-js-pyramidstack.f)
+#### [Chipmunk Physics Engine demo - Pyramid Stack](http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?cls_include_chipmunk-js-pyramidstack.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-pyramidstack.png)
  
 Get source code, unzip, and start running
-==================================
+=============
 
 | Item | Address |
 ----------------|----------------------------------------------
 | jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
+
+#### .
 
 
 Click **[Download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs. 
@@ -80,7 +82,7 @@ Presentation videos
 | 19 | [jsc JavaScript Console](http://www.camdemy.com/media/19271)| n/a |
 
 What to play in further depth
-========================
+==========
 Download and setup the jeforth.3we directory and project-k directory as mentioned above.
 
 ####**HTA** / jeforth.3hta

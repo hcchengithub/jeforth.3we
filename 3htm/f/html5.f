@@ -151,13 +151,22 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				\ 浙江淘?网?有限公司
 				</comment>
 
-: pickFile		( -- "pathname" ) \ Pick a file through web browser's GUI
-				char input createElement \ ele
-				dup char type char file setAttribute \ ele
-				js: $(tos()).hide() eleBody over appendChild \ 要 append 才行，是有點奇怪。
-				js> tos().click();tos().value
-				swap removeElement ;
-				/// Works fine on HTA. The dialog works on 3htm but returns Null string. 
+: pickFile 		( -- "pathname" ) \ Pick a file through web browser's GUI
+				char input createElement ( element )
+				dup char type  char file      setAttribute ( element )
+				dup char class char pick_file setAttribute ( element ) \ for debug, clue of the element
+				\ For none 3hta only, setup the event handler
+				js> vm.appname!="jeforth.3hta" if
+					js: tos().onchange=function(){execute('stopSleeping')} ( element ) then
+				js> body over appendChild \ 要 append 才有作用。 ( element )
+				js: tos().click() ( element ) \ @ HTA 回來就表示 user 已經完成操作, @ NW.js 則馬上回來。
+				\ For none 3hta only, wait for the onchange event
+				js> vm.appname!="jeforth.3hta" if
+					( minutes*60*1000 ) js> 5*60*1000 sleep ( element ) then
+				js> tos().value \ 即使 timeout 也不管了 ( element path )  
+				swap removeElement ; ( path )  
+				/// Works fine on 3hta and 3nw. The dialog works but returns Null string on 3htm 
+				/// or C:\fakepath\__865.jpg on 3ce.
 				/// Through excel app's GetOpenFilename method can do the same thing:
 				///     excel.app js> pop().GETopenFILENAME <== with or w/o () both fine
 				/// Excel's GetSaveAsFilename method too.
