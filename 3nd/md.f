@@ -1,4 +1,8 @@
 
+	\ SimpleMDE - Mark Down Editor
+
+	s" md.f"		source-code-header
+
 	: mde-include ( -- ok? ) \ Inclde MDE editor 
 		js> typeof(SimpleMDE)!="function" if
 			<text>
@@ -169,269 +173,148 @@
 		js: $('.mdpathname',tos(1))[0].value=pop() ( md )
 		js> $('.mdpathname',pop())[0] md.load ;
 		
-stop 
+<comment>
 
-\ execute the word does not work. But run on interpret mode always ok. Why?
-\ Even when it's not work, check the elements of link and script, they are existing:
-    js> $("head")[0] ce! ce 09 ce@ :> outerHTML .
-    js> $("head")[0] ce! ce 10 ce@ :> outerHTML .
-\ 
+	[x] execute the word does not work. But run on interpret mode always ok. Why?
+		--> including the ~.js takes time. Use a napping loop to wait for its readiness.
+	  
+	[x] Even when it's not work, check the elements of link and script, they are existing:
+		js> $("head")[0] ce! ce 09 ce@ :> outerHTML .  ( the SimpleMDE CSS )
+		js> $("head")[0] ce! ce 10 ce@ :> outerHTML .  ( the SimpleMDE .js )
+		--> Use BootCDN.cn will be better.
 
-: mde 
-    \ Include SimpleMDE and check it out
-        js> typeof(SimpleMDE)=="function" if else
-            <h>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"> 
-            <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-            </h> drop
-        then
-        js> typeof(SimpleMDE)!="function" ?abort" Error! Failed to include simplemde.js."
-    \ Create the required textarea for SimpleMDE
-        <o> <textarea id=simplemde ></textarea></o> 
-        js> $(".console3we")[0] insertBefore
+	[x] include, create MDE object, create textarea, launch MDE instance ... works! But the 
+		thing is strange. <-- Because it's in jeforth's .console3we <DIV> ! Should not. 
+		Should be outside of .console3we.
+		(@ 3nw) 改照抄 official demo page 上的 resource 也行, 但是問題還是一樣。
+		可見是 jeforth 的 style 造成的問題。 <-- 對, 但解法應如上。
+		[x] 下一步, 3nw 的 style 反璞歸真, 或限制範圍。
 
-\ Launch SimpleMDE on the above textarea
 
-    <js> 
-    var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); 
-    simplemde 
-    </jsV> 
-    constant simplemde
+	\ Include SimpleMDE
 
-\ Test, set the content
+		<h>
+		< link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"> 
+		< script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+		</h> drop
+		js> typeof(SimpleMDE) tib. \ ==> function (string) so it has been installed
 
-    simplemde <js> pop().value("This text will appear in the editor"); </js>
+	\ Create a textarea
 
+		cls <o> <textarea id=simplemde ></textarea></o> js> outputbox insertBefore
 
+	\ Launch SimpleMDE on the above textarea
 
+		<js> 
+		var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); 
+		simplemde 
+		</jsV> 
+		constant simplemde
 
+	\ Test, set the content
 
+		simplemde <js> pop().value("This text will appear in the editor"); </js>
 
+	\ Test, get the content
 
+		simplemde :> value() \ ==> # This text will appear in the editor (string)
 
 
+	\ Include SimpleMDE
 
+		<h>
+		<link href="//cdn.bootcss.com/simplemde/1.10.0/simplemde.min.css" rel="stylesheet">
+		<script src="//cdn.bootcss.com/simplemde/1.10.0/simplemde.min.js"></script>
+		</h> drop
+		js> typeof(SimpleMDE) \ ==> function (string) so it has been installed
 
+	\ Create a textarea
 
+		cls <o> <textarea id=simplemde ></textarea></o> js> outputbox insertBefore
 
+	\ Launch SimpleMDE on the above textarea
 
+		<js> var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); simplemde </jsV> constant simplemde
 
+	stop
 
+	[/] Try 3htm with localhost , the Error is : "require is not defined"
+		(1) Run local host : webserver.bat
+		(2) Run jeforth.3htm through http://localhost:8888 or http://localhost:8888/index.html 
+		(3) Run 
+			<h>
+			<link rel="stylesheet" href="http://localhost:8888/src/css/simplemde.css">
+			<script src="http://localhost:8888/src/js/simplemde.js"></script>
+			</h>
+			---> JavaScript error on word "doElement" : require is not defined
+		==> 不必自己架設 server , just use CDN library.
 
+	[ ] \ jeforth.3ce can not do this 
+		<h>
+		< link rel="stylesheet" href="http://localhost:8888/src/css/simplemde.css">
+		< script src="http://localhost:8888/src/js/simplemde.js"></script>
+		</h>
 
+		\s
 
+		jquery-1.11.2.js:9831 Refused to load the script 
+		'http://localhost:8888/src/js/simplemde.js?_=1462251960943' 
+		because it violates the following Content Security Policy directive: 
+		"script-src 'self' 'unsafe-eval'".
 
+		\s
+		char http://localhost:8888/src/js/simplemde.js readTextFile . \ ==> works fine
 
-
-
-
-
-\ (@ 3nw) 改照抄 official demo page 上的 resource 也行, 但是問題還是一樣。
-\ 可見是 jeforth 的 style 造成的問題。 
-\ [ ] 下一步, 3nw 的 style 反璞歸真, 或限制範圍。
-
-\ Include SimpleMDE
-
-    <h>
-    < link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"> 
-    < script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-    </h> drop
-    js> typeof(SimpleMDE) tib. \ ==> function (string) so it has been installed
-
-\ Create a textarea
-
-    cls <o> <textarea id=simplemde ></textarea></o> js> outputbox insertBefore
-
-\ Launch SimpleMDE on the above textarea
-
-    <js> 
-    var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); 
-    simplemde 
-    </jsV> 
-    constant simplemde
-
-\ Test, set the content
-
-    simplemde <js> pop().value("This text will appear in the editor"); </js>
-
-\ Test, get the content
-
-    simplemde :> value() \ ==> # This text will appear in the editor (string)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\ Include SimpleMDE
-
-    <h>
-    <link href="//cdn.bootcss.com/simplemde/1.10.0/simplemde.min.css" rel="stylesheet">
-    <script src="//cdn.bootcss.com/simplemde/1.10.0/simplemde.min.js"></script>
-    </h> drop
-    js> typeof(SimpleMDE) \ ==> function (string) so it has been installed
-
-\ Create a textarea
-
-    cls <o> <textarea id=simplemde ></textarea></o> js> outputbox insertBefore
-
-\ Launch SimpleMDE on the above textarea
-
-    <js> var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); simplemde </jsV> constant simplemde
-
-
-
-
-
-
-
-[ ] (@ 3htm localhost ) 算了, 直接用 BootCDN include 看看:
-    <h>
-    <link href="//cdn.bootcss.com/simplemde/1.10.0/simplemde.min.css" rel="stylesheet">
-    <script src="//cdn.bootcss.com/simplemde/1.10.0/simplemde.min.js"></script>
-    </h>
-    --> cls <js> typeof SimpleMDE </jsV> \ ==> function (string)
-        It works !!  
-    
-
-
-stop
-
-[ ] Try 3htm with localhost , the Error is : "require is not defined"
-    (1) Run local host : webserver.bat
-    (2) Run jeforth.3htm through http://localhost:8888 or http://localhost:8888/index.html 
-    (3) Run 
-        <h>
-        <link rel="stylesheet" href="http://localhost:8888/src/css/simplemde.css">
-        <script src="http://localhost:8888/src/js/simplemde.js"></script>
-        </h>
-        ---> JavaScript error on word "doElement" : require is not defined
-stop
-
-stop
-char http://localhost:8888/src/js/simplemde.js readTextFile .
-
-
-
-
-
-
-
-
-
-
-
-[ ] \ jeforth.3ce can not do this 
-    <h>
-    < link rel="stylesheet" href="http://localhost:8888/src/css/simplemde.css">
-    < script src="http://localhost:8888/src/js/simplemde.js"></script>
-    </h>
-
-    \s
-
-    jquery-1.11.2.js:9831 Refused to load the script 
-    'http://localhost:8888/src/js/simplemde.js?_=1462251960943' 
-    because it violates the following Content Security Policy directive: 
-    "script-src 'self' 'unsafe-eval'".
-
-    \s
-    char http://localhost:8888/src/js/simplemde.js readTextFile . \ ==> works fine
-
-
-
-
-
-
-
-
-
-[ ] require('codemirror') not found, add %NODEJSHOME%\node_modules\simplemde\node_modules
-    to NODE_PATH as below can resolve this.
-    ---- 3nw.bat ----
-    if a%COMPUTERNAME%==aWKS-38EN3476     set NODEJSHOME=C:\Program Files\nodejs
-    if a%COMPUTERNAME%==aWKS-4AEN0404     set NODEJSHOME=C:\Program Files\nodejs
-    set NODE_PATH=%NODEJSHOME%\node_modules;%NODEJSHOME%\node_modules\simplemde\node_modules
-    start nw ../jeforth.3we %1 %2 %3 %4 %5 %6 %7 %8 %9
-    -----------------
-    
-    
-
-\ Word does not work, mde-include not ok yet, but interpret mode works fine
-
-
-.( Include SimpleMDE.js )
-
-    js> typeof(SimpleMDE)!="function" [if]
-        <h>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"> 
-        <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-        </h> drop 
-    [then]
-    false ( assume include failed )  
-    30 ( seconds ) [for] 
-        js> typeof(SimpleMDE)=="function" [if] 
-            r> drop 0 >r \ break the loop
-            drop true ( include OK )
-        [else] 
-            20 nap ." ." \ wait a while
-        [then] 
-    [next] 
-    [if] ."  Done. " [else] ."  Error! Failed to include SimpleMDE! [then] cr
-
-.( Create the required textarea for SimpleMDE ) cr
-
-    <o> <textarea id=simplemde ></textarea></o> 
-    js> $(".console3we")[0] insertBefore
-
-.( Launch SimpleMDE on the above textarea ) cr
-
-    <js> 
-    var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); 
-    simplemde 
-    </jsV> 
-    constant simplemde
-
-.( Load README.md ) cr
-
-    char README.md readTextFile
-    simplemde :: value(pop())
-    
-\ Above interpret procedure works fine.
-
-
-
-352583060303269
-
-
-setup_3.1.69.5_htc.exe
+	[ ] require('codemirror') not found, add %NODEJSHOME%\node_modules\simplemde\node_modules
+		to NODE_PATH as below can resolve this.
+		---- 3nw.bat ----
+		if a%COMPUTERNAME%==aWKS-38EN3476     set NODEJSHOME=C:\Program Files\nodejs
+		if a%COMPUTERNAME%==aWKS-4AEN0404     set NODEJSHOME=C:\Program Files\nodejs
+		set NODE_PATH=%NODEJSHOME%\node_modules;%NODEJSHOME%\node_modules\simplemde\node_modules
+		start nw ../jeforth.3we %1 %2 %3 %4 %5 %6 %7 %8 %9
+		-----------------
+		
+		
+
+	\ Word does not work, mde-include not ok yet, but interpret mode works fine
+
+
+	.( Include SimpleMDE.js )
+
+		js> typeof(SimpleMDE)!="function" [if]
+			<h>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"> 
+			<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+			</h> drop 
+		[then]
+		false ( assume include failed )  
+		30 ( seconds ) [for] 
+			js> typeof(SimpleMDE)=="function" [if] 
+				r> drop 0 >r \ break the loop
+				drop true ( include OK )
+			[else] 
+				20 nap ." ." \ wait a while
+			[then] 
+		[next] 
+		[if] ."  Done. " [else] ."  Error! Failed to include SimpleMDE! [then] cr
+
+	.( Create the required textarea for SimpleMDE ) cr
+
+		<o> <textarea id=simplemde ></textarea></o> 
+		js> $(".console3we")[0] insertBefore
+
+	.( Launch SimpleMDE on the above textarea ) cr
+
+		<js> 
+		var simplemde = new SimpleMDE({element: document.getElementById("simplemde")}); 
+		simplemde 
+		</jsV> 
+		constant simplemde
+
+	.( Load README.md ) cr
+
+		char README.md readTextFile
+		simplemde :: value(pop())
+		
+	\ Above interpret procedure works fine.
+</comment>
