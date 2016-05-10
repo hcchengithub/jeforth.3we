@@ -1,21 +1,46 @@
 
-\ platform.f for jeforth.3nw 
-\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
+	\ platform.f for jeforth.3nw 
+	\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 
-include 3htm/f/platform.f
-also forth definitions
+	include 3htm/f/platform.f
+	also forth definitions
 
-: {F5}			( -- boolean ) \ Hotkey handler, Confirm reload the application.
-				<js> confirm("Really want to restart?") </jsV> 
-				if nw :: reloadIgnoringCache() then false ;
-				/// Return a false to stop the hotkey event handler chain.
-				/// Must intercept onkeydown event to avoid original function.
+	\ Save-Restore Local Storage 
+	\ 3htm/f/platform.f has defined window.storage already. For 3nw, further extend
+	\ storage.save() and storage.restore() the entire localStorage so as to share the
+	\ same copy with all 3nw on different computers.
 
-: {-}			( -- boolean ) \ Inputbox keydown handler, zoom out.
-				." {-} "
-				js> !event.ctrlKey if true else nw :: zoomLevel-=0.5 false then ;
-: {+}			( -- boolean ) \ Inputbox keydown handler, zoom in.
-				." {+} "
-				js> !event.ctrlKey if true else nw :: zoomLevel+=0.5 false then ;
+	\ window.storage should has been defined in 3htm/f/platform.f
+    js> window.storage!=undefined [if] <js>
+		storage.restore = function(pathname){
+			push(pathname ? pathname : "3nw/localstorage.json");
+			execute("readTextFile");
+			var ss = pop();
+			// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
+			// ss.charCodeAt(0)==65279 that's utf-8 BOM 
+			if (ss.charCodeAt(0)==65279) ss = ss.slice(1); // resolve the utf-8 BOM issue
+			var ls = JSON.parse(ss);
+			for (var i in ls) localStorage[i] = ls[i];
+		}
+		storage.save = function(pathname){
+			var ls = storage.all(); // entire localStorage
+			push(JSON.stringify(ls)); // entire localStorage
+			push(pathname ? pathname : "3nw/localstorage.json");
+			execute("writeTextFile");
+		}
+	</js> [then]
+	
+	: {F5}			( -- boolean ) \ Hotkey handler, Confirm reload the application.
+					<js> confirm("Really want to restart?") </jsV> 
+					if nw :: reloadIgnoringCache() then false ;
+					/// Return a false to stop the hotkey event handler chain.
+					/// Must intercept onkeydown event to avoid original function.
 
-previous definitions
+	: {-}			( -- boolean ) \ Inputbox keydown handler, zoom out.
+					." {-} "
+					js> !event.ctrlKey if true else nw :: zoomLevel-=0.5 false then ;
+	: {+}			( -- boolean ) \ Inputbox keydown handler, zoom in.
+					." {+} "
+					js> !event.ctrlKey if true else nw :: zoomLevel+=0.5 false then ;
+
+	previous definitions
