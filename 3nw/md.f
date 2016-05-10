@@ -1,5 +1,5 @@
 
-	\ SimpleMDE - Mark Down Editor
+	\ SimpleMDE - Markdown Editor
 
 	s" md.f"		source-code-header
 
@@ -36,6 +36,11 @@
 		
     : md.load ( btn -- ) \ Load the pathname to MDE
 		(md.parent) ( md )
+		js> tos().mde.isPreviewActive() if 
+			\ If is in preview mode then can't see the loaded article untill turn
+			\ off the preview. Don't want to confuse user.
+			<js> alert("Please turn off the preview mode.")</js> 
+		then
 		js> $('.mdpathname',tos())[0].value trim ( md pathname )
 		readTextFile ( md article ) js: pop(1).mde.value(pop()) ;
 
@@ -134,7 +139,7 @@
 		}); 
 		pop().mde = mde;
 		end-code
-		/// md.mde is the SimpleMDE object
+		/// md.mde is the SimpleMDE object of this instance.
 	
     : md.div ( -- md ) \ Create a SimpleMDE window, return the md DIV.
 		mde-include not ?abort" Fatal! SimpleMDE are not included."
@@ -148,16 +153,21 @@
 					font-size: 20px; /* 合理 */
 					padding:20px; /* 合理，頁面四周留白, border 到文字的距離 */ 
 				}
-				.md .mdpathname { font-size: 1.1em; width:30em;}
+				.md .mdpathname { font-size: 1em; width:20em;}
+				.md .CodeMirror, .md .CodeMirror-scroll {
+					min-height: 200px;
+				}
+				.md .CodeMirror {
+					height: 450px;
+				}				
             </style>
             <div class=mdbox>
-				<p align=center>
-					<input type=button value='File' class=mdfile>
-					<input type=text class=mdpathname placeholder="path/file name"></input>
-					<input type=button value='Load' class=mdload>
-					<input type=button value='Save' class=mdsave>
-					<input type=button value='Close' class=mdclose>
-				</p>
+				Markdown Editor - <a href="https://simplemde.com"> SimpleMDE </a>&nbsp; 
+				<input type=button value='File' class=mdfile>
+				<input type=text class=mdpathname placeholder="path/file name"></input>
+				<input type=button value='Load' class=mdload>
+				<input type=button value='Save' class=mdsave>
+				<input type=button value='Close' class=mdclose>
 				<textarea class=mdtextarea></textarea>
 			</div>
 		</div></text> /*remove*/ </o> ( md ) 
@@ -166,12 +176,19 @@
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( md ) ; 
 		/// TOS is the DIV of the entire MDEditor. We need it so as to give the pathname.
 
-	: md ( <pathname> -- ) \ Edit the given Mark Down article
+	: md ( <pathname> -- ) \ Edit the given Markdown article
 		md.div ( md )
 		char \n|\r word trim ( md pathname ) 
 		js: $('.mdpathname',tos(1))[0].value=pop() ( md )
 		js> $('.mdpathname',pop())[0] md.load ;
-		
+		/// Change font-size
+        ///   js> $(".mdbox").css("font-size","18px");$(".mdbox").css("font-size") tib.
+		/// Change font-family
+        ///   <js> $(".mdbox").css("font-family","courier");$(".mdbox").css("font-family")</jsV> tib.
+        ///   <js> $(".mdbox").css("font-family","Microsoft Yahei");$(".mdbox").css("font-family")</jsV> tib.
+		/// Change SimpleMDE window height
+		///   js> $(".CodeMirror").css("height","550px");$(".CodeMirror").css("height") tib.
+	
 <comment>
 
 	[x] execute the word does not work. But run on interpret mode always ok. Why?

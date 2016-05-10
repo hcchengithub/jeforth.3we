@@ -28,8 +28,7 @@ Get source code, unzip, and start running
 | jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
 
-#### .
-
+<br>
 
 Click **[Download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs. 
 
@@ -85,7 +84,7 @@ What to play in further depth
 ==========
 Download and setup the jeforth.3we directory and project-k directory as mentioned above.
 
-####**HTA** / jeforth.3hta
+#### **HTA** / jeforth.3hta
 Double click the **jeforth.3we/jeforth.hta** or execute the below DOS command line in a DOS box,
 ```
 jeforth.hta cls .' Hello world' cr 3000 sleep bye
@@ -97,7 +96,7 @@ The prior method runs self-test because there's no given task to do. The 2'nd me
 
 Note! If you see the Windows error message : ["Safety Settings on this computer prohibit accessing a data source on another domain"](https://social.msdn.microsoft.com/Forums/en-US/becc982a-b693-49bb-8fb0-95847a3e96c7/hta-safety-settings-on-this-computer-prohibit-accessing-a-data-source-on-another-domain?forum=scripting) that I heard may happen on some Windows 7 computers. Sorry, [I have no solution yet](http://stackoverflow.com/questions/32177060/hta-safety-settings-on-this-computer-prohibit-accessing-a-data-source-on-anot), It didn't happen on those Windows 7 computers that I could reach. Please upgrade to Windows 8 or 10 to avoid from the problem.
 
-####**Node.js** / jeforth.3nd
+#### **Node.js** / jeforth.3nd
 Make sure you can run node.exe in a DOS box so you have setup the path. Make the jeforth.3we/ folder be your working directory. Execute one of the below demo command lines:
 ```
 node jeforth.3nd.js
@@ -107,7 +106,7 @@ Again, like the above HTA case, the prior command line does the self-test, and t
 
 We have a local Web server written by jeforth.3nd itself. See jeforth.3we/Webserver.bat. Having a local Web server is necessary to run jeforth.3htm. 
 
-####**HTML** / jeforth.3htm
+#### **HTML** / jeforth.3htm
 Setup your local Web server by running jeforth.3we/Webserver.bat, 
 
 ![webserver.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/webserver.png)
@@ -123,7 +122,7 @@ http://localhost:8888/index.html?_."_8-)_"_100_nap_rewind
 ```
 I have tested IE10 , IE11 and Chrome. Firefox or other web browsers are not tested yet. As shown above, we can put any forth words in the URL. That will be the task jeforth.3htm will do after start up and the self-test will be skipped when having a task to do.
 
-####**Node-webkit** / jeforth.3nw
+#### **Node-webkit** / jeforth.3nw
 Setup your Node.js and Node-Webkit path in prior. Refer to 3nw.bat as an example. Make jeforth.3we/ be your working directory, run either one of below command lines:
 ```
 nw ../jeforth.3we
@@ -151,7 +150,8 @@ Use jeforth.3hta to manipulate excel spread sheets. This example gets a column f
 jeforth.hta include merge2.f
 ```
 
-####The End
+The End
+------
 
  - FigTaiwan [http://figtaiwan.org](http://figtaiwan.org) 
  - H.C. Chen [hcchen5600@gmail.com](hcchen5600@gmail.com) 
