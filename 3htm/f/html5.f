@@ -1,7 +1,8 @@
 
 s" html5.f"		source-code-header
 
-\ Where HTML5 is supported, JSON is too, I guess.
+\ Where HTML5 is supported, JSON is too, I guess <-- Yes.
+
 : stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
 				/// Example:
 				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
@@ -99,15 +100,21 @@ s" html5.f"		source-code-header
 				\ Must use jQuery append(), because HTMLelement.appendChild(node) is not suitable
 				
 : <e>			( "jQuery selector" <html> -- "html" ) \ HTML section header. Get HTML tags.
-				char (</e>|</o>|</h>) word
+				char (</e>|</o>|</h>|</text>) word
 				compiling if literal then ; immediate
+				/// Section ending can be </e> </o> or </h> for general element, outputbox, and 
+				/// header respectively, so far. Also </text> for debug.
 				last dup alias <o> immediate // ( <html> -- "html" ) Starting a HTML section append to output box.
 				alias <h> immediate // ( <html> -- "html" ) Starting a HTML section append to <HEAD>. 
-				/// Section ending can be </e> </o> or </h> which are element, outputbox, and header
-				/// respectively, so far. 分開寫也可以，併成一個只是圖方便。
+				
+: /*remove*/ 	( "raw" -- "cooked" ) \ remove /* comments in multiple lines */ 
+				:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") ; \ HTA 不能用 \/ 必須用 [/]
+				/// 使 /* ... */ 可以用在 HTML 裡面。
+				/// Support multiple comment lines in one pare of /* .. */
+				/// Not support nested.
 
 : </o>			( "html" -- element ) \ Delimiter of <o>, (O)utputbox.
-				compiling if compile trim else trim then
+				compiling if compile /*remove*/ compile trim else /*remove*/ trim then
 				char #outputbox compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
@@ -124,13 +131,13 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				/// Usage: "string" </o> when "string" contains <o></o>.
 
 : </h>			( "html" -- element ) \ Delimiter of <h>, (H)ead section.
-				compiling if compile trim else trim then
+				compiling if compile /*remove*/ compile trim else /*remove*/ trim then
 				char head compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
 
 : </e>			( "jQuery selector" "html" -- element ) \ Delimiter of <e>, general purpose.
-				compiling if compile trim else trim then 
+				compiling if compile /*remove*/ compile trim else /*remove*/ trim then
 				compiling if compile swap compile doElement 
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>

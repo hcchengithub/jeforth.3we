@@ -130,14 +130,6 @@
 		;
 		/// Support multiple lines
 		/// 只針對 <code> ... </code> 裡面。
-
-		
-	\ ----------- /* remove comment */ -----------------
-	: /*remove*/ ( "raw" -- "cooked" ) \ remove /* comments */ 
-		:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") ; \ HTA 不能用 \/ 必須用 [/]
-		/// 使 /* ... */ 可以用在 HTML 裡面。
-		/// Support multiple comment lines in one pare of /* .. */
-		/// Not support nested.
 		
 	\ --- End ---
 	

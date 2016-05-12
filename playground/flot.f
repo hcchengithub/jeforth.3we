@@ -5,7 +5,7 @@
 
     ' flotzone [if] [else]
         <o> <div class=flotzone></div></o> constant flotzone // ( -- DIV ) Place for Flot plotings avoid CSS conflict.
-        \ flotzone js> $(".console3we")[0] insertBefore
+        flotzone js> $(".console3we")[0] insertBefore
     [then]
 
     \ Include CSS and Flot.js
