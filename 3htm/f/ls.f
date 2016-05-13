@@ -243,7 +243,11 @@
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        js> $('.ebname',tos())[0].value trim ( eb name ) (eb.read) ;
+        js> $('.ebname',tos())[0].value 
+*debug* 1>>>		
+		trim ( eb name ) (eb.read) 
+*debug* 1>>>		
+		;
 	
     : ed ( <field name> -- ) \ Edit local storage field
 		(ed) ( eb ) char \n|\r word trim ( eb name ) 
@@ -299,16 +303,14 @@
 			'<code>export-all</code>' exports the entire local storage in JSON format.
 			<br><br>
 		</unindent></text> <code>escape </o> drop
-		js> storage.all() obj>keys ( array )
+		js> storage.all() obj>keys ( array ) \ array of field names
 		begin js> tos().length while ( array )
 			js> tos().pop()  ( array- fieldname )
-			<text>
-				<li> _fieldname_ 
-				<input class=lsfieldopen fieldname='_fieldname_' type=button value=Open> 
-				<input class=lsfieldexport fieldname='_fieldname_' type=button value=Export>
-				</li>
-			</text>	( array- fieldname HTML )
-			:> replace(/_fieldname_/mg,pop()) </o> drop
+			<o>	<input class=lsfieldexport type=button value=Export></o> 
+				char fieldname js> tos(2) setAttribute space
+			<o> <input class=lsfieldopen type=button value=Open></o> 
+				char fieldname js> tos(2) setAttribute
+			space . cr
 		repeat drop cr
 		<js> 
 			$("input.lsfieldopen").click(function(){

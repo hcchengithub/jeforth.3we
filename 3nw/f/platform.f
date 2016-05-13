@@ -32,7 +32,10 @@
 	
 	: {F5}			( -- boolean ) \ Hotkey handler, Confirm reload the application.
 					<js> confirm("Really want to restart?") </jsV> 
-					if nw :: reloadIgnoringCache() then false ;
+					if 
+						js: storage.save()
+						nw :: reloadIgnoringCache() 
+					then false ( stop bubbling ) ;
 					/// Return a false to stop the hotkey event handler chain.
 					/// Must intercept onkeydown event to avoid original function.
 

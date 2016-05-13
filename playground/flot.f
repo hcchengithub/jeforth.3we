@@ -12,8 +12,8 @@
     
     js> typeof($.plot)!="function" [if] 
         <h> 
-        <!-- link id=flotcss href="../flot/examples/examples.css" rel="stylesheet" type="text/css"-->
-        <script id=flotjs language="javascript" type="text/javascript" src="../flot/jquery.flot.js"></script>
+        <!-- link id=flotcss href="js/flot/examples/examples.css" rel="stylesheet" type="text/css"-->
+        <script id=flotjs language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
         </h> drop
 
         \ Wait a while, make sure Flot.js is ready

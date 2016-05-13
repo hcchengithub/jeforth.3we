@@ -10,7 +10,8 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 	\ 為了讓 localStorage 也能放 object 故看到就要翻成 JSON, 若非 object 則照放, 除了 object 都沒問題。
 	\ set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
 
-    js> window.storage==undefined [if] <js>
+    js> window.storage==undefined [if] 
+		<js>
 		window.storage = {};
 		window.storage.set = function(key,data){
 				if(typeof data == "object") {
@@ -18,6 +19,7 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 				} else {
 					localStorage[key] = data; // Assume it's a string
 				}
+				if(storage.save) storage.save();
 			}
 		window.storage.get = function(key){
 				var ss = localStorage[key];
@@ -29,9 +31,19 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 				}
 				return(data)
 			}
-		window.storage.all = function(){return(localStorage)}
-		window.storage.del = function(key){delete(localStorage[key])}
-	</js> [then]
+		window.storage.all = function(){
+			return(localStorage)
+		}
+		window.storage.del = function(key){
+			delete(localStorage[key])
+			if(storage.save) storage.save();
+		}
+		</js> 
+	[else]
+		<js> 
+		if(storage.restore) storage.restore();	
+		</js> 
+	[then]
 
 code run-inputbox ( -- ) \ <Enter> key's run time.
 				var cmd = inputbox.value; // w/o the '\n' character ($10).
