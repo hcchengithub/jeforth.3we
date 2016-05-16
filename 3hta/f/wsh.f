@@ -426,3 +426,4 @@ code (dir) 		( "folderspec" -- fileObjs[] ) \ Get file obj list of the given fol
 	            /// Cross origin requests are only supported for protocol schemes: http, 
 				/// data, chrome, chrome-extension,	https, chrome-extension-resource.				
 				/// Use super_chrome to run jeforth.3htm by simply browsing the index.html.
+				
