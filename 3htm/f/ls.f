@@ -43,7 +43,14 @@
 		;
 
 	code eb.content.code ( eb -- ) \ Use code mode content
-		$(".ebhtmlarea",tos()).html($(".ebtextarea",tos())[0].value);
+	    var ss = $(".ebtextarea",tos())[0].value; // the article
+		var flag = 
+			ss.indexOf("<script")!=-1 ||
+			ss.indexOf("<link")!=-1 ||
+			ss.indexOf("<style")!=-1 ||
+			ss.indexOf("<iframe")!=-1;
+		if (flag) flag = confirm("Tag of script,link,style, or iframe found, in purpose?");
+		if (flag) $(".ebhtmlarea",tos()).html(ss);
 		pop();
 		end-code
 
@@ -118,6 +125,7 @@
 		/// [ ] Don't know how to handle it if is changed in browse mode.
 
     code eb.settings ( eb -- ) \ Set edit box settings according to checkboxes
+		// call eb.settings 時 eb 都在 code mode, 然後視 checkbox 切換。
 		if ($(".ebreadonlyflag",tos())[0].checked){
 			$('textarea',tos()).attr("readOnly",true);
 			$('.ebhtmlarea',tos())[0].contentEditable=false;
@@ -127,8 +135,10 @@
 		}
 		if ($(".ebmodeflag",tos())[0].checked){
 			execute("eb.appearance.code");
+			// code mode 就不用切換 content 了
 		} else {
-			execute("eb.appearance.browse");
+			dictate("dup eb.content.code eb.appearance.browse");
+			// HTML mode 就得切換 content 
 		}
 		end-code
 	
@@ -151,7 +161,8 @@
                             push(this); // ( textarea ) 
                             execute("eb.save");
 							// Saved already so clear the onchange status
-                            this.innerText=this.value;this.value=this.innerText; 
+								this.innerText=this.value; 
+								// this.value=this.innerText; 這會造成 3nw 把整個 textarea 都清掉!! 幸好用不著。
                             e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
                             return(false);
                         }
@@ -239,15 +250,12 @@
 				</js>
 			then  ( eb )
 		\ Activate settings
-			dup eb.content.code eb.settings ;
+			eb.settings ;
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value 
-*debug* 1>>>		
-		trim ( eb name ) (eb.read) 
-*debug* 1>>>		
-		;
+		trim ( eb name ) (eb.read) ;
 	
     : ed ( <field name> -- ) \ Edit local storage field
 		(ed) ( eb ) char \n|\r word trim ( eb name ) 
