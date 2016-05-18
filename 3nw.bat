@@ -1,3 +1,4 @@
+cd %~dp0
 
 @REM ------ debug -------------------
 @REM chrome.exe http://127.0.0.1:9222

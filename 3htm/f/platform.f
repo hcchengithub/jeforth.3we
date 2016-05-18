@@ -48,7 +48,7 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 	\ 使 common.css 生效。直接用 link tag 引進 common.css 無法修改, 必續這樣。
 	\ style 經常有需要修改, 例如為了解決 flot.js 的問題: YNote: "Flot bug of graph disappear reproduced. How to fix it"
 
-	s" <style> " char common.css readTextFile ( css ) + ( <style>css )
+	s" <style id=commoncss> " char common.css readTextFile ( css ) + ( <style>css )
 	s" </style>" + ( <style>css</style> ) </h> drop 
 	
 code run-inputbox ( -- ) \ <Enter> key's run time.

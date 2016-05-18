@@ -31,7 +31,7 @@
 		js:	$(".ebhtmlarea",pop()).show() ;
 		/// only appearance, content as is.
 
-	code textarea.value->innertext ( scope -- ) \ Copy all textarea.value to its own innerText
+	code textarea.value->innertext ( eb -- ) \ Copy all textarea.value to its own innerText
 		$("textarea",pop()).each(function(){this.innerText = this.value}) 
 		end-code
 		/// Only HTA textarea.innerHTML always catches up with its value.
@@ -44,15 +44,18 @@
 
 	code eb.content.code ( eb -- ) \ Use code mode content
 	    var ss = $(".ebtextarea",tos())[0].value; // the article
-		var flag = 
-			ss.indexOf("<script")!=-1 ||
-			ss.indexOf("<link")!=-1 ||
-			ss.indexOf("<style")!=-1 ||
-			ss.indexOf("<iframe")!=-1;
-		if (flag) flag = confirm("Tag of script,link,style, or iframe found, in purpose?");
+		var flag = true, 
+		    warn = 
+				ss.indexOf("<script")!=-1 ||
+				ss.indexOf("<link")!=-1 ||
+				ss.indexOf("<style")!=-1 ||
+				ss.indexOf("<iframe")!=-1;
+		if (warn) flag = confirm("Tag of script,link,style, or iframe found, in purpose?");
 		if (flag) $(".ebhtmlarea",tos()).html(ss);
 		pop();
 		end-code
+		/// [ ] 加上警告是因為發現在 code mode 讀進有這些 tag 的資料,會意外地在 htmlarea 生效。
+		/// 其實只需要在 textarea code mode 裡編輯的內容,怎麼會有這種問題？整套設計太混亂了。
 
 	: eb.mode.toggle ( btn -- ) \ Toggle edit box between code mode and browse mode
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -335,7 +338,9 @@
 		</js> ;
 
 	: snapshot ( -- ) \ Save outputbox to a ed
-		(ed) ( eb ) now t.dateTime ( eb now ) js: $(".ebname",tos(1))[0].value=pop()
+		(ed) ( eb ) 
+		s" Snapshot " now t.dateTime + ( eb now ) 
+		js: $(".ebname",tos(1))[0].value=pop()
 		js: $(".ebtextarea",tos())[0].value=outputbox.innerHTML ( eb ) \ load the content
 		dup eb.content.code dup eb.appearance.browse ( eb ) \ correct appearance mode
 		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
