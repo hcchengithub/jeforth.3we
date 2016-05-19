@@ -32,64 +32,46 @@
 		/// only appearance, content as is.
 
 	code textarea.value->innertext ( eb -- ) \ Copy all textarea.value to its own innerText
-		if (vm.appname != "jeforth.3hta")
-			$("textarea",pop()).each(function(){this.innerText = this.value});
-		else pop();
+		$("textarea",pop()).each(function(){this.innerText = this.value}) 
 		end-code
 		/// Only HTA textarea.innerHTML always catches up with its value.
-		/// Other browsers need this word.
+		/// Other browsers need this word. HTA do this is redundant but ok.
 
 	: eb.content.browse ( eb -- ) \ Use browse mode content
-		dup textarea.value->innertext \ browse mode 之下萬一有 textarea 通通生效到各自的 innerText。
+		dup textarea.value->innertext \ browse mode 之下萬一有 textarea 通通生效到 innerText 去。
 		js: $(".ebtextarea",tos())[0].value=$(".ebhtmlarea",pop())[0].innerHTML
 		;
-		/// Copy $(".ebhtmlarea").innerHTML to $(".ebtextarea").value
 
-		
-	code living-tag-confirmed?  ( "article" -- boolean ) \ Does the article has script, style, etc special tags etc?
-	    var flag = true,
-		    warn =  
-				tos().indexOf("<script")!=-1 ||
-				tos().indexOf("<link")!=-1 ||
-				tos().indexOf("<style")!=-1 ||
-				pop().indexOf("<iframe")!=-1;
-		if (warn) flag = confirm("Tag of script,link,style, or iframe found, let them go alive?");
-		push(flag);
-		end-code 
-		/// Those tags may cause problems if went live in a .ebhtmlarea.
-		/// Check this before calling eb.content.code.
-		
-	: eb.content.code ( eb -- ) \ Use code mode content
-	    js> $(".ebtextarea",tos())[0].value ( eb article )
-		js: $(".ebhtmlarea",pop(1)).html(pop()) ;
-		/// Copy $(".ebtextarea").value to $(".ebhtmlarea").html()
+	code eb.content.code ( eb -- ) \ Use code mode content
+	    var ss = $(".ebtextarea",tos())[0].value; // the article
+		var flag = true, 
+		    warn = 
+				ss.indexOf("<script")!=-1 ||
+				ss.indexOf("<link")!=-1 ||
+				ss.indexOf("<style")!=-1 ||
+				ss.indexOf("<iframe")!=-1;
+		if (warn) flag = confirm("Tag of script,link,style, or iframe found, in purpose?");
+		if (flag) $(".ebhtmlarea",tos()).html(ss);
+		pop();
+		end-code
+		/// [ ] 加上警告是因為發現在 code mode 讀進有這些 tag 的資料,會意外地在 htmlarea 生效。
+		/// 其實只需要在 textarea code mode 裡編輯的內容,怎麼會有這種問題？整套設計太混亂了。
 
 	: eb.mode.toggle ( btn -- ) \ Toggle edit box between code mode and browse mode
-        (eb.parent) ( eb ) \ The input object can be any node of the target editbox.
-		js> $(".ebmodeflag",tos())[0].checked ( codeMode? ) if
-			\ Now codeMode to be browse mode
-			\ Warn &gt; translation may clutter your code.
-			<js> 
-				confirm(
-					"HTML Browsing mode may clutter your code,\n" +
-				    "e.g. '>' become '&gt;', Continue?\n" +
-					"Make a Save even if you're only to view."
-				) 
-			</jsV> 
-			if else exit then ( eb )
-			\ Warn living tag found
-			js> $(".ebtextarea",tos())[0].value ( eb article )
-			living-tag-confirmed? if
-				( eb ) dup eb.content.code \ use current, code mode's content
-				eb.appearance.browse
-			else drop then
+        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
+		js> $(".ebmodeflag",tos())[0].checked if
+			\ switch to browse mode
+			<js> confirm("HTML Browsing mode may clutter your code, e.g. '>' become '&gt;', Continue?") </jsV> 
+			if else exit then		
+			dup eb.content.code \ use current, code mode's content
+			eb.appearance.browse
 		else
 			\ switch to code mode
 			dup eb.content.browse \ use current, browse mode's content
 			eb.appearance.code
 		then ;
 		/// Some GT LT will be changed to &gt; &lt; unexpectedly 
-		/// when switching to HTML borwsing mode. Save is suggested.
+		/// when switched to HTML borwsing mode. Save is suggested.
 
     : eb.save ( btn -- ) \ Save the edit box to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -108,7 +90,7 @@
 			js: tos().mode=$(".ebmodeflag",tos(2))[0].checked ( eb name hash' ) \ mode flag
 			js: tos().readonly=$(".ebreadonlyflag",tos(2))[0].checked \ read only flag
 			( eb name hash' ) 
-		\ Write the object back to local storage
+		\ Write back the object back to local storage
 			js: storage.set(pop(1),pop()) ( eb ) \ save code to field
 		\ Adjust the saved flag
 			js: $(".ebsaveflag",pop())[0].checked=true 
@@ -129,8 +111,8 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         <js> 
 			var guts = "delete me no regret";
-			$('.ebtextarea',tos())[0].value.toLowerCase().indexOf(guts)<0 &&
-		    $('.ebhtmlarea',tos())[0].innerText.toLowerCase().indexOf(guts)<0
+			$('.ebtextarea',tos())[0].value.indexOf(guts)<0 &&
+		    $('.ebhtmlarea',tos())[0].innerText.indexOf(guts)<0
 		</jsV> ( eb flag )
         if <js> alert('Place "delete me no regret" in the document to demonstrate yor guts.') </js> drop exit then
         js> $('.ebname',tos())[0].value trim ( eb name ) 
@@ -154,14 +136,14 @@
 			$('textarea',tos()).attr("readOnly",false);
 			$('.ebhtmlarea',tos())[0].contentEditable=true;
 		}
-		// 只管外觀，不切換 content, 因為要不要 copy the content from the other mode is uncertain.
 		if ($(".ebmodeflag",tos())[0].checked){
 			execute("eb.appearance.code");
+			// code mode 就不用切換 content 了
 		} else {
-			execute("eb.appearance.browse");
+			dictate("dup eb.content.code eb.appearance.browse");
+			// HTML mode 就得切換 content 
 		}
 		end-code
-		/// 外觀 code mode or browse mode, editable or not, whether read only.
 	
     : eb.init-buttons ( eb -- ) \ Initialize buttons of the local storage edit box.
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
@@ -228,7 +210,7 @@
 		dup js> outputbox insertBefore
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
 
-	: local-storage-field-editable? ( name -- name field boolean ) \ Check if the object is a local storage editable or awared document
+	: local-storage-field-editable? ( name -- name field boolean ) \ Check if the object is a local storage editable document
 		js> storage.get(tos()) >r 
 		js> typeof(rtos())=="object" if
 			js> typeof(rtos().doc)=="string"
@@ -241,7 +223,7 @@
 		/// eb.open check it out, if not editable JSON.stringify() 
 		/// can make it a string and show. and by the way check readonly.
 
-    : (eb.read) ( eb name -- ) \ Read the localStorate[name] to textarea of the given edit box.
+    : (eb.read) ( eb name -- ) \  Read the localStorate[name] to textarea of the given edit box.
 		\ Idiot-proof first of all
 			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb name )
 				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
@@ -256,19 +238,13 @@
 			then drop
 			( eb field editable? )
 		\ Load the edit box with the hash
-			js: $(".ebsaveflag",tos(2))[0].checked=true \ the field is Saved 
-			( eb field editable? ) \ editable means it's a ls.f ed awared local storage field/document
+			js: $(".ebsaveflag",tos(2))[0].checked=true
 			if ( eb field )
 				<js>
-					$('.ebtextarea',tos(1))[0].value = tos().doc;
-					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+				$('.ebtextarea',tos(1))[0].value = tos().doc;
+				$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+				$(".ebmodeflag",tos(1))[0].checked = pop().mode;
 				</js>
-				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
-				if else \ Take care of Browse mode   ( eb field )
-					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if
-						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
-					then ( eb )	
-				then
 			else ( eb field )
 				<js>
 				$(".ebreadonlyflag",tos(1))[0].checked = true;
@@ -276,10 +252,8 @@
 				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
 				</js>
 			then  ( eb )
-		\ Activate settings ( eb )
+		\ Activate settings
 			eb.settings ;
-		/// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。		
-		/// [ ] 解決 snapshot 讀回來發現有 textarea.value 而 htmlarea.innerHTML 卻是空的的問題。
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -288,9 +262,9 @@
 	
     : ed ( <field name> -- ) \ Edit local storage field
 		(ed) ( eb ) char \n|\r word trim ( eb name ) 
-		js> tos()!="" if  ( eb name ) 
+		js> tos()!="" if 
 			js: $('.ebname',tos(1))[0].value=tos() ( eb name ) (eb.read) 
-		else 2drop then ; 
+		then ; 
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
 		js> storage.get(pop()).doc tib.append ;
@@ -364,13 +338,11 @@
 		</js> ;
 
 	: snapshot ( -- ) \ Save outputbox to a ed
-		(ed) ( eb ) \ default is editable, saved, code mode
-		s" Snapshot " now t.dateTime + ( eb "now" ) 
-		js: $(".ebname",tos(1))[0].value=pop() ( eb )
-		dup textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
-		js: $(".ebhtmlarea",tos())[0].innerHTML=outputbox.innerHTML ( eb ) \ load the content, let &lt; translation happen.
-		dup eb.appearance.browse ( eb ) 
-		
+		(ed) ( eb ) 
+		s" Snapshot " now t.dateTime + ( eb now ) 
+		js: $(".ebname",tos(1))[0].value=pop()
+		js: $(".ebtextarea",tos())[0].value=outputbox.innerHTML ( eb ) \ load the content
+		dup eb.content.code dup eb.appearance.browse ( eb ) \ correct appearance mode
 		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
 
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
