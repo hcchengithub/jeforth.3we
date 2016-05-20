@@ -94,9 +94,8 @@
     : eb.save ( btn -- ) \ Save the edit box to localStorate[name].
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		\ Use recent mode's content
-			dup js> $(".ebmodeflag",tos())[0].checked
-			if else eb.content.browse then \ now .ebtextarea is what to be saved
-			( eb ) 
+			js> $(".ebmodeflag",tos())[0].checked ( eb mode? )
+			if else eb.content.browse then \ now .ebtextarea is what to be saved ( eb ) 
 		\ Get object ready
 			js> $('.ebname',tos())[0].value trim ( eb name ) \ get field name
 			js> $('.ebtextarea',tos(1))[0].value ( eb name text ) \ get code
@@ -264,7 +263,7 @@
 					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
 				</js>
 				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
-				if else \ Take care of Browse mode   ( eb field )
+				if drop else \ Take care of Browse mode   ( eb field )
 					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if
 						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
 					then ( eb )	
