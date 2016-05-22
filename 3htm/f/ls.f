@@ -52,7 +52,8 @@
 				tos().indexOf("<script")!=-1 ||
 				tos().indexOf("<link")!=-1 ||
 				tos().indexOf("<style")!=-1 ||
-				pop().indexOf("<iframe")!=-1;
+				tos().indexOf("<iframe")!=-1;  // pop() 不能用在這裡面, 因為不一定會被執行到。
+		pop();	// drop() 必須獨立放在會執行到的地方。
 		if (warn) flag = confirm("Tag of script,link,style, or iframe found, let them go alive?");
 		push(flag);
 		end-code 
@@ -95,7 +96,7 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		\ Use recent mode's content
 			js> $(".ebmodeflag",tos())[0].checked ( eb mode? )
-			if else eb.content.browse then \ now .ebtextarea is what to be saved ( eb ) 
+			if else dup eb.content.browse then \ now .ebtextarea is what to be saved ( eb ) 
 		\ Get object ready
 			js> $('.ebname',tos())[0].value trim ( eb name ) \ get field name
 			js> $('.ebtextarea',tos(1))[0].value ( eb name text ) \ get code
@@ -171,8 +172,8 @@
         <js> $(".ebrun",     tos())[0].onclick =function(e){push(this);execute("eb.run");     return(false)}</js> 
         <js> $(".ebdelete",  tos())[0].onclick =function(e){push(this);execute("eb.delete");  return(false)}</js> 
         <js> $(".ebtextarea",tos())[0].onchange=function(e){push(this);execute("eb.onchange");return(false)}</js> 
-        <js> 
-            $(".ebtextarea",pop())[0].onkeydown = function(e) {
+        <js> // ( eb ) 以下類似的 handler 寫兩次 to be fool and safe.
+            $(".ebtextarea",tos())[0].onkeydown = function(e) {
                 e = (e) ? e : event; 
                 var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
                 switch(keycode) {
@@ -183,6 +184,20 @@
 							// Saved already so clear the onchange status
 								this.innerText=this.value; 
 								// this.value=this.innerText; 這會造成 3nw 把整個 textarea 都清掉!! 幸好用不著。
+                            e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
+                            return(false);
+                        }
+                    default: return (true); // pass down to following handlers
+                }
+            } // ( eb )
+            $(".ebhtmlarea",pop())[0].onkeydown = function(e) { // ( empty )
+                e = (e) ? e : event; 
+                var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
+                switch(keycode) {
+                    case  83: /* s */
+                        if (e&&e.ctrlKey) {
+                            push(this); // ( htmlarea ) 
+                            execute("eb.save");
                             e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
                             return(false);
                         }
@@ -263,11 +278,15 @@
 					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
 				</js>
 				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
-				if drop else \ Take care of Browse mode   ( eb field )
-					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if
+				if  ( eb field ) 
+					drop ( eb ) 
+				else \ Take care of Browse mode   ( eb field )
+					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if 
 						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
+					else ( eb )
+						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
 					then ( eb )	
-				then
+				then ( eb )
 			else ( eb field )
 				<js>
 				$(".ebreadonlyflag",tos(1))[0].checked = true;
@@ -369,10 +388,10 @@
 		dup textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
 		js: $(".ebhtmlarea",tos())[0].innerHTML=outputbox.innerHTML ( eb ) \ load the content, let &lt; translation happen.
 		dup eb.appearance.browse ( eb ) 
-		
 		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
 
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
+	
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
 			js: outputbox.style.fontSize="1.5em"
