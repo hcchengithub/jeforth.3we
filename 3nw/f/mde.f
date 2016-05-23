@@ -1,7 +1,11 @@
 
 	\ SimpleMDE - Markdown Editor
+	
+	\ For jeforth.3nw only due to 
+	\ 1) HTA is not so compatible with JavaScript libraries on the net.
+	\ 2) NW.js can access local files and also have HTML features.
 
-	s" md.f"		source-code-header
+	s" mde.f"		source-code-header
 
 	: mde-include ( -- ok? ) \ Inclde MDE editor 
 		js> typeof(SimpleMDE)!="function" if
