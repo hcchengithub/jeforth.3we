@@ -349,37 +349,48 @@
 		then ;
 
 	: list ( -- ) \ List all localStorage fields, click to open
-		<text> <unindent><br>
-			Local storage field '<code>autoexec</code>' is run when start-up.
-			'<code>run <field name></code>' to run the local storage field.
-			'<code>ed</code>' opens local storage editor and when in this editor,
-			hotkey <code>{F9},{F10}</code> resize the textarea and <code>{Ctrl-S}</code> saves
-			the textarea to local storage.
-			'<code>export-all</code>' exports the entire local storage in JSON format.
-			<br><br>
-		</unindent></text> <code>escape </o> drop
-		js> storage.all() obj>keys ( array ) \ array of field names
-		begin js> tos().length while ( array )
-			js> tos().pop()  ( array- fieldname )
-			<o>	<input class=lsfieldexport type=button value=Export></o> 
-				char fieldname js> tos(2) setAttribute space
-			<o> <input class=lsfieldopen type=button value=Open></o> 
-				char fieldname js> tos(2) setAttribute
-			space . cr
-		repeat drop cr
-		<js> 
-			$("input.lsfieldopen").click(function(){
-				execute("(ed)"); 
-				push(this.getAttribute("fieldname")); // ( eb name ) 
-				$('.ebname',tos(1))[0].value=tos();
-				execute("(eb.read)");
-			})
-			$("input.lsfieldexport").click(function(){
-				push(null); // ( null ) 
-				push(storage.get(this.getAttribute("fieldname"))); // ( null text ) 
-				execute("(export)");
-			})
-		</js> ;
+		\ Print How to use,
+			<text> <unindent><br>
+				HTML5 Local storage field '<code>autoexec</code>' is run when start-up.
+				'<code>run <field name></code>' runs the local storage field, you make sure it's executable.
+				'<code>ed <field-name or blank></code>' opens local storage editor, 
+				hotkey <code>{F9},{F10}</code> resize the textarea, <code>{Ctrl-S}</code> saves
+				it to local storage.
+				'<code>export-all</code>' exports the entire local storage in JSON format.
+				<br><br>
+			</unindent></text> <code>escape </o> drop
+		\ main loop 印出所有的 fields 
+			js> storage.all() obj>keys ( array ) \ array of field names
+			<o> <div class=lslist></div></o> swap ( DIV array ) \ 放整個 list 的 DIV, 非必要但可避免被 er 刪除。
+			begin js> tos().length while ( DIV array )
+				js> tos().pop()  ( DIV array fieldname )
+				<o>	<input class=lsfieldexport type=button value=Export></o> ( DIV array fieldname INPUT )
+					dup  ( DIV array fieldname INPUT INPUT ) 
+					char fieldname   ( DIV array fieldname INPUT INPUT "fieldname" ) 
+					js> tos(3)   ( DIV array fieldname INPUT INPUT "fieldname" fieldname ) 
+					setAttribute ( DIV array fieldname INPUT ) 
+					js> tos(3) swap appendChild  ( DIV array fieldname ) 
+				<o> <input class=lsfieldopen type=button value=Open></o> ( DIV array fieldname INPUT ) 
+					dup char fieldname js> tos(3) setAttribute ( DIV array fieldname INPUT ) 
+					js> tos(3) swap appendChild  ( DIV array fieldname ) 
+				s" <span> " swap + char <br></span> + </o> ( DIV array SPAN ) 
+				js> tos(2) swap appendChild ( DIV array ) 
+			repeat 2drop 
+		\ 給以上變出來的 buttons 畫龍點睛
+			<js> 
+				$("input.lsfieldopen").click(function(){
+					execute("(ed)"); 
+					push(this.getAttribute("fieldname")); // ( eb name ) 
+					$('.ebname',tos(1))[0].value=tos();
+					execute("(eb.read)");
+				})
+				$("input.lsfieldexport").click(function(){
+					push(null); // ( null ) 
+					push(storage.get(this.getAttribute("fieldname"))); // ( null text ) 
+					execute("(export)");
+				})
+			</js> 
+		;
 
 	: snapshot ( -- ) \ Save outputbox to a ed
 		(ed) ( eb ) \ default is editable, saved, code mode
