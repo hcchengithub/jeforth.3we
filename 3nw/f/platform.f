@@ -23,8 +23,8 @@
 			for (var i in ls) localStorage[i] = ls[i];
 		}
 		storage.save = function(pathname){
-			var ls = storage.all(); // entire localStorage
-			push(JSON.stringify(ls)); // entire localStorage
+			var ls = storage.all(); // entire localStorage object
+			push(JSON.stringify(ls)); // entire localStorage string
 			push(pathname ? pathname : "3nw/localstorage.json");
 			execute("writeTextFile");
 		}

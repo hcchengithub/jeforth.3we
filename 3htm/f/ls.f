@@ -317,7 +317,7 @@
 		char \n|\r word trim (run) ;
 		/// 一整行都當 field name 可以有空格。
 
-	: (export) ( field -- ) \ Export the given local storage field to a window
+	: (export) ( "string" -- ) \ Export the string to a textarea in a new window
 		\ HTA can open only one window, don't know why. Use that one anyway.
 		js> window.open('about:blank','export') ( field window )
 		js> tos().document.getElementsByTagName("html").length ( field window count )
@@ -333,16 +333,34 @@
 				'rows=20>' +
 				'</textarea></body></html>'
 			);
-			pop().document.getElementById("exportbox").value=JSON.stringify(pop());
+			pop().document.getElementById("exportbox").value=pop();
 		</js> ;
-		/// if no given window object then create a new window
 		
 	: export ( <field> -- ) \ Create a window to export a local storage field.
-		char \n|\r word trim js> storage.get(pop()) (export) ;
+		char \n|\r word trim ( field-name )
+		js> storage.get(pop()) ( field-obj )
+		js> JSON.stringify(pop()) ( "json of the field" )
+		(export) ;
 		
 	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
 		js> JSON.stringify(storage.all()) (export) ;
+		/// The format is compatible with (3hta or 3nw )\localstorage.json 
+		/// 手動 copy-paste 到 text editor 然後存檔，此為 jeforth.3hta, 3ca 等不能存檔
+		/// 的環境而設。
 
+	code import-all ( "string" -- ) \ Import entire localStorage in the format of export-all 
+		var ss = pop();
+		// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
+		// ss.charCodeAt(0)==65279 that's utf-8 BOM 
+		if (ss.charCodeAt(0)==65279) ss = ss.slice(1); // resolve the utf-8 BOM issue for jeforth.3nw
+		var ls = JSON.parse(ss);
+		for (var i in ls) storage.set(i,ls[i]);
+		end-code
+		/// The format is compatible with (3hta or 3nw )\localstorage.json 
+		/// 手動 <text> ...</text> import-all 即可 import 來自 export-all 的整個 local storage。
+		/// Example: jeforth.3ce 讀取 3hta 的整個 local storage
+		///     char 3hta/localstorage.json readTextFile import-all
+		
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
 			tib.insert
@@ -385,8 +403,8 @@
 					execute("(eb.read)");
 				})
 				$("input.lsfieldexport").click(function(){
-					push(null); // ( null ) 
-					push(storage.get(this.getAttribute("fieldname"))); // ( null text ) 
+					push(storage.get(this.getAttribute("fieldname"))); // ( field-obj ) 
+					push(JSON.stringify(pop())); // ( json-string )
 					execute("(export)");
 				})
 			</js> 
