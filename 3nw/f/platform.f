@@ -2,7 +2,6 @@
 	\ platform.f for jeforth.3nw 
 	\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 
-	include 3htm/f/platform.f
 	also forth definitions
 
 	\ Save-Restore Local Storage 
@@ -10,9 +9,9 @@
 	\ storage.save() and storage.restore() the entire localStorage so as to share the
 	\ same copy with all 3nw on different computers.
 
-	\ window.storage should has been defined in 3htm/f/platform.f
     js> window.storage!=undefined [if] <js>
 		storage.restore = function(pathname){
+			// Restore localStorage from the given json file or default localstorage.json
 			push(pathname ? pathname : "3nw/localstorage.json");
 			execute("readTextFile");
 			var ss = pop();
@@ -23,12 +22,15 @@
 			for (var i in ls) localStorage[i] = ls[i];
 		}
 		storage.save = function(pathname){
+			// Save localStorage to the json file or default localstorage.json
 			var ls = storage.all(); // entire localStorage object
 			push(JSON.stringify(ls)); // entire localStorage string
 			push(pathname ? pathname : "3nw/localstorage.json");
 			execute("writeTextFile");
 		}
 	</js> [then]
+	
+	include 3htm/f/platform.f
 	
 	: {F5}			( -- boolean ) \ Hotkey handler, Confirm reload the application.
 					<js> confirm("Really want to restart?") </jsV> 

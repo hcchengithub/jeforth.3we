@@ -1,19 +1,35 @@
 
-\ platform.f for jeforth.3htm, jeforth.3hta, and jeforth.3nw
-\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
+	\ platform.f for jeforth.3htm, jeforth.3hta, and jeforth.3nw
+	\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 
-s" platform.f"		source-code-header
+	s" platform.f"		source-code-header
 
-also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
+	also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
 
 	\ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
-	\ 為了讓 localStorage 也能放 object 故看到就要翻成 JSON, 若非 object 則照放, 除了 object 都沒問題。
-	\ set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
+	\ 為了讓 localStorage 也能放 object 故看到就要翻成 JSON, 若非 object 則照放, 除
+	\ 了 object 試過了，都沒問題。
+	
+	\ window.storage should has been defined in 3htm/f/platform.f 其中有 
+	\ stoarge.set(), ~.get(), ~.del(), and ~.all() 等是 3htm,3nw common 的。
+	\ .save(), .restore() 是 3nw 獨有的, 只有 .3nw 可以 save/restore HTML5.localStorage.
+	\ storage.read() 則是 3nw, 3hta, 3ce, 3htm 大家都需要的, ls.dump 會用到。
 
     js> window.storage==undefined [if] 
-		<js>
+		\ For 3htm, 3ce, define the psuedo interface
 		window.storage = {};
+	[else]
+		\ For 3hta and 3nw, restore localStorage from localstorage.json.
+		\ Their platform.f provides storage.save() and storage.restore(),
+		\ also localStorage itself in 3hta.
+		<js> 
+			if(storage.restore) storage.restore();	
+		</js> 
+	[then]
+		
+	<js>
 		window.storage.set = function(key,data){
+				// set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
 				if(typeof data == "object") {
 					localStorage[key] = JSON.stringify(data);
 				} else {
@@ -22,6 +38,7 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 				if(storage.save) storage.save();
 			}
 		window.storage.get = function(key){
+				// HTML5 localStorage only allow string, we support object too.
 				var ss = localStorage[key];
 				if(!ss) return (undefined); // the field is not existing
 				try {
@@ -29,7 +46,7 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 				} catch(err) {
 					data = ss; // Not an object
 				}
-				return(data)
+				return(data); // can be anything includes object
 			}
 		window.storage.all = function(){
 			return(localStorage)
@@ -38,12 +55,19 @@ also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary�
 			delete(localStorage[key])
 			if(storage.save) storage.save();
 		}
+		window.storage.read = function(pathname){
+			// Read hash table from the given json file to TOS
+			// The hash table is in localstorage.json compatible format.
+			push(pathname);
+			execute("readTextFile");
+			var ss = pop();
+			// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
+			// ss.charCodeAt(0)==65279 that's utf-8 BOM 
+			if (ss.charCodeAt(0)==65279) ss = ss.slice(1); // resolve the utf-8 BOM issue
+			var hash = JSON.parse(ss);
+			push(hash);
+		}
 		</js> 
-	[else]
-		<js> 
-		if(storage.restore) storage.restore();	
-		</js> 
-	[then]
 
 	\ 使 common.css 生效。直接用 link tag 引進 common.css 無法修改, 必續這樣。
 	\ style 經常有需要修改, 例如為了解決 flot.js 的問題: YNote: "Flot bug of graph disappear reproduced. How to fix it"
