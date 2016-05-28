@@ -7,39 +7,28 @@
 	also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
 
 	\ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
-	\ 為了讓 localStorage 也能放 object 故看到就要翻成 JSON, 若非 object 則照放, 除
-	\ 了 object 試過了，都沒問題。
+	\ 為了讓 localStorage 能放 object 看到 object 就翻成 JSON, 若非 object 則照放。
+	\ 所以連功能也擴充了。
 	
-	\ window.storage should has been defined in 3htm/f/platform.f 其中有 
-	\ stoarge.set(), ~.get(), ~.del(), and ~.all() 等是 3htm,3nw common 的。
-	\ .save(), .restore() 是 3nw 獨有的, 只有 .3nw 可以 save/restore HTML5.localStorage.
-	\ storage.read() 則是 3nw, 3hta, 3ce, 3htm 大家都需要的, ls.dump 會用到。
+	\ window.storage application functions are in 3htm/f/platform.f 其中有 
+	\ stoarge.set(), ~.get(), ~.del() 等是應用時 common 的。而 storage.all(), 
+	\ .save(), .restore() 這三個 low level I/O 是 3nw,3hta 要先提供的以便存取
+	\ localstorage.json 檔。storage.read() 則是大家都需要的, ls.dump 會用到。
 
     js> window.storage==undefined [if] 
-		\ For 3htm, 3ce, define the psuedo interface
-		window.storage = {};
+		\ For 3htm, 3ce, 3ca 等本身就有 localStorage 的環境 define the pseudo interface
+		js: window.storage={};
+		js: window.storage.all=function(){return(localStorage)}
 	[else]
 		\ For 3hta and 3nw, restore localStorage from localstorage.json.
-		\ Their platform.f provides storage.save() and storage.restore(),
-		\ also localStorage itself in 3hta.
-		<js> 
-			if(storage.restore) storage.restore();	
-		</js> 
+		\ Their platform.f provides storage.all(), .save() and .restore().
+		js: storage.restore()
 	[then]
 		
 	<js>
-		window.storage.set = function(key,data){
-				// set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
-				if(typeof data == "object") {
-					localStorage[key] = JSON.stringify(data);
-				} else {
-					localStorage[key] = data; // Assume it's a string
-				}
-				if(storage.save) storage.save();
-			}
 		window.storage.get = function(key){
 				// HTML5 localStorage only allow string, we support object too.
-				var ss = localStorage[key];
+				var ss = storage.all()[key];
 				if(!ss) return (undefined); // the field is not existing
 				try {
 					var data = JSON.parse(ss); // The field is an object
@@ -48,16 +37,22 @@
 				}
 				return(data); // can be anything includes object
 			}
-		window.storage.all = function(){
-			return(localStorage)
-		}
+		window.storage.set = function(key,data){
+				// set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
+				if(typeof data == "object") {
+					storage.all()[key] = JSON.stringify(data);
+				} else {
+					storage.all()[key] = data; // Assume it's a string
+				}
+				if(storage.save) storage.save();
+			}
 		window.storage.del = function(key){
-			delete(localStorage[key])
+			delete(storage.all()[key])
 			if(storage.save) storage.save();
 		}
 		window.storage.read = function(pathname){
 			// Read hash table from the given json file to TOS
-			// The hash table is in localstorage.json compatible format.
+			// The hash table is of the localstorage.json compatible format.
 			push(pathname);
 			execute("readTextFile");
 			var ss = pop();

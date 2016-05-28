@@ -360,7 +360,65 @@
 		/// 手動 <text> ...</text> import-all 即可 import 來自 export-all 的整個 local storage。
 		/// Example: jeforth.3ce 讀取 3hta 的整個 local storage
 		///     char 3hta/localstorage.json readTextFile import-all
-		
+   : (vb) ( -- vb ) \ Create view box in outputbox, view a localStorage field
+        <text>
+            <div class=vb>
+            <style type="text/css">
+                .vb .box { width:90%; }
+                .vb .box, .vb .vbhtmlarea { border:1px solid black; }
+                .vb p { display:inline; } /* [ ] <P> 不該有套疊,故多餘的很容易可以消除 */
+				.vb .vbname { font-size: 1.1em; }
+            </style>
+            <div class=box>
+				<p class=vbpathname>vb path name</p> &gt; <b class=vbfieldname>vb field name</b>
+				<div class=vbbody>
+					<textarea class=vbtextarea rows=12 wrap="off"></textarea>
+					<div class=vbhtmlarea></div>
+				</div>
+			</div>
+			</div>
+		</text> /*remove*/ </o> ( vb ) 
+		js: $('.vbtextarea',tos()).attr("readOnly",true)
+		js: $('.vbhtmlarea',tos())[0].contentEditable=false
+		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( vb ) ;
+
+	: vb.load ( vb hash fieldname -- ) \ Load data into a view box 
+		js: $(".vbfieldname",tos(2)).html(tos())  ( vb hash fieldname ) 
+		js> JSON.parse(pop(1)[pop()]) dup :> doc ( vb field doc )
+*debug* 11>>		
+		js> tos()==undefined if drop s" Unknown field." then swap ( vb doc field )
+*debug* 22>>		
+		:> mode ( vb doc mode ) if ( vb doc )
+*debug* 33>>		
+			js:	$(".vbhtmlarea",tos(1)).hide() 
+			js: $('.vbtextarea',pop(1))[0].value=pop() ( empty )
+		else ( vb doc )
+*debug* 44>>		
+			js: $(".vbtextarea",tos(1)).hide()
+			js: $(".vbhtmlarea",pop(1)).html(pop()) ( empty )
+		then ; 
+
+	: (ls.dump) ( pathname -- ) \ Dump the entire json file in localstorage.json format 
+		dup >r readTextFile ( "json" ) 
+		\ resolve utf-8 BOM ss.charCodeAt(0)==65279 that's utf-8 BOM 
+		js> tos().charCodeAt(0)==65279 if js> pop().slice(1) then ( "json" )
+		js> JSON.parse(pop()) ( hash )
+		dup obj>keys swap ( array hash ) 
+*debug* 2233>>		
+		js> tos(1).length ?dup if for ( array hash )
+*debug* 223344>>		
+			(vb) js: $(".vbpathname",tos()).html(rtos(1)) ( vb )
+			over ( array hash vb hash )
+*debug* 223355>>		
+			js> tos(3).pop() cr dup . cr ( array hash vb hash fieldname )
+*debug* 223366>>		
+			vb.load
+*debug* 223377>>		
+		next then ( array hash ) 2drop r> drop ;
+
+    : ls.dump ( <field name> -- ) \ Dump the entire localstorage.json formated file
+		char \n|\r word trim ( pathname ) (ls.dump) ;
+
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
 			tib.insert
@@ -418,7 +476,7 @@
 		js: $(".ebhtmlarea",tos())[0].innerHTML=outputbox.innerHTML ( eb ) \ load the content, let &lt; translation happen.
 		dup eb.appearance.browse ( eb ) 
 		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
-
+ 
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
 	
 	js> storage.get("autoexec") [if] [else] 
@@ -467,3 +525,4 @@
 	[then]
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
+

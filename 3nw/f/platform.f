@@ -4,12 +4,14 @@
 
 	also forth definitions
 
-	\ Save-Restore Local Storage 
-	\ 3htm/f/platform.f has defined window.storage already. For 3nw, further extend
-	\ storage.save() and storage.restore() the entire localStorage so as to share the
-	\ same copy with all 3nw on different computers.
+	\ Save-Restore Local Storage and pseudo interfaces. 
+	\ 3htm/f/platform.f has defined window.storage application functions : .get(), 
+	\ .set(), .del(), already. For 3nw, low level basics .all(), .save() and .restore() 
+	\ are plateform dependent. storage.all() equals to localStorage itself.
 
-    js> window.storage!=undefined [if] <js>
+    <js>
+		window.storage = {};
+		storage.all = function(){return(localStorage)};
 		storage.restore = function(pathname){
 			// Restore localStorage from the given json file or default localstorage.json
 			push(pathname ? pathname : "3nw/localstorage.json");
@@ -28,7 +30,7 @@
 			push(pathname ? pathname : "3nw/localstorage.json");
 			execute("writeTextFile");
 		}
-	</js> [then]
+	</js>
 	
 	include 3htm/f/platform.f
 	
