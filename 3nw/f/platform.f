@@ -15,7 +15,7 @@
 		storage.restore = function(pathname){
 			// Restore localStorage from the given json file or default localstorage.json
 			push(pathname ? pathname : "3nw/localstorage.json");
-			execute("readTextFile");
+			execute("readTextFile"); // 只有 synchronous 的 3nw, 3hta 才能在 js code 裡這樣用。
 			var ss = pop();
 			// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
 			// ss.charCodeAt(0)==65279 that's utf-8 BOM 

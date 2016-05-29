@@ -383,53 +383,43 @@
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( vb ) ;
 
 	: vb.load ( vb hash fieldname -- ) \ Load data into a view box 
-*debug* 0011>>		
 		js: $(".vbfieldname",tos(2)).html(tos())  ( vb hash fieldname ) 
-*debug* 0022>>		
 		js> pop(1)[pop()] ( vb "field" )
 		<js> try {
 			var data = JSON.parse(tos()); // The field is an object
 		} catch(err) {
-			data = tos(); // Not an object
-		}; push(data) </js> nip ( vb field )
-		dup :> doc ( vb field doc )
-*debug* 11>>		
-		js> tos()==undefined if 
-			drop 
-		else
-		then 
-		swap ( vb doc field )
-*debug* 22>>		
+			data = {doc:tos(),mode:true}; // Not an object, it must be a string.
+		};data</jsV> nip ( vb obj )
+		dup :> doc swap ( vb doc obj )
 		:> mode ( vb doc mode ) if ( vb doc )
-*debug* 33>>		
 			js:	$(".vbhtmlarea",tos(1)).hide() 
 			js: $('.vbtextarea',pop(1))[0].value=pop() ( empty )
 		else ( vb doc )
-*debug* 44>>		
 			js: $(".vbtextarea",tos(1)).hide()
 			js: $(".vbhtmlarea",pop(1)).html(pop()) ( empty )
 		then ; 
 
 	: (ls.dump) ( pathname -- ) \ Dump the entire json file in localstorage.json format 
-		dup >r readTextFile ( "json" ) 
+		dup >r readTextFile ( "json" )
 		\ resolve utf-8 BOM ss.charCodeAt(0)==65279 that's utf-8 BOM 
 		js> tos().charCodeAt(0)==65279 if js> pop().slice(1) then ( "json" )
 		js> JSON.parse(pop()) ( hash )
 		dup obj>keys swap ( array hash ) 
-*debug* 2233>>		
 		js> tos(1).length ?dup if for ( array hash )
-*debug* 223344>>		
 			(vb) js: $(".vbpathname",tos()).html(rtos(1)) ( vb )
 			over ( array hash vb hash )
-*debug* 223355>>		
-			js> tos(3).pop() cr dup . cr ( array hash vb hash fieldname )
-*debug* 223366>>		
-			vb.load
-*debug* 223377>>		
+			js> tos(3).pop() ( array hash vb hash fieldname )
+			vb.load ( array hash )
 		next then ( array hash ) 2drop r> drop ;
 
     : ls.dump ( <field name> -- ) \ Dump the entire localstorage.json formated file
-		char \n|\r word trim ( pathname ) (ls.dump) ;
+		char \n|\r word ( pathname ) 
+		?dup if else
+			js> vm.appname=="jeforth.3hta" if s" 3hta/localstorage.json" then 
+			js> vm.appname=="jeforth.3htm" if s" 3htm/localstorage.json" then
+			js> vm.appname=="jeforth.3ce"  if s" 3ce/localstorage.json"  then
+			js> vm.appname=="jeforth.3nw"  if s" 3nw/localstorage.json"  then
+		then ( pathname ) trim (ls.dump) ;
 
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
@@ -537,4 +527,3 @@
 	[then]
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
-

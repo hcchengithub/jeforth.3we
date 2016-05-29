@@ -41,6 +41,7 @@
 			})
 		</js>
 		120000 sleep \ 聽說過 typical 要等兩分鐘。[ ] 若還不夠而太早回來目前不知如何是好。
+		50 nap \ 3ca 的 ls.dump 會出問題 @ stopsleeping, 如此會好，可能是 js host 需要喘息時間。
 		;
 
 	\ Replace instead of redefine, because it has been used.

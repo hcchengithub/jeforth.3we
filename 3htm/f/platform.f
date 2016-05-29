@@ -12,8 +12,11 @@
 	
 	\ window.storage application functions are in 3htm/f/platform.f 其中有 
 	\ stoarge.set(), ~.get(), ~.del() 等是應用時 common 的。而 storage.all(), 
-	\ .save(), .restore() 這三個 low level I/O 是 3nw,3hta 要先提供的以便存取
-	\ localstorage.json 檔。storage.read() 則是大家都需要的, ls.dump 會用到。
+	\ .save(), .restore() 這三個 low level I/O 是 3nw,3hta 要在各自的 platform.f 中
+	\ 提供的以便存取 localstorage.json 檔，其中 storage.all() 是最重要的，用來
+	\ 虛擬化 HTML5 的 localStorage。 所以 3hta, 3nw 可以直接讓 localstorage.json 與它
+	\ 隨時保持同步。不能 access local computer 檔案的 3htm, 3ce 則有 ls.f export-all, 
+	\ import-all 這兩個命令來手動讀出與設定 localStorage。
 
     js> window.storage==undefined [if] 
 		\ For 3htm, 3ce, 3ca 等本身就有 localStorage 的環境 define the pseudo interface
@@ -49,18 +52,6 @@
 		window.storage.del = function(key){
 			delete(storage.all()[key])
 			if(storage.save) storage.save();
-		}
-		window.storage.read = function(pathname){
-			// Read hash table from the given json file to TOS
-			// The hash table is of the localstorage.json compatible format.
-			push(pathname);
-			execute("readTextFile");
-			var ss = pop();
-			// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
-			// ss.charCodeAt(0)==65279 that's utf-8 BOM 
-			if (ss.charCodeAt(0)==65279) ss = ss.slice(1); // resolve the utf-8 BOM issue
-			var hash = JSON.parse(ss);
-			push(hash);
 		}
 		</js> 
 
