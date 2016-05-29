@@ -383,10 +383,22 @@
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( vb ) ;
 
 	: vb.load ( vb hash fieldname -- ) \ Load data into a view box 
+*debug* 0011>>		
 		js: $(".vbfieldname",tos(2)).html(tos())  ( vb hash fieldname ) 
-		js> JSON.parse(pop(1)[pop()]) dup :> doc ( vb field doc )
+*debug* 0022>>		
+		js> pop(1)[pop()] ( vb "field" )
+		<js> try {
+			var data = JSON.parse(tos()); // The field is an object
+		} catch(err) {
+			data = tos(); // Not an object
+		}; push(data) </js> nip ( vb field )
+		dup :> doc ( vb field doc )
 *debug* 11>>		
-		js> tos()==undefined if drop s" Unknown field." then swap ( vb doc field )
+		js> tos()==undefined if 
+			drop 
+		else
+		then 
+		swap ( vb doc field )
 *debug* 22>>		
 		:> mode ( vb doc mode ) if ( vb doc )
 *debug* 33>>		
