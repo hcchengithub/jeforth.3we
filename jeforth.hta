@@ -212,6 +212,7 @@
 	// -------------------- End of the read/write local file section -------------------------------
 
 	// There's no main loop, event driven call back function is this.
+	kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
 	kvm.forthConsoleHandler = function (cmd) {
 		// Original version in jeforth.hta, will be reDef in jquery.f
 		var rlwas = kvm.rstack().length; // r)stack l)ength was
@@ -225,8 +226,7 @@
 				setTimeout(retry,100); 
 			else {
 				kvm.type(" " + kvm.prompt + " ");
-				// if ($(inputbox).is(":focus")) <-- do this reDef in jquery.f
-				window.scrollTo(0,endofinputbox.offsetTop);
+				kvm.scroll2inputbox();
 			}
 		})();
 	}

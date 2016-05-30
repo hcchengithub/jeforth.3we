@@ -6,7 +6,7 @@
 \  
 
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-				js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
+				js: type("\n") 1 nap js: kvm.scroll2inputbox();inputbox.focus() ;
 				/// redefined in quit.f, 1 nap 使輸出流暢。
 				/// Focus the display around the inputbox.
 				\ 早一點 redefine 以便流暢 include 諸 ~.f 時的 selftest messages.

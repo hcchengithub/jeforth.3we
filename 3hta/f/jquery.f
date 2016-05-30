@@ -46,7 +46,7 @@
 					else {
 						vm.type(" " + vm.prompt + " ");
 						if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
-							window.scrollTo(0,endofinputbox.offsetTop);
+							vm.scroll2inputbox();
 					}
 				})();
 			}

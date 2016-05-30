@@ -15,7 +15,7 @@
 			** 
 			** 下面的 source code 有 forth, JavaScript, HTML, CSS 等多種語言混搭。
 			** 您只要記得 interpreter 是 jeforth 所以切入別的語言之前一定有某個 jeforth
-			** 的命令切換，下面都會解釋。我覺得閱讀起來並無困難，您覺得呢？請多多惠賜意見。
+			** 的命令切換，下面都會解釋。我覺得閱讀起來並無困難，懇請多多惠賜意見。
 			*/
 		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
 			<style type="text/css">
@@ -72,10 +72,10 @@
 	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
 	<code>escape 	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert   	\ execute the string on TOS
-	<text> 
 	
-/* ----- Playground 互動區 --------------------------------------------------------------------- */
+\ /* ----- Playground 互動區 --------------------------------------------------------------------- */
 
+	<text> 
 		<o> <blockquote id=elePlayarea>
 		<table align=center width=90% border=2 cellspacing=0 cellpadding=4 bordercolor=white>
 			<tr>
@@ -93,9 +93,9 @@
 			</tr>
 		</table> 
 		</blockquote></o> js> eleOpening insertAfter
-/* -------------------------------------------------------------------------- */
 	</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	tib.insert
+\ /* -------------------------------------------------------------------------- */
 	
 	\ 以下的 js> 指令執行隨後的 JavaScript statements 直到遇上 white space 為止，最
 	\ 後一個 statement 的值 (or 'undefined') 放在 jeforth 的 TOS 傳回。
@@ -105,11 +105,14 @@
 	cls eleBody ce! er \ 清除畫面上的小垃圾。
 	include processing.f
 	js> vm.g.cv :> canvas js> cvdiv replaceNode \ Place the canvas
+	
 	\ include cloth.f 
 	\ 〈爽哥〉把 cloth.f 改得漂亮多了!
 	\  既然接下來也要顯示 cloth.f 而且有機會修改，不如改以讀進來用 tib.insert 方式執行。
+	
 	s" cloth.f" readTextFileAuto dup tib.insert
 	( 現在 TOS 是 cloth.f source code )
+	
 	<text>
 		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore, replaceNode 之類的手法搬動就定位 */
 		<div id=article class=essay><blockquote>
@@ -626,5 +629,12 @@
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert		\ execute the string on TOS
+	
+	\ 最後, 因為 inputbox, outputbox 版面改了, 原本以 inputbox 為 display 焦點的效果
+	\ 不知怎的 scrollto 不靈了。每下一個指令之後 inputbox 都會滾出 window 外，很彆扭。
+	\ 只好引進 vm.scroll2inputbox function, 方便改寫。如下用 -700 來調整之：
+	
+	js: vm.scroll2inputbox=function(){window.scrollTo(0,endofinputbox.offsetTop-700)}
+	
 \ ---------- The End -----------------
 	

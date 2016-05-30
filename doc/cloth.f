@@ -1,5 +1,5 @@
 
-\ cloth_sam.f
+\ cloth.f
 
 include canvas.f
 \ 有現成的畫布就用現成的，否則變出一個畫布來用。 
