@@ -356,10 +356,15 @@
 		var ls = JSON.parse(ss);
 		for (var i in ls) storage.set(i,ls[i]);
 		end-code
+		/// Import 進來疊加現有 local storage. 若不要只是疊加上去，先清除整個
+		/// local storage 再 import: js: localStorage.clear() /* none HTA */
+		/// window.storage.local_storage = {}; /* HTA */
 		/// The format is compatible with (3hta or 3nw )\localstorage.json 
-		/// 手動 <text> ...</text> import-all 即可 import 來自 export-all 的整個 local storage。
-		/// Example: jeforth.3ce 讀取 3hta 的整個 local storage
-		///     char 3hta/localstorage.json readTextFile import-all
+		/// 手動 <text> ...</text> import-all 即可 import 來自 export-all 的整個
+		/// local storage. Example: jeforth.3ce 讀取 3hta 的整個 local storage
+		/// char 3hta/localstorage.json readTextFile import-all
+		/// 疊加且覆蓋現有的 localStorage。
+		
    : (vb) ( -- vb ) \ Create view box in outputbox, view a localStorage field
         <text>
             <div class=vb>

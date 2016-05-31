@@ -87,22 +87,23 @@ code run-inputbox ( -- ) \ <Enter> key's run time.
 				
 : inputbox-edit-mode-on ( -- ) 
 				['] {F2} :: EditMode=true
-				<text> textarea:focus { 
+				<text> .console3we textarea:focus { 
 					border: 0px solid; background:#FFE0E0; /* pink indicating edit mode */
 				}</text> js: styleTextareaFocus.innerHTML=pop() ;
 
 : inputbox-edit-mode-off ( -- ) 
 				['] {F2} :: EditMode=false
-				<text> textarea:focus { 
+				<text> .console3we textarea:focus { 
 					border: 0px solid; background:##E0E0E0;
 				}</text> js: styleTextareaFocus.innerHTML=pop() ;
+				last execute \ default mode
 
 : toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
-				." Input box EditMode = " ['] {F2} :> EditMode dup . 
-				js: type('\n') \ can't use cr in event handler
-				if inputbox-edit-mode-off 
-				else inputbox-edit-mode-on
-				then ;
+				['] {F2} :> EditMode 
+				if inputbox-edit-mode-off false
+				else inputbox-edit-mode-on true then 
+				." Input box EditMode = " . js: type('\n') \ can't use cr in event handler
+				;
 
 : outputbox-edit-mode-on ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
