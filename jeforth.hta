@@ -226,7 +226,7 @@
 				setTimeout(retry,100); 
 			else {
 				kvm.type(" " + kvm.prompt + " ");
-				kvm.scroll2inputbox();
+				if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
 			}
 		})();
 	}

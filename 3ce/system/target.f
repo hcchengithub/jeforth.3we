@@ -130,7 +130,7 @@
 	last execute
 	
 	: cr ( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-		js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
+		js: type("\n") 1 nap js: vm.scroll2inputbox();inputbox.focus() ;
 		/// redefined in quit.f, 1 nap 使輸出流暢。
 		/// Focus the display around the inputbox.
 	
@@ -154,6 +154,6 @@
 
 	\ ------------ End of target.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
-	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()
+	js: vm.scroll2inputbox();inputbox.focus()
 
 

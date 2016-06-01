@@ -29,14 +29,14 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 	)
 	</js> 
 		
-	: host-message-handler ( message sender sendResponse -- ) \ 
+	: host-message-handler ( message sender sendResponse -- ) \ Handle messages from target page
 		2drop \ sender and sendResponse are not used so far
 		<js>
 			var message = pop();
 			if (message.addr && message.addr!=vm.g.myTabId) return;
 			if (message.type) {
 				vm.type(message.type);
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
+				vm.scroll2inputbox();inputbox.focus(); // Host side
 			} 
 			if (message.tos) { // Receving data from target page
 				push(message.tos);
@@ -211,7 +211,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 			0 begin
 				active-tab :> status=="complete" if 1+ then
 				dup 5 > if else \ 5 complete to make sure it's very ready.
-					js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					js: vm.scroll2inputbox();inputbox.focus();
 					char . . 300 nap false
 				then 
 			until
@@ -313,7 +313,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 							vm.type(" " + vm.prompt + " ");
 							if (typeof(endofinputbox)!="undefined"){
 								if ($(inputbox).is(":focus"))
-									window.scrollTo(0,endofinputbox.offsetTop);
+									vm.scroll2inputbox();
 							}
 						}
 					})();

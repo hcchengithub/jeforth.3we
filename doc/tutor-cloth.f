@@ -24,7 +24,7 @@
 					font-size: 110%; /*字細所以要大一點*/
 					background: #E0E0E0;
 				}
-				table {
+				.essay table {
 					width: 100%;
 				}
 				.essay { 
@@ -32,7 +32,7 @@
 					letter-spacing: 0px;
 					line-height: 160%;
 				}
-				.source { /*主要是把大小恢復否則 110% 太大了*/
+				.essay .source { /*主要是把大小恢復否則 110% 太大了*/
 					font-size:100%;
 					letter-spacing:0px"
 					line-height: 100%;
@@ -43,8 +43,8 @@
 		<o> /* <o>..</o> 是在 outputbox 裡寫 HTML */
 
 /* ----- Greeting 前言 --------------------------------------------------------------------- */
-
-			<div id=eleOpening class=essay> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
+			<div id=essay class=essay>
+			<div id=eleOpening> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
 			<blockquote><h1>玩電腦繪圖，熟悉 jeforth.3we</h1></blockquote>
 			<blockquote>
 			<p>	
@@ -65,11 +65,13 @@
 				<A HREF="#3we">jeforth.3we</a> 的應用程式。
 				我們一邊操作一邊自然地熟悉它的使用方式。
 			</p></blockquote>
-			</div>
+			</div> /* eleOpening */
+			</div> /* essay */
 /* -------------------------------------------------------------------------- */
-		</o> ( eleOpening ) js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
+		</o> ( essay ) 
+		js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
 	</text> 
-	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
+	/*remove*/ \ 清除 /* ... */ 註解。
 	<code>escape 	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert   	\ execute the string on TOS
 	
@@ -92,7 +94,7 @@
 				</td>
 			</tr>
 		</table> 
-		</blockquote></o> js> eleOpening insertAfter
+		</blockquote></o> js> essay swap appendChild
 	</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	tib.insert
 \ /* -------------------------------------------------------------------------- */
@@ -102,6 +104,7 @@
 	
 	js> inputbox  js> newinputbox  replaceNode \ replaceNode 移置過去，本來 inputbox 有很多功能皆獲保留。
 	js> outputbox js> newoutputbox replaceNode \ 同上。
+	js> endofinputbox js> elePlayarea insertAfter \ 這個別忘
 	cls eleBody ce! er \ 清除畫面上的小垃圾。
 	include processing.f
 	js> vm.g.cv :> canvas js> cvdiv replaceNode \ Place the canvas
@@ -114,7 +117,7 @@
 	( 現在 TOS 是 cloth.f source code )
 	
 	<text>
-		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore, replaceNode 之類的手法搬動就定位 */
+		<o> 
 		<div id=article class=essay><blockquote>
 /* ----- 認識操作環境 --------------------------------------------------------------------- */
 			<h2>認識環境</h2>
@@ -593,18 +596,22 @@
 			<h2>查看本文的 source code</h2>
 			<p>
 			這篇文章 tutor-cloth.f 本身就是一支 jeforth.3htm 的應用程式。
-			下達這段命令就可以把它讀出來放到這個網頁的最下面，請試著親手操作看看。
+			下達以下這段命令就可以把它讀出來放到這個網頁的最下面，
+			請試著親手操作看看。
 			您也可以把 jeforth.3we 從 GitHub 上 clone 
 			下來找到 tutor-cloth.f 就是了。
 			我盡量都寫了註解，請多指教。
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
-				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
-				^tab>spaces \ 把行首的 Tab 都換成 tab-spaces 避免過度內縮不好看。
-				<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
-				js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
-				js> article \ article 是本文最後一段的 element ID
-				insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent> 
+			    \ Copy-Paste 到 inputbox 去執行即可讀出本文 source code
+				not-only \ 所有的 vocabulary 都出列。
+				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code ( source )
+				^tab>spaces \ 適當調整行首的 Tab 避免 indent 過度內縮不好看。 ( source )
+				<o> <textarea id=source rows=24></textarea></o> \ 變出一個 <textarea> ( source ele )
+				js: tos().value=pop(1) \ 把 source code 填入 textarea ( ele )
+				js> essay swap appendChild \ 搬到本文最底下。 ( empty )
+				js: window.scrollTo(0,source.offsetTop);inputbox.blur() \ 跳過去。
+				
 			</unindent></code></pre></blockquote></td></table>
 			
 			<h2 id=3we>jeforth.3we 簡介</h2>
@@ -615,26 +622,31 @@
 				kernel 在不同環境的各種版本。
 				3we 當中的 3 之後加上一點點努力就是 Forth 語言的吉祥數字 4， 
 				而目前「we」則有 jeforth.3htm (HTML), jeforth.3hta (Microsoft HTML Application), 
-				jeforth.3nd (Node.js), jeforth.3nw (Node-Webkit or NW.js) 等。
+				jeforth.3ce (Chrome extension), jeforth.3nd (Node.js), jeforth.3nw (Node-Webkit or NW.js) 等。
 				在本網頁上呈現的是 jeforth.3htm 的應用。
 			</p>	
 			<p>--- The End ---</p>	
-			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03</p>
+			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03 初版, 2016.6.1 修改</p>
 			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
 		</blockquote></div>
-		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
+		</o> js> essay swap appendChild
 	</text>
 	:> replace(/----replace-me-with-cloth\.f----/,pop()) \ cloth.f source code 就顯示定位
-	:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
+	/*remove*/      \ 清除註解。
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert		\ execute the string on TOS
 	
 	\ 最後, 因為 inputbox, outputbox 版面改了, 原本以 inputbox 為 display 焦點的效果
 	\ 不知怎的 scrollto 不靈了。每下一個指令之後 inputbox 都會滾出 window 外，很彆扭。
-	\ 只好引進 vm.scroll2inputbox function, 方便改寫。如下用 -700 來調整之：
+	\ RI: 搬動 inputbox 時沒有把 endofinputbox 也搬到新址，故然。 
+	\     可能的解法：js> endofinputbox js> elePlayarea insertAfter
 	
-	js: vm.scroll2inputbox=function(){window.scrollTo(0,endofinputbox.offsetTop-700)}
+	\ 只好引進 vm.scroll2inputbox function, 方便如下改寫以調整之：
+	
+	js: vm.scroll2inputbox=function(){inputbox.focus();window.scrollTo(0,endofinputbox.offsetTop-700);}
+	js: window.scrollTo(0,0);inputbox.blur() \ 跳到頁首
+
 	
 \ ---------- The End -----------------
 	

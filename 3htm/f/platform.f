@@ -153,7 +153,7 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the active textarea or the inp
 				ta.rows = Math.max(r,1);
 				if (ta==inputbox) {
 					if (!r) $(ta).hide();
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					vm.scroll2inputbox();inputbox.focus();
 				}
 				push(false); // Stop event bubbling
 				end-code
@@ -167,7 +167,7 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				ta.rows = Math.max(r,1);
 				if (ta==inputbox) {
 					$(ta).show() // 縮到最後是 $.hide() 起來的。
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					vm.scroll2inputbox();inputbox.focus();
 				}
 				push(false); // Stop event bubbling
 				end-code
@@ -195,7 +195,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 					}
 					document.getElementById("inputbox").value += " " + ss;
 				}
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				vm.scroll2inputbox();inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -203,7 +203,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 
 code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				inputbox.value="";
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				vm.scroll2inputbox();inputbox.focus();
 				push(false); // Stop bubbling
 				end-code
 
@@ -218,7 +218,7 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					}
 					tos().size = Math.min(16,tos().length);
 					tos().selectedIndex=tos().length-1;
-					window.scrollTo(0,endofinputbox.offsetTop);tos().focus();
+					vm.scroll2inputbox();tos().focus();
 					var select = tos().onclick = function(){
 						inputbox.value = tos().value;
 						execute("removeElement");

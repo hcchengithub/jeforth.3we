@@ -91,11 +91,16 @@
 	include editor.f
 	include ls.f
 	marker ---
-	
-\ ----------------- run the command line -------------------------------------
-	<js> (vm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
 
 \ ------------ End of jeforth.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
-	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()
+	js: vm.scroll2inputbox();inputbox.focus()
+
+\ ----------------- run the command line -------------------------------------
+	<js> (vm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
+
+\ The End
+
+
+

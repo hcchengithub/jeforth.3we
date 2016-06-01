@@ -83,6 +83,7 @@
 		);                          
                                     
 		// There's no main loop, event driven call back function is this.
+		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
 		kvm.forthConsoleHandler = function(cmd) {
 			var rlwas = kvm.rstack().length; // r)stack l)ength was
             type((cmd?'\n> ':"")+cmd+'\n');
@@ -95,7 +96,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					if ($(inputbox).is(":focus")) window.scrollTo(0,endofinputbox.offsetTop);
+					if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
 				}
 			})();
 		}
