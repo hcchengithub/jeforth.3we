@@ -32,22 +32,21 @@
 		}
 	</js>
 	
-	include 3htm/f/platform.f
-	
 	: {F5}			( -- boolean ) \ Hotkey handler, Confirm reload the application.
 					<js> confirm("Really want to restart?") </jsV> 
 					if 
 						js: storage.save()
 						nw :: reloadIgnoringCache() 
 					then false ( stop bubbling ) ;
+					/// Defined in 3nw/f/platform.f
 					/// Return a false to stop the hotkey event handler chain.
 					/// Must intercept onkeydown event to avoid original function.
 
 	: {-}			( -- boolean ) \ Inputbox keydown handler, zoom out.
-					." {-} "
 					js> !event.ctrlKey if true else nw :: zoomLevel-=0.5 false then ;
 	: {+}			( -- boolean ) \ Inputbox keydown handler, zoom in.
-					." {+} "
 					js> !event.ctrlKey if true else nw :: zoomLevel+=0.5 false then ;
 
 	previous definitions
+	
+	include 3htm/f/platform.f

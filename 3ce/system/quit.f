@@ -10,6 +10,14 @@
 				/// redefined in quit.f, 1 nap 使輸出流暢。
 				/// Focus the display around the inputbox.
 				\ 早一點 redefine 以便流暢 include 諸 ~.f 時的 selftest messages.
+				
+: {F5}			( -- boolean ) \ Hotkey handler, Confirm the Chrome extension window refresh
+				<js> confirm("Really want to restart?") </jsV> 
+				if active-tab :> id js: chrome.tabs.reload(pop()) false
+				else true then ;
+				/// Defined in 3ce/system/quit.f
+				/// Return a false to stop the hotkey event handler bubbling.
+				/// Must intercept onkeydown event to avoid original function.
 
 \ ------------------ Get args from URL -------------------------------------------------------
 	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 

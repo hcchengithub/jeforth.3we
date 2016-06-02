@@ -640,13 +640,11 @@
 	\ 最後, 因為 inputbox, outputbox 版面改了, 原本以 inputbox 為 display 焦點的效果
 	\ 不知怎的 scrollto 不靈了。每下一個指令之後 inputbox 都會滾出 window 外，很彆扭。
 	\ RI: 搬動 inputbox 時沒有把 endofinputbox 也搬到新址，故然。 
-	\     可能的解法：js> endofinputbox js> elePlayarea insertAfter
-	
-	\ 只好引進 vm.scroll2inputbox function, 方便如下改寫以調整之：
+	\     解法：js> endofinputbox js> elePlayarea insertAfter
+	\     並且引進 vm.scroll2inputbox function, 方便如下改寫以調整之：
 	
 	js: vm.scroll2inputbox=function(){inputbox.focus();window.scrollTo(0,endofinputbox.offsetTop-700);}
 	js: window.scrollTo(0,0);inputbox.blur() \ 跳到頁首
-
 	
 \ ---------- The End -----------------
 	

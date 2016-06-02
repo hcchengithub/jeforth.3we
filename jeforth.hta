@@ -9,7 +9,7 @@
 	<HTA:APPLICATION 
 		ID="hta"
 		APPLICATIONNAME="jeforth.3hta"
-		VERSION="2" 
+		VERSION="203" 
 		/>
 	<meta charset="utf-8" />
 	<!-- link rel="stylesheet" type="text/css" href="common.css" -->
@@ -88,7 +88,7 @@
 		}
 	};
 	// minor version specified by application(hta.version), major version is from jeforth.js kernel.
-	var version = parseFloat(kvm.major_version+"."+hta.version);
+	var version = parseFloat(kvm.major_version+"."+hta.version); // hta.version is the "kvm.minor_version"
 	kvm.greeting = function(){
 		kvm.type("j e f o r t h . 3 h t a -- v"+version+'\n');
 		kvm.type(jsengine.innerText+'\n');

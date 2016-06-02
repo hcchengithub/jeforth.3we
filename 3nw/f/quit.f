@@ -24,7 +24,7 @@
 	[then] 
 	js: tick('<selftest>').buffer="" \ recycle the memory
 
-	include jsc.f			\ JavaScript debug console
+	include 3htm/f/jsc.f			\ JavaScript debug console
 	include voc.f			\ voc.f is basic of forth language
 	include html5.f			\ leverage jeforth.3htm
 	include element.f		\ HTML element manipulation
