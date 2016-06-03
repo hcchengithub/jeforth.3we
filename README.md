@@ -1,9 +1,10 @@
 j e f o r t h . 3 w e
 ==============
-**Forth** is the simplest computer programming language ever. **jeforth.3we Project** is an implementation with a **3 Words Engine** *jeforth.js* from [project-k](http://github.com/hcchengithub/project-k) for all applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and can be more. All of them have been tested on Windows 8 or Windows 10, I believe the same kernel can be also working on Linux, iOS, Android, and any where JavaScript is available with a minimal porting efforts.
+**Forth** is the simplest programming language ever. The **jeforth.3we Project** is an implementation based on a **3 Words Engine** *jeforth.js* from [project-k](http://github.com/hcchengithub/project-k) for many applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and can be more. All of them have been tested on Windows 8 or Windows 10.
 
 Play now
 ===========
+Among the many applications, jeforth for web page (jeforth.3htm) can run on your web browser right now thus is good for demonstration. 
 
 #### [Solar system](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png)
@@ -19,43 +20,44 @@ Play now
 
 #### [Chipmunk Physics Engine demo - Pyramid Stack](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-pyramidstack.png)
- 
+
+
+What else can you do with jeforth.3we?
+=============
+
+#### [Markdown editor](http://note.youdao.com/yws/public/redirect/share?id=1a8a342f3a9c1e0622a6050480af28b7&type=false)
+
+NW.js can access files in your local computer and also have all abilities like the Chrome browser, that allows jeforth.3nw to include any open source module on the Internet. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw. If you are a NW.js user, you can clone the enire jeforth.3we project to try. 
+
+![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo 3nw mde editor.JPG)
+
+
 Get source code, unzip, and start running
-==================================
+=============
 
 | Item | Address |
 ----------------|----------------------------------------------
 | jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
 
-
-Click **[Download ZIP]** both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Make your own private directory for your personal stuffs. 
-
-**Note:** One thing we need to know that, specially for jeforth.3hta, It's necessary to use something like GNU tool [unix2dos](https://en.wikipedia.org/wiki/Unix2dos) to convert the new line characters of all text files from Unix's LF to Windows' CRLF. Do this or not doesn't matter for other versions, so far jeforth.3htm, jeforth.3nd and jeforth.3nw. If you **clone** them instead of **Download Zip** then forget this step, GitHub client side for Windows converts new line characters to CRLF correctly already. This is an example of the usage:
-
-    d:\jeforth.3we>for /R %G in (*.*) do d:\bin\unix2dos.exe "%G"
+<br>
+Click the [Download ZIP] button of both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Then you can run 3hta.bat  without installing anything else if your computer is Windows 8 or Windows 10; or run 3nd.bat and 3nw.bat, if you have installed node.js and nw.js.
 
 My jeforth.3we/ directory listing for example,
 
-```
-    ... snip ...
-    2015/09/06  12:57    <DIR>          3wsh
-    2015/09/26  09:23    <DIR>          f
-    2015/09/06  12:57    <DIR>          js
-    2015/09/26  09:23    <DIR>          playground
-    2015/09/26  09:23    <DIR>          private    <---- your own stuff
-    2015/09/26  09:02    <DIR>          project-k  <---- from project-k project
-    2015/09/06  12:57               269 common.css
-    2015/09/26  09:58                96 3nd.bat
-    ... snip ...
-```
-
 ![jeforth3we-dir.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/jeforth3we-dir.png)
 
-Then you can run 3nd.bat, 3nw.bat, if you have installed node.js and nw.js. Also  run 3hta.bat  if your computer is Windows 8 or Windows 10.
+
+**Note:** Only for jeforth.3hta and only when you were **Download Zip** jeforth.3we from GitHub, It's necessary to use GNU tool [unix2dos](http://waterlan.home.xs4all.nl/dos2unix.html) to convert the new line characters of all text files [from Unix's LF to Windows' CRLF](https://en.wikipedia.org/wiki/Unix2dos). This is an example command line of the usage:
+
+    d:\jeforth.3we>for /R %G in (*.*) do d:\bin\unix2dos.exe "%G"
+
+<br>
+
+If you were **git clone https://github.com/hcchengithub/jeforth.3we** instead of **Download Zip** then forget this step, GitHub shell for Windows already converts new line characters to CRLF correctly. 
 
 Presentation videos
-================
+======
 
 | No.   | Mandarin | English |
 --------|----------|---------
@@ -83,7 +85,7 @@ What to play in further depth
 ========================
 Download and setup the jeforth.3we directory and project-k directory as mentioned above.
 
-####**HTA** / jeforth.3hta
+#### **HTA** / jeforth.3hta
 Double click the **jeforth.3we/jeforth.hta** or execute the below DOS command line in a DOS box,
 ```
 jeforth.hta cls .' Hello world' cr 3000 sleep bye
@@ -95,7 +97,7 @@ The prior method runs self-test because there's no given task to do. The 2'nd me
 
 Note! If you see the Windows error message : ["Safety Settings on this computer prohibit accessing a data source on another domain"](https://social.msdn.microsoft.com/Forums/en-US/becc982a-b693-49bb-8fb0-95847a3e96c7/hta-safety-settings-on-this-computer-prohibit-accessing-a-data-source-on-another-domain?forum=scripting) that I heard may happen on some Windows 7 computers. Sorry, [I have no solution yet](http://stackoverflow.com/questions/32177060/hta-safety-settings-on-this-computer-prohibit-accessing-a-data-source-on-anot), It didn't happen on those Windows 7 computers that I could reach. Please upgrade to Windows 8 or 10 to avoid from the problem.
 
-####**Node.js** / jeforth.3nd
+#### **Node.js** / jeforth.3nd
 Make sure you can run node.exe in a DOS box so you have setup the path. Make the jeforth.3we/ folder be your working directory. Execute one of the below demo command lines:
 ```
 node jeforth.3nd.js
@@ -105,7 +107,7 @@ Again, like the above HTA case, the prior command line does the self-test, and t
 
 We have a local Web server written by jeforth.3nd itself. See jeforth.3we/Webserver.bat. Having a local Web server is necessary to run jeforth.3htm. 
 
-####**HTML** / jeforth.3htm
+#### **HTML** / jeforth.3htm
 Setup your local Web server by running jeforth.3we/Webserver.bat, 
 
 ![webserver.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/webserver.png)
@@ -121,7 +123,7 @@ http://localhost:8888/index.html?_."_8-)_"_100_nap_rewind
 ```
 I have tested IE10 , IE11 and Chrome. Firefox or other web browsers are not tested yet. As shown above, we can put any forth words in the URL. That will be the task jeforth.3htm will do after start up and the self-test will be skipped when having a task to do.
 
-####**Node-webkit** / jeforth.3nw
+#### **Node-webkit** / jeforth.3nw
 Setup your Node.js and Node-Webkit path in prior. Refer to 3nw.bat as an example. Make jeforth.3we/ be your working directory, run either one of below command lines:
 ```
 nw ../jeforth.3we
@@ -149,7 +151,7 @@ Use jeforth.3hta to manipulate excel spread sheets. This example gets a column f
 jeforth.hta include merge2.f
 ```
 
-####The End
+#### The End
 
  - FigTaiwan [http://figtaiwan.org](http://figtaiwan.org) 
  - H.C. Chen [hcchen5600@gmail.com](hcchen5600@gmail.com) 

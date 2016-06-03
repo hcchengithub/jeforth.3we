@@ -4,6 +4,10 @@
 	\ For jeforth.3nw only due to 
 	\ 1) HTA is not so compatible with JavaScript libraries on the net.
 	\ 2) NW.js can access local files and also have HTML features.
+	\ 3) Chrome Extension refuses to load the SimpleMDE script because it 
+	\    violates the Content Security Policy.	
+	\ 4) Chrome browser not only can't write back to local disk but also 
+	\    can't get a specified file's full pathname.
 
 	s" mde.f"		source-code-header
 
