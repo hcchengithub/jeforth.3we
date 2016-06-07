@@ -82,7 +82,7 @@
 
 include processing.f
 
-s" naughty-balls.f" source-code-header
+s" naughty-balls2.f" source-code-header
 marker ~~~
 	
 \ setup

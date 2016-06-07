@@ -7,10 +7,16 @@
 	\ 3) Chrome Extension refuses to load the SimpleMDE script because it 
 	\    violates the Content Security Policy.	
 	\ 4) Chrome browser not only can't write back to local disk but also 
-	\    can't get a specified file's full pathname.
+	\    can't get a specified file's full pathname. Copy-paste your article
+	\    to MDEditor is the way so far.
 
+	js> vm.appname=="jeforth.3ce"  [if] ." Fatel: jeforth.3ce can't include SimpleMDE at all." cr stop [then]
+	js> vm.appname=="jeforth.3hta" [if] ." Fatel: jeforth.3hta is not compatible with SimpleMDE." cr stop [then]
+	js> vm.appname=="jeforth.3htm" [if] <js> alert("Warning: File access not allowed, copy-paste instead.")</js> [then]
+	
 	s" mde.f"		source-code-header
 
+	
 	: mde-include ( -- ok? ) \ Inclde MDE editor 
 		js> typeof(SimpleMDE)!="function" if
 			<text>

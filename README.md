@@ -1,6 +1,6 @@
 j e f o r t h . 3 w e
 ==============
-**Forth** is the simplest programming language ever. The **jeforth.3we Project** is an implementation based on a **3 Words Engine** *jeforth.js* from [project-k](http://github.com/hcchengithub/project-k) for many applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and can be more. All of them have been tested on Windows 8 or Windows 10.
+**Forth** is the simplest programming language ever. The jeforth.**3we** project is an implementation based on a **3 Words Engine** from [project-k](http://github.com/hcchengithub/project-k) for many applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and probably more in the future. All of them have been tested on Windows 8 or Windows 10.
 
 Play now
 ===========
@@ -27,7 +27,7 @@ What else can you do with jeforth.3we?
 
 #### [Markdown editor](http://note.youdao.com/yws/public/redirect/share?id=1a8a342f3a9c1e0622a6050480af28b7&type=false)
 
-NW.js can access files in your local computer and also have all abilities like the Chrome browser, that allows jeforth.3nw to include any open source module on the Internet. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw. If you are a NW.js user, you can clone the enire jeforth.3we project to try. 
+NW.js can access files in your local computer and also have all abilities like the Chrome browser, that allows jeforth.3nw to include JavaScript modules from the Internet. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw. 
 
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo 3nw mde editor.JPG)
 

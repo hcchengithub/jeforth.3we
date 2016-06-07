@@ -5,7 +5,7 @@
 
 	jeforth.3we 模擬行星軌道，蠻好玩的：
 	
-		http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?include solar-system.f
+		http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f
 
 	談電腦
 

@@ -1358,9 +1358,8 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				<js>
 					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
-					var timeoutId = vm.g.setTimeout(resume,delay);
+					setTimeout(resume,delay);
 					function resume() { 
-						delete(vm.g.setTimeout.registered()[timeoutId.toString()]);
 						tib = tibwas; ntib = ntibwas;
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}

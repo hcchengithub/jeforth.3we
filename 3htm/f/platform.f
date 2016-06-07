@@ -71,9 +71,12 @@ code run-inputbox ( -- ) \ <Enter> key's run time.
 				/// 原來 edit mode 時需要, 且可用於 focus 在別地方時下達執行命令, 因為 focus 本
 				/// 身要指著某東西；這個 word 還可以改寫，在 3ce 中用來加強分辨看命令是誰下達的。
 
-				' {F5} [if] [else]
-: {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
-				<js> confirm("Really want to restart?") </jsV> ;
+				' {F5} [if] [else] 
+				\ 3htm/f/platform.f 大家都共用，若已經定義過了避免重複。
+: {F5}			( -- boolean ) \ Hotkey handler, Confirm the window refresh
+				<js> confirm("Really want to restart?") </jsV> 
+				if js: window.location.reload(true) false
+				else false then ;
 				/// Defined in 3htm/f/platform.f
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
