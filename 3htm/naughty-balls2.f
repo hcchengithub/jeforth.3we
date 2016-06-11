@@ -154,8 +154,6 @@ marker ~~~
 						var mv2p = Math.sqrt(bvx*bvx + bvy*bvy);
 						// 動量守恆嗎？忽略不守恆的情形，相當於交錯而過，互不影響。
 						var diff = (mv1+mv2)-(mv1p+mv2p);
-if(kvm.debug>2) print("diff="+diff+" "); // [ ]
-if(kvm.debug>10){kvm.jsc.prompt='222>>>';eval(kvm.jsc.xt)} // [ ]
 						if (Math.abs(diff) < 0.5) {
 						vx = avx;  // 本球
 						vy = avy;  

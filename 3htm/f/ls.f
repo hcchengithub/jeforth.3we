@@ -427,9 +427,8 @@
 		then ( pathname ) trim (ls.dump) ;
 
 	: autoexec ( -- ) \ Run localStorage.autoexec
-		js> storage.get("autoexec").doc js> tos() if  ( autoexec )
-			tib.insert
-		then ;
+		js> storage.get("autoexec").doc ( "autoexec" )
+		js> tos() if ( "autoexec" ) tib.insert else ( "autoexec" ) drop then ;
 
 	: list ( -- ) \ List all localStorage fields, click to open
 		\ Print How to use,
