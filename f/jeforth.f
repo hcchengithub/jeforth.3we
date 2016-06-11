@@ -1354,13 +1354,29 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 				tick('sleep').resume();
 				end-code
 
-: nap			( mS -- ) \ Suspend to idle, resume after mS. Multiple nap is allowed.
+: nap-old			( mS -- ) \ Suspend to idle, resume after mS. Multiple nap is allowed.
 				<js>
 					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
 					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
 					setTimeout(resume,delay);
 					function resume() { 
 						tib = tibwas; ntib = ntibwas;
+						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
+					}
+				</js> ;
+				/// nap 沒有保留外顯的 timeoutId 故不能中止，但也不會堆積在 vm.g.setTimeout.registered() 裡。
+
+: nap			( mS -- ) \ Suspend to idle, resume after mS. Multiple nap is allowed.
+				<js>
+					var tibwas=tib, ntibwas=ntib, ipwas=ip, delay=pop();
+if(vm.debug) debugger;
+					tib = ""; ntib = ip = 0; // ip = 0 reserve rstack, suspend the forth VM 
+					setTimeout(resume,delay);
+					function resume() { 
+						if(typeof(tib)!="undefined") {
+						    if(vm.debug) debugger;
+							tib = tibwas; ntib = ntibwas;
+						} else debugger;
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
 					}
 				</js> ;
@@ -1381,7 +1397,7 @@ code cut		( -- ) \ Cut off used TIB.
 
 : rewind		( -- ) \ Rewind TIB so as to repeat it. 'stop' to terminate.
 				-word <js> var a=pop(),flag=false; for(var i in a) flag = flag || a[i]=='nap'; flag </jsV>
-				not ?abort" Warning! no 'nap' in command line, suspecious of infinit loop." js: ntib=0 ;
+				not ?abort" Warning! no 'nap' in command line, suspicious of infinite loop." js: ntib=0 ;
 				/// "cut ~ 10 nap rewind" repeat running the TIB.
 				/// See also <task>
 				

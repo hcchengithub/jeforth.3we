@@ -532,3 +532,21 @@
 	[then]
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
+
+	<comment>
+	[x] local storage ed editor textarea wrap on/off 
+		js> $("textarea",".eb").length . \ 先查看,確定目標只有一個,以免動錯對象
+		js> $("textarea",".eb").attr("wrap") . \ 查看目前狀態是 "on" 還是 "off"
+		js: $("textarea",".eb").attr("wrap","on") \ 這個例子把它 turn "on"
+		--> 增加這個按鈕... 可以不必, 用以下的 One-liner 一行搞定, 先 focus 在目標 textarea 
+			用 Ctrl-Enter 執行。
+		js: $("textarea:focus").attr("wrap","on")
+		js: $("textarea:focus").attr("wrap","off") 
+
+	[x] Change font size is similar 
+	    js: $("textarea",".eb").css("font-size","2em")
+	    js: $("textarea:focus").css("font-size","2em") \ 這個好, 同上, 用 Ctrl-Enter 執行
+	</comment>
+	
+	
+	

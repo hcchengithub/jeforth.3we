@@ -287,7 +287,7 @@ if(kvm.debug>10){kvm.jsc.prompt='222>>>';eval(kvm.jsc.xt)} // [ ]
 \ start to run
 newBall newBall newBall newBall newBall
 newBall newBall newBall newBall newBall
-[begin] draw interval nap [again] 
+js: vm.debug=true [begin] draw interval nap [again] 
 
 
 
