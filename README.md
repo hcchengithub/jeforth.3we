@@ -7,6 +7,7 @@ Play now
 Among the many applications, jeforth for web page (jeforth.3htm) can run on your web browser right now thus is good for demonstration. 
 
 #### [Solar system](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
+[簡介](http://note.youdao.com/yws/public/redirect/share?id=94764cf57ba4365e2997f4a268ff7716&type=false)<br>
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png)
 
 #### [H2O](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f)
