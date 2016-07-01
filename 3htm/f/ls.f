@@ -296,8 +296,7 @@
 			then  ( eb )
 		\ Activate settings ( eb )
 			eb.settings ;
-		/// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。		
-		/// [ ] 解決 snapshot 讀回來發現有 textarea.value 而 htmlarea.innerHTML 卻是空的的問題。
+		/// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -425,6 +424,11 @@
 			js> vm.appname=="jeforth.3ce"  if s" 3ce/localstorage.json"  then
 			js> vm.appname=="jeforth.3nw"  if s" 3nw/localstorage.json"  then
 		then ( pathname ) trim (ls.dump) ;
+		/// View logs in local storage of each applications:
+		///   ls.dump 3hta/localstorage.json
+		///   ls.dump doc/archive.json
+		/// If local storage become too big. Simply move to doc/archive.json 
+		/// manually through a text editor.
 
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc ( "autoexec" )
@@ -478,7 +482,7 @@
 		(ed) ( eb ) \ default is editable, saved, code mode
 		s" Snapshot " now t.dateTime + ( eb "now" ) 
 		js: $(".ebname",tos(1))[0].value=pop() ( eb )
-		dup textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
+		js> outputbox textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
 		js: $(".ebhtmlarea",tos())[0].innerHTML=outputbox.innerHTML ( eb ) \ load the content, let &lt; translation happen.
 		dup eb.appearance.browse ( eb ) 
 		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision

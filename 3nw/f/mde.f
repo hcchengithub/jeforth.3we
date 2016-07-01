@@ -10,8 +10,8 @@
 	\    can't get a specified file's full pathname. Copy-paste your article
 	\    to MDEditor is the way so far.
 
-	js> vm.appname=="jeforth.3ce"  [if] ." Fatel: jeforth.3ce can't include SimpleMDE at all." cr stop [then]
-	js> vm.appname=="jeforth.3hta" [if] ." Fatel: jeforth.3hta is not compatible with SimpleMDE." cr stop [then]
+	js> vm.appname=="jeforth.3ce"  [if] ." Fatel: jeforth.3ce can't include SimpleMDE at all. Try 3nw and 3htm." cr stop [then]
+	js> vm.appname=="jeforth.3hta" [if] ." Fatel: jeforth.3hta is not compatible with SimpleMDE. Try 3nw and 3htm." cr stop [then]
 	js> vm.appname=="jeforth.3htm" [if] <js> alert("Warning: File access not allowed, copy-paste instead.")</js> [then]
 	
 	s" mde.f"		source-code-header
