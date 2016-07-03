@@ -296,7 +296,7 @@
 			then  ( eb )
 		\ Activate settings ( eb )
 			eb.settings ;
-		/// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
+        /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
     
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
