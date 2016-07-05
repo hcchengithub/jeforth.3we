@@ -408,6 +408,15 @@
 		/// ( 含#NA! ) manual 0 cut i?stop formula>value 1 nap rewind auto
 		/// 把有值的格子都由參考公式轉成 value 並取得這些格子的座標，接著
 		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把這些格子都塗上顏色。
+
+    : string>number ( -- ) \ Convert cells from string to numbers
+		begin 
+			cell@ 1 * dup js> isNaN(pop()) 
+			if drop else cell! then 
+		down empty? until ;
+		/// Convert cells from the active cell down the column to next empty cell.
+		/// #N/A and isNaN are skipped. 其實這個不如 formula>value 好用, 請看它的
+		/// help 說明。
 		
 	: printDateTime ( time -- ) \ Print an excel Date-time value. Result like "2015-05-04 08:29 Mon".
 		vb> Year(vm.tos())    . char - .
