@@ -364,7 +364,7 @@
 		/// char 3hta/localstorage.json readTextFile import-all
 		/// 疊加且覆蓋現有的 localStorage。
 		
-   : (vb) ( -- vb ) \ Create view box in outputbox, view a localStorage field
+   : ls.viewBox ( -- viewBox ) \ Create view box in outputbox, view a localStorage field
         <text>
             <div class=vb>
             <style type="text/css">
@@ -381,24 +381,24 @@
 				</div>
 			</div>
 			</div>
-		</text> /*remove*/ </o> ( vb ) 
+		</text> /*remove*/ </o> ( viewBox ) 
 		js: $('.vbtextarea',tos()).attr("readOnly",true)
 		js: $('.vbhtmlarea',tos())[0].contentEditable=false
-		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( vb ) ;
+		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( viewBox ) ;
 
-	: vb.load ( vb hash fieldname -- ) \ Load data into a view box 
-		js: $(".vbfieldname",tos(2)).html(tos())  ( vb hash fieldname ) 
-		js> pop(1)[pop()] ( vb "field" )
+	: ls.viewBoxLoad ( viewBox hash fieldname -- ) \ Load data into a view box 
+		js: $(".vbfieldname",tos(2)).html(tos())  ( viewBox hash fieldname ) 
+		js> pop(1)[pop()] ( viewBox "field" )
 		<js> try {
 			var data = JSON.parse(tos()); // The field is an object
 		} catch(err) {
 			data = {doc:tos(),mode:true}; // Not an object, it must be a string.
-		};data</jsV> nip ( vb obj )
-		dup :> doc swap ( vb doc obj )
-		:> mode ( vb doc mode ) if ( vb doc )
+		};data</jsV> nip ( viewBox obj )
+		dup :> doc swap ( viewBox doc obj )
+		:> mode ( viewBox doc mode ) if ( viewBox doc )
 			js:	$(".vbhtmlarea",tos(1)).hide() 
 			js: $('.vbtextarea',pop(1))[0].value=pop() ( empty )
-		else ( vb doc )
+		else ( viewBox doc )
 			js: $(".vbtextarea",tos(1)).hide()
 			js: $(".vbhtmlarea",pop(1)).html(pop()) ( empty )
 		then ; 
@@ -410,10 +410,10 @@
 		js> JSON.parse(pop()) ( hash )
 		dup obj>keys swap ( array hash ) 
 		js> tos(1).length ?dup if for ( array hash )
-			(vb) js: $(".vbpathname",tos()).html(rtos(1)) ( vb )
-			over ( array hash vb hash )
-			js> tos(3).pop() ( array hash vb hash fieldname )
-			vb.load ( array hash )
+			ls.viewBox js: $(".vbpathname",tos()).html(rtos(1)) ( viewBox )
+			over ( array hash viewBox hash )
+			js> tos(3).pop() ( array hash viewBox hash fieldname )
+			ls.viewBoxLoad ( array hash )
 		next then ( array hash ) 2drop r> drop ;
 
     : ls.dump ( <field name> -- ) \ Dump the entire localstorage.json formated file
@@ -427,6 +427,7 @@
 		/// View logs in local storage of each applications:
 		///   ls.dump 3hta/localstorage.json
 		///   ls.dump doc/archive.json
+		///   ls.dump \ view the actual localStorage 
 		/// If local storage become too big. Simply move to doc/archive.json 
 		/// manually through a text editor.
 
