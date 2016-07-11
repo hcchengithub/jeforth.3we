@@ -3,6 +3,26 @@
 
 	s" ls.f"		source-code-header
 
+	\   localStorge 以及 storage.all() 的格式定義為:
+    \   
+	\   	{ 
+	\   		"key1":"string1",
+	\   		"key2":"string2", 
+	\   		... 
+	\   	}
+    \   
+	\   string 部分是 stringified JSON 格式定義為
+    \   
+	\   	{
+	\   		"doc":string,
+	\   		"mode":boolean, /* true is souce code mode in opposed to HTML mode */
+	\   		"readonly":boolean 
+	\   	}
+	\
+	\   參見 local-storage-field-editable? command 的定義，如果三個 key 及
+	\   其 type 都符合就被當成是一筆 localStorage edit box field.
+	
+
     : (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
         js> $(pop()).parents('.eb')[0] ( eb ) ;
 
@@ -403,12 +423,15 @@
 			js: $(".vbhtmlarea",pop(1)).html(pop()) ( empty )
 		then ; 
 
-	: (ls.dump) ( pathname -- ) \ Dump the entire json file in localstorage.json format 
-		dup >r readTextFile ( "json" )
-		\ resolve utf-8 BOM ss.charCodeAt(0)==65279 that's utf-8 BOM 
+	: read-json ( filename -- jsonHash ) \ Read json file
+		readTextFile ( "json" )
 		js> tos().charCodeAt(0)==65279 if js> pop().slice(1) then ( "json" )
-		js> JSON.parse(pop()) ( hash )
-		dup obj>keys swap ( array hash ) 
+		js> JSON.parse(pop()) ( hash ) ;
+		/// Not only read the file but also resolve utf-8 BOM problem.
+		/// charCodeAt(0)==65279 is utf-8 BOM that may bother JSON.parse()
+	
+	: (ls.dump) ( hash filename -- ) \ Dump the entire localstorage.json formated hash
+		>r dup obj>keys swap ( array hash ) 
 		js> tos(1).length ?dup if for ( array hash )
 			ls.viewBox js: $(".vbpathname",tos()).html(rtos(1)) ( viewBox )
 			over ( array hash viewBox hash )
@@ -416,18 +439,33 @@
 			ls.viewBoxLoad ( array hash )
 		next then ( array hash ) 2drop r> drop ;
 
-    : ls.dump ( <field name> -- ) \ Dump the entire localstorage.json formated file
-		char \n|\r word ( pathname ) 
-		?dup if else
-			js> vm.appname=="jeforth.3hta" if s" 3hta/localstorage.json" then 
-			js> vm.appname=="jeforth.3htm" if s" 3htm/localstorage.json" then
-			js> vm.appname=="jeforth.3ce"  if s" 3ce/localstorage.json"  then
-			js> vm.appname=="jeforth.3nw"  if s" 3nw/localstorage.json"  then
-		then ( pathname ) trim (ls.dump) ;
+    : ls.dump ( <filename> -- ) \ Dump the entire localstorage.json formated file or localStorage if filename is not given
+		char \n|\r word trim ( pathname ) 
+		?dup if char A else
+			js> vm.appname=="jeforth.3hta" if s" 3hta/localstorage.json" char A then 
+			js> vm.appname=="jeforth.3nw"  if s" 3nw/localstorage.json"  char A then
+			js> vm.appname=="jeforth.3htm" if char B then
+			js> vm.appname=="jeforth.3ce"  if char B then
+		then 
+		char A == if ( pathname ) 
+			dup read-json swap (ls.dump) 
+		else \ assume it's char B ( empty ) 
+			js> storage.all() char localStorage (ls.dump) 
+		then ;
 		/// View logs in local storage of each applications:
+		///   ls.dump /* localStorage */
 		///   ls.dump 3hta/localstorage.json
 		///   ls.dump doc/archive.json
-		///   ls.dump \ view the actual localStorage 
+		/// If local storage become too big. Simply move to doc/archive.json 
+		/// manually through a text editor.
+    : ls.dump ( <filename> -- ) \ Dump the entire localstorage.json formated file or localStorage if filename is not given
+		char \n|\r word trim ( pathname ) 
+		?dup if ( pathname ) dup read-json swap (ls.dump) 
+		else js> storage.all() char localStorage (ls.dump) then ;
+		/// View logs in local storage of each applications:
+		///   ls.dump /* localStorage */
+		///   ls.dump 3hta/localstorage.json
+		///   ls.dump doc/archive.json
 		/// If local storage become too big. Simply move to doc/archive.json 
 		/// manually through a text editor.
 

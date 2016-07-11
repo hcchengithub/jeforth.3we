@@ -1,7 +1,13 @@
 \ 
-\ jeforth.3ce 讀取「臺灣銀行」的「除權除息表」並比對歷史，如果有新的就發出 alert。
+\ **** for jeforth.3ce only ****
+\ 讀取「臺灣銀行」的「除權除息表」並比對歷史，如果有新的就發出 alert。
 \ 應用 localStorage 貯存公司列表，所以關機重跑還是記得讀到過的公司。
 \
+
+js> vm.appname!="jeforth.3ce" if 
+	cr cr abort" dividend.f is for jeforth.3ce only " cr cr 
+then
+
 \ 要手動先準備的部分
 \ 1. open the data page 
 \    > js: window.open("http://fund.bot.com.tw/z/ze/zeb/zeba.djhtm")

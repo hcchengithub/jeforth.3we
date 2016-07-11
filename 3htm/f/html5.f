@@ -246,20 +246,31 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				/// Example: dropall js> outputbox 10 children[] <== get an array 
 				///          of ending 10 child nodes to TOS.
 
-: remove-script-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
+: remove-script-from-HTML ( "HTML" -- "HTML'" ) \ Remove script tags
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
-				:> replace(/<script.*?script>/g,"")		\ remove all <script>
+				:> replace(/<script.*?script>/g,"")		\ remove all <script> tags
+				:> replace(/{_cr_}/g,"\n") ;
+				/// See also remove-script-from-element in ie.f.
+				/// Use RexEx word processing method.
+				
+: remove-style-from-HTML ( "HTML" -- "HTML'" ) \ Remove CSS style tags
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
+				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
+				:> replace(/<style.*?style>/g,"")		\ remove all <style> tags
 				:> replace(/{_cr_}/g,"\n") ;
 				/// See also remove-script-from-element in ie.f.
 				/// Use RexEx word processing method.
 				
 : remove-select-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				:> replace(/<select.*?select>/g,"")		\ remove all <select>
 				:> replace(/{_cr_}/g,"\n") ;
 				/// Use RexEx word processing method.
 				
 : remove-onmouse-from-HTML ( "HTML" -- "HTML'" ) \ Remove onmouseXX="dothis"  onmouseXX=dothat onmouseXX='dowhat' listenings.
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				<js> pop().replace(/\s+onmouse.+?=\s?\S+/g,"")</jsV> 
 				:> replace(/{_cr_}/g,"\n") ;
