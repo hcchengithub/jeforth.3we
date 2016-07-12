@@ -30,10 +30,12 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebreadonlyflag",tos())[0].checked if
 			js: $(".ebreadonlyflag",tos())[0].checked=false
+\			js: $(".ebreadonlyflag",tos()).attr("flag","false") \ new!
 			js: $('textarea',tos()).attr("readOnly",false) \ 
 			js: $('.ebhtmlarea',pop())[0].contentEditable=true \ last one use pop()
 		else
 			js: $(".ebreadonlyflag",tos())[0].checked=true
+\			js: $(".ebreadonlyflag",tos()).attr("flag","true") \ new!
 			js: $('textarea',tos()).attr("readOnly",true) \ 
 			js: $('.ebhtmlarea',pop())[0].contentEditable=false \ last one use pop()
 		then
@@ -41,12 +43,14 @@
 
 	: eb.appearance.code ( eb -- ) \ Switch edit box appearance
 		js: $(".ebmodeflag",tos())[0].checked=true
+\		js: $(".ebmodeflag",tos()).attr("flag","true") \ new!
 		js:	$(".ebhtmlarea",tos()).hide()
 		js:	$(".ebtextarea",pop()).show() ;
 		/// only appearance, content as is.
 
 	: eb.appearance.browse ( eb -- ) \ Switch edit box appearance
 		js: $(".ebmodeflag",tos())[0].checked=false
+\		js: $(".ebmodeflag",tos()).attr("flag","false") \ new!
 		js:	$(".ebtextarea",tos()).hide()
 		js:	$(".ebhtmlarea",pop()).show() ;
 		/// only appearance, content as is.
@@ -257,7 +261,9 @@
         dup eb.init-buttons 
 		js:	$(".ebsaveflag",tos())[0].checked=true;
 		js:	$(".ebmodeflag",tos())[0].checked=true;
+\		js:	$(".ebmodeflag",tos()).attr("flag","true") \ new!
 		js:	$(".ebreadonlyflag",tos())[0].checked=false;
+\		js:	$(".ebreadonlyflag",tos()).attr("flag","false") \ new!
 		dup eb.settings 
 		dup js> outputbox insertBefore
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
@@ -296,8 +302,10 @@
 				<js>
 					$('.ebtextarea',tos(1))[0].value = tos().doc;
 					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+//					$(".ebreadonlyflag",tos(1)).attr("flag",tos().readonly); // new!
 				</js>
 				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
+\				js> $(".ebmodeflag",tos(1)).attr("flag",tos().mode) ( eb field mode )
 				if  ( eb field ) 
 					drop ( eb ) 
 				else \ Take care of Browse mode   ( eb field )
@@ -305,12 +313,15 @@
 						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
 					else ( eb )
 						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
+\						js: $(".ebmodeflag",tos()).attr("flag","true") \ user refused, so stay in code mode
 					then ( eb )	
 				then ( eb )
 			else ( eb field )
 				<js>
 				$(".ebreadonlyflag",tos(1))[0].checked = true;
+\				$(".ebreadonlyflag",tos(1)).attr("flag",true); // new!
 				$(".ebmodeflag",tos(1))[0].checked = true;					
+\				$(".ebmodeflag",tos(1)).attr("flag",true); // new!
 				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
 				</js>
 			then  ( eb )
