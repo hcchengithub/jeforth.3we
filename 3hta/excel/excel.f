@@ -313,110 +313,134 @@
 						/// 讀取 JSON 檔: char filename.json readTextFileAuto constant oHash
 
 	code hash>column	( Hash Sheet "colKey" "colValue" top-row# -- ) \ Fill out the colValue by look up hash with colKey
-						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
-						var key = sheet.range(colKey  +":"+colKey);
-						var val = sheet.range(colValue+":"+colValue);
-						push(key); dictate("bottom"); var bottom = pop();
-						for (var i=top; i<=bottom; i++) {
-							if (key(i).value == undefined ) continue;
-							val(i).value = hash[key(i).value];
-						}
-						end-code
-						/// 應用: 
-						/// 先到 Data Sheet 取得 key-value hash table:
-						///     activeSheet char b ( index ) char e ( data ) 
-						///     init-hash ( hashDataTable )
-						/// 然後到 target Sheet 把資料貼上去:
-						///     ( hashDataTable ) activeSheet char b ( index ) char z 
-						///     ( target ) 4 ( top row# ) hash>column
+		var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
+		var key = sheet.range(colKey  +":"+colKey);
+		var val = sheet.range(colValue+":"+colValue);
+		push(key); dictate("bottom"); var bottom = pop();
+		for (var i=top; i<=bottom; i++) {
+			if (key(i).value == undefined ) continue;
+			val(i).value = hash[key(i).value];
+		}
+		end-code
+		/// 應用: 
+		/// 先到 Data Sheet 取得 key-value hash table:
+		///     activeSheet char b ( index ) char e ( data ) 
+		///     init-hash ( hashDataTable )
+		/// 然後到 target Sheet 把資料貼上去:
+		///     ( hashDataTable ) activeSheet char b ( index ) char z 
+		///     ( target ) 4 ( top row# ) hash>column
 
 	code hash>column2	( Hash sheet "colKey" "colValue" top-row# -- ) \ 類似 hash>column 但 key 嘗試比對 leading characters。
-						var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
-						var key = sheet.range(colKey  +":"+colKey);
-						var val = sheet.range(colValue+":"+colValue);
-						push(key); dictate("bottom"); var bottom = pop();
-						for (var i=top; i<=bottom; i++) {
-							if (key(i).value == undefined ) continue;
-							if (lookup(key(i).value)== undefined) continue;
-							val(i).value = lookup(key(i).value);
-						}
-						// key(i).value 就是本表的 key 或 index 值, 要查 hash 表, 得重複嘗試。
-						// 如果失敗就從最後少一個字母再試，直到兩個字母也失敗為止才放棄。
-						// 失敗時傳回 undefined 正好。這個 function 稱為 lookup 即可。
-						function lookup(index){ // return hash[index] or undefined
-							for(var i=index; i.length>=2; i=i.slice(0,-1)){
-								var v = hash[i];
-								if(typeof(v)!="undefined") break;
-							}
-							return v;
-						}
-						end-code
-						/// 應用: 
-						/// 先到 Data Sheet 取得 key-value hash table:
-						///     activeSheet char b ( index ) char e ( data ) 
-						///     init-hash ( hashDataTable )
-						/// 然後到 target Sheet 把資料貼上去:
-						///     ( hashDataTable ) activeSheet char b ( index ) char z 
-						///     ( target ) 4 ( top row# ) hash>column
+		var top=pop(), colValue=pop(), colKey=pop(), sheet=pop(), hash=pop();
+		var key = sheet.range(colKey  +":"+colKey);
+		var val = sheet.range(colValue+":"+colValue);
+		push(key); dictate("bottom"); var bottom = pop();
+		for (var i=top; i<=bottom; i++) {
+			if (key(i).value == undefined ) continue;
+			if (lookup(key(i).value)== undefined) continue;
+			val(i).value = lookup(key(i).value);
+		}
+		// key(i).value 就是本表的 key 或 index 值, 要查 hash 表, 得重複嘗試。
+		// 如果失敗就從最後少一個字母再試，直到兩個字母也失敗為止才放棄。
+		// 失敗時傳回 undefined 正好。這個 function 稱為 lookup 即可。
+		function lookup(index){ // return hash[index] or undefined
+			for(var i=index; i.length>=2; i=i.slice(0,-1)){
+				var v = hash[i];
+				if(typeof(v)!="undefined") break;
+			}
+			return v;
+		}
+		end-code
+		/// 應用: 
+		/// 先到 Data Sheet 取得 key-value hash table:
+		///     activeSheet char b ( index ) char e ( data ) 
+		///     init-hash ( hashDataTable )
+		/// 然後到 target Sheet 把資料貼上去:
+		///     ( hashDataTable ) activeSheet char b ( index ) char z 
+		///     ( target ) 4 ( top row# ) hash>column
 
 	code workbook>sheets ( workbook -- array ) \ Get array of all sheet names in a workbook
-						var target = pop(), count = target.sheets.count, aa = [];
-						for(var i=1; i<=count; i++) aa.push(target.sheets(i).name);
-						push(aa);
-						end-code
+		var target = pop(), count = target.sheets.count, aa = [];
+		for(var i=1; i<=count; i++) aa.push(target.sheets(i).name);
+		push(aa);
+		end-code
 
 	code list-workbooks ( -- count ) \ List all opened workbooks under excel.app
-						execute("excel.app");
-						var excelapp = pop(),
-							count = 0;
-						push(count = excelapp.workbooks.count); push(excelapp.name);
-						dictate(". .(  has ) . .(  opened workbooks at this moment.) cr");
-						for (var i=1; i<=excelapp.workbooks.count; i++){
-							push(excelapp.workbooks(i).name); push(excelapp.workbooks(i).path); push(i);
-							dictate("3 .r space . char \\ . . cr");
-						}
-						push(count);
-						end-code
-						/// run list-workbooks any time to see recent excel.app's workbooks.
+		execute("excel.app");
+		var excelapp = pop(),
+			count = 0;
+		push(count = excelapp.workbooks.count); push(excelapp.name);
+		dictate(". .(  has ) . .(  opened workbooks at this moment.) cr");
+		for (var i=1; i<=excelapp.workbooks.count; i++){
+			push(excelapp.workbooks(i).name); push(excelapp.workbooks(i).path); push(i);
+			dictate("3 .r space . char \\ . . cr");
+		}
+		push(count);
+		end-code
+		/// run list-workbooks any time to see recent excel.app's workbooks.
 						
-	\ Copy-Paste text data 進 Excel 有時候很挫折。
-	\ 有時候 excel 會自己分欄，分地好好的。
-	\ 有時候它不自動分欄，變成一整 column 的 text 手動用 excel 的 "Text to columns" 亦可。
-	\ 最令人哭笑不得者，他堅持要自動分欄，卻篤定地分錯了! 
-	\ 當 Excel 堅持要自動分欄，卻做不好時，下面這段程式讀進 text file 把它一行一行地從上
-	\ 往下寫進 excel 裡，讓它徹底不分欄。以便隨後手動自己分。
 	: lines-to-column 	( "text" -- ) \ Write text to Excel but avoid stupid text-to-columns
-						:> split('\n') ( a ) dup :> length
-						?dup if dup for dup r@ - ( a COUNT i )
-						js> tos(2)[pop()] cell! down 
-						( a COUNT ) next 2drop then ;
-						/// \ Example : Excel focus at the target position,
-						/// <text>
-						/// 11 22 33
-						/// 44 55 66
-						/// 77 88 99
-						/// </text> lines-to-column
+		:> split('\n') ( a ) dup :> length
+		?dup if dup for dup r@ - ( a COUNT i )
+		js> tos(2)[pop()] cell! down 
+		( a COUNT ) next 2drop then ;
+		/// Copy-Paste text data 進 Excel 有時候很挫折。
+		/// 有時候 excel 會自己分欄，分地好好的。
+		/// 有時候它不自動分欄，變成一整 column 的 text 手動用 excel 的 "Text to columns" 亦可。
+		/// 最令人哭笑不得者，他堅持要自動分欄，卻篤定地分錯了! 
+		/// 當 Excel 堅持要自動分欄，卻做不好時，下面這段程式讀進 text file 把它一行一行地從上
+		/// 往下寫進 excel 裡，讓它徹底不分欄。以便隨後手動自己分。
+		/// \ Example : Excel focus at the target position,
+		/// <text>
+		/// 11 22 33
+		/// 44 55 66
+		/// 77 88 99
+		/// </text> lines-to-column
 						
-	: formula>value ( -- ) \ Convert the recent cell from formula to value
+	: formula>value ( -- ) \ Convert the activeCell from formula to the recent value if it's not #N/A
+		?cell@ if cell! then ;
+		/// 透過 DDE 從 E01 拉值過來很花時間,也不穩定，連 StockID 都常有 #N/A 出現。
+		/// 以 e01 Worksheet 為例，其中很多值都是固定的，沒有必要一直去重抓。本命令
+		/// 把當格固定下來變成 value 而如果是 #N/A 的則保留其 formula。
+		/// 研究發現: #N/A, 空格子, #DIV/0! 等這些用 activeCell :> value tib. 來看
+		/// 都是 undefined (undefined) 可藉以判斷。
+		/// Examples:
+		/// o 把要把 formula 改成 value 的部分 mark 起來，一次全改好: 
+		/// 	manual 0 cut i?stop formula>value 1 nap rewind auto
+		/// o 隨便 activate 在 e01 worksheet 裡任意地方。一口氣加工所有指定的行:
+		///   manual 3 ( column# ) 4 goto cut formula>value down empty? ?stop 1 nap rewind
+		///    4 ( column# ) 4 goto cut formula>value down empty? ?stop 1 nap rewind
+		///   11 ( column# ) 4 goto cut formula>value down empty? ?stop 1 nap rewind
+		///   12 ( column# ) 4 goto cut formula>value down empty? ?stop 1 nap rewind
+		///   13 ( column# ) 4 goto cut formula>value down empty? ?stop 1 nap rewind
+		///   14 ( column# ) 4 goto cut formula>value down empty? ?stop 1 nap rewind auto
+		///
+		
+	: (formula>value) ( -- ) \ Convert the activeCell from formula to value and print the address
 		?cell@ if activeCell ( -- value cell ) js> tos().formula!=tos(1) if
 		js> tos().address . space :: value=pop() else 2drop then then ;
 		///	這個命令用來把當 cell 的 formula 改成 value。除了可以省時間，還
 		///	可以由列印出來的 address 看出哪些地方有新的值出現，例如除權除息表。
 		/// cell 若無 value 就不去動它。這個命令適合搭配 selection 整批處理。
-		/// 先 mark 想要處裡的區域，然後執行： 
-		/// ( 都有值 ) manual cut @?stop formula>value down 1 nap rewind auto
-		/// ( 含#NA! ) manual 0 cut i?stop formula>value 1 nap rewind auto
+		/// Example 所在位置往下到空 cell 為止： ( 都有值 ) 
+		///   manual cut @?stop formula>value down 1 nap rewind auto
+		/// Example 先 mark 想要處裡的區域，然後執行： ( 含#NA! ) 
+		///   manual 0 cut i?stop formula>value 1 nap rewind auto
 		/// 把有值的格子都由參考公式轉成 value 並取得這些格子的座標，接著
 		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把這些格子都塗上顏色。
 
-    : string>number ( -- ) \ Convert cells from string to numbers
-		begin 
-			cell@ 1 * dup js> isNaN(pop()) 
-			if drop else cell! then 
-		down empty? until ;
-		/// Convert cells from the active cell down the column to next empty cell.
-		/// #N/A and isNaN are skipped. 其實這個不如 formula>value 好用, 請看它的
-		/// help 說明。
+		
+    : string>number ( -- ) \ Convert the activeCell from string to number when it is.
+		cell@ 1 * dup js> isNaN(pop()) if drop else cell! then ;
+		/// #N/A and isNaN are skipped. 
+		/// Example: mark 一塊區域, 把其中是數字的 string 都定型為數字
+		///   manual 0 cut i?stop string>number 1 nap rewind auto
+
+    : number>string ( -- ) \ Convert the activeCell from number to string 
+		cell@ 1 * dup js> isNaN(pop()) if drop else char ' swap + cell! then ;
+		/// #N/A and isNaN are skipped. 
+		/// Example: mark 一塊區域, 把其中是數字的 string 都定型為數字
+		///   manual 0 cut i?stop string>number 1 nap rewind auto
 		
 	: printDateTime ( time -- ) \ Print an excel Date-time value. Result like "2015-05-04 08:29 Mon".
 		vb> Year(vm.tos())    . char - .
