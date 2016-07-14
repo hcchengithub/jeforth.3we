@@ -302,10 +302,8 @@
 				<js>
 					$('.ebtextarea',tos(1))[0].value = tos().doc;
 					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
-//					$(".ebreadonlyflag",tos(1)).attr("flag",tos().readonly); // new!
 				</js>
 				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
-\				js> $(".ebmodeflag",tos(1)).attr("flag",tos().mode) ( eb field mode )
 				if  ( eb field ) 
 					drop ( eb ) 
 				else \ Take care of Browse mode   ( eb field )
@@ -313,22 +311,19 @@
 						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
 					else ( eb )
 						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
-\						js: $(".ebmodeflag",tos()).attr("flag","true") \ user refused, so stay in code mode
 					then ( eb )	
 				then ( eb )
 			else ( eb field )
 				<js>
 				$(".ebreadonlyflag",tos(1))[0].checked = true;
-\				$(".ebreadonlyflag",tos(1)).attr("flag",true); // new!
 				$(".ebmodeflag",tos(1))[0].checked = true;					
-\				$(".ebmodeflag",tos(1)).attr("flag",true); // new!
 				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
 				</js>
 			then  ( eb )
 		\ Activate settings ( eb )
 			eb.settings ;
         /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
-    
+
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value 
