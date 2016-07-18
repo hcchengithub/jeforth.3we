@@ -230,7 +230,7 @@
             }
         </js> ;
 
-    : (ed) ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
+    : new-ed ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
         <text>
             <div class=eb>
             <style type="text/css">
@@ -270,6 +270,19 @@
 
 	: local-storage-field-editable? ( name -- name field boolean ) \ Check if the object is a local storage editable or awared document
 		js> storage.get(tos()) >r 
+		js> typeof(rtos())=="object" if
+			js> typeof(rtos().doc)=="string"
+			js> typeof(rtos().mode)=="boolean"
+			js> typeof(rtos().readonly)=="boolean"
+			and and ( boolean )
+		else 
+			false ( boolean )
+		then r> swap ;
+		/// eb.open check it out, if not editable JSON.stringify() 
+		/// can make it a string and show. and by the way check readonly.
+
+	: local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
+		js> pop(1)[tos()] >r ( name / field )
 		js> typeof(rtos())=="object" if
 			js> typeof(rtos().doc)=="string"
 			js> typeof(rtos().mode)=="boolean"
@@ -323,17 +336,63 @@
 		\ Activate settings ( eb )
 			eb.settings ;
         /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
+		
+    : (eb.read) ( eb hash name -- ) \ Read the hash[name] to textarea of the given edit box.
+		\ Idiot-proof first of all
+			js> $(".ebsaveflag",tos(2))[0].checked not if  ( eb hash name )
+				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
+				if else 3 drops exit then
+			then  
+			( eb hash name )
+		\ check the field name 	
+			local-storage-field-editable? ( eb name field editable? )
+			rot ( eb field editable? name ) js> Boolean(tos(2)) if else
+				<js> alert("Error! can't find '" + pop() + "' in local storage.")</js>
+				drop 3 drops exit \ [ ] test this case
+			then drop
+			( eb field editable? )
+		\ Load the edit box with the hash
+			js: $(".ebsaveflag",tos(2))[0].checked=true \ the field must have been Saved 
+			( eb field editable? ) \ editable means it's a ls.f ed awared local storage field/document
+			if ( eb field )
+				<js>
+					$('.ebtextarea',tos(1))[0].value = tos().doc;
+					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+				</js>
+				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
+				if  ( eb field ) 
+					drop ( eb ) 
+				else \ Take care of Browse mode   ( eb field )
+					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if 
+						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
+					else ( eb )
+						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
+					then ( eb )	
+				then ( eb )
+			else ( eb field )
+				<js>
+				$(".ebreadonlyflag",tos(1))[0].checked = true;
+				$(".ebmodeflag",tos(1))[0].checked = true;					
+				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
+				</js>
+			then  ( eb )
+		\ Activate settings ( eb )
+			eb.settings ;
+        /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
 
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        js> $('.ebname',tos())[0].value 
-		trim ( eb name ) (eb.read) ;
+        js> $('.ebname',tos())[0].value trim ( eb name ) 
+		js> storage.all() swap ( eb hash name ) (eb.read) ;
 	
-    : ed ( <field name> -- ) \ Edit local storage field
-		(ed) ( eb ) char \n|\r word trim ( eb name ) 
+    : (ed) ( "field name" -- ) \ Edit local storage field
+		new-ed ( name eb ) swap trim ( eb name ) 
 		js> tos()!="" if  ( eb name ) 
 			js: $('.ebname',tos(1))[0].value=tos() ( eb name ) (eb.read) 
 		else 2drop then ; 
+		
+    : ed ( <field name> -- ) \ Edit local storage field
+		char \n|\r word (ed) ; 
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
 		js> storage.get(pop()).doc tib.append ;
@@ -444,26 +503,7 @@
 			js> tos(3).pop() ( array hash viewBox hash fieldname )
 			ls.viewBoxLoad ( array hash )
 		next then ( array hash ) 2drop r> drop ;
-
-    : ls.dump ( <filename> -- ) \ Dump the entire localstorage.json formated file or localStorage if filename is not given
-		char \n|\r word trim ( pathname ) 
-		?dup if char A else
-			js> vm.appname=="jeforth.3hta" if s" 3hta/localstorage.json" char A then 
-			js> vm.appname=="jeforth.3nw"  if s" 3nw/localstorage.json"  char A then
-			js> vm.appname=="jeforth.3htm" if char B then
-			js> vm.appname=="jeforth.3ce"  if char B then
-		then 
-		char A == if ( pathname ) 
-			dup read-json swap (ls.dump) 
-		else \ assume it's char B ( empty ) 
-			js> storage.all() char localStorage (ls.dump) 
-		then ;
-		/// View logs in local storage of each applications:
-		///   ls.dump /* localStorage */
-		///   ls.dump 3hta/localstorage.json
-		///   ls.dump doc/archive.json
-		/// If local storage become too big. Simply move to doc/archive.json 
-		/// manually through a text editor.
+		
     : ls.dump ( <filename> -- ) \ Dump the entire localstorage.json formated file or localStorage if filename is not given
 		char \n|\r word trim ( pathname ) 
 		?dup if ( pathname ) dup read-json swap (ls.dump) 
@@ -474,6 +514,37 @@
 		///   ls.dump doc/archive.json
 		/// If local storage become too big. Simply move to doc/archive.json 
 		/// manually through a text editor.
+
+	: move-all-eb-to-outputbox ( -- ) \ Move all local storage edit boxes into outputbox
+		js> $(".eb") dup :> length ?dup if dup for dup r@ - ( array lengh i )
+			js> tos(2)[pop()] ( array length eb )
+			js> outputbox swap appendChild ( array length )
+		next 2drop then ;
+		/// 方便一次全都 cls 掉。
+
+	: standardize-eb ( -- ) \ Standardize local storage edit boxes
+		\ 處理 textarea innerHTML 與 value 不同步的問題
+			js: $("textarea",".eb").each(function(){this.innerText=this.value})
+		\ 給重要欄位的值都留下線索 
+			<js> 
+				$(".eb").each(function(){
+					$(".ebmodeflag",    this).attr("flag",       $(".ebmodeflag",    this)[0].checked);
+					$(".ebreadonlyflag",this).attr("flag",       $(".ebreadonlyflag",this)[0].checked);
+					$(".ebname",        this).attr("placeholder",$(".ebname",        this)[0].value);
+				})
+			</js> 
+		;
+		/// 處理 textarea innerHTML 與 value 不同步的問題
+		/// 給重要欄位的值都留下線索 
+	
+	: dump-all ( -- ) \ Dump all local storage fields 
+		\ main loop 印出所有的 fields 
+			js> storage.all() obj>keys ( array ) \ array of field names
+			begin js> tos().length while ( array )
+				js> tos().pop() ( array fieldname ) (ed) ( array )
+			repeat drop move-all-eb-to-outputbox standardize-eb ;
+		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
+		/// 可以 restore 回來。
 
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc ( "autoexec" )
@@ -510,7 +581,7 @@
 		\ 給以上變出來的 buttons 畫龍點睛
 			<js> 
 				$("input.lsfieldopen").click(function(){
-					execute("(ed)"); 
+					execute("new-ed"); 
 					push(this.getAttribute("fieldname")); // ( eb name ) 
 					$('.ebname',tos(1))[0].value=tos();
 					execute("(eb.read)");
@@ -524,7 +595,7 @@
 		;
 
 	: snapshot ( -- ) \ Save outputbox to a ed
-		(ed) ( eb ) \ default is editable, saved, code mode
+		new-ed ( eb ) \ default is editable, saved, code mode
 		s" Snapshot " now t.dateTime + ( eb "now" ) 
 		js: $(".ebname",tos(1))[0].value=pop() ( eb )
 		js> outputbox textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
@@ -594,6 +665,8 @@
 	[x] Change font size is similar 
 	    js: $("textarea",".eb").css("font-size","2em")
 	    js: $("textarea:focus").css("font-size","2em") \ 這個好, 同上, 用 Ctrl-Enter 執行
+	
+		
 	</comment>
 	
 	
