@@ -30,12 +30,10 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
 		js> $(".ebreadonlyflag",tos())[0].checked if
 			js: $(".ebreadonlyflag",tos())[0].checked=false
-\			js: $(".ebreadonlyflag",tos()).attr("flag","false") \ new!
 			js: $('textarea',tos()).attr("readOnly",false) \ 
 			js: $('.ebhtmlarea',pop())[0].contentEditable=true \ last one use pop()
 		else
 			js: $(".ebreadonlyflag",tos())[0].checked=true
-\			js: $(".ebreadonlyflag",tos()).attr("flag","true") \ new!
 			js: $('textarea',tos()).attr("readOnly",true) \ 
 			js: $('.ebhtmlarea',pop())[0].contentEditable=false \ last one use pop()
 		then
@@ -43,14 +41,12 @@
 
 	: eb.appearance.code ( eb -- ) \ Switch edit box appearance
 		js: $(".ebmodeflag",tos())[0].checked=true
-\		js: $(".ebmodeflag",tos()).attr("flag","true") \ new!
 		js:	$(".ebhtmlarea",tos()).hide()
 		js:	$(".ebtextarea",pop()).show() ;
 		/// only appearance, content as is.
 
 	: eb.appearance.browse ( eb -- ) \ Switch edit box appearance
 		js: $(".ebmodeflag",tos())[0].checked=false
-\		js: $(".ebmodeflag",tos()).attr("flag","false") \ new!
 		js:	$(".ebtextarea",tos()).hide()
 		js:	$(".ebhtmlarea",pop()).show() ;
 		/// only appearance, content as is.
@@ -261,28 +257,13 @@
         dup eb.init-buttons 
 		js:	$(".ebsaveflag",tos())[0].checked=true;
 		js:	$(".ebmodeflag",tos())[0].checked=true;
-\		js:	$(".ebmodeflag",tos()).attr("flag","true") \ new!
 		js:	$(".ebreadonlyflag",tos())[0].checked=false;
-\		js:	$(".ebreadonlyflag",tos()).attr("flag","false") \ new!
 		dup eb.settings 
 		dup js> outputbox insertBefore
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
 
-	: local-storage-field-editable? ( name -- name field boolean ) \ Check if the object is a local storage editable or awared document
-		js> storage.get(tos()) >r 
-		js> typeof(rtos())=="object" if
-			js> typeof(rtos().doc)=="string"
-			js> typeof(rtos().mode)=="boolean"
-			js> typeof(rtos().readonly)=="boolean"
-			and and ( boolean )
-		else 
-			false ( boolean )
-		then r> swap ;
-		/// eb.open check it out, if not editable JSON.stringify() 
-		/// can make it a string and show. and by the way check readonly.
-
 	: local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
-		js> pop(1)[tos()] >r ( name / field )
+		js> storage.get(tos(),pop(1)) >r ( name / field )
 		js> typeof(rtos())=="object" if
 			js> typeof(rtos().doc)=="string"
 			js> typeof(rtos().mode)=="boolean"
@@ -293,49 +274,6 @@
 		then r> swap ;
 		/// eb.open check it out, if not editable JSON.stringify() 
 		/// can make it a string and show. and by the way check readonly.
-
-    : (eb.read) ( eb name -- ) \ Read the localStorate[name] to textarea of the given edit box.
-		\ Idiot-proof first of all
-			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb name )
-				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
-				if else 2drop exit then
-			then  
-			( eb name )
-		\ check the field name 	
-			local-storage-field-editable? ( eb name field editable? )
-			rot ( eb field editable? name ) js> Boolean(tos(2)) if else
-				<js> alert("Error! can't find '" + pop() + "' in local storage.")</js>
-				drop 2drop exit
-			then drop
-			( eb field editable? )
-		\ Load the edit box with the hash
-			js: $(".ebsaveflag",tos(2))[0].checked=true \ the field is Saved 
-			( eb field editable? ) \ editable means it's a ls.f ed awared local storage field/document
-			if ( eb field )
-				<js>
-					$('.ebtextarea',tos(1))[0].value = tos().doc;
-					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
-				</js>
-				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
-				if  ( eb field ) 
-					drop ( eb ) 
-				else \ Take care of Browse mode   ( eb field )
-					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if 
-						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
-					else ( eb )
-						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
-					then ( eb )	
-				then ( eb )
-			else ( eb field )
-				<js>
-				$(".ebreadonlyflag",tos(1))[0].checked = true;
-				$(".ebmodeflag",tos(1))[0].checked = true;					
-				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
-				</js>
-			then  ( eb )
-		\ Activate settings ( eb )
-			eb.settings ;
-        /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
 		
     : (eb.read) ( eb hash name -- ) \ Read the hash[name] to textarea of the given edit box.
 		\ Idiot-proof first of all
@@ -387,9 +325,11 @@
 	
     : (ed) ( "field name" -- ) \ Edit local storage field
 		new-ed ( name eb ) swap trim ( eb name ) 
-		js> tos()!="" if  ( eb name ) 
-			js: $('.ebname',tos(1))[0].value=tos() ( eb name ) (eb.read) 
-		else 2drop then ; 
+		js> storage.all() swap ( eb hash name ) 
+		js> tos()!="" if ( eb hash name ) 
+			js: $('.ebname',tos(2))[0].value=tos() 
+		    ( eb hash name ) (eb.read) 
+		else 3 drops then ; 
 		
     : ed ( <field name> -- ) \ Edit local storage field
 		char \n|\r word (ed) ; 
@@ -519,7 +459,10 @@
 		js> $(".eb") dup :> length ?dup if dup for dup r@ - ( array lengh i )
 			js> tos(2)[pop()] ( array length eb )
 			js> outputbox swap appendChild ( array length )
-		next 2drop then ;
+		next 2drop then 
+		\ Multiple appendChild may not completed yet now!!
+			1 nap \ Take a break for DOM to complete its jobs
+		;
 		/// 方便一次全都 cls 掉。
 
 	: standardize-eb ( -- ) \ Standardize local storage edit boxes
@@ -581,9 +524,10 @@
 		\ 給以上變出來的 buttons 畫龍點睛
 			<js> 
 				$("input.lsfieldopen").click(function(){
-					execute("new-ed"); 
-					push(this.getAttribute("fieldname")); // ( eb name ) 
-					$('.ebname',tos(1))[0].value=tos();
+					execute("new-ed");  // ( eb )
+					push(storage.all()); // ( eb hash name ) 
+					push(this.getAttribute("fieldname")); // ( eb hash name ) 
+					$('.ebname',tos(2))[0].value=tos();
 					execute("(eb.read)");
 				})
 				$("input.lsfieldexport").click(function(){

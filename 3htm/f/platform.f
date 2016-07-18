@@ -29,9 +29,10 @@
 	[then]
 		
 	<js>
-		window.storage.get = function(key){
+		// 
+		window.storage.get = function(key,hash){
 				// HTML5 localStorage only allow string, we support object too.
-				var ss = storage.all()[key];
+				var ss = typeof(hash)=="object" ? hash[key] : storage.all()[key];
 				if(!ss) return (undefined); // the field is not existing
 				try {
 					var data = JSON.parse(ss); // The field is an object
