@@ -226,15 +226,21 @@
             }
         </js> ;
 
+	: eb-style ( -- ) \ Setup local storage edit box CSS style if it's undefined
+		js> typeof(ebstyle)=="undefined" if
+		<h> <style id=ebstyle type="text/css">
+			.eb .box { width:90%; font-size:1.5em; /* filename */ } 
+			.eb .box, .eb .ebhtmlarea { border:1px solid black; }
+			.eb .ebtextarea { font-size:1.5em }
+			.eb input { font-size:0.7em /* buttons */ }
+			.eb p { display:inline; }
+			.eb .ebname { font-size: 1em; }
+			</style>
+		</h> drop then ;
+	
     : new-ed ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
-        <text>
+        eb-style <text>
             <div class=eb>
-            <style type="text/css">
-                .eb .box { width:90%; }
-                .eb .box, .eb .ebhtmlarea { border:1px solid black; }
-                .eb p { display:inline; } /* [ ] <P> 不該有套疊,故多餘的很容易可以消除 */
-				.eb .ebname { font-size: 1.1em; }
-            </style>
             <div class=box>
             <p>Local Storage</p>
             <input class=ebname type=text placeholder="field name"></input> /* HTA not support 'placeholder' yet */
@@ -471,9 +477,9 @@
 		\ 給重要欄位的值都留下線索 
 			<js> 
 				$(".eb").each(function(){
-					$(".ebmodeflag",    this).attr("flag",       $(".ebmodeflag",    this)[0].checked);
-					$(".ebreadonlyflag",this).attr("flag",       $(".ebreadonlyflag",this)[0].checked);
-					$(".ebname",        this).attr("placeholder",$(".ebname",        this)[0].value);
+					$(".ebmodeflag",this).attr("flag",$(".ebmodeflag",    this)[0].checked);
+					$(".ebreadonlyflag",this).attr("flag",$(".ebreadonlyflag",this)[0].checked);
+					$(".ebname",this).attr("placeholder",$(".ebname",this)[0].value);
 				})
 			</js> 
 		;
@@ -609,7 +615,37 @@
 	[x] Change font size is similar 
 	    js: $("textarea",".eb").css("font-size","2em")
 	    js: $("textarea:focus").css("font-size","2em") \ 這個好, 同上, 用 Ctrl-Enter 執行
-	
+
+    [x] : read-ls.html ( "pathname" -- ObjJquery ) \ Read localstorage.html
+            readTextFile ( "html" )
+            remove-script-from-HTML remove-style-from-HTML
+            :> replace(/id="inputbox"/g,'id="input_box"')
+            :> replace(/id="outputbox"/g,'id="output_box"')
+            :> replace(/id="endofinputbox"/g,'id="endofinput_box"')
+            :> replace(/class="console3we"/g,'class="ls_hash"')
+            </o> ( obj ) \ The entire localstorage.html in outputbox
+            js> $(".box",$(".ls_hash")) ( array ) \ array of field elements
+            ; 
+            /// The entire localstorage.html will be shown on outputbox.
+            /// The result is an jQuery of field elements
+    [ ] fieldname 
+            js> $(".ebname",tos()[0]).attr("placeholder") \ ==> 台灣50評估 2016-07-03 買華碩吧 (string)
+        doc
+            > js> $(".ebhtmlarea",tos()[0])[0].innerHTML \ if codemode is false
+            > js> $(".ebtextarea",tos()[0])[0].value \ if codemode is true
+        readonly
+            js> $(".ebreadonlyflag",tos()[0]).attr("flag") \ ==> false (string)
+        codemode
+            js> $(".ebmodeflag",tos()[0]).attr("flag") \ ==> false (string)
+        : element>field ( element -- obj ) \ Translate a local storage DOM element to object
+            {} ( element obj ) <js>
+            tos().name=$(".ebname",tos(1)).attr("placeholder");
+            tos().readonly=$(".ebreadonlyflag",tos(1)).attr("flag");
+            tos().codemode=$(".ebmodeflag",tos(1)).attr("flag");
+            if (tos().codemode=="true") tos().doc=$(".ebtextarea",tos(1)).value;
+            else tos().doc=$(".ebhtmlarea",tos(1)).innerHTML;
+            </js> nip ; /// 今天到這裡, 還不成功, don't know why . . .
+		
 		
 	</comment>
 	
