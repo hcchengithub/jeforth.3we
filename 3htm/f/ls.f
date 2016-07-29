@@ -329,13 +329,22 @@
         js> $('.ebname',tos())[0].value trim ( eb name ) 
 		js> storage.all() swap ( eb hash name ) (eb.read) ;
 	
-    : (ed) ( "field name" -- ) \ Edit local storage field
+    : old-(ed) ( "field name" -- ) \ Edit local storage field
 		new-ed ( name eb ) swap trim ( eb name ) 
 		js> storage.all() swap ( eb hash name ) 
 		js> tos()!="" if ( eb hash name ) 
 			js: $('.ebname',tos(2))[0].value=tos() 
 		    ( eb hash name ) (eb.read) 
 		else 3 drops then ; 
+
+    : (ed) ( "field name" -- ) \ Edit local storage field
+		js> tos()!="" if ( name ) 
+			new-ed ( name eb ) swap trim ( eb name ) 
+			js> storage.all() swap ( eb hash name ) 
+			js: $('.ebname',tos(2))[0].value=tos() 
+		    ( eb hash name ) (eb.read) 
+		else drop then ; 
+		/// Open an empty edit box if field name is null string.
 		
     : ed ( <field name> -- ) \ Edit local storage field
 		char \n|\r word (ed) ; 
@@ -641,8 +650,8 @@
             {} ( element obj ) <js>
             tos().name=$(".ebname",tos(1)).attr("placeholder");
             tos().readonly=$(".ebreadonlyflag",tos(1)).attr("flag");
-            tos().codemode=$(".ebmodeflag",tos(1)).attr("flag");
-            if (tos().codemode=="true") tos().doc=$(".ebtextarea",tos(1)).value;
+            tos().mode=$(".ebmodeflag",tos(1)).attr("flag");
+            if (tos().mode=="true") tos().doc=$(".ebtextarea",tos(1)).value;
             else tos().doc=$(".ebhtmlarea",tos(1)).innerHTML;
             </js> nip ; /// 今天到這裡, 還不成功, don't know why . . .
 		
