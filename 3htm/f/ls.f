@@ -16,7 +16,7 @@
 	\   	{
 	\   		"doc":string,
 	\   		"mode":boolean, /* true is souce code mode in opposed to HTML mode */
-	\   		"readonly":boolean 
+	\   		"readonly":boolean /* Note! not string e.g. "true" or "false" */
 	\   	}
 	\
 	\   參見 local-storage-field-editable? command 的定義，如果三個 key 及
