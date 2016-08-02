@@ -450,6 +450,12 @@
 		vb> Minute(vm.tos())  2 .0r space
 		vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
 		;
+		/// vb> Year(vm.tos())
+		/// vb> Month(vm.tos())
+		/// vb> Day(vm.tos())
+		/// vb> Hour(vm.tos())
+		/// vb> Minute(vm.tos())
+		/// vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
 		
 	<selftest>
 		*** clsoe excel
@@ -466,7 +472,8 @@
 	[then] \ excel.app exists
 
 	\ -- end of source code --
-	<comment>
+	
+<comment>
 	\ ================ How to open an Excel file ============================================
 	\
 	\ Key points of automation Excel file accessing ,
@@ -1448,7 +1455,7 @@
 			excel.app :> selection.item(9).value \ ==> d4 (string)
 
 	
-	</comment>
+</comment>
 
 <comment>						
 	\ 有了 activeSheet activeCell activeWorkBook 之後, 這些應該都沒有用了。
@@ -1505,6 +1512,17 @@
 						</selftest>
 </comment>
 
+<comment> 
 
+	jeforth.3hta excel 應用集錦
 
+	\ Example, 一行 column 都是 excel date-time, 先選範圍，執行本程式在他們的右邊一格填
+	\ 入 "小時" 或其他時間屬性。See printDateTime for other attrributes of excel date-time.
+	manual 0 cut ( 前置準備 )
+	i?stop ( i )  \ 【判斷】兼【移位】,留下
+	cell@ ( i cell@ ) vb> Hour(vm.pop()) ( i hour ) 1 0 offset :: value=pop() ( i ) \ do
+	1 nap rewind ( 重複 )
+	auto ( 收尾 )
+
+</comment>
 
