@@ -15,7 +15,7 @@
     \   
 	\   	{
 	\   		"doc":string,
-	\   		"mode":boolean, /* true is souce code mode in opposed to HTML mode */
+	\   		"mode":boolean, /* true is source code mode in opposed to HTML mode */
 	\   		"readonly":boolean /* Note! not string e.g. "true" or "false" */
 	\   	}
 	\
@@ -166,7 +166,6 @@
 		/// [ ] Don't know how to handle it if is changed in browse mode.
 
     code eb.settings ( eb -- ) \ Set edit box settings according to checkboxes
-		// call eb.settings 時 eb 都在 code mode, 然後視 checkbox 切換。
 		if ($(".ebreadonlyflag",tos())[0].checked){
 			$('textarea',tos()).attr("readOnly",true);
 			$('.ebhtmlarea',tos())[0].contentEditable=false;
@@ -174,13 +173,15 @@
 			$('textarea',tos()).attr("readOnly",false);
 			$('.ebhtmlarea',tos())[0].contentEditable=true;
 		}
-		// 只管外觀，不切換 content, 因為要不要 copy the content from the other mode is uncertain.
+		// 只管外觀，不切換 content, 因為要不要 copy the content from the 
+		// other mode is uncertain.
 		if ($(".ebmodeflag",tos())[0].checked){
 			execute("eb.appearance.code");
 		} else {
 			execute("eb.appearance.browse");
 		}
 		end-code
+		/// Note! call eb.settings 時 eb 都在 code mode, 然後視 checkbox 切換。
 		/// 外觀 code mode or browse mode, editable or not, whether read only.
 	
     : eb.init-buttons ( eb -- ) \ Initialize buttons of the local storage edit box.
@@ -226,7 +227,7 @@
             }
         </js> ;
 
-	: eb-style ( -- ) \ Setup local storage edit box CSS style if it's undefined
+	: editbox-style ( -- ) \ Setup local storage edit box CSS style if it's undefined
 		js> typeof(ebstyle)=="undefined" if
 		<h> <style id=ebstyle type="text/css">
 			.eb .box { width:90%; font-size:1.5em; /* filename */ } 
@@ -237,9 +238,23 @@
 			.eb .ebname { font-size: 1em; }
 			</style>
 		</h> drop then ;
+		
+	: hidden-div ( -- div ) \ Get the hidden <DIV> element 
+		js> typeof(hiddendiv)=="undefined" if \ removeElement 之後就是如此
+			<o> <div id="hiddendiv" style="display: none;"></div></o>
+			[ last literal ] :: element=tos() ( div )
+		else [ last literal ] :> element ( div ) then ;
+		/// a hidden <DIV> is used in localstorage.html save-restore
+		\ Print something into the hiden DIV:
+		\   char #hiddendiv <e> again I am in the hidden div </e> drop
+		\ Show or hide the hidden DIV:
+		\   js: $("#hiddendiv").show()		
+		\   js: $("#hiddendiv").hide()		
+		\ js> $("#hiddendiv")[0] hidden-div === \ ==> true
 	
-    : new-ed ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
-        eb-style <text>
+	: create-raw-editbox ( -- element ) \ Create an edit box in outputbox
+        editbox-style
+		<text>
             <div class=eb>
             <div class=box>
             <p>Local Storage</p>
@@ -259,16 +274,24 @@
 			</div>
 			</div>
 			</div>
-		</text> /*remove*/ </o> ( eb ) 
-        dup eb.init-buttons 
-		js:	$(".ebsaveflag",tos())[0].checked=true;
-		js:	$(".ebmodeflag",tos())[0].checked=true;
-		js:	$(".ebreadonlyflag",tos())[0].checked=false;
-		dup eb.settings 
-		dup js> outputbox insertBefore
+		</text> /*remove*/ </o> ( eb ) 	;
+		/// Only HTML tags, no script.
+	
+    : (create-editbox) ( -- edit_box_element ) \ Create an HTML5 local storage edit box in outputbox
+        create-raw-editbox ( eb ) \ create the eb element
+        dup eb.init-buttons \ setup scripts
+		\ init check boxes
+			js:	$(".ebsaveflag",tos())[0].checked=true;
+			js:	$(".ebmodeflag",tos())[0].checked=true;
+			js:	$(".ebreadonlyflag",tos())[0].checked=false;
+		\ adjust the eb according to checkbox settings
+			dup eb.settings ;
+	
+    : create-editbox ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
+		(create-editbox) dup js> outputbox insertBefore
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
 
-	: is-edit-box-field? ( obj -- boolean ) \ Is the object a local storage edit box article?
+	: is-editbox-field? ( obj -- boolean ) \ Is the object a local storage edit box article?
 	    >r js> typeof(rtos())=="object" if
 			js> typeof(rtos().doc)=="string"
 			js> typeof(rtos().mode)=="boolean"
@@ -292,7 +315,7 @@
 		/// can make it a string and show. and by the way check readonly.
 	: local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
 		js> storage.get(tos(),pop(1)) ( name field )
-		dup is-edit-box-field? ( name field boolean ) ;
+		dup is-editbox-field? ( name field boolean ) ;
 		/// eb.open check it out, if not editable JSON.stringify() 
 		/// can make it a string and show. and by the way check readonly.
 		
@@ -345,7 +368,7 @@
 		js> storage.all() swap ( eb hash name ) (eb.read) ;
 	
     : old-(ed) ( "field name" -- ) \ Edit local storage field
-		new-ed ( name eb ) swap trim ( eb name ) 
+		create-editbox ( name eb ) swap trim ( eb name ) 
 		js> storage.all() swap ( eb hash name ) 
 		js> tos()!="" if ( eb hash name ) 
 			js: $('.ebname',tos(2))[0].value=tos() 
@@ -354,7 +377,7 @@
 
     : (ed) ( "field name" -- ) \ Edit local storage field
 		js> tos()!="" if ( name ) 
-			new-ed ( name eb ) swap trim ( eb name ) 
+			create-editbox ( name eb ) swap trim ( eb name ) 
 			js> storage.all() swap ( eb hash name ) 
 			js: $('.ebname',tos(2))[0].value=tos() 
 		    ( eb hash name ) (eb.read) 
@@ -498,12 +521,13 @@
 		<o> <div id="tempHiddenEditbox" style="display:none;"></div></o> drop
 		js> $(".eb") dup :> length ?dup if dup for dup r@ - ( array lengh i )
 			js> tos(2)[pop()] ( array length eb )
-			js> outputbox swap appendChild ( array length )
+			js> tempHiddenEditbox swap appendChild ( array length )
 		next 2drop then 
 		\ Multiple appendChild may not completed yet now!!
 			1 nap \ Take a break for DOM to complete its jobs
 		;
-		/// 方便一次全都 cls 掉。
+		/// 用於 restore localstorage.html, 避免擾畫面、方
+		/// 便一次全都 remove 掉。
 
 	: standardize-editbox ( -- ) \ Standardize local storage edit boxes
 		\ 處理 textarea innerHTML 與 value 不同步的問題
@@ -535,7 +559,7 @@
 			begin js> tos().length while ( array )
 				js> tos().pop() ( array fieldname )
 			    js> storage.get(tos()) ( array fieldname field ) 
-				is-edit-box-field? ( array fieldname boolean ) if 
+				is-editbox-field? ( array fieldname boolean ) if 
 				( array fieldname ) (ed) ( array )
 				else drop then ( array )
 			repeat drop move-all-editbox-to-outputbox standardize-editbox ;
@@ -577,7 +601,7 @@
 		\ 給以上變出來的 buttons 畫龍點睛
 			<js> 
 				$("input.lsfieldopen").click(function(){
-					execute("new-ed");  // ( eb )
+					execute("create-editbox");  // ( eb )
 					push(storage.all()); // ( eb hash name ) 
 					push(this.getAttribute("fieldname")); // ( eb hash name ) 
 					$('.ebname',tos(2))[0].value=tos();
@@ -592,7 +616,7 @@
 		;
 
 	: snapshot ( -- ) \ Save outputbox to a ed
-		new-ed ( eb ) \ default is editable, saved, code mode
+		create-editbox ( eb ) \ default is editable, saved, code mode
 		s" Snapshot " now t.dateTime + ( eb "now" ) 
 		js: $(".ebname",tos(1))[0].value=pop() ( eb )
 		js> outputbox textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
