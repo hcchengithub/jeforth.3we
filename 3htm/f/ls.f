@@ -251,6 +251,7 @@
 		\   js: $("#hiddendiv").show()		
 		\   js: $("#hiddendiv").hide()		
 		\ js> $("#hiddendiv")[0] hidden-div === \ ==> true
+		\ move-all-editbox-to-a-temp-hidden-div
 	
 	: create-raw-editbox ( -- element ) \ Create an edit box in outputbox
         editbox-style
@@ -313,6 +314,7 @@
 		then r> swap ;
 		/// eb.open check it out, if not editable JSON.stringify() 
 		/// can make it a string and show. and by the way check readonly.
+		
 	: local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
 		js> storage.get(tos(),pop(1)) ( name field )
 		dup is-editbox-field? ( name field boolean ) ;
@@ -518,10 +520,10 @@
 		;
 		/// 方便一次全都 cls 掉。
 	: move-all-editbox-to-a-temp-hidden-div ( -- ) \ For localstorage.html restoring
-		<o> <div id="tempHiddenEditbox" style="display:none;"></div></o> drop
+		\ <o> <div id="tempHiddenEditbox" style="display:none;"></div></o> drop
 		js> $(".eb") dup :> length ?dup if dup for dup r@ - ( array lengh i )
 			js> tos(2)[pop()] ( array length eb )
-			js> tempHiddenEditbox swap appendChild ( array length )
+			hidden-div swap appendChild ( array length )
 		next 2drop then 
 		\ Multiple appendChild may not completed yet now!!
 			1 nap \ Take a break for DOM to complete its jobs
@@ -531,7 +533,7 @@
 
 	: standardize-editbox ( -- ) \ Standardize local storage edit boxes
 		\ 處理 textarea innerHTML 與 value 不同步的問題
-			js: $("textarea",".eb").each(function(){this.innerText=this.value})
+			js: $("textarea").each(function(){this.innerText=this.value})
 		\ 給重要欄位的值都留下線索 
 			<js> 
 				$(".eb").each(function(){
@@ -549,7 +551,7 @@
 			js> storage.all() obj>keys ( array ) \ array of field names
 			begin js> tos().length while ( array )
 				js> tos().pop() ( array fieldname ) (ed) ( array )
-			repeat drop move-all-eb-to-outputbox standardize-editbox ;
+			repeat drop move-all-editbox-to-outputbox standardize-editbox ;
 		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
 		/// 可以 restore 回來。
 		
@@ -565,6 +567,130 @@
 			repeat drop move-all-editbox-to-outputbox standardize-editbox ;
 		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
 		/// 可以 restore 回來。非 edit box editable 的 objects 不含。
+		
+	: read-localstorage.html ( "pathname" -- jQobj ) \ Read localstorage.html
+		\ clean older garbage
+			hidden-div removeElement 
+		\ read the localstorage.html and clean it up
+			readTextFile ( "html" )
+			remove-script-from-HTML remove-style-from-HTML
+			:> replace(/id="inputbox"/g,'id="input_box"')
+			:> replace(/id="outputbox"/g,'id="output_box"')
+			:> replace(/id="endofinputbox"/g,'id="endofinput_box"')
+			:> replace(/class="console3we"/g,'class="ls_hash"')
+		\ bring "html" into hidden-div
+			char # hidden-div :> getAttribute("id") + swap ( #hiddendiv html )
+			</e> drop \ The entire localstorage.html in hidden-div
+		\ translate hidden-div into jquery object array
+			js> $(".box",$(".ls_hash")) \ jQuery collection of fields
+		;
+		/// The entire localstorage.html will be in hidden-div in outputbox
+		/// The result is an jQueryObject which is a collection of 
+		/// editbox field DOM elements
+
+	: element>field ( element -- obj ) \ Convert a local storage DOM element to js object
+		{} ( element obj )
+		js: tos().name=$(".ebname",tos(1)).attr("placeholder")
+		js: tos().readonly=$(".ebreadonlyflag",tos(1)).attr("flag")==="true"?true:false
+		js> tos().mode=$(".ebmodeflag",tos(1)).attr("flag")==="true"?true:false
+		char true == if js: tos().doc=$(".ebtextarea",tos(1))[0].value
+		else js: tos().doc=$(".ebhtmlarea",tos(1))[0].innerHTML then
+		nip ;
+
+	\ Test, both words work fine.
+	\	char private/jeforth.3ce.html read-localstorage.html ( arrayjQueryObj )
+	\	dup :> [0] element>field ( obj ) (see) ( objQuery ) cr
+	\	dup :> [1] element>field ( obj ) (see) ( objQuery ) cr
+	\	dropall
+
+	: jqo-list ( jQobj -- ) \ List localstorage.html fields in the given jQuery object
+		( jqo ) js> tos().length ( jqo length )
+		?dup if dup for dup r@ -
+		( jqo COUNT i ) js> tos(2)[tos()] ( jqo COUNT i jqo[i] )
+		element>field  ( jqo COUNT i filedObj )
+		swap . space :> name . cr
+		( COUNT ) next drop then drop ;
+
+\ Test, 
+    dropall cls 
+    char private/localstorage2.html  read-ls.html ( objQuery )
+    jqo-list
+
+: jqo-restore ( jQobj -- ) \ Restore localstorage.html jquery object to local storage
+    ( jqo ) js> tos().length ( jqo length )
+    ?dup if dup for dup r@ -
+    ( jqo COUNT i ) js> tos(2)[pop()] ( jqo COUNT jqo[i] )
+    element>field  ( jqo COUNT fieldObj ) 
+    dup :> name ( jqo COUNT fieldObj name )
+    js: storage.set(pop(),pop())
+    ( jqo COUNT ) next drop then drop ;
+
+\ Test, 成功了!!!!
+    dropall cls 
+    char private/jeforth.3ce.html read-ls.html ( objQuery )
+    jqo-restore
+
+
+<comment>
+    > jq :> [3] element>field ( obj ) (see) ( objQuery )
+    {
+        "name": "月梅股 2016-07-21",
+        "readonly": "false",
+        "codemode": "false",
+        "doc": "<textarea>2016 Stock Evaluate 3514昱晶 今年開始賺錢了! 月梅可能又對了。</textarea><hr>"
+    } OK Input box EditMode = true
+    Input box EditMode = false
+
+    : test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ;
+          5 test ==> 0 1 2 3 4
+
+
+    [x] 3hta's local storage 目前因為 debug localstorage.html 而被弄亂了, 從 3ce 來的 localstorage.html 應該先整理成安全的內容。
+        --> playground/localstorage2.html 弄好了, 所有在 DIV console3we 裡面的 class=box DIV 就是一個 field. 只留兩個把其他都
+            改成 class="boxxx" 即可。 field name 改掉了所以不會傷到真正的內容。
+        --> 把 3hta 修好,邊開發要用到, 必須保持可用。
+    [x] 直接從 Chrome Ctrl-S save 起來的 Edit boxes 沒有必要的線索，試試用 standardize-eb 先
+        跑過 --> 對了!! --> dump-all command does it now.
+    [x] 承上，所以 edit box save 之前都應該先 standardize-eb 一下。本來就有處裡 textarea 的
+        value 與 innerHTML 不一致的問題，該 command 保留但研究看是否應併進 ...
+        --> dump-all command does it now.
+    [x] Note! 3we applications 只能讀取 jeforth.3we folder 下的檔案。
+        char playground\jeforth.3ce.html read-ls.html ( objQuery )
+        如上，移到 playground 證實的確如此。 --> there are confidential info, 移到 private 更好。
+
+    \ 這行已經成功把整個 localstorage.html archive 檔讀成一個 jQuery object:
+    \     char playground\jeforth.3ce.html read-ls.html
+    \ js> $("*",tos()).length . \ ==> 16 OK 但是不能直接 (see) 那怎麼去觀察它?
+    \ 既然是 jQuery object 就用 each(function(){}) 來處理吧!
+    \ 以下這段 code 很成功地把 read-ls.html 取得的整個 jQuery object 以 outerHTML 的形式
+    \ 印出來了。
+    <js>
+    $("*",tos()).each(function(){
+        type("-------------------------\n");
+        type($(this)[0].outerHTML);
+        type("\n");
+    });
+    </js>
+    [ ] The local storage field "list-jqo" is redundant, I have this field "lab" already.
+
+    [ ] ok now, the localstorage.html appear in outputbox is a little problem. arrange to 
+        a </e> section so easier to delete. 
+        1. create a dummy DIV in outputbox 
+            <o> <div id=dummy>I am a dummy div</div></o> drop
+        2. print things into the dummy DIV like outputbox :
+           char #dummy <e> I am a dummy div with added things</e> drop
+           char #dummy <e> <h1>hi</h1></e>
+        3. Check it out :
+           js> dummy.innerHTML .
+           I am a dummy divI am a dummy div with added things<h1>hi</h1> OK 
+        4. delete it :
+　　　　　   js> dummy removeElement
+    [ ] none edit box fields will become an edit box field after saved to 
+        localstorage.html and restored. dump-all should skip them.
+        --> the way to view them is :
+              js> storage.get("field-name") (see)
+            so we don't need to use edit box to view them.
+</comment>		
 
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc ( "autoexec" )
@@ -833,7 +959,7 @@
 			   I am a dummy divI am a dummy div with added things<h1>hi</h1> OK 
 			4. delete it :
 	　　　　　   js> dummy removeElement
-		[ ] move-all-eb-to-outputbox may unnecessary at all. Try using above 
+		[ ] move-all-editbox-to-outputbox may unnecessary at all. Try using above 
 			knowledge in dump-edit-box 
 			[ ] create a hidden <DIV>
 				> <o> <div id=hh> I am hidden div</div></o> constant hh
