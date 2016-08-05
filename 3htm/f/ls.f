@@ -586,9 +586,9 @@
 		;
 		/// The entire localstorage.html will be in hidden-div in outputbox
 		/// The result is an jQueryObject which is a collection of 
-		/// editbox field DOM elements
+		/// editbox field DOM elements that are class="box"
 
-	: element>field ( element -- obj ) \ Convert a local storage DOM element to js object
+	: element>field ( element -- jsObj ) \ Convert a local storage DOM element to js object
 		{} ( element obj )
 		js: tos().name=$(".ebname",tos(1)).attr("placeholder")
 		js: tos().readonly=$(".ebreadonlyflag",tos(1)).attr("flag")==="true"?true:false
@@ -598,38 +598,41 @@
 		nip ;
 
 	\ Test, both words work fine.
-	\	char private/jeforth.3ce.html read-localstorage.html ( arrayjQueryObj )
+	\	char private/jeforth.3ce.html read-localstorage.html ( jQueryObj )
 	\	dup :> [0] element>field ( obj ) (see) ( objQuery ) cr
 	\	dup :> [1] element>field ( obj ) (see) ( objQuery ) cr
 	\	dropall
 
-	: jqo-list ( jQobj -- ) \ List localstorage.html fields in the given jQuery object
+	: list-fields ( jQobj -- ) \ List localstorage.html field names
 		( jqo ) js> tos().length ( jqo length )
 		?dup if dup for dup r@ -
 		( jqo COUNT i ) js> tos(2)[tos()] ( jqo COUNT i jqo[i] )
 		element>field  ( jqo COUNT i filedObj )
 		swap . space :> name . cr
 		( COUNT ) next drop then drop ;
+	/// Demo how to iterate through them all.
+	/// Example:	
+	/// char private/jeforth.3ce.html read-localstorage.html ( jQueryObj )
+	/// list-fields
+		
 
-\ Test, 
-    dropall cls 
-    char private/localstorage2.html  read-ls.html ( objQuery )
-    jqo-list
+	: jqo>localstorage ( jQobj -- ) \ Restore jquery object to local storage
+		\ get count of fields in the given jqo
+			( jqo ) js> tos().length ( jqo length )
+		\ loop all fields
+		?dup if dup for dup r@ -
+			\ Bring each field from jqo into local storage
+				( jqo COUNT i ) js> tos(2)[pop()] ( jqo COUNT jqo[i] )
+				element>field  ( jqo COUNT fieldObj ) 
+				dup :> name ( jqo COUNT fieldObj name )
+				js: storage.set(pop(),pop())
+		( jqo COUNT ) next drop then drop ;
+		/// jqo is from localstorage.html
 
-: jqo-restore ( jQobj -- ) \ Restore localstorage.html jquery object to local storage
-    ( jqo ) js> tos().length ( jqo length )
-    ?dup if dup for dup r@ -
-    ( jqo COUNT i ) js> tos(2)[pop()] ( jqo COUNT jqo[i] )
-    element>field  ( jqo COUNT fieldObj ) 
-    dup :> name ( jqo COUNT fieldObj name )
-    js: storage.set(pop(),pop())
-    ( jqo COUNT ) next drop then drop ;
-
-\ Test, 成功了!!!!
-    dropall cls 
-    char private/jeforth.3ce.html read-ls.html ( objQuery )
-    jqo-restore
-
+	: restore-localstorage.html ( "pathname" -- ) \ Restore localstorage.html to local storage
+		read-localstorage.html ( jQueryObj )
+		jqo>localstorage hidden-div removeElement ;
+		/// char private/jeforth.3ce.html restore-localstorage.html
 
 <comment>
     > jq :> [3] element>field ( obj ) (see) ( objQuery )
