@@ -20,7 +20,8 @@
 	\   	}
 	\
 	\   參見 local-storage-field-editable? command 的定義，如果三個 key 及
-	\   其 type 都符合就被當成是一筆 localStorage edit box field.
+	\   其 type 都符合就被當成是一筆 localStorage edit box field. 否則就是
+	\   普通 object 的 JSON.stringify(). 遇到困難用比對的方式查出問題。
 	
 
     : (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
@@ -43,21 +44,20 @@
 		js: $(".ebmodeflag",tos())[0].checked=true
 		js:	$(".ebhtmlarea",tos()).hide()
 		js:	$(".ebtextarea",pop()).show() ;
-		/// only appearance, content as is.
+		/// only affect the appearance, content as is.
 
 	: eb.appearance.browse ( eb -- ) \ Switch edit box appearance
 		js: $(".ebmodeflag",tos())[0].checked=false
 		js:	$(".ebtextarea",tos()).hide()
 		js:	$(".ebhtmlarea",pop()).show() ;
-		/// only appearance, content as is.
+		/// only affect the appearance, content as is.
 
 	code textarea.value->innertext ( eb -- ) \ Copy all textarea.value to its own innerText
-		if (vm.appname != "jeforth.3hta")
-			$("textarea",pop()).each(function(){this.innerText = this.value});
-		else pop();
+		$("textarea",pop()).each(function(){this.innerText = this.value});
 		end-code
 		/// Only HTA textarea.innerHTML always catches up with its value.
-		/// Other browsers need this word.
+		/// Other browsers need this word. HTA 多做無妨. 下例遍及整頁:
+		/// js: $("textarea").each(function(){this.innerText=this.value});
 
 	: eb.content.browse ( eb -- ) \ Use browse mode content
 		dup textarea.value->innertext \ browse mode 之下萬一有 textarea 通通生效到各自的 innerText。
@@ -78,7 +78,8 @@
 		push(flag);
 		end-code 
 		/// Those tags may cause problems if went live in a .ebhtmlarea.
-		/// Check this before calling eb.content.code.
+		/// Check this before calling eb.content.code that brings textarea.value
+		/// into .ebhtmlarea.html
 		
 	: eb.content.code ( eb -- ) \ Use code mode content
 	    js> $(".ebtextarea",tos())[0].value ( eb article )
@@ -174,7 +175,7 @@
 			$('.ebhtmlarea',tos())[0].contentEditable=true;
 		}
 		// 只管外觀，不切換 content, 因為要不要 copy the content from the 
-		// other mode is uncertain.
+		// other mode is uncertain. Content 切成 HTML 要經過 user 確認。
 		if ($(".ebmodeflag",tos())[0].checked){
 			execute("eb.appearance.code");
 		} else {
@@ -278,7 +279,7 @@
 		</text> /*remove*/ </o> ( eb ) 	;
 		/// Only HTML tags, no script.
 	
-    : (create-editbox) ( -- edit_box_element ) \ Create an HTML5 local storage edit box in outputbox
+    : (create-editbox) ( -- edit_box_element ) \ Create an empty HTML5 local storage edit box in outputbox
         create-raw-editbox ( eb ) \ create the eb element
         dup eb.init-buttons \ setup scripts
 		\ init check boxes
@@ -288,11 +289,12 @@
 		\ adjust the eb according to checkbox settings
 			dup eb.settings ;
 	
-    : create-editbox ( -- edit_box_element ) \ Create an HTML5 local storage edit box above outputbox
+    : create-editbox ( -- edit_box_element ) \ Create an empty HTML5 local storage edit box above outputbox
 		(create-editbox) dup js> outputbox insertBefore
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
+		/// WWW browser moves the focus to the editbox also.
 
-	: is-editbox-field? ( obj -- boolean ) \ Is the object a local storage edit box article?
+	: is-editbox-field? ( obj -- boolean ) \ Is the object (probably from localStorage) an edit box article?
 	    >r js> typeof(rtos())=="object" if
 			js> typeof(rtos().doc)=="string"
 			js> typeof(rtos().mode)=="boolean"
@@ -301,19 +303,6 @@
 		else 
 			false ( boolean )
 		then r> drop ;
-		
-	: old-local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
-		js> storage.get(tos(),pop(1)) >r ( name / field )
-		js> typeof(rtos())=="object" if
-			js> typeof(rtos().doc)=="string"
-			js> typeof(rtos().mode)=="boolean"
-			js> typeof(rtos().readonly)=="boolean"
-			and and ( boolean )
-		else 
-			false ( boolean )
-		then r> swap ;
-		/// eb.open check it out, if not editable JSON.stringify() 
-		/// can make it a string and show. and by the way check readonly.
 		
 	: local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
 		js> storage.get(tos(),pop(1)) ( name field )
@@ -369,22 +358,14 @@
         js> $('.ebname',tos())[0].value trim ( eb name ) 
 		js> storage.all() swap ( eb hash name ) (eb.read) ;
 	
-    : old-(ed) ( "field name" -- ) \ Edit local storage field
-		create-editbox ( name eb ) swap trim ( eb name ) 
-		js> storage.all() swap ( eb hash name ) 
-		js> tos()!="" if ( eb hash name ) 
-			js: $('.ebname',tos(2))[0].value=tos() 
-		    ( eb hash name ) (eb.read) 
-		else 3 drops then ; 
-
     : (ed) ( "field name" -- ) \ Edit local storage field
-		js> tos()!="" if ( name ) 
+		trim js> tos()!="" if ( name ) 
 			create-editbox ( name eb ) swap trim ( eb name ) 
 			js> storage.all() swap ( eb hash name ) 
 			js: $('.ebname',tos(2))[0].value=tos() 
 		    ( eb hash name ) (eb.read) 
 		else drop then ; 
-		/// Open an empty edit box if field name is null string.
+		/// If field name is null string then open an empty edit box 
 		
     : ed ( <field name> -- ) \ Edit local storage field
 		char \n|\r word (ed) ; 
@@ -398,10 +379,11 @@
 
 	: (export) ( "string" -- ) \ Export the string to a textarea in a new window
 		\ HTA can open only one window, don't know why. Use that one anyway.
-		js> window.open('about:blank','export') ( field window )
-		js> tos().document.getElementsByTagName("html").length ( field window count )
-		if js: tos().document.removeChild(tos().document.getElementsByTagName("html")[0]) then 
-		( field window )
+			js> window.open('about:blank','export') ( field window )
+		\ 把現有的頁面刪掉
+			js> tos().document.getElementsByTagName("html").length ( field window count )
+			if js: tos().document.removeChild(tos().document.getElementsByTagName("html")[0]) then 
+			( field window )
 		<js> 
 			// 如果不弄個 textarea 來顯示, 恐怕有些東西會被翻譯成 HTML。
 			tos().document.write(
@@ -415,19 +397,19 @@
 			pop().document.getElementById("exportbox").value=pop();
 		</js> ;
 		
-	: export ( <field> -- ) \ Create a window to export a local storage field.
+	: export-one-field ( <field> -- ) \ Create a window to export a local storage field.
 		char \n|\r word trim ( field-name )
-		js> storage.get(pop()) ( field-obj )
+		js> storage.get(pop()) ( field-obj ) \ storage.get() can be object, localStorge can't.
 		js> JSON.stringify(pop()) ( "json of the field" )
 		(export) ;
 		
-	: export-all ( -- ) \ Create a window to export entire local storage in JSON format.
+	: export ( -- ) \ Create a window to export entire local storage in JSON format.
 		js> JSON.stringify(storage.all()) (export) ;
 		/// The format is compatible with (3hta or 3nw )\localstorage.json 
 		/// 手動 copy-paste 到 text editor 然後存檔，此為 jeforth.3hta, 3ca 等不能存檔
 		/// 的環境而設。
 
-	code import-all ( "string" -- ) \ Import entire localStorage in the format of export-all 
+	code import ( "string" -- ) \ Import entire localStorage in the format of export-all 
 		var ss = pop();
 		// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
 		// ss.charCodeAt(0)==65279 that's utf-8 BOM 
