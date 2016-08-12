@@ -501,11 +501,6 @@
         /// 下法可 view 任何 localStorage field :
         ///   js> storage.get("field-name") (see)
 
-	: save ( -- ) \ Save all local storage edit box to localstorage.html
-		dump-edit-box <js>
-		alert("Press ctrl-s to save all edit boxes")
-		</js> ;
-	
 	: read-localstorage.html ( "pathname" -- jQobj ) \ Read localstorage.html
 		\ clean older garbage
 			hidden-div removeElement 
@@ -572,6 +567,23 @@
 		jqo>localstorage hidden-div removeElement ;
 		/// char private/jeforth.3ce.html restore-localstorage.html
 
+	: save ( -- ) \ Save all local storage edit box to localstorage.html
+		dump-edit-box <js>
+		alert("Press ctrl-s to save all edit boxes to private/3ce.html")
+		</js> ;
+        /// 3ce/localstorage.html, 3htm/localstorage.html for public logs.
+        /// or private/3ce.html, private/3htm.html for private info.
+
+    : restore ( -- ) \ Restore all local storage edit box from localstorage.html
+        js> vm.appname=="jeforth.3ce" if 
+            char private/3ce.html restore-localstorage.html 
+        then
+        js> vm.appname=="jeforth.3htm" if 
+            char private/3htm.html restore-localstorage.html 
+        then
+        ;
+        /// Only 3ce and 3htm need this command.
+        
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc ( "autoexec" )
 		js> tos() if ( "autoexec" ) tib.insert else ( "autoexec" ) drop then ;
