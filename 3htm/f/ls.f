@@ -320,7 +320,7 @@
 		\ check the field name 	
 			local-storage-field-editable? ( eb name field editable? )
 			rot ( eb field editable? name ) js> Boolean(tos(2)) if else
-				<js> alert("Error! can't find '" + pop() + "' in local storage.")</js>
+				<js> alert("Can't find '" + pop() + "' in local storage.")</js>
 				drop 3 drops exit \ [ ] test this case
 			then drop
 			( eb field editable? )
@@ -358,17 +358,42 @@
         js> $('.ebname',tos())[0].value trim ( eb name ) 
 		js> storage.all() swap ( eb hash name ) (eb.read) ;
 	
+	: is-opened? ( name -- name boolean ) \ Check if the field is opened?
+		trim <js> 
+			var flag = false;
+			$(".eb").each(function(){
+				if ($(".ebname",this)[0].value == tos()) flag = true;
+			});
+			flag;
+		</jsV> ;
+	
+	: jump-to-it ( name -- name ) \ Jump to the opened field
+		trim <js> 
+			var eb = null;
+			$(".eb").each(function(){
+				if ($(".ebname",this)[0].value==tos()) eb = this;
+			})
+			if (eb) {
+				inputbox.blur();
+				window.scrollTo(0,eb.offsetTop-50);
+			}
+		</js> ;
+	
+	
     : (ed) ( "field name" -- ) \ Edit local storage field
 		trim js> tos()!="" if ( name ) 
+			is-opened? if jump-to-it drop exit then ( name )
 			create-editbox ( name eb ) swap trim ( eb name ) 
 			js> storage.all() swap ( eb hash name ) 
 			js: $('.ebname',tos(2))[0].value=tos() 
 		    ( eb hash name ) (eb.read) 
 		else drop then ; 
-		/// If field name is null string then open an empty edit box 
+		/// If field name is null string then do nothing
+		/// If the field is opened then jump to it.
 		
     : ed ( <field name> -- ) \ Edit local storage field
 		char \n|\r word (ed) ; 
+		/// A new name creates a new field.
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
 		js> storage.get(pop()).doc tib.append ;
@@ -413,8 +438,8 @@
 		/// Import 疊加且覆蓋現有的 localStorage。The format is compatible 
 		/// with ~\localstorage.json。手動 <text> ...</text> import 即可 
 		/// import 來自 export 的整個 local storage 或者來自 export-one-field 
-		/// 的一個 field. 
-		/// Example:
+		/// 的一個 field. 經改良 <text> 可 nested 了可安心使用。或者如下用法
+		/// 也行：
 		///   char 3hta/localstorage.json readTextFile import
 		/// 若想整個蓋掉而不只是疊加上去，則需先清除整個 local storage. 
 		/// 要非常小心，方法是:
@@ -430,6 +455,7 @@
 			1 nap \ Take a break for DOM to complete its jobs
 		;
 		/// 方便一次全都 cls 掉。
+		
 	: move-all-editbox-to-a-temp-hidden-div ( -- ) \ For localstorage.html restoring
 		\ <o> <div id="tempHiddenEditbox" style="display:none;"></div></o> drop
 		js> $(".eb") dup :> length ?dup if dup for dup r@ - ( array lengh i )
@@ -439,8 +465,7 @@
 		\ Multiple appendChild may not completed yet now!!
 			1 nap \ Take a break for DOM to complete its jobs
 		;
-		/// 用於 restore localstorage.html, 避免擾畫面、方
-		/// 便一次全都 remove 掉。
+		/// 用於避免擾畫面、方便一次全都 remove 掉。
 
 	: standardize-editbox ( -- ) \ Standardize local storage edit boxes
 		\ 處理 textarea innerHTML 與 value 不同步的問題
@@ -456,20 +481,31 @@
 		;
 		/// 處理 textarea innerHTML 與 value 不同步的問題
 		/// 給重要欄位的值都留下線索 
-		
+
+	: close-all-edit-box ( -- ) \ Ignore and close all opened edit box 
+		js> $(".eb").length ?dup if for 
+			js> $(".eb")[0] removeElement
+		next then ;
+	
 	: dump-edit-box ( -- ) \ Dump local storage edit box fields 
-		\ main loop 印出所有的 fields 
-			js> storage.all() obj>keys ( array ) \ array of field names
-			begin js> tos().length while ( array )
-				js> tos().pop() ( array fieldname )
-			    js> storage.get(tos()) ( array fieldname field ) 
-				is-editbox-field? ( array fieldname boolean ) if 
-				( array fieldname ) (ed) ( array )
-				else drop then ( array )
-			repeat drop move-all-editbox-to-outputbox standardize-editbox ;
+		js> storage.all() obj>keys ( array ) \ array of field names
+		begin js> tos().length while ( array )
+			js> tos().pop() ( array fieldname )
+			js> storage.get(tos()) ( array fieldname field ) 
+			is-editbox-field? ( array fieldname boolean ) if 
+			( array fieldname ) (ed) ( array )
+			else drop then ( array )
+		repeat drop move-all-editbox-to-outputbox standardize-editbox ;
 		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
 		/// 可以 restore 回來。非 edit box editable 的 objects 不含。
-		
+        /// 下法可 view 任何 localStorage field :
+        ///   js> storage.get("field-name") (see)
+
+	: save ( -- ) \ Save all local storage edit box to localstorage.html
+		dump-edit-box <js>
+		alert("Press ctrl-s to save all edit boxes")
+		</js> ;
+	
 	: read-localstorage.html ( "pathname" -- jQobj ) \ Read localstorage.html
 		\ clean older garbage
 			hidden-div removeElement 
@@ -517,7 +553,6 @@
 		/// Example:	
 		/// char private/jeforth.3ce.html read-localstorage.html ( jQueryObj )
 		/// list-fields
-		
 
 	: jqo>localstorage ( jQobj -- ) \ Restore jquery object to local storage
 		\ get count of fields in the given jqo
@@ -752,80 +787,80 @@
 </comment>
 
 <comment>
-		> jq :> [3] element>field ( obj ) (see) ( objQuery )
-		{
-			"name": "月梅股 2016-07-21",
-			"readonly": "false",
-			"codemode": "false",
-			"doc": "<textarea>2016 Stock Evaluate 3514昱晶 今年開始賺錢了! 月梅可能又對了。</textarea><hr>"
-		} OK Input box EditMode = true
-		Input box EditMode = false
+	> jq :> [3] element>field ( obj ) (see) ( objQuery )
+	{
+		"name": "月梅股 2016-07-21",
+		"readonly": "false",
+		"codemode": "false",
+		"doc": "<textarea>2016 Stock Evaluate 3514昱晶 今年開始賺錢了! 月梅可能又對了。</textarea><hr>"
+	} OK Input box EditMode = true
+	Input box EditMode = false
 
-		: test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ;
-			  5 test ==> 0 1 2 3 4
+	: test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ;
+		  5 test ==> 0 1 2 3 4
 
 
-		[x] 3hta's local storage 目前因為 debug localstorage.html 而被弄亂了, 從 3ce 來的 localstorage.html 應該先整理成安全的內容。
-			--> playground/localstorage2.html 弄好了, 所有在 DIV console3we 裡面的 class=box DIV 就是一個 field. 只留兩個把其他都
-				改成 class="boxxx" 即可。 field name 改掉了所以不會傷到真正的內容。
-			--> 把 3hta 修好,邊開發要用到, 必須保持可用。
-		[x] 直接從 Chrome Ctrl-S save 起來的 Edit boxes 沒有必要的線索，試試用 standardize-editbox 先
-			跑過 --> 對了!! --> dump-all command does it now.
-		[x] 承上，所以 edit box save 之前都應該先 standardize-editbox 一下。本來就有處裡 textarea 的
-			value 與 innerHTML 不一致的問題，該 command 保留但研究看是否應併進 ...
-			--> dump-all command does it now.
-		[x] Note! 3we applications 只能讀取 jeforth.3we folder 下的檔案。
-			char playground\jeforth.3ce.html read-ls.html ( objQuery )
-			如上，移到 playground 證實的確如此。 --> there are confidential info, 移到 private 更好。
+	[x] 3hta's local storage 目前因為 debug localstorage.html 而被弄亂了, 從 3ce 來的 localstorage.html 應該先整理成安全的內容。
+		--> playground/localstorage2.html 弄好了, 所有在 DIV console3we 裡面的 class=box DIV 就是一個 field. 只留兩個把其他都
+			改成 class="boxxx" 即可。 field name 改掉了所以不會傷到真正的內容。
+		--> 把 3hta 修好,邊開發要用到, 必須保持可用。
+	[x] 直接從 Chrome Ctrl-S save 起來的 Edit boxes 沒有必要的線索，試試用 standardize-editbox 先
+		跑過 --> 對了!! --> dump-all command does it now.
+	[x] 承上，所以 edit box save 之前都應該先 standardize-editbox 一下。本來就有處裡 textarea 的
+		value 與 innerHTML 不一致的問題，該 command 保留但研究看是否應併進 ...
+		--> dump-all command does it now.
+	[x] Note! 3we applications 只能讀取 jeforth.3we folder 下的檔案。
+		char playground\jeforth.3ce.html read-ls.html ( objQuery )
+		如上，移到 playground 證實的確如此。 --> there are confidential info, 移到 private 更好。
 
-		\ 這行已經成功把整個 localstorage.html archive 檔讀成一個 jQuery object:
-		\     char playground\jeforth.3ce.html read-ls.html
-		\ js> $("*",tos()).length . \ ==> 16 OK 但是不能直接 (see) 那怎麼去觀察它?
-		\ 既然是 jQuery object 就用 each(function(){}) 來處理吧!
-		\ 以下這段 code 很成功地把 read-ls.html 取得的整個 jQuery object 以 outerHTML 的形式
-		\ 印出來了。
-		<js>
-		$("*",tos()).each(function(){
-			type("-------------------------\n");
-			type($(this)[0].outerHTML);
-			type("\n");
-		});
-		</js>
-		[ ] The local storage field "list-jqo" is redundant, I have this field "lab" already.
+	\ 這行已經成功把整個 localstorage.html archive 檔讀成一個 jQuery object:
+	\     char playground\jeforth.3ce.html read-ls.html
+	\ js> $("*",tos()).length . \ ==> 16 OK 但是不能直接 (see) 那怎麼去觀察它?
+	\ 既然是 jQuery object 就用 each(function(){}) 來處理吧!
+	\ 以下這段 code 很成功地把 read-ls.html 取得的整個 jQuery object 以 outerHTML 的形式
+	\ 印出來了。
+	<js>
+	$("*",tos()).each(function(){
+		type("-------------------------\n");
+		type($(this)[0].outerHTML);
+		type("\n");
+	});
+	</js>
 
-		[ ] ok now, the localstorage.html appear in outputbox is a little problem. arrange to 
-			a </e> section so easier to delete. 
-			1. create a dummy DIV in outputbox 
-				<o> <div id=dummy>I am a dummy div</div></o> drop
-			2. print things into the dummy DIV like outputbox :
-			   char #dummy <e> I am a dummy div with added things</e> drop
-			   char #dummy <e> <h1>hi</h1></e>
-			3. Check it out :
-			   js> dummy.innerHTML .
-			   I am a dummy divI am a dummy div with added things<h1>hi</h1> OK 
-			4. delete it :
-	　　　　　   js> dummy removeElement
-		[ ] move-all-editbox-to-outputbox may unnecessary at all. Try using above 
-			knowledge in dump-edit-box 
-			[ ] create a hidden <DIV>
-				> <o> <div id=hh> I am hidden div</div></o> constant hh
-				I am hidden divcan any body see me ??
-				> hh . ==> [object HTMLDivElement] OK 
-				> hh js: $("#hh").hide() <-- yes, it works.
-				> char #hh <e> can any body see me ?? </e>
-				> hh js: $("#hh").show() <-- Bingo!! it works.
-				\ CSS style is the trick to hide and show
-				<div id="hh" style="display: none;">I am hidden</div>
-				<div id="hh" style="">I am not hidden</div>
+	[x] ok now, the localstorage.html appear in outputbox is a little problem. 
+		arrange to a </e> section so easier to delete. 
+		1. create a dummy DIV in outputbox 
+			<o> <div id=dummy>I am a dummy div</div></o> drop
+		2. print things into the dummy DIV like outputbox :
+		   char #dummy <e> I am a dummy div with added things</e> drop
+		   char #dummy <e> <h1>hi</h1></e>
+		3. Check it out :
+		   js> dummy.innerHTML .
+		   I am a dummy divI am a dummy div with added things<h1>hi</h1> OK 
+		4. delete it :
+　　　　　   js> dummy removeElement
+	[x] move-all-editbox-to-outputbox may unnecessary at all. Try using above 
+		knowledge in dump-edit-box 
+		[x] create a hidden <DIV>
+			> <o> <div id=hh> I am hidden div</div></o> constant hh
+			I am hidden divcan any body see me ??
+			> hh . ==> [object HTMLDivElement] OK 
+			> hh js: $("#hh").hide() <-- yes, it works.
+			> char #hh <e> can any body see me ?? </e>
+			> hh js: $("#hh").show() <-- Bingo!! it works.
+			\ CSS style is the trick to hide and show
+			<div id="hh" style="display: none;">I am hidden</div>
+			<div id="hh" style="">I am not hidden</div>
+			--> Now we have "hidden-div" 
+		
+	[x] none edit box fields will become an edit box field after saved to 
+		localstorage.html and restored. dump-all should skip them.
+		--> the way to view them is :
+			  js> storage.get("field-name") (see)
+			so we don't need to use edit box to view them.
+		[x] "dump-all" is now "dump-edit-box" it doesn't dump none edit box
+			fields now.
 			
-		[x] none edit box fields will become an edit box field after saved to 
-			localstorage.html and restored. dump-all should skip them.
-			--> the way to view them is :
-				  js> storage.get("field-name") (see)
-				so we don't need to use edit box to view them.
-			[x] "dump-all" is now "dump-edit-box" it doesn't dump none edit box
-				fields now.
-				
 </comment>
 	
 <comment> 
@@ -969,22 +1004,9 @@
         type("\n");
     });
     </js>
-    [ ] The local storage field "list-jqo" is redundant, I have this field "lab" already.
 
-    [ ] ok now, the localstorage.html appear in outputbox is a little problem. arrange to 
-        a </e> section so easier to delete. 
-        1. create a dummy DIV in outputbox 
-            <o> <div id=dummy>I am a dummy div</div></o> drop
-        2. print things into the dummy DIV like outputbox :
-           char #dummy <e> I am a dummy div with added things</e> drop
-           char #dummy <e> <h1>hi</h1></e>
-        3. Check it out :
-           js> dummy.innerHTML .
-           I am a dummy divI am a dummy div with added things<h1>hi</h1> OK 
-        4. delete it :
-　　　　　   js> dummy removeElement
-    [ ] none edit box fields will become an edit box field after saved to 
-        localstorage.html and restored. dump-all should skip them.
+    [x] none edit box fields will become an edit box field after saved to 
+        localstorage.html and restored. dump-all should skip them <--- Done!!
         --> the way to view them is :
               js> storage.get("field-name") (see)
             so we don't need to use edit box to view them.

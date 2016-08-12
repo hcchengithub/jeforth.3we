@@ -972,9 +972,12 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 				/// Pattern : The normalized for-loop pattern. 0 based.
 				///   : test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ; 
 				///   5 test ==> 0 1 2 3 4 
+				/// Pattern : The normalized for-loop pattern. Count down
+				///   : test ?dup if for r@ . space next then ;
+				///   5 test ==> 5 4 3 2 1
 				/// Pattern : Normalized for-loop pattern but n based.
 				///   : test js: push(tos()+3,0) for dup r@ - ( count+n i ) . space next drop ; 
-				///   5 test ==> 3 4 5 6 7
+				///   5 test ==> 3 4 5 6 7 ; 1 test ==> 1 ; 0 test ==> nothing
 				/// Pattern : Simplest, fixed times.
 				///   : test 5 for r@ . space next ; 
 				///   test ==> 5 4 3 2 1
@@ -1239,21 +1242,54 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 \ TIB 只能到行尾為止後面沒了，所以才會跨不了行。將來要讓 keyboard 輸入也能跨行時，就
 \ 用 text。
 
-: <text>		( <text> -- "text" ) \ Get multiple-line string
-				char </text> word ; immediate
+\ 費了一番功夫寫就能 nested 的 <text> 及 <comment> , 開發心得在 Ynote 上
+\ search "jeforth.3we design a nesting supported〈text〉also〈comment〉"
 
+variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, for indirect call.
+                    
+: (<text>)		( <text> -- "text"+"</text>" ) \ Auxiliary <text>, handles nested portion
+                '<text> @ execute ( string ) \ 此時 TIB 非 </text> 即行尾
+				BL word char </text> = ( string is</text>? )
+				if \ 剛才撞上了 </text> ( string )
+					s" </text> " + ( string1' )
+				then ;
+                /// (<text>) is almost same as <text> but it consumes the 
+                /// next </text> in TIB and returns <text> + "</text>"
+
+: <text>		( <text> -- "text" ) \ Get multiple-line string, can be nested.
+				char </text>|<text> word ( string1 )
+				\ 撞到 delimiter 停下來非 <text> 即 </text> 要不就是行尾
+				BL word dup char <text> = ( string1 deli is<text>? )
+				if \ 剛才撞上了 <text> ( string1 deli )
+					drop s" <text> " + ( string1' )
+                    (<text>) ( string1' string2 ) + 
+                    [ last literal ] execute ( string1'' string3 ) + ( string )
+				else \ 剛才撞上了 </text> 或行尾  ( string1 deli )
+					char </text> swap over = ( string1 "</text>" is</text>? ) 
+                    if js: ntib-=pop().length ( string1 )
+                    else drop then  ( string1 )
+				then ; immediate last '<text> !
+                /// If <text> hits <text> in TIB then it returns 
+                /// string1 +  "<text>" + (<text>) + <text> 
+                /// leaves the next </text> in TIB
+                /// Colon definition 中萬一前後不 ballance 會造成 colon definition
+                /// 不如預期結束而停留在 compiling state 裡等 closing </text> 的現象。
+				
 : </text> 		( "text" -- ... ) \ Delimiter of <text>
 				compiling if literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
-: <comment>		( <comemnt> -- ) \ Can be nested
-				[ last literal ] :: level+=1 char <comment>|</comment> word drop 
-				; immediate last :: level=0
+\ If <comment> hits <comment> in TIB then it drops string1 
+\ and does <comment> and does again <comment>
 
-: </comment>	( -- ) \ Can be nested
-				['] <comment> js> tos().level>1 swap ( -- flag obj )
-				js: tos().level=Math.max(0,pop().level-2) \ 一律減一，再預減一餵給下面加回來
-				( -- flag ) if [compile] <comment> then ; immediate 
+: <comment>		( <comemnt> -- ) \ Can be nested
+				char <comment>|</comment> word drop ( empty )
+				BL word char <comment> = ( is<comment>? )
+				if \ 剛才撞上了 <comment> ( empty )
+					[ last literal ] dup execute execute
+				then ; immediate
+				
+: </comment>	; // ( -- ) \ Delimiter of <comment>
 
 				<selftest>
 					*** <comment>...</comment> can be nested now
@@ -2068,7 +2104,13 @@ code q			( -- ) \ Quit *debug*
 				BL word compiling if literal compile (*debug*) 
 				else (*debug*) then ; immediate
 				/// 'q' command to quit debugging
+				/// *debug* 可以用在 immediate word 裡面, 當 break 到時可能在 
+				/// colon definition 的半途，此時 q 要下成 [ q ] , .s 要下成 
+				/// [ .s ] ... etc
 
+
+				
+				
 \ ----------------- Self Test -------------------------------------
 "" value description // ( -- "text" ) description of a selftest section
 [] value expected_rstack // ( -- [..] ) an array to compare rstack in selftest

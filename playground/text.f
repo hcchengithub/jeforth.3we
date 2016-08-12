@@ -70,3 +70,32 @@ dropall 11 22 33
 : tt <text> aa <text> bb </text> cc </text> 77 ;
 [ q ]
 [ .s ]
+
+
+我早就讓 <comment> supports nesting 了, 自己都忘了。但是用到 ' <comment> :: level
+還是不理想。以上 <text> </text> 已經可以單憑 recursion 就坐到 nesting supports
+比照辦法改寫看看。
+
+: <comment>		( <comemnt> -- ) \ Can be nested
+				[ last literal ] :: level+=1 char <comment>|</comment> word drop 
+				; immediate last :: level=0
+
+: </comment>	( -- ) \ Can be nested
+				['] <comment> js> tos().level>1 swap ( -- flag obj )
+				js: tos().level=Math.max(0,pop().level-2) \ 一律減一，再預減一餵給下面加回來
+				( -- flag ) if [compile] <comment> then ; immediate 
+
+\ If <comment> hits <comment> in TIB then it drops string1 
+\ and does <comment> and does again <comment>
+
+: <comment>		( <comemnt> -- ) \ Can be nested
+				char <comment>|</comment> word drop ( empty )
+				BL word char <comment> = ( is<comment>? )
+				if \ 剛才撞上了 <comment> ( empty )
+					[ last literal ] dup execute execute
+				then ; immediate
+				
+: </comment>	; // ( -- ) \ Delimiter of <comment>
+
+				
+				
