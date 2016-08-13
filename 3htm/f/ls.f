@@ -402,27 +402,27 @@
 		char \n|\r word trim (run) ;
 		/// 一整行都當 field name 可以有空格。
 		
-	: type>textarea ( "string" -- ) \ Type the string into a textarea in outputbox
-		<o> <textarea style="width:100%;" rows=14></textarea></o> :: value=pop() ;
+	: type>textarea ( "string" "class" -- ) \ Type the string into a textarea in outputbox
+		<text> <textarea class=_class_ style="width:100%;" rows=14></textarea></text>
+		:> replace(/_class_/,pop()) </o> :: value=pop() ;
 		
 	: (export-one-field) ( "field-name" -- ) \ Export the local storage field in JSON format into a textarea in outputbox
 		trim ( field-name )
 		js> storage.get(tos()) ( field-name field-obj ) \ storage.get() can be object, localStorge can't.
 		( name obj ) {} dup :: [pop(2)]=pop(1)
 		js> JSON.stringify(pop()) ( "json of the field" )
-		s" <text> " swap + s" </text> import" + type>textarea cr ;
+		s" <text> " swap + s" </text> import" + \ 這樣比較乾脆
+		char export-one-field type>textarea cr ;
 		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field
 		/// 目前 <text> 還不能 nested, 萬一碰上了則須修改一下改用下法:
 		///   js> $("textarea")[n].value import \ you find the n in prior
 		
 	: export-one-field ( <field-name> -- ) \ Export the local storage field in JSON format into a textarea in outputbox
 		char \n|\r word (export-one-field) ;
-		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field
-		/// 目前 <text> 還不能 nested, 萬一碰上了則須修改一下改用下法:
-		///   js> $("textarea")[n].value import \ you find the n in prior
+		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field。
 		
 	: export ( -- ) \ Export entire local storage in JSON format into a textarea in outputbox.
-		js> JSON.stringify(storage.all()) type>textarea ;
+		js> JSON.stringify(storage.all()) char export type>textarea ;
 		/// The format is compatible with (3hta or 3nw )\localstorage.json 
 		/// 此為 jeforth.3htm, jeforth.3ca 等不能存檔的環境而設。
 		/// 手動 copy-paste 到 text editor 然後存檔，
