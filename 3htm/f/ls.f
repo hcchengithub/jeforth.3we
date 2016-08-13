@@ -66,7 +66,7 @@
 		/// Copy $(".ebhtmlarea").innerHTML to $(".ebtextarea").value
 
 		
-	code living-tag-confirmed?  ( "article" -- boolean ) \ Does the article has script, style, etc special tags etc?
+	code living-tag?  ( "article" -- boolean ) \ Does the article has script, style, etc special tags etc?
 	    var flag = true,
 		    warn =  
 				tos().indexOf("<script")!=-1 ||
@@ -101,7 +101,7 @@
 			if else exit then ( eb )
 			\ Warn living tag found
 			js> $(".ebtextarea",tos())[0].value ( eb article )
-			living-tag-confirmed? if
+			living-tag? if
 				( eb ) dup eb.content.code \ use current, code mode's content
 				eb.appearance.browse
 			else drop then
@@ -336,7 +336,7 @@
 				if  ( eb field ) 
 					drop ( eb ) 
 				else \ Take care of Browse mode   ( eb field )
-					:> doc ( eb doc ) living-tag-confirmed? ( eb flag ) if 
+					:> doc ( eb doc ) living-tag? ( eb flag ) if 
 						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
 					else ( eb )
 						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
@@ -357,7 +357,7 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value trim ( eb name ) 
 		js> storage.all() swap ( eb hash name ) (eb.read) ;
-	
+        
 	: is-opened? ( name -- name boolean ) \ Check if the field is opened?
 		trim <js> 
 			var flag = false;
@@ -489,6 +489,7 @@
 	
 	: dump-edit-box ( -- ) \ Dump local storage edit box fields 
 		js> storage.all() obj>keys ( array ) \ array of field names
+        :> sort(function(b,a){return(a.localeCompare(b))}) \ sorted
 		begin js> tos().length while ( array )
 			js> tos().pop() ( array fieldname )
 			js> storage.get(tos()) ( array fieldname field ) 
@@ -537,18 +538,6 @@
 	\	dup :> [1] element>field ( obj ) (see) ( objQuery ) cr
 	\	dropall
 
-	: list-fields ( jQobj -- ) \ List localstorage.html field names
-		( jqo ) js> tos().length ( jqo length )
-		?dup if dup for dup r@ -
-		( jqo COUNT i ) js> tos(2)[tos()] ( jqo COUNT i jqo[i] )
-		element>field  ( jqo COUNT i filedObj )
-		swap . space :> name . cr
-		( COUNT ) next drop then drop ;
-		/// Demo how to iterate through them all.
-		/// Example:	
-		/// char private/jeforth.3ce.html read-localstorage.html ( jQueryObj )
-		/// list-fields
-
 	: jqo>localstorage ( jQobj -- ) \ Restore jquery object to local storage
 		\ get count of fields in the given jqo
 			( jqo ) js> tos().length ( jqo length )
@@ -569,7 +558,7 @@
 
 	: save ( -- ) \ Save all local storage edit box to localstorage.html
 		dump-edit-box <js>
-		alert("Press ctrl-s to save all edit boxes to private/3ce.html")
+		alert("Press ctrl-s to save all edit boxes to private/3ce.html or private/3htm.html. I guess your are using Google Chrome Browser.")
 		</js> ;
         /// 3ce/localstorage.html, 3htm/localstorage.html for public logs.
         /// or private/3ce.html, private/3htm.html for private info.
@@ -601,6 +590,7 @@
 			</unindent></text> <code>escape </o> drop
 		\ main loop 印出所有的 fields 
 			js> storage.all() obj>keys ( array ) \ array of field names
+            :> sort(function(b,a){return(a.localeCompare(b))}) \ sorted 
 			<o> <div class=lslist></div></o> swap ( DIV array ) \ 放整個 list 的 DIV, 非必要但可避免被 er 刪除。
 			begin js> tos().length while ( DIV array )
 				js> tos().pop()  ( DIV array fieldname )
@@ -973,6 +963,42 @@
 			);
 			pop().document.getElementById("exportbox").value=pop();
 		</js> ;
+
+	: list-fields ( jQobj -- ) \ List field names in jQuery from read-localstorage.html
+		( jqo ) js> tos().length ( jqo length )
+		?dup if dup for dup r@ -
+		( jqo COUNT i ) js> tos(2)[tos()] ( jqo COUNT i jqo[i] )
+		element>field  ( jqo COUNT i filedObj )
+		swap . space :> name . cr
+		( COUNT ) next drop then drop ;
+		/// Demo how to iterate through them all.
+		/// Example:	
+		/// char private/jeforth.3ce.html read-localstorage.html ( jQueryObj )
+		/// list-fields
+        
+    \ very easy, no need of a word. 
+    \ js> storage.all() obj>keys :> sort(function(a,b){return(a.localeCompare(b))})
+	: field-list ( -- array ) \ Get local storage edit box fields, sorted by field name
+		[] js> storage.all() obj>keys ( [] names ) \ array of field names
+		begin js> tos().length while ( [] names )
+			js> tos().pop() ( [] names fieldname )
+			js> storage.get(pop()) ( [] names field ) 
+			dup is-editbox-field? ( [] names field boolean ) if 
+			( [] names field ) js: tos(2).push(pop()) ( [] names )
+			else drop then ( [] names )
+		repeat drop ;        
+
+    \ very easy, no need of a word. 
+    \ js> storage.all() obj>keys :> sort(function(a,b){return(a.localeCompare(b))})
+    code field-names ( -- [field-names] ) \ Get local storage edit box sorted field names
+        var aa = [];
+        for (var i in storage.all()){
+            push(storage.get(i));
+            execute("is-editbox-field?");
+            if (pop()) aa.push(i);
+        }
+        push(aa.sort(function(a,b){return(a.localeCompare(b))}));
+    end-code
 
 </comment>
 
