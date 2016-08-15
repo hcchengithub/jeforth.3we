@@ -19,7 +19,7 @@
 	\   		"readonly":boolean /* Note! not string e.g. "true" or "false" */
 	\   	}
 	\
-	\   參見 local-storage-field-editable? command 的定義，如果三個 key 及
+	\   參見 is-editbox-field? command 的定義，如果三個 key 及
 	\   其 type 都符合就被當成是一筆 localStorage edit box field. 否則就是
 	\   普通 object 的 JSON.stringify(). 遇到困難用比對的方式查出問題。
 	
@@ -294,7 +294,7 @@
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
 		/// WWW browser moves the focus to the editbox also.
 
-	: is-editbox-field? ( obj -- boolean ) \ Is the object (probably from localStorage) an edit box article?
+	: is-editbox-field? ( obj -- boolean ) \ Is the object an local storage edit box field?
 	    >r js> typeof(rtos())=="object" if
 			js> typeof(rtos().doc)=="string"
 			js> typeof(rtos().mode)=="boolean"
@@ -304,12 +304,6 @@
 			false ( boolean )
 		then r> drop ;
 		
-	: local-storage-field-editable? ( hash name -- name field boolean ) \ Check if the object is a local storage editable or awared document
-		js> storage.get(tos(),pop(1)) ( name field )
-		dup is-editbox-field? ( name field boolean ) ;
-		/// eb.open check it out, if not editable JSON.stringify() 
-		/// can make it a string and show. and by the way check readonly.
-		
     : (eb.read) ( eb hash name -- ) \ Read the hash[name] to textarea of the given edit box.
 		\ Idiot-proof first of all
 			js> $(".ebsaveflag",tos(2))[0].checked not if  ( eb hash name )
@@ -318,16 +312,15 @@
 			then  
 			( eb hash name )
 		\ check the field name 	
-			local-storage-field-editable? ( eb name field editable? )
-			rot ( eb field editable? name ) js> Boolean(tos(2)) if else
-				<js> alert("Can't find '" + pop() + "' in local storage.")</js>
-				drop 3 drops exit \ [ ] test this case
-			then drop
-			( eb field editable? )
+			js> storage.get(pop(),pop()) ( eb field )
+			js> Boolean(tos()) if else
+				<js> alert("Can't find '" + pop() + "', is it new?")</js>
+				drop 2drop exit
+			then ( eb field )
 		\ Load the edit box with the hash
-			js: $(".ebsaveflag",tos(2))[0].checked=true \ the field must have been Saved 
-			( eb field editable? ) \ editable means it's a ls.f ed awared local storage field/document
-			if ( eb field )
+			js: $(".ebsaveflag",tos(1))[0].checked=true \ the field must have been Saved 
+			( eb field ) dup is-editbox-field? if ( eb field )
+				\ Editbox Field is a ls.f ed awared local storage field
 				<js>
 					$('.ebtextarea',tos(1))[0].value = tos().doc;
 					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
@@ -352,6 +345,7 @@
 		\ Activate settings ( eb )
 			eb.settings ;
         /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
+		/// 
 
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
@@ -412,7 +406,8 @@
 		( name obj ) {} dup :: [pop(2)]=pop(1)
 		js> JSON.stringify(pop()) ( "json of the field" )
 		s" <text> " swap + s" </text> import" + \ 這樣比較乾脆
-		char export-one-field type>textarea cr ;
+		char export-one-field \ class attribute of the textarea
+		type>textarea cr ;
 		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field
 		/// 目前 <text> 還不能 nested, 萬一碰上了則須修改一下改用下法:
 		///   js> $("textarea")[n].value import \ you find the n in prior
@@ -427,7 +422,7 @@
 		/// 此為 jeforth.3htm, jeforth.3ca 等不能存檔的環境而設。
 		/// 手動 copy-paste 到 text editor 然後存檔，
 
-	code import ( "string" -- ) \ Import entire localStorage in the format of export-all 
+	code (import) ( "string" -- ) \ Import entire localStorage in JSON format
 		var ss = pop();
 		// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
 		// ss.charCodeAt(0)==65279 that's utf-8 BOM 
@@ -435,6 +430,18 @@
 		var ls = JSON.parse(ss);
 		for (var i in ls) storage.set(i,ls[i]);
 		end-code
+		
+	: import ( [<pathname.json>] -- ) \ Import entire pathname.json or default if absent
+		char \r|\n word trim ( pathname ) 
+		js> tos()=="" if \ use default 
+			drop 
+			js> vm.appname=="jeforth.3ce" if 
+				char private/3ce.json
+			then
+			js> vm.appname=="jeforth.3htm" if 
+				char private/3htm.json
+			then
+		then readTextFile (import) ;
 		/// Import 疊加且覆蓋現有的 localStorage。The format is compatible 
 		/// with ~\localstorage.json。手動 <text> ...</text> import 即可 
 		/// import 來自 export 的整個 local storage 或者來自 export-one-field 
