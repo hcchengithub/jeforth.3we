@@ -166,7 +166,7 @@
         js: $(".ebsaveflag",pop())[0].checked=false ;
 		/// [ ] Don't know how to handle it if is changed in browse mode.
 
-    code eb.settings ( eb -- ) \ Set edit box settings according to checkboxes
+    code eb.settings ( eb -- ) \ Effects of readonly and code/HTML mode
 		if ($(".ebreadonlyflag",tos())[0].checked){
 			$('textarea',tos()).attr("readOnly",true);
 			$('.ebhtmlarea',tos())[0].contentEditable=false;
@@ -183,7 +183,6 @@
 		}
 		end-code
 		/// Note! call eb.settings 時 eb 都在 code mode, 然後視 checkbox 切換。
-		/// 外觀 code mode or browse mode, editable or not, whether read only.
 	
     : eb.init-buttons ( eb -- ) \ Initialize buttons of the local storage edit box.
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
@@ -303,24 +302,22 @@
 		else 
 			false ( boolean )
 		then r> drop ;
-		
-    : (eb.read) ( eb hash name -- ) \ Read the hash[name] to textarea of the given edit box.
+
+    : (eb.read) ( eb field -- ) \ Load eb with field
 		\ Idiot-proof first of all
-			js> $(".ebsaveflag",tos(2))[0].checked not if  ( eb hash name )
+			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb field )
 				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
-				if else 3 drops exit then
+				if else 2drop exit then
 			then  
-			( eb hash name )
+			( eb field )
 		\ check the field name 	
-			js> storage.get(pop(),pop()) ( eb field )
 			js> Boolean(tos()) if else
 				<js> alert("Can't find '" + pop() + "', is it new?")</js>
-				drop 2drop exit
+				drop 2drop exit \ nothing to do
 			then ( eb field )
-		\ Load the edit box with the hash
+		\ Load the edit box with the field
 			js: $(".ebsaveflag",tos(1))[0].checked=true \ the field must have been Saved 
 			( eb field ) dup is-editbox-field? if ( eb field )
-				\ Editbox Field is a ls.f ed awared local storage field
 				<js>
 					$('.ebtextarea',tos(1))[0].value = tos().doc;
 					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
@@ -330,9 +327,11 @@
 					drop ( eb ) 
 				else \ Take care of Browse mode   ( eb field )
 					:> doc ( eb doc ) living-tag? ( eb flag ) if 
-						( eb ) dup eb.content.code \ copy code mode's content to browse mode  ( eb )
+						\ copy code mode's content to browse mode
+						( eb ) dup eb.content.code ( eb )
 					else ( eb )
-						js: $(".ebmodeflag",tos())[0].checked=true \ user refused, so stay in code mode
+						\ user refused, so stay in code mode
+						js: $(".ebmodeflag",tos())[0].checked=true 
 					then ( eb )	
 				then ( eb )
 			else ( eb field )
@@ -345,12 +344,11 @@
 		\ Activate settings ( eb )
 			eb.settings ;
         /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
-		/// 
-
+		
     : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value trim ( eb name ) 
-		js> storage.all() swap ( eb hash name ) (eb.read) ;
+		js> storage.get(pop()) ( eb field ) (eb.read) ;
         
 	: is-opened? ( name -- name boolean ) \ Check if the field is opened?
 		trim <js> 
@@ -373,14 +371,19 @@
 			}
 		</js> ;
 	
+    : {ed} ( {field} name -- ) \ Open the field in an edit box 
+		trim create-editbox ( field name eb )
+		js: $('.ebname',tos())[0].value=pop(1)  ( field eb ) 
+		swap (eb.read) ; 
+		/// According to ls.f localStorage field definition, it 
+		/// has no name in its structure. The given {field} can
+		/// be anything actually but when it's not a edit box field
+		/// then it's readonly, for viewing the thing only.
 	
     : (ed) ( "field name" -- ) \ Edit local storage field
 		trim js> tos()!="" if ( name ) 
 			is-opened? if jump-to-it drop exit then ( name )
-			create-editbox ( name eb ) swap trim ( eb name ) 
-			js> storage.all() swap ( eb hash name ) 
-			js: $('.ebname',tos(2))[0].value=tos() 
-		    ( eb hash name ) (eb.read) 
+		    js> storage.get(tos()) swap ( field name ) {ed}
 		else drop then ; 
 		/// If field name is null string then do nothing
 		/// If the field is opened then jump to it.
@@ -405,7 +408,7 @@
 		js> storage.get(tos()) ( field-name field-obj ) \ storage.get() can be object, localStorge can't.
 		( name obj ) {} dup :: [pop(2)]=pop(1)
 		js> JSON.stringify(pop()) ( "json of the field" )
-		s" <text> " swap + s" </text> import" + \ 這樣比較乾脆
+		s" <text> " swap + s" </text> (import)" + \ 這樣比較乾脆
 		char export-one-field \ class attribute of the textarea
 		type>textarea cr ;
 		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field
@@ -430,6 +433,15 @@
 		var ls = JSON.parse(ss);
 		for (var i in ls) storage.set(i,ls[i]);
 		end-code
+		/// 手動 <text> ...</text> (import) 即可 import 來自 export 的整個
+		/// local storage 或者來自 export-one-field 的一個 field. 經改良 <text> 
+		/// 可 nested 了, 可安心使用。或者如下用法也行：
+		///   char 3hta/localstorage.json readTextFile (import)
+		/// 但這樣會疊加且覆蓋原有的 localStorage 小心使用。最好用 dump 命令
+		/// 只 save 部分 fields 更理想。
+		/// save restore import export .. etc 等相關命令能在所有 jeforth.3we 
+		/// applications 上使用, 但只有 3ce, 3htm 有絕對必要，因為 3nw, 3hta
+		/// 會自動 save-restore localStorage。
 		
 	: import ( [<pathname.json>] -- ) \ Import entire pathname.json or default if absent
 		char \r|\n word trim ( pathname ) 
@@ -443,15 +455,14 @@
 			then
 		then readTextFile (import) ;
 		/// Import 疊加且覆蓋現有的 localStorage。The format is compatible 
-		/// with ~\localstorage.json。手動 <text> ...</text> import 即可 
-		/// import 來自 export 的整個 local storage 或者來自 export-one-field 
-		/// 的一個 field. 經改良 <text> 可 nested 了可安心使用。或者如下用法
-		/// 也行：
-		///   char 3hta/localstorage.json readTextFile import
+		/// with ~\localstorage.json。
 		/// 若想整個蓋掉而不只是疊加上去，則需先清除整個 local storage. 
 		/// 要非常小心，方法是:
 		///   js: localStorage.clear() \ for none 3HTA
 		///   js: window.storage.local_storage={} \ for 3HTA
+		/// save restore import export .. etc 等相關命令能在所有 jeforth.3we 
+		/// applications 上使用, 但只有 3ce, 3htm 有絕對必要，因為 3nw, 3hta
+		/// 會自動 save-restore localStorage。
 
 	: move-all-editbox-to-outputbox ( -- ) \ Move all local storage edit boxes into outputbox
 		js> $(".eb") dup :> length ?dup if dup for dup r@ - ( array lengh i )
@@ -493,22 +504,42 @@
 		js> $(".eb").length ?dup if for 
 			js> $(".eb")[0] removeElement
 		next then ;
-	
-	: dump-edit-box ( -- ) \ Dump local storage edit box fields 
-		js> storage.all() obj>keys ( array ) \ array of field names
-        :> sort(function(b,a){return(a.localeCompare(b))}) \ sorted
-		begin js> tos().length while ( array )
-			js> tos().pop() ( array fieldname )
-			js> storage.get(tos()) ( array fieldname field ) 
-			is-editbox-field? ( array fieldname boolean ) if 
-			( array fieldname ) (ed) ( array )
-			else drop then ( array )
-		repeat drop move-all-editbox-to-outputbox standardize-editbox ;
+
+	: (dump) ( "pathname" -- ) \ Dump local storage edit box fields 
+		trim ( pathname ) js> tos()!="" if
+			readTextFile ( "json" )
+			js> tos().charCodeAt(0)==65279 if js> pop().slice(1) then ( "json" )
+			js> JSON.parse(pop()) ( hash )
+		else
+			drop js> storage.all() ( hash )
+		then
+		dup obj>keys ( hash array ) \ array of field names
+        :> sort(function(b,a){return(a.localeCompare(b))}) \ sorted ( hash array ) 
+		begin js> tos().length while ( hash array )
+			js> tos().pop() ( hash array fieldname )
+			js> storage.get(tos(),tos(2)) ( hash array fieldname field ) 
+			is-editbox-field? ( hash array fieldname boolean ) if 
+				( hash array fieldname ) 
+				js> storage.get(tos(),tos(2)) swap 
+				( hash array field fieldname ) 
+				{ed} ( hash array )
+			else drop then ( hash array )
+		repeat 2drop move-all-editbox-to-outputbox standardize-editbox ;
+		/// Dump localStorage if the given pathname is a "".
 		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
 		/// 可以 restore 回來。非 edit box editable 的 objects 不含。
         /// 下法可 view 任何 localStorage field :
         ///   js> storage.get("field-name") (see)
 
+	: dump ( <pathname> -- ) \ Dump local storage edit box fields 
+		char \r|\n word (dump) ;
+		/// Dump localStorage if the given pathname is missing.
+		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
+		/// 可以 restore 回來。非 edit box editable 的 objects 不含。
+        /// 下法可 view 任何 localStorage field :
+        ///   js> storage.get("field-name") (see)
+		
+		
 	: read-localstorage.html ( "pathname" -- jQobj ) \ Read localstorage.html
 		\ clean older garbage
 			hidden-div removeElement 
@@ -563,23 +594,6 @@
 		jqo>localstorage hidden-div removeElement ;
 		/// char private/jeforth.3ce.html restore-localstorage.html
 
-	: save ( -- ) \ Save all local storage edit box to localstorage.html
-		dump-edit-box <js>
-		alert("Press ctrl-s to save all edit boxes to private/3ce.html or private/3htm.html. I guess your are using Google Chrome Browser.")
-		</js> ;
-        /// 3ce/localstorage.html, 3htm/localstorage.html for public logs.
-        /// or private/3ce.html, private/3htm.html for private info.
-
-    : restore ( -- ) \ Restore all local storage edit box from localstorage.html
-        js> vm.appname=="jeforth.3ce" if 
-            char private/3ce.html restore-localstorage.html 
-        then
-        js> vm.appname=="jeforth.3htm" if 
-            char private/3htm.html restore-localstorage.html 
-        then
-        ;
-        /// Only 3ce and 3htm need this command.
-        
 	: autoexec ( -- ) \ Run localStorage.autoexec
 		js> storage.get("autoexec").doc ( "autoexec" )
 		js> tos() if ( "autoexec" ) tib.insert else ( "autoexec" ) drop then ;
@@ -592,7 +606,8 @@
 				'<code>ed <field-name or blank></code>' opens local storage editor, 
 				hotkey <code>{F9},{F10}</code> resize the textarea, <code>{Ctrl-S}</code> saves
 				it to local storage.
-				'<code>export-all</code>' exports the entire local storage in JSON format.
+				'<code>export</code>' exports the entire local storage in JSON format.
+				'<code>help export</code>' for details.
 				<br><br>
 			</unindent></text> <code>escape </o> drop
 		\ main loop 印出所有的 fields 
@@ -616,21 +631,38 @@
 		\ 給以上變出來的 buttons 畫龍點睛
 			<js> 
 				$("input.lsfieldopen").click(function(){
-					execute("create-editbox");  // ( eb )
-					push(storage.all()); // ( eb hash name ) 
-					push(this.getAttribute("fieldname")); // ( eb hash name ) 
-					$('.ebname',tos(2))[0].value=tos();
-					execute("(eb.read)");
+					push(this.getAttribute("fieldname")); // ( name ) 
+					execute("(ed)");
 				})
 				$("input.lsfieldexport").click(function(){
-					// push(storage.get(this.getAttribute("fieldname"))); // ( field-obj ) 
-					// push(JSON.stringify(pop())); // ( json-string )
 					push(this.getAttribute("fieldname")); // ( field-name ) 
 					execute("(export-one-field)");
 				})
 			</js> 
 		;
 
+	: save ( -- ) \ Save all local storage edit box to localstorage.html
+		"" (dump) <js>
+		alert("Press ctrl-s to save all edit boxes to private/3ce.html or private/3htm.html. I guess your are using Google Chrome Browser.")
+		</js> ;
+        /// 3ce/localstorage.html, 3htm/localstorage.html for public logs.
+        /// or private/3ce.html, private/3htm.html for private info.
+		/// save restore import export .. etc 等相關命令能在所有 jeforth.3we 
+		/// applications 上使用, 但只有 3ce, 3htm 有絕對必要，因為 3nw, 3hta
+		/// 會自動 save-restore localStorage。
+
+    : restore ( -- ) \ Restore all local storage edit box from localstorage.html
+        js> vm.appname=="jeforth.3ce" if 
+            char private/3ce.html restore-localstorage.html 
+        then
+        js> vm.appname=="jeforth.3htm" if 
+            char private/3htm.html restore-localstorage.html 
+        then
+        list ;
+		/// save restore import export .. etc 等相關命令能在所有 jeforth.3we 
+		/// applications 上使用, 但只有 3ce, 3htm 有絕對必要，因為 3nw, 3hta 
+		/// 會自動 save-restore localStorage。
+        
 	: snapshot ( -- ) \ Save outputbox to a ed
 		create-editbox ( eb ) \ default is editable, saved, code mode
 		s" Snapshot " now t.dateTime + ( eb "now" ) 
@@ -689,384 +721,3 @@
 
 	autoexec \ Run localStorage.autoexec when jeforth starting up
 
-<comment>
-	[x] local storage ed editor textarea wrap on/off 
-		js> $("textarea",".eb").length . \ 先查看,確定目標只有一個,以免動錯對象
-		js> $("textarea",".eb").attr("wrap") . \ 查看目前狀態是 "on" 還是 "off"
-		js: $("textarea",".eb").attr("wrap","on") \ 這個例子把它 turn "on"
-		--> 增加這個按鈕... 可以不必, 用以下的 One-liner 一行搞定, 先 focus 在目標 textarea 
-			用 Ctrl-Enter 執行。
-		js: $("textarea:focus").attr("wrap","on")
-		js: $("textarea:focus").attr("wrap","off") 
-
-	[x] Change font size is similar 
-	    js: $("textarea",".eb").css("font-size","2em")
-	    js: $("textarea:focus").css("font-size","2em") \ 這個好, 同上, 用 Ctrl-Enter 執行
-
-    [x] : read-ls.html ( "pathname" -- ObjJquery ) \ Read localstorage.html
-            readTextFile ( "html" )
-            remove-script-from-HTML remove-style-from-HTML
-            :> replace(/id="inputbox"/g,'id="input_box"')
-            :> replace(/id="outputbox"/g,'id="output_box"')
-            :> replace(/id="endofinputbox"/g,'id="endofinput_box"')
-            :> replace(/class="console3we"/g,'class="ls_hash"')
-            </o> ( obj ) \ The entire localstorage.html in outputbox
-            js> $(".box",$(".ls_hash")) ( array ) \ array of field elements
-            ; 
-            /// The entire localstorage.html will be shown on outputbox.
-            /// The result is an jQuery of field elements
-    [ ] fieldname 
-            js> $(".ebname",tos()[0]).attr("placeholder") \ ==> 台灣50評估 2016-07-03 買華碩吧 (string)
-        doc
-            > js> $(".ebhtmlarea",tos()[0])[0].innerHTML \ if codemode is false
-            > js> $(".ebtextarea",tos()[0])[0].value \ if codemode is true
-        readonly
-            js> $(".ebreadonlyflag",tos()[0]).attr("flag") \ ==> false (string)
-        codemode
-            js> $(".ebmodeflag",tos()[0]).attr("flag") \ ==> false (string)
-        : element>field ( element -- obj ) \ Translate a local storage DOM element to object
-            {} ( element obj ) <js>
-            tos().name=$(".ebname",tos(1)).attr("placeholder");
-            tos().readonly=$(".ebreadonlyflag",tos(1)).attr("flag");
-            tos().mode=$(".ebmodeflag",tos(1)).attr("flag");
-            if (tos().mode=="true") tos().doc=$(".ebtextarea",tos(1)).value;
-            else tos().doc=$(".ebhtmlarea",tos(1)).innerHTML;
-            </js> nip ; /// 今天到這裡, 還不成功, don't know why . . .
-		
-		
-</comment>
-	
-	
-<comment>
-	: read-localstorage.html ( "pathname" -- ObjJquery ) \ Read localstorage.html
-		readTextFile ( "html" )
-		remove-script-from-HTML remove-style-from-HTML
-		:> replace(/id="inputbox"/g,'id="input_box"')
-		:> replace(/id="outputbox"/g,'id="output_box"')
-		:> replace(/id="endofinputbox"/g,'id="endofinput_box"')
-		:> replace(/class="console3we"/g,'class="ls_hash"')
-		</o> drop \ The entire localstorage.html in outputbox
-		js> $(".box",$(".ls_hash")) ( array ) \ array of field elements
-		;
-		/// The entire localstorage.html will be shown on outputbox.
-		/// The result is an jQuery of field elements
-
-	: element>field ( element -- obj ) \ Translate a local storage DOM element to object
-		{} ( element obj )
-		js: tos().name=$(".ebname",tos(1)).attr("placeholder")
-		js: tos().readonly=$(".ebreadonlyflag",tos(1)).attr("flag")==="true"?true:false
-		js> tos().mode=$(".ebmodeflag",tos(1)).attr("flag")==="true"?true:false
-		char true == if js: tos().doc=$(".ebtextarea",tos(1))[0].value
-		else js: tos().doc=$(".ebhtmlarea",tos(1))[0].innerHTML then
-		nip ;
-
-	\ Test, both words work fine.
-		char private/jeforth.3ce.html read-ls.html ( objQuery )
-		dup :> [0] element>field ( obj ) (see) ( objQuery ) cr
-		dup :> [1] element>field ( obj ) (see) ( objQuery ) cr
-		dropall
-
-	: jqo-list ( jQobj -- ) \ List localstorage.html fields in the given jQuery object
-		( jqo ) js> tos().length ( jqo length )
-		?dup if dup for dup r@ -
-		( jqo COUNT i ) js> tos(2)[tos()] ( jqo COUNT i jqo[i] )
-		element>field  ( jqo COUNT i filedObj )
-		swap . space :> name . cr
-		( COUNT ) next drop then drop ;
-
-	\ Test, 
-		dropall cls 
-		char private/localstorage2.html  read-ls.html ( objQuery )
-		jqo-list
-
-	: jqo-restore ( jQobj -- ) \ Restore localstorage.html jquery object to local storage
-		( jqo ) js> tos().length ( jqo length )
-		?dup if dup for dup r@ -
-		( jqo COUNT i ) js> tos(2)[pop()] ( jqo COUNT jqo[i] )
-		element>field  ( jqo COUNT fieldObj ) 
-		dup :> name ( jqo COUNT fieldObj name )
-		js: storage.set(pop(),pop())
-		( jqo COUNT ) next drop then drop ;
-
-	\ Test, 成功了!!!!
-		dropall cls 
-		char private/jeforth.3ce.html read-ls.html ( objQuery )
-		jqo-restore
-
-</comment>
-
-<comment>
-	> jq :> [3] element>field ( obj ) (see) ( objQuery )
-	{
-		"name": "月梅股 2016-07-21",
-		"readonly": "false",
-		"codemode": "false",
-		"doc": "<textarea>2016 Stock Evaluate 3514昱晶 今年開始賺錢了! 月梅可能又對了。</textarea><hr>"
-	} OK Input box EditMode = true
-	Input box EditMode = false
-
-	: test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ;
-		  5 test ==> 0 1 2 3 4
-
-
-	[x] 3hta's local storage 目前因為 debug localstorage.html 而被弄亂了, 從 3ce 來的 localstorage.html 應該先整理成安全的內容。
-		--> playground/localstorage2.html 弄好了, 所有在 DIV console3we 裡面的 class=box DIV 就是一個 field. 只留兩個把其他都
-			改成 class="boxxx" 即可。 field name 改掉了所以不會傷到真正的內容。
-		--> 把 3hta 修好,邊開發要用到, 必須保持可用。
-	[x] 直接從 Chrome Ctrl-S save 起來的 Edit boxes 沒有必要的線索，試試用 standardize-editbox 先
-		跑過 --> 對了!! --> dump-all command does it now.
-	[x] 承上，所以 edit box save 之前都應該先 standardize-editbox 一下。本來就有處裡 textarea 的
-		value 與 innerHTML 不一致的問題，該 command 保留但研究看是否應併進 ...
-		--> dump-all command does it now.
-	[x] Note! 3we applications 只能讀取 jeforth.3we folder 下的檔案。
-		char playground\jeforth.3ce.html read-ls.html ( objQuery )
-		如上，移到 playground 證實的確如此。 --> there are confidential info, 移到 private 更好。
-
-	\ 這行已經成功把整個 localstorage.html archive 檔讀成一個 jQuery object:
-	\     char playground\jeforth.3ce.html read-ls.html
-	\ js> $("*",tos()).length . \ ==> 16 OK 但是不能直接 (see) 那怎麼去觀察它?
-	\ 既然是 jQuery object 就用 each(function(){}) 來處理吧!
-	\ 以下這段 code 很成功地把 read-ls.html 取得的整個 jQuery object 以 outerHTML 的形式
-	\ 印出來了。
-	<js>
-	$("*",tos()).each(function(){
-		type("-------------------------\n");
-		type($(this)[0].outerHTML);
-		type("\n");
-	});
-	</js>
-
-	[x] ok now, the localstorage.html appear in outputbox is a little problem. 
-		arrange to a </e> section so easier to delete. 
-		1. create a dummy DIV in outputbox 
-			<o> <div id=dummy>I am a dummy div</div></o> drop
-		2. print things into the dummy DIV like outputbox :
-		   char #dummy <e> I am a dummy div with added things</e> drop
-		   char #dummy <e> <h1>hi</h1></e>
-		3. Check it out :
-		   js> dummy.innerHTML .
-		   I am a dummy divI am a dummy div with added things<h1>hi</h1> OK 
-		4. delete it :
-　　　　　   js> dummy removeElement
-	[x] move-all-editbox-to-outputbox may unnecessary at all. Try using above 
-		knowledge in dump-edit-box 
-		[x] create a hidden <DIV>
-			> <o> <div id=hh> I am hidden div</div></o> constant hh
-			I am hidden divcan any body see me ??
-			> hh . ==> [object HTMLDivElement] OK 
-			> hh js: $("#hh").hide() <-- yes, it works.
-			> char #hh <e> can any body see me ?? </e>
-			> hh js: $("#hh").show() <-- Bingo!! it works.
-			\ CSS style is the trick to hide and show
-			<div id="hh" style="display: none;">I am hidden</div>
-			<div id="hh" style="">I am not hidden</div>
-			--> Now we have "hidden-div" 
-		
-	[x] none edit box fields will become an edit box field after saved to 
-		localstorage.html and restored. dump-all should skip them.
-		--> the way to view them is :
-			  js> storage.get("field-name") (see)
-			so we don't need to use edit box to view them.
-		[x] "dump-all" is now "dump-edit-box" it doesn't dump none edit box
-			fields now.
-			
-</comment>
-	
-<comment> 
-	
-	\ These words are obsoleted
-
-   : ls.viewBox ( -- viewBox ) \ Create view box in outputbox, view a localStorage field
-		<text>
-			<div class=vb>
-			<style type="text/css">
-				.vb .box { width:90%; }
-				.vb .box, .vb .vbhtmlarea { border:1px solid black; }
-				.vb p { display:inline; } /* [ ] <P> 不該有套疊,故多餘的很容易可以消除 */
-				.vb .vbname { font-size: 1.1em; }
-			</style>
-			<div class=box>
-				<p class=vbpathname>vb path name</p> &gt; <b class=vbfieldname>vb field name</b>
-				<div class=vbbody>
-					<textarea class=vbtextarea rows=12 wrap="off"></textarea>
-					<div class=vbhtmlarea></div>
-				</div>
-			</div>
-			</div>
-		</text> /*remove*/ </o> ( viewBox ) 
-		js: $('.vbtextarea',tos()).attr("readOnly",true)
-		js: $('.vbhtmlarea',tos())[0].contentEditable=false
-		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( viewBox ) ;
-
-	: ls.viewBoxLoad ( viewBox hash fieldname -- ) \ Load data into a view box 
-		js: $(".vbfieldname",tos(2)).html(tos())  ( viewBox hash fieldname ) 
-		js> pop(1)[pop()] ( viewBox "field" )
-		<js> try {
-			var data = JSON.parse(tos()); // The field is an object
-		} catch(err) {
-			data = {doc:tos(),mode:true}; // Not an object, it must be a string.
-		};data</jsV> nip ( viewBox obj )
-		dup :> doc swap ( viewBox doc obj )
-		:> mode ( viewBox doc mode ) if ( viewBox doc )
-			js:	$(".vbhtmlarea",tos(1)).hide() 
-			js: $('.vbtextarea',pop(1))[0].value=pop() ( empty )
-		else ( viewBox doc )
-			js: $(".vbtextarea",tos(1)).hide()
-			js: $(".vbhtmlarea",pop(1)).html(pop()) ( empty )
-		then ; 
-
-	: read-json ( filename -- jsonHash ) \ Read json file
-		readTextFile ( "json" )
-		js> tos().charCodeAt(0)==65279 if js> pop().slice(1) then ( "json" )
-		js> JSON.parse(pop()) ( hash ) ;
-		/// Not only read the file but also resolve utf-8 BOM problem.
-		/// charCodeAt(0)==65279 is utf-8 BOM that may bother JSON.parse()
-	
-	: (ls.dump) ( hash filename -- ) \ Dump the entire localstorage.json formated hash
-		>r dup obj>keys swap ( array hash ) 
-		js> tos(1).length ?dup if for ( array hash )
-			ls.viewBox js: $(".vbpathname",tos()).html(rtos(1)) ( viewBox )
-			over ( array hash viewBox hash )
-			js> tos(3).pop() ( array hash viewBox hash fieldname )
-			ls.viewBoxLoad ( array hash )
-		next then ( array hash ) 2drop r> drop ;
-		
-	: ls.dump ( <filename> -- ) \ Dump the entire localstorage.json formated file or localStorage if filename is not given
-		char \n|\r word trim ( pathname ) 
-		?dup if ( pathname ) dup read-json swap (ls.dump) 
-		else js> storage.all() char localStorage (ls.dump) then ;
-		/// View logs in local storage of each applications:
-		///   ls.dump /* localStorage */
-		///   ls.dump 3hta/localstorage.json
-		///   ls.dump doc/archive.json
-		/// If local storage become too big. Simply move to doc/archive.json 
-		/// manually through a text editor.
-
-	: old-dump-all ( -- ) \ Dump all local storage fields 
-		\ main loop 印出所有的 fields 
-			js> storage.all() obj>keys ( array ) \ array of field names
-			begin js> tos().length while ( array )
-				js> tos().pop() ( array fieldname ) (ed) ( array )
-			repeat drop move-all-editbox-to-outputbox standardize-editbox ;
-		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
-		/// 可以 restore 回來。
-		
-	: old-(export) ( "string" -- ) \ Export the string to a textarea in a new window
-		\ HTA can open only one window, don't know why. Use that one anyway.
-			js> window.open('about:blank','export') ( field window )
-		\ 把現有的頁面刪掉
-			js> tos().document.getElementsByTagName("html").length ( field window count )
-			if js: tos().document.removeChild(tos().document.getElementsByTagName("html")[0]) then 
-			( field window )
-		<js> 
-			// 如果不弄個 textarea 來顯示, 恐怕有些東西會被翻譯成 HTML。
-			tos().document.write(
-				'<html><body>' +
-				'<textarea ' +
-				'id=exportbox ' +
-				'style="width:100%;font-size:1.3em"' +
-				'rows=20>' +
-				'</textarea></body></html>'
-			);
-			pop().document.getElementById("exportbox").value=pop();
-		</js> ;
-
-	: list-fields ( jQobj -- ) \ List field names in jQuery from read-localstorage.html
-		( jqo ) js> tos().length ( jqo length )
-		?dup if dup for dup r@ -
-		( jqo COUNT i ) js> tos(2)[tos()] ( jqo COUNT i jqo[i] )
-		element>field  ( jqo COUNT i filedObj )
-		swap . space :> name . cr
-		( COUNT ) next drop then drop ;
-		/// Demo how to iterate through them all.
-		/// Example:	
-		/// char private/jeforth.3ce.html read-localstorage.html ( jQueryObj )
-		/// list-fields
-        
-    \ very easy, no need of a word. 
-    \ js> storage.all() obj>keys :> sort(function(a,b){return(a.localeCompare(b))})
-	: field-list ( -- array ) \ Get local storage edit box fields, sorted by field name
-		[] js> storage.all() obj>keys ( [] names ) \ array of field names
-		begin js> tos().length while ( [] names )
-			js> tos().pop() ( [] names fieldname )
-			js> storage.get(pop()) ( [] names field ) 
-			dup is-editbox-field? ( [] names field boolean ) if 
-			( [] names field ) js: tos(2).push(pop()) ( [] names )
-			else drop then ( [] names )
-		repeat drop ;        
-
-    \ very easy, no need of a word. 
-    \ js> storage.all() obj>keys :> sort(function(a,b){return(a.localeCompare(b))})
-    code field-names ( -- [field-names] ) \ Get local storage edit box sorted field names
-        var aa = [];
-        for (var i in storage.all()){
-            push(storage.get(i));
-            execute("is-editbox-field?");
-            if (pop()) aa.push(i);
-        }
-        push(aa.sort(function(a,b){return(a.localeCompare(b))}));
-    end-code
-
-</comment>
-
-<comment>
-    > jq :> [3] element>field ( obj ) (see) ( objQuery )
-    {
-        "name": "月梅股 2016-07-21",
-        "readonly": "false",
-        "codemode": "false",
-        "doc": "<textarea>2016 Stock Evaluate 3514昱晶 今年開始賺錢了! 月梅可能又對了。</textarea><hr>"
-    } OK Input box EditMode = true
-    Input box EditMode = false
-
-    : test ?dup if dup for dup r@ - ( COUNT i ) . space ( COUNT ) next drop then ;
-          5 test ==> 0 1 2 3 4
-
-
-    [x] 3hta's local storage 目前因為 debug localstorage.html 而被弄亂了, 從 3ce 來的 localstorage.html 應該先整理成安全的內容。
-        --> playground/localstorage2.html 弄好了, 所有在 DIV console3we 裡面的 class=box DIV 就是一個 field. 只留兩個把其他都
-            改成 class="boxxx" 即可。 field name 改掉了所以不會傷到真正的內容。
-        --> 把 3hta 修好,邊開發要用到, 必須保持可用。
-    [x] 直接從 Chrome Ctrl-S save 起來的 Edit boxes 沒有必要的線索，試試用 standardize-eb 先
-        跑過 --> 對了!! --> dump-all command does it now.
-    [x] 承上，所以 edit box save 之前都應該先 standardize-eb 一下。本來就有處裡 textarea 的
-        value 與 innerHTML 不一致的問題，該 command 保留但研究看是否應併進 ...
-        --> dump-all command does it now.
-    [x] Note! 3we applications 只能讀取 jeforth.3we folder 下的檔案。
-        char playground\jeforth.3ce.html read-ls.html ( objQuery )
-        如上，移到 playground 證實的確如此。 --> there are confidential info, 移到 private 更好。
-
-    \ 這行已經成功把整個 localstorage.html archive 檔讀成一個 jQuery object:
-    \     char playground\jeforth.3ce.html read-ls.html
-    \ js> $("*",tos()).length . \ ==> 16 OK 但是不能直接 (see) 那怎麼去觀察它?
-    \ 既然是 jQuery object 就用 each(function(){}) 來處理吧!
-    \ 以下這段 code 很成功地把 read-ls.html 取得的整個 jQuery object 以 outerHTML 的形式
-    \ 印出來了。
-    <js>
-    $("*",tos()).each(function(){
-        type("-------------------------\n");
-        type($(this)[0].outerHTML);
-        type("\n");
-    });
-    </js>
-
-    [x] none edit box fields will become an edit box field after saved to 
-        localstorage.html and restored. dump-all should skip them <--- Done!!
-        --> the way to view them is :
-              js> storage.get("field-name") (see)
-            so we don't need to use edit box to view them.
-</comment>		
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
