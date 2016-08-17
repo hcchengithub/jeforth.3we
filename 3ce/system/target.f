@@ -149,7 +149,7 @@
 		/// modified by 3ce target.f to auto switch dispaly back to local.
 	
 	include f/mytools.f		
-	include 3htm/f/editor.f
+	include 3htm/f/hte.f
 	include 3htm/f/ls.f
 
 	\ ------------ End of target.f -------------------

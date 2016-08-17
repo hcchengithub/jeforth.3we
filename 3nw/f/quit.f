@@ -34,7 +34,7 @@
 	include process.f
 	include path.f
 	include fs.f
-	include editor.f
+	include hte.f
 	include ls.f
 
 \ ------------ End of quit.f -------------------

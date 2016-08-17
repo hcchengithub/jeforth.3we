@@ -53,7 +53,7 @@
 	include 3htm/f/element.f		\ HTML element manipulation
 	include 3htm/f/platform.f		
 	include f/mytools.f		
-	include 3htm/f/editor.f
+	include 3htm/f/hte.f
 	include 3ce/system/ce.f
 	include 3htm/f/ls.f
 	

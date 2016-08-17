@@ -2,7 +2,7 @@ code //         last().help = nexttoken('\n|\r'); end-code
 				// ( <comment> -- ) Give help message to the new word.
 code stop       reset() end-code // ( -- ) Stop the TIB loop
 code parse-help var ss = " " + pop() + " ", comment = "";
-				var stackDiagram = ss.match(/^\s+(\(\s.*\s\))\s+(.*)/); // null or [0] entire line, [1] (...), [2] the rest.
+				var stackDiagram = ss.match(/^\s+(\(\s.*?\s\))\s+(.*)/); // null or [0] entire line, [1] (...), [2] the rest.
 				if(stackDiagram) { 
 					comment = (" "+stackDiagram[2]+" ").match(/^\s+\\\s+(.*\S)\s+/); // null or [0] entire line, [1] comment
 					if(comment){
@@ -24,6 +24,7 @@ code parse-help var ss = " " + pop() + " ", comment = "";
 				}   
 				end-code        
 				// ( "line" -- "helpmsg" "rests" ) Parse "( -- ) \ help foo baa" from 1st input line
+				
 code code       push(nexttoken()); // name of the word
 				push(nexttoken('\n|\r')); // rest of the first line
 				execute("parse-help"); // ( "name" "helpmsg" "rests" )
@@ -457,7 +458,7 @@ code (forget) 	( -- ) \ Forget the last word
 				if (last().cfa) here = last().cfa;
 				words[current].pop(); // drop the last word
 				execute("rescan-word-hash");
-				end-code
+				end-code 
 
 				<selftest>
 					*** (forget) should forget the last word
@@ -1989,7 +1990,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 							var i = w.cfa;
 							type("\n-------- Definition in dictionary --------\n");
 							do {
-								push(i); execute("(dump)");
+								push(i); execute(_me["(dump)"]);
 							} while (dictionary[i++] != RET);
 							type("---------- End of the definition -----------\n");
 						}
@@ -2005,6 +2006,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 				}
 				vm.g.base = basewas;
 				end-code
+				last :: ["(dump)"]=tick("(dump)")
 
 : see           ' (see) ; // ( <name> -- ) See definition of the word
 
@@ -2046,7 +2048,7 @@ js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint
 code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
 				vm.jsc.enable = true;
-				dictate("bp");
+				execute(_me["bp"]); // call by reference safer than call by name
 				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
 code bd			( -- ) \ Disable breakpoint, See also 'bp','be'.
@@ -2059,13 +2061,17 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 				vm.jsc.enable = true;
 				if (bp) {
 					vm.jsc.bp = parseInt(bp);
-					execute("be") 
+					execute(_me["be"])  // call by reference safer than call by name
 				} else {
 					type("Breakpoint : " + vm.jsc.bp);
 					if (inner == vm.g.debugInner) type(", activated\n");
 					else  type(", inactive\n");
 				}
 				end-code interpret-only
+				\ bp be look easily conflictedly reused in the future
+				\ call by reference safer than call by name
+				' be :: ["bp"]=last() 
+				last :: ["be"]=tick("be")
 				/// If no address is given then show the recent breakPoint and 
 				/// its status.
 				/// work with 'jsc' debug console, jsc is application dependent.

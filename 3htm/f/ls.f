@@ -312,6 +312,7 @@
 			( eb field )
 		\ check the field name 	
 			js> Boolean(tos()) if else
+				js> $('.ebname',tos(1))[0].value
 				<js> alert("Can't find '" + pop() + "', is it new?")</js>
 				drop 2drop exit \ nothing to do
 			then ( eb field )
@@ -423,7 +424,8 @@
 		js> JSON.stringify(storage.all()) char export type>textarea ;
 		/// The format is compatible with (3hta or 3nw )\localstorage.json 
 		/// 此為 jeforth.3htm, jeforth.3ca 等不能存檔的環境而設。
-		/// 手動 copy-paste 到 text editor 然後存檔，
+		/// 手動 copy-paste 到 text editor 然後存檔成 filename.json.
+		/// 參見 help import 了解更多。
 
 	code (import) ( "string" -- ) \ Import entire localStorage in JSON format
 		var ss = pop();
@@ -441,21 +443,18 @@
 		/// 只 save 部分 fields 更理想。
 		/// save restore import export .. etc 等相關命令能在所有 jeforth.3we 
 		/// applications 上使用, 但只有 3ce, 3htm 有絕對必要，因為 3nw, 3hta
-		/// 會自動 save-restore localStorage。
+		/// 本來就會自動 save-restore localStorage。
 		
 	: import ( [<pathname.json>] -- ) \ Import entire pathname.json or default if absent
 		char \r|\n word trim ( pathname ) 
 		js> tos()=="" if \ use default 
-			drop 
-			js> vm.appname=="jeforth.3ce" if 
-				char private/3ce.json
-			then
-			js> vm.appname=="jeforth.3htm" if 
-				char private/3htm.json
-			then
-		then readTextFile (import) ;
-		/// Import 疊加且覆蓋現有的 localStorage。The format is compatible 
-		/// with ~\localstorage.json。
+			drop js> vm.appname :> match(/(.+)\.(.+)/) :> [2] ( 3ca|3htm|3nw|3hta )
+			char private/ swap + char .json +
+		then 
+		js> tos()=="" if ." Error! file not found: " . cr exit then
+		readTextFile (import) ;
+		/// 疊加且覆蓋現有的 localStorage from the specified JSON file,
+		/// default from private/3ce.json or private/3htm.json。
 		/// 若想整個蓋掉而不只是疊加上去，則需先清除整個 local storage. 
 		/// 要非常小心，方法是:
 		///   js: localStorage.clear() \ for none 3HTA

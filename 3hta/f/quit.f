@@ -88,7 +88,7 @@
 			/// at target position, press Ctrl-Enter, then that's it! Date-time pasted to
 			/// the target position. Only supported in 3hta so far.
 	
-	include editor.f
+	include hte.f
 	include ls.f
 	marker ---
 
