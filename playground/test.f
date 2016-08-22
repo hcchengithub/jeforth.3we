@@ -1,0 +1,1 @@
+run: cr 1 if ." True" else ." False" then cr  10 for r@ . space next cr 
