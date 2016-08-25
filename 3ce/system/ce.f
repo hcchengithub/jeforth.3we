@@ -8,7 +8,8 @@
 \ 早期讓 3htm, 3ce 共用 index.html home page was a mistake. 分開之後這種情況不會有了。
 \ 所以這段防呆只是 nice to have 其實不需要了。
 \
-js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if] 
+js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' 
+[if] \ Chrome extension environment.
 
 	s" ce.f" source-code-header
 
@@ -47,8 +48,21 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		</js> ;
 		/// 
 		
+	: open-web-page ( url activeFlag -- tab ) \ Open web page and return Chrome Extension tab object before complete loading
+		<js> chrome.tabs.create(
+			{url:pop(1),active:pop()},
+			function(tab){push(tab);execute('stopSleeping');}  
+		) </js> ( tab ) 
+		1000000 sleep ; \ 實際經常回來得很快
+		/// The input activeFlag specifies whether the page is to be activated
+		
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
-		js> window.open("jeforth.3ce.html") background-page :: lastTab=pop() ;
+		char jeforth.3ce.html true open-web-page ( tab )
+		background-page :: lastTab=pop() ;
+		/// 之前用 js> window.open("jeforth.3ce.html") 是可以取得新 3ce page
+		/// 的 window object 也許有某種用途，記一下。如今在 lastTab 留下的是
+		/// Chrome extension 的 tab object。要控制該 tab 可經由 tabid 下達
+		/// 手動的 {F7} 或 (dictate) command-line。
 		
 	: tabs.getCurrent ( -- objTab ) \ Get the current Chrome extension tab object.
 		js: chrome.tabs.getCurrent(function(tab){push(tab);execute('stopSleeping')}) 
@@ -381,7 +395,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// tabs.select tabid attach
 		/// ( empty, tabid by default or active-tab if from popup ) attach 
 
-[then] \ Not Chrome extension environment.
+		
+[then] \ Chrome extension environment.
 
 				
 	
