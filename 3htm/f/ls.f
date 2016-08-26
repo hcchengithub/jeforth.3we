@@ -393,6 +393,27 @@
 		char \n|\r word (ed) ; 
 		/// A new name creates a new field.
 
+	: (full-screen) ( "fieldname" -- ) \ The whole tab alone for the field, you lose outputbox.
+		trim ( fieldname ) (ed) ( empty )
+		cls js> $(".eb").length 1- ( name i ) js> $(".eb")[pop()] ( eb )
+		js> $(".console3we")[0] swap appendChild ( empty )
+		js> $(".ebname")[0].value ( name )
+		js: document.title=pop()+"-EditBox" ( empty )
+		js> header removeElement js> outputbox removeElement js> inputbox removeElement ;
+
+	: full-screen ( <fieldname> -- ) \ Open a new 3ce tab and edit box alone for the field 
+		char \r|\n word trim js> tos().length if else 
+			drop js> $(".eb").length js> tos()==0 ?abort" Which field?" 
+			1- ( i ) js> $(".eb")[pop()] ( eb )
+			js> $(".ebname",pop())[0].value ( name )
+		then
+		s" jeforth.3ce.html?<text> " 
+		swap + 
+		s" </text> (full-screen)" +
+		true open-web-page drop ;
+		/// 缺省 <fieldname> 用目前最後一個 edit box，若再無就報錯。
+
+
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
 		js> storage.get(pop()).doc tib.append ;
 		

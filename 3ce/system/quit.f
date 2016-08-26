@@ -13,8 +13,7 @@
 				
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the Chrome extension window refresh
 				<js> confirm("Really want to restart?") </jsV> 
-				if active-tab :> id js: chrome.tabs.reload(pop()) false
-				else true then ;
+				if js: chrome.tabs.reload() false else true then ;
 				/// Defined in 3ce/system/quit.f
 				/// Return a false to stop the hotkey event handler bubbling.
 				/// Must intercept onkeydown event to avoid original function.
@@ -46,7 +45,6 @@
 	\ 發現透過 rawgit.com 可以直接執行發佈在 GitHub 上的 jeforth.3htm
 	\ 為了加快速度,以下都用絕對位址。避免讓 readTextFileAuto 順著 path
 	\ 慢慢嘗試錯誤。
-	
 	include 3htm/f/jsc.f		    \ JavaScript debug console in 3htm/f
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
@@ -58,7 +56,7 @@
 	include 3htm/f/ls.f
 	
 \ ------------ End of jeforth.f -------------------
-	js: kvm.screenbuffer=null \ turn off the logging
+	js: vm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
 	js: vm.scroll2inputbox();inputbox.focus()
 
