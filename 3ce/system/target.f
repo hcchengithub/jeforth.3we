@@ -17,6 +17,13 @@
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 
+    \ target page does not have all the console3we features. Use 3ce page instead while 
+    \ 3ce pages ( opened by open-3ce-tab command ) have all the features. Press {F7} instead 
+    \ of {Enter} to execute the inputbox TIB on the target page ( pointed by tabid ) , or 
+    \ s" command line" (dictate) does the same thing, or use <ce> ... </ce> to run javascript 
+    \ code on the target page. ls.f full-screen command demos a 3ce page application that uses
+    \ URL command line directly to tell it what to do.
+
 	vocabulary target.f also target.f definitions
 	
 	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
