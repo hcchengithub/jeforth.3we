@@ -350,28 +350,23 @@
         (eb.parent) ( eb ) \ The input object can be any node of the editbox.
         js> $('.ebname',tos())[0].value trim ( eb name ) 
 		js> storage.get(pop()) ( eb field ) (eb.read) ;
-        
-	: is-opened? ( name -- name boolean ) \ Check if the field is opened?
+		
+	: fieldname>eb ( name -- eb ) \ Get eb object if it is opened, null otherwise
 		trim <js> 
-			var flag = false;
+			var o = null;
 			$(".eb").each(function(){
-				if ($(".ebname",this)[0].value == tos()) flag = true;
+				if ($(".ebname",this)[0].value == tos())o = this;
 			});
-			flag;
-		</jsV> ;
-	
-	: jump-to-it ( name -- name ) \ Jump to the opened field
-		trim <js> 
-			var eb = null;
-			$(".eb").each(function(){
-				if ($(".ebname",this)[0].value==tos()) eb = this;
-			})
-			if (eb) {
-				inputbox.blur();
-				window.scrollTo(0,eb.offsetTop-50);
-			}
+			pop(); // drop the field name 
+			push(o); // eb object
 		</js> ;
 	
+	: jump-to-it ( name -- ) \ Jump to the opened field
+		trim fieldname>eb ( eb ) ?dup if (eb)
+			js: inputbox.blur()
+			js: window.scrollTo(0,pop().offsetTop-50);
+		then ;
+		
     : {ed} ( {field} name -- ) \ Open the field in an edit box 
 		trim create-editbox ( field name eb )
 		js: $('.ebname',tos())[0].value=pop(1)  ( field eb ) 
@@ -383,36 +378,46 @@
 	
     : (ed) ( "field name" -- ) \ Edit local storage field
 		trim js> tos()!="" if ( name ) 
-			is-opened? if jump-to-it drop exit then ( name )
+			dup fieldname>eb if jump-to-it exit then ( name )
 		    js> storage.get(tos()) swap ( field name ) {ed}
 		else drop then ; 
 		/// If field name is null string then do nothing
-		/// If the field is opened then jump to it.
+		/// If the field has been opened then jump to it.
 		
     : ed ( <field name> -- ) \ Edit local storage field
 		char \n|\r word (ed) ; 
 		/// A new name creates a new field.
+		/// If field name is null string then do nothing
+		/// If the field has been opened then jump to it.
 
 	: (full-screen) ( "fieldname" -- ) \ The whole tab alone for the field, you lose outputbox.
 		trim ( fieldname ) (ed) ( empty )
 		cls js> $(".eb").length 1- ( name i ) js> $(".eb")[pop()] ( eb )
-		js> $(".console3we")[0] swap appendChild ( empty )
+		js> $(".console3we")[0] swap appendChild ( empty ) \ 本來在
 		js> $(".ebname")[0].value ( name )
 		js: document.title=pop()+"-EditBox" ( empty )
 		js> header removeElement js> outputbox removeElement js> inputbox removeElement ;
+		/// For non-3ce applications, use this command to edit 
 
+	js> vm.appname=="jeforth.3ce" [if]
+	
 	: full-screen ( <fieldname> -- ) \ Open a new 3ce tab and edit box alone for the field 
 		char \r|\n word trim js> tos().length if else 
 			drop js> $(".eb").length js> tos()==0 ?abort" Which field?" 
 			1- ( i ) js> $(".eb")[pop()] ( eb )
 			js> $(".ebname",pop())[0].value ( name )
-		then
+		then ( name ) 
+		dup fieldname>eb ( name eb ) js> $(".ebmode",pop()) ( name button )
+		dup eb.save ( name button ) eb.close ( name )
 		s" jeforth.3ce.html?<text> " 
-		swap + 
+		swap + \ [ ] 直接用 url 的方式使得中文 field name 失效! 
 		s" </text> (full-screen)" +
 		true open-web-page drop ;
 		/// 缺省 <fieldname> 用目前最後一個 edit box，若再無就報錯。
+		/// Only 3ce can do this. Common local storage among 
+		/// different 3ce tabs, control another 3ce tab, etc.
 
+	[then]
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
 		js> storage.get(pop()).doc tib.append ;
