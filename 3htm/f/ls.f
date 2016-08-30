@@ -362,7 +362,7 @@
 		</js> ;
 	
 	: jump-to-it ( name -- ) \ Jump to the opened field
-		trim fieldname>eb ( eb ) ?dup if (eb)
+		trim fieldname>eb ( eb ) ?dup if ( eb )
 			js: inputbox.blur()
 			js: window.scrollTo(0,pop().offsetTop-50);
 		then ;
@@ -400,23 +400,31 @@
 		/// For non-3ce applications, use this command to edit 
 
 	js> vm.appname=="jeforth.3ce" [if]
-	
-	: full-screen ( <fieldname> -- ) \ Open a new 3ce tab and edit box alone for the field 
-		char \r|\n word trim js> tos().length if else 
-			drop js> $(".eb").length js> tos()==0 ?abort" Which field?" 
-			1- ( i ) js> $(".eb")[pop()] ( eb )
-			js> $(".ebname",pop())[0].value ( name )
-		then ( name ) 
-		dup fieldname>eb ( name eb ) js> $(".ebmode",pop()) ( name button )
-		dup eb.save ( name button ) eb.close ( name )
-		s" jeforth.3ce.html?<text> " 
-		swap + \ [ ] 直接用 url 的方式使得中文 field name 失效! 
-		s" </text> (full-screen)" +
-		true open-web-page drop ;
+
+	: full-screen ( [<fieldname>] -- ) \ Open a new 3ce tab and edit box alone for the field 
+		\ 取得 fieldname from TIB or the last EditBox
+			char \r|\n word trim js> tos().length if else 
+				drop js> $(".eb").length js> tos()==0 ?abort" Which field?" 
+				1- ( i ) js> $(".eb")[pop()] ( eb )
+				js> $(".ebname",pop())[0].value ( name )
+			then ( name ) 
+		\ if is an existing EditBox then save and close
+			dup fieldname>eb ( name eb ) ?dup if 
+				js> $(".ebmode",pop()) ( name button )
+				dup eb.save ( name button ) eb.close ( name )
+			then ( name )
+		\ 留在 host TOS 的 command line 
+			<text> <text> _n_</text> (full-screen) </text> 
+			:> replace(/_n_/,pop())
+		\ New 3ce page url 
+			<text> jeforth.3ce.html?js: chrome.tabs.sendMessage(_id_,({forth:"(dictate)"}))</text> 
+			myTabId :> toString() swap :> replace(/_id_/,pop())
+		\ open the target page
+			true open-web-page :> id tabid! ;
 		/// 缺省 <fieldname> 用目前最後一個 edit box，若再無就報錯。
 		/// Only 3ce can do this. Common local storage among 
 		/// different 3ce tabs, control another 3ce tab, etc.
-
+		
 	[then]
 
 	: (run)  ( "local storage field name" -- ) \ Run local storage source code.
