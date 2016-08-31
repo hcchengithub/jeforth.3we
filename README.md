@@ -1,6 +1,6 @@
 j e f o r t h . 3 w e
 ==============
-**Forth** is the simplest programming language ever. The jeforth.**3we** project is an implementation based on a **3 Words Engine** from [project-k](http://github.com/hcchengithub/project-k) for many applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and probably more in the future. All of them have been tested on Windows 8 or Windows 10.
+**Forth** is the simplest programming language ever. The jeforth.**3we** project is an implementation based on a **3 Words Engine** from [project-k](http://github.com/hcchengithub/project-k) for many applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and can be more. All of them have been tested on Windows 8 or Windows 10.
 
 Play now
 ===========
@@ -9,53 +9,58 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 #### [Solar system](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
 [簡介](http://note.youdao.com/yws/public/redirect/share?id=94764cf57ba4365e2997f4a268ff7716&type=false)<br>
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png)
-
+<br>
 #### [H2O](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/h2o.png)
-
+<br>
 #### [Alarm clock](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
  ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-alarm.png)
  
+<br>
 #### [Box2Dweb Physics Engine demo - Arrows](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-arrow.png)
 
+<br>
 #### [Chipmunk Physics Engine demo - Pyramid Stack](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
 ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-pyramidstack.png)
 
-
-What else can you do with jeforth.3we?
-=============
-
+<br>
 #### [Markdown editor](http://note.youdao.com/yws/public/redirect/share?id=1a8a342f3a9c1e0622a6050480af28b7&type=false)
 
-NW.js can access files in your local computer and also have all abilities like the Chrome browser, that allows jeforth.3nw to include JavaScript modules from the Internet. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw. 
+NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw. 
 
-![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo 3nw mde editor.JPG)
+![enter image description here](https://raw.githubusercontent.com/wiki/hcchengithub/jeforth.3we/pictures/demo%203nw%20mde%20editor.JPG)
 
 
-Get source code, unzip, and start running
-=============
+Get source code
+======
 
 | Item | Address |
 ----------------|----------------------------------------------
 | jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
 
-<br>
-Click the [Download ZIP] button of both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. Then you can run 3hta.bat  without installing anything else if your computer is Windows 8 or Windows 10; or run 3nd.bat and 3nw.bat, if you have installed node.js and nw.js.
+Get source code from GitHub dwon to your computer through 'git clone' or Download Zip, either way.
+
+git clone
+---------
+'project-k' is a stand alone project and top on it is the 'jeforth.3we' porject. So, we need to 'git clone' twice for each of them to get the whole thing from GitHub down to to your computer. 1. 'git clone' jeforth.3we first to a directory named exactly 'jeforth.3we'. 2. Then 'git clone' project-k to under the jeforth.3we directly. 
+
+Download Zip
+------------
+Click the [Download ZIP] button of both projects [jeforth.3we](https://github.com/hcchengithub/jeforth.3we) and [project-k](https://github.com/hcchengithub/project-k) on their GitHub web page to get them. Unzip jeforth.3we first and then unzip project-k to under the jeforth.3we directory, as shown in the below directory listing. If your unzip'ed directory name is something like "jeforth.3we-master" or "jeforth.3we-develop" then you have to rename it to "jeforth.3we"; do the same thing to "project-k". Then you can run 3hta.bat  without installing anything else if your computer is Windows 8 or Windows 10; or run 3nd.bat and 3nw.bat, if you have installed node.js and nw.js.
 
 My jeforth.3we/ directory listing for example,
 
 ![jeforth3we-dir.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/jeforth3we-dir.png)
+<br>
+### Note! jeforth.3ha from Donload Zip needs to resolve new line characters
 
-
-**Note:** Only for jeforth.3hta and only when you were **Download Zip** jeforth.3we from GitHub, It's necessary to use GNU tool [unix2dos](http://waterlan.home.xs4all.nl/dos2unix.html) to convert the new line characters of all text files [from Unix's LF to Windows' CRLF](https://en.wikipedia.org/wiki/Unix2dos). This is an example command line of the usage:
+Only for jeforth.3hta and only when you were **Download Zip** jeforth.3we from GitHub, It's necessary to use GNU tool [unix2dos](http://waterlan.home.xs4all.nl/dos2unix.html) to convert the new line characters of all text files [from Unix's LF to Windows' CRLF](https://en.wikipedia.org/wiki/Unix2dos). The command line is like this:
 
     d:\jeforth.3we>for /R %G in (*.*) do d:\bin\unix2dos.exe "%G"
 
-<br>
-
-If you were **git clone https://github.com/hcchengithub/jeforth.3we** instead of **Download Zip** then forget this step, GitHub shell for Windows already converts new line characters to CRLF correctly. 
+If you were **git clone https://github.com/hcchengithub/jeforth.3we** instead of **Download Zip** then forget this step, GitHub shell for Windows converts new line characters to CRLF correctly. 
 
 Presentation videos
 ======

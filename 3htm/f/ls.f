@@ -636,7 +636,7 @@
 			<text> <unindent><br>
 				HTML5 Local storage field '<code>autoexec</code>' is run when start-up.
 				'<code>run <field name></code>' runs the local storage field, you make sure it's executable.
-				'<code>ed <field-name or blank></code>' opens local storage editor, 
+				'<code>ed <field-name></code>' opens local storage editor, 
 				hotkey <code>{F9},{F10}</code> resize the textarea, <code>{Ctrl-S}</code> saves
 				it to local storage.
 				'<code>export</code>' exports the entire local storage in JSON format.
