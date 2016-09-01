@@ -73,7 +73,7 @@
 	include beep.f		\ Define the beep command
 	include binary.f	\ Read/Write binary file
 	include shell.application.f
-	include excel.f
+  \ include excel.f		\ 有用到時再自行 include 好處多
 	include canvas.f
 	include mytools.f
 	

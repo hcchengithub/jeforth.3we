@@ -18,7 +18,10 @@
 						/// Formal way is : excel.app :: quit()
 						
 	\ 先查有幾個 excel.application 在 running? 通常應該只有一個，如果是一個就用它, 如果超過一個
-	\ 就警告, 如果沒有就開一個。 [x] 如果 excel 沒有 install 的情形要跳過。
+	\ 就警告, 如果沒有就開一個。 如果 excel 沒有 install 的情形要跳過。當 jeforth.3hta 已經在 run
+	\ 此時 excel 又已經是 multiple 了，與其提供 rescan 命令不如讓 excel.f 重啟，目前就是這樣。
+	\ 當要對 excel 工作時，最好臨時再 include excel.f 以收檢查之效且保證 excel.app object 有效。
+	\ 因此 quit.f 不再主動 include excel.f 了。
 	
 	: excel.app.count 	( -- count ) \ excel.exe instance count, I can only handle 1. 
 						s" where name = 'ExCeL.ExE'" count-process ;
@@ -71,6 +74,9 @@
 
 	: excel.invisible 	( -- ) \ Make the excel.app invisible
 						excel.app js> pop().visible=false drop ;
+
+						\ In case the excel is hidden, better be visible.
+						excel.invisible 100 nap excel.visible 
 						
 						<selftest>
 							*** excel.visible excel.invisible
@@ -456,12 +462,13 @@
 		vb> Minute(vm.tos())  2 .0r space
 		vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
 		;
+		/// 這 word 是個範例，需要時參考來調配適用的【日期時間】格式：
 		/// vb> Year(vm.tos())
 		/// vb> Month(vm.tos())
 		/// vb> Day(vm.tos())
 		/// vb> Hour(vm.tos())
 		/// vb> Minute(vm.tos())
-		/// vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
+		/// vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()]
 		
 	<selftest>
 		*** clsoe excel
