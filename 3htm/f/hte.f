@@ -155,4 +155,15 @@
 	: {ctrl-f2} ( -- false ) \ Event handler, convert HTML tags at the #text anchorNode
 		js> window.getSelection().anchorNode ce! #text>html false ;
 
+	: paste-string ( "string" -- ) \ Paste the string to anchorNode if it's a #text
+		js> getSelection() ( "string" selection )
+		dup :> anchorNode.nodeName=="#text" if ( "string" selection )
+		js> tos().anchorNode.nodeValue.slice(0,tos().anchorOffset)+pop(1)+tos().anchorNode.nodeValue.slice(tos().anchorOffset) ( selection "new string" )
+		js: pop(1).anchorNode.nodeValue=pop() 
+		else ( "string" selection ) 2drop then ;
+		/// Click on web page if the anchor is on a #text node then paste the given string.
+		/// Press ctrl-enter to execute this command so as to allow the click and anchor to
+		/// work. This command does not work if targeting in a textarea, it's not a #text
+		/// node and I don't know how to insert the given string into a textarea.
+		
 \ -- END --
