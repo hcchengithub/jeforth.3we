@@ -33,7 +33,11 @@
 						/// "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
 						s" where name = 'ExCeL.ExE'" count-process ( count ) 
 						excel.app.count 1 > [if] 
-							." Warning: Multiple Excel.Application are running." *debug* Multiple-Excel-error>>> 
+							cr cr ." W A R N I N G !   (from excel.f)" cr cr
+							." Multiple Excel.Application are running, I can only handle one of them." cr 
+							." The excel I've got the handle should be high-lighted, you see that? Please use" cr 
+							." that one or you'll have to use the 'kill-excel' command to close all of them and" cr
+							." then '--excel.f-- include excel.f' to restart me, the excel.f module, again." cr cr
 						[then]
 						excel.app.count [if] 
 							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):vm.push(xl)</vb> 會開出新 Excel.Application。
@@ -75,7 +79,9 @@
 	: excel.invisible 	( -- ) \ Make the excel.app invisible
 						excel.app js> pop().visible=false drop ;
 
-						\ In case the excel is hidden, better be visible.
+						\ In case the excel is hidden, let it be visible. Through this 
+						\ way the user will know which instance of excel is handled if
+						\ there were multiple ones.
 						excel.invisible 100 nap excel.visible 
 						
 						<selftest>
@@ -460,8 +466,7 @@
 		vb> Day(vm.tos())     2 .0r space   
 		vb> Hour(vm.tos())    2 .0r char : .
 		vb> Minute(vm.tos())  2 .0r space
-		vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr
-		;
+		vb> WeekDay(vm.pop()) js> (["Dummy","Sun","Mon","Tue","Wed","Thu","Fri","Sat"])[pop()] . cr ;
 		/// 這 word 是個範例，需要時參考來調配適用的【日期時間】格式：
 		/// vb> Year(vm.tos())
 		/// vb> Month(vm.tos())
@@ -1530,5 +1535,15 @@
 \	1 nap rewind ( 重複 )
 \	auto ( 收尾 )
 \
+\ 	: yellow-them ( "$A$1 $B$135" -- ) \ Mark given cells with yellow color
+\ 		<js> ("dummy "+pop()+" dummy").split(/\s+/).slice(1,-1)</jsV> ( array )
+\ 		( array ) js> tos().length for ( array )
+\ 			( array ) js> tos().pop() ( array' "$A$1" )
+\ 			activeSheet :: range(pop()).interior.colorindex=6
+\ 		next ( array ) drop ;
+\ 		/// 先 mark 配息日欄，然後執行： 
+\ 		/// ( 含#NA! ) manual 0 cut i?stop value-it 1 nap rewind auto
+\ 		/// 把有日期的都由參考公式轉成 value 並取得所有新格子的座標，接著
+\ 		/// 用 <text> $A$1 $B$135 ... </text> yellow-them 把新格子都塗上顏色。
 </comment>
 
