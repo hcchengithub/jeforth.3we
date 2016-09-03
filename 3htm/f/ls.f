@@ -627,9 +627,11 @@
 		jqo>localstorage hidden-div removeElement ;
 		/// char private/jeforth.3ce.html restore-localstorage.html
 
-	: autoexec ( -- ) \ Run localStorage.autoexec
-		js> storage.get("autoexec").doc ( "autoexec" )
-		js> tos() if ( "autoexec" ) tib.insert else ( "autoexec" ) drop then ;
+	: autoexec ( -- ) \ Run localStorage.autoexec if there's no command line jobs to do
+        args trim if else 
+            js> storage.get("autoexec").doc ( "autoexec" )
+            trim ?dup if tib.insert then 
+        then ;
 
 	: list ( -- ) \ List all localStorage fields, click to open
 		\ Print How to use,

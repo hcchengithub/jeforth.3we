@@ -6,7 +6,7 @@
 	include unindent.f
 	also forth definitions \ 怕有甚麼東西被 only 玩掉了，都放 forth 吧!
 
-	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
+	<text>	/* <Text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
 			** tib.insert 意思是：把這一大段 text 當作主人輸入 TIB 的 Forth commands 執行。 
 			** 像本段這種類似 C 語言的 comments 都會在執行前被清除掉，彷彿 jeforth 認得這種
@@ -54,7 +54,6 @@
 				<A HREF="http://wiki.laptop.org/go/Forth_Lessons" target="_blank">
 				OLPC (One Laptop per Child) 的 online 教材
 				</A>。
-				也許將來該特別為 OLPC 做一版 jeforth.OLPC 以求更完整地執行該教材的範例。
 			</p>							
 			<p>	
 				幾年前在 Processing.js 網站上看到過我們接下來要示範的這個 
@@ -74,7 +73,7 @@
 	/*remove*/ \ 清除 /* ... */ 註解。
 	<code>escape 	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert   	\ execute the string on TOS
-	
+
 \ /* ----- Playground 互動區 --------------------------------------------------------------------- */
 
 	<text> 
@@ -135,8 +134,8 @@
 			<img src="doc/jeforth-demo-cloth-2015-11-201.jpg">
 /* -------------------------------------------------------------------------- */
 			<p>
-				【交談區】初看只是上下兩塊區域，沒甚麼吧？
-				其實它們提供了相當完備的 Console 或 Shell 程式的常見功能。
+				【交談區】初看只是上下兩塊區域，
+				它們提供了相當完備的 Console 或 Shell 程式的常見功能。
 				例如 Command auto-completion, Previous commands recalling, 
 				至於 Outputbox triming 則別地方都還沒見過。
 				為了到處通用，外觀宜簡約，留給應用各自去發揮。
@@ -333,9 +332,8 @@
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
 				上面 source code 裡 <code>\ 設定</code> 區有定義 b 與 g 兩個 word。
-				請分別輸入 <code>help b -N</code> 與 <code>help g -N</code>
-				查看這兩個 word 的說明。加上 -N 指定 word name 
-				要完全吻合而非相近的指令，詳閱 <code>help help -N</code>。
+				請分別輸入 <code>help b</code> 與 <code>help g</code>
+				查看這兩個 word 的說明。詳閱 <code>help help</code>。
 			</p>
 			<img src="doc/jeforth-demo-cloth-help-b-help-g_20151126160042.png">				
 			<p>
@@ -365,7 +363,7 @@
 				我們先示範 HTML5 的 JavaScript 繪圖指令。
 				請用之前用過的 <code>clearCanvas</code> 指令把畫布抹乾淨。
 				然後在 inputbox 一口氣輸入以下
-				command line <code>cv . help cv -N</code> 
+				command line <code>cv . help cv</code> 
 				其中 cv 是我們的畫布 (canvas object) 隨後的小點兒是把
 				cv 的值打印出來；緊接著是去看 cv 的說明。結果如下：
 			</p>
@@ -529,7 +527,7 @@
 				beginPath w 0 moveTo 0 h lineTo stroke
 			</code></blockquote></td></table>
 			<p>
-				對其中任何 word, 比如說 h, 有疑問則 <code>help h -N</code> 
+				對其中任何 word, 比如說 h, 有疑問則 <code>help h</code> 
 				查它的說明。另外也可指定黃色, 畫一條從右下角到左上角的斜線, 
 				如下:
 			</p>

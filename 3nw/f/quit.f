@@ -43,7 +43,8 @@
 	js: vm.scroll2inputbox();inputbox.focus()
 
 \ ----------------- run the command line -------------------------------------
-	<js> (vm.argv.slice()).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
+	<js> (vm.argv.slice()).join(" ") </jsV> dup value args // ( -- string ) The command line 
+    tib.insert 
 
 \ The End
 

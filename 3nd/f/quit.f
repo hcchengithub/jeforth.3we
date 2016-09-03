@@ -35,8 +35,9 @@
 	include fs.f
 
 \ ---------------- Run command line -----------------------------------------------
-	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the jeforth.3nd.js pathname itself.
-
+	<js> (kvm.argv.slice(1)).join(" ") </jsV> \ skip first cell which is the jeforth.3nd.js pathname itself.
+    dup value args // ( -- string ) The command line 
+    tib.insert 
 \ ---------------- End of quit.f -----------------------------------------------
 	js: kvm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
