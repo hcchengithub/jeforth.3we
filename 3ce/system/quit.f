@@ -19,8 +19,9 @@
 				/// Must intercept onkeydown event to avoid original function.
 
 \ ------------------ Get args from URL -------------------------------------------------------
-	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
-	url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
+	js> location.href constant url // ( -- 'url' ) jeforth.3ce entire URL
+	url :> split("?")[1]||"" \ Command line can be an undefined when not given
+    trim value args // ( -- 'args' ) jeforth.3ce command line  
 	args [if] char %20 args + :> split('%') <js>
 		for (var ss="",i=1; i<tos().length; i++){
 			// %20 is space and also many others need to be translated 

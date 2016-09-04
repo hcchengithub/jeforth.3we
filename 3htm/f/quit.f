@@ -13,7 +13,7 @@
 
 \ ------------------ Get args from URL -------------------------------------------------------
 	js> location.href constant url // ( -- 'url' ) jeforth.3htm url entire command line 
-	url :> split("?")[1] value args // ( -- 'args' ) jeforth.3htm args
+	url :> split("?")[1] trim value args // ( -- 'args' ) jeforth.3htm command line args
 	args [if] char %20 args + :> split('%') <js>
 		for (var ss="",i=1; i<tos().length; i++){
 			// %20 is space and also many others need to be translated 

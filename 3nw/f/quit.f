@@ -15,16 +15,16 @@
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
 	\ application dependent. 
 	\
-
-	js> vm.argv.length \ Do we have jobs from command line?
-	[if] \ We have jobs from command line to do. Disable self-test.
+	<js> (vm.argv.slice()).join(" ") </jsV> trim value args // ( -- string ) The command line 
+	\ Do we have jobs from command line?
+	args [if] \ Yes, disable self-test.
 		js: tick('<selftest>').enabled=false
-	[else] \ We don't have jobs from command line to do. So we do the self-test.
+	[else] \ No, so we do the self-test.
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] 
 	js: tick('<selftest>').buffer="" \ recycle the memory
 
-	include 3htm/f/jsc.f			\ JavaScript debug console
+	include 3htm/f/jsc.f	\ JavaScript debug console
 	include voc.f			\ voc.f is basic of forth language
 	include html5.f			\ leverage jeforth.3htm
 	include element.f		\ HTML element manipulation
@@ -43,8 +43,7 @@
 	js: vm.scroll2inputbox();inputbox.focus()
 
 \ ----------------- run the command line -------------------------------------
-	<js> (vm.argv.slice()).join(" ") </jsV> dup value args // ( -- string ) The command line 
-    tib.insert 
+    args tib.insert 
 
 \ The End
 

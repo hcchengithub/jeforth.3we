@@ -8,28 +8,28 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 
 #### [Solar system](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
 [簡介](http://note.youdao.com/yws/public/redirect/share?id=94764cf57ba4365e2997f4a268ff7716&type=false)<br>
-![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/solar-system.png)
+[[pictures/solar-system.png]]
 <br>
 #### [H2O](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f)
-![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/h2o.png)
+[[pictures/h2o.png]]
 <br>
 #### [Alarm clock](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
- ![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-alarm.png)
+[[pictures/demo-alarm.png]]
  
 <br>
 #### [Box2Dweb Physics Engine demo - Arrows](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
-![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-arrow.png)
+[[pictures/demo-arrow.png]]
 
 <br>
 #### [Chipmunk Physics Engine demo - Pyramid Stack](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
-![enter image description here](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/demo-pyramidstack.png)
+[[pictures/demo-pyramidstack.png]]
 
 <br>
 #### [Markdown editor](http://note.youdao.com/yws/public/redirect/share?id=1a8a342f3a9c1e0622a6050480af28b7&type=false)
 
-NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw (NW.js application). To try this, you need to get the project downloaded to your computer.
+NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw (NW.js application).
 
-![enter image description here](https://raw.githubusercontent.com/wiki/hcchengithub/jeforth.3we/pictures/demo%203nw%20mde%20editor.JPG)
+[[pictures/demo 3nw mde editor.JPG]]
 
 
 Get the project
@@ -52,7 +52,7 @@ Click the [Download ZIP] button of both projects [jeforth.3we](https://github.co
 
 My jeforth.3we/ directory listing for example,
 
-![jeforth3we-dir.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/jeforth3we-dir.png)
+[[pictures/jeforth3we-dir.png]]
 <br>
 ### Note! jeforth.3ha from Donload Zip needs to resolve new line characters from LF to CRLF for Windows  
 
@@ -71,7 +71,7 @@ Double click the **jeforth.3we/jeforth.hta** or execute the below DOS command li
 ```
 jeforth.hta cls .' Hello world' cr 3000 sleep bye
 ```
-![3htahello-world.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/3htahello-world.png)
+[[pictures/3htahello-world.png]]
 
 The prior method runs self-test because there's no given task to do. The 2'nd method is expected to print 'Hello world' (as shown above) and return to DOS box after 3 seconds.
 
@@ -88,7 +88,7 @@ Again, like the above HTA case, the prior command line does the self-test, and t
 #### **HTML** / jeforth.3htm
 Having a local Web server is one of the ways to run jeforth.3htm.  We have a local Web server written by jeforth.3nd (Node.js). Run jeforth.3we/Webserver.bat to launch it, 
 
-![webserver.png](https://github.com/hcchengithub/jeforth.3we/wiki/pictures/webserver.png)
+[[pictures/webserver.png]]
 
 then try to visit below URLs:
 ```
@@ -123,7 +123,7 @@ Jeforth.3nd for Node.js can be a handy x86 CPU assembler (any other CPU too). We
 
 Demo: Excel automation
 ---------------------
-Use jeforth.3hta to manipulate Microsoft Office Excel spread sheets programmatically. It takes another short page for [Demonstrations of excel automation].
+Use jeforth.3hta to manipulate Microsoft Office Excel spread sheets programmatically. It takes another short page for [[Demonstrations of excel automation]].
 
 
 Presentation videos
