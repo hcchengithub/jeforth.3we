@@ -73,24 +73,13 @@
 	include platform.f 	\ Hotkey handlers and platform features
 	include wsh.f		\ Windows Shell Host
 	include env.f 		\ Windows environment variables
-	include beep.f		\ Define the beep command
+  \	include beep.f		\ Define the beep command --> moved into misc.hta.f
 	include binary.f	\ Read/Write binary file
 	include shell.application.f
   \ include excel.f		\ 有用到時再自行 include 好處多
 	include canvas.f
-	include mytools.f
-	
-	: stamp ( -- ) \ Paste date-time at cursor position
-			js> clipboardData.getData("text")  ( saved ) \ SAVE-restore
-			now t.dateTime ( saved "date time" )
-			js: clipboardData.setData("text",pop()) ( saved )
-			<vb> WshShell.SendKeys "^v" </vb> 
-			500 sleep js: clipboardData.setData("text",pop()) ( empty ) \ save-RESTORE
-			;
-			/// It works now 2016-05-16 18:11:03. Leave 'stamp' in inputbox then put cursor
-			/// at target position, press Ctrl-Enter, then that's it! Date-time pasted to
-			/// the target position. Only supported in 3hta so far.
-	
+	include misc.f
+	include misc.hta.f
 	include hte.f
 	include ls.f
 	marker ---

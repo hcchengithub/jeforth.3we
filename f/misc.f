@@ -1,5 +1,5 @@
 
-s" mytools.f"	source-code-header
+s" misc.f"	source-code-header
 		
 code tib.       ( result -- ) \ Print the command line and the TOS.
 				var lastCRindex = tib.slice(0, ntib).lastIndexOf('\n')+1;
@@ -53,6 +53,12 @@ code t.year 	( Time -- year ) \ Get year number
 				r@ t.minute 2 (.0r) char : + +
 				r> t.second 2 (.0r) + ;
 
+code precise-time(mS)	( -- mS ) \ JavaScript's precise recent time in mini seconds
+						push((new Date()).getTime()) end-code
+
+<comment>
+
+\ This was for test
 code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do anything.
 				var ms=pop();
 				var startTime = new Date().getTime();
@@ -60,7 +66,8 @@ code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do any
 				end-code
 				/// 'freeze' is not a good word, it totally blocks the entire system, useless maybe.
 				/// Try 'sleep' instead.
-
+				
+\ This was for fun
 code .longwords ( length -- ) \ type long words. I designed this word for fun to see what are they.
 				var limit = pop();
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
@@ -71,10 +78,6 @@ code .longwords ( length -- ) \ type long words. I designed this word for fun to
 				}
                 end-code
 
-code precise-time(mS)	( -- mS ) \ JavaScript's precise recent time in mini seconds
-						push((new Date()).getTime()) end-code
-
-<comment>
 \ 已經有更好的方法： mySetTimeout() mySetInterval()
 \ setTimout timers & setInterval timers. Idea was from Sam Suan Chen's jeforth HTML5 clock demo.
 \ [] constant timouts		// ( -- array[] ) setTimeout IDs' storage

@@ -44,7 +44,7 @@
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 	include 3htm/f/element.f		\ HTML element manipulation
 	include 3htm/f/platform.f		
-	include f/mytools.f		
+	include f/misc.f		
 	include 3htm/f/hte.f
 	include 3htm/f/ls.f
 

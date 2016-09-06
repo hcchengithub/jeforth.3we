@@ -28,7 +28,7 @@
 	include voc.f			\ voc.f is basic of forth language
 	include html5.f			\ leverage jeforth.3htm
 	include element.f		\ HTML element manipulation
-	include mytools.f		
+	include misc.f		
 	include nw.f
 	include platform.f		\ leverage jeforth.3htm
 	include process.f

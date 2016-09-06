@@ -21,7 +21,7 @@
 
 	\ ---------------- include other modules ------------------------------------------
 	include voc.f
-	include mytools.f
+	include misc.f
 
 \ ----------------- save selftest.log -------------------------------------
 	s" I want to view selftest.log" s" yes" = [if]

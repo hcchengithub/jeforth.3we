@@ -155,7 +155,7 @@
 		end-code
 		/// modified by 3ce target.f to auto switch dispaly back to local.
 	
-	include f/mytools.f		
+	include f/misc.f		
 	include 3htm/f/hte.f
 	include 3htm/f/ls.f
 

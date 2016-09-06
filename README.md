@@ -125,6 +125,8 @@ Demo: Excel automation
 ---------------------
 Use jeforth.3hta to manipulate Microsoft Office Excel spread sheets programmatically. It takes another short page for [[Demonstrations of excel automation]].
 
+Please check out the wiki of jeforth.3we repository on GitHub.com for more information. This README has probably been too long already.
+
 
 Presentation videos
 ===================
