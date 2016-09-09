@@ -1882,7 +1882,7 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 				/// VM suspend-resume doesn't allow multiple levels of dictate() so
 				/// we need tib.append or tib.insert.
 : sinclude.js	( "pathname" -- ) \ Include JavaScript source file
-				readTextFile js: eval(pop()) ;
+				readTextFileAuto js: eval(pop()) ;
 : include.js	( <pathname> -- ) \ Include JavaScript source file
 				BL word sinclude.js ;
 

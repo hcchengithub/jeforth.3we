@@ -1,4 +1,4 @@
-\ Big5
+\ utf-8
 
 \ This module supports binary file read/write functions that are surprisingly not existing in JScript nor WSH.
 \    save-binary-file    ( binary-string pathname -- ) Save binary-string to binary file

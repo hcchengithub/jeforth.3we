@@ -56,6 +56,11 @@ code t.year 	( Time -- year ) \ Get year number
 code precise-time(mS)	( -- mS ) \ JavaScript's precise recent time in mini seconds
 						push((new Date()).getTime()) end-code
 
+code jquery.version ( -- string ) \ Check jQuery version
+				push($.fn.jquery) end-code
+				\ or push($().jquery) too
+				\ http://www.moreonfew.com/how-to-check-jquery-version
+				
 <comment>
 
 \ This was for test

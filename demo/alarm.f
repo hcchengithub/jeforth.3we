@@ -89,7 +89,7 @@
 				value="No need to change. On server only e.g. 'playground/filename.mp3'"
 			/></span>
 			<br><audio controls id=mp3player>
-			  <source type="audio/mpeg" src="playground/228.mp3">
+			  <source type="audio/mpeg" src="demo/228.mp3">
 				Your browser does not support the audio element.
 			</audio>
 			</td>

@@ -12,7 +12,7 @@
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window; // DOM window is the root for global 掛那裡的根據。
-		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce/system", "3ce/f", "3ce", "playground"];
+		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce/system", "3ce/f", "3ce", "demo", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true; // type() refers to it.
 		

@@ -14,10 +14,7 @@
 		/// at target position, press Ctrl-Enter, then that's it! Date-time pasted to
 		/// the target position. Only supported in 3hta so far.
 	
-
-	\ beep command
-	
-	: beep ( -- ) Sounds a beep
+	: beep ( -- ) \ Sounds a beep
 		js: _beep_.play() 600 nap ;
 		s" <embed id=_beep_ autostart=false enablejavascript=true src='" 
 		char %WINDIR% env@ + s" \Media\chord.wav'></embed>" + </h> drop

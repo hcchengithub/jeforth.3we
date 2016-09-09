@@ -168,4 +168,3 @@ function init() {
     }
 
 };
-init();
