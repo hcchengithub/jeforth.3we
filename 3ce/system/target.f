@@ -17,6 +17,13 @@
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
 
+    \ target page does not have all the console3we features. Use 3ce page instead while 
+    \ 3ce pages ( opened by open-3ce-tab command ) have all the features. Press {F7} instead 
+    \ of {Enter} to execute the inputbox TIB on the target page ( pointed by tabid ) , or 
+    \ s" command line" (dictate) does the same thing, or use <ce> ... </ce> to run javascript 
+    \ code on the target page. ls.f full-screen command demos a 3ce page application that uses
+    \ URL command line directly to tell it what to do.
+
 	vocabulary target.f also target.f definitions
 	
 	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
@@ -130,7 +137,7 @@
 	last execute
 	
 	: cr ( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-		js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
+		js: type("\n") 1 nap js: vm.scroll2inputbox();inputbox.focus() ;
 		/// redefined in quit.f, 1 nap 使輸出流暢。
 		/// Focus the display around the inputbox.
 	
@@ -148,12 +155,12 @@
 		end-code
 		/// modified by 3ce target.f to auto switch dispaly back to local.
 	
-	include f/mytools.f		
-	include 3htm/f/editor.f
+	include f/misc.f		
+	include 3htm/f/hte.f
 	include 3htm/f/ls.f
 
 	\ ------------ End of target.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
-	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()
+	js: vm.scroll2inputbox();inputbox.focus()
 
 

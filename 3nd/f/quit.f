@@ -8,10 +8,12 @@
 
 \ ---------- Self-Test of jeforth.f kernel ----------------------------------------
 \ Do the jeforth.f self-test only when there's no command line
-	js> kvm.argv.length 1 > \ Do we have jobs from command line?
-	[if] \ We have jobs from command line to do. Disable self-test.
+	<js> (kvm.argv.slice(1)).join(" ") </jsV> \ skip first cell which is the jeforth.3nd.js pathname itself.
+    trim value args // ( -- string ) The command line 
+	\ Do we have jobs from command line?
+	args [if] \ Yes, disable self-test.
 		js: tick('<selftest>').enabled=false
-	[else] \ We don't have jobs from command line to do. So we do the self-test.
+	[else] \ No, so we do the self-test.
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 
@@ -29,14 +31,13 @@
 \ ---------------- include other modules ------------------------------------------
 	include jsc.f
 	include voc.f
-	include mytools.f
+	include misc.f
 	include process.f
 	include path.f
 	include fs.f
 
 \ ---------------- Run command line -----------------------------------------------
-	<js> (kvm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the jeforth.3nd.js pathname itself.
-
+    args tib.insert 
 \ ---------------- End of quit.f -----------------------------------------------
 	js: kvm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.

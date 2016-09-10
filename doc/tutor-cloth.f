@@ -6,7 +6,7 @@
 	include unindent.f
 	also forth definitions \ 怕有甚麼東西被 only 玩掉了，都放 forth 吧!
 
-	<text>	/* <text>...</Text> 是一段可以跨行的 string。 
+	<text>	/* <Text>...</Text> 是一段可以跨行的 string。 
 			** 您跳到下面查看，會發現這 string 將被交給 tib.insert 執行。
 			** tib.insert 意思是：把這一大段 text 當作主人輸入 TIB 的 Forth commands 執行。 
 			** 像本段這種類似 C 語言的 comments 都會在執行前被清除掉，彷彿 jeforth 認得這種
@@ -15,7 +15,7 @@
 			** 
 			** 下面的 source code 有 forth, JavaScript, HTML, CSS 等多種語言混搭。
 			** 您只要記得 interpreter 是 jeforth 所以切入別的語言之前一定有某個 jeforth
-			** 的命令切換，下面都會解釋。我覺得閱讀起來並無困難，您覺得呢？請多多惠賜意見。
+			** 的命令切換，下面都會解釋。我覺得閱讀起來並無困難，懇請多多惠賜意見。
 			*/
 		<h> /* <h>..</h> 是寫東西進 HTML 的 <head> 裡 */
 			<style type="text/css">
@@ -24,7 +24,7 @@
 					font-size: 110%; /*字細所以要大一點*/
 					background: #E0E0E0;
 				}
-				table {
+				.essay table {
 					width: 100%;
 				}
 				.essay { 
@@ -32,7 +32,7 @@
 					letter-spacing: 0px;
 					line-height: 160%;
 				}
-				.source { /*主要是把大小恢復否則 110% 太大了*/
+				.essay .source { /*主要是把大小恢復否則 110% 太大了*/
 					font-size:100%;
 					letter-spacing:0px"
 					line-height: 100%;
@@ -43,8 +43,8 @@
 		<o> /* <o>..</o> 是在 outputbox 裡寫 HTML */
 
 /* ----- Greeting 前言 --------------------------------------------------------------------- */
-
-			<div id=eleOpening class=essay> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
+			<div id=essay class=essay>
+			<div id=eleOpening> /* 將來可以 js> eleOpening 來取用這整個 DIV element */
 			<blockquote><h1>玩電腦繪圖，熟悉 jeforth.3we</h1></blockquote>
 			<blockquote>
 			<p>	
@@ -54,7 +54,6 @@
 				<A HREF="http://wiki.laptop.org/go/Forth_Lessons" target="_blank">
 				OLPC (One Laptop per Child) 的 online 教材
 				</A>。
-				也許將來該特別為 OLPC 做一版 jeforth.OLPC 以求更完整地執行該教材的範例。
 			</p>							
 			<p>	
 				幾年前在 Processing.js 網站上看到過我們接下來要示範的這個 
@@ -65,17 +64,19 @@
 				<A HREF="#3we">jeforth.3we</a> 的應用程式。
 				我們一邊操作一邊自然地熟悉它的使用方式。
 			</p></blockquote>
-			</div>
+			</div> /* eleOpening */
+			</div> /* essay */
 /* -------------------------------------------------------------------------- */
-		</o> ( eleOpening ) js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
+		</o> ( essay ) 
+		js> outputbox insertBefore /* 把這段 HTML 移到 outputbox 之前 */
 	</text> 
-	:> replace(/\/\*(.|\r|\n)*?\*\//mg,"") \ 清除 /* ... */ 註解。
+	/*remove*/ \ 清除 /* ... */ 註解。
 	<code>escape 	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert   	\ execute the string on TOS
-	<text> 
-	
-/* ----- Playground 互動區 --------------------------------------------------------------------- */
 
+\ /* ----- Playground 互動區 --------------------------------------------------------------------- */
+
+	<text> 
 		<o> <blockquote id=elePlayarea>
 		<table align=center width=90% border=2 cellspacing=0 cellpadding=4 bordercolor=white>
 			<tr>
@@ -92,26 +93,30 @@
 				</td>
 			</tr>
 		</table> 
-		</blockquote></o> js> eleOpening insertAfter
-/* -------------------------------------------------------------------------- */
+		</blockquote></o> js> essay swap appendChild
 	</text> :> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
 	tib.insert
+\ /* -------------------------------------------------------------------------- */
 	
 	\ 以下的 js> 指令執行隨後的 JavaScript statements 直到遇上 white space 為止，最
 	\ 後一個 statement 的值 (or 'undefined') 放在 jeforth 的 TOS 傳回。
 	
 	js> inputbox  js> newinputbox  replaceNode \ replaceNode 移置過去，本來 inputbox 有很多功能皆獲保留。
 	js> outputbox js> newoutputbox replaceNode \ 同上。
+	js> endofinputbox js> elePlayarea insertAfter \ 這個別忘
 	cls eleBody ce! er \ 清除畫面上的小垃圾。
 	include processing.f
 	js> vm.g.cv :> canvas js> cvdiv replaceNode \ Place the canvas
+	
 	\ include cloth.f 
 	\ 〈爽哥〉把 cloth.f 改得漂亮多了!
 	\  既然接下來也要顯示 cloth.f 而且有機會修改，不如改以讀進來用 tib.insert 方式執行。
+	
 	s" cloth.f" readTextFileAuto dup tib.insert
 	( 現在 TOS 是 cloth.f source code )
+	
 	<text>
-		s" body" <e> /* 直接放到 <body> 後面，不必像上面那樣用 insertBefore, replaceNode 之類的手法搬動就定位 */
+		<o> 
 		<div id=article class=essay><blockquote>
 /* ----- 認識操作環境 --------------------------------------------------------------------- */
 			<h2>認識環境</h2>
@@ -129,8 +134,8 @@
 			<img src="doc/jeforth-demo-cloth-2015-11-201.jpg">
 /* -------------------------------------------------------------------------- */
 			<p>
-				【交談區】初看只是上下兩塊區域，沒甚麼吧？
-				其實它們提供了相當完備的 Console 或 Shell 程式的常見功能。
+				【交談區】初看只是上下兩塊區域，
+				它們提供了相當完備的 Console 或 Shell 程式的常見功能。
 				例如 Command auto-completion, Previous commands recalling, 
 				至於 Outputbox triming 則別地方都還沒見過。
 				為了到處通用，外觀宜簡約，留給應用各自去發揮。
@@ -327,9 +332,8 @@
 			<h2 id="help">每個 word 都有 help</h2>
 			<p>
 				上面 source code 裡 <code>\ 設定</code> 區有定義 b 與 g 兩個 word。
-				請分別輸入 <code>help b -N</code> 與 <code>help g -N</code>
-				查看這兩個 word 的說明。加上 -N 指定 word name 
-				要完全吻合而非相近的指令，詳閱 <code>help help -N</code>。
+				請分別輸入 <code>help b</code> 與 <code>help g</code>
+				查看這兩個 word 的說明。詳閱 <code>help help</code>。
 			</p>
 			<img src="doc/jeforth-demo-cloth-help-b-help-g_20151126160042.png">				
 			<p>
@@ -359,7 +363,7 @@
 				我們先示範 HTML5 的 JavaScript 繪圖指令。
 				請用之前用過的 <code>clearCanvas</code> 指令把畫布抹乾淨。
 				然後在 inputbox 一口氣輸入以下
-				command line <code>cv . help cv -N</code> 
+				command line <code>cv . help cv</code> 
 				其中 cv 是我們的畫布 (canvas object) 隨後的小點兒是把
 				cv 的值打印出來；緊接著是去看 cv 的說明。結果如下：
 			</p>
@@ -523,7 +527,7 @@
 				beginPath w 0 moveTo 0 h lineTo stroke
 			</code></blockquote></td></table>
 			<p>
-				對其中任何 word, 比如說 h, 有疑問則 <code>help h -N</code> 
+				對其中任何 word, 比如說 h, 有疑問則 <code>help h</code> 
 				查它的說明。另外也可指定黃色, 畫一條從右下角到左上角的斜線, 
 				如下:
 			</p>
@@ -590,18 +594,22 @@
 			<h2>查看本文的 source code</h2>
 			<p>
 			這篇文章 tutor-cloth.f 本身就是一支 jeforth.3htm 的應用程式。
-			下達這段命令就可以把它讀出來放到這個網頁的最下面，請試著親手操作看看。
+			下達以下這段命令就可以把它讀出來放到這個網頁的最下面，
+			請試著親手操作看看。
 			您也可以把 jeforth.3we 從 GitHub 上 clone 
 			下來找到 tutor-cloth.f 就是了。
 			我盡量都寫了註解，請多指教。
 			</p>
-			<table width=100%><td class=code><blockquote><pre><code class=source><unindent>
-				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code
-				^tab>spaces \ 把行首的 Tab 都換成 tab-spaces 避免過度內縮不好看。
-				<o> <textarea rows=24></textarea>&lt;/o> \ 變出一個 <textarea>, 小心 &lt;/o> 要改成 &amp;lt;/o>
-				js: tos().value=pop(1) \ 把 source code 填入 <textarea>, TOS 是這個 <textarea> 的 object
-				js> article \ article 是本文最後一段的 element ID
-				insertAfter \ 把剛才變出來的 <textarea> 搬到 article 之後，否則就留在 outputbox 裡了。
+			<table width=100%><td class=code><blockquote><pre><code class=source><unindent> 
+			    \ Copy-Paste 到 inputbox 去執行即可讀出本文 source code
+				not-only \ 所有的 vocabulary 都出列。
+				s" tutor-cloth.f" readTextFileAuto \ 讀取本文的 source code ( source )
+				^tab>spaces \ 適當調整行首的 Tab 避免 indent 過度內縮不好看。 ( source )
+				<o> <textarea id=source rows=24></textarea></o> \ 變出一個 <textarea> ( source ele )
+				js: tos().value=pop(1) \ 把 source code 填入 textarea ( ele )
+				js> essay swap appendChild \ 搬到本文最底下。 ( empty )
+				js: window.scrollTo(0,source.offsetTop);inputbox.blur() \ 跳過去。
+				
 			</unindent></code></pre></blockquote></td></table>
 			
 			<h2 id=3we>jeforth.3we 簡介</h2>
@@ -612,19 +620,29 @@
 				kernel 在不同環境的各種版本。
 				3we 當中的 3 之後加上一點點努力就是 Forth 語言的吉祥數字 4， 
 				而目前「we」則有 jeforth.3htm (HTML), jeforth.3hta (Microsoft HTML Application), 
-				jeforth.3nd (Node.js), jeforth.3nw (Node-Webkit or NW.js) 等。
+				jeforth.3ce (Chrome extension), jeforth.3nd (Node.js), jeforth.3nw (Node-Webkit or NW.js) 等。
 				在本網頁上呈現的是 jeforth.3htm 的應用。
 			</p>	
 			<p>--- The End ---</p>	
-			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03</p>
+			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03 初版, 2016.6.1 修改</p>
 			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
 		</blockquote></div>
-		</e> drop \ <e>..</e> 留下的最後一個 element 沒用到，丟掉。
+		</o> js> essay swap appendChild
 	</text>
 	:> replace(/----replace-me-with-cloth\.f----/,pop()) \ cloth.f source code 就顯示定位
-	:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") \ 清除註解。
+	/*remove*/      \ 清除註解。
 	unindent 		\ handle all <unindent >..</unindent > sections
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	tib.insert		\ execute the string on TOS
+	
+	\ 最後, 因為 inputbox, outputbox 版面改了, 原本以 inputbox 為 display 焦點的效果
+	\ 不知怎的 scrollto 不靈了。每下一個指令之後 inputbox 都會滾出 window 外，很彆扭。
+	\ RI: 搬動 inputbox 時沒有把 endofinputbox 也搬到新址，故然。 
+	\     解法：js> endofinputbox js> elePlayarea insertAfter
+	\     並且引進 vm.scroll2inputbox function, 方便如下改寫以調整之：
+	
+	js: vm.scroll2inputbox=function(){inputbox.focus();window.scrollTo(0,endofinputbox.offsetTop-700);}
+	js: window.scrollTo(0,0);inputbox.blur() \ 跳到頁首
+	
 \ ---------- The End -----------------
 	

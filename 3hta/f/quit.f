@@ -34,7 +34,7 @@
 				/// ado is newer method and is prefereed. But has compatible issues on older Windows. 
 				
 : cr         	( -- ) \ 到下一列繼續輸出 *** 20111224 sam
-				js: type("\n") 1 nap js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus() ;
+				js: type("\n") 1 nap js: vm.scroll2inputbox();inputbox.focus() ;
 				/// redefined in quit.f, 1 nap 使輸出流暢。
 				/// Focus the display around the inputbox.
 				\ 早一點 redefine 以便流暢 include 諸 ~.f 時的 selftest messages.
@@ -43,10 +43,13 @@
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
 	\ application dependent. 
 	\
-	js> vm.argv.length 1 > \ Do we have jobs from command line?
-	[if] \ We have jobs from command line to do. Disable self-test.
+	<js> (vm.argv.slice(1)).join(" ") </jsV> \ skip first cell which is the *.hta pathname itself.
+    trim value args // ( -- string ) The command line 
+    
+	\ Do we have jobs from command line to do?
+	args [if] \ Yes, disable self-test.
 		js: tick('<selftest>').enabled=false
-	[else] \ We don't have jobs from command line to do. So we do the self-test.
+	[else] \ No, so we do the self-test.
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 	
@@ -70,19 +73,26 @@
 	include platform.f 	\ Hotkey handlers and platform features
 	include wsh.f		\ Windows Shell Host
 	include env.f 		\ Windows environment variables
-	include beep.f		\ Define the beep command
+  \	include beep.f		\ Define the beep command --> moved into misc.hta.f
 	include binary.f	\ Read/Write binary file
 	include shell.application.f
-	include excel.f
+  \ include excel.f		\ 有用到時再自行 include 好處多
 	include canvas.f
-	include mytools.f
-	include editor.f
+	include misc.f
+	include misc.hta.f
+	include hte.f
+	include ls.f
 	marker ---
-	
-\ ----------------- run the command line -------------------------------------
-	<js> (vm.argv.slice(1)).join(" ") </jsV> tib.insert \ skip first cell which is the *.hta pathname itself.
 
 \ ------------ End of jeforth.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
 	.(  OK ) \ The first prompt after system start up.
-	js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus()
+	js: vm.scroll2inputbox();inputbox.focus()
+
+\ ----------------- run the command line -------------------------------------
+    args tib.insert 
+
+\ The End
+
+
+

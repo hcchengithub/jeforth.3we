@@ -1,46 +1,87 @@
 
-\ platform.f for jeforth.3htm, jeforth.3hta, and jeforth.3nw
-\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
+	\ platform.f for jeforth.3htm, jeforth.3hta, and jeforth.3nw
+	\ KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 
-s" platform.f"		source-code-header
+	s" platform.f"		source-code-header
 
-also forth definitions
+	also forth definitions \ 本 word-list 太重要，必須放進 root vocabulary。
 
-\ 既然這種東西都是應用相關的，platform.f 裡面就不再預先設定了，但保留以下範例。
-<comment>
+	\ 用 storage 取代 localStorage 以便在不 support localStorage 的 3HTA 中模擬之。
+	\ 為了讓 localStorage 能放 object 看到 object 就翻成 JSON, 若非 object 則照放。
+	\ 所以連功能也擴充了。
+	
+	\ window.storage application functions are in 3htm/f/platform.f 其中有 
+	\ stoarge.set(), ~.get(), ~.del() 等是應用時 common 的。而 storage.all(), 
+	\ .save(), .restore() 這三個 low level I/O 是 3nw,3hta 要在各自的 platform.f 中
+	\ 提供的以便存取 localstorage.json 檔，其中 storage.all() 是最重要的，用來
+	\ 虛擬化 HTML5 的 localStorage。 所以 3hta, 3nw 可以直接讓 localstorage.json 與它
+	\ 隨時保持同步。不能 access local computer 檔案的 3htm, 3ce 則有 ls.f export-all, 
+	\ import-all 這兩個命令來手動讀出與設定 localStorage。
+
+    js> window.storage==undefined [if] 
+		\ For 3htm, 3ce, 3ca 等本身就有 localStorage 的環境 define the pseudo interface
+		js: window.storage={};
+		js: window.storage.all=function(){return(localStorage)}
+	[else]
+		\ For 3hta and 3nw, restore localStorage from localstorage.json.
+		\ Their platform.f provides storage.all(), .save() and .restore().
+		js: storage.restore()
+	[then]
+		
 	<js>
-	// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
-	document.body.ondblclick = function(){
-		push(true); // true let the river run, false stop bubbling
-		execute("double-click"); // execute() does nothing if undefined yet
-		return(pop()); // double-click ( flag -- ... flag' )
-	}
-	// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
-	document.body.onclick = function(){
-		push(true);  // true let the river run, false stop bubbling
-		execute("single-click"); // execute() does nothing if undefined yet
-		return(pop()); // single-click ( flag -- ... flag' )
-	}
-	// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
-	document.body.oncontextmenu = function(){
-		push(true); // true let the river run, false stop bubbling
-		execute("right-click"); // execute() does nothing if undefined yet
-		return(pop()); // right-click ( flag -- ... flag' )
-	}
-	</js>
-</comment>
+		// 
+		window.storage.get = function(key,hash){
+				// HTML5 localStorage only allow string, we support object too.
+				var ss = typeof(hash)=="object" ? hash[key] : storage.all()[key];
+				if(!ss) return (undefined); // the field is not existing
+				try {
+					var data = JSON.parse(ss); // The field is an object
+				} catch(err) {
+					data = ss; // Not an object
+				}
+				return(data); // can be anything includes object
+			}
+		window.storage.set = function(key,data){
+				// set() 新 field 會自動產生, 不必先 new(), 故沒有 new()。
+				if(typeof data == "object") {
+					storage.all()[key] = JSON.stringify(data);
+				} else {
+					storage.all()[key] = data; // Assume it's a string
+				}
+				if(storage.save) storage.save();
+			}
+		window.storage.del = function(key){
+			delete(storage.all()[key])
+			if(storage.save) storage.save();
+		}
+		</js> 
 
-code run-inputbox ( -- ) \ Used in onKeyDown event handler.
+	\ 使 common.css 生效。直接用 link tag 引進 common.css 無法修改, 必續這樣。
+	\ style 經常有需要修改, 例如為了解決 flot.js 的問題: YNote: "Flot bug of graph disappear reproduced. How to fix it"
+
+	s" <style id=commoncss> " char common.css readTextFile ( css ) + ( <style>css )
+	s" </style>" + ( <style>css</style> ) </h> drop 
+	
+code run-inputbox ( -- ) \ <Enter> key's run time.
 				var cmd = inputbox.value; // w/o the '\n' character ($10).
 				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 				vm.cmdhistory.push(cmd);
 				vm.forthConsoleHandler(cmd);
 				end-code
+				/// 抽出本命令有很多用途，首先是 support Ctrl-Enter 用來執行 inputbox, 這除了
+				/// 原來 edit mode 時需要, 且可用於 focus 在別地方時下達執行命令, 因為 focus 本
+				/// 身要指著某東西；這個 word 還可以改寫，在 3ce 中用來加強分辨看命令是誰下達的。
 
-: {F5}			( -- boolean ) \ Hotkey handler, Confirm the HTA window refresh
-				<js> confirm("Really want to restart?") </jsV> ;
+				' {F5} [if] [else] 
+				\ 3htm/f/platform.f 大家都共用，若已經定義過了避免重複。
+: {F5}			( -- boolean ) \ Hotkey handler, Confirm the window refresh
+				<js> confirm("Really want to restart?") </jsV> 
+				if js: window.location.reload(true) false
+				else false then ;
+				/// Defined in 3htm/f/platform.f
 				/// Return a false to stop the hotkey event handler chain.
 				/// Must intercept onkeydown event to avoid original function.
+				[then]
 
 : {F2}			( -- false ) \ Hotkey handler, Toggle input box EditMode
 				\ 以下都不能用 cr 改用 js: type('\n'); cr 中有 1 nap suspend, event handler 不能 suspend。
@@ -53,22 +94,23 @@ code run-inputbox ( -- ) \ Used in onKeyDown event handler.
 				
 : inputbox-edit-mode-on ( -- ) 
 				['] {F2} :: EditMode=true
-				<text> textarea:focus { 
+				<text> .console3we textarea:focus { 
 					border: 0px solid; background:#FFE0E0; /* pink indicating edit mode */
 				}</text> js: styleTextareaFocus.innerHTML=pop() ;
 
 : inputbox-edit-mode-off ( -- ) 
 				['] {F2} :: EditMode=false
-				<text> textarea:focus { 
+				<text> .console3we textarea:focus { 
 					border: 0px solid; background:##E0E0E0;
 				}</text> js: styleTextareaFocus.innerHTML=pop() ;
+				last execute \ default mode
 
 : toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
-				." Input box EditMode = " ['] {F2} :> EditMode dup . 
-				js: type('\n') \ can't use cr in event handler
-				if inputbox-edit-mode-off 
-				else inputbox-edit-mode-on
-				then ;
+				['] {F2} :> EditMode 
+				if inputbox-edit-mode-off false
+				else inputbox-edit-mode-on true then 
+				." Input box EditMode = " . js: type('\n') \ can't use cr in event handler
+				;
 
 : outputbox-edit-mode-on ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
@@ -118,7 +160,7 @@ code {F9}		( -- false ) \ Hotkey handler, Smaller the active textarea or the inp
 				ta.rows = Math.max(r,1);
 				if (ta==inputbox) {
 					if (!r) $(ta).hide();
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					vm.scroll2inputbox();inputbox.focus();
 				}
 				push(false); // Stop event bubbling
 				end-code
@@ -132,7 +174,7 @@ code {F10}		( -- false ) \ Hotkey handler, Bigger the input box
 				ta.rows = Math.max(r,1);
 				if (ta==inputbox) {
 					$(ta).show() // 縮到最後是 $.hide() 起來的。
-					window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					vm.scroll2inputbox();inputbox.focus();
 				}
 				push(false); // Stop event bubbling
 				end-code
@@ -160,7 +202,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 					}
 					document.getElementById("inputbox").value += " " + ss;
 				}
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				vm.scroll2inputbox();inputbox.focus();
 				push(false);
 				end-code
 				/// return a false to stop the hotkey event handler chain.
@@ -168,7 +210,7 @@ code {F4}		( -- false ) \ Hotkey handler, copy marked string into inputbox
 
 code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 				inputbox.value="";
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+				vm.scroll2inputbox();inputbox.focus();
 				push(false); // Stop bubbling
 				end-code
 
@@ -183,7 +225,7 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 					}
 					tos().size = Math.min(16,tos().length);
 					tos().selectedIndex=tos().length-1;
-					window.scrollTo(0,endofinputbox.offsetTop);tos().focus();
+					vm.scroll2inputbox();tos().focus();
 					var select = tos().onclick = function(){
 						inputbox.value = tos().value;
 						execute("removeElement");
@@ -614,39 +656,62 @@ previous definitions
 
 
 <comment>
-s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
 
-: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
-						r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
-						outputbox-high-light-style
-						r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
-					then
-				next ; compile-only 
-				/// Don't use this command directly, avoid disterbing save-restore orig_border.
-				/// So I make it a compile-only. Use ~-toggle instead.
+	\ 既然這種東西都是應用相關的，platform.f 裡面就不再預先設定了，但保留以下範例。
+		<js>
+		// 設定讓 整個 <body> 的 double-click 都發動 double-click 來處理。
+		document.body.ondblclick = function(){
+			push(true); // true let the river run, false stop bubbling
+			execute("double-click"); // execute() does nothing if undefined yet
+			return(pop()); // double-click ( flag -- ... flag' )
+		}
+		// 設定讓 整個 <body> 的 click 都發動 single-click 來處理。
+		document.body.onclick = function(){
+			push(true);  // true let the river run, false stop bubbling
+			execute("single-click"); // execute() does nothing if undefined yet
+			return(pop()); // single-click ( flag -- ... flag' )
+		}
+		// 設定讓 整個 <body> 的 right click 都發動 right-click 來處理。
+		document.body.oncontextmenu = function(){
+			push(true); // true let the river run, false stop bubbling
+			execute("right-click"); // execute() does nothing if undefined yet
+			return(pop()); // right-click ( flag -- ... flag' )
+		}
+		</js>
 
-: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
-				js> outputbox :> childNodes.length for
-					r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
-					if \ restore
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
-						r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
-					else \ no restore just clean
-						r@ 1- js> outputbox :> childNodes[pop()].style if
-						r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+	s" thin solid black" value outputbox-high-light-style // ( -- "style" ) CSS style
+
+	: outputbox-high-light-on ( -- ) \ Mark outputbox's children with border
+					js> outputbox :> childNodes.length for
+						r@ 1- js> outputbox :> childNodes[pop()].style if \ no style, #text I guess, do nothing.
+							r@ 1- js> outputbox :> childNodes[pop()].style.border \ get original border
+							r@ 1- js> outputbox :: childNodes[pop()].orig_border=pop() \ save to orig_border
+							outputbox-high-light-style
+							r@ 1- js> outputbox <js> pop().childNodes[pop()].style.border=pop()</js> \ set high lighting border
 						then
-					then
-				next ; 
+					next ; compile-only 
+					/// Don't use this command directly, avoid disterbing save-restore orig_border.
+					/// So I make it a compile-only. Use ~-toggle instead.
 
-: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
-				js> outputbox :> highLight if \ check recent state
-					outputbox-high-light-off
-					js> outputbox :: highLight=false \ Yes, we can add properties to an element
-				else
-					outputbox-high-light-on
-					js> outputbox :: highLight=true
-				then ;
+	: outputbox-high-light-off ( -- ) \ Unmark outputbox's children
+					js> outputbox :> childNodes.length for
+						r@ 1- js> outputbox :> childNodes[pop()].orig_border ?dup 
+						if \ restore
+							r@ 1- js> outputbox :: childNodes[pop()].style.border=pop() \ restore orig_border
+							r@ 1- js> outputbox :: childNodes[pop()].orig_border="" \ clear orig_border
+						else \ no restore just clean
+							r@ 1- js> outputbox :> childNodes[pop()].style if
+							r@ 1- js> outputbox :: childNodes[pop()].style.border=""
+							then
+						then
+					next ; 
+
+	: outputbox-high-light-toggle ( -- ) \ Help {backSpace} not to delete useful data.
+					js> outputbox :> highLight if \ check recent state
+						outputbox-high-light-off
+						js> outputbox :: highLight=false \ Yes, we can add properties to an element
+					else
+						outputbox-high-light-on
+						js> outputbox :: highLight=true
+					then ;
 </comment>				

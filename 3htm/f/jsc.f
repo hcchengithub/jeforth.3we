@@ -169,14 +169,17 @@
 </text> constant jsc.xt.F12 // ( -- source code ) jsc.xt for F12 debugger
 
 js> vm.appname char jeforth.3hta = [if]
+	\ 3hta
 	jsc.xt.hta js: vm.jsc.xt=pop()
 [else] 
+	\ 3htm, 3nw, 3ce 
 	jsc.xt.F12 js: vm.jsc.xt=pop()
 [then]
 	
 : jsc			( -- ) \ JavaScript console usage: js: vm.jsc.prompt="111>>>";eval(vm.jsc.xt)
 				cr ." J a v a S c r i p t   C o n s o l e" cr
 				." Usage: js: if(vm.debug){vm.jsc.prompt='msg';eval(vm.jsc.xt)}" cr
+				."        Open F12 debugger if possible." cr
 				<js> vm.jsc.prompt=" jsc>"; eval(vm.jsc.xt); </js> ;
 
 <js>

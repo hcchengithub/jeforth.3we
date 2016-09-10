@@ -1,14 +1,7 @@
 
-\ jeforth.3ce Google Chrome extension 
-\ For 3ce popup page and extension pages.
-\ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
-
-\
-\ Skip everything if is not running in Chrome extension.
-\ 早期讓 3htm, 3ce 共用 index.html home page was a mistake. 分開之後這種情況不會有了。
-\ 所以這段防呆只是 nice to have 其實不需要了。
-\
-js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if] 
+	\ jeforth.3ce Google Chrome extension 
+	\ For 3ce popup page and extension pages.
+	\ chrome.* APIs http://chrome-apps-doc2.appspot.com/trunk/extensions/api_index.html
 
 	s" ce.f" source-code-header
 
@@ -20,7 +13,17 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 
 	<js>
 	//	Host side onMessage event hander that receives messages from 
-	//  content scripts on target pages. See 3ce SPEC of sendMessage() defined in log.json.
+	//  content scripts on target pages. "3ce SPEC of sendMessage" 
+	//  was first defined in log.json.
+	// 
+	//  3ce SPEC of sendMessage({
+    //  	forth: ".s", // forth command 
+    //  	type : "hello world!",  // print message
+    //  	tos  : anything, // send variable, can be an object
+	//      addr : tabid or "background" // [ ] 可能應該用 sender 參數
+    //  })
+	//
+
 	chrome.runtime.onMessage.addListener(
 		function ce3_host_onmessage (message, sender, sendResponse) { 
 			kvm.push(message);kvm.push(sender);kvm.push(sendResponse);
@@ -29,14 +32,14 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 	)
 	</js> 
 		
-	: host-message-handler ( message sender sendResponse -- ) \ 
+	: host-message-handler ( message sender sendResponse -- ) \ Handle messages from target page
 		2drop \ sender and sendResponse are not used so far
 		<js>
 			var message = pop();
-			if (message.addr && message.addr!=vm.g.myTabId) return;
+			if (message.addr && message.addr!=vm.g.myTabId) return; // is to me?
 			if (message.type) {
 				vm.type(message.type);
-				window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus(); // Host side
+				vm.scroll2inputbox();inputbox.focus(); // Host side
 			} 
 			if (message.tos) { // Receving data from target page
 				push(message.tos);
@@ -47,16 +50,27 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		</js> ;
 		/// 
 		
+	: open-web-page ( url activeFlag -- tab ) \ Open web page and return Chrome Extension tab object before complete loading
+		<js> chrome.tabs.create(
+			{url:pop(1),active:pop()},
+			function(tab){push(tab);execute('stopSleeping');}  
+		) </js> ( tab ) 
+		1000000 sleep ; \ 實際經常回來得很快
+		/// The input activeFlag specifies whether the page is to be activated
+		
 	: open-3ce-tab ( -- ) \ Open a jeforth.3ce tab.
-		js> window.open("jeforth.3ce.html") background-page :: lastTab=pop() ;
+		char jeforth.3ce.html true open-web-page ( tab )
+		background-page :: lastTab=pop() ;
+		/// 之前用 js> window.open("jeforth.3ce.html") 是可以取得新 3ce page
+		/// 的 window object 也許有某種用途，記一下。如今在 lastTab 留下的是
+		/// Chrome extension 的 tab object。要控制該 tab 可經由 tabid 下達
+		/// 手動的 {F7} 或 (dictate) command-line。
 		
 	: tabs.getCurrent ( -- objTab ) \ Get the current Chrome extension tab object.
 		js: chrome.tabs.getCurrent(function(tab){push(tab);execute('stopSleeping')}) 
 		1000 sleep ;
 		/// Used in an extension page or content script in target pages. 
 		/// Returns 'undefined' if used in the popup page or background page.
-
-
 
 	: isPopup? ( -- boolean ) \ Is this page the 3ce popup page?
 		\ In Chrome extension/app is sure or this word won't be included at all.
@@ -90,13 +104,13 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		})</js> 10000 sleep ;
 		/// The input is a hash table, like :
 		/// {} tabs.query -- get all tabs.
-		/// js: push({active:true}) tabs.query -- get active tabs of every window.
-		/// js: push({title:"*anual*"}) tabs.query -- title pattern supports wildcard character '*'.
-		/// js: push({url:"http://*ibm*/*"}) tabs.query -- url pattern supports wildcard too.
+		/// js> ({active:true}) tabs.query -- get active tabs of every window.
+		/// js> ({title:"*anual*"}) tabs.query -- title pattern supports wildcard character '*'.
+		/// js> ({url:"http://*ibm*/*"}) tabs.query -- url pattern supports wildcard too.
 		/// <scheme>://<host><path> see http://chrome-apps-doc2.appspot.com/trunk/extensions/match_patterns.html
 		/// Should return an array, 'undefined' indicates invalid pattern.
 		
-	: list-tabs ( -- ) \ List Tabs in the current window
+	: list-tabs ( -- ) \ List all tabs in all window
 		{} tabs.query ( array ) dup :> length ( array length )
 		?dup if for ( array )
 		r@ 1- js> tos(1) :> [pop()] ( array tab )
@@ -129,7 +143,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		until ;
 		/// Sometimes we can't use "the active tab" as the working tab 
 		/// because it is the 3ce page. BTW, to get the active tab:
-		/// js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number)
+		/// js> ({active:true}) tabs.query js> tos().length \ ==> 1 (number)
 		
 	: get-manifest ( -- obj ) \ Get the Chrome extension/app manifest hash table.
 		js> chrome.runtime.getManifest() ;
@@ -144,6 +158,8 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// This word is the base of <ce> (Chrome Extension) commends.
 		/// The result is an array which is "The result of the script in every injected frame."
 		/// A result is the value of the last statement of the script file.
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
+		/// 必須是【別人的】web page。
 		
 	: <ce> ( <js statements> -- "block" ) \ Get JavaScript statements to run on tabid target page 
 		char </ce>|</ceV> word ; immediate
@@ -160,10 +176,11 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 
 	: </ce> ( "statements" -- ) \ Execute 3ce statements on target tabid. No return value.
 		compiling if literal compile (/ce) else (/ce) then ; immediate
-
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
 	: </ceV> ( "statements" -- ) \ Execute 3ce statements on target tabid. Retrun the value of last statement
 		compiling if literal compile (/ceV) else (/ceV) then ; immediate
+		/// chrome.tabs.executeScript() 不能用在 3ce 自己的 Extension pages。
 
 	code message->tabid ( anything -- ) \ Send a message of anything to tabid
 		execute("tabid"); chrome.tabs.sendMessage(pop(),pop()) end-code
@@ -211,7 +228,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 			0 begin
 				active-tab :> status=="complete" if 1+ then
 				dup 5 > if else \ 5 complete to make sure it's very ready.
-					js: window.scrollTo(0,endofinputbox.offsetTop);inputbox.focus();
+					js: vm.scroll2inputbox();inputbox.focus();
 					char . . 300 nap false
 				then 
 			until
@@ -231,7 +248,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 			// We need to help it a little as the following example:
 			
 			(function(){
-				vm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+				vm.minor_version = 202; // 3ce target page minor version. major version is from jeforth.js kernel.
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
@@ -313,7 +330,7 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 							vm.type(" " + vm.prompt + " ");
 							if (typeof(endofinputbox)!="undefined"){
 								if ($(inputbox).is(":focus"))
-									window.scrollTo(0,endofinputbox.offsetTop);
+									vm.scroll2inputbox();
 							}
 						}
 					})();
@@ -380,9 +397,5 @@ js> typeof(chrome)!='undefined'&&typeof(chrome.extension)!='undefined' [if]
 		/// 237 ( tabid ) attach
 		/// tabs.select tabid attach
 		/// ( empty, tabid by default or active-tab if from popup ) attach 
-
-[then] \ Not Chrome extension environment.
-
-				
 	
 	

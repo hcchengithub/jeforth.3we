@@ -1,7 +1,8 @@
 
 s" html5.f"		source-code-header
 
-\ Where HTML5 is supported, JSON is too, I guess.
+\ Where HTML5 is supported, JSON is too, I guess <-- Yes.
+
 : stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
 				/// Example:
 				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
@@ -99,15 +100,21 @@ s" html5.f"		source-code-header
 				\ Must use jQuery append(), because HTMLelement.appendChild(node) is not suitable
 				
 : <e>			( "jQuery selector" <html> -- "html" ) \ HTML section header. Get HTML tags.
-				char (</e>|</o>|</h>) word
+				char (</e>|</o>|</h>|</text>) word
 				compiling if literal then ; immediate
+				/// Section ending can be </e> </o> or </h> for general element, outputbox, and 
+				/// header respectively, so far. Also </text> for debug.
 				last dup alias <o> immediate // ( <html> -- "html" ) Starting a HTML section append to output box.
 				alias <h> immediate // ( <html> -- "html" ) Starting a HTML section append to <HEAD>. 
-				/// Section ending can be </e> </o> or </h> which are element, outputbox, and header
-				/// respectively, so far. 分開寫也可以，併成一個只是圖方便。
+				
+: /*remove*/ 	( "raw" -- "cooked" ) \ remove /* comments in multiple lines */ 
+				:> replace(/[/]\*(.|\r|\n)*?\*[/]/mg,"") ; \ HTA 不能用 \/ 必須用 [/]
+				/// 使 /* ... */ 可以用在 HTML 裡面。
+				/// Support multiple comment lines in one pare of /* .. */
+				/// Not support nested.
 
 : </o>			( "html" -- element ) \ Delimiter of <o>, (O)utputbox.
-				compiling if compile trim else trim then
+				compiling if compile /*remove*/ compile trim else /*remove*/ trim then
 				char #outputbox compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
@@ -124,13 +131,13 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				/// Usage: "string" </o> when "string" contains <o></o>.
 
 : </h>			( "html" -- element ) \ Delimiter of <h>, (H)ead section.
-				compiling if compile trim else trim then
+				compiling if compile /*remove*/ compile trim else /*remove*/ trim then
 				char head compiling 
 				if literal compile doElement 
 				else doElement then ; immediate
 
 : </e>			( "jQuery selector" "html" -- element ) \ Delimiter of <e>, general purpose.
-				compiling if compile trim else trim then 
+				compiling if compile /*remove*/ compile trim else /*remove*/ trim then
 				compiling if compile swap compile doElement 
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>
@@ -151,13 +158,25 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				\ 浙江淘?网?有限公司
 				</comment>
 
-: pickFile		( -- "pathname" ) \ Pick a file through web browser's GUI
-				char input createElement \ ele
-				dup char type char file setAttribute \ ele
-				js: $(tos()).hide() eleBody over appendChild \ 要 append 才行，是有點奇怪。
-				js> tos().click();tos().value
-				swap removeElement ;
-				/// Works fine on HTA. The dialog works on 3htm but returns Null string. 
+: pickFile 		( -- "pathname" ) \ Pick a file through web browser's GUI
+				char input createElement ( element )
+				dup char type  char file      setAttribute ( element )
+				dup char class char pick_file setAttribute ( element ) \ for debug, clue of the element
+				\ For none 3hta only, setup the event handler
+				js> vm.appname!="jeforth.3hta" if
+					js: tos().onchange=function(){execute('stopSleeping')} ( element ) 
+					js: tos().oncancel=function(){execute('stopSleeping')} ( element ) 
+				then
+				js> body over appendChild \ 要 append 才有作用。 ( element )
+				js: tos().click() ( element ) \ @ HTA 回來就表示 user 已經完成操作, @ NW.js 則馬上回來。
+				\ For none 3hta only, wait for the onchange event
+				js> vm.appname!="jeforth.3hta" if
+					( minutes*60*1000 ) js> 5*60*1000 sleep ( element ) then
+				js> tos().value \ 即使 timeout 也不管了 ( element path )  
+				swap removeElement ; ( path )  
+				/// Works fine on 3hta and 3nw. The dialog works but returns Null string on 3htm 
+				/// or C:\fakepath\__865.jpg on 3ce. See Ynote : "jeforth.3we fix pickFile 
+				/// problem on 3nw. Get full path of local file." for my developing log.
 				/// Through excel app's GetOpenFilename method can do the same thing:
 				///     excel.app js> pop().GETopenFILENAME <== with or w/o () both fine
 				/// Excel's GetSaveAsFilename method too.
@@ -227,20 +246,31 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				/// Example: dropall js> outputbox 10 children[] <== get an array 
 				///          of ending 10 child nodes to TOS.
 
-: remove-script-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
+: remove-script-from-HTML ( "HTML" -- "HTML'" ) \ Remove script tags
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
-				:> replace(/<script.*?script>/g,"")		\ remove all <script>
+				:> replace(/<script.*?script>/g,"")		\ remove all <script> tags
+				:> replace(/{_cr_}/g,"\n") ;
+				/// See also remove-script-from-element in ie.f.
+				/// Use RexEx word processing method.
+				
+: remove-style-from-HTML ( "HTML" -- "HTML'" ) \ Remove CSS style tags
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
+				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
+				:> replace(/<style.*?style>/g,"")		\ remove all <style> tags
 				:> replace(/{_cr_}/g,"\n") ;
 				/// See also remove-script-from-element in ie.f.
 				/// Use RexEx word processing method.
 				
 : remove-select-from-HTML ( "HTML" -- "HTML'" ) \ Remove scripts and other things
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				:> replace(/<select.*?select>/g,"")		\ remove all <select>
 				:> replace(/{_cr_}/g,"\n") ;
 				/// Use RexEx word processing method.
 				
 : remove-onmouse-from-HTML ( "HTML" -- "HTML'" ) \ Remove onmouseXX="dothis"  onmouseXX=dothat onmouseXX='dowhat' listenings.
+				:> replace(/\r\n/mg,"{_cr_}")	\ for Windows
 				:> replace(/\n/mg,"{_cr_}")	\ replace cr with _cr_ makes below operations easier
 				<js> pop().replace(/\s+onmouse.+?=\s?\S+/g,"")</jsV> 
 				:> replace(/{_cr_}/g,"\n") ;

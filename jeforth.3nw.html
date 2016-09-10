@@ -3,14 +3,14 @@
 <head id=head>
 	<title class=appname>appname</title> 
 	<meta charset="utf-8" />
-	<link rel="stylesheet" type="text/css" href="common.css">
+	<!-- link rel="stylesheet" type="text/css" href="common.css" -->
 	<!-- 分別定義 textarea:focus 才可以隨時修改，隨 editMode 改變顏色 -->
     <style id=styleTextareaFocus type="text/css"> 
-			textarea:focus {
+			.console3we textarea:focus {
 				background:#E0E0E0;
 			}
     </style>
-    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/jquery-1.11.2.js"></script>
 	<Script src="project-k/jeforth.js"></Script>
 	<script id=js>
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
@@ -21,7 +21,7 @@
 		kvm.selftest_visible = true;
 		kvm.minor_version = kvm.gui.App.manifest.version; // defined by package.json
 		kvm.host = window;  // global 掛那裡的根據。
-		kvm.path = ["dummy", "f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "playground"];
+		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "demo", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready
 		var type = kvm.type = function (s) { 
 			try {
@@ -67,6 +67,7 @@
 		);                          
                                     
 		// There's no main loop, event driven call back function is this.
+		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
 		kvm.forthConsoleHandler = function(cmd) {
 			var rlwas = kvm.rstack().length; // r)stack l)ength was
             type((cmd?'\n> ':"")+cmd+'\n');
@@ -79,8 +80,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					if ($(inputbox).is(":focus"))
-						window.scrollTo(0,endofinputbox.offsetTop);
+					if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
 				}
 			})();
 		}

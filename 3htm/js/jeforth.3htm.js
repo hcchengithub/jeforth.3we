@@ -1,11 +1,11 @@
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 	(function(){
-		kvm.minor_version = 1; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+		kvm.minor_version = 202; // minor version specified by each application (like here), major version is from jeforth.js kernel.
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-		kvm.path = ["dummy", "3ce", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "playground"];
+		kvm.path = ["dummy", "3ce", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "demo", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true; // type() refers to it.
 		
@@ -83,6 +83,7 @@
 		);                          
                                     
 		// There's no main loop, event driven call back function is this.
+		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
 		kvm.forthConsoleHandler = function(cmd) {
 			var rlwas = kvm.rstack().length; // r)stack l)ength was
             type((cmd?'\n> ':"")+cmd+'\n');
@@ -95,7 +96,7 @@
 					setTimeout(retry,100); 
 				else {
 					type(" " + kvm.prompt + " ");
-					if ($(inputbox).is(":focus")) window.scrollTo(0,endofinputbox.offsetTop);
+					if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
 				}
 			})();
 		}

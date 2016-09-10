@@ -7,10 +7,10 @@
 
 var jeForth = require('./project-k/jeforth.js').jeForth;
 global.kvm = global.jeforth_project_k_virtual_machine_object = new jeForth()
-kvm.minor_version = 1; // minor version specified by application, major version is from jeforth.js kernel.
+kvm.minor_version = 202; // minor version specified by application, major version is from jeforth.js kernel.
 kvm.host = global;  // global 掛那裡的根據。
 kvm.appname = "jeforth.3nd";
-kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "playground"];
+kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "demo", "playground"];
 kvm.screenbuffer = ""; // used by both inside and outside vm.
 kvm.selftest_visible = true; // used by both inside and outside vm.
 

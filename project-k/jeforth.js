@@ -257,7 +257,7 @@ function jeForth() {
 				w = dictionary[ip];
 			}
 			if(w===0) break; // w==0 is suspend, break inner loop but reserve rstack.
-			else ip = rstack.pop(); // w is either ret(NULL) or exit(""), return to caller.
+			else ip = rstack.pop(); // w is either ret(NULL) or exit(""), return to caller, or 0 when resuming through outer(entry)
 			if(resuming) w = dictionary[ip]; // Higher level of inner()'s have been terminated by suspend, do their job.
 		} while(ip && resuming); // Resuming inner loop. ip==0 means resuming has done。
 	}
