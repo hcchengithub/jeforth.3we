@@ -708,7 +708,7 @@
 		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
  
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
-	
+
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
 			js: outputbox.style.fontSize="1.5em"

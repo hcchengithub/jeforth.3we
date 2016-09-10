@@ -21,7 +21,10 @@
 		};ss
 	</jsV> nip to args [then]
 	// Facebook always turn space to + that we need to support _ as space. 
-	args ?dup [if] <js> pop().replace(/_/g," ") </jsV> to args [then]
+	args ?dup [if] 
+		<js> pop().replace(/_/g," ") </jsV>  ( args )
+		"" || ( 消除 undefined 留下 args or null string ) to args 
+	[then]
 
 \ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	\ Do the jeforth.f self-test only when there's no command line. How to see command line is
@@ -38,7 +41,6 @@
 	\ 發現透過 rawgit.com 可以直接執行發佈在 GitHub 上的 jeforth.3htm
 	\ 為了加快速度,以下都用絕對位址。避免讓 readTextFileAuto 順著 path
 	\ 慢慢嘗試錯誤。
-	
 	include 3htm/f/jsc.f		    \ JavaScript debug console in 3htm/f
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
