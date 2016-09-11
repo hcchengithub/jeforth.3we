@@ -8,28 +8,28 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 
 #### [Solar system](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
 [簡介](http://note.youdao.com/yws/public/redirect/share?id=94764cf57ba4365e2997f4a268ff7716&type=false)<br>
-[[pictures/solar-system.png]]
+![The Solar System](doc/README.md/solar-system.png)
 <br>
 #### [H2O](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f)
-[[pictures/h2o.png]]
+![H2o](doc/README.md/h2o.png)
 <br>
 #### [Alarm clock](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
-[[pictures/demo-alarm.png]]
+![Alarm clock](doc/README.md/demo-alarm.png)
  
 <br>
 #### [Box2Dweb Physics Engine demo - Arrows](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
-[[pictures/demo-arrow.png]]
+![Arrow](doc/README.md/demo-arrow.png)
 
 <br>
 #### [Chipmunk Physics Engine demo - Pyramid Stack](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
-[[pictures/demo-pyramidstack.png]]
+![Pyramid](doc/README.md/demo-pyramidstack.png)
 
 <br>
 #### [Markdown editor](http://note.youdao.com/yws/public/redirect/share?id=1a8a342f3a9c1e0622a6050480af28b7&type=false)
 
 NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw (NW.js application).
 
-[[pictures/demo 3nw mde editor.JPG]]
+![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
 
 
 Get the project
@@ -44,7 +44,7 @@ Get source code from GitHub dwon to your computer through 'git clone' or Downloa
 
 git clone
 ---------
-'project-k' is a stand alone project and top on it is the 'jeforth.3we' porject. So, we need to 'git clone' twice for each of them to get the whole thing from GitHub down to to your computer. 1. 'git clone' jeforth.3we first to a directory named exactly 'jeforth.3we'. 2. Then 'git clone' project-k to under the jeforth.3we directly. 
+'project-k' is a stand alone project and top on it is the 'jeforth.3we' porject. So, we have two projects to 'git clone' from GitHub down to to your computer. 1. 'git clone' jeforth.3we first to a directory named exactly 'jeforth.3we'. 2. Then 'git clone' project-k to under the jeforth.3we directory. 
 
 Download Zip
 ------------
@@ -52,7 +52,7 @@ Click the [Download ZIP] button of both projects [jeforth.3we](https://github.co
 
 My jeforth.3we/ directory listing for example,
 
-[[pictures/jeforth3we-dir.png]]
+![jeforth.3we directory](doc/README.md/jeforth3we-dir.png)
 <br>
 ### Note! jeforth.3ha from Donload Zip needs to resolve new line characters from LF to CRLF for Windows  
 
@@ -64,18 +64,17 @@ If you were **git clone https://github.com/hcchengithub/jeforth.3we** instead of
 
 Hello World!
 ========================
-Download and setup the jeforth.3we directory and project-k directory as mentioned above. Let's print "Hello World!" on different applications of jeforth.3we then,
+Let's print "Hello World!" on different applications of jeforth.3we
 
 #### **HTA** / jeforth.3hta
 Double click the **jeforth.3we/jeforth.hta** or execute the below DOS command line in a DOS box,
 ```
 jeforth.hta cls .' Hello world' cr 3000 sleep bye
 ```
-[[pictures/3htahello-world.png]]
+![Hellow world](doc/README.md/3htahello-world.png)
 
 The prior method runs self-test because there's no given task to do. The 2'nd method is expected to print 'Hello world' (as shown above) and return to DOS box after 3 seconds.
 
-<br>
 #### **Node.js** / jeforth.3nd
 Make sure you can run node.exe in a DOS box so your Node.js has been setup correctly. Let the jeforth.3we/ folder be your working directory. Execute one of the below demo command lines:
 ```
@@ -84,11 +83,10 @@ node jeforth.3nd.js cls .' Hello world' cr bye
 ```
 Again, like the above HTA case, the prior command line does the self-test, and the 2'nd prints 'Hello world'.
 
-<br>
 #### **HTML** / jeforth.3htm
 Having a local Web server is one of the ways to run jeforth.3htm.  We have a local Web server written by jeforth.3nd (Node.js). Run jeforth.3we/Webserver.bat to launch it, 
 
-[[pictures/webserver.png]]
+![Webserver](doc/README.md/webserver.png)
 
 then try to visit below URLs:
 ```
@@ -99,7 +97,6 @@ http://localhost:8888/index.html?_cr_."_hello_world"_cr_cr
 ```
 IE10 , IE11 and Chrome have been tested. As shown above, forth words can be put in the URL after a '?'. jeforth.3htm will run through it like running through a command line and the self-test will be skipped when having a task to do. Space character can be replaced by underscore.
 
-<br>
 #### **NW.js** / jeforth.3nw
 Install your Node.js and Node-Webkit (or NW.js now) in prior. Let jeforth.3we/ be your working directory, run either one of below command lines:
 ```
