@@ -43,9 +43,9 @@
 					/// Must intercept onkeydown event to avoid original function.
 
 	: {-}			( -- boolean ) \ Inputbox keydown handler, zoom out.
-					js> !event.ctrlKey if true else nw :: zoomLevel-=0.5 false then ;
+					js> event.ctrlKey if nw :: zoomLevel-=0.5 false else true then ;
 	: {+}			( -- boolean ) \ Inputbox keydown handler, zoom in.
-					js> !event.ctrlKey if true else nw :: zoomLevel+=0.5 false then ;
+					js> event.ctrlKey if nw :: zoomLevel+=0.5 false else true then ;
 
 	previous definitions
 	
