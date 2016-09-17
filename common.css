@@ -2,7 +2,7 @@
 	.console3we div , .console3we textarea {
 		color:black;
 		font-family: courier new;
-		font-size: 20px;
+		/* font-size: 40px; */
 		padding:20px; 
 		word-wrap:break-word;
 		border: 0px solid white;

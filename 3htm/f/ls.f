@@ -230,9 +230,9 @@
 	: editbox-style ( -- ) \ Setup local storage edit box CSS style if it's undefined
 		js> typeof(ebstyle)=="undefined" if
 		<h> <style id=ebstyle type="text/css">
-			.eb .box { width:90%; font-size:1.5em; /* filename */ } 
+			.eb .box { width:90%; font-size:1.1em; /* filename */ } 
 			.eb .box, .eb .ebhtmlarea { border:1px solid black; }
-			.eb .ebtextarea { font-size:1.5em }
+			.eb .ebtextarea { font-size:1.1em }
 			.eb input { font-size:0.7em /* buttons */ }
 			.eb p { display:inline; }
 			.eb .ebname { font-size: 1em; }

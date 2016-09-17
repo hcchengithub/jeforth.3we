@@ -210,7 +210,7 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 						[p 'version' p]
 				</selftest>
 
-code execute    ( Word|"name"|address|empty -- ... ) \ Execute the given word or the last() if stack is empty.
+code execute    ( Word|"name"|address -- ... ) \ Execute the given word.
 				execute(pop()); end-code
 
 				<selftest>

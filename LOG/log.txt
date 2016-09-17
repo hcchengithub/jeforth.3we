@@ -4063,6 +4063,13 @@
 [ ] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
 	[ ] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
 		I wish HTA supports something to tell OS version?
+	--> jeforth.hta uses the below method to distinguish Windows version:
+		if(document.getElementsByClassName){
+			document.getElementsByClassName('appname')[0].innerHTML=kvm.appname;
+			document.getElementsByClassName('appname')[1].innerHTML=kvm.appname;
+		} else{
+			alert("Warning: Your system is old, IE10 or newer preferred. Try Windows upgrade.");
+		}
 
 [x] How to tell Windows version?
 	> objEnumWin32_OperatingSystem :> item().Version .
@@ -4288,8 +4295,7 @@
 	==> 寫一個簡單的 index.html 裡面就是 include jquery 跟檢查。看能不能複製問題出來。
 	==> https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html?nop
 		run 得很好。
-	[ ] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
-
+[x] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
 [x]	only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
 	order 裡面。為了避免礙眼。
 	[x] re-design rescan-word-hash, let it always read 'forth' first even when it's
@@ -4318,13 +4324,6 @@
 
 [x] 撰寫 cloth.md / cloth.html ==> tutor-cloth.f is better !!
 
-[ ] cloth.f 發現 up/down recall command history 時,	popup menu 有點怪。
-	最好能讓 command history popup menu 真的 popup 出來，以適應不同版面。
-	如何清除 command history popup menu?
-
-[ ] help ==> How to	Run the HTML version online. Click here to run.
-	change to rawgit.com
-
 [x] up/down 直接 recall history 有點煩, 改成 default disabled。
 
 [x] 合併 [if][else][then][begin][again][until][for][next] 成對應的 if else ... etc
@@ -4333,18 +4332,17 @@
 	交給 interpreter 執行。
 	==> run: and (run:)
 
-[ ] recall all vocabulary after only
+[x] recall all vocabulary after only
 	get-vocs js> tos().length [for] js> tos().shift() . cr [next] drop
 	get-vocs js> tos().length [for] js: order.push(tos().shift()) [next] drop rescan-word-hash
-
+	==> "not-only" command recalls all loaded vocabularies.
+	
 [x] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be
 	a global, and it is.
 	So cv will be a value, a global too.
 	==> this is a bigger effort to modify all existing .f files. Done.
 
-[ ] 能不能把 vm.g.cv.lineWidth 直接弄成 value?
-
-[ ] webserver.bat 要避免重複跑，搶著當 localHost server 不可能。
+[ ] webserver.bat 要避免重複跑，multiple instance 搶著當 localHost server 不可能。
 
 [ ] This info seems a better way for ie.f to modify a web page
 	https://msdn.microsoft.com/en-us/library/jj733572.aspx#Date
@@ -4439,16 +4437,36 @@
 [x] 照 爽哥 建議增加 tutor-cloth.f 畫線的例子。
 	hcchen5600 2015/12/03 17:09:31
 
-[ ] This help message is wrong now?
+[x] This help message is wrong now?
 	execute ( Word|"name"|address|empty -- ... ) Execute the given word or the last() if stack is empty. (object)
+	==> 9/16'16 done
+	
 [ ] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
 [ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
 	facing the Access-Control-Allow-xxxxx 的問題。
 	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
 	==> study https://pages.github.com/
+	--> 9/16'16 tried https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html on 
+		IE 11/Windows 10, really failed, as shown below:
+		--- jeforth.3htm error message at beginning --- 
+		Error! Failed to read f/jeforth.f
+		--- F12 error messages ---
+		Navigation Event Separator
+		DOM7011: The code on this page disabled back and forward caching. For more information, see: http://go.microsoft.com/fwlink/?LinkID=291337
+		index.html
+		HTML1300: Navigation occurred.
+		index.html
+		SCRIPT7002: XMLHttpRequest: Network Error 0x80070005, Access is denied.
+		index.html
+		SCRIPT7002: XMLHttpRequest: Network Error 0x80070005, Access is denied.
+		index.html
+		SCRIPT7002: XMLHttpRequest: Network Error 0x80070005, Access is denied.
+		index.html
 
-[ ] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
+	
+	
+[x] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
 	--> See YNote: "在 Web browser 上直接編輯網頁內容"
 	-->	Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
 		IE and Edge can only save the original content like Chrome's "僅限網頁的HTML部分"。
@@ -4460,8 +4478,9 @@
 	--> 曾有過用 project-k 做成獨立的 template.html 實現此構想。直接執行:
 			chrome --allow-file-access-from-files
 		應該更好。有充分的資源可用。
-	[ ] 先寫 template 準備放在 inputbox 下面。用了再說，看需要甚麼功能。
-[ ] 應用 chrome --allow-file-access-from-files 之前要把所有執行中的 chrome.exe 都停掉。
+	==> now, ls.f Edit Box 
+	
+[x] 應用 chrome --allow-file-access-from-files 之前要把所有執行中的 chrome.exe 都停掉。
 	不如來寫一個命令叫做 powoer-chrome (引用 power user 的用法) 來一口氣完成。
 	: power-chrome ( -- ) \ Run chrome that
 
@@ -4513,8 +4532,8 @@
 	js> vm.plain(vm.g["log.txt"]) js: article.innerHTML=pop()
 	[x] CSS tab-size IE/Edge 皆無效, 3hta either . . . 
 		證實: char log.html readTextFile js: article.innerHTML=pop()
-		[ ]	先別想用 3hta 寫 log.html 吧!
-
+	==> ls.f Edit Box is now good enough
+	
 [x] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
 	\ caret at the target position
 	\ press Ctrl-F2
@@ -4560,7 +4579,7 @@
 		js: tempid.removeAttribute("id")
 		ce@ :> parentNode replaceNode ;
 		
-[ ] jeforth 分析 考勤 刷卡紀錄 上班時數 分析
+[x] jeforth 分析 考勤 刷卡紀錄 上班時數 分析
 [x] private folder is a new project 
 	--> GitHub is not for private use unless pay the money. Use and Dropbox Yun.Baidu instead.
 	
@@ -4569,9 +4588,10 @@
 	different topics.
 	--> 照這樣安排只 click 一下 [Sync] 按鈕, 兩邊這樣都成功了。
 	
-[ ] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone 
-    取代，因為 outputbox 只接 log 起來太正點了。保留現有 log.json 的 stack 架構, 但是擴充 random
-	access 的功能。讓它跟 outputbox 結合地更自然、更好用。
+[x] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone 
+    取代，因為 outputbox 只接 log 起來太正點了 (ls.f has "snapshot" command now)。保留現有 
+	log.json 的 stack 架構, 但是擴充 random	access 的功能。讓它跟 outputbox 結合地更自然、更好用。
+	==> Done, ls.f Edit Box.
 
 [x] words and help will list the exactly same word multiple times
 	depends on the order list. Try not. Simply check the recent i and the order
@@ -4643,7 +4663,7 @@
 	<div><img src="http://www.hao123.com/images/return.gif" width="60" height="30" alt="返回本站首页" border="0" data-pin-nopin="true"><img src="http://www.hao123.com/images/logo.gif" alt="hao123网址之家www.hao123.com" width="168" height="63" border="0" data-pin-nopin="true"></div>
 
 
-[ ] Now I hope that I can use some script in tr.table. So I can click and run scripts.
+[x] Now I hope that I can use some script in tr.table. So I can click and run scripts.
     That requires a Security Policy:
 		Refused to execute inline event handler because it violates the following Content 
 		Security Policy directive: "script-src 'self' 'unsafe-eval'". Either the 'unsafe-inline' 
@@ -4665,38 +4685,81 @@
 	==> 結論就是不要寫成 inline script 就行了, 那沒問題呀!
 	--> See Ynote: jeforth.3ce let tr.table to have script, do-able!
 	
-[ ] is#text? paste-string erase-#text-anchorNode
-	==> See Ynote: jeforth.3ce window.getSelection() 得到的 Selection object 是揮發性的！不能留下來以後用。
+[x] is#text? paste-string erase-#text-anchorNode
+	==> See Ynote: jeforth.3ce window.getSelection() 得到的 Selection object 是揮發性
+		的！不能留下來以後用。
 	
-[ ] project-k baby.html, sample.html 突然 run 起來之後 Ctrl-enter 沒有作用, F12 debugger 才看得見
+[x] project-k baby.html, sample.html 突然 run 起來之後 Ctrl-enter 沒有作用, F12 debugger 才看得見
 	問題, 原來是 jQuery 掛不起來：
 	Failed to load resource: net::ERR_NAME_NOT_RESOLVED http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js
 	baby.html:48 Uncaught ReferenceError: jQuery is not defined
 	這常有, 應該要有警告。
 	這是 GFW 的問題, 透過 VPN 就好了。中國境內有沒有 jQuery 的 mirror?
 	
-[ ] 14:21 2016-04-12 jeforth.3ce startup page to advertise itself. Use YNote directly.
+[x] 14:21 2016-04-12 jeforth.3ce startup page to advertise itself. Use YNote directly.
     cls <o> <iframe src="http://note.youdao.com/share/?id=b76172957fccf6a35b31dd7936327c3f&type=note#/" 
 	name="An introduction to jeforth.3ce" align="center" width="96%" height="6800px" 
 	marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> er	
 
-[ ]	This line works fine on the published jeforth.3ce which was installed from Chrome Web Store,
-    include http://rawgit.com/hcchengithub/jeforth.3we/develop/3htm/f/ls.f 
-	
-	In example of jeforth.3we\js\numeric-1.2.6.js, it does not work to:
-	include.js http://rawgit.com/hcchengithub/jeforth.3we/develop/js/numeric-1.2.6.js 
-	because the module assumes itself is included by HTML head while it's not in this case.
-	Note: It does not work due to that <js></js> is volatile in 3nw, 3htm, 3ce and 3hta, 
-	while it's under global in Node.js.
+[x]	tutor-cloth.f console3we strange. 
+	[x] Improve the scrollto position. 
+	[x] Font size not consistant either.
+[x] 'Edit box style' 這種東西實在太煩了, 到底為什麼 font size 怎麼都調不好。
+    [x] RI: don't use absolute font-size like the 20px in common.css, it is exactly
+		the root cause of this problem.
+    --> js> $("style").length \ ==> 3
+    --> js> $("style")[0].innerHTML 	
+	--> The below study shows me the idea that a stand along style setting for font-size
+	    may be the solution.
 
-	Workaround is:
-	char http://rawgit.com/hcchengithub/jeforth.3we/develop/js/numeric-1.2.6.js 
-	readTextFile \ 先讀取 .js 檔, 但不能直接用
-	<text> 
-	window.numeric = numeric;  // 先對 source 做一點必要的加工, 把 numeric 掛上 global 
-	</text> + </js> \ 然後才執行	
-	
-[ ]	tutor-cloth.f console3we strange. 
-	[ ] Improve the scrollto position. 
-	[ ] Font size not consistant either.
-	
+		js> $("style")[0].outerHTML \ ==> <style id="commoncss"> 
+			.console3we div , .console3we textarea {
+				color:black;
+				font-family: courier new;
+				font-size: 40px; <========== pull this line along out of this tag
+				padding:20px; 
+				word-wrap:break-word;
+				border: 0px solid white;
+				background:#F0F0F0;
+			}
+			
+			.console3we textarea {
+				width:99%; 
+				padding:4px; 
+				border: 0px solid;
+				background:#BBBBBB;
+			}
+		</style> (string)
+
+		js> $("style")[1].outerHTML 
+		\ ==> <style type="text/css">canvas{border:solid 1px #CCC}</style> (string)
+
+		js> $("style")[2].outerHTML 
+		\ ==> <style id="ebstyle" type="text/css">
+			.eb .box { width:90%; font-size:1.5em;  } 
+			.eb .box, .eb .ebhtmlarea { border:1px solid black; }
+			.eb .ebtextarea { font-size:1.5em }
+			.eb input { font-size:0.7em  }
+			.eb p { display:inline; }
+			.eb .ebname { font-size: 1em; }
+			</style> (string)
+
+		js> $("style")[3].outerHTML 
+		\ ==> <style id="styleTextareaFocus" type="text/css">.console3we textarea:focus { 
+				border: 0px solid; background:##E0E0E0;
+			}</style> (string)
+	[x] 乾脆把 font-size remove from the above [0] style section. The question of "what
+		is the "1.1em" font size refer to 
+		[x] remove font-size from jeforth.3we/common.css 
+		[x] also change font-size in 3htm/ls.f, which is now refer to default font-size,
+			to 1.1em that works fine now. 
+		--> it works!!
+		--> so the default font-size is good enough. <=== True !!!
+		
+[x] 3nw's Ctrl-{+}, Ctrl-{-} font size control does not work.
+    1) the two colon words' logic were wrong!! --> fixed
+	2) {pad +} and {pad -} and their normal equivlants are of different keycode, so
+		3htm/platform.f needs to add two more keys to allow notebooks (w/o numeric pad)
+		to press Ctrl-plus and Ctrl-Minus.
+	Sh**t! this problem has been there for a long time !!!
+	   
