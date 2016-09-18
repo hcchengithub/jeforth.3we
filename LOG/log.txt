@@ -4748,6 +4748,10 @@
 		\ ==> <style id="styleTextareaFocus" type="text/css">.console3we textarea:focus { 
 				border: 0px solid; background:##E0E0E0;
 			}</style> (string)
+		***	If want to modify existing style tag, I have done that before!
+			See flot.f "remove-backgroundColor-style" command that modifies common.css 
+			background color due to that flot.js does not work well with background color.
+		
 	[x] 乾脆把 font-size remove from the above [0] style section. The question of "what
 		is the "1.1em" font size refer to 
 		[x] remove font-size from jeforth.3we/common.css 
