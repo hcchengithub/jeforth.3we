@@ -1,9 +1,11 @@
 
     \ Flot.js demo GitHub\flot\examples\basic-usage\index.html
 
+	include flot.f
+    
     \ Prepare the Flot ploting zone
 
-		' flotzone [if] [else]
+		cls ' flotzone [if] [else]
 			<o> <div class=flotzone></div></o> constant flotzone // ( -- DIV ) Place for Flot plotings avoid CSS conflict.
 			flotzone js> $(".console3we")[0] insertBefore
 
@@ -13,25 +15,6 @@
 			</div></o> appendChild
 		[then]
 
-    \ Include CSS and Flot.js
-    
-		js> typeof($.plot)!="function" [if] 
-			<h> 
-			<!-- link id=flotcss href="external modules/flot/examples/examples.css" rel="stylesheet" type="text/css"-->
-			<script id=flotjs language="javascript" type="text/javascript" src="external modules/flot/jquery.flot.js"></script>
-			</h> drop
-
-			\ Wait a while, make sure Flot.js is ready
-			.( $.plot readiness check .)
-			( seconds * 1000 / nap ) js> 60*1000/200 [for] 
-				js> typeof($.plot)=="function" [if] 
-					r> drop 0 >r \ break the loop
-				[else] 
-					200 nap ." ." \ wait a while
-				[then] 
-			[next] cr
-		[then]
-    
     \ Demo #1
         \ Create the placeholder
 
