@@ -43,6 +43,7 @@
 			then
 		then ;
 		/// Error proof, return previous history ce, or window.document if history is empty.
+		/// ce@ :> childNodes[i] to access child nodes.
 
 	code <>escape ( "lines" -- "cooked" ) \ '<' '>' to "&lt;" "&gt;"
 		var result = pop().replace(/</mg,"&lt;").replace(/>/mg,"&gt;");
@@ -120,10 +121,14 @@
 		end-code
 		/// Stay recent ce if destination 
 		
-	: ce ( [<'index'>] -- ) \ change element to current-element[index] or '..' to parent element.
+	: ce ( [<'index'>] -- ) \ change element to ce@ :> childNode[index] or '..', '<', '>', 'pop'
 		BL word ( -- 'index' ) ?dup if (ce) else ce@ then se ; interpret-only
 		/// if nothing given then see current element
 		/// Use 'se' in compiling mode if that's what you want to do.
+		/// '..' change element to parent of ce@
+		/// '<' and '>' change element to sibling of ce@
+		/// 'pop' change element to previous ce.
+	
 
 	: ce< ( -- ) \ Change element to the previous current-element
 		ce-history :: pop() ce@ se ;

@@ -25,6 +25,11 @@
     \ URL command line directly to tell it what to do.
 
 	vocabulary target.f also target.f definitions
+
+	\ 3ce target page's ~.html and ~.js are all covered by target.f 
+	\ jeforth.3ce.html is the index.html home page of popup page and extension pages, 
+	\ jeforth.3ce.js   is the Javascript portion of the jeforth.3ce.html home page.
+	\ jeforth.3ce.background.html is the index.html of the background page
 	
 	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
 
@@ -44,7 +49,7 @@
 				padding:20px;
 			}
 			.console3we div {
-				font: 20px "courier new";
+				font-family: courier new;
 			}
 			.console3we textarea {
 				width:100%;
@@ -54,6 +59,12 @@
 				background:#BBBBBB;
 			}
 		</style>
+		<style id=styleTextareaFocus type="text/css"> 
+			.console3we textarea:focus {
+				background:#E0E0E0;
+			}
+		</style>
+		
 		<div id=header>
 			<div style="font-family:verdana;">
 				<b><div class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
@@ -119,6 +130,10 @@
 		// with target page's original settings, 但這樣做最簡單。下面的 platform.f 還會
 		// 在條件成熟後用更完整的 keyboard handler 重新設定。
 		document.onkeydown = target_onkeydown; 	
+		
+		// Where there are outputbox and inputbox there is this function
+		vm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)};
+		
 	</js>
 	
 		
@@ -157,7 +172,7 @@
 	
 	include f/misc.f		
 	include 3htm/f/hte.f
-	include 3htm/f/ls.f
+  \ include 3htm/f/ls.f
 
 	\ ------------ End of target.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging

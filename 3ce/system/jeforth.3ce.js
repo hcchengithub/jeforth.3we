@@ -4,6 +4,7 @@
 	// jeforth.3ce.html is the index.html home page of popup page and extension pages, 
 	// jeforth.3ce.js   is the Javascript portion of the jeforth.3ce.html home page.
 	// jeforth.3ce.background.html is the index.html of the background page
+	// 3ce target page's ~.html and ~.js are all covered by target.f 
 
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.

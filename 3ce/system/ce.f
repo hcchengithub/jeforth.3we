@@ -216,7 +216,7 @@
 		js: push({active:true}) tabs.query :> [0] ;
 		/// Used by 3ce popup page.
 
-	: attach ( tabid -- ) \ Attach 3ce to the specified target tab.
+	: attach ( tabid -- ) \ Attach 3ce to the target tab to be possessed
 		\ Activate the target tab
 		depth if ( Tab ID ) else
 			isPopup? if active-tab :> id else tabid then ( Tab ID )
