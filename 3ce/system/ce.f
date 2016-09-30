@@ -189,6 +189,16 @@
 	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
 		js: push({forth:pop()}) message->tabid ;
 		/// Usage: <text> ... </text> (dictate)
+        /// Example: 下達指令去 target page 讀取 source code
+        /// <text> 
+        ///     char not-read-yet \ flag
+        ///     100 nap js> $("body")[0].outerHTML 
+        ///     drop char already-read \ flag
+        /// </text> (dictate)
+        /// \ 必要步驟等待(dictate)完成
+        /// 100 [for] tos<target . cr [next]
+        /// \ 本實驗成功! 任何用到 (dictate) 之處皆應比照改寫。
+
 		
 	code {F7} ( -- ) \ Send inputbox to content script of tabid.
 		// 當命令來自 host page 就盡可能把 display 切向 host page
@@ -398,4 +408,23 @@
 		/// tabs.select tabid attach
 		/// ( empty, tabid by default or active-tab if from popup ) attach 
 	
+	: pop<target ( -- x ) \ 3ce extension pages get and consumes the TOS from the target page
+		char NotYet s' <js> chrome.runtime.sendMessage({addr:"'
+		myTabId + s' ",tos:pop()})</js>' + (dictate) 
+		begin js> tos()=="NotYet" while 100 nap repeat nip ;
+		/// for 3ce extension pages and popup page only
+		
+	: tos<target ( -- x ) \ 3ce extension pages get but not consumes the TOS from the target page
+		char NotYet s' <js> chrome.runtime.sendMessage({addr:"'
+		myTabId + s' ",tos:tos()})</js>' + (dictate) 
+		begin js> tos()=="NotYet" while 100 nap repeat nip ;
+		/// for 3ce extension pages and popup page only
+		
+	: pop>target ( x -- ) \ Send and consume the TOS to the target page
+		js> ({tos:pop()}) message->tabid ;
+		/// for 3ce extension page only
+
+	: tos>target ( x -- x ) \ Send but not consume the TOS to the target page
+		js> ({tos:tos()}) message->tabid ;
+		/// for 3ce extension page only
 	
