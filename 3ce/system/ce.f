@@ -187,7 +187,7 @@
 		/// Usage: anything message->tabid
 		
 	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
-		js: push({forth:pop()}) message->tabid ;
+		js: push({forth:pop()}) message->tabid 10 nap ;
 		/// Usage: <text> ... </text> (dictate)
         /// Example: 下達指令去 target page 讀取 source code
         /// <text> 
@@ -410,15 +410,19 @@
 	
 	: pop<target ( -- x ) \ 3ce extension pages get and consumes the TOS from the target page
 		char NotYet s' <js> chrome.runtime.sendMessage({addr:"'
-		myTabId + s' ",tos:pop()})</js>' + (dictate) 
+		myTabId + s' ",tos:pop()})</js>' + (dictate)
+        \ (dictate) 之後如果不 nap 一下這整行有時候會印上 host 端，不知何故？ 
+        \ 後來乾脆把 10 nap 移進 (dictate) 了。
 		begin js> tos()=="NotYet" while 100 nap repeat nip ;
 		/// for 3ce extension pages and popup page only
+        /// Uncertain if target data stack is empty or TOS is an undefined
 		
 	: tos<target ( -- x ) \ 3ce extension pages get but not consumes the TOS from the target page
 		char NotYet s' <js> chrome.runtime.sendMessage({addr:"'
-		myTabId + s' ",tos:tos()})</js>' + (dictate) 
+		myTabId + s' ",tos:tos()})</js>' + (dictate)
 		begin js> tos()=="NotYet" while 100 nap repeat nip ;
 		/// for 3ce extension pages and popup page only
+        /// Uncertain if target data stack is empty or TOS is an undefined
 		
 	: pop>target ( x -- ) \ Send and consume the TOS to the target page
 		js> ({tos:pop()}) message->tabid ;
@@ -427,4 +431,8 @@
 	: tos>target ( x -- x ) \ Send but not consume the TOS to the target page
 		js> ({tos:tos()}) message->tabid ;
 		/// for 3ce extension page only
-	
+
+    : get-title ( -- "title" ) \ Read target page's title
+        s" char notyet js> document.title nip char done" (dictate)
+        begin tos<target char done = until pop<target drop pop<target ;
+        /// 這是個正確使用 (dictate) 的範例。
