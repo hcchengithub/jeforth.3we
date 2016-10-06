@@ -409,7 +409,7 @@
 		/// ( empty, tabid by default or active-tab if from popup ) attach 
 	
 	: pop<target ( -- x ) \ 3ce extension pages get and consumes the TOS from the target page
-		char NotYet s' <js> chrome.runtime.sendMessage({addr:"'
+		char NotYet s' shooo! <js> chrome.runtime.sendMessage({addr:"'
 		myTabId + s' ",tos:pop()})</js>' + (dictate)
         \ (dictate) 之後如果不 nap 一下這整行有時候會印上 host 端，不知何故？ [ ] 被當成 F7 下的命令因此以 host 為 console
         \ 後來乾脆把 10 nap 移進 (dictate) 了。
@@ -418,7 +418,7 @@
         /// Uncertain if target data stack is empty or TOS is an undefined
 		
 	: tos<target ( -- x ) \ 3ce extension pages get but not consumes the TOS from the target page
-		char NotYet s' <js> chrome.runtime.sendMessage({addr:"'
+		char NotYet s' shooo! <js> chrome.runtime.sendMessage({addr:"'
 		myTabId + s' ",tos:tos()})</js>' + (dictate)
 		begin js> tos()=="NotYet" while 100 nap repeat nip ;
 		/// for 3ce extension pages and popup page only
@@ -433,12 +433,12 @@
 		/// for 3ce extension page only
 
     : get-title ( -- "title" ) \ Read target page's title
-        s" char notyet js> document.title nip char done" (dictate)
+        s" shooo! char notyet js> document.title nip char done" (dictate)
         begin tos<target char done = until pop<target drop pop<target ;
         /// 這是個正確使用 (dictate) 的範例。
         
     : get-element ( "js> element" -- "HTML" ) \ Read target page's source code
-        s" char notyet " swap + s"  nip char done" + (dictate)
+        s" shooo! char notyet " swap + s"  nip char done" + (dictate)
         begin tos<target char done <> while 10 nap repeat 
         pop<target drop pop<target ;
         /// Example:
