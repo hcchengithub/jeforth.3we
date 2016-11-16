@@ -1,0 +1,121 @@
+[x] 15:21 2016-11-08 
+	I created a new folder in addion to jeforth.3we. Because jeforth.3ca needs a new folder for its
+	manifest.json. I am thinking that 3nw, 3ca are also having the same problem so probably this is 
+	the best solution. jeforth.3we become a common base folder. 3ce, 3ca, 3nw uses Windows symbolic
+	link to acquire jeforth.3we sub-folders like project-k/, f/, js/, and 3htm/, etc.
+
+	rem files in the root directory
+	mklink manifest.json c:\Users\hcche\Documents\GitHub\jeforth.3we\3ca\manifest.json
+	mklink log.txt       c:\Users\hcche\Documents\GitHub\jeforth.3we\3ca\log.txt
+	rem folders
+	mklink /d  3htm                c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm
+	mklink /d  demo                c:\Users\hcche\Documents\GitHub\jeforth.3we\demo
+	mklink /d  "external modules"    "c:\Users\hcche\Documents\GitHub\jeforth.3we\external modules"
+	mklink /d  f                   c:\Users\hcche\Documents\GitHub\jeforth.3we\f
+	mklink /d  js                  c:\Users\hcche\Documents\GitHub\jeforth.3we\js
+	mklink /d  playground          c:\Users\hcche\Documents\GitHub\jeforth.3we\playground
+	mklink /d  project-k           c:\Users\hcche\Documents\GitHub\jeforth.3we\project-k
+
+	[supplement]
+	In case of jeforth.3ca, use related pathname is preferred as shown below:
+	c:\Users\hcche\Documents\GitHub\jeforth.3ca>mklink  common.css ..\jeforth.3we\common.css
+	symbolic link created for common.css <<===>> ..\jeforth.3we\common.css
+
+
+[x] so how to run it?
+
+	from:	H.C. Chen <hcchen5600@gmail.com>
+	to:	符式協會 <figtaiwan@googlegroups.com>
+	date:	Mon, Jan 4, 2016 at 12:14 AM
+	subject:	Re: [符式協會:6595] Re: 2015/12/28,29 (一,二) jeforth 實務研討
+	mailed-by:	gmail.com
+	:	Important according to our magic sauce.
+
+	jeforth.3we Chrome App 版 jeforth.3ca 已經完成
+
+    金理事長的指點："... JeForth 既然已經是成品了，就稍作整理後，放上 Chrome 的網路商店，讓國際
+	間的朋友也能分享，並給點意見。畢竟 Windows 的環境，不適合當學會的推廣平台。還是免費的瀏覽器
+	環境，比較恰當！而且，範例放在網路上，大家要學習，也方便的多。..." 元旦假期在家搞定了。
+
+	Chrome App 應該就是 Chrome【線上應用程式商店】的東西。我要做的工作: 1. 提供 Logo 圖檔(協會已
+	經有了！), 2. 提供 manifest.json 檔, 類似 Node-wekit 的 package.json 都放在 jeforth.3we 的 
+	root directory. 3. 其他都是 jeforth.3htm 現成的了，但是要解決ㄧ些 Chrome App 可能因為開放安全
+	權限所伴隨的 CSP (content security policy) 問題，都搞定了。沒有發佈前先在 local 執行, 好像稱
+	作 Unpacked Extension 者是。
+
+	安裝方法,
+
+	上 GitHub https://github.com/hcchengithub/jeforth.3we 把 jeforth.3we master branch clone 下來。
+	照這篇文章 https://developer.chrome.com/webstore/get_started_simple?csw=1 的 Step 4: Verify 
+	that the app works 去做。摸索五分鐘就可以讓 jeforth.3ca 出現在您的 Chrome Apps 頁面上了。 
+	Click 協會的 Logo 即可執行。
+	
+	陳厚成 敬上
+	蘇州．昆山
+
+	--> Same way to install jeforth.3ce. Contents in manifest.json makes them the differences.
+	--> Use jeforth.3we-7fd99850a527d3a390c979bb5b6731e29c143e5c.zip from gitHub and it works better
+		but still having a problem:
+			Uncaught EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' 
+			is not an allowed source of script in the following Content Security Policy 
+			directive: "default-src 'self' blob: filesystem: chrome-extension-resource:".
+	[x] Try to add 	Content Security Policy directive: "default-src 'self' --> failed
+	[x] Try to ask Google how to use eval() in Chrome App.
+	    --> No way! See https://developer.chrome.com/apps/contentSecurityPolicy	It says: 
+			You can’t use string-to-JavaScript methods like eval() and new Function().
+			Chrome extensions will let you relax the default Content Security Policy; Chrome Apps won’t.
+		--> Chrome:extension shows a message : 
+				There were warnings when trying to install this extension:
+					'content_security_policy' is only allowed for extensions and legacy packaged apps, 
+					but this is a packaged app.
+				This warning regards to the manifest.json "content_security_policy": field.
+				It indicates a possible solustion: The Legacy Packaged Apps!
+			==> Remove the entire "content_security_policy": "script-src 'self'; ... snip...
+				field is the only way to resolve the problem.
+	[x]	Resolve the problem of jeforth.3we/3ca first, it can't but the previous work can reach the CSP
+	    barrier.
+		[x]	This line in main.js : chrome.app.window.create('3ca/index.html', ...
+			is suspected the reason that makes base directly become /3ca this /3ca/js /3ca/html ... etc.
+			-->	But "mklink index.html c:\Users\hcche\Documents\GitHub\jeforth.3ca\3ca\index.html" 
+				created a symbolic link at root directery doesn't work. This is strange because 
+				manifest.json is a symblic link and it works.
+				--> try a real index.html at root directery ... B i n g o ! !
+					OMG, this is very strange. index.html can't be a symbolic link. So other than 
+					a symbolic link, how about a _hard_link_ ? (study Windows linkage options)
+					--> ~\jeforth.3ca>fsutil hardlink create index.html 3ca/index.html
+						Hardlink created for c:\Users\hcche\Documents\GitHub\jeforth.3ca\index.html <<===>> c:\Users\hcche\Documents\GitHub\jeforth.3ca\3ca\index.html
+						--> Try it .... B i n g o ! ! 
+							index.html can't be a symblic link but hard link works fine.
+[ ]	All done with GitHub\jeforth.3ca, the last problem is the ultimate obsticle of:
+	Uncaught EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' 
+	is not an allowed source of script in the following Content Security Policy directive: 
+	"default-src 'self' blob: filesystem: chrome-extension-resource:".(…)
+	[x]	Try Legacy Packaged Apps
+		http://stackoverflow.com/questions/14850788/difference-between-a-packaged-app-and-a-legacy-packaged-app-in-chrome
+		-->	No, Legacy Packaged Apps has been dropped, don't wast time on it.
+	[x] 2016-Jun was ok, the commit ID is jeforth.3we-59858c0208318dc563cd5d758a37ae5bac05036e.zip
+		Try again . . . Yes, it works!! 
+		So how did I overcome the CSP barrier?
+		o	jeforth.3we/LOG/log.html has some notes of how to resolve CSP problems.
+		o	Ditto above, Chrome App start-ups
+		o	Search 'chrome app' in jeforth.3we/LOG/log.html
+	[ ]	Study 2016-Jun commit jeforth.3we-59858c0208... to recall my solution. Why eval() can be used?
+		c:\Users\hcche\Downloads\jeforth.3we of my T550
+		Level #1 menifest.json 
+				"app": { /* from the ok */
+					"launch": {
+						"local_path": "jeforth.3chrome.html"
+					}
+				}, 
+		Level #2 ~\jeforth.3we\jeforth.3chrome.html <== suspected is the solution.
+				"app": { /* from the failed */
+					"background": {
+					  "scripts": ["3ca/main.js"]
+					}
+				}
+		--> So CSP is not a problem if only jeforth.3ca is launched through a .html instead 
+			of .js from menifest?
+		[ ] So, modify menifest.json to follow commit 59858c0 to use index.html instead of main.js.
+			It works, but it makes the same CSP error, good progress. 
+			--> compare index.html and jeforth.3chrome.html
+			
