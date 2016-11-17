@@ -115,7 +115,7 @@
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		function target_onkeydown(e) {
-			// Initial version defined in 3ce/system/quit.f
+			// Initial version defined in 3ce/quit.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */

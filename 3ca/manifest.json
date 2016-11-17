@@ -1,16 +1,29 @@
+/*
+**
+** The index.html is a Windows hard link of jeforth.3htm index.html.
+** Therefore everything else is exactly same as jeforth.3htm, so far.
+** The only difference is that jeforth.3ca runs on Chrome App 
+** environment. The benefit I can see at first is to run jeforth.3htm
+** without the need of through a local host.  09:48 2016-11-17
+**
+** Use this jeforth command line "js> chrome.app.getDetails() (see)"
+** to see the working manifest object.
+**
+*/
+
 {
-	"name": "jeforth.3ca target implementation",
-	"description": "jeforth.3we for Chrome App",
-	"version": "1.0",
+	"name": "jeforth.3ca",
+	"description": "Exactly jeforth.3htm but run on Chrome App.",
+	"version": "1.2",
 	"manifest_version": 2,
 	"icons": {
 		"128": "3ca/fig.tw128x128.png",
 		"16": "3ca/fig.tw16x16.png"
 	},
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 	"app": { 
 		"launch": {
 			"local_path": "index.html"
 		}
-	}
-	
+	}	
 }

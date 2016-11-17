@@ -86,20 +86,24 @@
 						Hardlink created for c:\Users\hcche\Documents\GitHub\jeforth.3ca\index.html <<===>> c:\Users\hcche\Documents\GitHub\jeforth.3ca\3ca\index.html
 						--> Try it .... B i n g o ! ! 
 							index.html can't be a symblic link but hard link works fine.
-[ ]	All done with GitHub\jeforth.3ca, the last problem is the ultimate obsticle of:
+[x]	All done with GitHub\jeforth.3ca, the last problem is the ultimate obsticle of:
 	Uncaught EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' 
 	is not an allowed source of script in the following Content Security Policy directive: 
 	"default-src 'self' blob: filesystem: chrome-extension-resource:".(…)
 	[x]	Try Legacy Packaged Apps
 		http://stackoverflow.com/questions/14850788/difference-between-a-packaged-app-and-a-legacy-packaged-app-in-chrome
-		-->	No, Legacy Packaged Apps has been dropped, don't wast time on it.
+		[ ]	Legacy Packaged Apps has been dropped, this is a potential problem.
+			--> What is a "Legacy Packaged Apps"? The answer is to run a ~.html in the app 
+				field in manifest.json. See ^2016-11-16 13:08^
+		
 	[x] 2016-Jun was ok, the commit ID is jeforth.3we-59858c0208318dc563cd5d758a37ae5bac05036e.zip
 		Try again . . . Yes, it works!! 
 		So how did I overcome the CSP barrier?
 		o	jeforth.3we/LOG/log.html has some notes of how to resolve CSP problems.
 		o	Ditto above, Chrome App start-ups
 		o	Search 'chrome app' in jeforth.3we/LOG/log.html
-	[ ]	Study 2016-Jun commit jeforth.3we-59858c0208... to recall my solution. Why eval() can be used?
+	[x]	Study 2016-Jun commit jeforth.3we-59858c0208... to recall my solution. Why eval() can be used?
+		--> [Resolved] The Answer is see ^2016-11-16 13:08^
 		c:\Users\hcche\Downloads\jeforth.3we of my T550
 		Level #1 menifest.json 
 				"app": { /* from the ok */
@@ -115,7 +119,105 @@
 				}
 		--> So CSP is not a problem if only jeforth.3ca is launched through a .html instead 
 			of .js from menifest?
-		[ ] So, modify menifest.json to follow commit 59858c0 to use index.html instead of main.js.
-			It works, but it makes the same CSP error, good progress. 
+		[x] So, modify menifest.json to follow commit 59858c0 to use index.html instead of main.js
+			works, but it makes the same CSP error, good progress. 
 			--> compare index.html and jeforth.3chrome.html
-			
+				c:\Users\hcche\Documents\GitHub\jeforth.3ca\index.html     \ from recent index.html
+					<Script src="3htm/js/jeforth.3htm.js"></Script>
+				c:\Users\hcche\Downloads\jeforth.3we\jeforth.3chrome.html  \ from jeforth.3we-59858c0208
+					<Script src="jeforth.3chrome.js"></Script>
+			-->	As shown above it's the .js file that is suspected --> compared, can't find any suspect.
+				so try to use jeforth.3chrome.js . . . still failed. --> Now I believe the jeforth.js
+				is different. Because it's blocked at jeforth.js --> Nope, jeforth.js is the same.
+				--> so try to use the jeforth.3chrome.html .. no work -> use the jeforth.js too ... 
+				failed --> use the manifest.json it self ... OK !!
+
+				------------ was --------------------------------------------
+				{
+					"name": "jeforth.3ca target implementation",
+					"description": "jeforth.3we for Chrome App",
+					"version": "1.0",
+					"manifest_version": 2,
+					"icons": {
+						"128": "3ca/fig.tw128x128.png",
+						"16": "3ca/fig.tw16x16.png"
+					},
+					"app": { 
+						"launch": {
+							"local_path": "index.html"
+						}
+					}
+					
+				}
+				---------------- to be and works ---------------------------------
+				{
+					"app": {
+						"launch": {
+							"local_path": "jeforth.3chrome.html"
+						}
+					},
+					"icons": {
+						"128": "3ca/fig.tw128x128.png"
+					},
+					"manifest_version": 2,
+					"name": "jeforth.3chrome.html",
+					"description": "jeforth for Chrome app",
+					"version": "1.0",
+					"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+					"permissions" : [
+						"tabs"
+					]
+				}
+				------------------------------------------------------
+				-->	roll back and try again . . . failed as before. --> Use the OK version again ... Bingo!!!
+				--> try to add the CSP field to the failed one:
+				------------ test --------------------------------------------
+				{
+					"name": "jeforth.3ca target implementation",
+					"description": "jeforth.3we for Chrome App",
+					"version": "1.0",
+					"manifest_version": 2,
+					"icons": {
+						"128": "3ca/fig.tw128x128.png",
+						"16": "3ca/fig.tw16x16.png"
+					},
+					"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+					"app": { 
+						"launch": {
+							"local_path": "index.html"
+						}
+					}
+					
+				}
+				------------------------------------------------------
+				--> Yes, that's it!!!!
+				--> So what if using main.js?
+				------------ test main.js --------------------------------------------
+				{
+					"name": "jeforth.3ca target implementation",
+					"description": "jeforth.3we for Chrome App",
+					"version": "1.0",
+					"manifest_version": 2,
+					"icons": {
+						"128": "3ca/fig.tw128x128.png",
+						"16": "3ca/fig.tw16x16.png"
+					},
+					"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+					"app": {
+						"background": {
+						  "scripts": ["3ca/main.js"]
+						}
+					}									
+				}
+				------------------------------------------------------
+				--> failed with the following warning message:
+				" There were warnings when trying to install this extension:
+				  'content_security_policy' is only allowed for extensions 
+				  and legacy packaged apps, but this is a packaged app."
+				[x]	*** So packaged app is running a background ~.js while legacy packaged app 
+					is running a ~.html that allows CSP statement. ^2016-11-16 13:08^
+[x] common.css does not work, due to symbolic link not allowed again? --> Yes!!
+	fsutil hardlink create common.css ..\jeforth.3we\common.css
+	[ ]	Write jeforth.3we/3ca/install.bat to build the GitHub/jeforth.3ca root folder.
+[ ] jeforth.3ca is totally jeforth.3htm so far, so the vm.appname is jeforth.3htm and it really is!
+	[ ]	Study what can 3ca do over 3htm?

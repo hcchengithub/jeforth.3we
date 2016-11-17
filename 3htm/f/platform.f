@@ -553,7 +553,6 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 				/// Example: 
 				///   help *     shows all words
 
-
 <js>
 	vm.cmdhistory = {
 		max:   100, // maximum length of the command history
