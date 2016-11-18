@@ -95,6 +95,7 @@
 		[ ]	Legacy Packaged Apps has been dropped, this is a potential problem.
 			--> What is a "Legacy Packaged Apps"? The answer is to run a ~.html in the app 
 				field in manifest.json. See ^2016-11-16 13:08^
+			--> What a legacy packaged app can do? See ^10:30 2016-11-18^
 		
 	[x] 2016-Jun was ok, the commit ID is jeforth.3we-59858c0208318dc563cd5d758a37ae5bac05036e.zip
 		Try again . . . Yes, it works!! 
@@ -218,6 +219,29 @@
 					is running a ~.html that allows CSP statement. ^2016-11-16 13:08^
 [x] common.css does not work, due to symbolic link not allowed again? --> Yes!!
 	fsutil hardlink create common.css ..\jeforth.3we\common.css
-	[ ]	Write jeforth.3we/3ca/install.bat to build the GitHub/jeforth.3ca root folder.
-[ ] jeforth.3ca is totally jeforth.3htm so far, so the vm.appname is jeforth.3htm and it really is!
-	[ ]	Study what can 3ca do over 3htm?
+	[x]	Write jeforth.3we/3ca/install.bat to build the GitHub/jeforth.3ca root folder.
+		--> install.bat for both 3ca and 3ce are done, it's a good idea that has simplified 
+			jeforth.3we/ root directory.
+[x] jeforth.3ca is totally jeforth.3htm so far, so the vm.appname is jeforth.3htm and it really is!
+	[x]	Study what can 3ca do over 3htm?
+		--> 3ca's abilities are specified in the manifest.json permissions field, like:
+			"permissions": [ /* ^10:30 2016-11-18^ */
+				"tts",
+				{"fileSystem": ["write", "retainEntries", "directory"]},
+				"storage"
+			]
+			--> js> chrome.app.getDetails() (see) 		\ to check it
+				js> chrome.runtime.getManifest() (see) 	\ also
+			In the above example, when reload in the Chrome:extensions page, a warning appears:
+				There were warnings when trying to install this extension:
+				'fileSystem' is only allowed for packaged apps, but this is a legacy packaged app.
+				'fileSystem.directory' is only allowed for packaged apps, but this is a legacy packaged app.
+				'fileSystem.retainEntries' is only allowed for packaged apps, but this is a legacy packaged app.
+				'fileSystem.write' is only allowed for packaged apps, but this is a legacy packaged app.
+			That means 'Text To Speach' and 'storage' are supported but not 'fileSystem'.
+[ ]	Try TTS Text To Speach --> It's so easy!!
+	<text> Hello world, this is jeforth.3we speaking. How are you? </text>
+	js: chrome.tts.speak(pop())	
+	
+	
+	

@@ -3,7 +3,7 @@
 ** jeforth.3ce, jeforth.3we for Chrome Extension 
 **
 ** Use this jeforth command line "js> chrome.app.getDetails() (see)"
-** to see the working manifest object.
+** to see the working manifest object. Also "js> chrome.runtime.getManifest() (see)"
 **
 */
 

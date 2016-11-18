@@ -23,7 +23,7 @@ md ..\..\jeforth.3ca
 cd ..\..\jeforth.3ca
 
 @rem Symbolic File Links
-mklink log.txt 				..\jeforth.3we\3ca\log.txt
+mklink 3ca.log.txt 			..\jeforth.3we\log\3ca.log.txt
 mklink manifest.json 		..\jeforth.3we\3ca\manifest.json
 
 @rem Symbolic Directory Links

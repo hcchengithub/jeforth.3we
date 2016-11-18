@@ -1,5 +1,7 @@
 /*
 **
+** jeforth.3ca manifest
+**
 ** The index.html is a Windows hard link of jeforth.3htm index.html.
 ** Therefore everything else is exactly same as jeforth.3htm, so far.
 ** The only difference is that jeforth.3ca runs on Chrome App 
@@ -7,7 +9,7 @@
 ** without the need of through a local host.  09:48 2016-11-17
 **
 ** Use this jeforth command line "js> chrome.app.getDetails() (see)"
-** to see the working manifest object.
+** to see the working manifest object. Also "js> chrome.runtime.getManifest() (see)"
 **
 */
 
@@ -25,5 +27,25 @@
 		"launch": {
 			"local_path": "index.html"
 		}
-	}	
+	},
+	"permissions": [
+		"tts", "storage", "geolocation", "<all_urls>", "notifications", "contextMenus"
+	]
 }
+
+
+/*
+
+	Not allowed permissions 
+		'system.network'			local host web server
+		'fileSystem'
+		'fileSystem.directory' 		
+		'fileSystem.retainEntries'
+		'fileSystem.write' 			
+		"pointerLock"
+		"videoCapture"
+		"desktopCapture"
+
+	Allowed permissions 
+		"tts", "storage"
+*/
