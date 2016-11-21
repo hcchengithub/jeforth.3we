@@ -9,8 +9,8 @@
 		<html>  
 			<head>  
 			<title>Box2DWeb Test</title>  
-				<script type="text/javascript" src="external modules/box2dweb/Box2dWeb-2.1.a.3.min.js"></script>  
-				<script type="text/javascript" src="external modules/box2dweb/arrow.js"></script>  
+				<script type="text/javascript" src="external-modules/box2dweb/Box2dWeb-2.1.a.3.min.js"></script>  
+				<script type="text/javascript" src="external-modules/box2dweb/arrow.js"></script>  
 			</head>  
 		
 			<body onload="init();">  
@@ -29,11 +29,11 @@
 	</o> constant canvas // ( -- obj ) canvas for Box2dWeb
 
 	<h> 
-	<script type="text/javascript" src="external modules/box2dweb/Box2dWeb-2.1.a.3.js"></script> 
+	<script type="text/javascript" src="external-modules/box2dweb/Box2dWeb-2.1.a.3.js"></script> 
 	</h> constant Box2dWeb // ( -- obj ) The Box2dWeb.js script element
 
 	<h> 
-	<script type="text/javascript" src="external modules/box2dweb/arrow.js"></script>
+	<script type="text/javascript" src="external-modules/box2dweb/arrow.js"></script>
 	</h> constant arrow.js // ( -- obj ) The arrow.js script element
 	/// It defines the init() function, run init() to launch the game.
 	

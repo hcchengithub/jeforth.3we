@@ -15,9 +15,9 @@ er
 	
 		http://www.figtaiwan.org/project/jeforth/jeforth.3we-master/index.html?include_chipmunk-js-pyramidstack.f
 	
-	我已經把 chipmunk.js 整包都放好在 external modules/chipmunk 處，可以開始來玩了。您可能想看它的 source code
+	我已經把 chipmunk.js 整包都放好在 external-modules/chipmunk 處，可以開始來玩了。您可能想看它的 source code
 	且在 local computer 上試跑它的 demo 請往 金城老使指點的 Github 去 download。從它的 demo 裡隨便
-	找一個來看 ~.html 檔，人家怎麼開始玩的？ 例如 external modules/chipmunk/demo/PyramidStack.html 內容是：
+	找一個來看 ~.html 檔，人家怎麼開始玩的？ 例如 external-modules/chipmunk/demo/PyramidStack.html 內容是：
 	
 		<canvas></canvas>
 		<script src="../cp.js"></script>
@@ -30,9 +30,9 @@ er
 	這麼簡單！那 jeforth.3we 肯定手動就可以 run 得起來，照實際位置改一下路徑，變成：
 	
 		<canvas></canvas>
-		<script src="external modules/chipmunk/cp.js"></script>
-		<script src="external modules/chipmunk/demo/demo.js"></script>
-		<script src="external modules/chipmunk/demo/PyramidStack.js"></script>
+		<script src="external-modules/chipmunk/cp.js"></script>
+		<script src="external-modules/chipmunk/demo/demo.js"></script>
+		<script src="external-modules/chipmunk/demo/PyramidStack.js"></script>
 		<script>
 		(new PyramidStack()).run();
 		</script> 
@@ -42,9 +42,9 @@ er
 	
 		<o>
 		<canvas></canvas>
-		<script src="external modules/chipmunk/cp.js"></script>
-		<script src="external modules/chipmunk/demo/demo.js"></script>
-		<script src="external modules/chipmunk/demo/PyramidStack.js"></script>
+		<script src="external-modules/chipmunk/cp.js"></script>
+		<script src="external-modules/chipmunk/demo/demo.js"></script>
+		<script src="external-modules/chipmunk/demo/PyramidStack.js"></script>
 		<script>
 		(new PyramidStack()).run();
 		</script> 
@@ -110,10 +110,10 @@ er
 </text> . <o> <hr></o> drop
 
 <o> <canvas></canvas></o> constant canvas // ( -- element ) The canvas of this demo.
-<h> <script src="external modules/chipmunk/cp.js"></script><script src="external modules/chipmunk/demo/demo.js"></script></h> drop
+<h> <script src="external-modules/chipmunk/cp.js"></script><script src="external-modules/chipmunk/demo/demo.js"></script></h> drop
 
 <js>
-	// <script src="external modules/chipmunk/demo/PyramidStack.js"></script>
+	// <script src="external-modules/chipmunk/demo/PyramidStack.js"></script>
 	// <script>
 	// (new PyramidStack()).run();
 	// </script> 

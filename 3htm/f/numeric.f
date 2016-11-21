@@ -4,7 +4,7 @@
 	
 	s" numeric.f" source-code-header
 
-	s" external modules/numeric/numeric-1.2.6.js"
+	s" external-modules/numeric/numeric-1.2.6.js"
 	\ or from the net directly if is 3htm : char http://www.numericjs.com/lib/numeric-1.2.6.js
 	readTextFile \ 先讀取 .js 檔, 但不能直接用
 	<text> 

@@ -10,7 +10,7 @@
 	rem folders
 	mklink /d  3htm                c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm
 	mklink /d  demo                c:\Users\hcche\Documents\GitHub\jeforth.3we\demo
-	mklink /d  "external modules"    "c:\Users\hcche\Documents\GitHub\jeforth.3we\external modules"
+	mklink /d  "external-modules"    "c:\Users\hcche\Documents\GitHub\jeforth.3we\external-modules"
 	mklink /d  f                   c:\Users\hcche\Documents\GitHub\jeforth.3we\f
 	mklink /d  js                  c:\Users\hcche\Documents\GitHub\jeforth.3we\js
 	mklink /d  playground          c:\Users\hcche\Documents\GitHub\jeforth.3we\playground

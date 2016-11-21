@@ -209,10 +209,16 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 	0 to friction 0 to gravity ( 為了做碰撞實驗，去掉重力 )
 	800 400 setCanvasSize	\ ( width height -- ) 
 	js: vm.debug=false;vm.g.balls[1].vx=5;vm.g.balls[1].vy=3 \ 初始擾動
+
+\ The main loop
+	[begin] draw 40 nap [again]
+	
+<comment> \ 當初研究總動量不穩定的問題
 	0 value count cut 
 	draw \ total-motivation . space \ 畫一禎印總動量
 	count 1+ dup to count 3000 > [if] cls 0 to count [then] \ 避免網頁太長怕 browser 受不了。
 	js: window.scrollTo(0,endofinputbox.offsetTop) 40 nap \ 畫面跳到 inputbox 下，喘口氣讓 browser 工作。
 	rewind \ 在 TIB 內重複以上 cut 之後的動作
+</comment>
 
 

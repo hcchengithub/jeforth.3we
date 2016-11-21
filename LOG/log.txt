@@ -4766,4 +4766,17 @@
         3htm/platform.f needs to add two more keys to allow notebooks (w/o numeric pad)
         to press Ctrl-plus and Ctrl-Minus.
     Sh**t! this problem has been there for a long time !!!
-       
+
+[ ] include command may do nothing if the ~.f module was existing. This causes problem 
+    if word reDef is expected. For example, many-clocks.f uses 'save' command which is
+	defined in canvas.f module. When include many-clocks.f the 'save' command has been
+	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
+	solution is that 'include' command should move the target module to the top instead
+	of do nothing when it's existing.
+[ ] Working on jeforth.3we\3hta\1.bat to leverage jeforth.hta for install.bat automation
+	for all applications.
+[ ] install.bat should include the private folder
+
+	
+	
+	

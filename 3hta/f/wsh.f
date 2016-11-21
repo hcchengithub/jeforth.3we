@@ -322,10 +322,11 @@ code GetFileName ( "path-name" -- "filename" ) \ Get file name portion of the gi
 				<selftest> 
 					*** GetFileName is a string operation
 					char . full-path \ ==> C:\Users\8304018.WKSCN\Dropbox\learnings\github\jeforth.3we\ (string)
-					GetFileName ( jeforth.3we (string) )
+					GetFileName ( jeforth.3we or jeforth.3hta (string) )
+					dup char jeforth.3we === swap char jeforth.3hta === or
 					js> window.location.toString().replace(/#endofinputbox/,"") \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
 					GetFileName ( jeforth.hta (string) )
-					[d "jeforth.3we","jeforth.hta" d] [p 'GetFileName' p]
+					[d true,"jeforth.hta" d] [p 'GetFileName' p]
 				</selftest>
 				
 code GetBaseName ( "path-name" -- "base-name" ) \ Get file base name portion of the given path-name
@@ -354,10 +355,11 @@ code GetExtensionName ( "path-name" -- "ext-name" ) \ Get file extension name po
 				<selftest> 
 					*** GetExtensionName is a string operation
 					char . full-path  \ ==> C:\lalala\jeforth.3we\ (string)
-					GetExtensionName  \ ==> 3we (string)
+					GetExtensionName  \ ==> 3we or 3hta (string)
+					dup char 3we === swap char 3hta === or
 					js> window.location.toString().replace(/#endofinputbox/,"")  \ ==> file:///C:/lalala/jeforth.3we/jeforth.hta (string)
 					GetExtensionName \ ==> hta (string)
-					[d "3we","hta" d] [p 'GetExtensionName' p]
+					[d true,"hta" d] [p 'GetExtensionName' p]
 				</selftest>
 
 code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of the given path-name
@@ -370,10 +372,11 @@ code GetParentFolderName ( "path-name" -- "folder" ) \ Get parent folder name of
 					*** GetParentFolderName is a string operation
 					s" file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we/jeforth.hta"
 					GetParentFolderName \ ==> file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we (string)
-					dup GetFileName \ jeforth.3we
+					dup GetFileName \ jeforth.3we or jeforth.3hta
+					dup char jeforth.3we === swap char jeforth.3hta === or
 					[d 
 						"file:///C:/Users/8304018.WKSCN/Dropbox/learnings/github/jeforth.3we",
-						"jeforth.3we" 
+						true 
 					d] [p 'GetParentFolderName' p]
 				</selftest>
 

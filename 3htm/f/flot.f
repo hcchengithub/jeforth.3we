@@ -5,8 +5,8 @@
 
 	js> typeof($.plot)!="function" [if] 
 		<h> 
-		<!-- link id=flotcss href="external modules/flot/examples/examples.css" rel="stylesheet" type="text/css"-->
-		<script id=flotjs language="javascript" type="text/javascript" src="external modules/flot/jquery.flot.js"></script>
+		<!-- link id=flotcss href="external-modules/flot/examples/examples.css" rel="stylesheet" type="text/css"-->
+		<script id=flotjs language="javascript" type="text/javascript" src="external-modules/flot/jquery.flot.js"></script>
 		</h> drop
 
 		\ Wait a while, make sure Flot.js is ready

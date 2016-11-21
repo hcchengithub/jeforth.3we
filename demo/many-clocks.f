@@ -1,6 +1,6 @@
 
     include canvas.f
-    
+	
     s" many-clocks.f"    source-code-header
 
 	\ createCanvas setWorkingCanvas  
@@ -33,6 +33,7 @@
     : 加時 hours   1+ dup 24 > if      24 - then to hours ; // ( -- ) 
     : 加分 minutes 1+ dup 60 > if 加時 60 - then to minutes ; // ( -- ) 
     : 加秒 seconds 1+ dup 60 > if 加分 60 - then to seconds ; // ( -- ) 
+*debug* 00>>
     
     : 畫訊息 ( msg grd -- ) \ Forth萬歲 
         s" 20pt bold Arial" font
@@ -70,14 +71,22 @@
 			r> 5 + @ js: vm.g.setTimeout(pop(),1000)
 		\	js> rstack.length if 0 >r then \ TSR 不要吃到別人 (in suspending) 的 rstack。重要！
 	; interpret-only
+*debug* 11>>
 
 	0	時鐘 台北 
+*debug* 22>>
 	1	時鐘 東京 
+*debug* 33>>
 	-6	時鐘 巴黎 
+*debug* 44>>
 	-7	時鐘 倫敦 
+*debug* 55>>
 	-15	時鐘 洛杉磯 
+*debug* 66>>
 	-12	時鐘 紐約 
+*debug* 77>>
 	-4	時鐘 杜拜 
+*debug* 88>>
 
 	
 
