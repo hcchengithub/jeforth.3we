@@ -1000,6 +1000,18 @@
         errorlevel = typeof(errorlevel)=='number' ? errorlevel : 0;
         kvm.bye(errorlevel);
     end-code
+	jeforth.hta can return ERRORLEVEL to its caller batch program, but not DOS box.
+	I repeat, TOS as errorlevel only works in batch program.
+	This is the experiment:
+	~\jeforth.3we>echo %errorlevel%
+	55 /* recent errorlevel is 55 */
+	~\jeforth.3we>jeforth.hta 77 bye  /* leave 77 */
+	~\jeforth.3we>echo %errorlevel%
+	55 /* the errorlevel is still 55 not 77, so the above line doesn't work */
+	~\jeforth.3we>echo jeforth.hta 77 bye > 77.bat
+	~\jeforth.3we>77.bat /* but it works through batch */
+	~\jeforth.3we>echo %errorlevel%
+	77
 
 [x] 這個要想一想。定樣在 jeforth.hta 中的 kvm 是個 global 可以反過來在 jeforth.js 裡看得見。
     但是定義在 node.js 的 index.js 裡的 kvm, fs 等則不然。既然 kvm 跟 KsanaVm() 裡面參考自己的
@@ -4767,16 +4779,44 @@
         to press Ctrl-plus and Ctrl-Minus.
     Sh**t! this problem has been there for a long time !!!
 
+[x] Working on jeforth.3we\3hta\1.bat to leverage jeforth.hta for install.bat automation
+	for all applications.
+	--> This is an example of the batch program :
+		: @rem ;
+		@rem ' \ dup alias echo dup alias @echo dup alias @echo. dup alias @goto dup alias :end alias jeforth.hta
+		@echo.
+		@echo Executing %~nx0 . . . 
+		@goto batch
+		\ --------------- start jeforth code ----------------------
+		cls <o> <h1> Hello world! from jeforth</h1></o> 
+		<o> <h3> ---- wait 5 seconds ----</h3></o> 
+		5000 nap 
+
+		bye \ TOS will be the errorlevel returned to DOS
+		\ ---------------- end jeforth code -----------------------
+
+		:batch
+		@rem ---------- start batch code ---------------------------
+		jeforth.hta include %~nx0 \ include the batch program itself
+		@if %errorlevel% GEQ 1 goto ERR
+		@rem ------------ end batch code ---------------------------
+
+		@goto END
+		:ERR
+		@echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		@echo  jeforth return an error code : %errorlevel%
+		@echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		pause
+		:END
+	--> done! jeforth.3we/setup.bat setup all applications.
+[x] setup.bat should include the private folder
 [ ] include command may do nothing if the ~.f module was existing. This causes problem 
     if word reDef is expected. For example, many-clocks.f uses 'save' command which is
 	defined in canvas.f module. When include many-clocks.f the 'save' command has been
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
-	of do nothing when it's existing.
-[ ] Working on jeforth.3we\3hta\1.bat to leverage jeforth.hta for install.bat automation
-	for all applications.
-[ ] install.bat should include the private folder
+	of doing nothing when it's existing.
 
 	
-	
+
 	

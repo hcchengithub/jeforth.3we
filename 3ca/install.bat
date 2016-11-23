@@ -40,6 +40,7 @@ mklink /d f 				..\jeforth.3we\f
 mklink /d js 				..\jeforth.3we\js
 mklink /d playground 		..\jeforth.3we\playground
 mklink /d project-k 		..\jeforth.3we\project-k
+mklink /d private 			..\jeforth.3we\private
 
 @rem Hard Links
 fsutil hardlink create common.css ..\jeforth.3we\common.css
