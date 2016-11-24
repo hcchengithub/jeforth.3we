@@ -1,0 +1,209 @@
+
+	Play chipmunk physics engine
+
+[ ]	How to access the *space*? It's very easy. We need to export the space or 
+	the world which is Balls() in the example named ball.html that come with 
+	the package. So Balls in jeforth is the chipmunk physics space object.
+	Everything is in this space.
+
+	\ The root members of the space:
+	Balls obj>keys . cr 
+	space,remainder,fps,mouse,simulationTime,drawTime,canvas2point,point2canvas,
+	mouseBody,canvas,ctx,width,height,scale,update,drawInfo,draw,run,benchmark,
+	stop,step,addFloor,addWalls
+	
+	\ Things are all in Balls.space
+	> Balls :> space obj>keys .
+	stamp,curr_dt,bodies,rousedBodies,sleepingComponents,staticShapes,activeShapes,
+	arbiters,contactBuffersHead,cachedArbiters,constraints,locked,collisionHandlers,
+	defaultHandler,postStepCallbacks,iterations,gravity,damping,idleSpeedThreshold,
+	sleepTimeThreshold,collisionSlop,collisionBias,collisionPersistence,enableContactGraph,
+	staticBody,collideShapes,getCurrentTimeStep,setIterations,isLocked,addCollisionHandler,
+	removeCollisionHandler,setDefaultCollisionHandler,lookupHandler,addShape,addStaticShape,
+	addBody,addConstraint,filterArbiters,removeShape,removeStaticShape,removeBody,
+	removeConstraint,containsShape,containsBody,containsConstraint,uncacheArbiter,eachBody,
+	eachShape,eachConstraint,reindexStatic,reindexShape,reindexShapesForBody,useSpatialHash,
+	activateBody,deactivateBody,processComponents,activateShapesTouchingShape,pointQuery,
+	pointQueryFirst,nearestPointQuery,nearestPointQueryNearest,segmentQuery,segmentQueryFirst,
+	bbQuery,shapeQuery,addPostStepCallback,runPostStepCallbacks,lock,unlock,makeCollideShapes,
+	arbiterSetFilter,step OK 
+	
+	> Balls :> space.gravity tib.
+	Balls :> space.gravity \ ==> [object Object] (object)
+	> Balls :> space.gravity obj>keys .
+	x,y,add,sub,neg,mult,project,rotate OK 
+	> Balls :> space.gravity.x tib.
+	Balls :> space.gravity.x \ ==> 0 (number) <-- horizantal gravity
+	> Balls :> space.gravity.y tib.
+	Balls :> space.gravity.y \ ==> -500 (number) <-- virtical gravity. Negative is downward.
+	> Balls :> space.gravity.y=0
+	> Balls :> space.gravity.y tib.
+	Balls :> space.gravity.y \ ==> 0 (number) <-- Dynamic change works !! he he he 
+
+	\ 
+> Balls :> space.bodies obj>keys .
+0,1,2,3,4,5,6,7,8,9,10 OK 
+0=rock, 1~10=ball, the ramp is not in the body array !!
+> Balls :> space.bodies[0] tib.
+Balls :> space.bodies[0] \ ==> [object Object] (object)
+ OK 
+> Balls :> space.bodies[0] obj>keys .
+p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
+> Balls :> space.bodies[0].getPos() tib.
+Balls :> space.bodies[0].getPos() \ ==> [object Object] (object)
+ OK 
+> Balls :> space.bodies[0].getPos() obj>keys .
+x,y,add,sub,neg,mult,project,rotate OK 
+
+Balls :> space.bodies[0].setPos(v(500,100))
+
+Balls obj>keys . cr 
+space,remainder,fps,mouse,simulationTime,drawTime,canvas2point,point2canvas,mouseBody,canvas,ctx,width,height,scale,update,drawInfo,draw,run,benchmark,stop,step,addFloor,addWalls
+
+Balls :: run() 
+ OK 
+> Balls :> space.bodies[0].getPos() obj>keys .
+JavaScript error : Cannot read property 'getPos' of undefined
+ OK 
+> Balls :> space .
+[object Object] OK 
+> Balls :> space.bodies .
+ OK 
+> Balls :> space.bodies tib.
+Balls :> space.bodies \ ==>  (array)
+ OK 
+> Balls :> space.bodies.length .
+0 OK 
+> Balls :> space.bodies (see)
+[] OK 
+> Balls :> space.gravity tib.
+Balls :> space.gravity \ ==> [object Object] (object)
+ OK 
+> Balls :> space.gravity (see)
+{
+    "x": 0,
+    "y": -500
+} OK 
+> Balls :> space.bodies tib.
+Balls :> space.bodies \ ==>  (array)
+ OK 
+> Balls :> space.sleepingComponents tib.
+Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
+ OK 
+> Balls :> space.eachBody tib.
+Balls :> space.eachBody \ ==> function (func)
+{
+    this.lock(); {
+        var bodies = this.bodies;
+        
+        for(var i=0; i<bodies.length; i++){
+            func(bodies[i]);
+        }
+        
+        var components = this.sleepingComponents;
+        for(var i=0; i<components.length; i++){
+            var root = components[i];
+            
+            var body = root;
+            while(body){
+                var next = body.nodeNext;
+                func(body);
+                body = next;
+            }
+        }
+    } this.unlock(true);
+} (function)
+ OK 
+> Balls :> space.sleepingComponents tib.
+Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
+ OK 
+> Balls :> space.bodies tib.
+Balls :> space.bodies \ ==>  (array)
+ OK 
+> Balls :> space.bodies.length .
+0 OK 
+> Balls :> space.sleepingComponents tib.
+Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
+ OK 
+
+> Balls :> space.sleepingComponents.length tib.
+Balls :> space.sleepingComponents.length \ ==> 4 (number)
+ OK 
+> Balls :> space.sleepingComponents[0] tib.
+Balls :> space.sleepingComponents[0] \ ==> [object Object] (object)
+ OK 
+> Balls :> space.sleepingComponents[0] obj>keys .
+p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
+> Balls :> space.sleepingComponents[0].getPos() tib.
+Balls :> space.sleepingComponents[0].getPos() \ ==> [object Object] (object)
+ OK 
+> Balls :> space.sleepingComponents[0].getPos() (see)
+{
+    "x": 399.45326663630857,
+    "y": 19.71613440411132
+} OK 
+> Balls :> space.sleepingComponents[0].setPos(v(10,10))
+ OK 
+ OK 
+> .s
+      0: undefined (undefined)
+ OK 
+> drop
+ OK 
+> .s
+empty
+ OK 
+> Balls :> space.sleepingComponents[0].setPos(v(10,10))
+ OK 
+> Balls :> space.sleepingComponents[0].getPos() (see)
+{
+    "x": 222.34176780374293,
+    "y": 24.768384638102052
+} OK 
+> Balls :> space.sleepingComponents[0].setPos(v(0,100))
+ OK 
+> Balls :> space.sleepingComponents[0].setPos(v(100,100))
+ OK 
+> Balls :> space.sleepingComponents[0].setPos(v(100,400))
+ OK 
+
+\ bodies.length 經常都是 0 因為都睡著了!!
+> Balls :> space.bodies.length . \ ==> 0 OK 
+\ 實驗觀察, 證實只有醒著的 body 才會出現在 bodies array 裡
+> run> 20 for Balls :> space.bodies.length . space 1000 nap next \ 擾動物品
+0 0 0 0 0 0 8 3 2 9 8 6 8 8 11 11 9 9 8 10  OK 
+
+\ 遍覽所有 body 的方法
+> Balls :> space.eachBody .  
+function (func)
+{
+    this.lock(); {
+        var bodies = this.bodies;
+        
+        for(var i=0; i<bodies.length; i++){
+            func(bodies[i]);
+        }
+        
+        var components = this.sleepingComponents;
+        for(var i=0; i<components.length; i++){
+            var root = components[i];
+            
+            var body = root;
+            while(body){
+                var next = body.nodeNext;
+                func(body);
+                body = next;
+            }
+        }
+    } this.unlock(true);
+} OK 
+> Balls :> space.eachBody(function(b){type(b.name+';')})
+ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK 
+\ 以上遍覽所有的 body 發現他們的順序不一定。
+\ 要不要保存每個 body 是 chipmunk user 的自由, chipmunk 本身管理所有 body 是分散在
+\ space.bodies 以及 space.sleepingComponents 結構裡面。
+
+\ space.activateBody(body) 就是把 body 放進 space.bodies[] 裡去。
+
+
+
