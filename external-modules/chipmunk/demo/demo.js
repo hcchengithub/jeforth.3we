@@ -130,6 +130,10 @@ Demo.prototype.update = function(dt) {
 };
 
 Demo.prototype.drawInfo = function() {
+	
+	// [ ] H.C. Chen add a switch to turn it off
+	if(arguments.callee.hide) return;
+	
 	var space = this.space;
 
 	var maxWidth = this.width - 20;
