@@ -205,5 +205,9 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 
 \ space.activateBody(body) 就是把 body 放進 space.bodies[] 裡去。
 
-
+[ ] 12choc.f, home command needs to restore the sponge's position at the center of the 
+	bucket. 
+[ ] The 4:4 command and friends has to freeze and unfreeze the water during putting on
+	the Chocs or longer the pause time between each drop.
+	
 
