@@ -48,7 +48,13 @@
 Balls :> space.bodies[0] \ ==> [object Object] (object)
  OK 
 > Balls :> space.bodies[0] obj>keys .
-p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
+p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,
+nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,
+isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,
+setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,
+getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,
+world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
+
 > Balls :> space.bodies[0].getPos() tib.
 Balls :> space.bodies[0].getPos() \ ==> [object Object] (object)
  OK 
@@ -210,4 +216,181 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 [ ] The 4:4 command and friends has to freeze and unfreeze the water during putting on
 	the Chocs or longer the pause time between each drop.
 	
+=======
+[x] How to hide or disable the Demo drawInfo?
+	--> Add one line to demo.js 
+		Demo.prototype.drawInfo = function() {
+		if(arguments.callee.hide) return; // H.C. Chen add a switch to turn it off
+		... snip ...
+	[x]	to disable the annoying information on the canvas.
+		js: Demo.prototype.drawInfo.hide=true 
+[x] float.f 裡,讓 chocolate[0] 轉動
+	> run: 100 for choc :: [0].setAngle(0.5) 500 nap choc :: [0].setAngle(0) 500 nap next
 
+[x] How to supress the rotation when draging a thing?
+	/// Maximum rotational rate (in radians/second) allowed when updating the angular velocity.
+	w_limit seems to be the answer	--> Yes! 0=no angular velocity, default is Infinity
+	--> This value is good enough --> choc :: [0].w_limit=1.5
+	body.w is the 角速度 Anglular Velocity
+[ ] To get a body's mass 
+	--> choc :> [0].m tib.		
+
+	To change the mass of a body
+	--> choc :: [n].setMass(m) \ where n is a chocolate, m is its new mass.
+
+	To see the defected chocolate
+	--> choc :: [0].activate()
+
+	To see a chocolate's position
+	--> choc :> [0].p (see)
+		{
+			"x": 115.13832984959171,
+			"y": 305.46889876462234
+		} OK
+		
+	To set a chocolate's position
+	--> choc :: [0].p=cp.v(x,y) choc :: [0].activate()
+	
+	To reset all chocolates to the lower left corner of the space
+	--> 
+		choc <js>
+			var choc = pop();
+			for(var i=0; i<12; i++){
+				choc[i].p=cp.v(40,40);
+				choc[i].activate();
+			}
+		</js>
+		
+	To list all chocolates' mass
+	--> 
+		cr choc <js>
+			var choc = pop();
+			for(var i=0; i<12; i++){
+				type("Chocolate #" + i + " mass " + choc[i].m + "\n");
+			}
+		</js>
+		
+	To change all chocolates' mass
+	--> 
+		cr choc <js>
+			var mm = 0.6;
+			var choc = pop();
+			for(var i=0; i<12; i++){
+				choc[i].setMass(mm);
+			}
+		</js>
+		
+	To change the water level
+	--> water :: bb_t=210 \ was 240
+	
+		
+[x] water :: setSensor(true) \ enable the water, become ice if disabled
+
+> water :> verts .
+140,100,140,240,630,240,630,100 OK 
+> water :: setVerts({140,100,140,150,630,150,630,100})
+JavaScript error : Unexpected token ,
+ OK 
+> water :: setVerts(({140,100,140,150,630,150,630,100}))
+JavaScript error : Unexpected token ,
+ OK 
+> water :: setVerts([140,100,140,150,630,150,630,100])
+JavaScript error : Cannot read property 'x' of undefined
+ OK 
+> water :: setVerts([140,100,140,150,630,150,630,100],{x:0,y:0})
+ OK 
+> water :> verts .
+140,100,140,150,630,150,630,100 OK 
+
+er run> 100 for random 12 * int 2 .r cr next \ --> 0~11 random
+er run> 100 for random  2 * int 2 .r cr next \ --> 0~1  random
+
+
+\ 萬一 海綿摔出去了, 把它移回來
+sponge :> setPos({x:200,y:200})
+
+[ ] 拉動某物時的慣性, 可能是 body.i body.i_inv, modify through body.setMoment()
+	> choc :> [0].setMoment .
+	function (moment)
+	{
+		assert(moment > 0, "Moment of Inertia must be positive and non-zero.");
+
+		this.activate();
+		this.i = moment;
+		this.i_inv = 1/moment;
+	} OK 
+	> choc :> [0].i .
+	47.24999999999999 OK 
+	> choc :> [0].i_inv .
+	0.021164021164021166 OK 
+
+
+\ Get sponge's center position	
+	> sponge :> getPos() (see)
+	{
+		"x": 389.3945442663677,
+		"y": 400
+	} OK 
+	
+\ The sponge's parameters	
+	> sponge :> mass . \ ==>	1.323 OK 
+	> sponge :> height . \ ==>	70 OK 
+	> sponge :> width . \ ==>	450 OK 
+
+\ Put a Choc on the sponge at the center
+	{} sponge :> getPos() ( o p )
+	js: tos(1).x=tos().x;tos(1).y=pop().y+vm.g.choc_size*8
+	choc :: [0].setAngle(0)
+	choc :: [0].setPos(pop()) \ set the choc's center above the sponge's left edge
+
+\ Put a Choc on the sponge at the left edge
+	{} sponge :> getPos() ( o p )
+	js: tos(1).x=tos().x-vm.g.sponge.width/2+vm.g.choc_size/2;tos(1).y=pop().y+vm.g.choc_size*8
+	choc :: [1].setAngle(0)
+	choc :: [1].setPos(pop()) \ set the choc's center above the sponge's center
+
+\ Put a Choc on the sponge at the right edge
+	{} sponge :> getPos() ( o p )
+	js: tos(1).x=tos().x+vm.g.sponge.width/2-vm.g.choc_size/2;tos(1).y=pop().y+vm.g.choc_size*8
+	choc :: [2].setAngle(0)
+	choc :: [2].setPos(pop()) \ set the choc's center above the sponge's right edge
+
+: drop-choc-left ( i -- ) \ Drop choc[i] on the left edge of the sponge
+	{} sponge :> getPos() ( i o p )
+	js: tos(1).x=tos().x-vm.g.sponge.width/2+vm.g.choc_size/2
+	js: tos(1).y=pop().y+vm.g.choc_size*5 ( i o )
+	choc :: [tos(1)].setAngle(0)
+	choc :: [pop(1)].setPos(pop()) ;
+	
+: drop-choc-right ( i -- ) \ Drop choc[i] on the right edge of the sponge
+	{} sponge :> getPos() ( i o p )
+	js: tos(1).x=tos().x+vm.g.sponge.width/2-vm.g.choc_size/2;
+	js: tos(1).y=pop().y+vm.g.choc_size*5 ( i o )
+	choc :: [tos(1)].setAngle(0)
+	choc :: [pop(1)].setPos(pop()) ;
+
+: 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
+	6 for drop-choc-right drop-choc-left 500 nap next ;
+
+: 5:5 ( 8 numbers -- ) \ Put 5 chocs on each side
+	5 for drop-choc-right drop-choc-left 500 nap next ;
+
+: 4:4 ( 8 numbers -- ) \ Put 4 chocs on each side
+	4 for drop-choc-right drop-choc-left 500 nap next ;
+
+: 3:3 ( 6 numbers -- ) \ Put 3 chocs on each side
+	3 for drop-choc-right drop-choc-left 500 nap next ;
+
+: 2:2 ( 4 numbers -- ) \ Put 2 chocs on each side
+	2 for drop-choc-right drop-choc-left 500 nap next ;
+
+: 1:1 ( 2 numbers -- ) \ Put 1 choc on each side
+	drop-choc-right drop-choc-left ;
+
+\ 挑出某一 chocolate 
+	choc :: [4].setPos({x:500,y:400})
+
+[x] float.f 裡,讓 chocolate[0] 轉動
+	> run: 100 for choc :: [0].setAngle(0.5) 500 nap choc :: [0].setAngle(0) 500 nap next
+	choc :: [0].setVel({x:0,y:200}) \ Jump the choc
+	choc :: [0].setAngVel(0.5) \ Rotate the choc
