@@ -4,15 +4,14 @@
 
 char 12choc.f source-code-header
 
-cls
-
 <o> <canvas></canvas></o> constant canvas // ( -- element ) The canvas of this demo.
 ( canvas must be ready before including chipmunk modules ) <o> 
 	<script src="external-modules/chipmunk/cp.js"></script>
 	<script src="external-modules/chipmunk/demo/demo.js"></script>
 </o> drop 
 
-{} constant bb // ( -- obj ) Study the bb 
+{} constant bb // ( -- obj ) Study the bb. Now I know it's a simple object of 4 corners. 
+			   /// For the bucket in this example.
 {} constant water // ( -- obj ) water is a sensor shape
 [] constant choc // ( -- array ) The 12 chocolates
 {} constant sponge // ( -- obj ) The floating balance scale
@@ -264,91 +263,119 @@ cls
 </js> constant Buoyancy // ( -- cp_object ) cp demo program main object
 
 \ Hide the Demo guage board
-js: Demo.prototype.drawInfo.hide=true 
+    js: Demo.prototype.drawInfo.hide=true 
 
 \ choc weight
-	choc :> [0].m ( standard mass ) to standard
+	choc :> [2].m ( standard mass ) to standard
 	0.14 to lighter
 	standard 2 * to heavier 
 
-: list ( -- ) \ See all chocolates' weight
-	choc <js>
-		var choc = pop();
-		for(var i=0; i<12; i++){
-			type("Chocolate #" + i + " mass " + choc[i].m + "\n");
-		}
-	</js> ;
+\ Drag and drop chocolates is fun but using below commands are more efficient    
 
-: freeze ( -- ) \ Freeze the water
-	water :: setSensor(false) ;
-	last alias >ice 
-	
-: unfreeze ( -- ) \ Unfreeze the ice
-	water :: setSensor(true) ;
-	last alias ice>
+    0 constant vel_limit // ( -- n ) Don't move when dropping to sponge
+    0 constant angVel_limit // ( -- n ) Don't rotate when dropping to sponge
+    code calm ( i -- ) \ Reduce choc's horizantal speed and rotation when dropping to sponge
+        var i=pop(), choc=vm.g.choc;
+        var v = choc[i].getVel(); 
+        v.x = Math.min(Math.abs(v.x), vm.g.vel_limit) * Math.sign(v.x);
+        var w = choc[i].getAngVel();
+        w = Math.min(Math.abs(w), vm.g.angVel_limit) * Math.sign(w);
+        choc[i].setVel(v); 
+        choc[i].setAngle(w);
+        end-code
 
-: drop-choc-left ( i -- ) \ Drop choc[i] on the left edge of the sponge
-	{} sponge :> getPos() ( i o p )
-	js: tos(1).x=tos().x-vm.g.sponge.width/2+vm.g.choc_size/2
-	js: tos(1).y=pop().y+vm.g.choc_size*8 ( i o )
-	choc :: [tos(1)].setAngle(0)
-	choc :: [pop(1)].setPos(pop()) ;
-	
-: drop-choc-right ( i -- ) \ Drop choc[i] on the right edge of the sponge
-	{} sponge :> getPos() ( i o p )
-	js: tos(1).x=tos().x+vm.g.sponge.width/2-vm.g.choc_size/2;
-	js: tos(1).y=pop().y+vm.g.choc_size*8 ( i o )
-	choc :: [tos(1)].setAngle(0)
-	choc :: [pop(1)].setPos(pop()) ;
+    : drop-choc-left ( i -- ) \ Drop choc[i] on the left edge of the sponge
+        {} sponge :> getPos() ( i o p )
+        js: tos(1).x=tos().x-vm.g.sponge.width/2+vm.g.choc_size/2
+        js: tos(1).y=pop().y+vm.g.choc_size*8 ( i o )
+        choc :: [tos(1)].setPos(pop())  ( i ) calm ;
+        
+    : drop-choc-right ( i -- ) \ Drop choc[i] on the right edge of the sponge
+        {} sponge :> getPos() ( i o p )
+        js: tos(1).x=tos().x+vm.g.sponge.width/2-vm.g.choc_size/2;
+        js: tos(1).y=pop().y+vm.g.choc_size*8 ( i o )
+        choc :: [tos(1)].setPos(pop()) ( i ) calm ;
 
-: home ( -- ) \ All chocs go home, reset their position
-	choc <js>
-	var choc = pop();
-	for(var i=0; i<12; i++){
-		choc[i].p=cp.v(40,40);
-		choc[i].activate();
-	}
-	</js> ;
+    1200 value wait	// ( -- n ) Delay time, mS
+    
+    : hold< ( -- ) \ Hold the sponge to avoid shaking 
+        sponge :: w_limit=0 ;
+    : >hold ( -- ) \ Unhold the sponge to allow natural behavior 
+        sponge :: w_limit=Infinity ;
 
-1500 value wait	// ( -- n ) Delay time, mS
+    [] constant L [] constant R 
+    : left:right ( len -- ) \ 1 2 3 4 5 6 7 8 => 1 5 2 6 3 7 4 8 where len is 4 in this example
+        L :: splice(0,Infinity) R :: splice(0,Infinity) \ clear the two temp array
+        >r r@ for R :: push(pop()) next r@ for L :: push(pop()) next 
+        r> for L :> pop() R :> pop() next ;
+    
+    : home ( -- ) \ The sponge and chocs all go home, reset their positions.
+        bb sponge choc <js>
+            var choc = pop(); // array of all chocs
+            var sponge = pop();
+            var bb = pop(); // the bucket's vertices 
+            for(var i=0; i<12; i++) choc[i].setPos(cp.v(40,40));
+            sponge.setPos(cp.v(bb.l+(bb.r - bb.l)/2, bb.b+(bb.t-bb.b)/2))
+            sponge.setAngVel(0); 
+            sponge.setAngle(0);
+        </js> 1000 nap ;
+    : 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
+        6 left:right home 
+        hold< 6 for drop-choc-right drop-choc-left wait nap next >hold ;
 
-: 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
-	6 for drop-choc-right drop-choc-left wait nap next ;
+    : 5:5 ( 8 numbers -- ) \ Put 5 chocs on each side
+        5 left:right home
+        hold< 5 for drop-choc-right drop-choc-left wait nap next >hold ;
 
-: 5:5 ( 8 numbers -- ) \ Put 5 chocs on each side
-	5 for drop-choc-right drop-choc-left wait nap next ;
+    : 4:4 ( 8 numbers -- ) \ Put 4 chocs on each side
+        4 left:right home
+        hold< 4 for drop-choc-right drop-choc-left wait nap next >hold ;
 
-: 4:4 ( 8 numbers -- ) \ Put 4 chocs on each side
-	4 for drop-choc-right drop-choc-left wait nap next ;
+    : 3:3 ( 6 numbers -- ) \ Put 3 chocs on each side
+        3 left:right home
+        hold< 3 for drop-choc-right drop-choc-left wait nap next >hold ;
 
-: 3:3 ( 6 numbers -- ) \ Put 3 chocs on each side
-	3 for drop-choc-right drop-choc-left wait nap next ;
+    : 2:2 ( 4 numbers -- ) \ Put 2 chocs on each side
+        2 left:right home
+        hold< 2 for drop-choc-right drop-choc-left wait nap next >hold ;
 
-: 2:2 ( 4 numbers -- ) \ Put 2 chocs on each side
-	2 for drop-choc-right drop-choc-left wait nap next ;
+    : 1:1 ( 2 numbers -- ) \ Put 1 choc on each side
+        home hold< drop-choc-right drop-choc-left wait nap >hold ;
 
-: 1:1 ( 2 numbers -- ) \ Put 1 choc on each side
-	drop-choc-right drop-choc-left wait nap ;
+\ Auxiliary tools
 
-: replay ( -- ) \ Reassign the defect choc and all chocs go home
-	<js>
-		for(var i=0; i<12; i++){
-			vm.g.choc[i].setMass(vm.g.standard);
-			vm.g.choc[i].w_limit = 0.5; 
-			// [ ] was Infinit, body.w is the 角速度 Anglular Velocity
-			// 改小一點不要讓它亂打轉。
-		}
-	</js>
-	random 2 * int if heavier else lighter then ( defect_weight ) 
-	random 12 * int ( defect_weight i ) 
-	choc :: [pop()].setMass(pop()) \ Set mass or weight of the defect chocolate
-	home ;
+    : list ( -- ) \ See all chocolates' weight
+        choc <js>
+            var choc = pop();
+            for(var i=0; i<12; i++){
+                type("Chocolate #" + i + " mass " + choc[i].m + "\n");
+            }
+        </js> ;
 
-: yo ( i -- ) \ Let the choc jump so we know which is it
-	choc :: [tos()].setVel({x:0,y:200}) \ Jump the choc
-	choc :: [tos()].w_limit=Infinity
-	choc :: [pop()].setAngVel(30) \ Rotate the choc
-	;
-	
-replay Buoyancy :: run()
+    : freeze ( -- ) \ Freeze the water
+        water :: setSensor(false) ;
+        
+    : unfreeze ( -- ) \ Unfreeze the ice
+        water :: setSensor(true) ;
 
+    : replay ( -- ) \ Reassign the defect choc and all chocs go home
+        <js>
+            for(var i=0; i<12; i++){
+                vm.g.choc[i].setMass(vm.g.standard);
+                vm.g.choc[i].w_limit = 0.5; 
+                // [ ] was Infinit, body.w is the 角速度 Anglular Velocity
+                // 改小一點不要讓它亂打轉。
+            }
+        </js>
+        random 2 * int if heavier else lighter then ( defect_weight ) 
+        random 12 * int ( defect_weight i ) 
+        choc :: [pop()].setMass(pop()) \ Set mass or weight of the defect chocolate
+        ;
+
+    : yo ( i -- ) \ Let the choc jump so we know which is it
+        choc :: [tos()].setVel({x:0,y:200}) \ Jump the choc
+        choc :: [tos()].w_limit=Infinity
+        choc :: [pop()].setAngVel(30) \ Rotate the choc
+        ;
+er Buoyancy :: run()	
+replay 0 1 2 3 4 5 6 7 8 9 10 11 6:6 

@@ -4455,8 +4455,8 @@
     
 [ ] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
-[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome 能 run, IE/Edge are
-    facing the Access-Control-Allow-xxxxx 的問題。
+[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
+	IE/Edge, and Firefox are facing the Access-Control-Allow-xxxxx 的問題。
     可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
     ==> study https://pages.github.com/
     --> 9/16'16 tried https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html on 
@@ -4475,9 +4475,12 @@
         index.html
         SCRIPT7002: XMLHttpRequest: Network Error 0x80070005, Access is denied.
         index.html
-
-    
-    
+	--> 13:35 2016-11-26 Firefox's error messages
+		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/readtextfile.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
+		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/f/jeforth.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
+		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/quit.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
+	[ ] 
+	
 [x] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
     --> See YNote: "在 Web browser 上直接編輯網頁內容"
     --> Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
@@ -4816,7 +4819,9 @@
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
 	of doing nothing when it's existing.
-
-	
+[ ] jeforth.3htm run through rawgit.com has some problems,
+	[ ] The outputbox background color covers only half screen when cell phone is 
+		not vertical.
+	[ ] 12choc.f can not drag and drop objects on Andorid browser.
 
 	
