@@ -210,12 +210,6 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 \ space.bodies 以及 space.sleepingComponents 結構裡面。
 
 \ space.activateBody(body) 就是把 body 放進 space.bodies[] 裡去。
-
-[ ] 12choc.f, home command needs to restore the sponge's position at the center of the 
-	bucket. 
-[ ] The 4:4 command and friends has to freeze and unfreeze the water during putting on
-	the Chocs or longer the pause time between each drop.
-	
 =======
 [x] How to hide or disable the Demo drawInfo?
 	--> Add one line to demo.js 
@@ -394,3 +388,43 @@ sponge :> setPos({x:200,y:200})
 	> run: 100 for choc :: [0].setAngle(0.5) 500 nap choc :: [0].setAngle(0) 500 nap next
 	choc :: [0].setVel({x:0,y:200}) \ Jump the choc
 	choc :: [0].setAngVel(0.5) \ Rotate the choc
+
+[x] 12choc.f, home command needs to restore the sponge's position at the center of the 
+	bucket. I have 'water' already. Water's verts and bb is almost the same thing. So
+	the center position of the sponge is [bb.l+(bb.r - bb.l)/2, bb.b+(bb.t-bb.b)/2]
+	
+[x] The 4:4 command and friends has to freeze and unfreeze the water during putting on
+	the Chocs or longer the pause time between each drop. Or a better idea is to temporarily 
+	make the water to have a bigger mass to avoid big waves. If this is not doable then 
+	change the angular velocity limit of the sponge is also a solutioin.
+	--> The last idea works fine! Tested by the one-liner:
+	    10 [for] replay 5000 nap 0 1 2 3 4 5 6 7 4:4 3000 nap [next]
+[ ] improve 4:4 and friends, let 0 1 2 3 at left top down as well as the right side ones
+	1 2 3 4 2:2 will be 
+	> 1 2
+	> 3 4
+	0 2 1 3 2:2 will be 
+	> 0 2 
+	> 1 3
+	So, swap 2,3 is the solution for 2:2
+	1 2 3 4 5 6 3:3 will be
+	> 1 2
+	> 3 4
+	> 5 6
+	1 4 2 5 3 6 3:3 will be
+    > 1 4 
+	> 2 5
+	> 3 6
+	_ _ _ _ _ _ 
+	0 3 1 4 2 5
+	0 : 0
+	1 : L/2 = 3
+	2 : 上上一個 + 1 = 1
+	3 : 上上一個 + 1 = 4
+	4 : 上上一個 + 1 = 2
+	5 : 上上一個 + 1 = 5
+	
+	[i]
+	[L/2]
+	[i
+	

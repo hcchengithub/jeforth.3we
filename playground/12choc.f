@@ -12,7 +12,8 @@ cls
 	<script src="external-modules/chipmunk/demo/demo.js"></script>
 </o> drop 
 
-{} constant bb // ( -- obj ) Study the bb 
+{} constant bb // ( -- obj ) Study the bb. Now I know it's a simple object of 4 corners. 
+			   /// For the bucket in this example.
 {} constant water // ( -- obj ) water is a sensor shape
 [] constant choc // ( -- array ) The 12 chocolates
 {} constant sponge // ( -- obj ) The floating balance scale
@@ -301,34 +302,40 @@ js: Demo.prototype.drawInfo.hide=true
 	choc :: [tos(1)].setAngle(0)
 	choc :: [pop(1)].setPos(pop()) ;
 
-: home ( -- ) \ All chocs go home, reset their position
-	choc <js>
-	var choc = pop();
-	for(var i=0; i<12; i++){
-		choc[i].p=cp.v(40,40);
-		choc[i].activate();
-	}
-	</js> ;
-
+: home ( -- ) \ The sponge and chocs all go home, reset their positions.
+	bb sponge choc <js>
+		var choc = pop(); // array of all chocs
+		var sponge = pop();
+		var bb = pop(); // the bucket's vertices 
+		for(var i=0; i<12; i++) choc[i].setPos(cp.v(40,40));
+		sponge.setPos(cp.v(bb.l+(bb.r - bb.l)/2, bb.b+(bb.t-bb.b)/2))
+	</js> 
+	;
+<js>
+</js>
 900 value wait	// ( -- n ) Delay time, mS
+: hold< ( -- ) \ Hold the sponge to avoid shaking 
+	sponge :: w_limit=0 ;
+: >hold ( -- ) \ Unhold the sponge to allow natural behavior 
+	sponge :: w_limit=Infinity ;
 
 : 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
-	6 for drop-choc-right drop-choc-left wait nap next ;
+	hold< 6 for drop-choc-right drop-choc-left wait nap next >hold ;
 
 : 5:5 ( 8 numbers -- ) \ Put 5 chocs on each side
-	5 for drop-choc-right drop-choc-left wait nap next ;
+	hold< 5 for drop-choc-right drop-choc-left wait nap next >hold ;
 
 : 4:4 ( 8 numbers -- ) \ Put 4 chocs on each side
-	4 for drop-choc-right drop-choc-left wait nap next ;
+	hold< 4 for drop-choc-right drop-choc-left wait nap next >hold ;
 
 : 3:3 ( 6 numbers -- ) \ Put 3 chocs on each side
-	3 for drop-choc-right drop-choc-left wait nap next ;
+	hold< 3 for drop-choc-right drop-choc-left wait nap next >hold ;
 
 : 2:2 ( 4 numbers -- ) \ Put 2 chocs on each side
-	2 for drop-choc-right drop-choc-left wait nap next ;
+	hold< 2 for drop-choc-right drop-choc-left wait nap next >hold ;
 
 : 1:1 ( 2 numbers -- ) \ Put 1 choc on each side
-	drop-choc-right drop-choc-left wait nap ;
+	hold< drop-choc-right drop-choc-left wait nap >hold ;
 
 : replay ( -- ) \ Reassign the defect choc and all chocs go home
 	<js>

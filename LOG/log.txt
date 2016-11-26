@@ -4823,7 +4823,5 @@
 	[ ] The outputbox background color covers only half screen when cell phone is 
 		not vertical.
 	[ ] 12choc.f can not drag and drop objects on Andorid browser.
-	
-	
 
 	
