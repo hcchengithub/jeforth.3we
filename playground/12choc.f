@@ -310,7 +310,7 @@ js: Demo.prototype.drawInfo.hide=true
 	}
 	</js> ;
 
-900 value wait	// ( -- n ) Delay time, mS
+1500 value wait	// ( -- n ) Delay time, mS
 
 : 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
 	6 for drop-choc-right drop-choc-left wait nap next ;
