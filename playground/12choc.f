@@ -162,7 +162,8 @@ cls <text>
 		// { 12 chocolates 
 			width = vm.g.choc_size;
 			height = width;
-			mass = 2.5*FLUID_DENSITY*width*height;
+			mass = 0.2675; // was 2.5*FLUID_DENSITY*width*height;
+                           // try and error gets the mass of water, so standard chocs will balance in the water
 			
 			for (var i=0; i<12; i++) {
 				moment = cp.momentForBox(mass, width, height);
@@ -269,7 +270,7 @@ cls <text>
 
 \ choc weight
 	choc :> [2].m ( standard mass ) to standard
-	0.14 to lighter
+	0.05 to lighter
 	standard 2 * to heavier 
 
 \ Drag and drop chocolates is fun but using below commands are more efficient    
@@ -323,6 +324,7 @@ cls <text>
             sponge.setPos(cp.v(bb.l+(bb.r - bb.l)/2, bb.b+(bb.t-bb.b)/2))
             sponge.setAngVel(0); 
             sponge.setAngle(0);
+            sponge.setVel(cp.v(0,0));
         </js> 1000 nap ;
     : 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
         6 left:right home 
