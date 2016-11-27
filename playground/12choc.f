@@ -2,13 +2,30 @@
 \  12choc.f -- A simulation of the 12 coins problem
 \
 
-char 12choc.f source-code-header
+marker --12choc.f--
+vocabulary 12choc.f 
+also 12choc.f definitions
 
-<o> <canvas></canvas></o> constant canvas // ( -- element ) The canvas of this demo.
-( canvas must be ready before including chipmunk modules ) <o> 
-	<script src="external-modules/chipmunk/cp.js"></script>
-	<script src="external-modules/chipmunk/demo/demo.js"></script>
-</o> drop 
+cls <text> 
+    <style>
+        .center {
+            text-align:center;
+        }
+        #canvas-container {
+           width: 100%;
+           text-align:center;
+        }
+        canvas {
+           display: inline;
+        }        
+    </style>
+    <h1 class=center> A simulation of the 12 coin problem</h1>
+    <h3 class=center> Find the defect chocolate with the floating sponge in the bucket</h3>
+    <div id="canvas-container"><canvas>Your browser doesn't support canvas</canvas></div>
+    /* canvas must be defined before chipmunk modules */
+    <script src="external-modules/chipmunk/cp.js"></script>
+    <script src="external-modules/chipmunk/demo/demo.js"></script>
+</text> /*remove*/ </o> drop 
 
 {} constant bb // ( -- obj ) Study the bb. Now I know it's a simple object of 4 corners. 
 			   /// For the bucket in this example.
@@ -30,7 +47,7 @@ char 12choc.f source-code-header
 	// (new Buoyancy()).run();
 	// </script>
 
-	var FLUID_DENSITY = 0.00014;
+	var FLUID_DENSITY = 0.0003;
 	var FLUID_DRAG = 2.0;
 
 	var Buoyancy = function() {
@@ -39,7 +56,6 @@ char 12choc.f source-code-header
 		var space = this.space;
 		space.iterations = 30;
 		space.gravity = cp.v(0,-500);
-	//	cpSpaceSetDamping(space, 0.5);
 		space.sleepTimeThreshold = Infinity;
 		space.collisionSlop = 0.5;
 
@@ -47,7 +63,7 @@ char 12choc.f source-code-header
 
 		// Create segments around the edge of the screen.
 		// left wall of the space. Keep things in the wall to avoid falling out.
-		var wall_top = 500;
+		var wall_top = 350;
 		var wall_right = 760;
 		
 		// left wall
@@ -69,15 +85,15 @@ char 12choc.f source-code-header
 		shape.setLayers(NOT_GRABABLE_MASK);
 
 		// ceiling 
-		shape = space.addShape( new cp.SegmentShape(staticBody, cp.v(0,wall_top), cp.v(wall_right,wall_top), 0.0));
-		shape.setElasticity(1.0);
-		shape.setFriction(1.0);
-		shape.setLayers(NOT_GRABABLE_MASK);
+		// shape = space.addShape( new cp.SegmentShape(staticBody, cp.v(0,wall_top), cp.v(wall_right,wall_top), 0.0));
+		// shape.setElasticity(1.0);
+		// shape.setFriction(1.0);
+		// shape.setLayers(NOT_GRABABLE_MASK);
 
 		// {
 			// Add the edges of the bucket
 			//                 l    b    r    t
-			var bb = new cp.BB(140, 100, 630, 200);   
+			var bb = new cp.BB(140, 65, 630, 200);   
 			vm.g.bb = bb; // [x] study the bb
 				// > bb (see)
 				// {
@@ -140,21 +156,6 @@ char 12choc.f source-code-header
 			// 本 body 大塊海綿若不加進 shape 是看不見的
 			shape = space.addShape( new cp.BoxShape(body, width, height));
 			shape.setFriction(0.8);
-		// }
-
-		// { 小塊的海綿
-		//	width = 40.0;
-		//	height = width*2;
-		//	mass = 0.3*FLUID_DENSITY*width*height;
-		//	moment = cp.momentForBox(mass, width, height);
-        //	
-		//	body = space.addBody( new cp.Body(mass, moment));
-		//	body.setPos(cp.v(120, 190));
-		//	body.setVel(cp.v(0, -100));
-		//	body.setAngVel(1);
-        //	
-		//	shape = space.addShape(new cp.BoxShape(body, width, height));
-		//	shape.setFriction(0.8);
 		// }
 		
 		// { 12 chocolates 
@@ -314,7 +315,10 @@ char 12choc.f source-code-header
             var choc = pop(); // array of all chocs
             var sponge = pop();
             var bb = pop(); // the bucket's vertices 
-            for(var i=0; i<12; i++) choc[i].setPos(cp.v(40,40));
+            for(var i=0; i<12; i++) {
+                choc[i].setPos(cp.v(40,40));
+                choc[i].setVel(cp.v(0,0));
+            }
             sponge.setPos(cp.v(bb.l+(bb.r - bb.l)/2, bb.b+(bb.t-bb.b)/2))
             sponge.setAngVel(0); 
             sponge.setAngle(0);
@@ -344,11 +348,15 @@ char 12choc.f source-code-header
 
 \ Auxiliary tools
 
-    : list ( -- ) \ See all chocolates' weight
+    : view ( -- ) \ See all chocolates' weight
         choc <js>
             var choc = pop();
             for(var i=0; i<12; i++){
-                type("Chocolate #" + i + " mass " + choc[i].m + "\n");
+                type("Chocolate #" + i + " mass " + round(choc[i].m));
+                type(" x:" + round(choc[i].p.x) + " y:" + round(choc[i].p.y) + "\n");
+            }
+            function round(n){
+                return(Math.round(n*1000)/1000)
             }
         </js> ;
 
@@ -377,5 +385,5 @@ char 12choc.f source-code-header
         choc :: [tos()].w_limit=Infinity
         choc :: [pop()].setAngVel(30) \ Rotate the choc
         ;
-er Buoyancy :: run()	
-replay 0 1 2 3 4 5 6 7 8 9 10 11 6:6 
+
+    Buoyancy :: run() replay

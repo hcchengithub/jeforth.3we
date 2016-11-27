@@ -4823,5 +4823,14 @@
 	[ ] The outputbox background color covers only half screen when cell phone is 
 		not vertical.
 	[ ] 12choc.f can not drag and drop objects on Andorid browser.
+[x] ls.f autoexec has a problem. If it include ~.f which uses source-code-header
+    that will cause a self-test nested structre problem. Because autoexec is added to
+    the end of tib by tib.insert. But included ~.f's are spposed to be completed before
+    the ending self-test structure to balance the nested self-test structure.
+    To avoid the problem, ~.f inclded in autoexec should not use source-code-header.
+    How to debug this issue? Use this line:
+        "" value tib-at-the-point js: vm.g.tib=tib.slice(ntib)
+    and check tib-at-the-point
+    
 
 	
