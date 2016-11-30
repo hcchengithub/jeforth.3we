@@ -203,13 +203,43 @@ function (func)
         }
     } this.unlock(true);
 } OK 
+
 > Balls :> space.eachBody(function(b){type(b.name+';')})
 ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK 
 \ 以上遍覽所有的 body 發現他們的順序不一定。
 \ 要不要保存每個 body 是 chipmunk user 的自由, chipmunk 本身管理所有 body 是分散在
-\ space.bodies 以及 space.sleepingComponents 結構裡面。
-
+\ space.bodies 以及 space.sleepingComponents 結構裡面。 
 \ space.activateBody(body) 就是把 body 放進 space.bodies[] 裡去。
+
+[x] The below code brings all bodies into an jeforth array 'bodies'
+	\ The array
+		[] constant bodies // ( -- array ) \ Array of all bodies in the space
+	\ Pack the array
+		Balls :> space.eachBody(function(b){vm.g.bodies.push(b)})
+	\ Print the entire array
+		bodies <js> for(var i in tos()) type(i + " : " + tos()[i].name + "\n"); </js> drop
+
+[x] How to rotate a body
+	\ Method 1, Set angular velocity directly
+		> bodies :: [1].setAngVel(3) \ anti-clock
+		> bodies :: [5].setAngVel(-3) \ clock-wise
+	\ Method 2, Set torque ( rotating force ) 轉矩, 轉動力 
+		> bodies :> [5].t . \ ==> 0 keep the Angular Velocity constant
+		> bodies :: [5].t=900 \ add rotating force to the body makes it rotate faster and faster
+		> bodies :: [5].t=0 \ stop the torque force, AngVel become constant
+		> bodies :: [5].t=-100 \ Turn to clock-wise
+		> bodies :> [5].t . \ ==> -100 OK 
+		> bodies :: [5].t=-300 \ faster
+		> bodies :: [5].t=0 \ Keep the rotating speed
+	[ ] body.i is not body.t, when body.t is set 0 body.t is another number
+	
+[x]	What is body.rot ? It's a vector
+	> bodies :> [5].rot (see)
+	{
+		"x": 0.9970688464448313,
+		"y": -0.07650957749964037
+	} OK
+	
 =======
 [x] How to hide or disable the Demo drawInfo?
 	--> Add one line to demo.js 
@@ -277,7 +307,12 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 	To change the water level
 	--> water :: bb_t=210 \ was 240
 	
+[ ]	To understand a body, read cp.js 
+	var Body = cp.Body = function(m, i) { ... }
+	m	is mass, .setMass(n)
+	i	is moment of inertia 轉動慣量 of the body, setMoment()
 		
+	
 [x] water :: setSensor(true) \ enable the water, become ice if disabled
 
 > water :> verts .

@@ -1,8 +1,10 @@
 \
-\  12coin.f for 12 coin problem simulation
+\  Chipmunk demo : Balls
 \
 
-char 12coin.f source-code-header
+marker --balls.f--
+vocabulary balls 
+also balls definitions
 
 <o> <canvas></canvas></o> constant canvas // ( -- element ) The canvas of this demo.
 <h> 
@@ -10,7 +12,8 @@ char 12coin.f source-code-header
 	<script src="external-modules/chipmunk/demo/demo.js"></script>
 </h> drop
 
-{} constant rock // ( -- obj ) The rock body in the chipmunk space
+\ {} constant rock // ( -- obj ) The rock body in the chipmunk space
+[] constant bodies // ( -- array ) \ Array of all bodies in the space
 
 <js>
 
@@ -24,23 +27,25 @@ char 12coin.f source-code-header
 
 		var space = this.space;
 		space.iterations = 60;
-		space.gravity = v(0, -500);
+		space.gravity = v(0, 0); // was -500
 		space.sleepTimeThreshold = 0.5;
 		space.collisionSlop = 0.5;
 
 		this.addFloor();
 		this.addWalls();
+		
+		
 		var width = 50;
 		var height = 60;
 		var mass = width * height * 1/1000;
 		var rock = space.addBody(new cp.Body(mass, cp.momentForBox(mass, width, height)));
 		rock.setPos(v(500, 100));
-		rock.setAngle(1);
+		rock.setAngle(3.1416/4);
 		rock.name = 'rock';
 		var shape = space.addShape(new cp.BoxShape(rock, width, height));
 		shape.setFriction(0.8);
 		shape.setElasticity(0.3);
-		vm.g.rock = rock; 
+		vm.g.bodies.push(rock); 
 
 		for (var i = 1; i <= 10; i++) {
 			var radius = 20;
@@ -48,6 +53,7 @@ char 12coin.f source-code-header
 			var body = space.addBody(new cp.Body(mass, cp.momentForCircle(mass, 0, radius, v(0, 0))));
 			body.setPos(v(200 + i, (2 * radius + 5) * i));
 			body.name="ball#"+i;
+			vm.g.bodies.push(body); 
 			var circle = space.addShape(new cp.CircleShape(body, radius, v(0, 0)));
 			circle.setElasticity(0.1);
 			circle.setFriction(10);
