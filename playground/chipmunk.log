@@ -1,18 +1,17 @@
 
 	Play chipmunk physics engine
 
-[ ]	How to access the *space*? It's very easy. We need to export the space or 
-	the world which is Balls() in the example named ball.html that come with 
-	the package. So Balls in jeforth is the chipmunk physics space object.
-	Everything is in this space.
+[ ]	How to access the *space*? It's very easy. We need to export the Balls() object in the 
+	example named ball.html that comes with the chipmunk package. So Balls in jeforth is 
+	the demo.js object and Balls.space is the chipmunk space. Everything is in this space.
 
-	\ The root members of the space:
+[x]	The root members of the Balls() world:
 	Balls obj>keys . cr 
 	space,remainder,fps,mouse,simulationTime,drawTime,canvas2point,point2canvas,
 	mouseBody,canvas,ctx,width,height,scale,update,drawInfo,draw,run,benchmark,
 	stop,step,addFloor,addWalls
 	
-	\ Things are all in Balls.space
+[x]	Things are all in Balls.space
 	> Balls :> space obj>keys .
 	stamp,curr_dt,bodies,rousedBodies,sleepingComponents,staticShapes,activeShapes,
 	arbiters,contactBuffersHead,cachedArbiters,constraints,locked,collisionHandlers,
@@ -27,11 +26,17 @@
 	pointQueryFirst,nearestPointQuery,nearestPointQueryNearest,segmentQuery,segmentQueryFirst,
 	bbQuery,shapeQuery,addPostStepCallback,runPostStepCallbacks,lock,unlock,makeCollideShapes,
 	arbiterSetFilter,step OK 
-	
+
+[x] space.gravity is an object	
 	> Balls :> space.gravity tib.
 	Balls :> space.gravity \ ==> [object Object] (object)
 	> Balls :> space.gravity obj>keys .
 	x,y,add,sub,neg,mult,project,rotate OK 
+	> Balls :> space.gravity (see)
+	{
+		"x": 0,
+		"y": -500
+	} OK 
 	> Balls :> space.gravity.x tib.
 	Balls :> space.gravity.x \ ==> 0 (number) <-- horizantal gravity
 	> Balls :> space.gravity.y tib.
@@ -40,190 +45,103 @@
 	> Balls :> space.gravity.y tib.
 	Balls :> space.gravity.y \ ==> 0 (number) <-- Dynamic change works !! he he he 
 
-	\ 
-> Balls :> space.bodies obj>keys .
-0,1,2,3,4,5,6,7,8,9,10 OK 
-0=rock, 1~10=ball, the ramp is not in the body array !!
-> Balls :> space.bodies[0] tib.
-Balls :> space.bodies[0] \ ==> [object Object] (object)
- OK 
-> Balls :> space.bodies[0] obj>keys .
-p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,
-nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,
-isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,
-setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,
-getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,
-world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
+[x] Play with Balls.f body
 
-> Balls :> space.bodies[0].getPos() tib.
-Balls :> space.bodies[0].getPos() \ ==> [object Object] (object)
- OK 
-> Balls :> space.bodies[0].getPos() obj>keys .
-x,y,add,sub,neg,mult,project,rotate OK 
+	\ all bodies
+	> Balls :> space.bodies obj>keys .
+	0,1,2,3,4,5,6,7,8,9,10 OK ( when they are not in sleep )
+	0=rock, 1~10=ball, the ramp is not in the body array !! <-- No, the ramp is a shape rather than a body
+	> Balls :> space.bodies[0] tib.
+	Balls :> space.bodies[0] \ ==> [object Object] (object)
+	
+	\ The array space.bodies are usually empty!! Because they are sleeping and 
+	\ thus are not in space.bodies.
+	> Balls :> space.bodies tib.
+	Balls :> space.bodies \ ==>  (array)
+	> Balls :> space.bodies.length . \ => 0 OK 
+	> Balls :> space.bodies (see) \ ==> [] OK 
+	> Balls :> space.gravity tib.
+	 
+	\ body object
+	> Balls :> space.bodies[0] obj>keys .
+	p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,
+	nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,
+	isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,
+	setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,
+	getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,
+	world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
 
-Balls :> space.bodies[0].setPos(v(500,100))
+	\ Position of a body
+	> Balls :> space.bodies[0].getPos() tib.
+	Balls :> space.bodies[0].getPos() \ ==> [object Object] (object)
+	> Balls :> space.bodies[0].getPos() obj>keys .
+	x,y,add,sub,neg,mult,project,rotate OK 
 
-Balls obj>keys . cr 
-space,remainder,fps,mouse,simulationTime,drawTime,canvas2point,point2canvas,mouseBody,canvas,ctx,width,height,scale,update,drawInfo,draw,run,benchmark,stop,step,addFloor,addWalls
+	\ Set position of a body
+	Balls :> space.bodies[0].setPos(v(500,100))
+	
+	
+	> Balls :> space.bodies tib.
+	Balls :> space.bodies \ ==>  (array)
+	> Balls :> space.sleepingComponents tib.
+	Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
+	
+	\ Yes, this works. The body really got moved to the position and activated for a while.
+		> Balls :> space.sleepingComponents[0].setPos(v(100,400)) 
 
-Balls :: run() 
- OK 
-> Balls :> space.bodies[0].getPos() obj>keys .
-JavaScript error : Cannot read property 'getPos' of undefined
- OK 
-> Balls :> space .
-[object Object] OK 
-> Balls :> space.bodies .
- OK 
-> Balls :> space.bodies tib.
-Balls :> space.bodies \ ==>  (array)
- OK 
-> Balls :> space.bodies.length .
-0 OK 
-> Balls :> space.bodies (see)
-[] OK 
-> Balls :> space.gravity tib.
-Balls :> space.gravity \ ==> [object Object] (object)
- OK 
-> Balls :> space.gravity (see)
-{
-    "x": 0,
-    "y": -500
-} OK 
-> Balls :> space.bodies tib.
-Balls :> space.bodies \ ==>  (array)
- OK 
-> Balls :> space.sleepingComponents tib.
-Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
- OK 
-> Balls :> space.eachBody tib.
-Balls :> space.eachBody \ ==> function (func)
-{
-    this.lock(); {
-        var bodies = this.bodies;
-        
-        for(var i=0; i<bodies.length; i++){
-            func(bodies[i]);
-        }
-        
-        var components = this.sleepingComponents;
-        for(var i=0; i<components.length; i++){
-            var root = components[i];
-            
-            var body = root;
-            while(body){
-                var next = body.nodeNext;
-                func(body);
-                body = next;
-            }
-        }
-    } this.unlock(true);
-} (function)
- OK 
-> Balls :> space.sleepingComponents tib.
-Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
- OK 
-> Balls :> space.bodies tib.
-Balls :> space.bodies \ ==>  (array)
- OK 
-> Balls :> space.bodies.length .
-0 OK 
-> Balls :> space.sleepingComponents tib.
-Balls :> space.sleepingComponents \ ==> [object Object],[object Object],[object Object],[object Object] (array)
- OK 
+	\ bodies.length ç¶“å¸¸éƒ½æ˜¯ 0 å› ç‚ºéƒ½ç¡è‘—äº†ï¼Œè·‘é€²äº† Balls :> space.sleepingComponents array
+	\ è£¡åŽ»äº†ã€‚
+		> Balls :> space.bodies.length . \ ==> 0 OK 
+	\ å¯¦é©—è§€å¯Ÿ, è­‰å¯¦åªæœ‰é†’è‘—çš„ body æ‰æœƒå‡ºç¾åœ¨ bodies array è£¡
+		> run> 20 for Balls :> space.bodies.length . space 1000 nap next \ é‚ŠåŸ·è¡Œé‚Šæ“¾å‹•ç‰©å“
+		0 0 0 0 0 0 8 3 2 9 8 6 8 8 11 11 9 9 8 10  OK 
 
-> Balls :> space.sleepingComponents.length tib.
-Balls :> space.sleepingComponents.length \ ==> 4 (number)
- OK 
-> Balls :> space.sleepingComponents[0] tib.
-Balls :> space.sleepingComponents[0] \ ==> [object Object] (object)
- OK 
-> Balls :> space.sleepingComponents[0] obj>keys .
-p,vy,vx,f,w,t,v_limit,w_limit,v_biasy,v_biasx,w_bias,space,shapeList,arbiterList,constraintList,nodeRoot,nodeNext,nodeIdleTime,m,m_inv,i,i_inv,rot,a,sanityCheck,getPos,getVel,getAngVel,isSleeping,isStatic,isRogue,setMass,setMoment,addShape,removeShape,removeConstraint,setPos,setVel,setAngVel,setAngleInternal,setAngle,velocity_func,position_func,resetForces,applyForce,applyImpulse,getVelAtPoint,getVelAtWorldPoint,getVelAtLocalPoint,eachShape,eachConstraint,eachArbiter,local2World,world2Local,kineticEnergy,activate,activateStatic,pushArbiter,sleep,sleepWithGroup OK 
-> Balls :> space.sleepingComponents[0].getPos() tib.
-Balls :> space.sleepingComponents[0].getPos() \ ==> [object Object] (object)
- OK 
-> Balls :> space.sleepingComponents[0].getPos() (see)
-{
-    "x": 399.45326663630857,
-    "y": 19.71613440411132
-} OK 
-> Balls :> space.sleepingComponents[0].setPos(v(10,10))
- OK 
- OK 
-> .s
-      0: undefined (undefined)
- OK 
-> drop
- OK 
-> .s
-empty
- OK 
-> Balls :> space.sleepingComponents[0].setPos(v(10,10))
- OK 
-> Balls :> space.sleepingComponents[0].getPos() (see)
-{
-    "x": 222.34176780374293,
-    "y": 24.768384638102052
-} OK 
-> Balls :> space.sleepingComponents[0].setPos(v(0,100))
- OK 
-> Balls :> space.sleepingComponents[0].setPos(v(100,100))
- OK 
-> Balls :> space.sleepingComponents[0].setPos(v(100,400))
- OK 
+	\ éè¦½æ‰€æœ‰ body çš„æ–¹æ³•
+	> Balls :> space.eachBody .  
+	function (func)
+	{
+		this.lock(); {
+			var bodies = this.bodies;
+			
+			for(var i=0; i<bodies.length; i++){
+				func(bodies[i]);
+			}
+			
+			var components = this.sleepingComponents;
+			for(var i=0; i<components.length; i++){
+				var root = components[i];
+				
+				var body = root;
+				while(body){
+					var next = body.nodeNext;
+					func(body);
+					body = next;
+				}
+			}
+		} this.unlock(true);
+	} OK 
 
-\ bodies.length ¸g±`³£¬O 0 ¦]¬°³£ºÎµÛ¤F!!
-> Balls :> space.bodies.length . \ ==> 0 OK 
-\ ¹êÅçÆ[¹î, ÃÒ¹ê¥u¦³¿ôµÛªº body ¤~·|¥X²{¦b bodies array ¸Ì
-> run> 20 for Balls :> space.bodies.length . space 1000 nap next \ ÂZ°Êª««~
-0 0 0 0 0 0 8 3 2 9 8 6 8 8 11 11 9 9 8 10  OK 
+	> Balls :> space.eachBody(function(b){type(b.name+';')})
+		ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK 
+		
+	\ ä»¥ä¸Šéè¦½æ‰€æœ‰çš„ body ç™¼ç¾ä»–å€‘çš„é †åºä¸ä¸€å®šã€‚
+	\ è¦ä¸è¦ä¿å­˜æ¯å€‹ body æ˜¯ chipmunk user çš„è‡ªç”±, chipmunk æœ¬èº«ç®¡ç†æ‰€æœ‰ body æ˜¯åˆ†æ•£åœ¨
+	\ space.bodies ä»¥åŠ space.sleepingComponents çµæ§‹è£¡é¢ã€‚ 
+	\ space.activateBody(body) å°±æ˜¯æŠŠ body æ”¾é€² space.bodies[] è£¡åŽ»ã€‚
 
-\ ¹MÄý©Ò¦³ body ªº¤èªk
-> Balls :> space.eachBody .  
-function (func)
-{
-    this.lock(); {
-        var bodies = this.bodies;
-        
-        for(var i=0; i<bodies.length; i++){
-            func(bodies[i]);
-        }
-        
-        var components = this.sleepingComponents;
-        for(var i=0; i<components.length; i++){
-            var root = components[i];
-            
-            var body = root;
-            while(body){
-                var next = body.nodeNext;
-                func(body);
-                body = next;
-            }
-        }
-    } this.unlock(true);
-} OK 
-
-> Balls :> space.eachBody(function(b){type(b.name+';')})
-ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK 
-\ ¥H¤W¹MÄý©Ò¦³ªº body µo²{¥L­Ìªº¶¶§Ç¤£¤@©w¡C
-\ ­n¤£­n«O¦s¨C­Ó body ¬O chipmunk user ªº¦Û¥Ñ, chipmunk ¥»¨­ºÞ²z©Ò¦³ body ¬O¤À´²¦b
-\ space.bodies ¥H¤Î space.sleepingComponents µ²ºc¸Ì­±¡C 
-\ space.activateBody(body) ´N¬O§â body ©ñ¶i space.bodies[] ¸Ì¥h¡C
-
-[x] The below code brings all bodies into an jeforth array 'bodies'
-	\ The array
-		[] constant bodies // ( -- array ) \ Array of all bodies in the space
-	\ Pack the array
-		Balls :> space.eachBody(function(b){vm.g.bodies.push(b)})
-	\ Print the entire array
-		bodies <js> for(var i in tos()) type(i + " : " + tos()[i].name + "\n"); </js> drop
+	[x] The below code brings all bodies into an jeforth array 'bodies'
+		\ The array
+			[] constant bodies // ( -- array ) \ Array of all bodies in the space
+		\ Pack the array
+			Balls :> space.eachBody(function(b){vm.g.bodies.push(b)})
+		\ Print the entire array
+			bodies <js> for(var i in tos()) type(i + " : " + tos()[i].name + "\n"); </js> drop
 
 [x] How to rotate a body
 	\ Method 1, Set angular velocity directly
 		> bodies :: [1].setAngVel(3) \ anti-clock
 		> bodies :: [5].setAngVel(-3) \ clock-wise
-	\ Method 2, Set torque ( rotating force ) Âà¯x, Âà°Ê¤O 
+	\ Method 2, Set torque ( rotating force ) è½‰çŸ©, è½‰å‹•åŠ› 
 		> bodies :> [5].t . \ ==> 0 keep the Angular Velocity constant
 		> bodies :: [5].t=900 \ add rotating force to the body makes it rotate faster and faster
 		> bodies :: [5].t=0 \ stop the torque force, AngVel become constant
@@ -239,8 +157,7 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 		"x": 0.9970688464448313,
 		"y": -0.07650957749964037
 	} OK
-	
-=======
+
 [x] How to hide or disable the Demo drawInfo?
 	--> Add one line to demo.js 
 		Demo.prototype.drawInfo = function() {
@@ -248,24 +165,45 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 		... snip ...
 	[x]	to disable the annoying information on the canvas.
 		js: Demo.prototype.drawInfo.hide=true 
-[x] float.f ¸Ì,Åý chocolate[0] Âà°Ê
+		
+[x] float.f è£¡,è®“ chocolate[0] è½‰å‹•
 	> run: 100 for choc :: [0].setAngle(0.5) 500 nap choc :: [0].setAngle(0) 500 nap next
 
 [x] How to supress the rotation when draging a thing?
 	/// Maximum rotational rate (in radians/second) allowed when updating the angular velocity.
 	w_limit seems to be the answer	--> Yes! 0=no angular velocity, default is Infinity
 	--> This value is good enough --> choc :: [0].w_limit=1.5
-	body.w is the ¨¤³t«× Anglular Velocity
-[ ] To get a body's mass 
+	body.w is the è§’é€Ÿåº¦ Anglular Velocity
+	
+[x] To get a body's mass 
 	--> choc :> [0].m tib.		
 
 	To change the mass of a body
 	--> choc :: [n].setMass(m) \ where n is a chocolate, m is its new mass.
+	
+	To list all chocolates' mass
+	--> 
+		cr choc <js>
+			var choc = pop();
+			for(var i=0; i<12; i++){
+				type("Chocolate #" + i + " mass " + choc[i].m + "\n");
+			}
+		</js>
+		
+	To change all chocolates' mass
+	--> 
+		cr choc <js>
+			var mm = 0.6;
+			var choc = pop();
+			for(var i=0; i<12; i++){
+				choc[i].setMass(mm);
+			}
+		</js>
 
-	To see the defected chocolate
-	--> choc :: [0].activate()
+[x]	To see the defected chocolate
+	--> choc :: [0].activate()  
 
-	To see a chocolate's position
+[x]	To see a chocolate's position
 	--> choc :> [0].p (see)
 		{
 			"x": 115.13832984959171,
@@ -285,34 +223,24 @@ ball#3;rock;ball#2;ball#10;ball#9;ball#8;ball#7;ball#4;ball#5;ball#6;ball#1; OK
 			}
 		</js>
 		
-	To list all chocolates' mass
-	--> 
-		cr choc <js>
-			var choc = pop();
-			for(var i=0; i<12; i++){
-				type("Chocolate #" + i + " mass " + choc[i].m + "\n");
-			}
-		</js>
-		
-	To change all chocolates' mass
-	--> 
-		cr choc <js>
-			var mm = 0.6;
-			var choc = pop();
-			for(var i=0; i<12; i++){
-				choc[i].setMass(mm);
-			}
-		</js>
-		
-	To change the water level
+[x]	To change the water level
 	--> water :: bb_t=210 \ was 240
 	
-[ ]	To understand a body, read cp.js 
+[x]	To understand a body, read cp.js 
 	var Body = cp.Body = function(m, i) { ... }
 	m	is mass, .setMass(n)
-	i	is moment of inertia Âà°ÊºD¶q of the body, setMoment()
-		
-	
+	i	is moment of inertia è½‰å‹•æ…£é‡ (or simply moment) of the body, setMoment()
+	A body needs only (m,i) for both speed and rotation.
+	While its shape is another thing. Moment or (i, inertia) is a function of shape 
+	but not speed.
+		cp.momentForCircle(mass,åœ“å¿ƒ0,åŠå¾‘,offsetVector)
+		cp.momentForSegment,
+		cp.momentForPoly,
+		cp.momentForBox,
+		cp.momentForBox2,
+[x] To understand a shape, read cp.js
+	var Shape = cp.Shape = function(body) { ... }
+
 [x] water :: setSensor(true) \ enable the water, become ice if disabled
 
 > water :> verts .
@@ -335,10 +263,10 @@ er run> 100 for random 12 * int 2 .r cr next \ --> 0~11 random
 er run> 100 for random  2 * int 2 .r cr next \ --> 0~1  random
 
 
-\ ¸U¤@ ®üºøºL¥X¥h¤F, §â¥¦²¾¦^¨Ó
+\ è¬ä¸€ æµ·ç¶¿æ‘”å‡ºåŽ»äº†, æŠŠå®ƒç§»å›žä¾†
 sponge :> setPos({x:200,y:200})
 
-[ ] ©Ô°Ê¬Yª«®ÉªººD©Ê, ¥i¯à¬O body.i body.i_inv, modify through body.setMoment()
+[ ] æ‹‰å‹•æŸç‰©æ™‚çš„æ…£æ€§, å¯èƒ½æ˜¯ body.i body.i_inv, modify through body.setMoment()
 	> choc :> [0].setMoment .
 	function (moment)
 	{
@@ -416,10 +344,10 @@ sponge :> setPos({x:200,y:200})
 : 1:1 ( 2 numbers -- ) \ Put 1 choc on each side
 	drop-choc-right drop-choc-left ;
 
-\ ¬D¥X¬Y¤@ chocolate 
+\ æŒ‘å‡ºæŸä¸€ chocolate 
 	choc :: [4].setPos({x:500,y:400})
 
-[x] float.f ¸Ì,Åý chocolate[0] Âà°Ê
+[x] float.f è£¡,è®“ chocolate[0] è½‰å‹•
 	> run: 100 for choc :: [0].setAngle(0.5) 500 nap choc :: [0].setAngle(0) 500 nap next
 	choc :: [0].setVel({x:0,y:200}) \ Jump the choc
 	choc :: [0].setAngVel(0.5) \ Rotate the choc
@@ -454,10 +382,10 @@ sponge :> setPos({x:200,y:200})
 	0 3 1 4 2 5
 	0 : 0
 	1 : L/2 = 3
-	2 : ¤W¤W¤@­Ó + 1 = 1
-	3 : ¤W¤W¤@­Ó + 1 = 4
-	4 : ¤W¤W¤@­Ó + 1 = 2
-	5 : ¤W¤W¤@­Ó + 1 = 5
+	2 : ä¸Šä¸Šä¸€å€‹ + 1 = 1
+	3 : ä¸Šä¸Šä¸€å€‹ + 1 = 4
+	4 : ä¸Šä¸Šä¸€å€‹ + 1 = 2
+	5 : ä¸Šä¸Šä¸€å€‹ + 1 = 5
 	
 	[i]
 	[L/2]

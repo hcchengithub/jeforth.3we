@@ -21,7 +21,7 @@ cls <text>
     </style>
     <h1 class=center> A simulation of the 12 coin problem</h1>
     <h3 class=center> Find the defect chocolate with the floating sponge in the bucket</h3>
-    <h2 class=center><a href="https://www.evernote.com/shard/s22/nl/2472143/d5754beb-1439-41d5-8363-5def2bc53b86?title=A%20simulation%20of%20the%2012%20coin%20problem">Read me</a></h2>
+    <h2 class=center><a href="http://www.evernote.com/l/ABbVdUvrFDlB1YNjXe8rxTuGzvpldXxS2gs/">Read me</a></h2>
     <div id="canvas-container"><canvas>Your browser doesn't support canvas</canvas></div>
     /* canvas must be defined before chipmunk modules */
     <script src="external-modules/chipmunk/cp.js"></script>
