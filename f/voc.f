@@ -323,13 +323,14 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				dup (') 			( name.f exist? )
 				BL word swap 		( name.f eof exist? )
 				if 					( name.f eof )
-					word drop 		( name.f )
-					BL word 		( name.f eof )
-					drop			( name.f )
+					word drop 		( name.f ) \ drop everything before eof
+					BL word 		( name.f eof ) \ remove eof from tib
+					drop			( name.f ) \ drop eof
 				else				( name.f eof )
-				then				
-				drop ;
-				/// Conditional skep TIB down to the next EOF mark.
+				then	( name.f | name.f eof )
+				drop \ when the .f module has been totally skipped the stack is empty as well for there's nothing to do in that case
+				; 
+				/// Conditional skip TIB down to the next EOF mark.
 				/// The EOF mark is supposed to be at the end of a \ comment at end of the .f file.
 				/// In None-blocking settings, to support suspend-resume of the forth VM, dictate()
 				/// can not call itself recursively so as to avoid from confusing the suspend-level.

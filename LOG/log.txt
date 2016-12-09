@@ -4818,7 +4818,9 @@
 	defined in canvas.f module. When include many-clocks.f the 'save' command has been
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
-	of doing nothing when it's existing.
+	of doing nothing when it's existing. 
+	--> Not 'include' but 'source-code-header' who skip existing vocabulary.
+	
 [ ] jeforth.3htm run through rawgit.com has some problems,
 	[ ] The outputbox background color covers only half screen when cell phone is 
 		not vertical.
