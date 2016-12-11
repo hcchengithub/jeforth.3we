@@ -4833,6 +4833,103 @@
     How to debug this issue? Use this line:
         "" value tib-at-the-point js: vm.g.tib=tib.slice(ntib)
     and check tib-at-the-point
-    
 
-	
+[ ] Change the self-test design of jeforth.3we. No command line do nothing.
+
+[ ] change the include design. 
+
+: sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
+				dup readTextFileAuto ( pathname file )
+				\ js> tos().indexOf("-=e"+"Of=-")!=-1 if ( pathname file )  *debug* 111>
+				\ 	\ EOF is not allowed in ~.f module
+				\ 	s" Abort! EOF mark '-=eOf=-' is reserved but found in " + js> tos(2) + "msg"abort
+				\ then ( pathname file ) *debug* 222>
+				<js> ("\n\\ -=pathname[" + pop(1) + "]pathname=-\n" + pop())</jsV> ( file' )
+				\ <text> 
+				\ 	\ 跟 source_code_header 成對的尾部
+				\ 	<selftest>
+				\ 	js> tick('<selftest>').masterMarker tib.insert
+				\ 	</selftest>
+				\ 	js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
+				\ 	js: tick('<selftest>').buffer="" \ recycle the memory
+				\ </text> s" \ --E" + s" OF--" +
+				\ swap  ( -- code file )
+				\ <js> // 把 - - EOF - - 之後先切除再加回，為往後的 source code header, selftest 等準備。
+				\ 	var ss = pop();
+				\ 	ss = (ss+'x').slice(0,ss.search(/\\\s*-=eOf=-/)); // 一開始多加一個 'x' 讓 search 結果 -1 時吃掉。
+				\ 	ss += pop(); // Now ss becomes the TOS
+				\ </jsV> *debug* 444>
+                <js> var ss=pop();(ss+'x').slice(0,ss.search(/-=eOf=-/))+'\n\\ -=eOf=-\n'</jsV> \ The last \n 避免最後是 \ comment 時吃到後面來
+                tib.insert ;
+                /// Add -=pathname[pathname]pathname=- and cut after -=eof=-
+
+char -=EOF=- ( eof ) <js> (new RegExp(tos()))</jsV> ( eof /eof/ )
+js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
+
+: sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
+				dup readTextFileAuto ( pathname file )
+				<js> ("\n\\ -=pathname[" + pop(1) + "]pathname=-\n" + pop())</jsV> ( file' )
+                <js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV> 
+                \ The last \n 避免最後是 \ comment 時吃到後面來
+                tib.insert ;
+                /// Add -=pathname[pathname]pathname=- and cut after -=EOF=-
+                
+: include       ( <filename> -- ... ) \ Load the source file if it's not included yet.
+				BL word sinclude ; interpret-only
+
+            "" value TIB
+            0  value  nTIB
+            : source~ 
+                js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( ieof )
+                dup -1 = ?abort" Abort! EOF mark not found." ( ieof )
+                js> ntib + ( ieof ) \ insert selftest section tail here
+                js> tib.slice(ntib,pop()) ( tib ) \ tib[ntib ~ before EOF]
+                <text> 
+					\ 跟 source_code_header 成對的尾部
+					<selftest>
+					js> tick('<selftest>').masterMarker tib.insert
+					</selftest>
+					js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
+					js: tick('<selftest>').buffer="" \ recycle the memory
+				</text> s" \ " EOF :> pattern + js> '\n' + ( tib[ntib~eof] ) 
+                js> tib to TIB js> ntib to nTIB *debug* 22> 
+                js> tib.slice(0,ntib)+'\n' *debug* 33> swap + *debug* 44>  
+                js> tib to TIB js> ntib to nTIB 
+                js: tib=pop()
+            ;
+                
+				<text>
+					?skip2 -=EOF=- \ skip it if already included
+					dup .( Including ) . cr char -- over over + +
+					js: tick('<selftest>').masterMarker=tos()+"selftest--";
+					also forth definitions (marker) (vocabulary)
+					last execute definitions
+					<selftest>
+                        \ setup marker of this module, run this marker to forget everything back to here.
+						js> tick('<selftest>').masterMarker (marker)
+					</selftest>
+				</text> swap + ( tib_a' )
+                js> tib to TIB js> ntib to nTIB *debug* 11> 
+                lastIndexOf()
+                
+                find the eof index, 
+                <text> 11 33 44 -=eOf=- 44 55 66 </text> :> slice(3).indexOf("-=eOf=-") tib.
+                new RegExp(pattern, attributes);
+                <js> (new RegExp("pattern","img"))</jsV> \ ==> /pattern/gim (object)
+                
+: source-code-header ( -- ) \ The source-code-file.f header macro 
+				<text>
+					?skip2 -=EOF=- \ skip it if already included
+					dup .( Including ) . cr char -- over over + +
+					js: tick('<selftest>').masterMarker=tos()+"selftest--";
+					also forth definitions (marker) (vocabulary)
+					last execute definitions
+					<selftest>
+						js> tick('<selftest>').masterMarker (marker)
+					</selftest>
+				</text> tib.insert ;
+				/// skip including if the module has been included.
+				/// setup the self-test module
+				/// initiate vocabulary for the including module                
+                
+                
