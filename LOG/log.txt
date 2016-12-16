@@ -4863,6 +4863,8 @@
                 tib.insert ;
                 /// Add -=pathname[pathname]pathname=- and cut after -=eof=-
 
+\ developing new include and friends
+				
 char -=EOF=- ( eof ) <js> (new RegExp(tos()))</jsV> ( eof /eof/ )
 js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
 
@@ -4877,13 +4879,13 @@ js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of 
 : include       ( <filename> -- ... ) \ Load the source file if it's not included yet.
 				BL word sinclude ; interpret-only
 
-            "" value TIB
-            0  value  nTIB
-            : source~ 
+"" value TIB
+0  value  nTIB
+: source~ 
                 js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( ieof )
                 dup -1 = ?abort" Abort! EOF mark not found." ( ieof )
                 js> ntib + ( ieof ) \ insert selftest section tail here
-                js> tib.slice(ntib,pop()) ( tib ) \ tib[ntib ~ before EOF]
+                js> tib.slice(ntib,pop()) ( tib[ntib ~ before EOF] ) \ cut after EOF 
                 <text> 
 					\ 跟 source_code_header 成對的尾部
 					<selftest>
@@ -4891,12 +4893,9 @@ js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of 
 					</selftest>
 					js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
 					js: tick('<selftest>').buffer="" \ recycle the memory
-				</text> s" \ " EOF :> pattern + js> '\n' + ( tib[ntib~eof] ) 
-                js> tib to TIB js> ntib to nTIB *debug* 22> 
-                js> tib.slice(0,ntib)+'\n' *debug* 33> swap + *debug* 44>  
-                js> tib to TIB js> ntib to nTIB 
-                js: tib=pop()
-            ;
+				</text> ( tib[ntib ~ before EOF] code ) + ( tib[ntib ~ before EOF]+code ) 
+				s" \ " EOF :> pattern + js> '\n' + + ( tib[ntib~beforeEof+code+EOF] ) \ EOF mark appended back
+                js> tib.slice(0,ntib)+'\n' swap + js: tib=pop() ;
                 
 				<text>
 					?skip2 -=EOF=- \ skip it if already included
