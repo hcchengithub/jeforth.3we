@@ -372,7 +372,7 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					<table class=help_words style="width:90%">
 					<tr>
 					  <td style="width:200px"><b>_name_</b></td><td colspan=4><b>_help_</b>
-					  [_type_][_vid_][_immediate_][_compile_]</td>
+					  [_type_][_vid_][_immediate_][_compile_][_private_]</td>
 					</tr>
 					_comment_
 					</table>
@@ -394,6 +394,9 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					if (tos(1).compileonly) 
 						 push(pop().replace(/_compile_/,"COMPILE-ONLY")); 
 					else push(pop().replace(/_compile_/,""));
+					if (tos(1).private) 
+						 push(pop().replace(/_private_/,"PRIVATE")); 
+					else push(pop().replace(/_private_/,""));
 				</js> 
 				</o> 2drop ;
 
