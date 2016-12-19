@@ -1,8 +1,6 @@
 
 s" html5.f"		source-code-header
 
-\ Where HTML5 is supported, JSON is too, I guess <-- Yes.
-
 : stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
 				/// Example:
 				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
@@ -275,4 +273,4 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				<js> pop().replace(/\s+onmouse.+?=\s?\S+/g,"")</jsV> 
 				:> replace(/{_cr_}/g,"\n") ;
 				/// Use RexEx word processing method.
-				
+

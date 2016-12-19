@@ -1,6 +1,4 @@
 
-	include f/html5.f
-
 	s" vb.f"		source-code-header
 
 	\ include basic.vbs

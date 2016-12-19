@@ -25,6 +25,8 @@
 \	</js>
 \
 
+.( Including jsc.f ) cr
+
 <text>
 	J a v a S c r i p t   c o n s o l e
 	  for jeforth.[3nw|3htm|3hta]

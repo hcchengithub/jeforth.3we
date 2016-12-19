@@ -5053,6 +5053,49 @@
                 header tib.insert 
         then ;
 
-                
-                
+[ ] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include 
+	command is not reliable either. So, sinclude command should save the pathname
+	itself or use the old way like source-code-header does that requires the module
+	name.f given explicitly.
+	
+[x] I am warrying about the nested ~.f modules. An included module is to be tib.inserted
+    to the position of ntib. The process should not hurt the original tib.
+	My sinclude command does it well. <--- OK.
+	[ ]	But source~ should insert the header and tailer into the right place or split tib
+		into 3 pices [used][ntib~EOF][after EOF] is also a method candidate.
+	
+[x] My recent modifications on sinclude to support private words also caused this problem. 
+	I am not so sure why the modification causes this problem, how ever, jquery defer is not 
+	needed any more so I have fixed it by include jquery in jeforth.hta. The error message was:
+	'$' is undefined. So jQuery did not included correctly? --> jeforth.hta this line:
+		if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
+	in kvm.forthConsoleHandler() caused the problem. Because jquery was not included yet.
+	Defer jquery to jquery.f was for Windows 7. Now it's not necessary. --> do it now! include
+	jquery in jeforth.hta. --> done. Seems easy. Include jquery in jeforth.hta. Move back
+	vm.plain, vm.type, vm.forthConsoleHandler from jquery.f back to jeforth.hta. That's all.
+	
+	
+[x] try 3nd ... failed too after the recent modification on rescan-word-hash to support private
+	that has caused the bug of accessing order[-1] which is of course undefined:
+	JavaScript error on word "rescan-word-hash" : Cannot read property 'length' of undefined
+	--> Try 3nw with f12 debugger ... 3nw and 3htm no problem <-- [ ] strange, should have the same problem.
+	--> Root cause is: after the 'only' command, order array become 0 length but words in
+		forth vocabulary are still visible because the rescan-word-hash command always scan
+		forth word-list. 'only 'clears the order array may be a mistake, should preserve forth
+		word-list <-- Yes! according to ANSI : "Set the search order to the implementation-defined 
+		minimum search order." which is to have 'forth' at least.
+	--> Modify the definition of 'only' then the rescan-word-hash command can be simplified.
+	--> ok now.
+		
+[ ] project-k jeoforth.js has a variable 'context'. It is actually the order[order.length-1]
+	so why need 'context'? 
+
+[x] 3hta can run, 'including wmi.f' and stop. Caused by my recent modifications on sinclude?
+	--> use 123.f new sinclude, source-code-header then problem gone. But I found html5.f
+	is being included multiple times! --> vb.f too, so source~ is in trouble. --> include 123.f 
+	before include html5.f see see --> shit, vb.f needs html5.f so it does! --> wsh.f includes vb.f
+	again too. --> ok now.
+
+[ ] Make sure new source-code-header can handle nested include ...
+	
 

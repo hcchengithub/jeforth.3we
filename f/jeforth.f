@@ -466,14 +466,13 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 \ 				end-code
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {};
-				scan_vocabulary("forth"); // words in "forth" always available
 				for (var j=0; j<order.length-1; j++) scan_vocabulary(order[j],false); // 越後面的 priority 越高
 				scan_vocabulary(order[order.length-1],true); // The context
-				function scan_vocabulary(v,no_private) {
-					for (var i=1; i<words[v].length; i++){  // 第零個是0,一律跳過。
+				function scan_vocabulary(v,context) { // skip private words but all words of context
+					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
 						// skip the last() to avoid unexpected 'reveal'.
-						if (compiling) if (last()==words[v][i]) continue; 
-						if (no_private || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
+						if (compiling && last()==words[v][i]) continue; 
+						if (context || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
 					}
 				}
 				end-code
@@ -1910,37 +1909,8 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 : include.js	( <pathname> -- ) \ Include JavaScript source file
 				BL word sinclude.js ;
 
-\ : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
-\ 				readTextFileAuto ( -- file )
-\ 				js> tos().indexOf("source-code"+"-header")!=-1 if \ 有 selftest 的正常 .f 檔
-\ 					<text> 
-\ 						\ 跟 source_code_header 成對的尾部
-\ 						<selftest>
-\ 						js> tick('<selftest>').masterMarker tib.insert
-\ 						</selftest>
-\ 						js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
-\ 						js: tick('<selftest>').buffer="" \ recycle the memory
-\ 					</text> s" \ --E" + s" OF--" +
-\ 
-\ 					swap  ( -- code file )
-\ 					<js> // 把 - - EOF - - 之後先切除再加回，為往後的 source code header, selftest 等準備。
-\ 						var ss = pop();
-\ 						ss = (ss+'x').slice(0,ss.search(/\\\s*--EOF--/)); // 一開始多加一個 'x' 讓 search 結果 -1 時吃掉。
-\ 						ss += pop(); // Now ss becomes the TOS
-\ 					</jsV>
-\ 				then
-\ 				js> '\n'+pop()+'\n' ( 避免最後是 \ comment 時吃到後面來 ) tib.insert ;
-
                 char -=EOF=- ( eof ) <js> (new RegExp(tos()))</jsV> ( eof /eof/ )
                 js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
-: sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
-                dup readTextFileAuto ( pathname file )
-                <js> ("\n\\ -=pathname[" + pop(1) + "]pathname=-\n" + pop())</jsV> ( file' )
-                <js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV> 
-                \ The +'x' is a perfect trick, will be cut both EOF mark exists or not. 
-                \ The last \n 避免最後是 \ comment 時吃到後面來
-                tib.insert ;
-                /// Add -=pathname[pathname]pathname=- and cut off after -=EOF=-
 : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
                 readTextFileAuto ( file )
                 <js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV> 

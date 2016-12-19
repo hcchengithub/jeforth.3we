@@ -83,8 +83,8 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 : vocabulary	( <name> -- ) \ create a new word list.
 				BL word (vocabulary) ;
 				
-: only       	( -- ) \ Clear vocabulary search order[] list.
-				js: order=order.slice(0,0) rescan-word-hash ;
+: only       	( -- ) \ Leaving forth the only vocabulary in order[]
+				js: order=["forth"] rescan-word-hash ;
 
 				<selftest>
 					\ search: forth,vvv,vvv000
@@ -97,7 +97,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					[d false,true,true d] [p "only" p]
 				</selftest>
 
-code also       if(order.length) order.push(order[order.length-1]) end-code // ( -- ) vocabulary array's dup
+code also       order.push(order[order.length-1]) end-code // ( -- ) dup vocabulary order[] array
 
 code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
 
@@ -128,7 +128,7 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 : get-vocs		js> words obj>keys ; // ( -- vocs[] ) Get all vocabulary names.
 
 : not-only 		( -- ) \ Bring back all vocabulary 
-				only get-vocs <js> pop().join(" also ")</jsV> tib.insert ;
+				only get-vocs <js> pop().join(" also ")</jsV> tib.insert ; interpret-only
 				/// Does not change the current.
 
 : vocs       	." vocs: " get-vocs . cr ; // ( -- ) List all vocabulary names.
@@ -177,6 +177,11 @@ code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear sea
 					char code char forth search-wordlist js> pop().name=='code' \ true
 					[d true d] [p "search-wordlist" p]
 				</selftest>
+
+: prioritize 	( vid -- ) \ Make the vocabulary first priority
+				js> order.indexOf(tos()) ( vid i ) 
+				js> tos()==-1 ?abort" Error! unknown vocabulary." ( vid i )
+				js> order.splice(pop(),1);order.push(pop()) ;
 
 : forget		( <name> -- ) \ Forget the current vocabulary from <name>
 				BL word dup (') js> tos().vid js> current = if ( -- name Word )
@@ -337,9 +342,10 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				/// While 'include' used to utilize dictate() that is now replaced by "tib.insert".
 				/// Use ?skip2 at the beginning of a .f file if you don't want it to be double included.
 
-: source-code-header ( -- ) \ The source-code-file.f header macro 
-				<text>
-					?skip2 --EOF-- \ skip it if already included
+: header 		( -- 'head' ) \ ~.f common header
+				EOF :> pattern <text>
+					\ ~.f common header
+					?skip2 _eof_ \ skip it if already included
 					dup .( Including ) . cr char -- over over + +
 					js: tick('<selftest>').masterMarker=tos()+"selftest--";
 					also forth definitions (marker) (vocabulary)
@@ -347,10 +353,39 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					<selftest>
 						js> tick('<selftest>').masterMarker (marker)
 					</selftest>
-				</text> tib.insert ;
-				/// skip including if the module has been included.
-				/// setup the self-test module
-				/// initiate vocabulary for the including module
+				</text> :> replace("_eof_",pop()) ; private
+    
+: tailer 		( -- 'tailer' ) \ ~.f common tailer
+				<text> 
+					\ ~.f common tailer
+					<selftest>
+					js> tick('<selftest>').masterMarker tib.insert
+					</selftest>
+					js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
+					js: tick('<selftest>').buffer="" \ recycle the memory
+				</text> ; private
+				
+: source-code-header ( "module-name" -- ) \ source code header
+				\ Check if the module is included already
+				dup (') ( mname w )
+				if  \ already included ( mname ) 
+					prioritize
+				else 
+					\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
+					\ slice ntib~EOF 
+						js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( mname ieof )
+						dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
+						js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
+					\ append the tailer
+						tailer + ( mname ieof tib[ntib~before EOF]+tailer ) 
+					\ reform the EOF
+						s" \ " + ( mname ieof tib[ntib~beforeEof+tailer+\] )
+					\ wrap up the tib
+						swap js> tib.slice(pop()) ( mname tib[ntib~before EOF]+tailer afterEOF ) 
+						+ js: tib=pop();ntib=0 ( mname )
+						header tib.insert 
+				then ; interpret-only
+				/// The given module-name is for ?skip2
 
 <selftest> --voc.f-self-test-- </selftest>
 js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 

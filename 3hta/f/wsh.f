@@ -1,7 +1,5 @@
 \ utf-8
 
-include vb.f
-
 s" wsh.f"	source-code-header
 
 <js> vm.fso = new ActiveXObject("Scripting.FileSystemObject") </jsV> constant vm.fso // ( -- fso ) Scripting.FileSystemObject
