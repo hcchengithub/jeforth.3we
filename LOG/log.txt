@@ -5100,6 +5100,6 @@
 
 [ ] See code word don't show the toString method.
 
-
+[ ] words and help do not list private words by default. * to show all.
 	
 

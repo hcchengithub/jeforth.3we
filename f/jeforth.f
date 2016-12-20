@@ -25,7 +25,7 @@ code parse-help var ss = " " + pop() + " ", comment = "";
 				end-code        
 				// ( "line" -- "helpmsg" "rests" ) Parse "( -- ) \ help foo baa" from 1st input line
 				
-code get-privacy push(false) end-code // ( -- false ) Default privacy-mode is false, words are nonprivate by default.
+code privacy-mode push(false) end-code // ( -- false ) Default is false, words are nonprivate by default.
 				
 code code       push(nexttoken()); // name of the word
 				push(nexttoken('\n|\r')); // rest of the first line
@@ -35,7 +35,7 @@ code code       push(nexttoken()); // name of the word
 				newhelp = pop();
 				tib = pop() + " " + tib; // "name" + tib
 				execute(words.forth[1]); // execute the old version 'code'.
-				execute("get-privacy");last().private = Boolean(pop());
+				execute("privacy-mode");last().private = Boolean(pop());
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
 
@@ -315,13 +315,13 @@ code compile-only  ( -- ) \ Make the last new word a compile-only.
 
 \ ------------------ Fundamental words ------------------------------------------------------
 
-code get-privacy ( -- boolean ) \ Get context's privacy-mode, true is private, false is public.
-				if (tick("privacy-mode")) execute("privacy-mode");
-				else push(false); end-code
-				/// Reads privacy-mode ( -- boolean ) which must be a private word 
-				/// of each ~.f module if is defined, and it must be defined after 
-				/// vocabualry current and context are well arranged. Example:
-				/// : privacy-mode false ; private // ( -- false ) foobar.f 
+\ [ ] code get-privacy ( -- boolean ) \ Get context's privacy-mode, true is private, false is public.
+\ 				if (tick("privacy-mode")) execute("privacy-mode");
+\ 				else push(false); end-code
+\ 				/// Reads privacy-mode ( -- boolean ) which must be a private word 
+\ 				/// of each ~.f module if is defined, and it must be defined after 
+\ 				/// vocabualry current and context are well arranged. Example:
+\ 				/// : privacy-mode false ; private // ( -- false ) foobar.f 
 				
 				
 code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added into wordhash{} yet
@@ -331,7 +331,7 @@ code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added 
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
 				last().type = "colon-create";
-				execute("get-privacy");last().private = Boolean(pop());
+				execute("privacy-mode");last().private = Boolean(pop());
 				end-code
 
 code reveal		( -- ) \ Add the last word into wordhash
@@ -1703,14 +1703,24 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					---
 				</selftest>
 
-code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
-				// var RegEx = new RegExp(nexttoken(),"i");
+code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
 				var option = pop();
 				var pattern = pop();
-				var word_list = words[pop()];
+                var vid = pop();
 				var result = [];
-				for(var i=1;i<word_list.length;i++) {
-					if (!pattern) { result.push(word_list[i]); continue; } // 沒有 pattern 就是全部
+                var word_list = [];
+                var isContext = order[order.length-1] == vid;
+                // Remove private words unless in context
+                for (var i=1; i<words[vid].length; i++) {
+                    if (isContext || !words[vid][i].private) 
+                        word_list.push(words[vid][i]);
+                }
+				for(var i=1; i<word_list.length; i++) {
+					if (!pattern) { 
+                        // no pattern is all public
+                        result.push(word_list[i]); 
+                        continue; 
+                    } 
 					switch(option){ 
 						// 這樣寫表示這些 option 都是唯一的。
 						case "-t": // -t for matching type pattern, case insensitive.
@@ -1736,7 +1746,6 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 								result.push(word_list[i]);
 							}
 							break;
-
 						default: // any other option, includes -N, for exactly name only, case sensitive.
 							if (word_list[i].name==pattern) {
 								result = [word_list[i]];
