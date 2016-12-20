@@ -5087,8 +5087,8 @@
 	--> Modify the definition of 'only' then the rescan-word-hash command can be simplified.
 	--> ok now.
 		
-[ ] project-k jeoforth.js has a variable 'context'. It is actually the order[order.length-1]
-	so why need 'context'? 
+[x] project-k jeoforth.js has a variable 'context'. It is actually the order[order.length-1]
+	so why need 'context'? --> Because ANSI or eforth has it. --> let it be.
 
 [x] 3hta can run, 'including wmi.f' and stop. Caused by my recent modifications on sinclude?
 	--> use 123.f new sinclude, source-code-header then problem gone. But I found html5.f
@@ -5096,6 +5096,10 @@
 	before include html5.f see see --> shit, vb.f needs html5.f so it does! --> wsh.f includes vb.f
 	again too. --> ok now.
 
-[ ] Make sure new source-code-header can handle nested include ...
+[x] Make sure new source-code-header can handle nested include ... ok now. 
+
+[ ] See code word don't show the toString method.
+
+
 	
 

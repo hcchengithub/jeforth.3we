@@ -238,6 +238,7 @@ function jeForth() {
 		}
 	}
 
+	// execute("unknown") == do nothing, this is beneficial when executing a future word
 	function execute(entry) { 
 		var w; 
 		if (w = phaseA(entry)){

@@ -25,6 +25,8 @@ code parse-help var ss = " " + pop() + " ", comment = "";
 				end-code        
 				// ( "line" -- "helpmsg" "rests" ) Parse "( -- ) \ help foo baa" from 1st input line
 				
+code get-privacy push(false) end-code // ( -- false ) Default privacy-mode is false, words are nonprivate by default.
+				
 code code       push(nexttoken()); // name of the word
 				push(nexttoken('\n|\r')); // rest of the first line
 				execute("parse-help"); // ( "name" "helpmsg" "rests" )
@@ -33,6 +35,7 @@ code code       push(nexttoken()); // name of the word
 				newhelp = pop();
 				tib = pop() + " " + tib; // "name" + tib
 				execute(words.forth[1]); // execute the old version 'code'.
+				execute("get-privacy");last().private = Boolean(pop());
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
 
@@ -241,10 +244,34 @@ code immediate  ( -- ) \ Make the last new word an immediate.
 						' \ :> immediate==true ( true )
 						[d false,true d] [p "immediate" p]
 				</selftest>
+				
+code ///        ( <comment> -- ) \ Add comment to the new word, it appears in 'see'.
+				var ss = nexttoken('\n|\r');
+				ss = ss.replace(/^/,"\t"); // Add leading \t to each line.
+				ss = ss.replace(/\s*$/,'\n'); // trim tailing white spaces
+				last().comment = typeof(last().comment) == "undefined" ? ss : last().comment + ss;
+				end-code interpret-only
+
+				<selftest>
+					*** /// adds comment to the last word
+						1234 constant x
+						/// comment-line-111
+						/// comment-line-222
+						js> last().comment.indexOf("comment-line-111")==-1
+						js> last().comment.indexOf("comment-line-222")==-1
+						x [d false,false,1234 d] [p "///","constant" p]
+						(forget)
+				</selftest>
                 
-code private  ( -- ) \ Make the last new word invisible out of the vocabulary
+code private  ( -- ) \ Make the last word invisible when out of the context.
 				last().private=true
 				end-code
+				/// The opposite is nonprivate.
+				
+code nonprivate  ( -- ) \ Make the last word non-private so it's globally visible.
+				last().private=false
+				end-code
+				/// The opposite is private.
                 
 				<selftest>
 					\ *** private marks the last word a private word
@@ -288,18 +315,23 @@ code compile-only  ( -- ) \ Make the last new word a compile-only.
 
 \ ------------------ Fundamental words ------------------------------------------------------
 
+code get-privacy ( -- boolean ) \ Get context's privacy-mode, true is private, false is public.
+				if (tick("privacy-mode")) execute("privacy-mode");
+				else push(false); end-code
+				/// Reads privacy-mode ( -- boolean ) which must be a private word 
+				/// of each ~.f module if is defined, and it must be defined after 
+				/// vocabualry current and context are well arranged. Example:
+				/// : privacy-mode false ; private // ( -- false ) foobar.f 
+				
+				
 code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added into wordhash{} yet
-				if(!(newname=pop())) panic("Create what?\n", tib.length-ntib>100);
+				if(!(newname=pop())) panic("(create) what?\n", tib.length-ntib>100);
 				if(isReDef(newname)) type("reDef "+newname+"\n"); // 若用 tick(newname) 就錯了
 				current_word_list().push(new Word([newname,function(){}]));
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
 				last().type = "colon-create";
-				// push(nexttoken('\n|\r')); // rest of the first line
-				// execute("parse-help"); // ( "helpmsg" "rests" )
-				// tib = " " + pop() + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
-				// newhelp = pop();
-				// last().help = newname + " " + newhelp; // help messages packed
+				execute("get-privacy");last().private = Boolean(pop());
 				end-code
 
 code reveal		( -- ) \ Add the last word into wordhash
@@ -313,23 +345,7 @@ code reveal		( -- ) \ Add the last word into wordhash
 						js> last().name [d "~(create)~" d] [p "(create)","char" p]
 				</selftest>
 
-code ///        ( <comment> -- ) \ Add comment to the new word, it appears in 'see'.
-				var ss = nexttoken('\n|\r');
-				ss = ss.replace(/^/,"\t"); // Add leading \t to each line.
-				ss = ss.replace(/\s*$/,'\n'); // trim tailing white spaces
-				last().comment = typeof(last().comment) == "undefined" ? ss : last().comment + ss;
-				end-code interpret-only
-
-				<selftest>
-					*** /// adds comment to the last word
-						1234 constant x
-						/// comment-line-111
-						/// comment-line-222
-						js> last().comment.indexOf("comment-line-111")==-1
-						js> last().comment.indexOf("comment-line-222")==-1
-						x [d false,false,1234 d] [p "///","constant" p]
-						(forget)
-				</selftest>
+\ [ ] /// was here
 
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
 code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space.
@@ -452,18 +468,6 @@ code exit       ( -- ) \ Exit this colon word.
 code ret        ( -- ) \ Mark at the end of a colon word.
 				comma(RET) end-code immediate compile-only
 
-\ code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
-\ 				wordhash = {};
-\ 				scan_vocabulary("forth"); // words in "forth" always available
-\ 				for (var j=0; j<order.length; j++) scan_vocabulary(order[j]); // 越後面的 priority 越高
-\ 				function scan_vocabulary(v) {
-\ 					for (var i=1; i<words[v].length; i++){  // 第零個都放 0，一律跳過。
-\ 						// skip the last() to avoid unexpected 'reveal'.
-\ 						if (compiling) if (last()==words[v][i]) continue; 
-\ 						wordhash[words[v][i].name] = words[v][i];
-\ 					}
-\ 				}
-\ 				end-code
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {};
 				for (var j=0; j<order.length-1; j++) scan_vocabulary(order[j],false); // 越後面的 priority 越高

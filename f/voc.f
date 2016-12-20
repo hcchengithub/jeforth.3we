@@ -178,10 +178,16 @@ code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear sea
 					[d true d] [p "search-wordlist" p]
 				</selftest>
 
-: prioritize 	( vid -- ) \ Make the vocabulary first priority
-				js> order.indexOf(tos()) ( vid i ) 
-				js> tos()==-1 ?abort" Error! unknown vocabulary." ( vid i )
-				js> order.splice(pop(),1);order.push(pop()) ;
+: prioritize 	( "vid" -- ) \ Make the vocabulary first priority
+				get-vocs :> indexOf(tos()) ( vid i1 ) 
+				js> tos()==-1 ?abort" Error! unknown vocabulary." ( vid i1 )
+				js> order.indexOf(tos(1)) ( vid i1 i2 )
+				js> tos()==-1 if ( vid i1 i2 ) \ existing but not in order[]
+					js: order.push(pop(2)) drop drop 
+				else ( vid i1 i2 ) \ already in order[]
+					nip ( vid i2 ) js: order.splice(pop(),1);order.push(pop()) 
+				then ;
+				/// Refer to "set-context" command which is cruder.
 
 : forget		( <name> -- ) \ Forget the current vocabulary from <name>
 				BL word dup (') js> tos().vid js> current = if ( -- name Word )
@@ -365,27 +371,27 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					js: tick('<selftest>').buffer="" \ recycle the memory
 				</text> ; private
 				
-: source-code-header ( "module-name" -- ) \ source code header
-				\ Check if the module is included already
-				dup (') ( mname w )
-				if  \ already included ( mname ) 
-					prioritize
-				else 
-					\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
-					\ slice ntib~EOF 
-						js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( mname ieof )
-						dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
-						js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
-					\ append the tailer
-						tailer + ( mname ieof tib[ntib~before EOF]+tailer ) 
-					\ reform the EOF
-						s" \ " + ( mname ieof tib[ntib~beforeEof+tailer+\] )
-					\ wrap up the tib
-						swap js> tib.slice(pop()) ( mname tib[ntib~before EOF]+tailer afterEOF ) 
-						+ js: tib=pop();ntib=0 ( mname )
-						header tib.insert 
-				then ; interpret-only
-				/// The given module-name is for ?skip2
+: source-code-header ( "vocabulary-name" -- ) \ source code header
+				\ make it the context if the module is existing
+					dup (') ( mname w ) if dup prioritize then \ ?skip2 will skip to EOF ( mname )
+				\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
+				\ slice ntib~EOF 
+					js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( mname ieof )
+					dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
+					js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
+				\ append the tailer
+					tailer + ( mname ieof tib[ntib~before EOF]+tailer ) 
+				\ reform the EOF
+					s" \ " + ( mname ieof tib[ntib~beforeEof+tailer+\] )
+				\ wrap up the tib
+					swap js> tib.slice(pop()) ( mname tib[ntib~before EOF]+tailer afterEOF ) 
+					+ js: tib=pop();ntib=0 ( mname )
+					header tib.insert 
+				; interpret-only
+				/// The given name becomes the vocabulary name. If the vocabulary is 
+				/// existing then make it the context but skip the including. The command
+				/// is time consuming therefore is not suitable for ~.f modules that require
+				/// performance.
 
 <selftest> --voc.f-self-test-- </selftest>
 js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 
