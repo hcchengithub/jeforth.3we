@@ -376,7 +376,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					dup (') ( mname w ) if dup prioritize then \ ?skip2 will skip to EOF ( mname )
 				\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
 				\ slice ntib~EOF 
-					js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( mname ieof )
+					js> tib.slice(ntib).indexOf(vm.v.forth.EOF.pattern) ( mname ieof )
 					dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
 					js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
 				\ append the tailer
