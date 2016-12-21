@@ -5100,6 +5100,57 @@
 
 [ ] See code word don't show the toString method.
 
-[ ] words and help do not list private words by default. * to show all.
+[x] words and help do not list private words by default. [/] pattern '*' to show all.
+	\ List all private words in wordhash{} and count word quantity
+		> <js> var count=0; for (var i in wordhash) { count++; 
+		  if(wordhash[i].private) type(wordhash[i]+"\n")}; count </jsV> .
+		header ( -- 'head' ) ~.f common header
+		tailer ( -- 'tailer' ) ~.f common tailer
+		test ( ?? ) No help message. Use // to add one.
+		493 OK 
+[ ] private support has a problem. variable, constant, value are all global! under vm.g
+	now they should be under vm.g.vid.name if they are private word. This is difficult because
+	definiton doesn't know if it's a private word. So, all of them are to be hooked under their
+	definition vid not only private words. --> This is easy, modify 'constant' would be enough.
+	
+: constant 		( n <name> -- ) \ Create a 'constnat'
+				BL word (create) <js> 
+					last().type = "constant";
+					var s = 'function(){push(vm.g["_vid_"]["_name_"])}';
+					var vid = current;
+					var name = last().name;
+					vid = vid.replace(/"/g,"\\\"");
+					name = name.replace(/"/g,"\\\"");
+					s = s.replace(/_vid_/,vid).replace(/_name_/,name);
+					last().xt = eval(s);
+					vm.g[current][last().name] = pop();
+				</js> reveal ; 
+: value 		( n <name> -- ) \ Create a 'value' variable.
+				constant last :: type='value' ; 
+: to 			( n <value> -- ) \ Assign n to <value>.
+				' ( word ) <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
+				compiling if ( word ) 
+					<text>
+						var f;f=function(){/* to */ vm.g["'+pop().name.replace(/"/g,"\\\"")+'"]=pop()}'
+					</text>
+					<js> 
+					var s = 'var f;f=function(){/* to */ vm.g["'+pop().name.replace(/"/g,"\\\"")+'"]=pop()}';push(eval(s))
+					</js> ( f ) ,
+				else ( n word )
+					js: vm.g[tos().vid][pop().name]=pop()
+				then ; immediate
 	
 
+: constant 		( n <name> -- ) \ Create a 'constnat'
+				BL word (create) <js> 
+					last().type = "constant";
+					var s = 'function(){push(vm.g["_vid_"]["_name_"])}';
+					var vid = current;
+					var name = last().name;
+					vid = vid.replace(/"/g,"\\\"");
+					name = name.replace(/"/g,"\\\"");
+					s = s.replace(/_vid_/,vid).replace(/_name_/,name);
+type("\n"+s+"\n");					
+					last().xt = eval(s);
+					vm.g[current][last().name] = pop();
+				</js> reveal ; 

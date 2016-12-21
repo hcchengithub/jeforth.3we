@@ -1340,7 +1340,7 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				compiling if jsFunc , else jsEval then ; immediate
 				/// 可以用來組合 JavaScript function
 
-: constant 		( n <name> -- ) \ Create a 'constnat', Don't use " in <name>.
+: constant 		( n <name> -- ) \ Create a 'constnat'
 				BL word (create) <js> 
 				last().type = "constant";
 				var s = 'var f;f=function(){push(vm.g["' 
