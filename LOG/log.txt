@@ -5114,5 +5114,42 @@
 	definition vid not only private words. --> This is easy, modify 'constant' would be enough.
 	--> ok now! Much much easier than I anticipated. 3hta and 3htm passed self-test already.
     [ ] check all vm.g.name and vm.g[name] values and constants
-	
+		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
+	[ ] context is a jeforth.js global variable. It should always be a copy of order[order.length-1].
+		I guess rescan-word-hash is the right place to do this.
+	[x] Make vocabulary commands (also only previous) immediate words, due to private support
+		switching context become important. For example:
+			: test3 also hte.f one previous ;
+		although the above example looks verbose, but 'one' in hte.f is a private word and test3
+		defined in a different context can use it. --> they work fine.
 
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\processing.f
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3nd\f\jsc.f
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3hta\registry.f
+		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3hta\ie.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\private\work.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\private\money.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\doc\tutor-cloth.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\alarm.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\modify.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\target.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\many-clocks.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\balls.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\ce.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\f\jsc.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\123.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\f\jeforth.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\f\voc.f
+		

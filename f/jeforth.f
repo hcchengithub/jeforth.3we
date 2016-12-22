@@ -25,7 +25,7 @@ code parse-help var ss = " " + pop() + " ", comment = "";
 				end-code        
 				// ( "line" -- "helpmsg" "rests" ) Parse "( -- ) \ help foo baa" from 1st input line
 				
-code privacy-mode push(false) end-code // ( -- false ) Default is false, words are nonprivate by default.
+code privacy 	push(false) end-code // ( -- false ) Default is false, words are nonprivate by default.
 				
 code code       push(nexttoken()); // name of the word
 				push(nexttoken('\n|\r')); // rest of the first line
@@ -35,7 +35,7 @@ code code       push(nexttoken()); // name of the word
 				newhelp = pop();
 				tib = pop() + " " + tib; // "name" + tib
 				execute(words.forth[1]); // execute the old version 'code'.
-				execute("privacy-mode");last().private = Boolean(pop());
+				execute("privacy");last().private = Boolean(pop());
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
 
@@ -315,15 +315,6 @@ code compile-only  ( -- ) \ Make the last new word a compile-only.
 				</selftest>
 
 \ ------------------ Fundamental words ------------------------------------------------------
-
-\ [ ] code get-privacy ( -- boolean ) \ Get context's privacy-mode, true is private, false is public.
-\ 				if (tick("privacy-mode")) execute("privacy-mode");
-\ 				else push(false); end-code
-\ 				/// Reads privacy-mode ( -- boolean ) which must be a private word 
-\ 				/// of each ~.f module if is defined, and it must be defined after 
-\ 				/// vocabualry current and context are well arranged. Example:
-\ 				/// : privacy-mode false ; private // ( -- false ) foobar.f 
-				
 				
 code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added into wordhash{} yet
 				if(!(newname=pop())) panic("(create) what?\n", tib.length-ntib>100);
@@ -332,7 +323,7 @@ code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added 
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
 				last().type = "colon-create";
-				execute("privacy-mode");last().private = Boolean(pop());
+				execute("privacy");last().private = Boolean(pop());
 				end-code
 
 code reveal		( -- ) \ Add the last word into wordhash
@@ -470,14 +461,15 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 				comma(RET) end-code immediate compile-only
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
-				wordhash = {};
-				for (var j=0; j<order.length-1; j++) scan_vocabulary(order[j],false); // 越後面的 priority 越高
-				scan_vocabulary(order[order.length-1],true); // The context
-				function scan_vocabulary(v,context) { // skip private words but all words of context
+				wordhash = {}; context = order[order.length-1];
+				for (var j=0; j<order.length-1; j++) 
+					scan_vocabulary(order[j],false); // The latter the higher priority
+				scan_vocabulary(context,true); // The context has the highest priority
+				function scan_vocabulary(v,isContext) { // skip private words but all words of context
 					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
 						// skip the last() to avoid unexpected 'reveal'.
 						if (compiling && last()==words[v][i]) continue; 
-						if (context || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
+						if (isContext || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
 					}
 				}
 				end-code
@@ -1791,7 +1783,6 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				/// An empty pattern matches all words.
 
 : (help)		( "word-list" "[pattern [-t|-T|-n|-f]]" -- "msg" ) \ Get help message of screened words
-				\ js> context swap ( voc line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
 				<js>

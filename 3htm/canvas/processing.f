@@ -10,7 +10,7 @@
 
 	s" processing.f" source-code-header
 
-	js> vm.g.cv ( :> constructor :> name char CanvasRenderingContext2D = ) [if] 
+	cv ( :> constructor :> name char CanvasRenderingContext2D = ) [if] 
 		\ use the existing canvas.
 	[else]
 		createCanvas setWorkingCanvas \ Init default canvas vm.g.cv

@@ -13,7 +13,6 @@ s" canvas.f"	source-code-header
 	</h> constant canvasStyle // ( -- [object HTMLStyleElement] ) Canvas style is globally for all canvases.
 							/// See also 'setCanvasStyle' command.
 							\ canvasStyle js> pop().parentElement ==> [object HTMLHeadElement]  (object)
-
 	: createCanvas			( -- cv ) \ cv is [object CanvasRenderingContext2D], cv.canvas is the parent object
 							char body <e> <canvas width=300 height=300></canvas></e>
 							js> pop().getContext('2d') ;
@@ -21,17 +20,19 @@ s" canvas.f"	source-code-header
 							/// Use commands e.g. replaceNode, insertBefore, or insertAfter 
 							/// to move it to where you want it to be.
 
-	null value cv			// ( -- cv ) The default cv object (CanvasRenderingContext2D)
-							/// 即 js> vm.g.cv。引入 default canvas 可以簡化 canvas 操
-							/// 作，避免每次都得指定 canvas。若有多個 canvas 必要時用切
-							/// 換的，看來還可以。 
+	code cv					( -- cv ) \ The default cv object (CanvasRenderingContext2D)
+							push(vm.g.cv) end-code
+							/// Gets js> vm.g.cv object. If use value then I doubt the performance 
+							/// of vm.v["canvas.f"].cv will be lower and the expression is ugly.
+							/// Default canvas simplifies canvas usge by skipping the need of
+							/// specifying canvas every where. For cases with multiple canvas, it
+							/// seems ok to overcome by switching the default.
 	
 	code setWorkingCanvas	( [object CanvasRenderingContext2D] -- ) \ Make the given cv be the default canvas.
 							vm.g.cv = pop() end-code
 
-	code setCanvasSize		( width height -- )
-							vm.g.cv.canvas.width=pop(1);vm.g.cv.canvas.height=pop(); end-code 
-							/// Canvas size can be changed dynamically.
+	: setCanvasSize			( width height -- ) \ Canvas size can be changed dynamically.
+							cv :: canvas.height=pop() cv :: canvas.width=pop() ;
 
 	: setCanvasStyle		( "canvas{border:solid 1px #CCC}" -- )
 							canvasStyle :: innerHTML=pop() ; 

@@ -27,7 +27,7 @@ code isMember 	( value group -- key|index T|F ) \ Return key or index if value e
 				</selftest>
 
 code get-context ( -- "vid" ) \ Get the word list that is searched first. 
-				push(order[Math.max(0,order.length-1)]) end-code
+				push(context=order[Math.max(0,order.length-1)]) end-code
 				/// context is order[last]
 
 : set-context	 ( "vid" -- ) \ Replace the word-list which is searched first.
@@ -84,7 +84,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 				BL word (vocabulary) ;
 				
 : only       	( -- ) \ Leaving forth the only vocabulary in order[]
-				js: order=["forth"] rescan-word-hash ;
+				js: order=["forth"] rescan-word-hash ; immediate
 
 				<selftest>
 					\ search: forth,vvv,vvv000
@@ -97,9 +97,11 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					[d false,true,true d] [p "only" p]
 				</selftest>
 
-code also       order.push(order[order.length-1]) end-code // ( -- ) dup vocabulary order[] array
+code also       order.push(order[order.length-1]) end-code immediate 
+				// ( -- ) dup vocabulary order[] array
 
-code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
+code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code immediate
+				// ( -- ) Drop vocabulary order[] array's TOS
 
 : forth 		( -- ) \ Make forth-wordlist be searched first, which is to set context="forth".
 				forth-wordlist set-context ; immediate
@@ -123,7 +125,8 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 				." search: " get-order . cr
 				." define: " get-current ( -- vid ) . cr ;
 				
-: definitions 	get-context set-current ; // ( -- ) make current equals to context. current = order[order.length-1].
+: definitions 	get-context set-current ; 
+				// ( -- ) make current equals to context. current = order[order.length-1].
 
 : get-vocs		js> words obj>keys ; // ( -- vocs[] ) Get all vocabulary names.
 
