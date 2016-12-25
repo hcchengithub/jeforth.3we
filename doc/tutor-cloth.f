@@ -461,19 +461,32 @@
 				當中最左邊這個 <ff>function(){<b>pop()</b>.moveTo ...</ff> 
 				來取得該 cv ——等於是同一個東西的 push(), pop() 
 				連著做——還是有點不滿，而且這種情形又很多。所以 
-				jeforth.3we 把所有的 value, variable, constant, ... etc 
+				jeforth.3we 把所有的 value, constant 
 				都收納成 <code>vm.g["任意-variableName-中文也可以"]</code>, 
 				其中  <code>vm</code> object 是 jeforth.3we 的 Virtual Machine 
 				本身，<code>g</code> property 取自 global 的第一個字母，
-				請自 <code> see cv</code> 即見。所以每當我們定義一個 value x 
+				請自 <code> see cv</code> 即見。
+            
+                <blockquote><i>
+                註: 後來 jeforth.3we 開始 support private 屬性之後, constant 以及
+                value 就從早期的全部都隸屬於 vm.g 改成屬於各自的 vocabulary 了。此處
+                的 cv 經過改寫使仍然為 vm.g.cv 以便相容舊的程式碼。其他一般 constant 
+                以及 value 從 JavaScript 碼來存取時要改用 vm[vid].name 的形式 (相較
+                以前是 vm.g.name) 其中 vid (vocabulary ID) 是該 constant 或 value 所在
+                的 vocabulary name。例如 vm["forth"].base 就是 base (是個 value) 的
+                JavaScript 形式。熟悉 JavaScript 者即知 vm.forth.base 也是同樣的東西。
+                有了 private 屬性之後，private words 只在所屬的 vocabulary 為 context
+                時才會顯現，或用 vm.vid.name 的絕對形式直接存取，避免了同名衝突。
+                </i></blockquote>
+                
+                所以每當我們定義一個 value x 
 				(或 constant x, 或 variable x 皆然) 就馬上有 
 				<code>vm.g.x</code> 可用，
 				其中 x 是 forth word 而 <code>vm.g.x</code> 
 				是 JavaScript variable 兩者是同一個東西。
 				可以這麼設計是一個 forth 的慣例使然：「forth 語言中，有名字的 
 				variable, value, constant 都是 global。」這不是規定，Forth 
-				沒有甚麼規定，有規定也不必遵守，
-				但是大家都這麼做的地方 jeforth.3we 也不例外。
+				沒有甚麼規定，有規定也不必遵守，但是大家都這麼做的地方 jeforth.3we 也不例外。
 				在此基礎上 <code>moveTo</code> 還可以更精簡：			
 			</p>
 			<p>

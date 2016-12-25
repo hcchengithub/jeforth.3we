@@ -5111,7 +5111,8 @@
 [x] private support has a problem. variable, constant, value are all global! under vm.g
 	now they should be under vm.g.vid.name if they are private word. This is difficult because
 	definiton doesn't know if it's a private word. So, all of them are to be hooked under their
-	definition vid not only private words. --> This is easy, modify 'constant' would be enough.
+	definition vid not only private words. 
+    --> This is easy, modify 'constant' would be enough.
 	--> ok now! Much much easier than I anticipated. 3hta and 3htm passed self-test already.
     [ ] check all vm.g.name and vm.g[name] values and constants
 		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
@@ -5122,17 +5123,31 @@
 			: test3 also hte.f one previous ;
 		although the above example looks verbose, but 'one' in hte.f is a private word and test3
 		defined in a different context can use it. --> they work fine.
-
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\processing.f
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3nd\f\jsc.f
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3hta\registry.f
-		x	c:\Users\hcche\Documents\GitHub\jeforth.3we\3hta\ie.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\private\work.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\private\money.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\doc\tutor-cloth.f
+        [x] See setup.bat (was vm.v[context]) vm[context] is not correct! Should be vm.[current]. 
+            --> vm.v[current] was a mistake. context = current then still use vm[context] is correct.
+        [x] setup.bat uses value and vm.g.flag and vm.g._a thus is now not working because they should be
+            (was vm.v[]) vm.[context].flag and vm[context]._a 
+        [ ] Am I going to modify all vm.g to vm[context] ? very annoying and I am afraid it's a bad 
+            idea and I'll have to modify again. 
+            --> See Ynote: "jeforth.3we private support value vm.g.name become vm.vid.name" discussion.
+                1. For code word, vm[_me.vid].name
+                2. For <js> ... </js> in tib, vm[context].name or vid js> vm[pop()].name 
+                3. vid forth word is a private command, code context push(_me.vid) end-code private
+                   so vid command can be used in colon words 
+                4. for in module applications , everything is in the ~.f module. Thus js> current  and js> 
+                   context are the same vid. This is important and is done by source-code-header. Thus 
+                   vm[context].name is the easist way.
+        
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\processing.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3nd\f\jsc.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3hta\registry.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3hta\ie.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\private\work.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\private\money.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\doc\tutor-cloth.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\alarm.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
@@ -5152,4 +5167,16 @@
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\123.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\f\jeforth.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\f\voc.f
-		
+
+[x] recently, only foo will crash the system , previous rescan-wordhash is better. 
+    Done, now: 
+        only work.f help * 
+    works fine.
+[x] 3hta, include work.f, all words are private but not lookup, why? It's the only code word
+    Ha, this line in code is a mistake:
+        execute("privacy");last().private = Boolean(pop());
+    should be in end-code because last() is not this word when in code.
+    re-define end-code like what I did to code does not work, although the experiment of 
+        code end-code alert(1234) end-code 
+    works fine. However, modify end-code.xt directly can be an solution --> Bingo!
+    

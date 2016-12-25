@@ -30,7 +30,7 @@ cd %~dp0
 @goto batch
 \ --------------- start jeforth code ----------------------
 \ Preparations
-	also wsh.f \ Use wsh.f's "run" command
+	also wsh.f definitions \ Use wsh.f's "run" command
 	0 value flag // ( -- value ) Accumulator of error count
 	: +=flag flag + to flag ; // ( n -- flag+=n ) Add TOS to flag
 	: ckp ( f #cp -- ) \ Check point, pause and warn if f is true. #cp is check point number.
@@ -44,24 +44,25 @@ cd %~dp0
 	"" value _a // ( -- path ) Path of the Application currently working on.
 	char ..\jeforth.3we constant _h // ( -- path ) path of the Home directory
 	: ah ( s -- s' ) \ Replace _a and _h with application path and home path
-		:> replace(/_a/g,vm.g._a).replace(/_h/g,vm.g._h) ;
+		:> replace(/_a/g,vm[current]._a).replace(/_h/g,vm[current]._h) ;
 	: ahf ( s <filename> -- s' ) \ ah plus _f with filename
 		BL word swap ( filename s ) ah :> replace(/_f/g,pop()) ;
 	: setup-common-folders ( -- ) \ Setup jeforth common folders
-		s" cmd /c mklink /d _a\log 				_h\log              " ah (run) 1 ckp
-		s" cmd /c mklink /d _a\3htm 			_h\3htm             " ah (run) 2 ckp
-		s" cmd /c mklink /d _a\demo 			_h\demo             " ah (run) 3 ckp
-		s" cmd /c mklink /d _a\external-modules _h\external-modules " ah (run) 4 ckp
-		s" cmd /c mklink /d _a\f 				_h\f                " ah (run) 5 ckp
-		s" cmd /c mklink /d _a\js 				_h\js               " ah (run) 6 ckp
-		s" cmd /c mklink /d _a\playground 		_h\playground       " ah (run) 7 ckp
-		s" cmd /c mklink /d _a\project-k 		_h\project-k        " ah (run) 8 ckp
-		s" cmd /c mklink /d _a\private 			_h\private          " ah (run) 9 ckp
+		s" cmd /c mklink /d _a\log 				_h\log              " ah (run)  1 ckp
+		s" cmd /c mklink /d _a\3htm 			_h\3htm             " ah (run)  2 ckp
+		s" cmd /c mklink /d _a\demo 			_h\demo             " ah (run)  3 ckp
+		s" cmd /c mklink /d _a\external-modules _h\external-modules " ah (run)  4 ckp
+		s" cmd /c mklink /d _a\f 				_h\f                " ah (run)  5 ckp
+		s" cmd /c mklink /d _a\js 				_h\js               " ah (run)  6 ckp
+		s" cmd /c mklink /d _a\playground 		_h\playground       " ah (run)  7 ckp
+		s" cmd /c mklink /d _a\project-k 		_h\project-k        " ah (run)  8 ckp
+		s" cmd /c mklink /d _a\private 			_h\private          " ah (run)  9 ckp
+		s" cmd /c mklink /d _a\doc              _h\doc              " ah (run) 10 ckp
 		;
 
 \ 3ca	Chrome Applications
 	char ..\jeforth.3ca to _a _a GetFolder [if] [else]
-	s" cmd /c md _a" :> replace(/_a/,vm.g._a) 				(run) 110 ckp
+	s" cmd /c md _a" :> replace(/_a/,vm[current]._a)      (run) 110 ckp
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
 	s" cmd /c mklink    _a\_f  _h\log\_f" ahf 3ca.log.txt 	(run) 111 ckp
@@ -72,7 +73,7 @@ cd %~dp0
 	[then]
 \ 3ce	Chrome Extensions
 	char ..\jeforth.3ce to _a _a GetFolder [if] [else]
-	s" cmd /c md _a" :> replace(/_a/,vm.g._a) 								(run) 120 ckp
+	s" cmd /c md _a" :> replace(/_a/,vm[current]._a) 								(run) 120 ckp
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
 	s" cmd /c mklink    _a\_f  _h\3ce\_f" ahf manifest.json 				(run) 121 ckp
@@ -83,7 +84,7 @@ cd %~dp0
 	[then]
 \ 3hta	Windows HEML Applications
 	char ..\jeforth.3hta to _a _a GetFolder [if] [else]
-	s" cmd /c md _a" :> replace(/_a/,vm.g._a) 				(run) 130 ckp
+	s" cmd /c md _a" :> replace(/_a/,vm[current]._a)		(run) 130 ckp
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
 	s" cmd /c mklink /d _a\3hta _h\3hta" ah 				(run) 131 ckp
@@ -92,7 +93,7 @@ cd %~dp0
 	[then]
 \ 3nd	Node.js
 	char ..\jeforth.3nd to _a _a GetFolder [if] [else]
-	s" cmd /c md _a" :> replace(/_a/,vm.g._a) 				(run) 140 ckp
+	s" cmd /c md _a" :> replace(/_a/,vm[current]._a)		(run) 140 ckp
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
 	s" cmd /c mklink /d _a\3nd _h\3nd"	ah 					(run) 141 ckp
@@ -101,7 +102,7 @@ cd %~dp0
 	[then]
 \ 3nw	NW.js
 	char ..\jeforth.3nw to _a _a GetFolder [if] [else]
-	s" cmd /c md _a" :> replace(/_a/,vm.g._a) 				(run) 150 ckp
+	s" cmd /c md _a" :> replace(/_a/,vm[current]._a)		(run) 150 ckp
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
 	s" cmd /c mklink /d _a\3nw _h\3nw" ah 					(run) 151 ckp

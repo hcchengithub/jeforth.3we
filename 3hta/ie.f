@@ -31,11 +31,11 @@
 
 	shell.application :> windows() 
 	constant ShellWindows // ( -- obj ) Shell Windows (File Explorer & Internet Explorer) object.
-
-cr cr
 .( After private support, ShellWindows is not vm.g.ShellWindows anymore. 2016/12/22 H.C. Chen ) cr
-.( It's now vm.v[context].ShellWindows or a better way to avoid using context which is volitile. ) cr
+.( It's now vm[context].ShellWindows or a better way to avoid using context which is volitile. ) cr
 *debug* under-constructing>>
+
+
 
 		/// 這個 collection 就是所有的 IE 以及 File Explorer windows. ShellWindows :> count 就是
 		/// 兩者頁面的總數。ShellWindows :> item(0,1,2,3...) 即 FE/IE objects (與 DOM window 不

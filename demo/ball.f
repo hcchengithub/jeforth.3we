@@ -9,6 +9,8 @@ include processing.f
 
 s" ball.f" source-code-header
 
+true constant privacy // ( -- true ) All words in this module are private
+
 \ messages
 	: starting-message ( -- ) ." Start bouncing . . ." cr ;
 	: ending-message ( -- ) ." Stop bouncing." cr ;

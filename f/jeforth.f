@@ -35,15 +35,28 @@ code code       push(nexttoken()); // name of the word
 				newhelp = pop();
 				tib = pop() + " " + tib; // "name" + tib
 				execute(words.forth[1]); // execute the old version 'code'.
-				execute("privacy");last().private = Boolean(pop());
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
-
+                
 code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js which is thus kept pure.
+
+                // To support private word, END-CODE needs one more line
+                words.forth[2].xt = function(){ 
+                    // was from project-k jeforth.js, modified by jeforth.3we jeforth.f _init_ 
+                    if(compiling!="code"){ panic("Error! 'END-CODE' to a none code word.\n"); return};
+                    current_word_list().push(new Word([newname,newxt]));
+                    last().vid = current;
+                    last().wid = current_word_list().length-1;
+                    last().type = 'code';
+                    last().help = newhelp;
+                    execute("privacy"); last().private = Boolean(pop()); // support private word
+                    wordhash[last().name]=last();
+                    compiling  = false;
+                }                
+                
 				// An array's length is array.length but there's no such thing of hash.length for hash{}.
 				// memberCount(object) gets the given object's member count which is also a hash table's length.
 				vm.g = {}; // The global hash
-                vm.v = {}; // The value hash, includes constants and values
 				vm.g.memberCount = function (obj) {
 					var i=0;
 					for(var members in obj) i++;
@@ -462,6 +475,7 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {}; context = order[order.length-1];
+				scan_vocabulary("forth",false); // forth always available
 				for (var j=0; j<order.length-1; j++) 
 					scan_vocabulary(order[j],false); // The latter the higher priority
 				scan_vocabulary(context,true); // The context has the highest priority
@@ -1341,17 +1355,17 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				/// NOT every line of a multiple line string, only the begin/end of it.
 				/// Work with </o> </h> </e> 前置 white spaces 會變成 [object Text] 必須消除。
 
-\ 2016/12/21 Now constant & value support private and direct-access through vm.v.vid.name 
+\ 2016/12/21 Now constant & value support private and direct-access through vm[vid].name 
 : constant 		( n <name> -- ) \ Create a 'constnat'
 				BL word (create) <js> 
 					last().type = "constant";
-					var s = '(function(){push(vm.v["_vid_"]["_name_"])})';
+					var s = '(function(){push(vm["_vid_"]["_name_"])})';
 					var vid = current.replace(/"/g,"\\\"");
 					var name = last().name.replace(/"/g,"\\\"");
 					s = s.replace(/_vid_/,vid).replace(/_name_/,name);
 					last().xt = eval(s);
-                    if(vm.v[current]==undefined) vm.v[current]={};
-					vm.v[current][last().name] = pop();
+                    if(vm[current]==undefined) vm[current]={};
+					vm[current][last().name] = pop();
 				</js> reveal ; 
                 
 : value 		( n <name> -- ) \ Create a 'value' variable.
@@ -1362,7 +1376,7 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
                 <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
 				compiling if ( n word ) 
 					<text>
-						(function(){/* to */ vm.v["_vid_"]["_name_"]=pop()})
+						(function(){/* to */ vm["_vid_"]["_name_"]=pop()})
 					</text> trim ( n word s ) 
                     <js> 
                         var s = pop(); // ( n word )
@@ -1372,7 +1386,7 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
                         push(eval(s));
 					</js> ( n xt ) , 
 				else ( n word )
-					js: vm.v[tos().vid][pop().name]=pop()
+					js: vm[tos().vid][pop().name]=pop()
 				then ; immediate
 				
 				<selftest>
@@ -1391,10 +1405,10 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 \ 目前 Base 切換只影響 .r .0r 的輸出結果。
 \ JavaScript 輸入用外顯的 0xFFFF 形式，用不著 hex decimal 切換。
 10 value base // ( -- base ) decimal base is 10, hex base is 16, can be any number.
-code hex        vm.v.forth.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
-code decimal    vm.v.forth.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
-code base@      push(vm.v.forth.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
-code base!      vm.v.forth.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
+code hex        vm.forth.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
+code decimal    vm.forth.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
+code base@      push(vm.forth.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
+code base!      vm.forth.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
 
 				<selftest>
 					*** hex decimal base@ base!
@@ -1585,10 +1599,10 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 code (.r)		( num|str n -- "  num|str" ) \ Right adjusted num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				if(typeof i == 'number') {
-					if(vm.v.forth.base == 10){
-						i=i.toString(vm.v.forth.base);
+					if(vm.forth.base == 10){
+						i=i.toString(vm.forth.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(vm.v.forth.base) + (i & 0xffff).toString(vm.v.forth.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.forth.base) + (i & 0xffff).toString(vm.forth.base);
 					}
 				}
 				n=n-i.length;
@@ -1605,11 +1619,11 @@ code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n character
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
-					if(vm.v.forth.base == 10){
+					if(vm.forth.base == 10){
 						if (i<0) minus = '-';
-						i=Math.abs(i).toString(vm.v.forth.base);
+						i=Math.abs(i).toString(vm.forth.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(vm.v.forth.base) + (i & 0xffff).toString(vm.v.forth.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.forth.base) + (i & 0xffff).toString(vm.forth.base);
 					}
 				}
 				n=n-i.length - (minus?1:0);
@@ -1684,7 +1698,7 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
-				var count=stack.length, basewas=vm.v.forth.base;
+				var count=stack.length, basewas=vm.forth.base;
 				if(count>0) for(var i=0;i<count;i++){
 					if (typeof(stack[i])=="number") {
 						push(stack[i]); push(i); dictate("decimal 7 .r char : . space dup decimal 11 .r space hex 11 .r char h .");
@@ -1693,7 +1707,7 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					}
 					type(" ("+mytypeof(stack[i])+")\n");
 				} else type("empty\n");
-				vm.v.forth.base = basewas;
+				vm.forth.base = basewas;
 				end-code
 
 				<selftest>
@@ -1933,7 +1947,7 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
                 js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
 : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
                 readTextFileAuto ( file )
-                <js> var ss=pop();(ss+'x').slice(0,ss.search(vm.v.forth.EOF.regex))+'\n\\ '+vm.v.forth.EOF.pattern+'\n'</jsV> 
+                <js> var ss=pop();(ss+'x').slice(0,ss.search(vm.forth.EOF.regex))+'\n\\ '+vm.forth.EOF.pattern+'\n'</jsV> 
                 \ The +'x' is a perfect trick, will be cut both EOF mark exists or not. 
                 \ The last \n 避免最後是 \ comment 時吃到後面來
                 tib.insert ;
@@ -1994,7 +2008,7 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 
 code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
 				var w=pop();
-				var basewas = vm.v.forth.base; vm.v.forth.base = 10;
+				var basewas = vm.forth.base; vm.forth.base = 10;
 				if (!(w instanceof Word)) {
 					type(JSON.stringify(w,"\n","\t"));  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
 				}else{
@@ -2023,7 +2037,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 					}
 					if (w.comment != undefined) type("\ncomment:\n"+w.comment+"\n");
 				}
-				vm.v.forth.base = basewas;
+				vm.forth.base = basewas;
 				end-code
 				last :: ["(dump)"]=tick("(dump)")
 
@@ -2161,12 +2175,12 @@ code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 : [r 			( <"text"> -- ) \ Prepare an array of data to compare with rstack in selftest.
 				char r] word js> eval("["+pop()+"]") to expected_rstack ;
 : r] 			( -- boolean ) \ compare rstack and expected_rstack in selftest
-				js> vm.g.isSameArray(rstack,vm.v.forth.expected_rstack) ;
+				js> vm.g.isSameArray(rstack,vm.forth.expected_rstack) ;
 : [d 			( <"text"> -- ) \ Prepare an array to compare with data stack. End of a selftest section.
 				char d] word js> eval("["+pop()+"]") to expected_stack ;
 				/// Data stack will be clean after check
 : d] 			( -- boolean ) \ compare data stack and expected_stack in selftest
-				js> vm.g.isSameArray(stack,vm.v.forth.expected_stack) to test-result 
+				js> vm.g.isSameArray(stack,vm.forth.expected_stack) to test-result 
 				description . test-result if ." pass" cr dropall
 				else ." fail" cr stop then ;
 				/// Data stack will be clean after check
