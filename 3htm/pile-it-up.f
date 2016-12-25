@@ -65,13 +65,13 @@ if(1){kvm.jsc.prompt='333';eval(kvm.jsc.xt)}
 			}
 			this.move = function(){
 				if (mousepressed) return;
-				vy += vm.g.gravity;  // 「力」表現為位移的幅度，而重力就是在 vy 上加成.  vx,vy 是該 ball 的瞬時向量。
-				vx += vx>0 ? -vm.g.friction : vm.g.friction ; // 扣除摩擦係數
-				vy += vy>0 ? -vm.g.friction : vm.g.friction ;
-				vx = Math.abs(vx) < vm.g.friction? 0 : vx ; // 比摩擦力小就是零，否則會抖。
-				vy = Math.abs(vy) < vm.g.friction? 0 : vy ;
-				vx = Math.abs(vx) > vm.g.maxvx? vm.g.maxvx*vx/Math.abs(vx) : vx ; // 這啥？ [ ]
-				vy = Math.abs(vy) > vm.g.maxvy? vm.g.maxvy*vy/Math.abs(vy) : vy ;
+				vy += vm[context].gravity;  // 「力」表現為位移的幅度，而重力就是在 vy 上加成.  vx,vy 是該 ball 的瞬時向量。
+				vx += vx>0 ? -vm[context].friction : vm[context].friction ; // 扣除摩擦係數
+				vy += vy>0 ? -vm[context].friction : vm[context].friction ;
+				vx = Math.abs(vx) < vm[context].friction? 0 : vx ; // 比摩擦力小就是零，否則會抖。
+				vy = Math.abs(vy) < vm[context].friction? 0 : vy ;
+				vx = Math.abs(vx) > vm[context].maxvx? vm[context].maxvx*vx/Math.abs(vx) : vx ; // 這啥？ [ ]
+				vy = Math.abs(vy) > vm[context].maxvy? vm[context].maxvy*vy/Math.abs(vy) : vy ;
 				
 				x += vx;  
 				y += vy;  
@@ -79,17 +79,17 @@ if(1){kvm.jsc.prompt='333';eval(kvm.jsc.xt)}
 				
 				if (x + radius > vm.g.cv.canvas.width) {  // 超過 canvas 右邊
 					x = vm.g.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
-					vx *= -vm.g.wallBounce;               // 牆壁的反彈力 [ ] 為何這裡用加的，而下面卻用乘的？ 用加的可能是 typo! 改正之。
+					vx *= -vm[context].wallBounce;               // 牆壁的反彈力 [ ] 為何這裡用加的，而下面卻用乘的？ 用加的可能是 typo! 改正之。
 				} else if (x - radius < 0) {   // 超過 canvas 左邊
 					x = radius;  
-					vx *= -vm.g.wallBounce;  
+					vx *= -vm[context].wallBounce;  
 				}  
 				if (y + radius > vm.g.cv.canvas.height) {  // 撞上 canvas 地板
 					y = vm.g.cv.canvas.height - radius;  
-					vy *= -vm.g.wallBounce;   
+					vy *= -vm[context].wallBounce;   
 				} else if (y - radius < 0) {  // 超過 canvas 上邊
 					y = radius;  
-					vy *= -vm.g.wallBounce;  
+					vy *= -vm[context].wallBounce;  
 				}  
 			}
 			this.display = function(){

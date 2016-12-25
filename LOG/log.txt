@@ -5148,11 +5148,11 @@
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\private\work.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\private\money.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\doc\tutor-cloth.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\alarm.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\alarm.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\cloth(processing).f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\modify.f
@@ -5179,4 +5179,40 @@
     re-define end-code like what I did to code does not work, although the experiment of 
         code end-code alert(1234) end-code 
     works fine. However, modify end-code.xt directly can be an solution --> Bingo!
-    
+[x] 3hta has a new problem. 1. include foo.f <-- file not found intentionally.
+    then F5 and ctrl-up are all triggering jsc error! <== Problem!
+	--> 3ce is fine. Only 3HTA has this problem. So, 3hta's jsc is suspected.
+		debugging sinclude . . . --> no need to include foo.f, run jsc then the problem
+		begins --> run any command (cr, words) or trigger any event (single-click) 
+		all cause the error : JavaScript error on word "cr" : Object expected
+		Panic jsc>
+	--> so, simplify jsc and see ... seem like executing reset() is the reason...Nope.
+		jsc's exit, q, reset commands can repro the problem. While r rr do not reprothe
+		problem. So what's the difference? --> Ha! root cause is the bd command. Run
+		'bd' command after a restart has repro'ed the problem without jsc.
+		RI: the below vm.g.fastInner should be vm.forth.fastInner
+		function(_me){ /* bd */
+			inner = vm.g.fastInner <--- should be vm.forth.fastInner now, because fastinner is a constant in jeforth.f
+			vm.jsc.enable = false; // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
+		}		
+	Bingo!! this bug is caused by the private support that changes vm.g to vm.vid.
+	So, review all constant --> 
+		>words constant -t
+		-------- forth (5 words) --------
+		[x]EOF [x]fastInner [x]jsc.xt.hta [x]jsc.xt.F12 [x]forth-wordlist 
+		-------- vb.f (1 words) --------
+		[x]vm.process 
+		-------- wsh.f (1 words) --------
+		[x]WshShell 
+		-------- env.f (3 words) --------
+		[x]WshProcEnv [x]WshUserEnv [x]BinaryStream 
+		> words value -t
+		-------- forth (4 words) --------
+		[x]base [x]breakPoint [x]args [x]up/down-recall-needs-alt-key? 
+
+		
+		
+		
+		
+		
+		

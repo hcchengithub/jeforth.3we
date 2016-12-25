@@ -637,7 +637,8 @@
 				在本網頁上呈現的是 jeforth.3htm 的應用。
 			</p>	
 			<p>--- The End ---</p>	
-			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03 初版, 2016.6.1 修改</p>
+			<p>H.C. Chen hcchen5600@gmail.com 蘇州．昆山 2015.12.03 初版, 2016.6.1 修改, 
+			2016.12.25 為 private support修改</p>
 			<p>FigTaiwan http://groups.google.com/group/figtaiwan</p>
 		</blockquote></div>
 		</o> js> essay swap appendChild

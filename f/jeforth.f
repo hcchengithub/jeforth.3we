@@ -1947,9 +1947,16 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
                 js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
 : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
                 readTextFileAuto ( file )
-                <js> var ss=pop();(ss+'x').slice(0,ss.search(vm.forth.EOF.regex))+'\n\\ '+vm.forth.EOF.pattern+'\n'</jsV> 
-                \ The +'x' is a perfect trick, will be cut both EOF mark exists or not. 
-                \ The last \n 避免最後是 \ comment 時吃到後面來
+                <js> 
+					var s = pop();
+					var ss = (s+'x').slice(0,s.search(vm.forth.EOF.regex))
+							 + '\n\\ '
+							 + vm.forth.EOF.pattern
+							 + '\n';
+					// The +'x' is a perfect trick, will be cut both EOF mark exists or not. 
+					// The last \n 避免最後是 \ comment 時吃到後面來
+					if (s) push(ss); else push(""); // skip if file not found
+				</js> 
                 tib.insert ;
                 /// Cut after EOF and append EOF back to guarantee an EOF exists
 
@@ -2076,7 +2083,7 @@ code passed		( -- ) \ List words their sleftest flag are 'pass'.
 
 js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
 
-0 value breakPoint // ( -- ip ) jsc breakpoint address
+\ 0 value breakPoint // ( -- ip ) jsc breakpoint address
 
 code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
@@ -2085,7 +2092,7 @@ code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
 code bd			( -- ) \ Disable breakpoint, See also 'bp','be'.
-				inner = vm.g.fastInner;
+				inner = vm.forth.fastInner;
 				vm.jsc.enable = false; // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
 				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
