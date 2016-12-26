@@ -77,8 +77,8 @@ cd %~dp0
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
 	s" cmd /c mklink    _a\_f  _h\3ce\_f" ahf manifest.json 				(run) 121 ckp
-	s" cmd /c mklink    _a\_f  _h\3ce\_f" ahf jeforth.3ce.background.html	(run) 122 ckp
 	s" cmd /c mklink /d _a\3ce _h\3ce"    ah 								(run) 123 ckp
+	s" cmd /c mklink /h _a\_f  _h\3ce\_f" ahf jeforth.3ce.background.html	(run) 122 ckp
 	s" cmd /c mklink /h _a\_f  _h\_f"     ahf common.css					(run) 124 ckp
 	s" cmd /c mklink /h _a\_f  _h\3ce\_f" ahf jeforth.3ce.html				(run) 125 ckp
 	[then]

@@ -405,10 +405,7 @@
 				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
 			\ 準備好 readTextFile 就可以 include 了	
-			.( [ ] target page 準備好 readTextFile 就可以 include 了 ) cr
 			include 3ce/target.f
-			.( [ ] target page include 3ce/target.f done 了 ) cr
-			
 		</text> (dictate) ;
 		/// Usage : 
 		/// 237 ( tabid ) attach

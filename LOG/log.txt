@@ -5158,12 +5158,42 @@
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\f\jsc.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\ce.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\target.f
-			[ ] attach 3ce to target page does not 100% work, yet the F7 command is fine.
-					> js> document.title .
-					hao123网址之家－在线繁体字转换 OK 
-				I guess the readTextFile on target page does not work , because include & 
-				sinclude have been modified recently.
-		
+			[x] attach 3ce to target page does not work, yet the F7 command is fine.
+				> js> document.title . \ ==> hao123网址之家－在线繁体字转换 OK 
+                [x] I guess the readTextFile on target page does not work , because include & 
+				sinclude have been modified recently. --> actually readTextFile does not work 
+                at all. it's good to have F7 enter so I know.
+                [x] Also, target.f no exist either. --> simply because not read
+                [x] Some older note recalled from jeforth.3we/log/Log of TR.html
+                    o   當 host page 都不存在時, readTextFile 也不 work 了! 已證實。--> So we need background page (to readTextFile)
+                    o   Google 已經建議用 Event page 取代 background page 了 --> no much difference.
+                    o   檢驗 background-page <js> pop().vm.dictate("11 22 33 .s js: debugger")</js>
+                    o   由 3ce extenstion page 對 background page 下令的公式:
+                        background-page <js> tos().bvm.dictate("cr see readTextFile");pop().bvm.screenbuffer </jsV> .
+                    o   對 background page jeforth 下令的範本：    
+                            background-page <js> pop().bvm.dictate(".s")</js>
+                            background-page :> bvm.screenbuffer .                        
+                    o   若要重複 init background page 只要 
+                        background-page :: jeforth_project_k_virtual_machine_object=null 
+                        然後 refresh 3ce extension page 即可。 
+                    --> er background-page :> document.head.outerHTML .
+                        er background-page :> document.body.outerHTML . 
+                        both empty, so I guess the background page is not init'ed
+                    --> use chrome://extensions/ > Inspect views: jeforth.3ce.background.html to check
+                        background page --> no body, no head 
+                            --> incorrect! We have jeforth.3ce.background.html
+                            --> do the same inspect on the 3ce from Google Play --> the background page is correct
+                                body and head are all as jeforth.3ce.background.html
+                        which is not empty, title is <title>jeforth.3ce background page</title> besides
+                        [x] I guess jeforth.3ce.background.html is a symbolic link instead of a hard link
+                            in setup.bat is the root cause! --> Yeah!! 
+                        [x] Now check the background page title
+                            > background-page :> document.title . \ ==> jeforth.3ce background page OK 
+                            Bingo! so easy, run from 3ce page.
+                [x] Now, Bug fixed! Root cause is in setup.bat, jeforth.3ce.background.html should be hard link
+                    should not be symbolic link. symbolic link jeforth.3ce.background.html causes no error
+                    in manifest.json but it become an empty nothing like a null jeforth.3ce.background.html.
+                    
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f

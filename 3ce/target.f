@@ -1,4 +1,3 @@
-.( [ ] in target.f ) cr
 
 	\ quit.f for jeforth.3ce target page
 	\
@@ -14,8 +13,6 @@
 	\ 為了加快速度,以下都用絕對位址。避免讓 readTextFileAuto 順著 path
 	\ 慢慢嘗試錯誤。
 
-.( [ ] in target.f before include jsc.f ) cr
-
 	include 3htm/f/jsc.f		    \ JavaScript debug console in 3htm/f
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
@@ -28,8 +25,6 @@
     \ URL command line directly to tell it what to do.
 
 	vocabulary target.f also target.f definitions
-
-.( [ ] in target.f after vocabualr target.f ) cr
 
 	\ 3ce target page's ~.html and ~.js are all covered by target.f 
 	\ jeforth.3ce.html is the index.html home page of popup page and extension pages, 
