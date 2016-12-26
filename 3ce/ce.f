@@ -36,7 +36,7 @@
 		2drop \ sender and sendResponse are not used so far
 		<js>
 			var message = pop();
-			if (message.addr && message.addr!=vm.g.myTabId) return; // is to me?
+			if (message.addr && message.addr!=vm["ce.f"].myTabId) return; // is to me?
 			if (message.type) {
 				vm.type(message.type);
 				vm.scroll2inputbox();inputbox.focus(); // Host side
@@ -202,7 +202,7 @@
 		
 	code {F7} ( -- ) \ Send inputbox to content script of tabid.
 		// 當命令來自 host page 就盡可能把 display 切向 host page
-		dictate('<ce> if(vm.tick("host.type")) vm.type = vm.g["host.type"];</ce>');
+		dictate('<ce> if(vm.tick("host.type")) vm.type = vm["target.f"]["host.type"];</ce>');
 		vm.cmdhistory.push(inputbox.value);  // Share the same command history with the host
 		push(inputbox.value); // command line 
 		inputbox.value=""; // clear the inputbox
@@ -248,7 +248,7 @@
 			tabid {} js: tos().file="js/jquery-1.11.2.js" inject drop			
 		then
 		tabid {} js: tos().file="project-k/jeforth.js" inject drop 
-		
+
 		\ Inject the main program of jeforrth.3ce (jeforth.3htm.js equivalent)
 		<ce>
 			var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
@@ -373,10 +373,14 @@
 				vm.readTextFile = function(pathname){
 					panic("jeforth.3ce does not have vm.readTextFile(), please use readTextFile directly.\n");
 				}
+
 			})();
 		</ceV>  drop \ Use /ceV for synchronous
 		char f/jeforth.f (install)
-		s" js: vm.g.myTabId=" tabid + (dictate) \ equivalent to "tabs.getCurrent :> id" on target page
+
+		s" js: vm.g.myTabId=" tabid + (dictate) 
+		\ equivalent to "tabs.getCurrent :> id" on target page
+		\ Let target page know who's the host page. myTabId is the host page's tab ID.
 
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
@@ -401,7 +405,10 @@
 				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
 			\ 準備好 readTextFile 就可以 include 了	
+			.( [ ] target page 準備好 readTextFile 就可以 include 了 ) cr
 			include 3ce/target.f
+			.( [ ] target page include 3ce/target.f done 了 ) cr
+			
 		</text> (dictate) ;
 		/// Usage : 
 		/// 237 ( tabid ) attach

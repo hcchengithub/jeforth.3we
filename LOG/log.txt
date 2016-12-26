@@ -5116,7 +5116,7 @@
 	--> ok now! Much much easier than I anticipated. 3hta and 3htm passed self-test already.
     [ ] check all vm.g.name and vm.g[name] values and constants
 		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
-	[ ] context is a jeforth.js global variable. It should always be a copy of order[order.length-1].
+	[x] context is a jeforth.js global variable. It should always be a copy of order[order.length-1].
 		I guess rescan-word-hash is the right place to do this.
 	[x] Make vocabulary commands (also only previous) immediate words, due to private support
 		switching context become important. For example:
@@ -5153,20 +5153,26 @@
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\naughty-balls2.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\p5.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\modify.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\f\voc.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\f\jeforth.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\f\jsc.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\ce.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\target.f
+			[ ] attach 3ce to target page does not 100% work, yet the F7 command is fine.
+					> js> document.title .
+					hao123网址之家－在线繁体字转换 OK 
+				I guess the readTextFile on target page does not work , because include & 
+				sinclude have been modified recently.
+		
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\target.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\many-clocks.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\balls.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\ce.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\f\jsc.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\modify.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
+			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\123.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\f\jeforth.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\f\voc.f
 
 [x] recently, only foo will crash the system , previous rescan-wordhash is better. 
     Done, now: 

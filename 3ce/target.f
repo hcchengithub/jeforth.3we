@@ -1,3 +1,4 @@
+.( [ ] in target.f ) cr
 
 	\ quit.f for jeforth.3ce target page
 	\
@@ -13,6 +14,8 @@
 	\ 為了加快速度,以下都用絕對位址。避免讓 readTextFileAuto 順著 path
 	\ 慢慢嘗試錯誤。
 
+.( [ ] in target.f before include jsc.f ) cr
+
 	include 3htm/f/jsc.f		    \ JavaScript debug console in 3htm/f
 	include f/voc.f					\ voc.f is basic of forth language
 	include 3htm/f/html5.f			\ html5.f is basic of jeforth.3htm
@@ -25,6 +28,8 @@
     \ URL command line directly to tell it what to do.
 
 	vocabulary target.f also target.f definitions
+
+.( [ ] in target.f after vocabualr target.f ) cr
 
 	\ 3ce target page's ~.html and ~.js are all covered by target.f 
 	\ jeforth.3ce.html is the index.html home page of popup page and extension pages, 
@@ -109,7 +114,7 @@
 			if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
 			if(vm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
 		}
-		vm.g["target.type"] = target_type;
+		vm[context]["target.type"] = target_type;
 
 		// onkeydown,onkeypress,onkeyup
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
@@ -162,7 +167,7 @@
 
 	code run-inputbox ( -- ) \ Used in onKeyDown event handler.
 		// 當命令來自 local 就把 display 切回 local target page
-	    if(tick("target.type")) vm.type = vm.g["target.type"];
+	    if(tick("target.type")) vm.type = vm["target.f"]["target.type"];
 		var cmd = inputbox.value; // w/o the '\n' character ($10).
 		inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 		vm.cmdhistory.push(cmd);
