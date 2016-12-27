@@ -536,6 +536,7 @@ code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
 code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Word object on TOS.
 				push(tick(nexttoken())) end-code
 
+
 				<selftest>
 					*** ' tick and (') should return a word object
 						' code :> name char end-code (') :> name
@@ -1314,6 +1315,12 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				compiling if literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
+<text> 
+ Example 'privacy' definition for a vocabulary. Assume current == context.
+ false constant privacy // ( -- true ) All words in this module are public
+ true  constant privacy // ( -- true ) All words in this module are private
+</text> ' privacy :: comment=pop()
+				
 \ If <comment> hits <comment> in TIB then it drops string1 
 \ and does <comment> and does again <comment>
 
@@ -1455,7 +1462,6 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 					setTimeout(resume,delay);
 					function resume() { 
 						if(typeof(tib)!="undefined") {
-						    if(vm.debug) debugger;
 							tib = tibwas; ntib = ntibwas;
 						} else debugger;
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.

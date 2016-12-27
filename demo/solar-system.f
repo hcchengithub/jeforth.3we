@@ -5,6 +5,7 @@ cls
 include processing.f
 
 vocabulary solar-system.f also solar-system.f definitions
+true  constant privacy // ( -- true ) All words in this module are private"
 
 marker ~~~
 	
@@ -29,9 +30,9 @@ marker ~~~
 		' ( n word ) 
 		js> tos().type!="star.property" ?abort" Error! Assigning to a none star.property."
 		compiling if ( n word ) 
-			<js> var s='var f;f=function(){/* to star.property */ vm.g.stars[vm.g.istar]["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+			<js> var s='var f;f=function(){/* to star.property */ vm[context].stars[vm[context].istar]["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
 		else ( n word )
-			js: vm.g.stars[vm.g.istar][pop().name]=pop()
+			js: vm[context].stars[vm[context].istar][pop().name]=pop()
 		then ; immediate
 		/// 以下要用 Function Overloading 的手法把專為 'star.property' 寫就的這個 'to' command 加
 		/// 回原 'to' 使它能處理多種 type。
@@ -58,11 +59,11 @@ marker ~~~
 	: property ( <name> -- ) \ Create a property of a stars[istar]
 		BL word (create) <js> 
 		last().type = "star.property";
-		var s = 'var f;f=function(){push(vm.g.stars[vm.g.istar]["' 
+		var s = 'var f;f=function(){push(vm[context].stars[vm[context].istar]["' 
 				+ last().name 
 				+ '"])}';
 		last().xt = eval(s);
-		// vm.g.stars[vm.g.istar][last().name] = undefined;
+		// vm[context].stars[vm[context].istar][last().name] = undefined;
 		</js> reveal ;
 		/// A property is a global variable but pointed by a common index, istar.
 		/// Like 'value', use 'to' to assign data into a property. You may need to use 
@@ -90,7 +91,7 @@ marker ~~~
 	
 	: newStar ( -- ) \ Create a New stars[istar]
 		istar ( save ) stars :> length to istar \ point to the last star which is the New Star
-		js: if(!vm.g.stars[vm.g.istar])vm.g.stars[vm.g.istar]={} \ if it's empty then declair
+		js: if(!vm[context].stars[vm[context].istar])vm[context].stars[vm[context].istar]={} \ if it's empty then declair
 		<js>  // get color fillStyle string
 			(function(){
 			var r=80,g=80,b=100,range=100,c="rgba(";
@@ -101,8 +102,8 @@ marker ~~~
 			push(c)})() 
 		</js> to color
 		js> Math.random()*(30-10)+10 to radius \ radius 10 ~ 30
-		js> Math.random()*vm.g.maxPlanet+vm.g.cv.canvas.width to x \ 座標位置，初值在畫面之外
-		js> Math.random()*vm.g.maxPlanet+vm.g.cv.canvas.height to y
+		js> Math.random()*vm[context].maxPlanet+vm.g.cv.canvas.width to x \ 座標位置，初值在畫面之外
+		js> Math.random()*vm[context].maxPlanet+vm.g.cv.canvas.height to y
 		js> Math.random()*5-2.5 to vx \ 速度向量 between -2.5 ~ 2.5 
 		js> Math.random()*5-2.5 to vy
 		0 to ax 0 to ay \ 重力加速度
@@ -160,7 +161,7 @@ marker ~~~
 		next
 		stars :> length-1 for r@ to istar \ where istar : numBalls,...,3,2,1 
 			\ 垃圾清理撞進太陽湮滅掉的行星，換一個新的上去
-			radius if else stars :: splice(vm.g.istar,1) newStar then
+			radius if else stars :: splice(vm[context].istar,1) newStar then
 		next
 		( restore ) to istar
 	;
@@ -195,14 +196,13 @@ marker ~~~
 		char rgba(255,166,47,0.6) to color display \ 太陽的顏色，金色 http://www.computerhope.com/htmcolor.htm
 
 	\ the main loop
-	
 		er [begin]	draw 20 nap [again]
 	
 	\ 讓太陽左右來回移動
 	\ 上面是個 infinit loop 所以根本不會下來，必須手動 copy-paste 在 inputbox 執行。
 	js: e=d=0.5 
 	[begin]
-		js: h=vm.g.stars[0].x+=e 
+		js: h=vm[context].stars[0].x+=e 
 		js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
 		js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
 	[again]

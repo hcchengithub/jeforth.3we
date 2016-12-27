@@ -5114,8 +5114,6 @@
 	definition vid not only private words. 
     --> This is easy, modify 'constant' would be enough.
 	--> ok now! Much much easier than I anticipated. 3hta and 3htm passed self-test already.
-    [ ] check all vm.g.name and vm.g[name] values and constants
-		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
 	[x] context is a jeforth.js global variable. It should always be a copy of order[order.length-1].
 		I guess rescan-word-hash is the right place to do this.
 	[x] Make vocabulary commands (also only previous) immediate words, due to private support
@@ -5127,17 +5125,18 @@
             --> vm.v[current] was a mistake. context = current then still use vm[context] is correct.
         [x] setup.bat uses value and vm.g.flag and vm.g._a thus is now not working because they should be
             (was vm.v[]) vm.[context].flag and vm[context]._a 
-        [ ] Am I going to modify all vm.g to vm[context] ? very annoying and I am afraid it's a bad 
+        [x] Am I going to modify all vm.g to vm[context] ? very annoying and I am afraid it's a bad 
             idea and I'll have to modify again. 
             --> See Ynote: "jeforth.3we private support value vm.g.name become vm.vid.name" discussion.
                 1. For code word, vm[_me.vid].name
                 2. For <js> ... </js> in tib, vm[context].name or vid js> vm[pop()].name 
-                3. vid forth word is a private command, code context push(_me.vid) end-code private
-                   so vid command can be used in colon words 
+                3. vid forth word is a private command, code vid push(_me.vid) end-code private
+                   so vid command can be used in colon words for js: statements
                 4. for in module applications , everything is in the ~.f module. Thus js> current  and js> 
                    context are the same vid. This is important and is done by source-code-header. Thus 
                    vm[context].name is the easist way.
-        
+    [ ] check all vm.g.name and vm.g[name] values and constants
+		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\canvas\canvas.f
@@ -5194,7 +5193,71 @@
                     should not be symbolic link. symbolic link jeforth.3ce.background.html causes no error
                     in manifest.json but it become an empty nothing like a null jeforth.3ce.background.html.
                     
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
+			[ ] 2016/12/27 15:48 
+				This command line : '[begin] ." *" 100 nap [again]' stops the solar system!
+				F12 debugger shows that tib.slice[ntib] is at near ending of solar-system.f <-- Problem!
+				that point has passed --> [begin] ..[again] in trouble but only sometimes, strange.
+				--> use the debug trik of saving tib to TIB and ntib to nTIB, the actual tib is really
+					at that place but ntib was correctly points at the point before [again] of the 
+					solar-system.f main loop.
+				--> so the command line '[begin] ." *" 100 nap [again]' that was supposed to have its
+					own tib and ntib but it actually modifies the solar-system.f's tib and ntib <--- problem!!
+				--> 
+					"" value TIB 0 value nTIB 
+					[begin] 
+					." *" 
+					js> tib to TIB js> ntib to nTIB 
+					js: vm.debug=11;debugger
+					100 nap \ <----------- restores wrong tib and ntib , suspected
+					js> tib to TIB js> ntib to nTIB 
+					js: vm.debug=22;debugger 
+					[again]
+				--> Test, if different nap2 shares the same tibwas? --> no, if use var 
+					save={tibwas,ntibwas,ipwas} then different nap2's save{} are different.
+				--> interpret state test1 test2 in log/archive.json field "[closed] log 2016/05/30"	
+					failed! --> try older version 3htm from rawgit.com
+						commit: 3rd release of 12choc.f (committed on Nov 27'16)
+						http://rawgit.com/hcchengithub/jeforth.3we/26541aae54882fad713be4c9a93d55d00cc7b9ef/index.html 
+						include solar-system.f
+						[begin] ." *" 100 nap [again]
+					--> shit! same problem has been there for long!!
+				--> try master (Latest commit 77afb32 on Sep 11'16) on rawgit.com 
+					--> same problme on solar-system.f and "[begin] ." *" 100 nap [again]"
+					--> the [begin]..[again] loop in the source code does not work either!!
+				--> earlier commit --> committed on Jun 12 master
+					http://rawgit.com/hcchengithub/jeforth.3we/7360c64e00643808fb465ea5667e727689b3a53d/index.html
+					\ 讓太陽左右來回移動
+					js: e=d=0.5 
+					[begin]
+						js: h=vm.g.stars[0].x+=e 
+						js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+						js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
+					[again]				
+					--> failed!
+				-->	commit 4c009ce7a1e5aec19513b1fc66e7d651ba404b20
+					Author: H.C. Chen <hcchen5600@gmail.com>
+					Date:   Sun Jun 12 00:08:57 2016 +0800
+
+						new nap sleep [begin][for] and [[for]]
+
+						solar-system.f ok now
+
+					\ 讓太陽左右來回移動
+						js: e=d=0.5 
+						[begin]
+							js: h=vm.g.stars[0].x+=e 
+							js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+							js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
+						[again]
+
+					--> failed!!	
+					> [begin] ." *" 100 nap [again]
+					*Error! ar unknown. <-------------------- exactly the same recent problem.
+				[ ] According to the discussion on my Meta Moji Note, try to repro the problem through
+					interpret state test1 test2 and let's starting over the debugging . . . 
+					
+			
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\many-clocks.f
@@ -5209,13 +5272,13 @@
         only work.f help * 
     works fine.
 [x] 3hta, include work.f, all words are private but not lookup, why? It's the only code word
-    Ha, this line in code is a mistake:
+    Ha, this line in definition of 'code' is a mistake:
         execute("privacy");last().private = Boolean(pop());
-    should be in end-code because last() is not this word when in code.
+    should be in 'end-code's definition because last() is not this word when in code.
     re-define end-code like what I did to code does not work, although the experiment of 
         code end-code alert(1234) end-code 
     works fine. However, modify end-code.xt directly can be an solution --> Bingo!
-[x] 3hta has a new problem. 1. include foo.f <-- file not found intentionally.
+[x] 3hta has a new problem. 1. include foo.f <-- file not found
     then F5 and ctrl-up are all triggering jsc error! <== Problem!
 	--> 3ce is fine. Only 3HTA has this problem. So, 3hta's jsc is suspected.
 		debugging sinclude . . . --> no need to include foo.f, run jsc then the problem
