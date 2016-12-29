@@ -1491,56 +1491,75 @@ code cut		( -- ) \ Cut off used TIB.
 : ?rewind		( boolean -- ) \ Conditional rewind TIB so as to repeat it. 'stop' to terminate.
 				if rewind then ;
 
-code [begin]	( -- ) \ [begin]..[again], [begin].. flag [until]
-				rstack.push(ntib) end-code immediate
+\ To TIB command line TSRs, the tib/ntib is their only private storage. So save-restore and
+\ loop back information must be using the tib. That's why we have >t t@ and t> 
+
+code >t			( int -- ) \ Push the integer to end of TIB as a comment
+				tib += "\n\\ " + String.fromCharCode(pop());
+				end-code
+
+code t@			( -- int ) \ Get integer from end of the TIB 
+				var value = tib.charCodeAt(tib.length-1);
+				push(value); 
+				end-code
+
+: t>			( -- int ) \ Pop integer from end of the TIB 
+				t@ ( int ) js: tib=tib.slice(0,-4) ;
+				\ the -4 is \n \ space and the int, total 4.
+
+: [begin]		( -- ) \ [begin]..[again], [begin].. flag [until]
+				js> ntib >t ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 				/// ex. [begin] .s js> rstack . cr 1000 nap [again]
 				
-code [again]	( -- ) \ [begin]..[again]
-				ntib=rtos() end-code immediate
+: [again]		( -- ) \ [begin]..[again]
+				t@ js: ntib=pop() ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 
 
-code [until]	( flag -- ) \ [begin].. flag [until]
-				if(pop()) rstack.pop(); else  ntib=rtos(); end-code immediate
+: [until]		( flag -- ) \ [begin].. flag [until]
+				if  t> drop else [compile] [again] then ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 				/// ex. [begin] now t.second dup . space 5 mod not 100 nap [until]
 
-code [for]		( count -- , R: -- #tib count ) \ [for]..[next] 
-				rstack.push(ntib); rstack.push(pop()); end-code immediate
+: [for]			( count -- ) \ (T -- ntib count ) [for]..[next] 
+				[compile] [begin] >t ; interpret-only
+				/// Instead of using rstack, [for] loop uses tib tail to save-restore 
+				/// the loop back address and the count. Thus >t t> and t@ replace
+				/// >r r> and r@ respectively.
 				/// Pattern : The normalized for-loop pattern. 0 based.
-				///   5 ?dup [if] dup [for] dup r@ - ( COUNT i ) . space ( COUNT ) [next] drop [then]
+				///   5 ?dup [if] dup [for] dup t@ - ( COUNT i ) . space ( COUNT ) [next] drop [then]
 				///   ==> 0 1 2 3 4
 				/// Pattern : Normalized for-loop pattern but n(66) based.
-				///   5 js: push(tos()+66,0) [for] dup r@ - ( count+n i ) . space [next] drop
+				///   5 js: push(tos()+66,0) [for] dup t@ - ( count+n i ) . space [next] drop
 				///   ==> 66 67 68 69 70  OK 		
 				/// Pattern : Simplest, fixed times.
-				///   5 [for] r@ . space [next]
+				///   5 [for] t@ . space [next]
 				///   ==> 5 4 3 2 1
 				/// Pattern : fixed times and 0 based index
-				///   5 [for] 5 r@ - . space [next]
+				///   5 [for] 5 t@ - . space [next]
 				///   ==> 0 1 2 3 4
-				/// Pattern of break : "r> drop 0 >r" or "js: rstack[rstack.length-1]=0"
-				///   10 [for] 10 r@ - dup . space 5 >= [if] r> drop 0 >r [then] [next]
+				/// Pattern of break : "t> drop 0 >t" or "js: rstack[rstack.length-1]=0"
+				///   10 [for] 10 t@ - dup . space 5 >= [if] t> drop 0 >t [then] [next]
 				///   ==> 0 1 2 3 4 5
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 
-code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
-				rstack[rstack.length-1] -= 1;
-				if(rtos()>0){
-					ntib=rtos(1);
-				} else {
-					rstack.pop(); // drop the count
-					rstack.pop(); // drop the #tib rewind position
-				}
-				end-code immediate
+: [next]		( -- ) \ (T ntib count -- ntib count-1 | empty ) [for]..[next]
+				t> 1- dup >t js> pop()>0 ( count>0 ) if 
+					\ rewind
+					t> t> js: ntib=tos() >t >t 
+				else
+					\ exit the for loop
+					t> t> 2drop \ drop the count and loop back ntib address
+				then ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
-code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpret mode
+
+code (run:) 	( "..if.." -- "..[if].." ) \ Run string with "if","begin","for" in interpret mode
 				var ss = pop();
 				var result = ss
 					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3")

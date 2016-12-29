@@ -5357,7 +5357,10 @@
 	: tib.pop ( -- int ) \ Pop integer from end of the TIB 
 		tib.tos ( int ) js: tib=tib.slice(0,-4) ;
 	
-
+	--> actually t> >t and t@ for tib.pop tib.push and tib.tos and used them
+		on [for][next], [begin][again][until] --> solar-system.f sun moving ok now, Bingo!
+	[x] test by the below one-liner. The 3 new words, they work just fine, balance perfectly
+		cls ( ------------- ) js> tib dup . cr 111 >t js> tib . cr t@ . cr js> tib . cr t> . cr js> tib dup . cr
 	
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
