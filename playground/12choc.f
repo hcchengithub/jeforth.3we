@@ -2,9 +2,8 @@
 \  12choc.f -- A simulation of the 12 coins problem
 \
 
-marker --12choc.f--
-vocabulary 12choc.f 
-also 12choc.f definitions
+s" 12choc.f" source-code-header
+true  constant privacy // ( -- true ) All words in this module are private
 
 cls <text> 
     <style>
@@ -95,7 +94,7 @@ cls <text>
 			// Add the edges of the bucket
 			//                 l    b    r    t
 			var bb = new cp.BB(140, 65, 630, 200);   
-			vm.g.bb = bb; // [x] study the bb
+			vm[context].bb = bb; // [x] study the bb
 				// > bb (see)
 				// {
 				//    "l": 20,  left
@@ -129,7 +128,7 @@ cls <text>
 			shape.setSensor(true);
 			shape.setCollisionType(1);
 			shape.setFriction(1); // [ ] 變成冰時,希望不要滑動
-			vm.g.water = shape; // [x] study the water shape
+			vm[context].water = shape; // [x] study the water shape
 				// > water obj>keys .
 				// verts,tVerts,planes,tPlanes,type,body,bb_t,bb_r,bb_b,bb_l,hashid,sensor,e,u,surface_v,
 				// collision_type,group,layers,space,collisionCode,setVerts,transformVerts,transformAxes,
@@ -149,10 +148,10 @@ cls <text>
 			body.setVel( cp.v(0, -100));
 			body.setAngVel( 1 );
 			// [ ] keep parameters that I don't yet know how to read back
-			vm.g.sponge = body;
-			vm.g.sponge.width = width;
-			vm.g.sponge.height = height;
-			vm.g.sponge.mass = mass;
+			vm[context].sponge = body;
+			vm[context].sponge.width = width;
+			vm[context].sponge.height = height;
+			vm[context].sponge.mass = mass;
 			
 			// 本 body 大塊海綿若不加進 shape 是看不見的
 			shape = space.addShape( new cp.BoxShape(body, width, height));
@@ -160,7 +159,7 @@ cls <text>
 		// }
 		
 		// { 12 chocolates 
-			width = vm.g.choc_size;
+			width = vm[context].choc_size;
 			height = width;
 			mass = 0.2675; // was 2.5*FLUID_DENSITY*width*height;
                            // try and error gets the mass of water, so standard chocs will balance in the water
@@ -176,7 +175,7 @@ cls <text>
 
 				shape = space.addShape(new cp.BoxShape(body, width, height));
 				shape.setFriction(0.8);
-				vm.g.choc.push(body);
+				vm[context].choc.push(body);
 			}
 		// }
 
@@ -278,25 +277,25 @@ cls <text>
     0 constant vel_limit // ( -- n ) Don't move when dropping to sponge
     0 constant angVel_limit // ( -- n ) Don't rotate when dropping to sponge
     code calm ( i -- ) \ Reduce choc's horizantal speed and rotation when dropping to sponge
-        var i=pop(), choc=vm.g.choc;
+        var i=pop(), choc=vm[context].choc;
         var v = choc[i].getVel(); 
-        v.x = Math.min(Math.abs(v.x), vm.g.vel_limit) * Math.sign(v.x);
+        v.x = Math.min(Math.abs(v.x), vm[context].vel_limit) * Math.sign(v.x);
         var w = choc[i].getAngVel();
-        w = Math.min(Math.abs(w), vm.g.angVel_limit) * Math.sign(w);
+        w = Math.min(Math.abs(w), vm[context].angVel_limit) * Math.sign(w);
         choc[i].setVel(v); 
         choc[i].setAngle(w);
         end-code
 
     : drop-choc-left ( i -- ) \ Drop choc[i] on the left edge of the sponge
         {} sponge :> getPos() ( i o p )
-        js: tos(1).x=tos().x-vm.g.sponge.width/2+vm.g.choc_size/2
-        js: tos(1).y=pop().y+vm.g.choc_size*8 ( i o )
+        js: tos(1).x=tos().x-vm[context].sponge.width/2+vm[context].choc_size/2
+        js: tos(1).y=pop().y+vm[context].choc_size*8 ( i o )
         choc :: [tos(1)].setPos(pop())  ( i ) calm ;
         
     : drop-choc-right ( i -- ) \ Drop choc[i] on the right edge of the sponge
         {} sponge :> getPos() ( i o p )
-        js: tos(1).x=tos().x+vm.g.sponge.width/2-vm.g.choc_size/2;
-        js: tos(1).y=pop().y+vm.g.choc_size*8 ( i o )
+        js: tos(1).x=tos().x+vm[context].sponge.width/2-vm[context].choc_size/2;
+        js: tos(1).y=pop().y+vm[context].choc_size*8 ( i o )
         choc :: [tos(1)].setPos(pop()) ( i ) calm ;
 
     1200 value wait	// ( -- n ) Delay time, mS
@@ -372,8 +371,8 @@ cls <text>
     : replay ( -- ) \ Reassign the defect choc and all chocs go home
         <js>
             for(var i=0; i<12; i++){
-                vm.g.choc[i].setMass(vm.g.standard);
-                vm.g.choc[i].w_limit = 0.5; 
+                vm[context].choc[i].setMass(vm[context].standard);
+                vm[context].choc[i].w_limit = 0.5; 
                 // [ ] was Infinit, body.w is the 角速度 Anglular Velocity
                 // 改小一點不要讓它亂打轉。
             }

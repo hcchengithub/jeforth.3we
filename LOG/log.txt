@@ -5194,7 +5194,7 @@
                     in manifest.json but it become an empty nothing like a null jeforth.3ce.background.html.
                     
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
-			[ ] 2016/12/27 15:48 
+			[x] 2016/12/27 15:48 
 				This command line : '[begin] ." *" 100 nap [again]' stops the solar system!
 				F12 debugger shows that tib.slice[ntib] is at near ending of solar-system.f <-- Problem!
 				that point has passed --> [begin] ..[again] in trouble but only sometimes, strange.
@@ -5254,7 +5254,7 @@
 					--> failed!!	
 					> [begin] ." *" 100 nap [again]
 					*Error! ar unknown. <-------------------- exactly the same recent problem.
-				[ ] According to the discussion on my Meta Moji Note, try to repro the problem through
+				[x] According to the discussion on my Meta Moji Note, try to repro the problem through
 					interpret state test1 test2 and let's start over the debugging . . . 
 				--> run 1111 then run 3333. They seems ok but after 3333 an extra 1111 will be shown.		
 					[begin] 1111 dup . space nap [again]
@@ -5263,110 +5263,112 @@
 					this exmpains why running the failed '[begin] ." *" 100 nap [again]' added extra 
 					stars to the solar system.
 					
-\ try again the previous experiment that saw after nap tib has been changed
-\ test1
-	js: vm.debug=false
-	[begin] 1111 dup . space 
-	js: if(vm.debug){vm.debug=1111;debugger}
-	nap 
-	js: if(vm.debug){vm.debug=1122;tib=tib+"";debugger} \ after this 
-	[again]
-	
-\ test2
-	[begin] 3333 dup . space 
-	js: vm.debug=2211;debugger
-	nap 
-	js: vm.debug=2222;debugger 
-	[again]
-	
-[x] When F12 debug breakpoint at 1122, vm is undefined, tib either, only kvm is visible, isn't this strange?
-	If it's not F12 debugger's problem then it must be triggered by timeout() while timeout() event doesn't
-	know anything about the kvm internal!! --> check it out, can I access tib, compiling, or any other vm
-	internal variables?
-\ test3 , 
-	js: vm.debug=false 
-	[begin] 1111 dup . space 
-	js: if(vm.debug){alert(3311+tib);debugger}
-	nap 
-	js: if(vm.debug){alert(3322+tib);debugger}
-	[again]
-	\ if only test3 then 3311 and 3322 are both shown correctly. So tib is there.
-	\ check by the debugger, compiling context and ntib are also all there. So try
-	\ to have test4 see see
-\ test4
-	js: vm.debug=false 
-	[begin] 3333 dup . space 
-	js: vm.debug=3333;alert(3333+tib);debugger
-	nap 
-	js: vm.debug=3344;alert(3344+tib);debugger
-	[again]
-	\ after added with test4 to test3. test4 itself is ok. Test3 3322 is ok too.
-	\ but after test3's [again] problem happened.
-[x] 1. 3ce run test3 w/ F12. no problem. 2. copy-paste run test4 --> alert@3333 ok. 
-	--> debug@3333 ok rstack=[]40,0,37,0] --> alert@3322 --> debug@3322 same rstack 
-	--> I know after the [again] something will happen, start single step trace. So
-		I break F12 debugger in outer() in jeforth.js --> got next token is [again] Yeah.
-		--> at this point context, rstack become unknown!! --> kvm.rstack() is [40,0,37]
-		--> according to F12 debugger 'Call Stack' this thread was started from resume()
-			and then outer() so I check tibwas and ntibwas when in the outer() they are
-			still carring the correct values! But F12 debugger is really has its own 
-			limitation, at this time, only vm internal global variables that are also 
-			appear in resume() function can be seen. So tib,ntib,tibwas,ipwas can be 
-			seen on F12 debugger. But not delay,context,stack,rstack..etc because they
-			are not appearing in resume() therefore when down to outer() they are not
-			visible either.
-		!*!	[x] This finding is very strange, how can outer() know it can't see stack
-		!*!		and rstack sometimes? So this must be F12 debugger's limitation instead
-		!*!		of a JavaScript normal behavior. --> True!! When in resume() > outer()
-		!*!		compiling is not visible in F12 debugger, but further step to resume() >
-		!*!		outer() > outerExecute() then compiling become visible! So, this is caused
-		!*!		by JavaScript engin's optimization and thus become F12 debugger's limitation.
-		-->	so, forget about the "foobar is not defined" debugger limitations, go on debugging
-		--> trace into [again] it restores rtos() to ntib which is the 37 as mentioned above.
-			when in the xt of [again] code word, again, ntib can be seen but tib can't.
-		--> gotcha! ntib restored with 37 but tib.slice[37] points to the wrong place!! <-- RI!
-			The tib is wrong, I guess at first. But it's correct. We are now at test3 is 
-			right. So do this again. But check rstack before adding test4. --> ha ha ha!!
-			You know what? the rstack is [40, 0]. So, root cause is test3's [again] rewind
-			with test4's [begin] position!!! <------ real RI!!!
-		--> In the other word, test3 TSR sees test4's rstack when test3 resume from nap.
-			test3 expects its rstack will be remain unchanged when it resume from nap and
-			that's not true. When test3 resume from nap, test4 is in nap and thus rstack
-			is keeping test4's resuming information, at this moment test3 time out and resume
-			will actually uses test4's resuming information and certainly it's a disaster.
-[x]	Now, root cause identified. As mentioned before, root cause is stack/rstack must be balance
-	to my recent design of nap and sleep or actually [begin] ... [again] and friends because
-	they store their loop back ntib address in rstack and this is so fatal. However, nap/sleep 
-	can't guarantee what will happen during their unconscious time. Test4 leaves further loop
-	back into rstack is an example. The workaround is : if only support one loop in interpret 
-	mode for each TSR command line. Then [begin] [for] , like cut, cut off all older tib
-	and thus the new ntib is always 0 then they don't need to save loop back address into
-	rstack, because they are always 0, and therefore there will be no rstack required to save
-	that loop back information and problem will be fixed. Just like using cut...rewind was ok.
-	--> No! I already have the solution, tib.push tib.pop tib.tos
+					\ try again the previous experiment that saw after nap tib has been changed
+					\ test1
+						js: vm.debug=false
+						[begin] 1111 dup . space 
+						js: if(vm.debug){vm.debug=1111;debugger}
+						nap 
+						js: if(vm.debug){vm.debug=1122;tib=tib+"";debugger} \ after this 
+						[again]
+						
+					\ test2
+						[begin] 3333 dup . space 
+						js: vm.debug=2211;debugger
+						nap 
+						js: vm.debug=2222;debugger 
+						[again]
+						
+					[x] When F12 debug breakpoint at 1122, vm is undefined, tib either, only kvm is visible, isn't this strange?
+						If it's not F12 debugger's problem then it must be triggered by timeout() while timeout() event doesn't
+						know anything about the kvm internal!! --> check it out, can I access tib, compiling, or any other vm
+						internal variables?
+					\ test3 , 
+						js: vm.debug=false 
+						[begin] 1111 dup . space 
+						js: if(vm.debug){alert(3311+tib);debugger}
+						nap 
+						js: if(vm.debug){alert(3322+tib);debugger}
+						[again]
+						\ if only test3 then 3311 and 3322 are both shown correctly. So tib is there.
+						\ check by the debugger, compiling context and ntib are also all there. So try
+						\ to have test4 see see
+					\ test4
+						js: vm.debug=false 
+						[begin] 3333 dup . space 
+						js: vm.debug=3333;alert(3333+tib);debugger
+						nap 
+						js: vm.debug=3344;alert(3344+tib);debugger
+						[again]
+						\ after added with test4 to test3. test4 itself is ok. Test3 3322 is ok too.
+						\ but after test3's [again] problem happened.
+						[x] 1. 3ce run test3 w/ F12. no problem. 2. copy-paste run test4 --> alert@3333 ok. 
+							--> debug@3333 ok rstack=[]40,0,37,0] --> alert@3322 --> debug@3322 same rstack 
+							--> I know after the [again] something will happen, start single step trace. So
+								I break F12 debugger in outer() in jeforth.js --> got next token is [again] Yeah.
+								--> at this point context, rstack become unknown!! --> kvm.rstack() is [40,0,37]
+								--> according to F12 debugger 'Call Stack' this thread was started from resume()
+									and then outer() so I check tibwas and ntibwas when in the outer() they are
+									still carring the correct values! But F12 debugger is really has its own 
+									limitation, at this time, only vm internal global variables that are also 
+									appear in resume() function can be seen. So tib,ntib,tibwas,ipwas can be 
+									seen on F12 debugger. But not delay,context,stack,rstack..etc because they
+									are not appearing in resume() therefore when down to outer() they are not
+									visible either.
+								!*!	[x] This finding is very strange, how can outer() know it can't see stack
+								!*!		and rstack sometimes? So this must be F12 debugger's limitation instead
+								!*!		of a JavaScript normal behavior. --> True!! When in resume() > outer()
+								!*!		compiling is not visible in F12 debugger, but further step to resume() >
+								!*!		outer() > outerExecute() then compiling become visible! So, this is caused
+								!*!		by JavaScript engin's optimization and thus become F12 debugger's limitation.
+								-->	so, forget about the "foobar is not defined" debugger limitations, go on debugging
+								--> trace into [again] it restores rtos() to ntib which is the 37 as mentioned above.
+									when in the xt of [again] code word, again, ntib can be seen but tib can't.
+								--> gotcha! ntib restored with 37 but tib.slice[37] points to the wrong place!! <-- RI!
+									The tib is wrong, I guess at first. But it's correct. We are now at test3 is 
+									right. So do this again. But check rstack before adding test4. --> ha ha ha!!
+									You know what? the rstack is [40, 0]. So, root cause is test3's [again] rewind
+									with test4's [begin] position!!! <------ real RI!!!
+								--> In the other word, test3 TSR sees test4's rstack when test3 resume from nap.
+									test3 expects its rstack will be remain unchanged when it resume from nap and
+									that's not true. When test3 resume from nap, test4 is in nap and thus rstack
+									is keeping test4's resuming information, at this moment test3 time out and resume
+										will actually uses test4's resuming information and certainly it's a disaster.
+				[x]	Now, root cause identified. As mentioned before, root cause is stack/rstack must be balance
+					to my recent design of nap and sleep or actually [begin] ... [again] and friends because
+					they store their loop back ntib address in rstack and this is so fatal. However, nap/sleep 
+					can't guarantee what will happen during their unconscious time. Test4 leaves further loop
+					back into rstack is an example. The workaround is : if allow only one loop in interpret 
+					mode for each TSR command line. Then [begin] [for] , like cut, cut off all older tib
+					and thus the new ntib is always 0 then they don't need to save loop back address into
+					rstack, because they are always 0, and therefore there will be no rstack required to save
+					that loop back information and problem will be fixed. Just like using cut...rewind was ok.
+					--> No! I already have the solution, tib.push >t tib.pop t> tib.tos t@
+						
+					code tib.push ( int -- ) \ Push the integer to end of TIB as a comment
+						tib += "\n\\ " + String.fromCharCode(pop());
+						end-code 
+
+					code tib.tos ( -- int ) \ Get integer from end of the TIB 
+						var value = tib.charCodeAt(tib.length-1);
+						push(value); 
+						end-code 
+
+					: tib.pop ( -- int ) \ Pop integer from end of the TIB 
+						tib.tos ( int ) js: tib=tib.slice(0,-4) ;
+					
+					--> actually t> >t and t@ for tib.pop tib.push and tib.tos and used them
+						on [for][next], [begin][again][until] --> solar-system.f sun moving ok now, Bingo!
+					[x] test by the below one-liner. The 3 new words, they work just fine, balance perfectly
+						cls ( ------------- ) js> tib dup . cr 111 >t js> tib . cr t@ . cr js> tib . cr t> . cr js> tib dup . cr
+					--> See Ynote "jeforth.3we improve nap sleep add (sleep) and [sleep]"
 		
-	code tib.push ( int -- ) \ Push the integer to end of TIB as a comment
-		tib += "\n\\ " + String.fromCharCode(pop());
-		end-code 
-
-	code tib.tos ( -- int ) \ Get integer from end of the TIB 
-		var value = tib.charCodeAt(tib.length-1);
-		push(value); 
-		end-code 
-
-	: tib.pop ( -- int ) \ Pop integer from end of the TIB 
-		tib.tos ( int ) js: tib=tib.slice(0,-4) ;
-	
-	--> actually t> >t and t@ for tib.pop tib.push and tib.tos and used them
-		on [for][next], [begin][again][until] --> solar-system.f sun moving ok now, Bingo!
-	[x] test by the below one-liner. The 3 new words, they work just fine, balance perfectly
-		cls ( ------------- ) js> tib dup . cr 111 >t js> tib . cr t@ . cr js> tib . cr t> . cr js> tib dup . cr
-	
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\many-clocks.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\balls.f
-			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\modify.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
+				[x] Math.sign was not in HTA, fixed by adding it in misc.hta.f.
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\many-clocks.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\balls.f
+		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\modify.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile-it-up.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\123.f
@@ -5413,8 +5415,20 @@
 		-------- forth (4 words) --------
 		[x]base [x]breakPoint [x]args [x]up/down-recall-needs-alt-key? 
 
-		
-		
+[ ] Do we need a command to inhibit any new tib commands during nap / sleep ?
+[ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
+	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
+[ ] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
+[ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
+	After previous command the recent order[order.length-1] become new context. Purpose is to
+	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
+	process that rescan only the context. But there's a little difference through this way.
+	The previous context is not totally disappeared, only replaced with the new definitions from 
+	the new context. Un-replaced words are still visible instead of totally disappeared.
+	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
+		simply 'assembly' and then 'forth' to switch back.
+	
+	
 		
 		
 		

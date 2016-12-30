@@ -27,7 +27,13 @@
 		\ dup char enablejavascript char true setAttribute \ ele
 		\ js: $(tos()).hide() eleHead swap appendChild \ 可以掛 header （與 body 同屬 document）但不能不掛
 
-				
+	<js>
+		// HTA does not support Math.sign so far, fix it.
+		// http://stackoverflow.com/questions/7624920/number-sign-in-javascript
+		if (Math.sign==undefined)
+			Math.sign = function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };
+	</js>
+
 
 
 

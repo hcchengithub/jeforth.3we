@@ -14,17 +14,17 @@
 		;
 		
 	: ^^^==> ( -- T/f ) \ Move icommand and get pattern. Return true if found.
-		js> vm.g.command.indexOf("^^^==&gt;") ( idx )
+		js> vm[context].command.indexOf("^^^==&gt;") ( idx )
 		dup -1 = if (  沒事做了 ) drop false else ( idex )
 			\  找到了
-			js> vm.g.command.slice(pop()) to command \ chop leading garbage
-			js> vm.g.command.search(/\^\^\^[+-]/) ( idx ) 
+			js> vm[context].command.slice(pop()) to command \ chop leading garbage
+			js> vm[context].command.search(/\^\^\^[+-]/) ( idx ) 
 			dup -1 = if ( idx )
 				\  故意留下 idx 
 				abort" Error! anticipating ^^^+ or ^^^- command not found!" 
 			else
-				js> vm.g.command.slice(0,tos()) to pattern \ get pattern
-				js> vm.g.command.slice(pop()) to command   \ chop processed portion
+				js> vm[context].command.slice(0,tos()) to pattern \ get pattern
+				js> vm[context].command.slice(pop()) to command   \ chop processed portion
 			then
 			true
 		then ;

@@ -2,9 +2,9 @@
 \  Chipmunk demo : Balls
 \
 
-marker --balls.f--
-vocabulary balls 
-also balls definitions
+s" balls.f" source-code-header
+true  constant privacy // ( -- true ) All words in this module are private"
+
 
 <o> <canvas></canvas></o> constant canvas // ( -- element ) The canvas of this demo.
 <h> 
@@ -45,7 +45,7 @@ also balls definitions
 		var shape = space.addShape(new cp.BoxShape(rock, width, height));
 		shape.setFriction(0.8);
 		shape.setElasticity(0.3);
-		vm.g.bodies.push(rock); 
+		vm[context].bodies.push(rock); 
 
 		for (var i = 1; i <= 10; i++) {
 			var radius = 20;
@@ -53,7 +53,7 @@ also balls definitions
 			var body = space.addBody(new cp.Body(mass, cp.momentForCircle(mass, 0, radius, v(0, 0))));
 			body.setPos(v(200 + i, (2 * radius + 5) * i));
 			body.name="ball#"+i;
-			vm.g.bodies.push(body); 
+			vm[context].bodies.push(body); 
 			var circle = space.addShape(new cp.CircleShape(body, radius, v(0, 0)));
 			circle.setElasticity(0.1);
 			circle.setFriction(10);
