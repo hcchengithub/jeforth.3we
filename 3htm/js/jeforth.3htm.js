@@ -1,7 +1,7 @@
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
 	(function(){
-		kvm.minor_version = 202; // minor version specified by each application (like here), major version is from jeforth.js kernel.
+		kvm.minor_version = 203; // minor version specified by each application (like here), major version is from jeforth.js kernel.
 		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 		kvm.appname = "jeforth.3htm"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		kvm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。

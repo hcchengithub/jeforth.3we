@@ -5,7 +5,7 @@
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 	var bvm = jeforth_project_k_virtual_machine_object; // (B)ackground page VM, a shorter name that identifies itself also.
 	(function(vm){
-		vm.minor_version = 202; // for 3ce background page, major version is from jeforth.js kernel.
+		vm.minor_version = 203; // for 3ce background page, major version is from jeforth.js kernel.
 		var version = parseFloat(vm.major_version+"."+vm.minor_version);
 		vm.appname = "jeforth.3ce.background"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。

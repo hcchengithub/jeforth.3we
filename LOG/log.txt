@@ -5418,7 +5418,6 @@
 [ ] Do we need a command to inhibit any new tib commands during nap / sleep ?
 [ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
 	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
-[ ] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
 [ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
 	After previous command the recent order[order.length-1] become new context. Purpose is to
 	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
@@ -5428,8 +5427,43 @@
 	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
 		simply 'assembly' and then 'forth' to switch back.
 	
-	
+[ ] 準備 release master 新版 release 新版 master
+    o search "kvm.minor_version" increase 版號。
+        [x] jeforth.3nd.js --> version 203
+        [x] 3nw, jeforth.3we/package.json version 223
+        [x] jeforth.3htm.js --> to be version 203
+        [x] jeforth.3ce.js(3ce extension pages)-> 203
+        [x] jeforth.3ce, ce.f(Target page) -> vm.minor_version = 203
+        [x] jeforth.3ce, background.js vm.minor_version = 203
+        [x] jeforth.hta --> <HTA> tag. VERSION="204" 
+        [/] jeforth.3ca, also jeforth.3htm.js above
+    o selftest them all
+        [x] 3hta
+        [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
+        [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+        [x] 3nd
+        [x] 3ce
+        [ ] 3ca
+        
+    [ ] README.md 上的 demo 也要改寫好一點。最好能有浮動 console3we 框。
+        --> 先把結構改好, link 出去的內容先弄成 under constructing. 日起有功,穩步推進。
+        
+[/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
+	--> js: tick('<selftest>').enabled=false in every quit.f 
+    --> 算了麻煩
 		
-		
-		
-		
+[ ] setup.bat screen flashs badly, try not but beautiful progress info instead on the 3hta window.		
+[ ] Testing all demo, calc.f does not work in 3ca due to the inline permission. Try to rewrite
+    event handlers of those buttons.
+> js> vm.appname .
+jeforth.3htm OK 
+> <js>
+window._im = function(){kvm.execute('疊代法')}
+
+</js>
+ OK 
+> js: im()
+JavaScript error : im is not defined
+ OK 
+> js: _im()
+ OK 		
