@@ -8,8 +8,8 @@
 				/// regkey :> lbound() \ ==> 0 OK 
 				/// regkey :> ubound() \ ==> 35 OK 
 				/// <js> // Dump the entire regkey
-				/// 	for(var i=0; i<=vm.g.regkey.ubound(); i++){
-				/// 		push(vm.g.regkey.getItem(i));
+				/// 	for(var i=0; i<=vm[context].regkey.ubound(); i++){
+				/// 		push(vm[context].regkey.getItem(i));
 				/// 		dictate(".b space");
 				/// 	}
 				/// </js>				

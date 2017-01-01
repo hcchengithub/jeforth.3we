@@ -6,6 +6,8 @@
 include processing.f
 
 s" blowing-in-the-wind.f" source-code-header
+
+true constant privacy // ( -- true ) All words in this module are private
 marker ~~~
 	
 \ setup
@@ -38,10 +40,10 @@ marker ~~~
 			this.collide = function(){
 				for (var i = id - 1; i >= 1; i--) {  // 只管自己 id 以後兩兩之間的 collision
 					// the distance from this ball to another ball
-					var dx = vm.g.balls[i].x - x;  
-					var dy = vm.g.balls[i].y - y;  
+					var dx = vm[context].balls[i].x - x;  
+					var dy = vm[context].balls[i].y - y;  
 					var distance = Math.sqrt(dx*dx + dy*dy);  // 碰撞時的球心距離，有凹陷，所以可小於 minDist
-					var minDist = vm.g.balls[i].radius + radius;  // 緊貼兩 ball 的球心距離。
+					var minDist = vm[context].balls[i].radius + radius;  // 緊貼兩 ball 的球心距離。
 					if (distance < minDist) {   // 撞上了！ 當兩球相撞時，總動量不變。
 						var angle = Math.atan2(dy, dx);  // 以本 ball 朝向 next ball 的方向。Math.atan2(y,x) 長度換算成角度（徑度）
 						// 到底誰撞誰？應該是對稱平等的。
@@ -55,41 +57,41 @@ marker ~~~
 						var targetX = x + Math.cos(angle) * minDist;  // 球心連線在 x 軸上的投影加上 x 即為另一球的 x軸 位置。
 						var targetY = y + Math.sin(angle) * minDist;  
 					
-						var ax = (targetX - vm.g.balls[i].x) * vm.g.spring;  // 另一球當在的位置與目前互相撞進球體之內的差距 乘上 彈性係數。方向是另一球該修正的方向。
-						var ay = (targetY - vm.g.balls[i].y) * vm.g.spring;
+						var ax = (targetX - vm[context].balls[i].x) * vm[context].spring;  // 另一球當在的位置與目前互相撞進球體之內的差距 乘上 彈性係數。方向是另一球該修正的方向。
+						var ay = (targetY - vm[context].balls[i].y) * vm[context].spring;
 						vx -= ax;  // 本球該修正的方向與另一球相反。
 						vy -= ay;  
 
-						vm.g.balls[i].vx += ax;  
-						vm.g.balls[i].vy += ay;  
+						vm[context].balls[i].vx += ax;  
+						vm[context].balls[i].vy += ay;  
 					}  
 				}     
 			}
 			this.animate = function(){
-				vy += vm.g.gravity;  // 「力」表現為位移的幅度，而重力就是在 vy 上加成.  vx,vy 是該 ball 的瞬時向量。
-				vx += vx>0 ? -vm.g.friction : vm.g.friction ; // 扣除摩擦係數
-				vy += vy>0 ? -vm.g.friction : vm.g.friction ;
-				vx = Math.abs(vx) < vm.g.friction? 0 : vx ; // 比摩擦力小就是零，否則會抖。
-				vy = Math.abs(vy) < vm.g.friction? 0 : vy ;
-				// vx = Math.abs(vx) > vm.g.maxvx? vm.g.maxvx*vx/Math.abs(vx) : vx ;
-				// vy = Math.abs(vy) > vm.g.maxvy? vm.g.maxvy*vy/Math.abs(vy) : vy ;
+				vy += vm[context].gravity;  // 「力」表現為位移的幅度，而重力就是在 vy 上加成.  vx,vy 是該 ball 的瞬時向量。
+				vx += vx>0 ? -vm[context].friction : vm[context].friction ; // 扣除摩擦係數
+				vy += vy>0 ? -vm[context].friction : vm[context].friction ;
+				vx = Math.abs(vx) < vm[context].friction? 0 : vx ; // 比摩擦力小就是零，否則會抖。
+				vy = Math.abs(vy) < vm[context].friction? 0 : vy ;
+				// vx = Math.abs(vx) > vm[context].maxvx? vm[context].maxvx*vx/Math.abs(vx) : vx ;
+				// vy = Math.abs(vy) > vm[context].maxvy? vm[context].maxvy*vy/Math.abs(vy) : vy ;
 				x += vx;  
 				y += vy;  
 				// 如果不考慮牆面，以上就是 move() 了！
 				
 				if (x + radius > vm.g.cv.canvas.width) {  // 超過 canvas 右邊
 					x = vm.g.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
-					vx *= -vm.g.wallBounce;               // 牆壁的反彈力
+					vx *= -vm[context].wallBounce;               // 牆壁的反彈力
 				} else if (x - radius < 0) {   // 超過 canvas 左邊
 					x = radius;  
-					vx *= -vm.g.wallBounce;  
+					vx *= -vm[context].wallBounce;  
 				}  
 				if (y + radius > vm.g.cv.canvas.height) {  // 撞上 canvas 地板
 					y = vm.g.cv.canvas.height - radius;  
-					vy *= -vm.g.wallBounce;   
+					vy *= -vm[context].wallBounce;   
 				} else if (y - radius < 0) {  // 超過 canvas 上邊
 					y = radius;  
-					vy *= -vm.g.wallBounce;  
+					vy *= -vm[context].wallBounce;  
 				}  
 			}
 			this.display = function(){
@@ -101,8 +103,8 @@ marker ~~~
 				// text(id, x, y);  
 			}
 		}};
-		vm.g.balls.push(new Ball(
-			vm.g.balls.length, // id
+		vm[context].balls.push(new Ball(
+			vm[context].balls.length, // id
 			Math.random()*vm.g.cv.canvas.width, // x
 			Math.random()*vm.g.cv.canvas.height,	// y
 			Math.random()*(50-20)+20,			// radius=[20~50]
@@ -120,7 +122,7 @@ marker ~~~
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function
 		clearCanvas
-		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm[context].balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [tos()].collide()
 			balls :: [tos()].animate()
 			balls :: [pop()].display()
@@ -134,7 +136,7 @@ marker ~~~
 		fill
 	;
 	: dump ( -- ) \ See all balls
-		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm[context].balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [pop()].see()
 		next
 	;
@@ -143,7 +145,7 @@ marker ~~~
 	: run ( count -- ) \ draw count times
 		for draw speed nap next ;
 	: trigger ( -- ) \ move all balls up 
-		js> vm.g.balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> vm[context].balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [pop()].move(0,0)
 		next ;
 	

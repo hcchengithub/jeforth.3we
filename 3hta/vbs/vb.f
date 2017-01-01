@@ -1,6 +1,4 @@
 
-	include f/html5.f
-
 	s" vb.f"		source-code-header
 
 	\ include basic.vbs
@@ -123,7 +121,10 @@
 						if(stack.length==0 || isNaN(tos())) push(0); 
 						vm.process.terminate(pop());
 					</js> ;
-					/// start /WAIT jeforth.hta . . . don't forget the /WAIT option!
+					/// start /WAIT jeforth.hta . . . don't forget the /WAIT option
+					/// The %errorlevel% returned to DOS prompt only works in batch program.
+					/// Run "jeforth.hta 123 bye" won't change it, through a batch file does.
+					/// "run jeforth.hta 66 bye" in 3hta returns 66 correctly also.
 	
 	\ ------------------- Collection and Enumerator Object ----------------------------------------------------------------------
 	\

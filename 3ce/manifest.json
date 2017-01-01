@@ -1,3 +1,13 @@
+/*
+**
+** jeforth.3ce, jeforth.3we for Chrome Extension 
+**
+** Use this jeforth command line "js> chrome.app.getDetails() (see)"
+** to see the working manifest object. Also "js> chrome.runtime.getManifest() (see)"
+**
+*/
+
+
 {
 	 "manifest_version" : 2
 	,"name" : "jeforth.3ce"
@@ -5,7 +15,7 @@
 	,"version" : "1.1"
 	,"browser_action" : {
 		"default_title": "Popup of jeforth.3ce",
-		"default_icon" : "3ce/system/fig.tw.black.16x16.png",
+		"default_icon" : "3ce/fig.tw.black.16x16.png",
 		"default_popup" : "jeforth.3ce.html"
 	 }
 	,"background": {

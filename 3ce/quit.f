@@ -14,7 +14,7 @@
 : {F5}			( -- boolean ) \ Hotkey handler, Confirm the Chrome extension window refresh
 				<js> confirm("Really want to restart?") </jsV> 
 				if js: chrome.tabs.reload() false else true then ;
-				/// Defined in 3ce/system/quit.f
+				/// Defined in 3ce/quit.f
 				/// Return a false to stop the hotkey event handler bubbling.
 				/// Must intercept onkeydown event to avoid original function.
 
@@ -53,7 +53,7 @@
 	include 3htm/f/platform.f		
 	include f/misc.f		
 	include 3htm/f/hte.f
-	include 3ce/system/ce.f
+	include 3ce/ce.f
 	include 3htm/f/ls.f
 	
 \ ------------ End of jeforth.f -------------------

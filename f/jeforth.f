@@ -25,6 +25,8 @@ code parse-help var ss = " " + pop() + " ", comment = "";
 				end-code        
 				// ( "line" -- "helpmsg" "rests" ) Parse "( -- ) \ help foo baa" from 1st input line
 				
+code privacy 	push(false) end-code // ( -- false ) Default is false, words are nonprivate by default.
+				
 code code       push(nexttoken()); // name of the word
 				push(nexttoken('\n|\r')); // rest of the first line
 				execute("parse-help"); // ( "name" "helpmsg" "rests" )
@@ -35,8 +37,23 @@ code code       push(nexttoken()); // name of the word
 				execute(words.forth[1]); // execute the old version 'code'.
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
-
+                
 code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js which is thus kept pure.
+
+                // To support private word, END-CODE needs one more line
+                words.forth[2].xt = function(){ 
+                    // was from project-k jeforth.js, modified by jeforth.3we jeforth.f _init_ 
+                    if(compiling!="code"){ panic("Error! 'END-CODE' to a none code word.\n"); return};
+                    current_word_list().push(new Word([newname,newxt]));
+                    last().vid = current;
+                    last().wid = current_word_list().length-1;
+                    last().type = 'code';
+                    last().help = newhelp;
+                    execute("privacy"); last().private = Boolean(pop()); // support private word
+                    wordhash[last().name]=last();
+                    compiling  = false;
+                }                
+                
 				// An array's length is array.length but there's no such thing of hash.length for hash{}.
 				// memberCount(object) gets the given object's member count which is also a hash table's length.
 				vm.g = {}; // The global hash
@@ -210,7 +227,7 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 						[p 'version' p]
 				</selftest>
 
-code execute    ( Word|"name"|address|empty -- ... ) \ Execute the given word or the last() if stack is empty.
+code execute    ( Word|"name"|address -- ... ) \ Execute the given word.
 				execute(pop()); end-code
 
 				<selftest>
@@ -225,7 +242,7 @@ code interpret-only  ( -- ) \ Make the last new word an interpret-only.
 				end-code interpret-only
 
 				<selftest>
-					*** interpret-only marks the last word as an interpret-only word
+					*** interpret-only marks the last word an interpret-only word
 						' execute :> interpretonly==true ( false ) 
 						' interpret-only :> interpretonly==true ( true )
 						[d false,true d] [p "interpret-only" p]
@@ -236,10 +253,45 @@ code immediate  ( -- ) \ Make the last new word an immediate.
 				end-code
 
 				<selftest>
-					*** immediate marks the last word as an immediate word
+					*** immediate marks the last word an immediate word
 						' execute :> immediate==true ( false ) 
 						' \ :> immediate==true ( true )
 						[d false,true d] [p "immediate" p]
+				</selftest>
+				
+code ///        ( <comment> -- ) \ Add comment to the new word, it appears in 'see'.
+				var ss = nexttoken('\n|\r');
+				ss = ss.replace(/^/,"\t"); // Add leading \t to each line.
+				ss = ss.replace(/\s*$/,'\n'); // trim tailing white spaces
+				last().comment = typeof(last().comment) == "undefined" ? ss : last().comment + ss;
+				end-code interpret-only
+
+				<selftest>
+					*** /// adds comment to the last word
+						1234 constant x
+						/// comment-line-111
+						/// comment-line-222
+						js> last().comment.indexOf("comment-line-111")==-1
+						js> last().comment.indexOf("comment-line-222")==-1
+						x [d false,false,1234 d] [p "///","constant" p]
+						(forget)
+				</selftest>
+                
+code private  ( -- ) \ Make the last word invisible when out of the context.
+				last().private=true
+				end-code
+				/// The opposite is nonprivate.
+				
+code nonprivate  ( -- ) \ Make the last word non-private so it's globally visible.
+				last().private=false
+				end-code
+				/// The opposite is private.
+                
+				<selftest>
+					\ *** private marks the last word a private word
+					\ 	' execute :> immediate==true ( false ) 
+					\ 	' \ :> immediate==true ( true )
+					\ 	[d false,true d] [p "immediate" p]
 				</selftest>
 
 code .((		( <str> -- ) \ Print string that has ')' in it down to '))' immediately.
@@ -276,19 +328,15 @@ code compile-only  ( -- ) \ Make the last new word a compile-only.
 				</selftest>
 
 \ ------------------ Fundamental words ------------------------------------------------------
-
+				
 code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added into wordhash{} yet
-				if(!(newname=pop())) panic("Create what?\n", tib.length-ntib>100);
+				if(!(newname=pop())) panic("(create) what?\n", tib.length-ntib>100);
 				if(isReDef(newname)) type("reDef "+newname+"\n"); // 若用 tick(newname) 就錯了
 				current_word_list().push(new Word([newname,function(){}]));
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
 				last().type = "colon-create";
-				// push(nexttoken('\n|\r')); // rest of the first line
-				// execute("parse-help"); // ( "helpmsg" "rests" )
-				// tib = " " + pop() + tib.slice(ntib); ntib = 0; // "rests" + tib(ntib)
-				// newhelp = pop();
-				// last().help = newname + " " + newhelp; // help messages packed
+				execute("privacy");last().private = Boolean(pop());
 				end-code
 
 code reveal		( -- ) \ Add the last word into wordhash
@@ -302,23 +350,7 @@ code reveal		( -- ) \ Add the last word into wordhash
 						js> last().name [d "~(create)~" d] [p "(create)","char" p]
 				</selftest>
 
-code ///        ( <comment> -- ) \ Add comment to the new word, it appears in 'see'.
-				var ss = nexttoken('\n|\r');
-				ss = ss.replace(/^/,"\t"); // Add leading \t to each line.
-				ss = ss.replace(/\s*$/,'\n'); // trim tailing white spaces
-				last().comment = typeof(last().comment) == "undefined" ? ss : last().comment + ss;
-				end-code interpret-only
-
-				<selftest>
-					*** /// adds comment to the last word
-						1234 constant x
-						/// comment-line-111
-						/// comment-line-222
-						js> last().comment.indexOf("comment-line-111")==-1
-						js> last().comment.indexOf("comment-line-222")==-1
-						x [d false,false,1234 d] [p "///","constant" p]
-						(forget)
-				</selftest>
+\ [ ] /// was here
 
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
 code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space.
@@ -442,14 +474,16 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 				comma(RET) end-code immediate compile-only
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
-				wordhash = {};
-				scan_vocabulary("forth"); // words in "forth" always available
-				for (var j=0; j<order.length; j++) scan_vocabulary(order[j]); // 越後面的 priority 越高
-				function scan_vocabulary(v) {
-					for (var i=1; i<words[v].length; i++){  // 第零個都放 0，一律跳過。
+				wordhash = {}; context = order[order.length-1];
+				scan_vocabulary("forth",false); // forth always available
+				for (var j=0; j<order.length-1; j++) 
+					scan_vocabulary(order[j],false); // The latter the higher priority
+				scan_vocabulary(context,true); // The context has the highest priority
+				function scan_vocabulary(v,isContext) { // skip private words but all words of context
+					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
 						// skip the last() to avoid unexpected 'reveal'.
-						if (compiling) if (last()==words[v][i]) continue; 
-						wordhash[words[v][i].name] = words[v][i];
+						if (compiling && last()==words[v][i]) continue; 
+						if (isContext || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
 					}
 				}
 				end-code
@@ -501,6 +535,7 @@ code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
 
 code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Word object on TOS.
 				push(tick(nexttoken())) end-code
+
 
 				<selftest>
 					*** ' tick and (') should return a word object
@@ -1280,6 +1315,12 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				compiling if literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
+<text> 
+ Example 'privacy' definition for a vocabulary. Assume current == context.
+ false constant privacy // ( -- true ) All words in this module are public
+ true  constant privacy // ( -- true ) All words in this module are private
+</text> ' privacy :: comment=pop()
+				
 \ If <comment> hits <comment> in TIB then it drops string1 
 \ and does <comment> and does again <comment>
 
@@ -1313,23 +1354,46 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				compiling if jsFunc , else jsEval then ; immediate
 				/// 可以用來組合 JavaScript function
 
-: constant 		( n <name> -- ) \ Create a 'constnat', Don't use " in <name>.
+: trim			( string -- string' ) \ Remove leading&ending white spaces of the multiple line string.
+				\ remove 頭尾 whitespaces. 但 .trim() 舊 JScript v5.6 未 support
+				dup if <js> pop().toString().replace(/(^\s*)/,'').replace(/(\s*$)/,'') </jsV>
+				then ;
+				/// If TOS is not a string then do nothing.
+				/// NOT every line of a multiple line string, only the begin/end of it.
+				/// Work with </o> </h> </e> 前置 white spaces 會變成 [object Text] 必須消除。
+
+\ 2016/12/21 Now constant & value support private and direct-access through vm[vid].name 
+: constant 		( n <name> -- ) \ Create a 'constnat'
 				BL word (create) <js> 
-				last().type = "constant";
-				var s = 'var f;f=function(){push(vm.g["' 
-						+ last().name.replace(/"/g,"\\\"")
-						+ '"])}';
-				last().xt = eval(s);
-				vm.g[last().name] = pop();
+					last().type = "constant";
+					var s = '(function(){push(vm["_vid_"]["_name_"])})';
+					var vid = current.replace(/"/g,"\\\"");
+					var name = last().name.replace(/"/g,"\\\"");
+					s = s.replace(/_vid_/,vid).replace(/_name_/,name);
+					last().xt = eval(s);
+                    if(vm[current]==undefined) vm[current]={};
+					vm[current][last().name] = pop();
 				</js> reveal ; 
+                
 : value 		( n <name> -- ) \ Create a 'value' variable.
 				constant last :: type='value' ; 
+                
 : to 			( n <value> -- ) \ Assign n to <value>.
-				' ( word ) <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
-				compiling if ( word ) 
-					<js> var s='var f;f=function(){/* to */ vm.g["'+pop().name.replace(/"/g,"\\\"")+'"]=pop()}';push(eval(s))</js> ( f ) ,
+				' ( n word ) 
+                <js> if (tos().type!="value") panic("Error! Assigning to a none-value.\n",'error') </js>
+				compiling if ( n word ) 
+					<text>
+						(function(){/* to */ vm["_vid_"]["_name_"]=pop()})
+					</text> trim ( n word s ) 
+                    <js> 
+                        var s = pop(); // ( n word )
+                        var vid = tos().vid.replace(/"/g,"\\\"");
+                        var name = pop().name.replace(/"/g,"\\\"");
+                        s = s.replace(/_vid_/,vid).replace(/_name_/,name);
+                        push(eval(s));
+					</js> ( n xt ) , 
 				else ( n word )
-					js: vm.g[pop().name]=pop()
+					js: vm[tos().vid][pop().name]=pop()
 				then ; immediate
 				
 				<selftest>
@@ -1348,10 +1412,10 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 \ 目前 Base 切換只影響 .r .0r 的輸出結果。
 \ JavaScript 輸入用外顯的 0xFFFF 形式，用不著 hex decimal 切換。
 10 value base // ( -- base ) decimal base is 10, hex base is 16, can be any number.
-code hex        vm.g.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
-code decimal    vm.g.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
-code base@      push(vm.g.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
-code base!      vm.g.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
+code hex        vm.forth.base=16 end-code // ( -- ) 設定數值以十六進制印出 *** 20111224 sam
+code decimal    vm.forth.base=10 end-code // ( -- ) 設定數值以十進制印出 *** 20111224 sam
+code base@      push(vm.forth.base) end-code // ( -- n ) 取得 base 值 n *** 20111224 sam
+code base!      vm.forth.base=pop() end-code // ( n -- ) 設定 n 為 base 值 *** 20111224 sam
 
 				<selftest>
 					*** hex decimal base@ base!
@@ -1398,7 +1462,6 @@ code stopSleeping ( -- ) \ Resume forth VM sleeping state, opposite of the sleep
 					setTimeout(resume,delay);
 					function resume() { 
 						if(typeof(tib)!="undefined") {
-						    if(vm.debug) debugger;
 							tib = tibwas; ntib = ntibwas;
 						} else debugger;
 						outer(ipwas); // resume to the below ending 'ret' and then go through the TIB.
@@ -1428,56 +1491,75 @@ code cut		( -- ) \ Cut off used TIB.
 : ?rewind		( boolean -- ) \ Conditional rewind TIB so as to repeat it. 'stop' to terminate.
 				if rewind then ;
 
-code [begin]	( -- ) \ [begin]..[again], [begin].. flag [until]
-				rstack.push(ntib) end-code immediate
+\ To TIB command line TSRs, the tib/ntib is their only private storage. So save-restore and
+\ loop back information must be using the tib. That's why we have >t t@ and t> 
+
+code >t			( int -- ) \ Push the integer to end of TIB as a comment
+				tib += "\n\\ " + String.fromCharCode(pop());
+				end-code
+
+code t@			( -- int ) \ Get integer from end of the TIB 
+				var value = tib.charCodeAt(tib.length-1);
+				push(value); 
+				end-code
+
+: t>			( -- int ) \ Pop integer from end of the TIB 
+				t@ ( int ) js: tib=tib.slice(0,-4) ;
+				\ the -4 is \n \ space and the int, total 4.
+
+: [begin]		( -- ) \ [begin]..[again], [begin].. flag [until]
+				js> ntib >t ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 				/// ex. [begin] .s js> rstack . cr 1000 nap [again]
 				
-code [again]	( -- ) \ [begin]..[again]
-				ntib=rtos() end-code immediate
+: [again]		( -- ) \ [begin]..[again]
+				t@ js: ntib=pop() ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 
 
-code [until]	( flag -- ) \ [begin].. flag [until]
-				if(pop()) rstack.pop(); else  ntib=rtos(); end-code immediate
+: [until]		( flag -- ) \ [begin].. flag [until]
+				if  t> drop else [compile] [again] then ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 				/// ex. [begin] now t.second dup . space 5 mod not 100 nap [until]
 
-code [for]		( count -- , R: -- #tib count ) \ [for]..[next] 
-				rstack.push(ntib); rstack.push(pop()); end-code immediate
+: [for]			( count -- ) \ (T -- ntib count ) [for]..[next] 
+				[compile] [begin] >t ; interpret-only
+				/// Instead of using rstack, [for] loop uses tib tail to save-restore 
+				/// the loop back address and the count. Thus >t t> and t@ replace
+				/// >r r> and r@ respectively.
 				/// Pattern : The normalized for-loop pattern. 0 based.
-				///   5 ?dup [if] dup [for] dup r@ - ( COUNT i ) . space ( COUNT ) [next] drop [then]
+				///   5 ?dup [if] dup [for] dup t@ - ( COUNT i ) . space ( COUNT ) [next] drop [then]
 				///   ==> 0 1 2 3 4
 				/// Pattern : Normalized for-loop pattern but n(66) based.
-				///   5 js: push(tos()+66,0) [for] dup r@ - ( count+n i ) . space [next] drop
+				///   5 js: push(tos()+66,0) [for] dup t@ - ( count+n i ) . space [next] drop
 				///   ==> 66 67 68 69 70  OK 		
 				/// Pattern : Simplest, fixed times.
-				///   5 [for] r@ . space [next]
+				///   5 [for] t@ . space [next]
 				///   ==> 5 4 3 2 1
 				/// Pattern : fixed times and 0 based index
-				///   5 [for] 5 r@ - . space [next]
+				///   5 [for] 5 t@ - . space [next]
 				///   ==> 0 1 2 3 4
-				/// Pattern of break : "r> drop 0 >r" or "js: rstack[rstack.length-1]=0"
-				///   10 [for] 10 r@ - dup . space 5 >= [if] r> drop 0 >r [then] [next]
+				/// Pattern of break : "t> drop 0 >t" or "js: rstack[rstack.length-1]=0"
+				///   10 [for] 10 t@ - dup . space 5 >= [if] t> drop 0 >t [then] [next]
 				///   ==> 0 1 2 3 4 5
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
 
-code [next]		( -- , R: #tib count -- #tib count-1 or empty ) \ [for]..[next]
-				rstack[rstack.length-1] -= 1;
-				if(rtos()>0){
-					ntib=rtos(1);
-				} else {
-					rstack.pop(); // drop the count
-					rstack.pop(); // drop the #tib rewind position
-				}
-				end-code immediate
+: [next]		( -- ) \ (T ntib count -- ntib count-1 | empty ) [for]..[next]
+				t> 1- dup >t js> pop()>0 ( count>0 ) if 
+					\ rewind
+					t> t> js: ntib=tos() >t >t 
+				else
+					\ exit the for loop
+					t> t> 2drop \ drop the count and loop back ntib address
+				then ; interpret-only
 				/// Don't forget some nap.
 				/// 'stop' command or {Ctrl-Break} hotkey to abort.
-code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpret mode
+
+code (run:) 	( "..if.." -- "..[if].." ) \ Run string with "if","begin","for" in interpret mode
 				var ss = pop();
 				var result = ss
 					.replace(/(^|\s)(if|else|then|begin|again|until|for|next)(\s|$)/mg,"$1[$2]$3")
@@ -1498,14 +1580,6 @@ code (run:) 	( "if" -- "[if]" ) \ Run string with "if","begin","for" in interpre
 				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 
 \ ------------------ Tools  ----------------------------------------------------------------------
-
-: trim			( string -- string' ) \ Remove leading&ending white spaces of the multiple line string.
-				\ remove 頭尾 whitespaces. 但 .trim() 舊 JScript v5.6 未 support
-				dup if <js> pop().toString().replace(/(^\s*)/,'').replace(/(\s*$)/,'') </jsV>
-				then ;
-				/// If TOS is not a string then do nothing.
-				/// NOT every line of a multiple line string, only the begin/end of it.
-				/// Work with </o> </h> </e> 前置 white spaces 會變成 [object Text] 必須消除。
 				
 code int 		push(parseInt(pop())) end-code   // ( float|string -- integer|NaN )
 code float		push(parseFloat(pop())) end-code // ( string -- float|NaN ) 
@@ -1550,10 +1624,10 @@ code float		push(parseFloat(pop())) end-code // ( string -- float|NaN )
 code (.r)		( num|str n -- "  num|str" ) \ Right adjusted num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				if(typeof i == 'number') {
-					if(vm.g.base == 10){
-						i=i.toString(vm.g.base);
+					if(vm.forth.base == 10){
+						i=i.toString(vm.forth.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(vm.g.base) + (i & 0xffff).toString(vm.g.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.forth.base) + (i & 0xffff).toString(vm.forth.base);
 					}
 				}
 				n=n-i.length;
@@ -1570,11 +1644,11 @@ code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n character
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
-					if(vm.g.base == 10){
+					if(vm.forth.base == 10){
 						if (i<0) minus = '-';
-						i=Math.abs(i).toString(vm.g.base);
+						i=Math.abs(i).toString(vm.forth.base);
 					}else{
-						i = (i >> 16 & 0xffff || "").toString(vm.g.base) + (i & 0xffff).toString(vm.g.base);
+						i = (i >> 16 & 0xffff || "").toString(vm.forth.base) + (i & 0xffff).toString(vm.forth.base);
 					}
 				}
 				n=n-i.length - (minus?1:0);
@@ -1649,7 +1723,7 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
-				var count=stack.length, basewas=vm.g.base;
+				var count=stack.length, basewas=vm.forth.base;
 				if(count>0) for(var i=0;i<count;i++){
 					if (typeof(stack[i])=="number") {
 						push(stack[i]); push(i); dictate("decimal 7 .r char : . space dup decimal 11 .r space hex 11 .r char h .");
@@ -1658,7 +1732,7 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					}
 					type(" ("+mytypeof(stack[i])+")\n");
 				} else type("empty\n");
-				vm.g.base = basewas;
+				vm.forth.base = basewas;
 				end-code
 
 				<selftest>
@@ -1676,14 +1750,24 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					---
 				</selftest>
 
-code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
-				// var RegEx = new RegExp(nexttoken(),"i");
+code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
 				var option = pop();
 				var pattern = pop();
-				var word_list = words[pop()];
+                var vid = pop();
 				var result = [];
-				for(var i=1;i<word_list.length;i++) {
-					if (!pattern) { result.push(word_list[i]); continue; } // 沒有 pattern 就是全部
+                var word_list = [];
+                var isContext = order[order.length-1] == vid;
+                // Remove private words unless in context
+                for (var i=1; i<words[vid].length; i++) {
+                    if (isContext || !words[vid][i].private) 
+                        word_list.push(words[vid][i]);
+                }
+				for(var i=1; i<word_list.length; i++) {
+					if (!pattern) { 
+                        // no pattern is all public
+                        result.push(word_list[i]); 
+                        continue; 
+                    } 
 					switch(option){ 
 						// 這樣寫表示這些 option 都是唯一的。
 						case "-t": // -t for matching type pattern, case insensitive.
@@ -1709,7 +1793,6 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 								result.push(word_list[i]);
 							}
 							break;
-
 						default: // any other option, includes -N, for exactly name only, case sensitive.
 							if (word_list[i].name==pattern) {
 								result = [word_list[i]];
@@ -1739,7 +1822,6 @@ code (words)    ( "word-list" "pattern" "option" -- word[] ) \ Get an array of w
 				/// An empty pattern matches all words.
 
 : (help)		( "word-list" "[pattern [-t|-T|-n|-f]]" -- "msg" ) \ Get help message of screened words
-				\ js> context swap ( voc line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
 				<js>
@@ -1886,30 +1968,26 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 : include.js	( <pathname> -- ) \ Include JavaScript source file
 				BL word sinclude.js ;
 
+                char -=EOF=- ( eof ) <js> (new RegExp(tos()))</jsV> ( eof /eof/ )
+                js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
 : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
-				readTextFileAuto ( -- file )
-				js> tos().indexOf("source-code"+"-header")!=-1 if \ 有 selftest 的正常 .f 檔
-					<text> 
-						\ 跟 source_code_header 成對的尾部
-						<selftest>
-						js> tick('<selftest>').masterMarker tib.insert
-						</selftest>
-						js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
-						js: tick('<selftest>').buffer="" \ recycle the memory
-					</text> s" \ --E" + s" OF--" +
+                readTextFileAuto ( file )
+                <js> 
+					var s = pop();
+					var ss = (s+'x').slice(0,s.search(vm.forth.EOF.regex))
+							 + '\n\\ '
+							 + vm.forth.EOF.pattern
+							 + '\n';
+					// The +'x' is a perfect trick, will be cut both EOF mark exists or not. 
+					// The last \n 避免最後是 \ comment 時吃到後面來
+					if (s) push(ss); else push(""); // skip if file not found
+				</js> 
+                tib.insert ;
+                /// Cut after EOF and append EOF back to guarantee an EOF exists
 
-					swap  ( -- code file )
-					<js> // 把 - - EOF - - 之後先切除再加回，為往後的 source code header, selftest 等準備。
-						var ss = pop();
-						ss = (ss+'x').slice(0,ss.search(/\\\s*--EOF--/)); // 一開始多加一個 'x' 讓 search 結果 -1 時吃掉。
-						ss += pop(); // Now ss becomes the TOS
-					</jsV>
-				then
-				js> '\n'+pop()+'\n' ( 避免最後是 \ comment 時吃到後面來 ) tib.insert ;
-
-: include       ( <filename> -- ... ) \ Load the source file if it's not included yet.
+: include       ( <filename> -- ... ) \ Load the source file
 				BL word sinclude ; interpret-only
-
+                
 code obj>keys	( obj -- keys[] ) \ Get all keys of an object.
 				var obj=pop();
 				var array = [];
@@ -1962,7 +2040,7 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 
 code (see)      ( thing -- ) \ See into the given word, object, array, ... anything.
 				var w=pop();
-				var basewas = vm.g.base; vm.g.base = 10;
+				var basewas = vm.forth.base; vm.forth.base = 10;
 				if (!(w instanceof Word)) {
 					type(JSON.stringify(w,"\n","\t"));  // none forth word objects. 意外的好處是不必有 "unkown word" 這種無聊的錯誤訊息。
 				}else{
@@ -1991,7 +2069,7 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 					}
 					if (w.comment != undefined) type("\ncomment:\n"+w.comment+"\n");
 				}
-				vm.g.base = basewas;
+				vm.forth.base = basewas;
 				end-code
 				last :: ["(dump)"]=tick("(dump)")
 
@@ -2030,7 +2108,7 @@ code passed		( -- ) \ List words their sleftest flag are 'pass'.
 
 js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
 
-0 value breakPoint // ( -- ip ) jsc breakpoint address
+\ 0 value breakPoint // ( -- ip ) jsc breakpoint address
 
 code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
@@ -2039,7 +2117,7 @@ code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
 code bd			( -- ) \ Disable breakpoint, See also 'bp','be'.
-				inner = vm.g.fastInner;
+				inner = vm.forth.fastInner;
 				vm.jsc.enable = false; // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
 				end-code interpret-only
 				/// work with 'jsc' debug console, jsc is application dependent.
@@ -2105,11 +2183,11 @@ code q			( -- ) \ Quit *debug*
 				
 				
 \ ----------------- Self Test -------------------------------------
-"" value description // ( -- "text" ) description of a selftest section
-[] value expected_rstack // ( -- [..] ) an array to compare rstack in selftest
-[] value expected_stack // ( -- [..] ) an array to compare data stack in selftest
-0  value test-result // ( -- boolean ) selftest result from [d .. d] 
-[] value [all-pass] // ( -- ["words"] ) array of words for all-pass in selftest
+"" value description private // ( -- "text" ) description of a selftest section
+[] value expected_rstack private // ( -- [..] ) an array to compare rstack in selftest
+[] value expected_stack private // ( -- [..] ) an array to compare data stack in selftest
+0  value test-result private // ( -- boolean ) selftest result from [d .. d] 
+[] value [all-pass] private // ( -- ["words"] ) array of words for all-pass in selftest
 : *** 			( <description> -- ) \ Start a selftest section
 				char \n|\r word trim
 				<js> "*** " + pop() + " ... " </jsV> to description
@@ -2129,12 +2207,12 @@ code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 : [r 			( <"text"> -- ) \ Prepare an array of data to compare with rstack in selftest.
 				char r] word js> eval("["+pop()+"]") to expected_rstack ;
 : r] 			( -- boolean ) \ compare rstack and expected_rstack in selftest
-				js> vm.g.isSameArray(rstack,vm.g.expected_rstack) ;
+				js> vm.g.isSameArray(rstack,vm.forth.expected_rstack) ;
 : [d 			( <"text"> -- ) \ Prepare an array to compare with data stack. End of a selftest section.
 				char d] word js> eval("["+pop()+"]") to expected_stack ;
 				/// Data stack will be clean after check
 : d] 			( -- boolean ) \ compare data stack and expected_stack in selftest
-				js> vm.g.isSameArray(stack,vm.g.expected_stack) to test-result 
+				js> vm.g.isSameArray(stack,vm.forth.expected_stack) to test-result 
 				description . test-result if ." pass" cr dropall
 				else ." fail" cr stop then ;
 				/// Data stack will be clean after check

@@ -9,6 +9,8 @@ include processing.f
 
 s" ball.f" source-code-header
 
+true constant privacy // ( -- true ) All words in this module are private
+
 \ messages
 	: starting-message ( -- ) ." Start bouncing . . ." cr ;
 	: ending-message ( -- ) ." Stop bouncing." cr ;
@@ -28,16 +30,16 @@ s" ball.f" source-code-header
 	
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function
-		frameCount frameRate <js> 
-			vm.g.cv.canvas.height/2 * Math.abs(
+		cv frameCount frameRate <js> 
+			tos(2).canvas.height/2 * Math.abs(
 				Math.sin( 
 					Math.PI * (pop(1) % tos()) / pop()
 				)
 			)
 		</jsV> to bounce_height
 
-		bounce_height ball_radius <js> 
-			vm.g.cv.canvas.height - ( pop(1) + pop() )
+		( cv ) bounce_height ball_radius <js> 
+			pop(2).canvas.height - ( pop(1) + pop() )
 			// because the top of the screen is 0, and the bottom is "height",
 		</jsV> to ball_height 
 		clearCanvas beginPath

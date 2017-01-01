@@ -1,7 +1,8 @@
 
     include canvas.f
-    
+	
     s" many-clocks.f"    source-code-header
+	true  constant privacy // ( -- true ) All words in this module are private"
 
 	\ createCanvas setWorkingCanvas  
 
@@ -78,8 +79,6 @@
 	-15	時鐘 洛杉磯 
 	-12	時鐘 紐約 
 	-4	時鐘 杜拜 
-
-	
 
 
 

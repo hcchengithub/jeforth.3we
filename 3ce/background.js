@@ -5,14 +5,14 @@
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
 	var bvm = jeforth_project_k_virtual_machine_object; // (B)ackground page VM, a shorter name that identifies itself also.
 	(function(vm){
-		vm.minor_version = 202; // for 3ce background page, major version is from jeforth.js kernel.
+		vm.minor_version = 203; // for 3ce background page, major version is from jeforth.js kernel.
 		var version = parseFloat(vm.major_version+"."+vm.minor_version);
 		vm.appname = "jeforth.3ce.background"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 		vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-		vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce/system", "3ce/f", "3ce", "playground"];
+		vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
 		vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		vm.selftest_visible = true; // Dummy, background page does not have a display.
-		
+debugger;		
 		// vm.type() is the master typing or printing function.
 		// The type() called in code ... end-code is defined in the kernel jeforth.js.
 		// type to vm.screenbuffer, although background page has no display.
@@ -61,7 +61,7 @@
 			function() {
 				var k = "f/jeforth.f";
 				var r = "3htm/f/readtextfile.f";
-				var q = "3ce/system/background.f";
+				var q = "3ce/background.f";
 				var kk = $.get(k,'text'); 
 				var rr = $.get(r,'text');
 				var qq = $.get(q,'text');

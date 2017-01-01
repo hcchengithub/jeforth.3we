@@ -36,7 +36,7 @@
 		2drop \ sender and sendResponse are not used so far
 		<js>
 			var message = pop();
-			if (message.addr && message.addr!=vm.g.myTabId) return; // is to me?
+			if (message.addr && message.addr!=vm["ce.f"].myTabId) return; // is to me?
 			if (message.type) {
 				vm.type(message.type);
 				vm.scroll2inputbox();inputbox.focus(); // Host side
@@ -187,12 +187,22 @@
 		/// Usage: anything message->tabid
 		
 	: (dictate) ( "forth source code" -- ) \ Run a block of forth source code on tabid.
-		js: push({forth:pop()}) message->tabid ;
+		js: push({forth:pop()}) message->tabid 10 nap ;
 		/// Usage: <text> ... </text> (dictate)
+        /// Example: 下達指令去 target page 讀取 source code
+        /// <text> 
+        ///     char not-read-yet \ flag
+        ///     100 nap js> $("body")[0].outerHTML 
+        ///     drop char already-read \ flag
+        /// </text> (dictate)
+        /// \ 必要步驟等待(dictate)完成
+        /// 100 [for] tos<target . cr [next]
+        /// \ 本實驗成功! 任何用到 (dictate) 之處皆應比照改寫。
+
 		
 	code {F7} ( -- ) \ Send inputbox to content script of tabid.
 		// 當命令來自 host page 就盡可能把 display 切向 host page
-		dictate('<ce> if(vm.tick("host.type")) vm.type = vm.g["host.type"];</ce>');
+		dictate('<ce> if(vm.tick("host.type")) vm.type = vm["target.f"]["host.type"];</ce>');
 		vm.cmdhistory.push(inputbox.value);  // Share the same command history with the host
 		push(inputbox.value); // command line 
 		inputbox.value=""; // clear the inputbox
@@ -216,7 +226,7 @@
 		js: push({active:true}) tabs.query :> [0] ;
 		/// Used by 3ce popup page.
 
-	: attach ( tabid -- ) \ Attach 3ce to the specified target tab.
+	: attach ( tabid -- ) \ Attach 3ce to the target tab to be possessed
 		\ Activate the target tab
 		depth if ( Tab ID ) else
 			isPopup? if active-tab :> id else tabid then ( Tab ID )
@@ -238,7 +248,7 @@
 			tabid {} js: tos().file="js/jquery-1.11.2.js" inject drop			
 		then
 		tabid {} js: tos().file="project-k/jeforth.js" inject drop 
-		
+
 		\ Inject the main program of jeforrth.3ce (jeforth.3htm.js equivalent)
 		<ce>
 			var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
@@ -248,11 +258,11 @@
 			// We need to help it a little as the following example:
 			
 			(function(){
-				vm.minor_version = 202; // 3ce target page minor version. major version is from jeforth.js kernel.
+				vm.minor_version = 203; // 3ce target page minor version. major version is from jeforth.js kernel.
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。
-				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce/system", "3ce/f", "3ce", "playground"];
+				vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "playground"];
 				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
@@ -363,10 +373,14 @@
 				vm.readTextFile = function(pathname){
 					panic("jeforth.3ce does not have vm.readTextFile(), please use readTextFile directly.\n");
 				}
+
 			})();
 		</ceV>  drop \ Use /ceV for synchronous
 		char f/jeforth.f (install)
-		s" js: vm.g.myTabId=" tabid + (dictate) \ equivalent to "tabs.getCurrent :> id" on target page
+
+		s" js: vm.g.myTabId=" tabid + (dictate) 
+		\ equivalent to "tabs.getCurrent :> id" on target page
+		\ Let target page know who's the host page. myTabId is the host page's tab ID.
 
 		<text> shooo!
 			: readTextFile ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
@@ -391,11 +405,46 @@
 				js: chrome.runtime.sendMessage({addr:"background",forth:pop()}) 
 				10000 sleep ;   
 			\ 準備好 readTextFile 就可以 include 了	
-			include 3ce/system/target.f
+			include 3ce/target.f
 		</text> (dictate) ;
 		/// Usage : 
 		/// 237 ( tabid ) attach
 		/// tabs.select tabid attach
 		/// ( empty, tabid by default or active-tab if from popup ) attach 
 	
-	
+	: pop<target ( -- x ) \ 3ce extension pages get and consumes the TOS from the target page
+		char NotYet s' shooo! <js> chrome.runtime.sendMessage({addr:"'
+		myTabId + s' ",tos:pop()})</js>' + (dictate)
+        \ (dictate) 之後如果不 nap 一下這整行有時候會印上 host 端，不知何故？ [ ] 被當成 F7 下的命令因此以 host 為 console
+        \ 後來乾脆把 10 nap 移進 (dictate) 了。
+		begin js> tos()=="NotYet" while 100 nap repeat nip ;
+		/// for 3ce extension pages and popup page only
+        /// Uncertain if target data stack is empty or TOS is an undefined
+		
+	: tos<target ( -- x ) \ 3ce extension pages get but not consumes the TOS from the target page
+		char NotYet s' shooo! <js> chrome.runtime.sendMessage({addr:"'
+		myTabId + s' ",tos:tos()})</js>' + (dictate)
+		begin js> tos()=="NotYet" while 100 nap repeat nip ;
+		/// for 3ce extension pages and popup page only
+        /// Uncertain if target data stack is empty or TOS is an undefined
+		
+	: pop>target ( x -- ) \ Send and consume the TOS to the target page
+		js> ({tos:pop()}) message->tabid ;
+		/// for 3ce extension page only
+
+	: tos>target ( x -- x ) \ Send but not consume the TOS to the target page
+		js> ({tos:tos()}) message->tabid ;
+		/// for 3ce extension page only
+
+    : get-title ( -- "title" ) \ Read target page's title
+        s" shooo! char notyet js> document.title nip char done" (dictate)
+        begin tos<target char done = until pop<target drop pop<target ;
+        /// 這是個正確使用 (dictate) 的範例。
+        
+    : get-element ( "js> element" -- "HTML" ) \ Read target page's source code
+        s" shooo! char notyet " swap + s"  nip char done" + (dictate)
+        begin tos<target char done <> while 10 nap repeat 
+        pop<target drop pop<target ;
+        /// Example:
+        /// s` js> $("article")[0].outerHTML ` get-element
+

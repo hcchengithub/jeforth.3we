@@ -9,7 +9,7 @@
 	<HTA:APPLICATION 
 		ID="hta"
 		APPLICATIONNAME="jeforth.3hta"
-		VERSION="203" 
+		VERSION="204" 
 		/>
 	<meta charset="utf-8" />
 	<!-- link rel="stylesheet" type="text/css" href="common.css" -->
@@ -20,7 +20,7 @@
 			}
     </style>
 </head>
-<body id=body onload="init();">
+<body id=body onload="init()">
 	<div id=header>
 	<div style="opacity:0.2;position:absolute;top:40px;left:90px;width:300px;height:75px;background-color:#20B3DF">
 	<center><span style="color:#FFFFFF;"><br>FigTaiwan</span></center></div>
@@ -41,7 +41,7 @@
 	<span id=endofinputbox></span>
 	</div>
 </body>
-<!-- moved to html5.f script src="js/jquery-1.11.2.js"></script -->
+<script src="js/jquery-1.11.2.js"></script>
 <Script src="project-k/jeforth.js"></Script>
 <script>
 	// 人家都把 script 放在 head 或 body。我怎麼發現可以放在這裡的，為什麼？
@@ -61,32 +61,44 @@
 	kvm.plain = function (s) {
 		// Origin in jeforth.hta before jQuery available
 		var ss = s + ""; // avoid numbers to fail at s.replace()
-		ss = ss.replace(/\t/g,'\u00a0\u00a0\u00a0\u00a0');
-		ss = ss.replace(/ /g,'\u00a0'); // utf-8 space ce@ :: textContent="a\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0b"
-		// ss = ss.replace(/</g,'&lt;'); 不用 jQuery 的 append() 就不需要。
-		// ss = ss.replace(/>/g,'&gt;');
-		ss = ss.replace(/\r?\n\r?/g,'\n');
+		ss = ss.replace(/\t/g,'\u00a0\u00a0\u00a0\u00a0')
+			   .replace(/ /g,'\u00a0') // utf-8 space ce@ :: textContent="a\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0b"
+			   .replace(/</g,'&lt;') // jQuery append() needs this
+			   .replace(/>/g,'&gt;') // jQuery append() needs this
+			   .replace(/\r?\n\r?/g,'<br>');
 		return ss;
 	}
+	// kvm.type = function (s) { 
+	// 	// No jquery, more efforts.
+	// 	try {
+	// 		var ss = s + ''; // Print-able test
+	// 	} catch(err) {
+	// 		ss = Object.prototype.toString.apply(s);
+	// 	}
+	// 	if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
+	// 	if(kvm.selftest_visible){
+	// 		// was: $('#outputbox').append(kvm.plain(ss)); 不用 jQuery 變成一大片還缺特性。
+	// 		// HTA 在 Windows XP, Windows 7 都有很多問題，如果太早 include jQuery 馬
+	// 		// 上就會撞上。延後到 jeforth.f 都起來了之後是比較好的安排。
+	// 		var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
+	// 		for(i=0; i<aa.length-1; i++){
+	// 			outputbox.appendChild(document.createTextNode(aa[i]));
+	// 			outputbox.appendChild(document.createElement("br"));
+	// 		}
+	// 		if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
+	// 	}
+	// };
 	kvm.type = function (s) { 
+		// Use jquery.f, simpler.
 		try {
 			var ss = s + ''; // Print-able test
 		} catch(err) {
 			ss = Object.prototype.toString.apply(s);
 		}
 		if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-		if(kvm.selftest_visible){
-			// was: $('#outputbox').append(kvm.plain(ss)); 不用 jQuery 變成一大片還缺特性。
-			// HTA 在 Windows XP, Windows 7 都有很多問題，如果太早 include jQuery 馬
-			// 上就會撞上。延後到 jeforth.f 都起來了之後是比較好的安排。
-			var aa = (kvm.plain(ss)+'\n').split('\n').slice(0,-1); // [aaa,bbb,]
-			for(i=0; i<aa.length-1; i++){
-				outputbox.appendChild(document.createTextNode(aa[i]));
-				outputbox.appendChild(document.createElement("br"));
-			}
-			if(aa[i]) outputbox.appendChild(document.createTextNode(aa[i]));
-		}
+		if(kvm.selftest_visible) $('#outputbox').append(kvm.plain(ss)); 
 	};
+	
 	// minor version specified by application(hta.version), major version is from jeforth.js kernel.
 	var version = parseFloat(kvm.major_version+"."+hta.version); // hta.version is the "kvm.minor_version"
 	kvm.greeting = function(){
@@ -213,8 +225,26 @@
 
 	// There's no main loop, event driven call back function is this.
 	kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
+	
+	// kvm.forthConsoleHandler = function (cmd) {
+	// 	// No jquery. Original version in jeforth.hta, will be reDef in jquery.f
+	// 	var rlwas = kvm.rstack().length; // r)stack l)ength was
+	// 	kvm.type((cmd?'\n> ':"")+cmd+'\n');
+	// 	kvm.dictate(cmd);  // Pass the command line to jeForth VM
+	// 	(function retry(){
+	// 		// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+	// 		// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+	// 		// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+	// 		if(kvm.rstack().length!=rlwas)
+	// 			setTimeout(retry,100); 
+	// 		else {
+	// 			kvm.type(" " + kvm.prompt + " ");
+	// 			if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
+	// 		}
+	// 	})();
+	// }
 	kvm.forthConsoleHandler = function (cmd) {
-		// Original version in jeforth.hta, will be reDef in jquery.f
+		// Use jquery 
 		var rlwas = kvm.rstack().length; // r)stack l)ength was
 		kvm.type((cmd?'\n> ':"")+cmd+'\n');
 		kvm.dictate(cmd);  // Pass the command line to jeForth VM
@@ -226,10 +256,12 @@
 				setTimeout(retry,100); 
 			else {
 				kvm.type(" " + kvm.prompt + " ");
-				if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
+				if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
+					kvm.scroll2inputbox();
 			}
 		})();
 	}
+	
 
 	// onkeydown,onkeypress,onkeyup
 	// event.shiftKey event.ctrlKey event.altKey event.metaKey

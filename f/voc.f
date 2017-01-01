@@ -27,7 +27,7 @@ code isMember 	( value group -- key|index T|F ) \ Return key or index if value e
 				</selftest>
 
 code get-context ( -- "vid" ) \ Get the word list that is searched first. 
-				push(order[Math.max(0,order.length-1)]) end-code
+				push(context=order[Math.max(0,order.length-1)]) end-code
 				/// context is order[last]
 
 : set-context	 ( "vid" -- ) \ Replace the word-list which is searched first.
@@ -83,8 +83,8 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 : vocabulary	( <name> -- ) \ create a new word list.
 				BL word (vocabulary) ;
 				
-: only       	( -- ) \ Clear vocabulary search order[] list.
-				js: order=order.slice(0,0) rescan-word-hash ;
+: only       	( -- ) \ Leaving forth the only vocabulary in order[]
+				js: order=["forth"] rescan-word-hash ; immediate
 
 				<selftest>
 					\ search: forth,vvv,vvv000
@@ -97,9 +97,11 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					[d false,true,true d] [p "only" p]
 				</selftest>
 
-code also       if(order.length) order.push(order[order.length-1]) end-code // ( -- ) vocabulary array's dup
+code also       order.push(order[order.length-1]) end-code immediate 
+				// ( -- ) dup vocabulary order[] array
 
-code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code // ( -- ) Drop vocabulary order[] array's TOS
+code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code immediate
+				// ( -- ) Drop vocabulary order[] array's TOS
 
 : forth 		( -- ) \ Make forth-wordlist be searched first, which is to set context="forth".
 				forth-wordlist set-context ; immediate
@@ -123,12 +125,13 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 				." search: " get-order . cr
 				." define: " get-current ( -- vid ) . cr ;
 				
-: definitions 	get-context set-current ; // ( -- ) make current equals to context. current = order[order.length-1].
+: definitions 	get-context set-current ; 
+				// ( -- ) make current equals to context. current = order[order.length-1].
 
 : get-vocs		js> words obj>keys ; // ( -- vocs[] ) Get all vocabulary names.
 
 : not-only 		( -- ) \ Bring back all vocabulary 
-				only get-vocs <js> pop().join(" also ")</jsV> tib.insert ;
+				only get-vocs <js> pop().join(" also ")</jsV> tib.insert ; interpret-only
 				/// Does not change the current.
 
 : vocs       	." vocs: " get-vocs . cr ; // ( -- ) List all vocabulary names.
@@ -177,6 +180,17 @@ code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear sea
 					char code char forth search-wordlist js> pop().name=='code' \ true
 					[d true d] [p "search-wordlist" p]
 				</selftest>
+
+: prioritize 	( "vid" -- ) \ Make the vocabulary first priority
+				get-vocs :> indexOf(tos()) ( vid i1 ) 
+				js> tos()==-1 ?abort" Error! unknown vocabulary." ( vid i1 )
+				js> order.indexOf(tos(1)) ( vid i1 i2 )
+				js> tos()==-1 if ( vid i1 i2 ) \ existing but not in order[]
+					js: order.push(pop(2)) drop drop 
+				else ( vid i1 i2 ) \ already in order[]
+					nip ( vid i2 ) js: order.splice(pop(),1);order.push(pop()) 
+				then ;
+				/// Refer to "set-context" command which is cruder.
 
 : forget		( <name> -- ) \ Forget the current vocabulary from <name>
 				BL word dup (') js> tos().vid js> current = if ( -- name Word )
@@ -323,22 +337,24 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				dup (') 			( name.f exist? )
 				BL word swap 		( name.f eof exist? )
 				if 					( name.f eof )
-					word drop 		( name.f )
-					BL word 		( name.f eof )
-					drop			( name.f )
+					word drop 		( name.f ) \ drop everything before eof
+					BL word 		( name.f eof ) \ remove eof from tib
+					drop			( name.f ) \ drop eof
 				else				( name.f eof )
-				then				
-				drop ;
-				/// Conditional skep TIB down to the next EOF mark.
+				then	( name.f | name.f eof )
+				drop \ when the .f module has been totally skipped the stack is empty as well for there's nothing to do in that case
+				; 
+				/// Conditional skip TIB down to the next EOF mark.
 				/// The EOF mark is supposed to be at the end of a \ comment at end of the .f file.
 				/// In None-blocking settings, to support suspend-resume of the forth VM, dictate()
 				/// can not call itself recursively so as to avoid from confusing the suspend-level.
 				/// While 'include' used to utilize dictate() that is now replaced by "tib.insert".
 				/// Use ?skip2 at the beginning of a .f file if you don't want it to be double included.
 
-: source-code-header ( -- ) \ The source-code-file.f header macro 
-				<text>
-					?skip2 --EOF-- \ skip it if already included
+: header 		( -- 'head' ) \ ~.f common header
+				EOF :> pattern <text>
+					\ ~.f common header
+					?skip2 _eof_ \ skip it if already included
 					dup .( Including ) . cr char -- over over + +
 					js: tick('<selftest>').masterMarker=tos()+"selftest--";
 					also forth definitions (marker) (vocabulary)
@@ -346,10 +362,39 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					<selftest>
 						js> tick('<selftest>').masterMarker (marker)
 					</selftest>
-				</text> tib.insert ;
-				/// skip including if the module has been included.
-				/// setup the self-test module
-				/// initiate vocabulary for the including module
+				</text> :> replace("_eof_",pop()) ; private
+    
+: tailer 		( -- 'tailer' ) \ ~.f common tailer
+				<text> 
+					\ ~.f common tailer
+					<selftest>
+					js> tick('<selftest>').masterMarker tib.insert
+					</selftest>
+					js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
+					js: tick('<selftest>').buffer="" \ recycle the memory
+				</text> ; private
+				
+: source-code-header ( "vocabulary-name" -- ) \ source code header
+				\ make it the context if the module is existing
+					dup (') ( mname w ) if dup prioritize then \ ?skip2 will skip to EOF ( mname )
+				\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
+				\ slice ntib~EOF 
+					js> tib.slice(ntib).indexOf(vm.forth.EOF.pattern) ( mname ieof )
+					dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
+					js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
+				\ append the tailer
+					tailer + ( mname ieof tib[ntib~before EOF]+tailer ) 
+				\ reform the EOF
+					s" \ " + ( mname ieof tib[ntib~beforeEof+tailer+\] )
+				\ wrap up the tib
+					swap js> tib.slice(pop()) ( mname tib[ntib~before EOF]+tailer afterEOF ) 
+					+ js: tib=pop();ntib=0 ( mname )
+					header tib.insert 
+				; interpret-only
+				/// The given name becomes the vocabulary name. If the vocabulary is 
+				/// existing then make it the context but skip the including. The command
+				/// is time consuming therefore is not suitable for ~.f modules that require
+				/// performance.
 
 <selftest> --voc.f-self-test-- </selftest>
 js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then] 

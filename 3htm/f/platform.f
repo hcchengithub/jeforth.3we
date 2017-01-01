@@ -372,7 +372,7 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					<table class=help_words style="width:90%">
 					<tr>
 					  <td style="width:200px"><b>_name_</b></td><td colspan=4><b>_help_</b>
-					  [_type_][_vid_][_immediate_][_compile_]</td>
+					  [_type_][_vid_][_immediate_][_compile_][_private_]</td>
 					</tr>
 					_comment_
 					</table>
@@ -394,6 +394,9 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 					if (tos(1).compileonly) 
 						 push(pop().replace(/_compile_/,"COMPILE-ONLY")); 
 					else push(pop().replace(/_compile_/,""));
+					if (tos(1).private) 
+						 push(pop().replace(/_private_/,"PRIVATE")); 
+					else push(pop().replace(/_private_/,""));
 				</js> 
 				</o> 2drop ;
 
@@ -553,7 +556,6 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 				/// Example: 
 				///   help *     shows all words
 
-
 <js>
 	vm.cmdhistory = {
 		max:   100, // maximum length of the command history
@@ -630,22 +632,24 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 	    // document.onkeydown() reDef in 3htm/f/platform.f 
 		e = (e) ? e : event; var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 		switch(keycode) {
-			case  13: /* CR  */ if(event.ctrlKey){execute("run-inputbox");return(false)}return(true);
-			case  27: /* Esc */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
-			case 109: /* -   */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
-			case 107: /* +   */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
-			case 112: /* F1  */ if(tick('{F1}' )){execute('{F1}' );return(pop());} break;
-			case 113: /* F2  */ if(tick('{F2}' )){execute('{F2}' );return(pop());} break;
-			case 114: /* F3  */ if(tick('{F3}' )){execute('{F3}' );return(pop());} break;
-			case 115: /* F4  */ if(tick('{F4}' )){execute('{F4}' );return(pop());} break;
-			case 116: /* F5  */ if(tick('{F5}' )){execute('{F5}' );return(pop());} break;
-			case 117: /* F6  */ if(tick('{F6}' )){execute('{F6}' );return(pop());} break;
-			case 118: /* F7  */ if(tick('{F7}' )){execute('{F7}' );return(pop());} break;
-			case 119: /* F8  */ if(tick('{F8}' )){execute('{F8}' );return(pop());} break;
-			case 120: /* F9  */ if(tick('{F9}' )){execute('{F9}' );return(pop());} break;
-			case 121: /* F10 */ if(tick('{F10}')){execute('{F10}');return(pop());} break;
-			case 122: /* F11 */ if(tick('{F11}')){execute('{F11}');return(pop());} break;
-			case 123: /* F12 */ if(tick('{F12}')){execute('{F12}');return(pop());} break;
+			case  13: /* CR    */ if(event.ctrlKey){execute("run-inputbox");return(false)}return(true);
+			case  27: /* Esc   */ if(tick('{esc}')){execute('{esc}');return(pop());} break;
+			case 107: /* pad + */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
+			case 109: /* pad - */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
+			case 187: /* =     */ if(tick('{+}'  )){execute('{+}'  );return(pop());} break;
+			case 189: /* -     */ if(tick('{-}'  )){execute('{-}'  );return(pop());} break;
+			case 112: /* F1    */ if(tick('{F1}' )){execute('{F1}' );return(pop());} break;
+			case 113: /* F2    */ if(tick('{F2}' )){execute('{F2}' );return(pop());} break;
+			case 114: /* F3    */ if(tick('{F3}' )){execute('{F3}' );return(pop());} break;
+			case 115: /* F4    */ if(tick('{F4}' )){execute('{F4}' );return(pop());} break;
+			case 116: /* F5    */ if(tick('{F5}' )){execute('{F5}' );return(pop());} break;
+			case 117: /* F6    */ if(tick('{F6}' )){execute('{F6}' );return(pop());} break;
+			case 118: /* F7    */ if(tick('{F7}' )){execute('{F7}' );return(pop());} break;
+			case 119: /* F8    */ if(tick('{F8}' )){execute('{F8}' );return(pop());} break;
+			case 120: /* F9    */ if(tick('{F9}' )){execute('{F9}' );return(pop());} break;
+			case 121: /* F10   */ if(tick('{F10}')){execute('{F10}');return(pop());} break;
+			case 122: /* F11   */ if(tick('{F11}')){execute('{F11}');return(pop());} break;
+			case 123: /* F12   */ if(tick('{F12}')){execute('{F12}');return(pop());} break;
 			case   3: /* ctrl-break */ if(tick('{ctrl-break}')){execute('{ctrl-break}');return(pop());} break;
 		}
 		return (true); // pass down to following handlers

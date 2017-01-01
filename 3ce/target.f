@@ -25,6 +25,11 @@
     \ URL command line directly to tell it what to do.
 
 	vocabulary target.f also target.f definitions
+
+	\ 3ce target page's ~.html and ~.js are all covered by target.f 
+	\ jeforth.3ce.html is the index.html home page of popup page and extension pages, 
+	\ jeforth.3ce.js   is the Javascript portion of the jeforth.3ce.html home page.
+	\ jeforth.3ce.background.html is the index.html of the background page
 	
 	js: if($(".console3we").length)$(".console3we").remove() \ remove existing forth console
 
@@ -44,7 +49,7 @@
 				padding:20px;
 			}
 			.console3we div {
-				font: 20px "courier new";
+				font-family: courier new;
 			}
 			.console3we textarea {
 				width:100%;
@@ -54,6 +59,12 @@
 				background:#BBBBBB;
 			}
 		</style>
+		<style id=styleTextareaFocus type="text/css"> 
+			.console3we textarea:focus {
+				background:#E0E0E0;
+			}
+		</style>
+		
 		<div id=header>
 			<div style="font-family:verdana;">
 				<b><div class=appname style="letter-spacing:16px;color:#555555;">appname</div></b>
@@ -98,13 +109,13 @@
 			if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
 			if(vm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
 		}
-		vm.g["target.type"] = target_type;
+		vm[context]["target.type"] = target_type;
 
 		// onkeydown,onkeypress,onkeyup
 		// event.shiftKey event.ctrlKey event.altKey event.metaKey
 		// KeyCode test page http://www.asquare.net/javascript/tests/KeyCode.html
 		function target_onkeydown(e) {
-			// Initial version defined in 3ce/system/quit.f
+			// Initial version defined in 3ce/quit.f
 			e = (e) ? e : event; var keyCode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
 			switch(keyCode) {
 				case 13: /* Enter */
@@ -119,6 +130,10 @@
 		// with target page's original settings, 但這樣做最簡單。下面的 platform.f 還會
 		// 在條件成熟後用更完整的 keyboard handler 重新設定。
 		document.onkeydown = target_onkeydown; 	
+		
+		// Where there are outputbox and inputbox there is this function
+		vm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)};
+		
 	</js>
 	
 		
@@ -147,7 +162,7 @@
 
 	code run-inputbox ( -- ) \ Used in onKeyDown event handler.
 		// 當命令來自 local 就把 display 切回 local target page
-	    if(tick("target.type")) vm.type = vm.g["target.type"];
+	    if(tick("target.type")) vm.type = vm["target.f"]["target.type"];
 		var cmd = inputbox.value; // w/o the '\n' character ($10).
 		inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 		vm.cmdhistory.push(cmd);
@@ -157,8 +172,9 @@
 	
 	include f/misc.f		
 	include 3htm/f/hte.f
-	include 3htm/f/ls.f
+  \ include 3htm/f/ls.f
 
+ 
 	\ ------------ End of target.f -------------------
 	js: vm.screenbuffer=null \ turn off the logging
 	js: vm.scroll2inputbox();inputbox.focus()

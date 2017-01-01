@@ -120,7 +120,7 @@ Jeforth.3nd for Node.js can be a handy x86 CPU assembler (any other CPU too). We
 
 Demo: Excel automation
 ---------------------
-Use jeforth.3hta to manipulate Microsoft Office Excel spread sheets programmatically. It takes another short page for [[Demonstrations of excel automation]].
+Use jeforth.3hta to manipulate Microsoft Office Excel spread sheets programmatically. It takes another short page for [Demonstrations of excel automation](https://github.com/hcchengithub/jeforth.3we/wiki/Demonstrations-of-excel-automation).
 
 Please check out the wiki of jeforth.3we repository on GitHub.com for more information. This README has probably been too long already.
 

@@ -31,6 +31,12 @@
 
 	shell.application :> windows() 
 	constant ShellWindows // ( -- obj ) Shell Windows (File Explorer & Internet Explorer) object.
+.( After private support, ShellWindows is not vm.g.ShellWindows anymore. 2016/12/22 H.C. Chen ) cr
+.( It's now vm[context].ShellWindows or a better way to avoid using context which is volitile. ) cr
+*debug* under-constructing>>
+
+
+
 		/// 這個 collection 就是所有的 IE 以及 File Explorer windows. ShellWindows :> count 就是
 		/// 兩者頁面的總數。ShellWindows :> item(0,1,2,3...) 即 FE/IE objects (與 DOM window 不
 		/// 同)。ShellWindows 本身沒有開啟 IE 頁面的功能。我本來以為 ShellWindows :> count >= 1 
@@ -44,7 +50,7 @@
 	\ **Note** 有了 ShellWindows 可以隨時 access 所有的 FE/IE 頁面, 後三者都用不著了。
 	
 	: sw(i)				( i -- sw|null ) \ Get ShellWindow object of the indexed ShellWindow
-						js> vm.g.ShellWindows.item(parseInt(pop())) ;
+						ShellWindows :> item(parseInt(pop())) ;
 						/// IE,FE run 起來之前 sw 是 null 即 IE process 不存在。
 						/// 若把 window 都關掉: 0 sw(i) :> document.parentWindow 
 						/// :: close() 也會把 IE process 關掉, 0 sw(i) 就是 null。
@@ -61,7 +67,7 @@
 	0 value theIE // ( -- i ) Make ShellWindows.item(theIE) the default IE object.
 	
 	: sw 				( -- sw|null ) \ Get the ShellWindows.item(theIE) sw object
-						js> vm.g.ShellWindows.item(parseInt(vm.g.theIE)) ;
+						theIE ShellWindows :> item(parseInt(pop())) ;
 						/// ShellWindows collection 有可能跳空，sw(0) 是 null 即使 sw(1)
 						/// 有東西。 sw 存在,但沒有 connect 任何網址時 ReadyState 也是 4,
 						/// 也有 document, 但是 document 裡 innerHTML 是 undefined，這樣
