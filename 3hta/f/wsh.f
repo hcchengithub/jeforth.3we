@@ -106,17 +106,21 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				/// 其中 1 nap 讓 notepad 上手必要， 10000 nap 時間不足以讓 keys 倒完，結果前半段倒往 notepad 後半段倒往 jeforth.3hta 的 inputbox,不論 wait 是 true/false 都一樣,因為實驗做完 jeforth 有下 focus 奪回關注。
 				
 				
-: (run)			( "command-line" -- errorlevel ) \ Run anything like Win-R does and wait for the return.
-				<js> WshShell.run(pop(),5,true) </jsV> ;
+: (run)			( "command-line" -- errorlevel ) \ Silently run like Win-R and wait for the return.
+				<js> WshShell.run(pop(),7,true) </jsV> ;
 				/// See also run, (run), fork, (fork), dos, (dos).
 				/// Use run or dos if want the return value. 
+				/// 5 Activates the window and displays it in its current size and position. 
+				/// 7 Displays the window as a minimized window. The active window remains active. 
 
-: run			( <command-line> -- errorlevel ) \ Run anything like Win-R does and wait for the return.
-				char \n|\r word (run) ; interpret-only 
+: run			( <command-line> -- errorlevel ) \ Run like Win-R does and wait for the return.
+				char \n|\r word js> WshShell.run(pop(),5,true) ; interpret-only 
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
 				/// See also run, (run), fork, (fork), dos, (dos).
 				/// Use run or dos if want the return value. 
+				/// 5 Activates the window and displays it in its current size and position. 
+				/// 7 Displays the window as a minimized window. The active window remains active. 
 
 				<selftest> 
 					\ 這是個簡單明了的範例。
@@ -130,14 +134,14 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 					[d 112233,1,0 d] [p '(run)','run' p]
 				</selftest>
 
-: (fork)		( "command-line" -- ) \ Fork anything like Win-R does, fire and forget, no return value.
-				<js> WshShell.run(pop(),5,false) </js> ;
+: (fork)		( "command-line" -- ) \ Silently fork throug Win-R, fire and forget, no return value.
+				<js> WshShell.run(pop(),7,false) </js> ;
 				/// No return value, because the caller doesn't wait.
 				/// See also run, (run), fork, (fork), dos, (dos).
 				/// Use run or dos if want the return value. 
 
-: fork			( <command-line> -- ) \ Fork anything like Win-R does, fire and forget, no return value.
-				char \n|\r word (fork) ;
+: fork			( <command-line> -- ) \ Fork througn Win-R does, fire and forget, no return value.
+				char \n|\r word js: WshShell.run(pop(),5,false) ;
 				/// No return value, because the caller doesn't wait.
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
@@ -145,13 +149,15 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				/// Use run or dos if want the return value. 
 				/// Ex. fork chrome --allow-file-access-from-files
 
-: (dos) 		( "command-line" -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
-				s" cmd /c " swap + (run) ;
+: (dos) 		( "command-line" -- errorlevel ) \ Silently run DOS command-line and close. Errorlevel will return.
+				s" cmd /c " swap + js> WshShell.run(pop(),7,true) ;
 				/// See also run, (run), fork, (fork), dos, (dos).
 				/// Use run or dos if want the return value. 
-
+				/// Example: 
+				///   s' find "forth" jeforth.hta' (dos) .s
+				
 : dos			( <command-line> -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
-				char \n|\r word s" cmd /k " swap + (run) ;
+				char \n|\r word s" cmd /k " swap + js> WshShell.run(pop(),5,true) ;
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
 				/// See also run, (run), fork, (fork), dos, (dos).

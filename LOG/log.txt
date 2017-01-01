@@ -5443,27 +5443,20 @@
         [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
         [x] 3nd
         [x] 3ce
-        [ ] 3ca
-        
-    [ ] README.md 上的 demo 也要改寫好一點。最好能有浮動 console3we 框。
-        --> 先把結構改好, link 出去的內容先弄成 under constructing. 日起有功,穩步推進。
+        [x] 3ca
+    [ ] release note
+	[x] Testing all demo, calc.f does not work in 3ca due to the inline permission. Try to rewrite
+		event handlers of those buttons. Search "Refused to execute inline event handler" there's a
+		solution above (in log.txt). Solution is very viable. Avoid using onclick=anything
+		in HTML tags but using :
+			window.element的名字可以用中文！.onclick=function(){kvm.execute("wordname")}
+		that's very easy and doable. ==> Bingo!! new calc.f has done.
+	[x] setup.bat screen flashs badly, try not but beautiful progress info instead on the 3hta window.		
+		[x] done with (run) (fork) and (dos) <--- they are now silently run.
+		[x] Simplify setup.bat to use (dos) instead of (run)
         
 [/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
 	--> js: tick('<selftest>').enabled=false in every quit.f 
     --> 算了麻煩
 		
-[ ] setup.bat screen flashs badly, try not but beautiful progress info instead on the 3hta window.		
-[ ] Testing all demo, calc.f does not work in 3ca due to the inline permission. Try to rewrite
-    event handlers of those buttons.
-> js> vm.appname .
-jeforth.3htm OK 
-> <js>
-window._im = function(){kvm.execute('疊代法')}
-
-</js>
- OK 
-> js: im()
-JavaScript error : im is not defined
- OK 
-> js: _im()
- OK 		
+	

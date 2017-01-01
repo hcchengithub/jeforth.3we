@@ -1,7 +1,8 @@
 
 	s" calc.f" source-code-header
+	true  constant privacy // ( -- true ) All words in this module are private"
 
-	<o> 
+	<text> 
 		<style>
 			.calc table, .calc th, .calc td {
 				border: 1px solid #989898;
@@ -25,46 +26,46 @@
 			<caption><span style="font-family:DFKai-SB;font-size:40px;text-shadow: 2px 2px 3px #505050;">小算盤</span>
 			<span style="font-family:'Microsoft YaHei';">value 填初值， 改寫 formula 或點觸 x,y,z 疊代計算新值。</span></caption>
 			<tr>   
-				<th><input type=button value=Reset onclick="kvm.execute('清空')" /></th><th>Formula</th><th>Value</th><th>Remark</th>
+				<th><input type=button value=Reset id=清空 /*onclick="kvm.execute('清空')"*/ /></th><th>Formula</th><th>Value</th><th>Remark</th>
 			</tr>
 			<tr>
-				<td align=center><input type=button value='	   x	' onclick="kvm.execute('calculate-x')" /></td>
-				<td><input id=x type=text value='' onchange="kvm.execute('calculate-x')" /></td>
+				<td align=center><input type=button value='	   x	' id=xbtn /*onclick="kvm.execute('calculate-x')"*/ /></td>
+				<td><input id=x type=text value='' /*onchange="kvm.execute('calculate-x')"*/ /></td>
 				<td><input id=xvalue type=text value=0 /></td>
 				<td><input id=xremark size=70 type=text value='' /></td>
 			</tr>
 			<tr>
-				<td align=center><input type=button value='	   y	' onclick="kvm.execute('calculate-y')" /></td>
-				<td><input id=y type=text value='' onchange="kvm.execute('calculate-y')" /></td>
+				<td align=center><input type=button value='	   y	' id=ybtn /*onclick="kvm.execute('calculate-y')"*/ /></td>
+				<td><input id=y type=text value='' /*onchange="kvm.execute('calculate-y')"*/ /></td>
 				<td><input id=yvalue type=text value=0 /></td>
 				<td><input id=yremark size=70 type=text value='' /></td>
 			</tr>
 			<tr>
-				<td align=center><input type=button value='	   z	' onclick="kvm.execute('calculate-z')" /></td>
-				<td><input id=z type=text value='' onchange="kvm.execute('calculate-z')" /></td>
+				<td align=center><input type=button value='	   z	' id=zbtn /*onclick="kvm.execute('calculate-z')"*/ /></td>
+				<td><input id=z type=text value='' /*onchange="kvm.execute('calculate-z')"*/ /></td>
 				<td><input id=zvalue type=text value=0 /></td>
 				<td><input id=zremark size=70 type=text value='' /></td>
 			</tr>
 			<tr>
 				<td colspan=4> <input 
-						type=button 
-						onclick="kvm.execute('原始範例')" 
+						type=button id="原始範例"
+						/* onclick="kvm.execute('原始範例')" */
 						value="原始範例"
 					/>
 					<input 
-						type=button 
-						onclick="kvm.execute('歐元換算台幣')" 
+						type=button id="歐元換算台幣"
+						/* onclick="kvm.execute('歐元換算台幣')" */
 						value="歐元換算台幣"
 					/>
 					<input 
-						type=button 
-						onclick="kvm.execute('疊代法')" 
+						type=button id="疊代法"
+						/* onclick=newtonMethod */
 						value="3x² + 4x = 5, 求 x"
 					/>
 				</td>
 			</tr>
 		</table>
-	</o> drop
+	</text> /*remove*/ </o> drop
 
 	: 產生計算器 ( "variable-name" -- ) \ x y z 都由這個母機產生
 		create
@@ -112,6 +113,23 @@
 		<js> yremark.value='驗算'	 </js>
 		<js> zremark.value='英制身高五呎六吋記為 5.6, 按 z 換算成公分。' </js>
 	;
+
+	\ Chrome App version hits the permission violation "Refused to execute inline event handler".
+	\ Solution is not difficult. Just avoid using onclick=anything in HTML tags but using :
+	\ 	window.element的名字可以用中文！.onclick=function(){kvm.execute("wordname")}
+	\ that's very easy and viable.
+	<js>
+		window.原始範例.onclick 	= function(){kvm.execute('原始範例')}
+		window.歐元換算台幣.onclick = function(){kvm.execute('歐元換算台幣')}
+		window.疊代法.onclick 		= function(){kvm.execute('疊代法')}
+		window.清空.onclick  = function(){kvm.execute('清空')} 
+		window.xbtn.onclick  = function(){kvm.execute('calculate-x')}
+		window.x.onchange 	 = function(){kvm.execute('calculate-x')}
+		window.ybtn.onclick  = function(){kvm.execute('calculate-y')}
+		window.y.onchange    = function(){kvm.execute('calculate-y')}
+		window.zbtn.onclick  = function(){kvm.execute('calculate-z')}
+		window.z.onchange    = function(){kvm.execute('calculate-z')}
+	</js>
 	
 	char x 產生計算器 calculate-x
 	char y 產生計算器 calculate-y
