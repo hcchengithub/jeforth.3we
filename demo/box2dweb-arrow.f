@@ -29,7 +29,7 @@
 	</o> constant canvas // ( -- obj ) canvas for Box2dWeb
 
 	<h> 
-	<script type="text/javascript" src="external-modules/box2dweb/Box2dWeb-2.1.a.3.js"></script> 
+	<script type="text/javascript" src="external-modules/box2dweb/Box2dWeb-2.1.a.3.min.js"></script> 
 	</h> constant Box2dWeb // ( -- obj ) The Box2dWeb.js script element
 
 	<h> 

@@ -5427,7 +5427,7 @@
 	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
 		simply 'assembly' and then 'forth' to switch back.
 	
-[ ] 準備 release master 新版 release 新版 master
+[x] 準備 release master 新版 release 新版 master
     o search "kvm.minor_version" increase 版號。
         [x] jeforth.3nd.js --> version 203
         [x] 3nw, jeforth.3we/package.json version 223
@@ -5438,13 +5438,13 @@
         [x] jeforth.hta --> <HTA> tag. VERSION="204" 
         [/] jeforth.3ca, also jeforth.3htm.js above
     o selftest them all
+        [x] setup.bat
         [x] 3hta
         [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
         [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
         [x] 3nd
         [x] 3ce
         [x] 3ca
-    [ ] release note
 	[x] Testing all demo, calc.f does not work in 3ca due to the inline permission. Try to rewrite
 		event handlers of those buttons. Search "Refused to execute inline event handler" there's a
 		solution above (in log.txt). Solution is very viable. Avoid using onclick=anything
@@ -5454,6 +5454,26 @@
 	[x] setup.bat screen flashs badly, try not but beautiful progress info instead on the 3hta window.		
 		[x] done with (run) (fork) and (dos) <--- they are now silently run.
 		[x] Simplify setup.bat to use (dos) instead of (run)
+    [x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+        切換到Master分支 : git checkout master 
+        合併 develop 分支進 master 來 : git merge --no-ff develop 
+            Merge branch 'develop'
+            # Conflicts:
+            #	3ca/fig.tw128x128.png
+            #	3ca/fig.tw16x16.png
+            #	3hta/localstorage.json
+            #	3nw/localstorage.json
+            #
+            # It looks like you may be committing a merge.
+            # If this is not correct, please remove the file
+            #	.git/MERGE_HEAD
+            # and try again.
+            I plan to rm them all and copy them back from develop, and commit again.
+            他說我有問題的,很多不知何故,連 .png 都說是 conflict!? 解法是乾脆把它們都殺掉,因為確信 develop
+            版是沒問題的。先 git rm <所有 conflicts> 然後 commit 成功, 把這些檔案 copy 回來再 commit 一次
+            就可以解決。
+    [x] Test the master all over again ... pass        
+    [ ] release note
         
 [/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
 	--> js: tick('<selftest>').enabled=false in every quit.f 
