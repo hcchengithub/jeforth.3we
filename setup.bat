@@ -122,8 +122,8 @@ cd %~dp0
 	<o> <h1 style="text-align:center"> 
 	jeforth.3we application setup is successfully done </h1>
 	<h3 style="text-align:center">Automatically close in 30 seconds</h3> 
-	</o> drop 30000 nap
-	 0 bye 	\ TOS will be the errorlevel returned to DOS, 
+	</o> drop 0 ( errorlevel ) 30000 nap
+	bye 	\ TOS will be the errorlevel returned to DOS, 
 			\ errors were handeled above we don't need it.
 			
 \ ---------------- end jeforth code -----------------------
