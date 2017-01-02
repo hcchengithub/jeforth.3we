@@ -2389,7 +2389,9 @@
         ==> 這段 code is from index.html of jeforth.3htm, all others should follow this solution
         [x]3htm [x]3hta, [x]3nw, [x]3nd, 唯 3wsh 沒有 setTimeout 故無此必要。
 
-[ ] need a tool addr>word ( addr -- Word )
+[ ] need a tool addr>word ( addr -- Word ) for debugging, find the 
+	word through the given address.
+	
 [x] need a 'breath' compile-only command to suspend and resume immediately ===> 從 cr 下手，用 1 nap 達成。
     To avoid suddenly print a lot of things. 問題是 jeforth 本身就是 event driven 不靠 1 sleep
     根本上不了手。---> 除非讓 sleep 單獨用另一組 suspend-resume 或者每一組 suspend-resume 都有自己的 call-back。
@@ -5480,14 +5482,6 @@
         
 [ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
 	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
-[ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
-	After previous command the recent order[order.length-1] become new context. Purpose is to
-	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
-	process that rescan only the context. But there's a little difference through this way.
-	The previous context is not totally disappeared, only replaced with the new definitions from 
-	the new context. Un-replaced words are still visible instead of totally disappeared.
-	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
-		simply 'assembly' and then 'forth' to switch back.
 [ ] private support is good, but there are many event handlers like examples in ls.f
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
     will be not working because "call by name" and the name will be invisible after being not
@@ -5507,6 +5501,41 @@
         end-code
     and the line will become:
         ['] eb.readonly word>handler js: $(".ebreadonly",tos(n))[0].onclick=pop()
-    [ ] call by name must be reviewed.
+    [ ] call by name must be reviewed especially utility vocabularies.
         [x] ls.f privacy is true now.
+[ ] (.0r) Negative numbers become "0000-123", 
+	--> use Math.sign to fix it.
+[ ] <task> ... </task> does not work as expected. Remove them.
+	: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
+					char </task> word ; immediate
+					///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
+					///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
+					///	個則用 cut ... rewind 即可。
+					/// Ex. 
+					///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
+
+	: </task>		( "task" -- ... ) \ Delimiter of <task>
+					compiling if literal js: push(function(){dictate(pop())}) , 
+					else js: dictate(pop()) then ; immediate
+					/// See alternative method for command line by 'cut' and 'rewind'.
+	--> are they do-able? Is it possible to run interpret state tasks by using them?
+[x] many words in jeforth.f and 3htm/f/platform.f are now private	
+[ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
+	After previous command the recent order[order.length-1] become new context. Purpose is to
+	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
+	process that rescan only the context. Or even better a two-pass search of the target word,
+	in context and in wordhash if not found in context while context vocabulary word always has
+	its own wordhash ready
+	But there's a little difference through this way.
+	The previous context is not totally disappeared, only replaced with the new definitions from 
+	the new context. Un-replaced words are still visible instead of totally disappeared.
+	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
+		simply 'assembly'. If the order was [forth,misc] then all words in 'misc' were visible 
+		while after running 'assembly' only public words in 'misc' are visible because it's not
+		the context now. In contrast with traditional forth, all 'misc' words are invisible once
+		context switched to 'assembly'. That's not exactly the purpose of switching to 'assembly'!
+		So the new design is better. If I want to use vocabulary forth, misc, io, and math. I
+		simply execute "forth misc io math" instead of "also forth also misc also io also math".
+		However, the rear method is still workable as before.
+		
     

@@ -1,8 +1,8 @@
 
 
 \ hte.f 
-\ Editor commands for 3hta and 3nw to edit HTML documents directly
-\ in jeforth window.
+\ Editor commands for HTML based applications to edit HTML documents directly
+\ in jeforth window. As known as the Alt-F2 editor.
 	
 	\ 因為用到了 <code>escape <o>escape 所以要在 unindent.f 之後
 	\ 而不能併入 html5.f
@@ -15,15 +15,6 @@
 
 	null value div-hte // ( -- element ) The entire DIV node of the hte.
 	
-	\ Setup the handler of clicks that are poping up the hte.
-	<js>
-		document.body.onclick = function(){
-			push(true); // true let the river run, false stop bubbling
-			execute("single-click"); // execute() does nothing if undefined yet
-			return(pop()); // right-click ( flag -- ... flag' )
-		}
-	</js>
-
 	: unenvelope ( element -- firstNode ) \ Peel an element into its children nodes
 		( ele ) js> tos().childNodes.length ?dup if ( ele length ) 
 			( ele length ) js> tos(1).firstChild -rot ( first0 ele length ) 
@@ -140,13 +131,22 @@
 		js> window.getSelection().anchorNode ce! \ Get the anchorNode to ce.
 		ce@ edit-node false ( stop bubbling ) ;
 
-	: single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch hte
-		\ ['] {F2} :> EditMode div-hte not and if ( flag ) 
-		\ 	drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
-		\ 	{alt-f2} \ Launch hte
-		\ then 
-		; /// alt-f2 is good enough, single-click is annoying.
-
+		
+	\ : single-click ( flag -- flag' ) \ Single-click when in {F2} EditMode launch hte
+	\ 	['] {F2} :> EditMode div-hte not and if ( flag ) 
+	\ 		drop inputbox-edit-mode-off \ avlid clicked again when already in editing.
+	\ 		{alt-f2} \ Launch hte
+	\ 	then ; 
+	\ 	/// alt-f2 is good enough, single-click is annoying.
+	\ 	\ Setup the handler of clicks that are poping up the hte.
+	\ 	last <js>
+	\ 		document.body.onclick = function(){
+	\ 			push(true); // true let the river run, false stop bubbling
+	\ 			execute("single-click"); // execute() does nothing if undefined yet
+	\ 			return(pop()); // right-click ( flag -- ... flag' )
+	\ 		}
+	\ 	</js>
+		
 	: #text>html ( -- ) \ convert HTML tags in the ce #text node
 		ce@ if create-hte \ create div-hte
 		ce@ node-source js: htetextarea.value=pop() \ target source code

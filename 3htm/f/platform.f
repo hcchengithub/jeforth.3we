@@ -96,13 +96,13 @@ code run-inputbox ( -- ) \ <Enter> key's run time.
 				['] {F2} :: EditMode=true
 				<text> .console3we textarea:focus { 
 					border: 0px solid; background:#FFE0E0; /* pink indicating edit mode */
-				}</text> js: styleTextareaFocus.innerHTML=pop() ;
+				}</text> js: styleTextareaFocus.innerHTML=pop() ; private
 
 : inputbox-edit-mode-off ( -- ) 
 				['] {F2} :: EditMode=false
 				<text> .console3we textarea:focus { 
 					border: 0px solid; background:##E0E0E0;
-				}</text> js: styleTextareaFocus.innerHTML=pop() ;
+				}</text> js: styleTextareaFocus.innerHTML=pop() ; private
 				last execute \ default mode
 
 : toggle-inputbox-edit-mode ( -- ) \ One of the {F2} events
@@ -115,19 +115,19 @@ code run-inputbox ( -- ) \ <Enter> key's run time.
 : outputbox-edit-mode-on ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid red"</js>
-				js: outputbox.contentEditable=true ;
+				js: outputbox.contentEditable=true ; private
 				
 : outputbox-edit-mode-off ( -- ) \ One of the {F2} events
 				js> outputbox :> style ( outputbox.style )
 				<js> pop().border="thin solid white"</js>
-				js: outputbox.contentEditable=false ;
+				js: outputbox.contentEditable=false ; private
 				
 : toggle-outputbox-edit-mode ( -- ) \ Toggle outputbox edit mode.
 				js> outputbox.contentEditable!="true" if 
 					outputbox-edit-mode-on
 				else 
 					outputbox-edit-mode-off 
-				then ;
+				then ; private
 
 : {shift-f2}	( -- ) \ One of the {F2} events, toggle-outputbox-edit-mode
 				toggle-outputbox-edit-mode false ( false terminate bubbling ) ;
@@ -242,9 +242,10 @@ code {esc}		( -- false ) \ Inputbox keydown handler, clean inputbox
 						}
 						return (false);
 					}
-				</js> ;
+				</js> ; private
 				
-true value up/down-recall-needs-alt-key? // ( -- boolean ) An optional setting. Up/Down key to recall command history needs the Alt-key?
+true value up/down-recall-needs-alt-key? private
+				// ( -- boolean ) An optional setting. Up/Down key to recall command history needs the Alt-key?
 
 : {up}			( -- boolean ) \ Inputbox keydown handler, get previous command history.
 				js> event.altKey if 
@@ -401,7 +402,6 @@ code {Tab} 		( -- ) \ Inputbox auto-complete
 				</o> 2drop ;
 
 code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screened words
-				// execute("parser(words,help)"); var option = pop();
 				var spec = pop().replace(/\s+/g," ").split(" "); // [pattern,option,rests]
 				for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
 					push(order[j]); // vocabulary

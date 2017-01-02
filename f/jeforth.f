@@ -285,7 +285,7 @@ code private  ( -- ) \ Make the last word invisible when out of the context.
 code nonprivate  ( -- ) \ Make the last word non-private so it's globally visible.
 				last().private=false
 				end-code
-				/// The opposite is private.
+				/// The opposite of private.
                 
 				<selftest>
 					\ *** private marks the last word a private word
@@ -350,8 +350,6 @@ code reveal		( -- ) \ Add the last word into wordhash
 						js> last().name [d "~(create)~" d] [p "(create)","char" p]
 				</selftest>
 
-\ [ ] /// was here
-
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
 code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space.
 code CR 		push("\n") end-code // ( -- '\n' ) NewLine is ASCII 10(0x0A)
@@ -374,7 +372,7 @@ code jsEval 	( "js code" -- result ) \ Evaluate the given JavaScript statements,
 				} catch(err) {
 				  panic("JavaScript error : "+err.message+"\n", "error");
 				};
-				end-code
+				end-code private
 				
 				<selftest>
 					*** jsEval should eval(tos) and return the last statement's value
@@ -387,7 +385,7 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 				} catch(err) {
 				  panic("JavaScript error : "+err.message+"\n", "error");
 				};
-				end-code
+				end-code private
 
 				<selftest>
 					*** jsEvalNo should eval(tos) but won't return any value
@@ -442,11 +440,11 @@ code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that
 						    // 已經不平衡了,算了。因為 ['"/] 裡又可能有 escape char 目前不夠周全。
 					}
 				}
-				end-code
+				end-code private
 
 code jsFuncNo	( "js code" -- function ) \ Compile JavaScript to a function()
 				eval("push(function(){" + pop() + "})"); 
-				end-code
+				end-code private
 
 code [          compiling=false end-code immediate // ( -- ) 進入直譯狀態, 輸入指令將會直接執行 *** 20111224 sam
 code ]          compiling=true end-code // ( -- ) 進入編譯狀態, 輸入指令將會編碼到系統 dictionary *** 20111224 sam
@@ -787,8 +785,11 @@ code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The 
 						[d 3,-2 d] [p "max","min" p]
 				</selftest>
 
-code doVar      push(ip); ip=rstack.pop(); end-code compile-only // ( -- a ) 取隨後位址 a , runtime of created words
-code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code compile-only // ( -- ) next's runtime.
+code doVar      push(ip); ip=rstack.pop(); end-code compile-only private
+				// ( -- a ) 取隨後位址 a , runtime of created words
+code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code 
+				compile-only private 
+				// ( -- ) next's runtime.
 code ,          comma(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
 				<selftest>
@@ -873,7 +874,7 @@ code colon-word	( -- ) \ Decorate the last() as a colon word.
 				// last().type = "colon";
 				last().cfa = here;
 				last().xt = colonxt;
-				end-code
+				end-code private
 
 : create		( <name> -- ) \ Create a new word. The new word is a variable by default.
 				BL word (create) reveal colon-word compile doVar ;
@@ -946,7 +947,8 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 \ ------------------ eforth colon words ---------------------------
 
 ' != alias <>	// ( a b -- f ) 比較 a 是否不等於 b, alias of !=.
-\ ' \s alias stop // ( -- ) Samething as \s, stop outer loop hopefully stop everything.
+' nonprivate alias public /// alias of nonprivate
+
 code nip		pop(1) end-code // ( a b -- b ) 
 code rot		push(pop(2)) end-code // ( w1 w2 w3 -- w2 w3 w1 ) 
 				/// see rot -rot roll pick
@@ -1259,14 +1261,14 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 				</selftest>
 
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
-				js: panic(pop()+'\n') abort ;
+				js: panic(pop()+'\n') abort ; private
 
 : abort"		( <msg>	-- ) \ Through an error message and abort the forth VM
 				char " word literal BL word drop compile "msg"abort ;
 				immediate compile-only
 
 : "msg"?abort	( "errormsg" flag -- ) \ Conditional panic with error message and abort the forth VM
-				if "msg"abort else drop then ;
+				if "msg"abort else drop then ; private
 
 : ?abort"       ( f <errormsg> -- ) \ Conditional abort with an error message.
 				char " word literal BL word drop
@@ -1281,14 +1283,15 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 \ 費了一番功夫寫就能 nested 的 <text> 及 <comment> , 開發心得在 Ynote 上
 \ search "jeforth.3we design a nesting supported〈text〉also〈comment〉"
 
-variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, for indirect call.
+variable '<text> private
+				// ( -- <text> ) Variable reference to the <text> Word object, for indirect call.
                     
 : (<text>)		( <text> -- "text"+"</text>" ) \ Auxiliary <text>, handles nested portion
                 '<text> @ execute ( string ) \ 此時 TIB 非 </text> 即行尾
 				BL word char </text> = ( string is</text>? )
 				if \ 剛才撞上了 </text> ( string )
 					s" </text> " + ( string1' )
-				then ;
+				then ; private
                 /// (<text>) is almost same as <text> but it consumes the 
                 /// next </text> in TIB and returns <text> + "</text>"
 
@@ -1315,6 +1318,7 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				compiling if literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
+\ Ready to add comment to 'privacy' 
 <text> 
  Example 'privacy' definition for a vocabulary. Assume current == context.
  false constant privacy // ( -- true ) All words in this module are public
@@ -1637,10 +1641,11 @@ code (.r)		( num|str n -- "  num|str" ) \ Right adjusted num|str in n characters
 				} while(n>0);
 				push(i);
 				end-code
+				
 : .r			( num|str n -- ) \ Print right adjusted num|str in n characters (FigTaiwan SamSuanChen)
 				(.r) . ;
 				
-code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+code (.0r)      ( num|str n -- "0000num|str" ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
@@ -1659,9 +1664,12 @@ code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n character
 				// type(minus+i);
 				push(minus+i);
 				end-code
-				/// Limitation: Negative numbers are printed in a strange way. e.g. "0000-123".
-				/// We need to take care of that separately.
-: .0r (.0r) . ;
+				/// Negative numbers become "0000-123".
+				
+: .0r 			( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+				(.0r) . ;
+				/// Negative numbers are printed in a strange way. e.g. "0000-123".
+
 				<selftest>
 					<comment> .r 是 FigTaiwan 爽哥那兒抄來的。 JavaScript 本身就有 
 					number.toString(base) 可以任何 base 印出數值。base@ base! hex 
@@ -1691,11 +1699,11 @@ code dropall    stack=[] end-code // ( ... -- ) Clear the data stack.
 					1 2 3 4 5 dropall depth 0= [d true d] [p "dropall","0=" p]
 				</selftest>
 
-code (ASCII)    push(pop().charCodeAt(0)) end-code // ( str -- ASCII ) Get a character's ASCII code.
-code ASCII>char ( ASCII -- 'c' ) \ number to character
+code (ASCII)    push(pop().charCodeAt(0)) end-code // ( str -- ASCII ) Get str[0]'s ASCII code.
+code ASCII>char ( ASCII -- 'c' ) \ ASCII code number to character
 				push(String.fromCharCode(pop())) end-code
 				/// 65 ASCII>char tib. \ ==> A (string)
-: ASCII			( <str> -- ASCII ) \ Get a character's ASCII code.
+: ASCII			( <str> -- ASCII ) \ Get <str>[0]'s ASCII code.
 				BL word (ASCII) compiling if literal then
 				; immediate
 
@@ -1708,19 +1716,6 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 					[d 97,'b',99 d] [p '(ASCII)', 'ASCII>char', "ASCII" p]
 					---
 				</selftest>
-
-: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
-				char </task> word ; immediate
-				///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
-				///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
-				///	個則用 cut ... rewind 即可。
-				/// Ex. 
-				///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
-
-: </task>		( "task" -- ... ) \ Delimiter of <task>
-				compiling if literal js: push(function(){dictate(pop())}) , 
-				else js: dictate(pop()) then ; immediate
-				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
 				var count=stack.length, basewas=vm.forth.base;
@@ -2009,7 +2004,7 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 					case null: type('RET');break;
 					case "": type('EXIT');break;
 					default: type(x);
-				}; end-code
+				}; end-code private
 
 : (dump)		( addr -- ) \ dump one cell of dictionary
 				decimal dup 5 .0r s" : " . dup (?) s"  (" . js> mytypeof(dictionary[pop()]) . s" )" . cr ;
@@ -2106,9 +2101,7 @@ code passed		( -- ) \ List words their sleftest flag are 'pass'.
 
 \ -------------- Debugger : set breakpoint to a colon word -------------------------
 
-js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
-
-\ 0 value breakPoint // ( -- ip ) jsc breakpoint address
+js> inner constant fastInner private // ( -- inner ) Original inner() without breakpoint support
 
 code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
@@ -2162,7 +2155,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 						// (*debug*) must be a colon word so as to use this trick.
 						tib = ""; ntib = ip = 0; 
 					}
-				</js> ;
+				</js> ; private
 				/// 'q' command to quit debugging
 code q			( -- ) \ Quit *debug*
 				type("\n ---- Leaving *debug* ----\n");
@@ -2203,7 +2196,8 @@ code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 					if(!w) panic("Error! " + a[i] + "?\n");
 					else w.selftest='pass';
 				}
-				end-code
+				end-code private
+				
 : [r 			( <"text"> -- ) \ Prepare an array of data to compare with rstack in selftest.
 				char r] word js> eval("["+pop()+"]") to expected_rstack ;
 : r] 			( -- boolean ) \ compare rstack and expected_rstack in selftest
@@ -2224,6 +2218,7 @@ code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 <selftest>
 	*** End of kernel self-test
 	[d d] [p 'accept', 'refill', '***' p]
+	~~selftest~~
 </selftest>
 
 \ jeforth.f kernel code is now common for different application. I/O may not ready enough to read 
