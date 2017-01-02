@@ -5415,18 +5415,6 @@
 		-------- forth (4 words) --------
 		[x]base [x]breakPoint [x]args [x]up/down-recall-needs-alt-key? 
 
-[ ] Do we need a command to inhibit any new tib commands during nap / sleep ?
-[ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
-	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
-[ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
-	After previous command the recent order[order.length-1] become new context. Purpose is to
-	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
-	process that rescan only the context. But there's a little difference through this way.
-	The previous context is not totally disappeared, only replaced with the new definitions from 
-	the new context. Un-replaced words are still visible instead of totally disappeared.
-	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
-		simply 'assembly' and then 'forth' to switch back.
-	
 [x] 準備 release master 新版 release 新版 master
     o search "kvm.minor_version" increase 版號。
         [x] jeforth.3nd.js --> version 203
@@ -5473,10 +5461,52 @@
             版是沒問題的。先 git rm <所有 conflicts> 然後 commit 成功, 把這些檔案 copy 回來再 commit 一次
             就可以解決。
     [x] Test the master all over again ... pass        
+    [x] Master 到回 develop
+        切換到Master分支 : git checkout develop
+        合併 develop 分支進 master 來 : git merge --no-ff master
     [ ] release note
         
 [/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
 	--> js: tick('<selftest>').enabled=false in every quit.f 
     --> 算了麻煩
-		
-	
+[/] Do we need a command to inhibit any new tib commands during nap / sleep ?
+    --> to avoid stack/rstack or whatever system things to be changed during napping in waiting 
+        I/O. Sounds necessary, but how? --> where to add this line?
+            if(kvm.tick("sleep").timeoutId) return; // sleep if for I/O, avoid 
+    --> Add a 'sleeping' variable to project-k jeforth.js kernel to replace using 
+        kvm.tick("sleep").timeoutId if outer() and dictate() are the right places to inhibit
+        executing during sleeping.
+    Let it be, abort, no actual reason so far.
+        
+[ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
+	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
+[ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
+	After previous command the recent order[order.length-1] become new context. Purpose is to
+	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
+	process that rescan only the context. But there's a little difference through this way.
+	The previous context is not totally disappeared, only replaced with the new definitions from 
+	the new context. Un-replaced words are still visible instead of totally disappeared.
+	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
+		simply 'assembly' and then 'forth' to switch back.
+[ ] private support is good, but there are many event handlers like examples in ls.f
+        <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
+    will be not working because "call by name" and the name will be invisible after being not
+    the context. My idea is to have a word, say 'word>handler' that output a handler function. So,
+        code word>handler ( word -- handler() ) \ Pack the word into an event handler
+            push((new Handler(pop())));
+            function Handler(w) {
+                var eventHandler = w;
+                return(
+                    function(e){
+                        push(this);
+                        execute(eventHandler);
+                        return(false);
+                    }
+                )
+            }
+        end-code
+    and the line will become:
+        ['] eb.readonly word>handler js: $(".ebreadonly",tos(n))[0].onclick=pop()
+    [ ] call by name must be reviewed.
+        [x] ls.f privacy is true now.
+    
