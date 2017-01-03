@@ -5520,6 +5520,11 @@
 					/// See alternative method for command line by 'cut' and 'rewind'.
 	--> are they do-able? Is it possible to run interpret state tasks by using them?
 [x] many words in jeforth.f and 3htm/f/platform.f are now private	
+	[ ] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
+		So not only execute("callByName") in trouble, tick("name") too!!!
+		--> Let execute() and tick() to warn if the target word is a private word when
+			selftest is on.
+
 [ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
 	After previous command the recent order[order.length-1] become new context. Purpose is to
 	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
@@ -5537,5 +5542,39 @@
 		So the new design is better. If I want to use vocabulary forth, misc, io, and math. I
 		simply execute "forth misc io math" instead of "also forth also misc also io also math".
 		However, the rear method is still workable as before.
-		
-    
+	[ ] If use two-pass search, then all words need to be searched twice. Consider the cost!
+	
+
+[ ] 3ce, list-tabs hang up !!!		
+[ ] setup.bat should not include private folder. If want to include private folder separately do 
+	it manually.
+	[ ] Need a command to make many tokens alias of \ comment, useful for batch program.
+	
+    : tt char \n|\r word :> split(/\s+/) ;
+	char \n|\r word :> split(/\s+/) ( array ) 
+	
+	: (aliases) ( Word [array] -- ) \ Make array of tokens to be aliases of the Word
+				js> tos().length ( w a length ) ?dup if for ( w a )
+					\ create one alias word
+						js> tos().pop() ( w a name ) (create) reveal ( w a )
+					\ copy from predecessor, arrays and objects are by reference
+						<js> for(var i in tos(1)) last()[i] = tos(1)[i]; </js>
+					\ touch up
+						<js>
+							last().type = "alias";
+							last().predecessor = last().name;
+							last().name = newname;
+						</js>
+				next then ( w a ) 2drop ;
+				/// Used in DOS box batch programs for jeforth to ignore DOS words.
+
+	: aliases	( Word <name1 name2 ... > -- ) \ Make following tokens be aliases of the Word
+				char \n|\r word :> split(/\s+/) ( Word array ) (aliases) ; 
+				/// Used in DOS box batch programs for jeforth to ignore DOS words.
+	
+[x] \r|\n  and \n|\r are different! char \r|\n word :> split(/\s+/) may having a ending
+	extra null string. ---> no, see log.txt beginning. The recent problem has been fixed
+	by using a dummy to the string.
+	
+[ ] 	
+	

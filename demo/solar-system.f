@@ -5,7 +5,7 @@ cls
 include processing.f
 
 vocabulary solar-system.f also solar-system.f definitions
-true  constant privacy // ( -- true ) All words in this module are private"
+true  constant privacy private // ( -- true ) All words in this module are private"
 
 marker ~~~
 	

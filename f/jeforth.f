@@ -351,8 +351,8 @@ code reveal		( -- ) \ Add the last word into wordhash
 				</selftest>
 
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
-code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space.
-code CR 		push("\n") end-code // ( -- '\n' ) NewLine is ASCII 10(0x0A)
+code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space, works with 'word' command.
+code CR 		push("\n|\r") end-code // ( -- '\n' ) RegEx new line, works with 'word' command.
 				/// Also String.fromCharCode(10) in JavaScript
 
 				<selftest>
@@ -788,7 +788,7 @@ code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The 
 code doVar      push(ip); ip=rstack.pop(); end-code compile-only private
 				// ( -- a ) 取隨後位址 a , runtime of created words
 code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code 
-				compile-only private 
+				compile-only nonprivate 
 				// ( -- ) next's runtime.
 code ,          comma(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
@@ -1321,8 +1321,8 @@ variable '<text> private
 \ Ready to add comment to 'privacy' 
 <text> 
  Example 'privacy' definition for a vocabulary. Assume current == context.
- false constant privacy // ( -- true ) All words in this module are public
- true  constant privacy // ( -- true ) All words in this module are private
+ false constant privacy private // ( -- true ) All words in this module are public
+ true  constant privacy private // ( -- true ) All words in this module are private
 </text> ' privacy :: comment=pop()
 				
 \ If <comment> hits <comment> in TIB then it drops string1 
@@ -2101,7 +2101,7 @@ code passed		( -- ) \ List words their sleftest flag are 'pass'.
 
 \ -------------- Debugger : set breakpoint to a colon word -------------------------
 
-js> inner constant fastInner private // ( -- inner ) Original inner() without breakpoint support
+js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
 
 code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
@@ -2155,7 +2155,7 @@ code bp			( <address> -- ) \ Set breakpoint in a colon word. See also 'bd','be'.
 						// (*debug*) must be a colon word so as to use this trick.
 						tib = ""; ntib = ip = 0; 
 					}
-				</js> ; private
+				</js> ;
 				/// 'q' command to quit debugging
 code q			( -- ) \ Quit *debug*
 				type("\n ---- Leaving *debug* ----\n");

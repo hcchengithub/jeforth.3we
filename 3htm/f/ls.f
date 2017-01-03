@@ -2,7 +2,7 @@
 	\ Maintain source code in HTML5 local storage directly
 
 	s" ls.f"		source-code-header
-    true  constant privacy // ( -- true ) All words in this module are private"
+    true  constant privacy private // ( -- true ) All words in this module are private"
 
 	\   localStorge 以及 storage.all() 的格式定義為:
     \   

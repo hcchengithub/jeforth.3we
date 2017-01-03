@@ -1,4 +1,4 @@
-: @rem ; ' \ dup alias echo dup alias @echo dup alias @echo. dup alias @goto dup alias :end dup alias jeforth.hta dup alias @rem dup alias cd alias call
+: @rem ; ' \ aliases echo @echo @echo. @goto :end jeforth.hta @rem cd call @if :ERR pause :END
 cd %~dp0
 @rem 
 @rem   S e t u p . b a t 
@@ -50,16 +50,15 @@ cd %~dp0
 	: ahf ( s <filename> -- s' ) \ ah plus _f with filename
 		BL word swap ( filename s ) ah :> replace(/_f/g,pop()) ;
 	: setup-common-folders ( -- ) \ Setup jeforth common folders
-		s" mklink /d _a\log 			_h\log              " ah (dos)  1 ckp
-		s" mklink /d _a\3htm 			_h\3htm             " ah (dos)  2 ckp
-		s" mklink /d _a\demo 			_h\demo             " ah (dos)  3 ckp
-		s" mklink /d _a\external-modules _h\external-modules " ah (dos)  4 ckp
-		s" mklink /d _a\f 				_h\f                " ah (dos)  5 ckp
-		s" mklink /d _a\js 				_h\js               " ah (dos)  6 ckp
-		s" mklink /d _a\playground 		_h\playground       " ah (dos)  7 ckp
-		s" mklink /d _a\project-k 		_h\project-k        " ah (dos)  8 ckp
-		s" mklink /d _a\private 		_h\private          " ah (dos)  9 ckp
-		s" mklink /d _a\doc             _h\doc              " ah (dos) 10 ckp
+		s" mklink /d _a\log 			_h\log              " ah (dos) 1 ckp
+		s" mklink /d _a\3htm 			_h\3htm             " ah (dos) 2 ckp
+		s" mklink /d _a\demo 			_h\demo             " ah (dos) 3 ckp
+		s" mklink /d _a\external-modules _h\external-modules" ah (dos) 4 ckp
+		s" mklink /d _a\f 				_h\f                " ah (dos) 5 ckp
+		s" mklink /d _a\js 				_h\js               " ah (dos) 6 ckp
+		s" mklink /d _a\playground 		_h\playground       " ah (dos) 7 ckp
+		s" mklink /d _a\project-k 		_h\project-k        " ah (dos) 8 ckp
+		s" mklink /d _a\doc             _h\doc              " ah (dos) 9 ckp
 		;
 
 \ 3ca	Chrome Applications
