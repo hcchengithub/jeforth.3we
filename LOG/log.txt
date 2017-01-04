@@ -5610,4 +5610,4 @@
 	--> readTextFile suspected again ... yes it is the criminal due to:
 		> char manifest.json readTextFileAuto . \ {F7}
 		dummy,doc,f,3htm/f,3htm/canvas,3htm,3ce,playground OK 	<--- problem! the file is not read correctly
-		
+	--> trace back develop versions...	
