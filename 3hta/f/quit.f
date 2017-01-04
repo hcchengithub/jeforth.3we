@@ -48,8 +48,10 @@
     
 	\ Do we have jobs from command line to do?
 	args [if] \ Yes, disable self-test.
+		warning-off
 		js: tick('<selftest>').enabled=false
 	[else] \ No, so we do the self-test.
+		warning-on
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] js: tick('<selftest>').buffer="" \ recycle the memory
 	

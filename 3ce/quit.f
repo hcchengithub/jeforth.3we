@@ -37,8 +37,10 @@
 	\
 
 	args [if] \ jobs to do, disable self-test.
+		warning-off
 		js: tick('<selftest>').enabled=false
 	[else] \ no job, do the self-test.
+		warning-on
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert
 	[then] 
 	js: tick('<selftest>').buffer="" \ recycle the memory

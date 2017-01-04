@@ -819,7 +819,7 @@ code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The 
 code doVar      push(ip); ip=rstack.pop(); end-code compile-only private
 				// ( -- a ) 取隨後位址 a , runtime of created words
 code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code 
-				compile-only nonprivate 
+				compile-only
 				// ( -- ) next's runtime.
 code ,          comma(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
@@ -937,8 +937,10 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 				end-code
 : marker     	( <name> -- ) \ Create marker <name>. Run <name> to forget itself and all newers.
 				BL word (marker) ;
-code next       comma(tick("doNext"));dictionary[here++]=pop(); end-code immediate compile-only // ( -- ) for ... next (FigTaiwan SamSuanChen)
-
+code next       ( -- ) \ for ... next (FigTaiwan SamSuanChen)
+				comma(vm.tick("doNext")); // use original tick() to avoid warning
+				dictionary[here++]=pop(); 
+				end-code immediate compile-only 
 code cls		( -- ) \ Clear jeforth console screen
 				vm.screenbuffer = (vm.screenbuffer==null) ? null : "";
 				vm.clearScreen();
@@ -1290,16 +1292,23 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 					-%-%-%-%-%-
 					[d true,true,true d] [p 'value','to' p]
 				</selftest>
+				
+\ This word works fine. But doing this for letting doNext be a private is carried way too far.
+\ : next		( -- ) \ for ... next (FigTaiwan SamSuanChen)
+\ 				['] doNext , js: dictionary[here++]=pop() ; immediate compile-only
+\ 				\ Redefine after js: and ['] to allow doNext be private
 
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
-				js: panic(pop()+'\n') abort ; private
+				js: panic(pop()+'\n') abort ; nonprivate
+				\ needed to compose variables into the errormsg
 
 : abort"		( <msg>	-- ) \ Through an error message and abort the forth VM
 				char " word literal BL word drop compile "msg"abort ;
 				immediate compile-only
 
 : "msg"?abort	( "errormsg" flag -- ) \ Conditional panic with error message and abort the forth VM
-				if "msg"abort else drop then ; private
+				if "msg"abort else drop then ; nonprivate
+				\ needed to compose variables into the errormsg
 
 : ?abort"       ( f <errormsg> -- ) \ Conditional abort with an error message.
 				char " word literal BL word drop
@@ -2203,10 +2212,12 @@ code q			( -- ) \ Quit *debug*
 				/// colon definition 的半途，此時 q 要下成 [ q ] , .s 要下成 
 				/// [ .s ] ... etc
 
-
-				
-				
 \ ----------------- Self Test -------------------------------------
+: warning-on	( -- ) \ Turn on run-time warnings 
+				js: tick=vm.g.selftest_tick;execute=vm.g.selftest_execute ;
+: warning-off	( -- ) \ Turn off run-time warnings
+				js: tick=vm.tick;execute=vm.execute ;
+				
 "" value description     ( private ) // ( -- "text" ) description of a selftest section
 [] value expected_rstack ( private ) // ( -- [..] ) an array to compare rstack in selftest
 [] value expected_stack  ( private ) // ( -- [..] ) an array to compare data stack in selftest

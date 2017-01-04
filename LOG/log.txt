@@ -5572,11 +5572,12 @@
 	by using a dummy to the string.
 	
 [x] many words in jeforth.f and 3htm/f/platform.f are now private	
-	[ ] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
+	[x] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
 		So not only execute("callByName") in trouble, tick("name") too!!!
-	[ ]	Let execute() and tick() to warn if the target word is a private word when
+		--> let doNext be a public, it'll be carried too far to make it private.
+	[x]	Let execute() and tick() to warn if the target word is a private word when
 		selftest is on. That warning only appear in selftest on mode so they are different 
-		versions when selftest is on. Refer to fastInner() and debugInner(), jeforth.js functions
+		versions. Refer to fastInner() and debugInner(), jeforth.js functions
 		can be replaced very easily.
 		--> This idea works! tick = vm.g.selftest_tick = function tick(name) catches private words
 			Warning! private word description referenced by name in tick()!
@@ -5584,7 +5585,7 @@
 			Warning! private word expected_stack referenced by name in tick()!
 			Warning! private word test-result referenced by name in tick()!
 			Warning! private word [all-pass] referenced by name in tick()!		
-		[/]	These private words are only used in the same module, make them be private
+		[x]	These private words are only used in the same module, make them be private
 			at the end of the module :
 			' description 	  :: private=true
 			' expected_rstack :: private=true
@@ -5593,21 +5594,20 @@
 			' [all-pass] 	  :: private=true
 			--> this is annoying, because then we can't make the word private when define it.
 				Use this idea when in jeforth.f to avoid warnings is fine.
-
-			[ ]	Also, provide executeAbs(vid,w) and tickAbs(vid,w) 	
+		==> Done, default only warning when in selftest mode. 
+			warning-on to turn on the run-time warning any time.
 	[ ] need a word 'all' to scan all words so they are all public temporarily. So 'all words' 
 		lists all words.
+	[ ]	what if to have executeAbs(vid,w) and tickAbs(vid,w) 	
 		
-[ ] 3nd selftest failed at 
+[x] 3nd selftest failed at 
 		Including fs.f
-		Error! "msg"abort unknown.
-
-		 -------- Following Instructions --------
-		 0 : EXIT
-		 1 : (space) ( -- " " ) Put a space on TOS.
-		 2 : . ( sth -- ) Print number or string on TOS.
-		 3 : RET
-		 -------------- Forth Stacks ------------
-		 rstack[]:0  stack[]:0
-		Panic jsc>	
+		Error! "msg"abort unknown. <---- can't be private.
+		
+[ ] 3ce attach target tab in trouble again now!!
+	--> search "attach 3ce to target page does not work" above for how to debug.
+	--> F7 or (dictate) both need attach the target tab first, try them: --> both work!!!
+	--> readTextFile suspected again ... yes it is the criminal due to:
+		> char manifest.json readTextFileAuto . \ {F7}
+		dummy,doc,f,3htm/f,3htm/canvas,3htm,3ce,playground OK 	<--- problem! the file is not read correctly
 		
