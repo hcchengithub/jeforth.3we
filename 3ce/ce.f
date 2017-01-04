@@ -216,7 +216,7 @@
 		/// shooo! avoid echoing the entire source code.
 	
 	: install ( <pathname> -- )  \ Install forth source code to tabid.
-		char \n|\r word (install) ;
+		CR word (install) ;
 
 	: first-tab ( -- objTab ) \ Get first tab (the leftest) of Chrome browser.
 		js: push({"index":0}) tabs.query :> [0] ;

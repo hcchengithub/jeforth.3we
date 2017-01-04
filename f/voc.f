@@ -294,7 +294,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				</selftest>
 
 : help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
-				char \r|\n word ( spec )
+				CR word ( spec )
 				js> tos().length if 
 					<js>
 					var spec = pop();

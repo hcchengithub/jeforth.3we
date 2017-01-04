@@ -5519,11 +5519,6 @@
 					else js: dictate(pop()) then ; immediate
 					/// See alternative method for command line by 'cut' and 'rewind'.
 	--> are they do-able? Is it possible to run interpret state tasks by using them?
-[x] many words in jeforth.f and 3htm/f/platform.f are now private	
-	[ ] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
-		So not only execute("callByName") in trouble, tick("name") too!!!
-		--> Let execute() and tick() to warn if the target word is a private word when
-			selftest is on.
 
 [ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
 	After previous command the recent order[order.length-1] become new context. Purpose is to
@@ -5576,5 +5571,43 @@
 	extra null string. ---> no, see log.txt beginning. The recent problem has been fixed
 	by using a dummy to the string.
 	
-[ ] 	
-	
+[x] many words in jeforth.f and 3htm/f/platform.f are now private	
+	[ ] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
+		So not only execute("callByName") in trouble, tick("name") too!!!
+	[ ]	Let execute() and tick() to warn if the target word is a private word when
+		selftest is on. That warning only appear in selftest on mode so they are different 
+		versions when selftest is on. Refer to fastInner() and debugInner(), jeforth.js functions
+		can be replaced very easily.
+		--> This idea works! tick = vm.g.selftest_tick = function tick(name) catches private words
+			Warning! private word description referenced by name in tick()!
+			Warning! private word expected_rstack referenced by name in tick()!
+			Warning! private word expected_stack referenced by name in tick()!
+			Warning! private word test-result referenced by name in tick()!
+			Warning! private word [all-pass] referenced by name in tick()!		
+		[/]	These private words are only used in the same module, make them be private
+			at the end of the module :
+			' description 	  :: private=true
+			' expected_rstack :: private=true
+			' expected_stack  :: private=true
+			' test-result 	  :: private=true
+			' [all-pass] 	  :: private=true
+			--> this is annoying, because then we can't make the word private when define it.
+				Use this idea when in jeforth.f to avoid warnings is fine.
+
+			[ ]	Also, provide executeAbs(vid,w) and tickAbs(vid,w) 	
+	[ ] need a word 'all' to scan all words so they are all public temporarily. So 'all words' 
+		lists all words.
+		
+[ ] 3nd selftest failed at 
+		Including fs.f
+		Error! "msg"abort unknown.
+
+		 -------- Following Instructions --------
+		 0 : EXIT
+		 1 : (space) ( -- " " ) Put a space on TOS.
+		 2 : . ( sth -- ) Print number or string on TOS.
+		 3 : RET
+		 -------------- Forth Stacks ------------
+		 rstack[]:0  stack[]:0
+		Panic jsc>	
+		

@@ -156,7 +156,7 @@ s" git.f"   source-code-header
         s" cd " project-name + </shell> then ; 
 
     : cd ( <...> -- ) \ The DOS command 'change directory'.
-        s" cd " char \n|\r word + </shell> ;
+        s" cd " CR word + </shell> ;
         
     : (cd) ( "..." -- ) \ The DOS command 'change directory'.
         s" cd " swap + </shell> ;
@@ -167,7 +167,7 @@ s" git.f"   source-code-header
 		/// 改大寫避免老是誤用
 
     : dir ( <...> -- ) \ The DOS command 'View directory'.
-        s" dir " char \n|\r word + </shell> ;
+        s" dir " CR word + </shell> ;
         /// 'ls' to list repository.
         
     : init ( -- ) \ Create a new git repository at the current directory
@@ -193,7 +193,7 @@ s" git.f"   source-code-header
         /// 行下達指令執行。例如: git gc
 
     : clone ( <'URI'> -- ) \ New a repository, which is from URI, at the current folder
-        s" git clone " char \n|\r word + </shell> ;
+        s" git clone " CR word + </shell> ;
         ///     git clone 將遠端儲存庫複製到本地，並建立工作目錄與本地儲存庫，
         /// 也就是 .git 資料夾。
         ///     Example: clone https://github.com/figtaiwan/forthtranspiler
@@ -258,7 +258,7 @@ s" git.f"   source-code-header
     \   -0 代表有 0 個「刪除」的檔案將被建立一個版本
 
     : add ( <...> -- ) \ Add file(s) into the cache of the repo (the project)
-        s" git add " char \n|\r word + </shell> ;
+        s" git add " CR word + </shell> ;
         /// 注意，pathname 有分大小寫，靠，弄錯了沒有 warning 等你自己慢慢發現！
         /// Usage: add name1 name2 ... , wild card '*', '?' and '.' supported.
         /// 'add' 把檔案加進 tracked 且進 cache 準備 commit。原本是 tracked 或
@@ -268,7 +268,7 @@ s" git.f"   source-code-header
         /// "git add ." 會將所有檔案(含子目錄)加入到 working directory 的索引中。
 
     : commit ( <...> -- ) \ Save the cache into the repository. 把 tracked files 都 commit 進 repository.
-        s" git commit " char \n|\r word + </shell> ;
+        s" git commit " CR word + </shell> ;
         /// Usage: commit [-m "Descriptions"]
         /// 先用 'add' 把檔案加進 cache 才 commit 得到它。原本是 tracked 或
         /// untracked 都得經過 add 才會進 cache。別以為只有新檔才需要 add 因
@@ -338,7 +338,7 @@ s" git.f"   source-code-header
         /// "git log -10" to see only the recent 10 commits
 
     : 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從「最後的 commit」裡恢復回來。
-        s" git checkout -- " char \n|\r word + </shell> ;
+        s" git checkout -- " CR word + </shell> ;
         /// 若要把檔案退回到指定的版本則用另一種寫法: 
         /// git checkout <master|commitId> path/Gruntfile.js
         last alias retrieve
@@ -350,11 +350,11 @@ s" git.f"   source-code-header
         /// 以回復到上一版，然後再重新合併一次引發相同的衝突。
 
     : ls ( <[-u or other options]> -- ) \ Like dir of DOS, list all files of the repository.
-        s" git ls-files " char \n|\r word + </shell> ;
+        s" git ls-files " CR word + </shell> ;
         /// "ls -u" to list conflict files then use "diff [filepath]" to see the details.
 
     : ls-remote ( -- ) \  'ls' but regarding the remote repo.
-        s" git ls-remote " char \n|\r word + </shell> ;
+        s" git ls-remote " CR word + </shell> ;
         /// ls-remote 顯示特定 remote repo 的 reference 名稱。包含
         /// remote branchs 與 remote tags.
 
@@ -392,12 +392,12 @@ s" git.f"   source-code-header
 		/// Also : list-all-branch 含 remote server 上的也列出來。
         
     : create-branch ( <...> -- ) \ Create a new branch e.g. 用來 commit 剛改的東西以供實驗。
-        s" git branch " char \n|\r word + </shell> ;
+        s" git branch " CR word + </shell> ;
         /// * 不必先 commit，故可以 commit 到新 branch 去，新的所以可以。
 		/// git branch ...
         
     : checkout-to-new-branch ( [<...>] -- ) \ checkout to a new branch e.g. 用來 commit 剛改的東西以供實驗。
-        s" git checkout -b " char \n|\r word + </shell> ;
+        s" git checkout -b " CR word + </shell> ;
         /// * 不必先 commit，故可以 commit 到新 branch 去，新的所以可以。
 		/// git checkout -b ...
 		/// Example:
@@ -422,7 +422,7 @@ s" git.f"   source-code-header
 
         
     : switch-branch ( <branch name> -- ) \ Switch to another branch which is existing.
-        s" git checkout " char \n|\r word + </shell> ;
+        s" git checkout " CR word + </shell> ;
         /// "switch branch" and "switch commit" and "checkout" are the same.
         /// [ ] 不必先 commit，故現有的 cache 可以 commit 到別的 branch 去。其實
         /// 就是 checkout 某個 commit。
@@ -449,7 +449,7 @@ s" git.f"   source-code-header
     \ 第 09 天：比對檔案與版本差異
 
     : diff ( <[id1] [--cached] [id2]> -- ) \ List differences between comments.
-        s" git diff " char \n|\r word + </shell> ;
+        s" git diff " CR word + </shell> ;
         /// diff               => 工作目錄 vs 索引
         /// diff HEAD          => 工作目錄 vs HEAD (代表最新版本 or commit)
         /// diff --cached HEAD => 索引     vs HEAD
@@ -521,7 +521,7 @@ s" git.f"   source-code-header
     \ 找到之後再用 git diff [filepath] 就可以僅比對其中一個檔案了：
 
     : merge ( <from commit> -- ) \ Merge the commit(s) into the recent HEAD
-        s" git merge " char \n|\r word + </shell> ;
+        s" git merge " CR word + </shell> ;
 		/// 新的 GitHub for Windows 有 tutorial https://guides.github.com/introduction/flow/ 
 		/// 圖解說明 branch > pull request > merge 的流程。
 
@@ -549,7 +549,7 @@ s" git.f"   source-code-header
         /// 設值相同。
     
     : push ( [<options>] -- ) \ Upload local repo up to the remote repo
-        s" git push " char \n|\r word + </shell> ;
+        s" git push " CR word + </shell> ;
         ///     假設本地是 GitHub 上 clone 下來的，第一次 upload 所用的命令
         /// 是：git push origin master 。當你第二次建立版本時，直接執行 git push 
         /// 就會自動上傳成功。
@@ -579,7 +579,7 @@ s" git.f"   source-code-header
     \         然後直接將現有的本地 Git 儲存庫上傳到指定的 GitHub 專案
 
     : remote ( <...> -- ) \ 對 GitHub 操作
-        s" git remote " char \n|\r word + </shell> ;
+        s" git remote " CR word + </shell> ;
         ///     本地若非 clone 下來的，就必須告訴本地 Git 遠端儲存庫在哪。而如
         /// 果 GitHub 上的 repo 又是空的，這時我們可以輸入:
         ///     git remote add origin https://bla/bla/bla.git
@@ -594,7 +594,7 @@ s" git.f"   source-code-header
         /// 主要目的是用來代表一個遠端儲存庫的 URL 位址。
 
     : pull ( <...> -- ) \ Get repo from GitHub and merge to local.
-        s" git pull " char \n|\r word + </shell> ;
+        s" git pull " CR word + </shell> ;
         /// 將遠端儲存庫的 master 分支取回，並合併到本地儲存庫的 master 分支:
         /// 使用 git pull origin master 指令
         /// git pull 將遠端儲存庫的最新版下載回來，下載的內容包含完整的物件儲
@@ -644,7 +644,7 @@ s" git.f"   source-code-header
         \ 收拾起來更費勁。
 		
     : fetch  ( <...> -- ) \ Get repo from GitHub w/o merge.
-        s" git fetch " char \n|\r word + </shell> ;
+        s" git fetch " CR word + </shell> ;
         /// 將遠端儲存庫的 master 分支取回，並合併到本地儲存庫的 master 分支:
         /// 使用 git fetch 指令後再執行 git merge origin/master 合併動作。
         ///     git fetch 將遠端儲存庫的最新版下載回來，下載的內容包含完整的
@@ -687,7 +687,7 @@ s" git.f"   source-code-header
     </comment>
     
     : 手動加入一個「遠端儲存庫」 ( <tagName> <URI> -- )
-        s" git remote add " char \n|\r word + </shell> ;
+        s" git remote add " CR word + </shell> ;
         /// 事實上你可以在你的工作目錄中，建立多個遠端儲存庫的參照位址。
         /// 看不太懂。see 第 25 天：使用 GitHub 遠端儲存庫 - 觀念篇
     
@@ -703,7 +703,7 @@ s" git.f"   source-code-header
         /// http://jlord.us/git-it/challenges-zhtw/get_git.html
 
     : config ( <[...]> -- ) \ The 'git config' general
-        s" git config " char \n|\r word + </shell> ;
+        s" git config " CR word + </shell> ;
 
     : list-config ( -- ) \ List the entire configuarations
         <shell> git config -l</shell> ; 
@@ -723,12 +723,12 @@ s" git.f"   source-code-header
         /// 這個用不著，灌 "GitHub for Windows" 的過程已經搞定。
         
     : untrack ( <file>... -- ) \ Untrack, remove a file from repo w/o deleting it
-        s" git rm --cached " char \n|\r word + </shell> ;
+        s" git rm --cached " CR word + </shell> ;
         last alias unstage
         /// 當初是 add 命令 track 進去的，用 git rm --cached filename 脫離。
         
     : untrack-folder ( <name>... -- ) \ Untrack, remove a directory from repo w/o deleting it
-        s" git rm --cached -r " char \n|\r word + </shell> ;
+        s" git rm --cached -r " CR word + </shell> ;
         last alias unstage-folder
         /// 當初是 add 命令 track 進去的，用 git rm --cached -r pathname 脫離。
 

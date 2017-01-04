@@ -49,7 +49,8 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js
                     last().wid = current_word_list().length-1;
                     last().type = 'code';
                     last().help = newhelp;
-                    execute("privacy"); last().private = Boolean(pop()); // support private word
+                    vm.execute("privacy"); // use the original execute() to avoid warning
+					last().private = Boolean(pop()); // support private word
                     wordhash[last().name]=last();
                     compiling  = false;
                 }                
@@ -163,6 +164,33 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js
 						if(resuming) w = dictionary[ip];
 					} while(ip && resuming); // ip==0 means resuming has done
 				}
+				
+				// Referenced by name warning when execute(),tick() on a private word.
+				// vm.tick is the original version which is used sometimes like in 'all-pass'.
+				tick = vm.g.selftest_tick = function tick(name) {
+					// selftest version defined in jeforth.f
+					var w = wordhash[name] || 0; // 0 means 'not found'
+					if (w && w.private)
+						panic("Warning! private word "+w.name+" referenced by name in tick()!\n",true); 
+					return w;
+				}
+				
+				// Referenced by name warning when execute(),tick() on a private word.
+				// vm.execute is the original version which is used sometimes like in '(create)'.
+				execute = vm.g.selftest_execute = function execute(entry) { 
+					// selftest version defined in jeforth.f 
+					var w, calledByName = typeof entry == "string"; 
+					if (w = phaseA(entry)){
+						if(typeof(w)=="number") {
+							panic("Error! please use inner("+w+") instead of execute("+w+").\n","severe");
+							return;
+						}
+						if (calledByName && typeof(w)=="object" && w.private)
+							panic("Warning! private word "+w.name+" called by name in execute()!\n",true); 
+						phaseB(w); 
+					}
+				}
+				
 				end-code _init_
 
 code version    ( -- revision ) \ print the greeting message and return the revision code
@@ -336,7 +364,8 @@ code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added 
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
 				last().type = "colon-create";
-				execute("privacy");last().private = Boolean(pop());
+				vm.execute("privacy"); // use the original execute() to avoid warning
+				last().private = Boolean(pop());
 				end-code
 
 code reveal		( -- ) \ Add the last word into wordhash
@@ -352,7 +381,7 @@ code reveal		( -- ) \ Add the last word into wordhash
 
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
 code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space, works with 'word' command.
-code CR 		push("\n|\r") end-code // ( -- '\n' ) RegEx new line, works with 'word' command.
+code CR 		push("\\n|\\r") end-code // ( -- '\n' ) RegEx new line, works with 'word' command.
 				/// Also String.fromCharCode(10) in JavaScript
 
 				<selftest>
@@ -361,8 +390,8 @@ code CR 		push("\n|\r") end-code // ( -- '\n' ) RegEx new line, works with 'word
 						[d true d] [p "(space)","=" p]
 					*** BL should return the string '\s' literally
 						BL [d "\\s" d] [p "BL" p]
-					*** CR should return a new line character
-						CR js> String.fromCharCode(10) = 
+					*** CR should return the string \n|\r literally
+						CR js> "\\n|\\r" = 
 						[d true d] [p "CR","=" p]						
 				</selftest>
 
@@ -529,10 +558,12 @@ code ;          ( -- ) \ End of the colon definition.
 				end-code immediate compile-only
 
 code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
-				push(tick(pop())) end-code
+				push(vm.tick(pop())) // use the original tick() to avoid warning
+				end-code
 
 code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Word object on TOS.
-				push(tick(nexttoken())) end-code
+				push(vm.tick(nexttoken())) // use the original tick() to avoid warning
+				end-code
 
 
 				<selftest>
@@ -1575,7 +1606,7 @@ code (run:) 	( "..if.." -- "..[if].." ) \ Run string with "if","begin","for" in 
 				/// I like to use "if" in interpret mode directly instead of "[if]" and
 				/// to merge them is difficult to me so far. So I defined this word.
 : run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
-				char \r|\n word (run:) ; interpret-only
+				CR word (run:) ; interpret-only
 				/// To run multiple lines use <text>...</text> (run:) or "run>" instead of "run:".
 				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 : run> 			( <string> -- ... ) \ Run multiple lines with "if","begin","for", in interpret mode
@@ -1804,7 +1835,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				/// "" pattern is exact name. 
 
 : words			( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
-				js> context char \r|\n word ( forth line )
+				js> context CR word ( forth line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
 				js> tos()[0] swap js> tos()[1] nip (words) <js>
 					var word_list = pop();
@@ -1830,7 +1861,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				last :: comment+=tick("(words)").comment
 
 : help			( <["pattern" [-t|-T|-n|-f]]> -- ) \ Print the help of screened words
-				js> context char \n|\r word ( voc pattern )
+				js> context CR word ( voc pattern )
 				js> tos().length if 
 					dup char * = if drop "" then (help) .
 				else
@@ -2176,13 +2207,13 @@ code q			( -- ) \ Quit *debug*
 				
 				
 \ ----------------- Self Test -------------------------------------
-"" value description private // ( -- "text" ) description of a selftest section
-[] value expected_rstack private // ( -- [..] ) an array to compare rstack in selftest
-[] value expected_stack private // ( -- [..] ) an array to compare data stack in selftest
-0  value test-result private // ( -- boolean ) selftest result from [d .. d] 
-[] value [all-pass] private // ( -- ["words"] ) array of words for all-pass in selftest
+"" value description     ( private ) // ( -- "text" ) description of a selftest section
+[] value expected_rstack ( private ) // ( -- [..] ) an array to compare rstack in selftest
+[] value expected_stack  ( private ) // ( -- [..] ) an array to compare data stack in selftest
+0  value test-result     ( private ) // ( -- boolean ) selftest result from [d .. d] 
+[] value [all-pass]      ( private ) // ( -- ["words"] ) array of words for all-pass in selftest
 : *** 			( <description> -- ) \ Start a selftest section
-				char \n|\r word trim
+				CR word trim
 				<js> "*** " + pop() + " ... " </jsV> to description
 				depth if 
 					description . ." aborted" cr 
@@ -2192,7 +2223,7 @@ code q			( -- ) \ Quit *debug*
 code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 				var a=pop();
 				for (var i in a) {
-					var w = tick(a[i]);
+					var w = vm.tick(a[i]); // use the original tick()
 					if(!w) panic("Error! " + a[i] + "?\n");
 					else w.selftest='pass';
 				}
@@ -2214,6 +2245,14 @@ code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 				char p] word js> eval("["+pop()+"]") to [all-pass] ; /// In selftest
 : p] 			( -- boolean ) \ all-pass if test-result
 				test-result if [all-pass] all-pass then ; /// In selftest
+				
+				\ Make these words private. Do it this way instead of at their definitions 
+				\ to void selftest_tick() warnings
+				' description 	  :: private=true
+				' expected_rstack :: private=true
+				' expected_stack  :: private=true
+				' test-result 	  :: private=true
+				' [all-pass] 	  :: private=true
 
 <selftest>
 	*** End of kernel self-test

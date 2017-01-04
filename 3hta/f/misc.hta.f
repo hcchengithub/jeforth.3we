@@ -50,7 +50,7 @@
 		/// Used in DOS box batch program for jeforth to ignore DOS words.
 
 	: aliases	( Word <name1 name2 ... > -- ) \ Make following tokens be aliases of the Word
-		char \n|\r word s"  dummy" + :> split(/\s+/) 
+		CR word s"  dummy" + :> split(/\s+/) 
 		js: tos().pop() \ drop the dummy
 		( Word array ) (aliases) ; 
 		/// Used in DOS box batch program for jeforth to ignore DOS words.

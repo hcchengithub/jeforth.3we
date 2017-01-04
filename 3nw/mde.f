@@ -192,7 +192,7 @@
 
 	: md ( <pathname> -- ) \ Edit the given Markdown article
 		md.div ( md )
-		char \n|\r word trim ( md pathname ) 
+		CR word trim ( md pathname ) 
 		js: $('.mdpathname',tos(1))[0].value=pop() ( md )
 		js> $('.mdpathname',pop())[0] md.load ;
 		/// Change font-size

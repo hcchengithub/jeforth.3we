@@ -428,7 +428,7 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 				///   help ! -n  shows words with '!' in their name
 
 : help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
-                char \n|\r word js> tos().length if 
+                CR word js> tos().length if 
 					js> tos()=='*' if drop "" then
 					(help) 
 				else

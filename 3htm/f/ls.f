@@ -404,7 +404,7 @@
 		/// If the field has been opened then jump to it.
 		
     : ed ( <field name> -- ) \ Edit local storage field
-		char \n|\r word (ed) ; nonprivate
+		CR word (ed) ; nonprivate
 		/// A new name creates a new field.
 		/// If field name is null string then do nothing
 		/// If the field has been opened then jump to it.
@@ -422,7 +422,7 @@
 
 	: full-screen ( [<fieldname>] -- ) \ Open a new 3ce tab and edit box alone for the field 
 		\ 取得 fieldname from TIB or the last EditBox
-			char \r|\n word trim js> tos().length if else 
+			CR word trim js> tos().length if else 
 				drop js> $(".eb").length js> tos()==0 ?abort" Which field?" 
 				1- ( i ) js> $(".eb")[pop()] ( eb )
 				js> $(".ebname",pop())[0].value ( name )
@@ -450,7 +450,7 @@
 		js> storage.get(pop()).doc tib.append ;
 		
 	: run ( <local storage field name> -- ) \ Run local storage source code.
-		char \n|\r word trim (run) ;
+		CR word trim (run) ;
 		/// 一整行都當 field name 可以有空格。
 		
 	: type>textarea ( "string" "class" -- ) \ Type the string into a textarea in outputbox
@@ -470,7 +470,7 @@
 		///   js> $("textarea")[n].value import \ you find the n in prior
 		
 	: export-one-field ( <field-name> -- ) \ Export the local storage field in JSON format into a textarea in outputbox
-		char \n|\r word (export-one-field) ;
+		CR word (export-one-field) ;
 		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field。
 		
 	: export ( -- ) \ Export entire local storage in JSON format into a textarea in outputbox.
@@ -499,7 +499,7 @@
 		/// 本來就會自動 save-restore localStorage。
 		
 	: import ( [<pathname.json>] -- ) \ Import entire pathname.json or default if absent
-		char \r|\n word trim ( pathname ) 
+		CR word trim ( pathname ) 
 		js> tos()=="" if \ use default 
 			drop js> vm.appname :> match(/(.+)\.(.+)/) :> [2] ( 3ca|3htm|3nw|3hta )
 			char private/ swap + char .json +
@@ -584,7 +584,7 @@
         ///   js> storage.get("field-name") (see)
 
 	: dump ( <pathname> -- ) \ Dump local storage edit box fields 
-		char \r|\n word (dump) ; nonprivate
+		CR word (dump) ; nonprivate
 		/// Dump localStorage if the given pathname is missing.
 		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
 		/// 可以 restore 回來。非 edit box editable 的 objects 不含。
