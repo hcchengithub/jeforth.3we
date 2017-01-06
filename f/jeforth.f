@@ -165,6 +165,17 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js
 					} while(ip && resuming); // ip==0 means resuming has done
 				}
 				
+				
+				// Scan given VID into wordhash{}
+				vm.g.scan_vocabulary = function (v,isContext) { 
+					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
+						// skip the last() to avoid unexpected 'reveal'.
+						if (compiling && last()==words[v][i]) continue; 
+						// skip private words unless in context
+						if (isContext || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
+					}
+				}
+				
 				// Referenced by name warning when execute(),tick() on a private word.
 				// vm.tick is the original version which is used sometimes like in 'all-pass'.
 				tick = vm.g.selftest_tick = function tick(name) {
@@ -502,19 +513,17 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {}; context = order[order.length-1];
-				scan_vocabulary("forth",false); // forth always available
+				vm.g.scan_vocabulary("forth",false); // forth always available
 				for (var j=0; j<order.length-1; j++) 
-					scan_vocabulary(order[j],false); // The latter the higher priority
-				scan_vocabulary(context,true); // The context has the highest priority
-				function scan_vocabulary(v,isContext) { // skip private words but all words of context
-					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
-						// skip the last() to avoid unexpected 'reveal'.
-						if (compiling && last()==words[v][i]) continue; 
-						if (isContext || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
-					}
-				}
+					vm.g.scan_vocabulary(order[j],false); // The latter the higher priority
+				vm.g.scan_vocabulary(context,true); // The context has the highest priority
 				end-code
 
+code all 		( -- ) \ Temporarily make all private words public, so "all words" shows them all.
+				for (var j=0; j<order.length; j++) 
+					vm.g.scan_vocabulary(order[j],true); // The latter the higher priority
+				end-code
+				
 code (forget) 	( -- ) \ Forget the last word
 				if (last().cfa) here = last().cfa;
 				words[current].pop(); // drop the last word
@@ -1785,19 +1794,42 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					---
 				</selftest>
 
-code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
+code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
+				var vid=pop(), aa = [], bb = [], j=1; // vid[0] always 0, start from 1.
+				// get the raw list
+				for (var i in wordhash) 
+					if (wordhash[i].vid==vid) aa.push(wordhash[i]);
+				// sort aa by wid to be bb
+				while (aa.length) { 
+					for (i=0; i<aa.length; i++) {
+						if (aa[i].wid<=j) {
+							bb.push(aa.splice(i,1)[0]);
+							break;
+						}
+					}
+					if (vm.debug && i>=aa.length) 
+						// warning, rare case like ' code.wid is 7 because reDef'ed
+						debugger; 
+					j += 1;
+				}
+				push(bb);
+				end-code
+				
+: word_select	( "vid" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
+				rot dup wordhash>array ( "pattern" "option" "vid" array )
+				<js> 
+                var word_list = pop();
+                var vid = pop();
 				var option = pop();
 				var pattern = pop();
-                var vid = pop();
 				var result = [];
-                var word_list = [];
                 var isContext = order[order.length-1] == vid;
                 // Remove private words unless in context
-                for (var i=1; i<words[vid].length; i++) {
-                    if (isContext || !words[vid][i].private) 
-                        word_list.push(words[vid][i]);
-                }
-				for(var i=1; i<word_list.length; i++) {
+                // for (var i=0; i<words[vid].length; i++) {
+                //     if (isContext || !words[vid][i].private) 
+                //         word_list.push(words[vid][i]);
+                // }
+				for(var i=0; i<word_list.length; i++) {
 					if (!pattern) { 
                         // no pattern is all public
                         result.push(word_list[i]); 
@@ -1834,8 +1866,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 							}
 					}
 				}
-				push(result);
-				end-code
+				push(result); </js> ;
 				/// Options: 
 				/// -f pattern matches all names, helps and comments. Case insensitive.
 				/// -n pattern in name. Case insensitive.
@@ -1843,22 +1874,23 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				/// -T pattern is exact type.
 				/// "" pattern is exact name. 
 
+
 : words			( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
 				js> context CR word ( forth line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
-				js> tos()[0] swap js> tos()[1] nip (words) <js>
+				js> tos()[0] swap js> tos()[1] nip word_select <js>
 					var word_list = pop();
 					var w = "";
 					for (var i=0; i<word_list.length; i++) w += word_list[i].name + " ";
 					type(w);
 				</js> ;
 				/// Original version in jeforth.f
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 				/// An empty pattern matches all words.
 
 : (help)		( "word-list" "[pattern [-t|-T|-n|-f]]" -- "msg" ) \ Get help message of screened words
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
-				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
+				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) word_select ( [words...] )
 				<js>
 					var word_list = pop();
 					for (var ss="",i=0; i<word_list.length; i++) {
@@ -1867,7 +1899,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 					};ss
 				</jsV> ;
 				/// Original version in jeforth.f
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 
 : help			( <["pattern" [-t|-T|-n|-f]]> -- ) \ Print the help of screened words
 				js> context CR word ( voc pattern )
@@ -1903,7 +1935,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 					] :> general_help . cr
 				then ;
 				/// Original version in jeforth.f
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 				/// A pattern of star '*' matches all words.
 				/// Example: 
 				///   help * <-- show help of all words
@@ -1913,12 +1945,12 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				<selftest>
 					<text>
 					本來 words help 都接受 RegEx 的，可是不好用。現已改回普通 non RegEx pattern. 只動
-					(words) 就可以來回修改成 RegEx/non-RegEx.
+					word_select 就可以來回修改成 RegEx/non-RegEx.
 					</text> drop
 
-					*** help words (words)
+					*** help words word_select
 					marker ---
-					: test ; // testing help words and (words) 32974974
+					: test ; // testing help words and word_select 32974974
 					/// 9247329474 comment
 					js: vm.selftest_visible=false;vm.screenbuffer=""
 					\ help test -N
@@ -1930,8 +1962,8 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 					words test -f
 					<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
-					js: vm.selftest_visible=true
-					[d true,true,true,true,true d] [p '(words)', 'words' p]
+					js: vm.selftest_visible=true;
+					[d true,true,true,true,true d] [p 'word_select', 'words' p]
 					---
 				</selftest>
 
@@ -2095,11 +2127,9 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 							type("---------- End of the definition -----------\n");
 						}
 					} else {
-						for(var i in w){
-							if (typeof(w[i])!="function") continue;
-							// if (i=="selfTest") continue;
-							push(i); dictate("16 .r s'  :\n' .");
-							type(w[i]+"\n");
+						if (typeof w.xt == "function") {
+							push("xt"); dictate("16 .r s'  :\n' .");
+							type(w.xt+"\n");
 						}
 					}
 					if (w.comment != undefined) type("\ncomment:\n"+w.comment+"\n");

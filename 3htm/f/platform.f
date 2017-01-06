@@ -407,7 +407,7 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 					push(order[j]); // vocabulary
 					push(spec[0]||""); // pattern
 					push(spec[1]||""); // option
-					execute("(words)"); // [words...]
+					execute("word_select"); // [words...]
 					var word_list = pop();
 					var voc = "\n--------- " + order[j] +" ("+ word_list.length + " words) ---------\n";
 					// 印出
