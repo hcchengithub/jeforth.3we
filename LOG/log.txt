@@ -5635,3 +5635,9 @@
 			合併 develop 分支進 master 來 : git merge --no-ff master
 		[ ] release note
 [ ] setup.bat to create one more folder	: jeforth.3htm 
+[x] git.f in trouble now, due to (fork) definition changed, it's quiet now, is that the root cause?
+		> launch-git-shell
+		JavaScript error on word "(fork)" : Invalid procedure call or argument
+	==> No! git.f doesn't know the Git Shell path. That needs manual setup by editing git.f
+		and I didn't do that for this computer yet.
+		
