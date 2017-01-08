@@ -125,7 +125,7 @@
 			}
 		}
 	})()
-</text> constant jsc.xt.hta // ( -- source code ) jsc.xt for HTA
+</text> constant jsc.xt.hta private // ( -- source code ) jsc.xt for HTA
 <text>
 	(function(){
 		inputbox.value = ""; // for erase command
@@ -168,7 +168,7 @@
 		vm.jsc.bottom();
 		debugger;
 	})()
-</text> constant jsc.xt.F12 // ( -- source code ) jsc.xt for F12 debugger
+</text> constant jsc.xt.F12 private // ( -- source code ) jsc.xt for F12 debugger
 
 js> vm.appname char jeforth.3hta = [if]
 	\ 3hta

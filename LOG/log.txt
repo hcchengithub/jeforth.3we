@@ -2389,7 +2389,9 @@
         ==> 這段 code is from index.html of jeforth.3htm, all others should follow this solution
         [x]3htm [x]3hta, [x]3nw, [x]3nd, 唯 3wsh 沒有 setTimeout 故無此必要。
 
-[ ] need a tool addr>word ( addr -- Word )
+[ ] need a tool addr>word ( addr -- Word ) for debugging, find the 
+	word through the given address.
+	
 [x] need a 'breath' compile-only command to suspend and resume immediately ===> 從 cr 下手，用 1 nap 達成。
     To avoid suddenly print a lot of things. 問題是 jeforth 本身就是 event driven 不靠 1 sleep
     根本上不了手。---> 除非讓 sleep 單獨用另一組 suspend-resume 或者每一組 suspend-resume 都有自己的 call-back。
@@ -5415,18 +5417,6 @@
 		-------- forth (4 words) --------
 		[x]base [x]breakPoint [x]args [x]up/down-recall-needs-alt-key? 
 
-[ ] Do we need a command to inhibit any new tib commands during nap / sleep ?
-[ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
-	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
-[ ] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
-	After previous command the recent order[order.length-1] become new context. Purpose is to
-	switch context faster. Switch context inevitably triggers a wordhash rescan, but it's a faster
-	process that rescan only the context. But there's a little difference through this way.
-	The previous context is not totally disappeared, only replaced with the new definitions from 
-	the new context. Un-replaced words are still visible instead of totally disappeared.
-	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
-		simply 'assembly' and then 'forth' to switch back.
-	
 [x] 準備 release master 新版 release 新版 master
     o search "kvm.minor_version" increase 版號。
         [x] jeforth.3nd.js --> version 203
@@ -5473,10 +5463,181 @@
             版是沒問題的。先 git rm <所有 conflicts> 然後 commit 成功, 把這些檔案 copy 回來再 commit 一次
             就可以解決。
     [x] Test the master all over again ... pass        
-    [ ] release note
+    [x] Master 到回 develop
+        切換到Master分支 : git checkout develop
+        合併 develop 分支進 master 來 : git merge --no-ff master
+    [x] release note
         
 [/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
 	--> js: tick('<selftest>').enabled=false in every quit.f 
     --> 算了麻煩
-		
+[/] Do we need a command to inhibit any new tib commands during nap / sleep ?
+    --> to avoid stack/rstack or whatever system things to be changed during napping in waiting 
+        I/O. Sounds necessary, but how? --> where to add this line?
+            if(kvm.tick("sleep").timeoutId) return; // sleep if for I/O, avoid 
+    --> Add a 'sleeping' variable to project-k jeforth.js kernel to replace using 
+        kvm.tick("sleep").timeoutId if outer() and dictate() are the right places to inhibit
+        executing during sleeping.
+    Let it be, abort, no actual reason so far.
+        
+[ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
+	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
+[x] private support is good, but there are many event handlers like examples in ls.f
+        <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
+    will be not working because "call by name" and the name will be invisible after being not
+    the context. My idea is to have a word, say 'word>handler' that output a handler function. So,
+        code word>handler ( word -- handler() ) \ Pack the word into an event handler
+			... snip ...
+        end-code
+    and the line will become:
+        ['] eb.readonly word>handler js: $(".ebreadonly",tos(n))[0].onclick=pop()
+    [x] call by name must be reviewed especially utility vocabularies. 
+		--> tick() and execute() have run-time-warning in selftest mode
+    [x] ls.f privacy is true now.
+[ ] (.0r) Negative numbers become "0000-123", 
+	--> use Math.sign to fix it.
+[ ] <task> ... </task> does not work as expected. Remove them.
+	: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
+					char </task> word ; immediate
+					///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
+					///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
+					///	個則用 cut ... rewind 即可。
+					/// Ex. 
+					///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
+
+	: </task>		( "task" -- ... ) \ Delimiter of <task>
+					compiling if literal js: push(function(){dictate(pop())}) , 
+					else js: dictate(pop()) then ; immediate
+					/// See alternative method for command line by 'cut' and 'rewind'.
+	--> are they do-able? Is it possible to run interpret state tasks by using them?
+
+[/] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
+	After previous command the recent order[order.length-1] become new context. Purpose is to
+	switch context faster. context. Consider a two-pass search of the target word, in context and 
+	in wordhash if not found in context while context vocabulary word always has its own wordhash 
+	ready.
+	[x] If use two-pass search, then all words need to be searched twice. Consider the cost!
+		==> Yeah, two pass is a bad idea.
+[x]	Switch context inevitably triggers a wordhash rescan, it's faster if rescan only the target
+	vocabulary into the current wordhash{} while the previous wordhash{} is not totally disappeared, 
+	only overritten with the alternative definitions. Un-replaced words are still visible.
+	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
+		simply 'assembly'. If the order was [forth,misc] then all words in 'misc' were visible 
+		while after running 'assembly' only public words in 'misc' are visible because it's not
+		the context now. In contrast with traditional forth, all 'misc' words are invisible once
+		context switched to 'assembly'. That's actually an overkill of switching to 'assembly'!
+		So the new design is better. If I want to use vocabulary forth, misc, io, and math. I
+		simply execute "forth misc io math" instead of "also forth also misc also io also math".
+		However, the rear method is still workable as before.
+	--> The downside is that after 'previous' command too many words will be disappeared.
+		However, that is not a new problems caused by the new design of vocabulary words.
+		So, the idea is still attractive.
+	==> Done !! 17:37 January 7, 2017	
+	[x] Problem found but not a problem!!
+		Selftest failed when selftest 3hta because 'bye' redefined by vb.f that returns errorlevel
+		has been replaced by the original 'bye' defined in forth. Because context switched to forth
+		somewhere before running the selftest although in order vb.f has higher priority due to the
+		new design the active 'bye' is the older one. This is NOT 100% a problem because the vb.f bye
+		can be inactive anytime unexpectedly like this case. The correct way to reDef 'forth bye' is
+		to put the new 'bye' defined in vb.f into the 'forth' vocabulary. ---> Done, and it works now.
 	
+[x] 3ce, list-tabs hang up !!! --> Chrome in trouble, restart then ok.
+[x] setup.bat should not include private folder. If want to include private folder separately do 
+	it manually. ==> done.
+	[x] Need a command to make many tokens alias of \ comment, useful for batch program.
+		==> aliases works fine, for 3HTA only.
+	
+[x] \r|\n  and \n|\r are different! char \r|\n word :> split(/\s+/) may having a ending
+	extra null string. ---> no, see log.txt beginning. The recent problem has been fixed
+	by using a dummy to the string.
+	
+[x] many words in jeforth.f and 3htm/f/platform.f are now private	
+	[x] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
+		So not only execute("callByName") in trouble, tick("name") too!!!
+		--> let doNext be a public, it'll be carried too far to make it private.
+	[x]	Let execute() and tick() to warn if the target word is a private word when
+		selftest is on. That warning only appear in selftest on mode so they are different 
+		versions. Refer to fastInner() and debugInner(), jeforth.js functions
+		can be replaced very easily.
+		--> This idea works! tick = vm.g.selftest_tick = function tick(name) catches private words
+			Warning! private word description referenced by name in tick()!
+			Warning! private word expected_rstack referenced by name in tick()!
+			Warning! private word expected_stack referenced by name in tick()!
+			Warning! private word test-result referenced by name in tick()!
+			Warning! private word [all-pass] referenced by name in tick()!		
+		[x]	These private words are only used in the same module, make them be private
+			at the end of the module :
+			' description 	  :: private=true
+			' expected_rstack :: private=true
+			' expected_stack  :: private=true
+			' test-result 	  :: private=true
+			' [all-pass] 	  :: private=true
+			--> this is annoying, because then we can't make the word private when define it.
+				Use this idea when in jeforth.f to avoid warnings is fine.
+		==> Done, default only warning when in selftest mode. 
+			warning-on to turn on the run-time warning any time.
+	[x] need a word 'all' to scan all words so they are all public temporarily. So 'all words' 
+		lists all words. --> it works fine!
+	[x]	what if to have executeAbs(vid,w) and tickAbs(vid,w) for refering to private words?
+		--> Make them public is easier and more natural. If a word is warned by execute()
+			and tick() then consider to make it public.
+		
+[x] 3nd selftest failed at 
+		Including fs.f
+		Error! "msg"abort unknown. <---- can't be private.
+		
+[x] 3ce attach target tab in trouble again now!!
+	--> search "attach 3ce to target page does not work" above for how to debug.
+	--> F7 or (dictate) both need attach the target tab first, try them: --> both work!!!
+	--> readTextFile suspected again ... yes it is the criminal due to:
+		> char manifest.json readTextFileAuto . \ {F7}
+		dummy,doc,f,3htm/f,3htm/canvas,3htm,3ce,playground OK 	<--- problem! the file is not read correctly
+	--> trace back develop versions...	all failed --> re-start Chrome then OK! Shit
+	
+[x] Redefine (words) to support 'all' command. Rename to word_select.
+	-->	code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
+		\ it works now! see you tomorrow with my Metamoji note on X1 Yoga.
+	--> Test [x] 3htm (help)
+[ ] 準備 release master 新版 release 新版 master
+    o search "kvm.minor_version" increase 版號。
+        [x] jeforth.3nd.js --> kvm.minor_version = 203 -> 204
+        [x] 3nw, jeforth.3we/package.json version 223 -> 224
+        [x] jeforth.3htm.js --> kvm.minor_version = 203 -> 204
+        [x] jeforth.3ce.js(3ce extension pages)-> 203 kvm.minor_version = 204
+        [x] jeforth.3ce, ce.f(Target page) -> vm.minor_version = 203 -> vm.minor_version = 204
+        [x] jeforth.3ce, background.js vm.minor_version = 203 -> vm.minor_version = 204
+        [x] jeforth.hta --> <HTA> tag. VERSION="204" -> VERSION="205"
+        [/] jeforth.3ca, also jeforth.3htm.js above
+    o selftest them all
+        [x] setup.bat
+        [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
+        [x] 3nd
+			[x] run webserver.f
+        [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+        [x] 3hta
+        [x] 3ce 
+			[x] attach to target pages
+        [x] 3ca
+		[ ] Testing all demo
+			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
+			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
+			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , 
+			[x] solar-system.f			 
+				[x] alarm.f has this problem so it doesn't work in 3ce and 3ca
+					Refused to execute inline event handler because it violates the following Content 
+					Security Policy ---> fixed.
+		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+			切換到Master分支 : git checkout master 
+			合併 develop 分支進 master 來 : git merge --no-ff develop 
+		[ ] Test the master all over again ... pass        
+		[ ] Master 到回 develop
+			切換到Master分支 : git checkout develop
+			合併 develop 分支進 master 來 : git merge --no-ff master
+		[ ] release note
+[ ] setup.bat to create one more folder	: jeforth.3htm 
+[x] git.f in trouble now, due to (fork) definition changed, it's quiet now, is that the root cause?
+		> launch-git-shell
+		JavaScript error on word "(fork)" : Invalid procedure call or argument
+	==> No! git.f doesn't know the Git Shell path. That needs manual setup by editing git.f
+		and I didn't do that for this computer yet.
+		

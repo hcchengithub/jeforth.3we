@@ -216,7 +216,7 @@
 		/// shooo! avoid echoing the entire source code.
 	
 	: install ( <pathname> -- )  \ Install forth source code to tabid.
-		char \n|\r word (install) ;
+		CR word (install) ;
 
 	: first-tab ( -- objTab ) \ Get first tab (the leftest) of Chrome browser.
 		js: push({"index":0}) tabs.query :> [0] ;
@@ -258,7 +258,7 @@
 			// We need to help it a little as the following example:
 			
 			(function(){
-				vm.minor_version = 203; // 3ce target page minor version. major version is from jeforth.js kernel.
+				vm.minor_version = 204; // 3ce target page minor version. major version is from jeforth.js kernel.
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。

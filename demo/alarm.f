@@ -39,23 +39,13 @@
 			</td>
 		</tr>
 		<tr>
-			<td class=control rowspan=3
-				onmousedown="kvm.execute('alarmReset')"
-			><div id=almReset><span id=reset_button style="color:black">RESET<span><br><span id=clear_button style="color:gray">CLEAR</span></div></td>
-			<td id='alarmHour10' class=control
-				onmousedown="kvm.execute('alarmHour10')" 
-			>+</td>
+			<td id=alarmreset class=control rowspan=3><div id=almReset><span id=reset_button style="color:black">RESET<span><br><span id=clear_button style="color:gray">CLEAR</span></div></td>
+			<td id='alarmHour10' class=control>+</td>
 			<td class=nobg></td>
-			<td id='alarmMinute10' class=control
-				onmousedown="kvm.execute('alarmMinute10')" 
-			>+</td>
+			<td id='alarmMinute10' class=control>+</td>
 			<td class=nobg></td>
-			<td id='alarmSecond10' class=control
-				onmousedown="kvm.execute('alarmSecond10')" 
-			>+</td>
-			<td class=control rowspan=3
-				onmousedown="kvm.execute('alarmStart')" 
-			><div id=almStart><span id=start_button style="color:black">START<span><br><span id=pause_button style="color:gray">PAUSE</span></div></td>
+			<td id='alarmSecond10' class=control>+</td>
+			<td id=btnStart class=control rowspan=3><div id=almStart><span id=start_button style="color:black">START<span><br><span id=pause_button style="color:gray">PAUSE</span></div></td>
 		</tr>
 		<tr class=bigchar>
 			<td><b><div id=almHour>00</div></b></td>
@@ -65,17 +55,11 @@
 			<td><b><div id=almSecond>00</div></b></td>
 		</tr>
 		<tr>
-			<td id='alarmHour1' class=control
-				onmousedown="kvm.execute('alarmHour1')" 
-			>+</td>
+			<td id='alarmHour1' class=control>+</td>
 			<td class=nobg></td>
-			<td id='alarmMinute1' class=control
-				onmousedown="kvm.execute('alarmMinute1')" 
-			>+</td>
+			<td id='alarmMinute1' class=control>+</td>
 			<td class=nobg></td>
-			<td id='alarmSecond1' class=control
-				onmousedown="kvm.execute('alarmSecond1')" 
-			>+</td>
+			<td id='alarmSecond1' class=control>+</td>
 		</tr>
 		<tr>
 			<td colspan=7>
@@ -83,10 +67,9 @@
 				type=text 
 				class=control
 				id=mp3path 
-				onchange="mp3player.src=mp3path.value" 
 				style="margin:0 0 8px;font-size:20px;" 
 				size=70
-				value="No need to change. On server only e.g. 'playground/filename.mp3'"
+				value="e.g. 'demo/filename.mp3' on server w/o the quote"
 			/></span>
 			<br><audio controls id=mp3player>
 			  <source type="audio/mpeg" src="demo/228.mp3">
@@ -215,6 +198,19 @@
 		} </js>
 	;
 
+	\ jeforth.3ce and 3ca, Chrome Extension and Chrome App, do not allow inline event handler.
+	\ the workaround is as easy as the following section:
+	<js>
+		window.alarmreset.onmousedown=function(){kvm.execute("alarmReset")};
+		window.alarmHour10.onmousedown=function(){kvm.execute("alarmHour10")};
+		window.alarmMinute10.onmousedown=function(){kvm.execute("alarmMinute10")};
+		window.alarmSecond10.onmousedown=function(){kvm.execute("alarmSecond10")};
+		window.btnStart.onmousedown=function(){kvm.execute("alarmStart")};
+		window.alarmHour1.onmousedown=function(){kvm.execute("alarmHour1")};
+		window.alarmMinute1.onmousedown=function(){kvm.execute("alarmMinute1")};
+		window.alarmSecond1.onmousedown=function(){kvm.execute("alarmSecond1")};
+		window.mp3path.onchange=function(){mp3player.src=mp3path.value};
+	</js>
 	alarmOff \ initial state
 
 	( ----- the end ----- )

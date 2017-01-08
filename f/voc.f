@@ -31,7 +31,7 @@ code get-context ( -- "vid" ) \ Get the word list that is searched first.
 				/// context is order[last]
 
 : set-context	 ( "vid" -- ) \ Replace the word-list which is searched first.
-				 js: order.pop();order.push(pop()) rescan-word-hash ;
+				 js: order.pop();order.push(tos());vm.g.scan_vocabulary(context=pop(),true) ;
 				 /// context and order[last] are samething. 
 				 /// No error-proof, because it is only used in vocabulary words.
 
@@ -78,7 +78,7 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 					last().help = "( -- ) I am a vocabulary. I switch word-list.";
 				</js>
 				immediate \ 要在 colon definition 裡切換 word-list 所以是 immediate。 
-				does> r> @ set-context rescan-word-hash ;
+				does> r> @ set-context ;
 				
 : vocabulary	( <name> -- ) \ create a new word list.
 				BL word (vocabulary) ;
@@ -189,7 +189,7 @@ code search-wordlist ( "name" "vid" -- wordObject|F ) \ A.16.6.1.2192 Linear sea
 					js: order.push(pop(2)) drop drop 
 				else ( vid i1 i2 ) \ already in order[]
 					nip ( vid i2 ) js: order.splice(pop(),1);order.push(pop()) 
-				then ;
+				then rescan-word-hash ;
 				/// Refer to "set-context" command which is cruder.
 
 : forget		( <name> -- ) \ Forget the current vocabulary from <name>
@@ -267,7 +267,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					push(order[j]); // vocabulary
 					push(spec[0]||""); // pattern
 					push(spec[1]||""); // option
-					execute("(words)"); // [words...]
+					execute("word_select"); // [words...]
 					if (tos().length) { 
 						type("\n-------- " + order[j] +" ("+ tos().length + " words) --------\n"); 
 						for(var i=0; i<tos().length; i++) type(tos()[i].name+" ");
@@ -277,7 +277,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				execute("cr");
                 end-code interpret-only
 				/// Modified by voc.f to support vocabulary.
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 				/// Example: words ! -n
 
 				<selftest>
@@ -294,7 +294,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				</selftest>
 
 : help			( <["pattern" [-t|-T|-n|-f]]> -- )  \ Print help message of screened words
-				char \r|\n word ( spec )
+				CR word ( spec )
 				js> tos().length if 
 					<js>
 					var spec = pop();
@@ -315,7 +315,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					['] help :> general_help . cr
 				then ; 
 				/// Modified by voc.f to support vocabulary.
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 				/// A pattern of star '*' matches all words.
 				/// Example: 
 				///   help * <-- show help of all words

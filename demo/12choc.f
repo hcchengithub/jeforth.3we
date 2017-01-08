@@ -3,7 +3,7 @@
 \
 
 s" 12choc.f" source-code-header
-true  constant privacy // ( -- true ) All words in this module are private
+true  constant privacy private // ( -- true ) All words in this module are private
 
 cls <text> 
     <style>

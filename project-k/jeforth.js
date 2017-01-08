@@ -131,7 +131,10 @@ function jeForth() {
 	// tick() is same thing as forth word '。 
 	// Let words[voc][0]=0 also means tick() return 0 indicates "not found".
 	// Return the word obj of the given name or 0 if the word is not found.
+	// May be redefined for selftest to detect private words referenced by name. 
+	// vm.tick keeps the original version.
 	function tick(name) {
+		// defined in project-k jeforth.js 
 		return wordhash[name] || 0;  // 0 means 'not found'
 	}
 	
@@ -197,7 +200,7 @@ function jeForth() {
 		var w = 0; 
 		switch(typeof(entry)){
 			case "string": // "string" is word name
-				w = tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/mg,'')); // remove leading and tailing white spaces
+				w = vm.tick(entry.replace(/(^( |\t)*)|(( |\t)*$)/mg,'')); // remove leading and tailing white spaces
 				break;
 			case "function": case "object": // object is a word
 				w = entry; 
@@ -239,7 +242,10 @@ function jeForth() {
 	}
 
 	// execute("unknown") == do nothing, this is beneficial when executing a future word
+	// May be redefined for selftest to detect private words called by name.
+	// vm.execute keeps the original version.
 	function execute(entry) { 
+		// defined in proejct-k jeforth.js
 		var w; 
 		if (w = phaseA(entry)){
 			if(typeof(w)=="number") 
@@ -279,7 +285,7 @@ function jeForth() {
 		}
 		// Handle one token. 
 		function outerExecute(token){
-			var w = tick(token);   // not found is 0. w is an Word object.
+			var w = vm.tick(token);   // not found is 0. w is an Word object.
 			if (w) {
 				if(!compiling){ // interpret state or immediate words
 					if (w.compileonly) {
@@ -470,7 +476,7 @@ function jeForth() {
 	// js> mytypeof(null)         \ ==> null (string)  
 
 	vm.dictate = dictate; // This is where commands are from. A clause or more.
-	vm.execute = execute; // This is where commands are from. A single command.
+	vm.execute = execute; // Original version. Execute a single command.
 	vm.stack = function(){return(stack)}; // debug easier. stack got manipulated often, need a fresh grab.
 	vm.rstack = function(){return(rstack)}; // debug easier especially debugging TSR
 	vm.words = words; // debug easier. works.forth is the root vocabulary or word-list
@@ -479,7 +485,7 @@ function jeForth() {
 	vm.pop = pop;   // interface for getting data out of the VM.
 	vm.tos = tos;   // interface for getting data out of the VM.
 	vm.reset = reset; // Recovery from a crash
-	vm.tick = tick; // get a word object
+	vm.tick = tick; // Original version. Get a word object.
 }
 if (typeof exports!='undefined') exports.jeForth = jeForth;	// export for node.js APP
 

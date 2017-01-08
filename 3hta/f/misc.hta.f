@@ -34,6 +34,26 @@
 			Math.sign = function sign(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };
 	</js>
 
+	: (aliases) ( Word [array] -- ) \ Make array of tokens to be aliases of the Word
+		js> tos().length ( w a length ) ?dup if for ( w a )
+			\ create one alias word
+				js> tos().pop() ( w a name ) (create) reveal ( w a )
+			\ copy from predecessor, arrays and objects are by reference
+				<js> for(var i in tos(1)) last()[i] = tos(1)[i]; </js>
+			\ touch up
+				<js>
+					last().type = "alias";
+					last().predecessor = last().name;
+					last().name = newname;
+				</js>
+		next then ( w a ) 2drop ;
+		/// Used in DOS box batch program for jeforth to ignore DOS words.
+
+	: aliases	( Word <name1 name2 ... > -- ) \ Make following tokens be aliases of the Word
+		CR word s"  dummy" + :> split(/\s+/) 
+		js: tos().pop() \ drop the dummy
+		( Word array ) (aliases) ; 
+		/// Used in DOS box batch program for jeforth to ignore DOS words.
 
 
 

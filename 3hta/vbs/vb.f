@@ -116,16 +116,19 @@
 							
 					</selftest>
 
+					char forth set-current \ replace the forth bye
 	: bye			( errorlevel -- ) \ Terminate jeforth.hta return TOS as the errorlevel
 					<js> 
 						if(stack.length==0 || isNaN(tos())) push(0); 
 						vm.process.terminate(pop());
 					</js> ;
+					/// Redefined by vb.f
 					/// start /WAIT jeforth.hta . . . don't forget the /WAIT option
 					/// The %errorlevel% returned to DOS prompt only works in batch program.
 					/// Run "jeforth.hta 123 bye" won't change it, through a batch file does.
 					/// "run jeforth.hta 66 bye" in 3hta returns 66 correctly also.
-	
+					definitions
+					
 	\ ------------------- Collection and Enumerator Object ----------------------------------------------------------------------
 	\
 	\ Unlike 'array', members of a 'collection' are not directly accessible. Instead of using index, 

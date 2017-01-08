@@ -49,7 +49,8 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js
                     last().wid = current_word_list().length-1;
                     last().type = 'code';
                     last().help = newhelp;
-                    execute("privacy"); last().private = Boolean(pop()); // support private word
+                    vm.execute("privacy"); // use the original execute() to avoid warning
+					last().private = Boolean(pop()); // support private word
                     wordhash[last().name]=last();
                     compiling  = false;
                 }                
@@ -163,6 +164,44 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js
 						if(resuming) w = dictionary[ip];
 					} while(ip && resuming); // ip==0 means resuming has done
 				}
+				
+				
+				// Scan given VID into wordhash{}
+				vm.g.scan_vocabulary = function (v,isContext) { 
+					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
+						// skip the last() to avoid unexpected 'reveal'.
+						if (compiling && last()==words[v][i]) continue; 
+						// skip private words unless in context
+						if (isContext || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
+					}
+				}
+				
+				// Referenced by name warning when execute(),tick() on a private word.
+				// vm.tick is the original version which is used sometimes like in 'all-pass'.
+				tick = vm.g.selftest_tick = function tick(name) {
+					// selftest version defined in jeforth.f
+					var w = wordhash[name] || 0; // 0 means 'not found'
+					if (w && w.private)
+						panic("Warning! private word "+w.name+" referenced by name in tick()!\n",true); 
+					return w;
+				}
+				
+				// Referenced by name warning when execute(),tick() on a private word.
+				// vm.execute is the original version which is used sometimes like in '(create)'.
+				execute = vm.g.selftest_execute = function execute(entry) { 
+					// selftest version defined in jeforth.f 
+					var w, calledByName = typeof entry == "string"; 
+					if (w = phaseA(entry)){
+						if(typeof(w)=="number") {
+							panic("Error! please use inner("+w+") instead of execute("+w+").\n","severe");
+							return;
+						}
+						if (calledByName && typeof(w)=="object" && w.private)
+							panic("Warning! private word "+w.name+" called by name in execute()!\n",true); 
+						phaseB(w); 
+					}
+				}
+				
 				end-code _init_
 
 code version    ( -- revision ) \ print the greeting message and return the revision code
@@ -285,7 +324,7 @@ code private  ( -- ) \ Make the last word invisible when out of the context.
 code nonprivate  ( -- ) \ Make the last word non-private so it's globally visible.
 				last().private=false
 				end-code
-				/// The opposite is private.
+				/// The opposite of private.
                 
 				<selftest>
 					\ *** private marks the last word a private word
@@ -336,7 +375,8 @@ code (create)	( "name" -- ) \ Create a code word that has a dummy xt, not added 
 				last().vid = current; // vocabulary ID
 				last().wid = current_word_list().length-1; // word ID
 				last().type = "colon-create";
-				execute("privacy");last().private = Boolean(pop());
+				vm.execute("privacy"); // use the original execute() to avoid warning
+				last().private = Boolean(pop());
 				end-code
 
 code reveal		( -- ) \ Add the last word into wordhash
@@ -350,11 +390,9 @@ code reveal		( -- ) \ Add the last word into wordhash
 						js> last().name [d "~(create)~" d] [p "(create)","char" p]
 				</selftest>
 
-\ [ ] /// was here
-
 code (space)    push(" ") end-code // ( -- " " ) Put a space on TOS.
-code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space.
-code CR 		push("\n") end-code // ( -- '\n' ) NewLine is ASCII 10(0x0A)
+code BL         push("\\s") end-code // ( -- "\s" ) RegEx white space, works with 'word' command.
+code CR 		push("\\n|\\r") end-code // ( -- '\n' ) RegEx new line, works with 'word' command.
 				/// Also String.fromCharCode(10) in JavaScript
 
 				<selftest>
@@ -363,8 +401,8 @@ code CR 		push("\n") end-code // ( -- '\n' ) NewLine is ASCII 10(0x0A)
 						[d true d] [p "(space)","=" p]
 					*** BL should return the string '\s' literally
 						BL [d "\\s" d] [p "BL" p]
-					*** CR should return a new line character
-						CR js> String.fromCharCode(10) = 
+					*** CR should return the string \n|\r literally
+						CR js> "\\n|\\r" = 
 						[d true d] [p "CR","=" p]						
 				</selftest>
 
@@ -374,7 +412,7 @@ code jsEval 	( "js code" -- result ) \ Evaluate the given JavaScript statements,
 				} catch(err) {
 				  panic("JavaScript error : "+err.message+"\n", "error");
 				};
-				end-code
+				end-code private
 				
 				<selftest>
 					*** jsEval should eval(tos) and return the last statement's value
@@ -387,7 +425,7 @@ code jsEvalNo 	( "js code" -- ) \ Evaluate the given JavaScript statements, w/o 
 				} catch(err) {
 				  panic("JavaScript error : "+err.message+"\n", "error");
 				};
-				end-code
+				end-code private
 
 				<selftest>
 					*** jsEvalNo should eval(tos) but won't return any value
@@ -442,11 +480,11 @@ code jsFunc		( "js code" -- function ) \ Compile JavaScript to a function() that
 						    // 已經不平衡了,算了。因為 ['"/] 裡又可能有 escape char 目前不夠周全。
 					}
 				}
-				end-code
+				end-code private
 
 code jsFuncNo	( "js code" -- function ) \ Compile JavaScript to a function()
 				eval("push(function(){" + pop() + "})"); 
-				end-code
+				end-code private
 
 code [          compiling=false end-code immediate // ( -- ) 進入直譯狀態, 輸入指令將會直接執行 *** 20111224 sam
 code ]          compiling=true end-code // ( -- ) 進入編譯狀態, 輸入指令將會編碼到系統 dictionary *** 20111224 sam
@@ -475,19 +513,17 @@ code ret        ( -- ) \ Mark at the end of a colon word.
 
 code rescan-word-hash ( -- ) \ Rescan all word-lists in the order[] to rebuild wordhash{}
 				wordhash = {}; context = order[order.length-1];
-				scan_vocabulary("forth",false); // forth always available
+				vm.g.scan_vocabulary("forth",false); // forth always available
 				for (var j=0; j<order.length-1; j++) 
-					scan_vocabulary(order[j],false); // The latter the higher priority
-				scan_vocabulary(context,true); // The context has the highest priority
-				function scan_vocabulary(v,isContext) { // skip private words but all words of context
-					for (var i=1; i<words[v].length; i++){  // The [0] is 0, skip it.
-						// skip the last() to avoid unexpected 'reveal'.
-						if (compiling && last()==words[v][i]) continue; 
-						if (isContext || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
-					}
-				}
+					vm.g.scan_vocabulary(order[j],false); // The latter the higher priority
+				vm.g.scan_vocabulary(context,true); // The context has the highest priority
 				end-code
 
+code all 		( -- ) \ Temporarily make all private words public, so "all words" shows them all.
+				for (var j=0; j<order.length; j++) 
+					vm.g.scan_vocabulary(order[j],true); // The latter the higher priority
+				end-code
+				
 code (forget) 	( -- ) \ Forget the last word
 				if (last().cfa) here = last().cfa;
 				words[current].pop(); // drop the last word
@@ -531,10 +567,12 @@ code ;          ( -- ) \ End of the colon definition.
 				end-code immediate compile-only
 
 code (')		( "name" -- Word ) \ name>Word like tick but the name is from TOS.
-				push(tick(pop())) end-code
+				push(vm.tick(pop())) // use the original tick() to avoid warning
+				end-code
 
 code '         	( <name> -- Word ) \ Tick, get word name from TIB, leave the Word object on TOS.
-				push(tick(nexttoken())) end-code
+				push(vm.tick(nexttoken())) // use the original tick() to avoid warning
+				end-code
 
 
 				<selftest>
@@ -787,8 +825,11 @@ code min        push(Math.min(pop(),pop())) end-code // ( a b -- min(a,b) ) The 
 						[d 3,-2 d] [p "max","min" p]
 				</selftest>
 
-code doVar      push(ip); ip=rstack.pop(); end-code compile-only // ( -- a ) 取隨後位址 a , runtime of created words
-code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code compile-only // ( -- ) next's runtime.
+code doVar      push(ip); ip=rstack.pop(); end-code compile-only private
+				// ( -- a ) 取隨後位址 a , runtime of created words
+code doNext     var i=rstack.pop()-1;if(i>0){ip=dictionary[ip]; rstack.push(i);}else ip++ end-code 
+				compile-only
+				// ( -- ) next's runtime.
 code ,          comma(pop()) end-code // ( n -- ) Compile TOS to dictionary.
 
 				<selftest>
@@ -873,7 +914,7 @@ code colon-word	( -- ) \ Decorate the last() as a colon word.
 				// last().type = "colon";
 				last().cfa = here;
 				last().xt = colonxt;
-				end-code
+				end-code private
 
 : create		( <name> -- ) \ Create a new word. The new word is a variable by default.
 				BL word (create) reveal colon-word compile doVar ;
@@ -905,8 +946,10 @@ code (marker)   ( "name" -- ) \ Create marker "name". Run "name" to forget itsel
 				end-code
 : marker     	( <name> -- ) \ Create marker <name>. Run <name> to forget itself and all newers.
 				BL word (marker) ;
-code next       comma(tick("doNext"));dictionary[here++]=pop(); end-code immediate compile-only // ( -- ) for ... next (FigTaiwan SamSuanChen)
-
+code next       ( -- ) \ for ... next (FigTaiwan SamSuanChen)
+				comma(vm.tick("doNext")); // use original tick() to avoid warning
+				dictionary[here++]=pop(); 
+				end-code immediate compile-only 
 code cls		( -- ) \ Clear jeforth console screen
 				vm.screenbuffer = (vm.screenbuffer==null) ? null : "";
 				vm.clearScreen();
@@ -946,7 +989,8 @@ code alias      ( Word <alias> -- ) \ Create a new name for an existing word
 \ ------------------ eforth colon words ---------------------------
 
 ' != alias <>	// ( a b -- f ) 比較 a 是否不等於 b, alias of !=.
-\ ' \s alias stop // ( -- ) Samething as \s, stop outer loop hopefully stop everything.
+' nonprivate alias public /// alias of nonprivate
+
 code nip		pop(1) end-code // ( a b -- b ) 
 code rot		push(pop(2)) end-code // ( w1 w2 w3 -- w2 w3 w1 ) 
 				/// see rot -rot roll pick
@@ -1257,16 +1301,23 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 					-%-%-%-%-%-
 					[d true,true,true d] [p 'value','to' p]
 				</selftest>
+				
+\ This word works fine. But doing this for letting doNext be a private is carried way too far.
+\ : next		( -- ) \ for ... next (FigTaiwan SamSuanChen)
+\ 				['] doNext , js: dictionary[here++]=pop() ; immediate compile-only
+\ 				\ Redefine after js: and ['] to allow doNext be private
 
 : "msg"abort	( "errormsg" -- ) \ Panic with error message and abort the forth VM
-				js: panic(pop()+'\n') abort ;
+				js: panic(pop()+'\n') abort ; nonprivate
+				\ needed to compose variables into the errormsg
 
 : abort"		( <msg>	-- ) \ Through an error message and abort the forth VM
 				char " word literal BL word drop compile "msg"abort ;
 				immediate compile-only
 
 : "msg"?abort	( "errormsg" flag -- ) \ Conditional panic with error message and abort the forth VM
-				if "msg"abort else drop then ;
+				if "msg"abort else drop then ; nonprivate
+				\ needed to compose variables into the errormsg
 
 : ?abort"       ( f <errormsg> -- ) \ Conditional abort with an error message.
 				char " word literal BL word drop
@@ -1281,14 +1332,15 @@ code accept		push(false) end-code // ( -- str T|F ) Read a line from terminal. A
 \ 費了一番功夫寫就能 nested 的 <text> 及 <comment> , 開發心得在 Ynote 上
 \ search "jeforth.3we design a nesting supported〈text〉also〈comment〉"
 
-variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, for indirect call.
+variable '<text> private
+				// ( -- <text> ) Variable reference to the <text> Word object, for indirect call.
                     
 : (<text>)		( <text> -- "text"+"</text>" ) \ Auxiliary <text>, handles nested portion
                 '<text> @ execute ( string ) \ 此時 TIB 非 </text> 即行尾
 				BL word char </text> = ( string is</text>? )
 				if \ 剛才撞上了 </text> ( string )
 					s" </text> " + ( string1' )
-				then ;
+				then ; private
                 /// (<text>) is almost same as <text> but it consumes the 
                 /// next </text> in TIB and returns <text> + "</text>"
 
@@ -1315,10 +1367,11 @@ variable '<text> // ( -- <text> ) Variable reference to the <text> Word object, 
 				compiling if literal then ; immediate
 				/// Usage: <text> word of multiple lines </text>
 
+\ Ready to add comment to 'privacy' 
 <text> 
  Example 'privacy' definition for a vocabulary. Assume current == context.
- false constant privacy // ( -- true ) All words in this module are public
- true  constant privacy // ( -- true ) All words in this module are private
+ false constant privacy private // ( -- true ) All words in this module are public
+ true  constant privacy private // ( -- true ) All words in this module are private
 </text> ' privacy :: comment=pop()
 				
 \ If <comment> hits <comment> in TIB then it drops string1 
@@ -1571,7 +1624,7 @@ code (run:) 	( "..if.." -- "..[if].." ) \ Run string with "if","begin","for" in 
 				/// I like to use "if" in interpret mode directly instead of "[if]" and
 				/// to merge them is difficult to me so far. So I defined this word.
 : run: 			( <string> -- ... ) \ Run one-liner with "if","begin","for", in interpret mode
-				char \r|\n word (run:) ; interpret-only
+				CR word (run:) ; interpret-only
 				/// To run multiple lines use <text>...</text> (run:) or "run>" instead of "run:".
 				/// run: is oneliner. I think run: may be used in ~.f files while run> certainly can't.
 : run> 			( <string> -- ... ) \ Run multiple lines with "if","begin","for", in interpret mode
@@ -1637,10 +1690,11 @@ code (.r)		( num|str n -- "  num|str" ) \ Right adjusted num|str in n characters
 				} while(n>0);
 				push(i);
 				end-code
+				
 : .r			( num|str n -- ) \ Print right adjusted num|str in n characters (FigTaiwan SamSuanChen)
 				(.r) . ;
 				
-code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+code (.0r)      ( num|str n -- "0000num|str" ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				var n=pop(); var i=pop();
 				var minus = "";
 				if(typeof i == 'number') {
@@ -1659,9 +1713,12 @@ code (.0r)        ( num|str n -- ) \ Right adjusted print num|str in n character
 				// type(minus+i);
 				push(minus+i);
 				end-code
-				/// Limitation: Negative numbers are printed in a strange way. e.g. "0000-123".
-				/// We need to take care of that separately.
-: .0r (.0r) . ;
+				/// Negative numbers become "0000-123".
+				
+: .0r 			( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
+				(.0r) . ;
+				/// Negative numbers are printed in a strange way. e.g. "0000-123".
+
 				<selftest>
 					<comment> .r 是 FigTaiwan 爽哥那兒抄來的。 JavaScript 本身就有 
 					number.toString(base) 可以任何 base 印出數值。base@ base! hex 
@@ -1691,11 +1748,11 @@ code dropall    stack=[] end-code // ( ... -- ) Clear the data stack.
 					1 2 3 4 5 dropall depth 0= [d true d] [p "dropall","0=" p]
 				</selftest>
 
-code (ASCII)    push(pop().charCodeAt(0)) end-code // ( str -- ASCII ) Get a character's ASCII code.
-code ASCII>char ( ASCII -- 'c' ) \ number to character
+code (ASCII)    push(pop().charCodeAt(0)) end-code // ( str -- ASCII ) Get str[0]'s ASCII code.
+code ASCII>char ( ASCII -- 'c' ) \ ASCII code number to character
 				push(String.fromCharCode(pop())) end-code
 				/// 65 ASCII>char tib. \ ==> A (string)
-: ASCII			( <str> -- ASCII ) \ Get a character's ASCII code.
+: ASCII			( <str> -- ASCII ) \ Get <str>[0]'s ASCII code.
 				BL word (ASCII) compiling if literal then
 				; immediate
 
@@ -1708,19 +1765,6 @@ code ASCII>char ( ASCII -- 'c' ) \ number to character
 					[d 97,'b',99 d] [p '(ASCII)', 'ASCII>char', "ASCII" p]
 					---
 				</selftest>
-
-: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
-				char </task> word ; immediate
-				///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
-				///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
-				///	個則用 cut ... rewind 即可。
-				/// Ex. 
-				///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
-
-: </task>		( "task" -- ... ) \ Delimiter of <task>
-				compiling if literal js: push(function(){dictate(pop())}) , 
-				else js: dictate(pop()) then ; immediate
-				/// See alternative method for command line by 'cut' and 'rewind'.
 
 code .s         ( ... -- ... ) \ Dump the data stack.
 				var count=stack.length, basewas=vm.forth.base;
@@ -1750,19 +1794,42 @@ code .s         ( ... -- ... ) \ Dump the data stack.
 					---
 				</selftest>
 
-code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
+code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
+				var vid=pop(), aa = [], bb = [], j=1; // vid[0] always 0, start from 1.
+				// get the raw list
+				for (var i in wordhash) 
+					if (wordhash[i].vid==vid) aa.push(wordhash[i]);
+				// sort aa by wid to be bb
+				while (aa.length) { 
+					for (i=0; i<aa.length; i++) {
+						if (aa[i].wid<=j) {
+							bb.push(aa.splice(i,1)[0]);
+							break;
+						}
+					}
+					if (vm.debug && i>=aa.length) 
+						// warning, rare case like ' code.wid is 7 because reDef'ed
+						debugger; 
+					j += 1;
+				}
+				push(bb);
+				end-code
+				
+: word_select	( "vid" "pattern" "option" -- word[] ) \ Get an array of words, name/help/comments screened by pattern.
+				rot dup wordhash>array ( "pattern" "option" "vid" array )
+				<js> 
+                var word_list = pop();
+                var vid = pop();
 				var option = pop();
 				var pattern = pop();
-                var vid = pop();
 				var result = [];
-                var word_list = [];
                 var isContext = order[order.length-1] == vid;
                 // Remove private words unless in context
-                for (var i=1; i<words[vid].length; i++) {
-                    if (isContext || !words[vid][i].private) 
-                        word_list.push(words[vid][i]);
-                }
-				for(var i=1; i<word_list.length; i++) {
+                // for (var i=0; i<words[vid].length; i++) {
+                //     if (isContext || !words[vid][i].private) 
+                //         word_list.push(words[vid][i]);
+                // }
+				for(var i=0; i<word_list.length; i++) {
 					if (!pattern) { 
                         // no pattern is all public
                         result.push(word_list[i]); 
@@ -1799,8 +1866,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 							}
 					}
 				}
-				push(result);
-				end-code
+				push(result); </js> ;
 				/// Options: 
 				/// -f pattern matches all names, helps and comments. Case insensitive.
 				/// -n pattern in name. Case insensitive.
@@ -1808,22 +1874,23 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				/// -T pattern is exact type.
 				/// "" pattern is exact name. 
 
+
 : words			( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screened by spec.
-				js> context char \r|\n word ( forth line )
+				js> context CR word ( forth line )
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( forth [pattern,option,rests] )
-				js> tos()[0] swap js> tos()[1] nip (words) <js>
+				js> tos()[0] swap js> tos()[1] nip word_select <js>
 					var word_list = pop();
 					var w = "";
 					for (var i=0; i<word_list.length; i++) w += word_list[i].name + " ";
 					type(w);
 				</js> ;
 				/// Original version in jeforth.f
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 				/// An empty pattern matches all words.
 
 : (help)		( "word-list" "[pattern [-t|-T|-n|-f]]" -- "msg" ) \ Get help message of screened words
 				<js> pop().replace(/\s+/g," ").split(" ")</jsV> ( voc [pattern,option,rests] )
-				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) (words) ( [words...] )
+				js> tos()[0] swap js> tos()[1] nip ( forth pattern option ) word_select ( [words...] )
 				<js>
 					var word_list = pop();
 					for (var ss="",i=0; i<word_list.length; i++) {
@@ -1832,10 +1899,10 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 					};ss
 				</jsV> ;
 				/// Original version in jeforth.f
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 
 : help			( <["pattern" [-t|-T|-n|-f]]> -- ) \ Print the help of screened words
-				js> context char \n|\r word ( voc pattern )
+				js> context CR word ( voc pattern )
 				js> tos().length if 
 					dup char * = if drop "" then (help) .
 				else
@@ -1868,7 +1935,7 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 					] :> general_help . cr
 				then ;
 				/// Original version in jeforth.f
-				last :: comment+=tick("(words)").comment
+				last :: comment+=tick("word_select").comment
 				/// A pattern of star '*' matches all words.
 				/// Example: 
 				///   help * <-- show help of all words
@@ -1878,12 +1945,12 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 				<selftest>
 					<text>
 					本來 words help 都接受 RegEx 的，可是不好用。現已改回普通 non RegEx pattern. 只動
-					(words) 就可以來回修改成 RegEx/non-RegEx.
+					word_select 就可以來回修改成 RegEx/non-RegEx.
 					</text> drop
 
-					*** help words (words)
+					*** help words word_select
 					marker ---
-					: test ; // testing help words and (words) 32974974
+					: test ; // testing help words and word_select 32974974
 					/// 9247329474 comment
 					js: vm.selftest_visible=false;vm.screenbuffer=""
 					\ help test -N
@@ -1895,8 +1962,8 @@ code (words)    ( "vid" "pattern" "option" -- word[] ) \ Get an array of words, 
 					words test -f
 					<js> vm.screenbuffer.indexOf('<selftest>') !=-1 </jsV> \ true
 					<js> vm.screenbuffer.indexOf('***') !=-1 </jsV> \ true
-					js: vm.selftest_visible=true
-					[d true,true,true,true,true d] [p '(words)', 'words' p]
+					js: vm.selftest_visible=true;
+					[d true,true,true,true,true d] [p 'word_select', 'words' p]
 					---
 				</selftest>
 
@@ -2009,7 +2076,7 @@ code (?)        ( a -- ) \ print value of the variable consider ret and exit
 					case null: type('RET');break;
 					case "": type('EXIT');break;
 					default: type(x);
-				}; end-code
+				}; end-code private
 
 : (dump)		( addr -- ) \ dump one cell of dictionary
 				decimal dup 5 .0r s" : " . dup (?) s"  (" . js> mytypeof(dictionary[pop()]) . s" )" . cr ;
@@ -2060,11 +2127,9 @@ code (see)      ( thing -- ) \ See into the given word, object, array, ... anyth
 							type("---------- End of the definition -----------\n");
 						}
 					} else {
-						for(var i in w){
-							if (typeof(w[i])!="function") continue;
-							// if (i=="selfTest") continue;
-							push(i); dictate("16 .r s'  :\n' .");
-							type(w[i]+"\n");
+						if (typeof w.xt == "function") {
+							push("xt"); dictate("16 .r s'  :\n' .");
+							type(w.xt+"\n");
 						}
 					}
 					if (w.comment != undefined) type("\ncomment:\n"+w.comment+"\n");
@@ -2107,8 +2172,6 @@ code passed		( -- ) \ List words their sleftest flag are 'pass'.
 \ -------------- Debugger : set breakpoint to a colon word -------------------------
 
 js> inner constant fastInner // ( -- inner ) Original inner() without breakpoint support
-
-\ 0 value breakPoint // ( -- ip ) jsc breakpoint address
 
 code be			( -- ) \ Enable the breakPoint. See also 'bp','bd'.
 				inner = vm.g.debugInner; 
@@ -2179,17 +2242,19 @@ code q			( -- ) \ Quit *debug*
 				/// colon definition 的半途，此時 q 要下成 [ q ] , .s 要下成 
 				/// [ .s ] ... etc
 
-
-				
-				
 \ ----------------- Self Test -------------------------------------
-"" value description private // ( -- "text" ) description of a selftest section
-[] value expected_rstack private // ( -- [..] ) an array to compare rstack in selftest
-[] value expected_stack private // ( -- [..] ) an array to compare data stack in selftest
-0  value test-result private // ( -- boolean ) selftest result from [d .. d] 
-[] value [all-pass] private // ( -- ["words"] ) array of words for all-pass in selftest
+: warning-on	( -- ) \ Turn on run-time warnings 
+				js: tick=vm.g.selftest_tick;execute=vm.g.selftest_execute ;
+: warning-off	( -- ) \ Turn off run-time warnings
+				js: tick=vm.tick;execute=vm.execute ;
+				
+"" value description     ( private ) // ( -- "text" ) description of a selftest section
+[] value expected_rstack ( private ) // ( -- [..] ) an array to compare rstack in selftest
+[] value expected_stack  ( private ) // ( -- [..] ) an array to compare data stack in selftest
+0  value test-result     ( private ) // ( -- boolean ) selftest result from [d .. d] 
+[] value [all-pass]      ( private ) // ( -- ["words"] ) array of words for all-pass in selftest
 : *** 			( <description> -- ) \ Start a selftest section
-				char \n|\r word trim
+				CR word trim
 				<js> "*** " + pop() + " ... " </jsV> to description
 				depth if 
 					description . ." aborted" cr 
@@ -2199,11 +2264,12 @@ code q			( -- ) \ Quit *debug*
 code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 				var a=pop();
 				for (var i in a) {
-					var w = tick(a[i]);
+					var w = vm.tick(a[i]); // use the original tick()
 					if(!w) panic("Error! " + a[i] + "?\n");
 					else w.selftest='pass';
 				}
-				end-code
+				end-code private
+				
 : [r 			( <"text"> -- ) \ Prepare an array of data to compare with rstack in selftest.
 				char r] word js> eval("["+pop()+"]") to expected_rstack ;
 : r] 			( -- boolean ) \ compare rstack and expected_rstack in selftest
@@ -2220,10 +2286,19 @@ code all-pass 	( ["name",...] -- ) \ Pass-mark all these word's selftest flag
 				char p] word js> eval("["+pop()+"]") to [all-pass] ; /// In selftest
 : p] 			( -- boolean ) \ all-pass if test-result
 				test-result if [all-pass] all-pass then ; /// In selftest
+				
+				\ Make these words private. Do it this way instead of at their definitions 
+				\ to void selftest_tick() warnings
+				' description 	  :: private=true
+				' expected_rstack :: private=true
+				' expected_stack  :: private=true
+				' test-result 	  :: private=true
+				' [all-pass] 	  :: private=true
 
 <selftest>
 	*** End of kernel self-test
 	[d d] [p 'accept', 'refill', '***' p]
+	~~selftest~~
 </selftest>
 
 \ jeforth.f kernel code is now common for different application. I/O may not ready enough to read 

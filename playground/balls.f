@@ -3,7 +3,7 @@
 \
 
 s" balls.f" source-code-header
-true  constant privacy // ( -- true ) All words in this module are private"
+true  constant privacy private // ( -- true ) All words in this module are private"
 
 
 <o> <canvas></canvas></o> constant canvas // ( -- element ) The canvas of this demo.

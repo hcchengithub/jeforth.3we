@@ -7,7 +7,7 @@ include processing.f
 
 s" blowing-in-the-wind.f" source-code-header
 
-true constant privacy // ( -- true ) All words in this module are private
+true constant privacy private // ( -- true ) All words in this module are private
 marker ~~~
 	
 \ setup

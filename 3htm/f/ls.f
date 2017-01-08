@@ -2,6 +2,7 @@
 	\ Maintain source code in HTML5 local storage directly
 
 	s" ls.f"		source-code-header
+    true  constant privacy private // ( -- true ) All words in this module are private"
 
 	\   localStorge 以及 storage.all() 的格式定義為:
     \   
@@ -22,7 +23,22 @@
 	\   參見 is-editbox-field? command 的定義，如果三個 key 及
 	\   其 type 都符合就被當成是一筆 localStorage edit box field. 否則就是
 	\   普通 object 的 JSON.stringify(). 遇到困難用比對的方式查出問題。
-	
+
+    code word>handler ( word -- handler() ) \ Pack the word into an event handler function
+        push((new Handler(pop())));
+        function Handler(w) {
+            var eventHandler = w;
+            return(
+                function(e){
+                    push(this);
+                    execute(eventHandler);
+                    return(false);
+                }
+            )
+        } end-code
+        \ Much easier if use the 'call by name' form : execute("wordname"), instead of 
+        \ call by object form : ['] wordname execute(pop()), but then the entire vocabulary
+        \ must be nonprivate.
 
     : (eb.parent) ( node -- eb ) \ Get the parent edit box object of the given node/element.
         js> $(pop()).parents('.eb')[0] ( eb ) ;
@@ -166,34 +182,93 @@
         js: $(".ebsaveflag",pop())[0].checked=false ;
 		/// [ ] Don't know how to handle it if is changed in browse mode.
 
-    code eb.settings ( eb -- ) \ Effects of readonly and code/HTML mode
-		if ($(".ebreadonlyflag",tos())[0].checked){
-			$('textarea',tos()).attr("readOnly",true);
-			$('.ebhtmlarea',tos())[0].contentEditable=false;
-		} else {
-			$('textarea',tos()).attr("readOnly",false);
-			$('.ebhtmlarea',tos())[0].contentEditable=true;
-		}
-		// 只管外觀，不切換 content, 因為要不要 copy the content from the 
-		// other mode is uncertain. Content 切成 HTML 要經過 user 確認。
-		if ($(".ebmodeflag",tos())[0].checked){
-			execute("eb.appearance.code");
-		} else {
-			execute("eb.appearance.browse");
-		}
-		end-code
+    : eb.settings ( eb -- ) \ Effects of readonly and code/HTML mode
+		js> $(".ebreadonlyflag",tos())[0].checked if
+			<js> $('textarea',tos()).attr("readOnly",true);
+			$('.ebhtmlarea',tos())[0].contentEditable=false; </js>
+		else
+			<js> $('textarea',tos()).attr("readOnly",false);
+			$('.ebhtmlarea',tos())[0].contentEditable=true; </js>
+		then 
+		\ 只管外觀，不切換 content, 因為要不要 copy the content from the 
+		\ other mode is uncertain. Content 切成 HTML 要經過 user 確認。
+		js> $(".ebmodeflag",tos())[0].checked if
+			eb.appearance.code
+		else
+			eb.appearance.browse
+		then ;
 		/// Note! call eb.settings 時 eb 都在 code mode, 然後視 checkbox 切換。
-	
+        
+        
+	: is-editbox-field? ( obj -- boolean ) \ Is the object an local storage edit box field?
+	    >r js> typeof(rtos())=="object" if
+			js> typeof(rtos().doc)=="string"
+			js> typeof(rtos().mode)=="boolean"
+			js> typeof(rtos().readonly)=="boolean"
+			and and ( boolean )
+		else 
+			false ( boolean )
+		then r> drop ;
+        
+    : (eb.read) ( eb field -- ) \ Load eb with field
+		\ Idiot-proof first of all
+			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb field )
+				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
+				if else 2drop exit then
+			then  
+			( eb field )
+		\ check the field name 	
+			js> Boolean(tos()) if else
+				js> $('.ebname',tos(1))[0].value
+				<js> alert("Can't find '" + pop() + "', is it new?")</js>
+				drop 2drop exit \ nothing to do
+			then ( eb field )
+		\ Load the edit box with the field
+			js: $(".ebsaveflag",tos(1))[0].checked=true \ the field must have been Saved 
+			( eb field ) dup is-editbox-field? if ( eb field )
+				<js>
+					$('.ebtextarea',tos(1))[0].value = tos().doc;
+					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
+				</js>
+				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
+				if  ( eb field ) 
+					drop ( eb ) 
+				else \ Take care of Browse mode   ( eb field )
+					:> doc ( eb doc ) living-tag? ( eb flag ) if 
+						\ copy code mode's content to browse mode
+						( eb ) dup eb.content.code ( eb )
+					else ( eb )
+						\ user refused, so stay in code mode
+						js: $(".ebmodeflag",tos())[0].checked=true 
+					then ( eb )	
+				then ( eb )
+			else ( eb field )
+				<js>
+				$(".ebreadonlyflag",tos(1))[0].checked = true;
+				$(".ebmodeflag",tos(1))[0].checked = true;					
+				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
+				</js>
+			then  ( eb )
+		\ Activate settings ( eb )
+			eb.settings ;
+        /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
+		
+    : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
+        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
+        js> $('.ebname',tos())[0].value trim ( eb name ) 
+		js> storage.get(pop()) ( eb field ) (eb.read) ;
+        
     : eb.init-buttons ( eb -- ) \ Initialize buttons of the local storage edit box.
-        <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
-        <js> $(".ebmode",    tos())[0].onclick =function(e){push(this);execute("eb.mode.toggle");    return(false)}</js>
-        <js> $(".ebsave",    tos())[0].onclick =function(e){push(this);execute("eb.save");    return(false)}</js>
-        <js> $(".ebread",    tos())[0].onclick =function(e){push(this);execute("eb.read");    return(false)}</js>
-        <js> $(".ebclose",   tos())[0].onclick =function(e){push(this);execute("eb.close");   return(false)}</js>
-        <js> $(".ebrun",     tos())[0].onclick =function(e){push(this);execute("eb.run");     return(false)}</js> 
-        <js> $(".ebdelete",  tos())[0].onclick =function(e){push(this);execute("eb.delete");  return(false)}</js> 
-        <js> $(".ebtextarea",tos())[0].onchange=function(e){push(this);execute("eb.onchange");return(false)}</js> 
-        <js> // ( eb ) 以下類似的 handler 寫兩次 to be fool and safe.
+        ['] eb.readonly    word>handler js: $(".ebreadonly",tos(1))[0].onclick=pop()
+        ['] eb.mode.toggle word>handler js: $(".ebmode",tos(1))[0].onclick=pop()
+        ['] eb.save        word>handler js: $(".ebsave",tos(1))[0].onclick=pop()
+        ['] eb.read        word>handler js: $(".ebread",tos(1))[0].onclick=pop()
+        ['] eb.close       word>handler js: $(".ebclose",tos(1))[0].onclick=pop()
+        ['] eb.run         word>handler js: $(".ebrun",tos(1))[0].onclick=pop()
+        ['] eb.delete      word>handler js: $(".ebdelete",tos(1))[0].onclick=pop()
+        ['] eb.onchange    word>handler js: $(".ebtextarea",tos(1))[0].onclick=pop()
+        ['] eb.save ( eb eb.save ) <js> 
+            var ebsave = pop(); // ( eb ) 以下類似的 handler 寫兩次 to be fool and safe.
             $(".ebtextarea",tos())[0].onkeydown = function(e) {
                 e = (e) ? e : event; 
                 var keycode = (e.keyCode) ? e.keyCode : (e.which) ? e.which : false;
@@ -201,7 +276,7 @@
                     case  83: /* s */
                         if (e&&e.ctrlKey) {
                             push(this); // ( textarea ) 
-                            execute("eb.save");
+                            execute(ebsave);
 							// Saved already so clear the onchange status
 								this.innerText=this.value; 
 								// this.value=this.innerText; 這會造成 3nw 把整個 textarea 都清掉!! 幸好用不著。
@@ -218,7 +293,7 @@
                     case  83: /* s */
                         if (e&&e.ctrlKey) {
                             push(this); // ( htmlarea ) 
-                            execute("eb.save");
+                            execute(ebsave);
                             e.stopPropagation ? e.stopPropagation() : (e.cancelBubble=true); // stop bubbling
                             return(false);
                         }
@@ -293,63 +368,7 @@
 		js: inputbox.blur();window.scrollTo(0,tos().offsetTop-50) ( eb ) ;
 		/// WWW browser moves the focus to the editbox also.
 
-	: is-editbox-field? ( obj -- boolean ) \ Is the object an local storage edit box field?
-	    >r js> typeof(rtos())=="object" if
-			js> typeof(rtos().doc)=="string"
-			js> typeof(rtos().mode)=="boolean"
-			js> typeof(rtos().readonly)=="boolean"
-			and and ( boolean )
-		else 
-			false ( boolean )
-		then r> drop ;
-
-    : (eb.read) ( eb field -- ) \ Load eb with field
-		\ Idiot-proof first of all
-			js> $(".ebsaveflag",tos(1))[0].checked not if  ( eb field )
-				<js> confirm("Overwrite unsaved edit box, are you sure?") </jsV> 
-				if else 2drop exit then
-			then  
-			( eb field )
-		\ check the field name 	
-			js> Boolean(tos()) if else
-				js> $('.ebname',tos(1))[0].value
-				<js> alert("Can't find '" + pop() + "', is it new?")</js>
-				drop 2drop exit \ nothing to do
-			then ( eb field )
-		\ Load the edit box with the field
-			js: $(".ebsaveflag",tos(1))[0].checked=true \ the field must have been Saved 
-			( eb field ) dup is-editbox-field? if ( eb field )
-				<js>
-					$('.ebtextarea',tos(1))[0].value = tos().doc;
-					$(".ebreadonlyflag",tos(1))[0].checked = tos().readonly;
-				</js>
-				js> $(".ebmodeflag",tos(1))[0].checked=tos().mode;  ( eb field mode )
-				if  ( eb field ) 
-					drop ( eb ) 
-				else \ Take care of Browse mode   ( eb field )
-					:> doc ( eb doc ) living-tag? ( eb flag ) if 
-						\ copy code mode's content to browse mode
-						( eb ) dup eb.content.code ( eb )
-					else ( eb )
-						\ user refused, so stay in code mode
-						js: $(".ebmodeflag",tos())[0].checked=true 
-					then ( eb )	
-				then ( eb )
-			else ( eb field )
-				<js>
-				$(".ebreadonlyflag",tos(1))[0].checked = true;
-				$(".ebmodeflag",tos(1))[0].checked = true;					
-				$('.ebtextarea',tos(1))[0].value = JSON.stringify(pop());
-				</js>
-			then  ( eb )
-		\ Activate settings ( eb )
-			eb.settings ;
-        /// 讀進來固定都先放 .ebtextarea, 好像有好處, [ ] 待分析清楚。
-		
-    : eb.read ( btn -- ) \ Read the localStorate[name] to textarea.
-        (eb.parent) ( eb ) \ The input object can be any node of the editbox.
-        js> $('.ebname',tos())[0].value trim ( eb name ) 
-		js> storage.get(pop()) ( eb field ) (eb.read) ;
+\ [ ] is-editbox-field? and eb.read was here
 		
 	: fieldname>eb ( name -- eb ) \ Get eb object if it is opened, null otherwise
 		trim <js> 
@@ -385,7 +404,7 @@
 		/// If the field has been opened then jump to it.
 		
     : ed ( <field name> -- ) \ Edit local storage field
-		char \n|\r word (ed) ; 
+		CR word (ed) ; nonprivate
 		/// A new name creates a new field.
 		/// If field name is null string then do nothing
 		/// If the field has been opened then jump to it.
@@ -403,7 +422,7 @@
 
 	: full-screen ( [<fieldname>] -- ) \ Open a new 3ce tab and edit box alone for the field 
 		\ 取得 fieldname from TIB or the last EditBox
-			char \r|\n word trim js> tos().length if else 
+			CR word trim js> tos().length if else 
 				drop js> $(".eb").length js> tos()==0 ?abort" Which field?" 
 				1- ( i ) js> $(".eb")[pop()] ( eb )
 				js> $(".ebname",pop())[0].value ( name )
@@ -431,7 +450,7 @@
 		js> storage.get(pop()).doc tib.append ;
 		
 	: run ( <local storage field name> -- ) \ Run local storage source code.
-		char \n|\r word trim (run) ;
+		CR word trim (run) ;
 		/// 一整行都當 field name 可以有空格。
 		
 	: type>textarea ( "string" "class" -- ) \ Type the string into a textarea in outputbox
@@ -451,7 +470,7 @@
 		///   js> $("textarea")[n].value import \ you find the n in prior
 		
 	: export-one-field ( <field-name> -- ) \ Export the local storage field in JSON format into a textarea in outputbox
-		char \n|\r word (export-one-field) ;
+		CR word (export-one-field) ;
 		/// 直接 copy-paste 該內容在 inputbox 執行即覆寫或新增該 field。
 		
 	: export ( -- ) \ Export entire local storage in JSON format into a textarea in outputbox.
@@ -480,7 +499,7 @@
 		/// 本來就會自動 save-restore localStorage。
 		
 	: import ( [<pathname.json>] -- ) \ Import entire pathname.json or default if absent
-		char \r|\n word trim ( pathname ) 
+		CR word trim ( pathname ) 
 		js> tos()=="" if \ use default 
 			drop js> vm.appname :> match(/(.+)\.(.+)/) :> [2] ( 3ca|3htm|3nw|3hta )
 			char private/ swap + char .json +
@@ -565,7 +584,7 @@
         ///   js> storage.get("field-name") (see)
 
 	: dump ( <pathname> -- ) \ Dump local storage edit box fields 
-		char \r|\n word (dump) ;
+		CR word (dump) ; nonprivate
 		/// Dump localStorage if the given pathname is missing.
 		/// 配合 Chrome 的 Ctrl-S 把 local storage 整個 save 成 .html 檔, 將來
 		/// 可以 restore 回來。非 edit box editable 的 objects 不含。
@@ -664,17 +683,18 @@
 				js> tos(2) swap appendChild ( DIV array ) 
 			repeat 2drop 
 		\ 給以上變出來的 buttons 畫龍點睛
-			<js> 
+			['] (export-one-field) ['] (ed) <js> 
+                var ed = pop(), exp = pop();
 				$("input.lsfieldopen").click(function(){
 					push(this.getAttribute("fieldname")); // ( name ) 
-					execute("(ed)");
+					execute(ed);
 				})
 				$("input.lsfieldexport").click(function(){
 					push(this.getAttribute("fieldname")); // ( field-name ) 
-					execute("(export-one-field)");
+					execute(exp);
 				})
 			</js> 
-		;
+		; nonprivate
 
 	: save ( -- ) \ Save all local storage edit box to localstorage.html
 		"" (dump) <js>
@@ -705,7 +725,8 @@
 		js> outputbox textarea.value->innertext ( eb ) \ let textarea.innerText = its.value
 		js: $(".ebhtmlarea",tos())[0].innerHTML=outputbox.innerHTML ( eb ) \ load the content, let &lt; translation happen.
 		dup eb.appearance.browse ( eb ) 
-		js: $(".ebsaveflag",pop())[0].checked=false ; \ Not saved yet, up to users decision
+		js: $(".ebsaveflag",pop())[0].checked=false \ Not saved yet, up to users decision
+        ; nonprivate
  
 	\ Setup default autoexec, ad, and pruning if autoexec is not existing
 

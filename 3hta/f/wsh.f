@@ -114,7 +114,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				/// 7 Displays the window as a minimized window. The active window remains active. 
 
 : run			( <command-line> -- errorlevel ) \ Run like Win-R does and wait for the return.
-				char \n|\r word js> WshShell.run(pop(),5,true) ; interpret-only 
+				CR word js> WshShell.run(pop(),5,true) ; interpret-only 
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
 				/// See also run, (run), fork, (fork), dos, (dos).
@@ -141,7 +141,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				/// Use run or dos if want the return value. 
 
 : fork			( <command-line> -- ) \ Fork througn Win-R does, fire and forget, no return value.
-				char \n|\r word js: WshShell.run(pop(),5,false) ;
+				CR word js: WshShell.run(pop(),5,false) ;
 				/// No return value, because the caller doesn't wait.
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
@@ -157,7 +157,7 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				///   s' find "forth" jeforth.hta' (dos) .s
 				
 : dos			( <command-line> -- errorlevel ) \ Run DOS command-line and stay there. Errorlevel will return.
-				char \n|\r word s" cmd /k " swap + js> WshShell.run(pop(),5,true) ;
+				CR word s" cmd /k " swap + js> WshShell.run(pop(),5,true) ;
 				\ The first match of either \r or \n terminates the command line. This is important
 				\ otherwise the extra \n may pollute the command line.
 				/// See also run, (run), fork, (fork), dos, (dos).
