@@ -5618,7 +5618,7 @@
         [x] 3ce 
 			[x] attach to target pages
         [x] 3ca
-		[ ] Testing all demo
+		[x] Testing all demo
 			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
 			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
 			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , 
@@ -5626,11 +5626,11 @@
 				[x] alarm.f has this problem so it doesn't work in 3ce and 3ca
 					Refused to execute inline event handler because it violates the following Content 
 					Security Policy ---> fixed.
-		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
 			切換到Master分支 : git checkout master 
 			合併 develop 分支進 master 來 : git merge --no-ff develop 
-		[ ] Test the master all over again ... pass        
-		[ ] Master 到回 develop
+		[/] Test the master all over again ... ignored, lazy.
+		[x] Master 到回 develop
 			切換到Master分支 : git checkout develop
 			合併 develop 分支進 master 來 : git merge --no-ff master
 		[ ] release note
