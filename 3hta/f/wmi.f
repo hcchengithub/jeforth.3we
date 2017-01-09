@@ -51,27 +51,28 @@ t/c getWMIService js: vm.objWMIService=pop()
 				again
 				;
 				
-				<selftest>
-					marker -%-%-%-%-%-
-					*** get WMI object, get NIC config, print IP addresses
-					js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stops working if is null.
-					js> vm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 vm.screenbuffer 尾巴。
-					\ Start to do anything ...
-					js> vm.objWMIService js> typeof(pop()) \ "object" 
-					printIPAddress
-					\ .... done, start checking ...
-					start-here <js> vm.screenbuffer.indexOf("thernet",pop())!=-1 </jsV> \ true  Ethernet
-					start-here <js> vm.screenbuffer.indexOf("dapter",pop())!=-1 </jsV> \ true   Adapter
-					start-here <js> vm.screenbuffer.indexOf("ireless",pop())!=-1 </jsV> \ true  Wireless
-					start-here <js> vm.screenbuffer.indexOf("ontroller",pop())!=-1 </jsV> \ true  Controller
-					or or or [d "object",true d] [p 
-						't/c',
-						'getWMIService',
-						'objEnumWin32_NetworkAdapterConfiguration',
-						'printIPAddress'
-					p]
-					-%-%-%-%-%-
-				</selftest>
+				\ [ ] failed if network is disconnected, improve it for the tolerance
+				\ <selftest>
+				\ 	marker -%-%-%-%-%-
+				\ 	*** get WMI object, get NIC config, print IP addresses
+				\ 	js: vm.screenbuffer=vm.screenbuffer?vm.screenbuffer:""; \ enable vm.screenbuffer, it stops working if is null.
+				\ 	js> vm.screenbuffer.length constant start-here // ( -- n ) 開始測試前的 vm.screenbuffer 尾巴。
+				\ 	\ Start to do anything ...
+				\ 	js> vm.objWMIService js> typeof(pop()) \ "object" 
+				\ 	printIPAddress
+				\ 	\ .... done, start checking ...
+				\ 	start-here <js> vm.screenbuffer.indexOf("thernet",pop())!=-1 </jsV> \ true  Ethernet
+				\ 	start-here <js> vm.screenbuffer.indexOf("dapter",pop())!=-1 </jsV> \ true   Adapter
+				\ 	start-here <js> vm.screenbuffer.indexOf("ireless",pop())!=-1 </jsV> \ true  Wireless
+				\ 	start-here <js> vm.screenbuffer.indexOf("ontroller",pop())!=-1 </jsV> \ true  Controller
+				\ 	or or or [d "object",true d] [p 
+				\ 		't/c',
+				\ 		'getWMIService',
+				\ 		'objEnumWin32_NetworkAdapterConfiguration',
+				\ 		'printIPAddress'
+				\ 	p]
+				\ 	-%-%-%-%-%-
+				\ </selftest>
 
 \ 利用 jeforth for WSH 與其 JavaScript console 手動來操作 WMI 很有用，沒必要寫一大堆人機介面。
 \ 跑一下 objEnumWin32_OperatingSystem 準備好 Win32_OperatingSystem object 放在 TOS，此後用 console 進 js console, 

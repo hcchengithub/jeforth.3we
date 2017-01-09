@@ -31,7 +31,7 @@ code get-context ( -- "vid" ) \ Get the word list that is searched first.
 				/// context is order[last]
 
 : set-context	 ( "vid" -- ) \ Replace the word-list which is searched first.
-				 js: order.pop();order.push(pop()) rescan-word-hash ;
+				 js: order.pop();order.push(tos());vm.g.scan_vocabulary(context=pop(),true) ;
 				 /// context and order[last] are samething. 
 				 /// No error-proof, because it is only used in vocabulary words.
 

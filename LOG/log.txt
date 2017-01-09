@@ -4457,7 +4457,7 @@
     
 [ ] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
-[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
+[x] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
 	IE/Edge, and Firefox are facing the Access-Control-Allow-xxxxx 的問題。
     可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
     ==> study https://pages.github.com/
@@ -4481,7 +4481,7 @@
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/readtextfile.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/f/jeforth.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/quit.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
-	[ ] 
+	==> use http://cdn.rawgit.com/... 	is the solution. 13:11 2017-01-08
 	
 [x] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
     --> See YNote: "在 Web browser 上直接編輯網頁內容"
@@ -4815,15 +4815,17 @@
 		:END
 	--> done! jeforth.3we/setup.bat setup all applications.
 [x] setup.bat should include the private folder
-[ ] include command may do nothing if the ~.f module was existing. This causes problem 
+[x] include command may do nothing if the ~.f module was existing. This causes problem 
     if word reDef is expected. For example, many-clocks.f uses 'save' command which is
 	defined in canvas.f module. When include many-clocks.f the 'save' command has been
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
 	of doing nothing when it's existing. 
 	--> Not 'include' but 'source-code-header' who skip existing vocabulary.
+	==> done, now include command will always prioritize the word-list even if it has
+		included already. It's not NOP anymore. 13:10 2017-01-08
 	
-[ ] jeforth.3htm run through rawgit.com has some problems,
+[ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
 	[ ] The outputbox background color covers only half screen when cell phone is 
 		not vertical.
 	[ ] 12choc.f can not drag and drop objects on Andorid browser.
@@ -4836,7 +4838,11 @@
         "" value tib-at-the-point js: vm.g.tib=tib.slice(ntib)
     and check tib-at-the-point
 
-[ ] Change the self-test design of jeforth.3we. No command line do nothing.
+[x] Change the self-test design of jeforth.3we. No command line do nothing.
+	--> Yuan-Yuan Teng's experience made me considered this modification. But actually
+		the problem was now RI, when a computer is off line then 3HTA selftest will fail
+		at printIPAddress. Simply remove the test item has temporary skipped the problem.
+		13:07 2017-01-08
 
 [x] support 'private' command to hide private words in the vocabulary	
     Forth 好用, 但是所有的 word 都是 global 令人想念有 local 的環境。應用 jeforth 用久了, 這
@@ -4885,7 +4891,7 @@
                     }
                     end-code
 
-[ ] change the include design. 
+[x] change the include design. 
     : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
                     dup readTextFileAuto ( pathname file )
                     \ js> tos().indexOf("-=e"+"Of=-")!=-1 if ( pathname file )  *debug* 111>
@@ -5100,7 +5106,7 @@
 
 [x] Make sure new source-code-header can handle nested include ... ok now. 
 
-[ ] See code word don't show the toString method.
+[x] See code word don't show the toString method.
 
 [x] words and help do not list private words by default. [/] pattern '*' to show all.
 	\ List all private words in wordhash{} and count word quantity
@@ -5137,7 +5143,7 @@
                 4. for in module applications , everything is in the ~.f module. Thus js> current  and js> 
                    context are the same vid. This is important and is done by source-code-header. Thus 
                    vm[context].name is the easist way.
-    [ ] check all vm.g.name and vm.g[name] values and constants
+    [x] check all vm.g.name and vm.g[name] values and constants
 		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
@@ -5466,7 +5472,7 @@
     [x] Master 到回 develop
         切換到Master分支 : git checkout develop
         合併 develop 分支進 master 來 : git merge --no-ff master
-    [ ] release note
+    [x] release note
         
 [/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
 	--> js: tick('<selftest>').enabled=false in every quit.f 
@@ -5482,27 +5488,18 @@
         
 [ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
 	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
-[ ] private support is good, but there are many event handlers like examples in ls.f
+[x] private support is good, but there are many event handlers like examples in ls.f
         <js> $(".ebreadonly",tos())[0].onclick =function(e){push(this);execute("eb.readonly");return(false)}</js>
     will be not working because "call by name" and the name will be invisible after being not
     the context. My idea is to have a word, say 'word>handler' that output a handler function. So,
         code word>handler ( word -- handler() ) \ Pack the word into an event handler
-            push((new Handler(pop())));
-            function Handler(w) {
-                var eventHandler = w;
-                return(
-                    function(e){
-                        push(this);
-                        execute(eventHandler);
-                        return(false);
-                    }
-                )
-            }
+			... snip ...
         end-code
     and the line will become:
         ['] eb.readonly word>handler js: $(".ebreadonly",tos(n))[0].onclick=pop()
-    [ ] call by name must be reviewed especially utility vocabularies.
-        [x] ls.f privacy is true now.
+    [x] call by name must be reviewed especially utility vocabularies. 
+		--> tick() and execute() have run-time-warning in selftest mode
+    [x] ls.f privacy is true now.
 [ ] (.0r) Negative numbers become "0000-123", 
 	--> use Math.sign to fix it.
 [ ] <task> ... </task> does not work as expected. Remove them.
@@ -5527,7 +5524,7 @@
 	ready.
 	[x] If use two-pass search, then all words need to be searched twice. Consider the cost!
 		==> Yeah, two pass is a bad idea.
-[ ]	Switch context inevitably triggers a wordhash rescan, it's faster if rescan only the target
+[x]	Switch context inevitably triggers a wordhash rescan, it's faster if rescan only the target
 	vocabulary into the current wordhash{} while the previous wordhash{} is not totally disappeared, 
 	only overritten with the alternative definitions. Un-replaced words are still visible.
 	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
@@ -5541,7 +5538,15 @@
 	--> The downside is that after 'previous' command too many words will be disappeared.
 		However, that is not a new problems caused by the new design of vocabulary words.
 		So, the idea is still attractive.
-
+	==> Done !! 17:37 January 7, 2017	
+	[x] Problem found but not a problem!!
+		Selftest failed when selftest 3hta because 'bye' redefined by vb.f that returns errorlevel
+		has been replaced by the original 'bye' defined in forth. Because context switched to forth
+		somewhere before running the selftest although in order vb.f has higher priority due to the
+		new design the active 'bye' is the older one. This is NOT 100% a problem because the vb.f bye
+		can be inactive anytime unexpectedly like this case. The correct way to reDef 'forth bye' is
+		to put the new 'bye' defined in vb.f into the 'forth' vocabulary. ---> Done, and it works now.
+	
 [x] 3ce, list-tabs hang up !!! --> Chrome in trouble, restart then ok.
 [x] setup.bat should not include private folder. If want to include private folder separately do 
 	it manually. ==> done.
@@ -5599,4 +5604,46 @@
 	-->	code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
 		\ it works now! see you tomorrow with my Metamoji note on X1 Yoga.
 	--> Test [x] 3htm (help)
-	
+[ ] 準備 release master 新版 release 新版 master
+    o search "kvm.minor_version" increase 版號。
+        [x] jeforth.3nd.js --> kvm.minor_version = 203 -> 204
+        [x] 3nw, jeforth.3we/package.json version 223 -> 224
+        [x] jeforth.3htm.js --> kvm.minor_version = 203 -> 204
+        [x] jeforth.3ce.js(3ce extension pages)-> 203 kvm.minor_version = 204
+        [x] jeforth.3ce, ce.f(Target page) -> vm.minor_version = 203 -> vm.minor_version = 204
+        [x] jeforth.3ce, background.js vm.minor_version = 203 -> vm.minor_version = 204
+        [x] jeforth.hta --> <HTA> tag. VERSION="204" -> VERSION="205"
+        [/] jeforth.3ca, also jeforth.3htm.js above
+    o selftest them all
+        [x] setup.bat
+        [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
+        [x] 3nd
+			[x] run webserver.f
+        [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+        [x] 3hta
+        [x] 3ce 
+			[x] attach to target pages
+        [x] 3ca
+		[x] Testing all demo
+			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
+			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
+			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , 
+			[x] solar-system.f			 
+				[x] alarm.f has this problem so it doesn't work in 3ce and 3ca
+					Refused to execute inline event handler because it violates the following Content 
+					Security Policy ---> fixed.
+		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+			切換到Master分支 : git checkout master 
+			合併 develop 分支進 master 來 : git merge --no-ff develop 
+		[/] Test the master all over again ... ignored, lazy.
+		[x] Master 到回 develop
+			切換到Master分支 : git checkout develop
+			合併 develop 分支進 master 來 : git merge --no-ff master
+		[ ] release note
+[ ] setup.bat to create one more folder	: jeforth.3htm 
+[x] git.f in trouble now, due to (fork) definition changed, it's quiet now, is that the root cause?
+		> launch-git-shell
+		JavaScript error on word "(fork)" : Invalid procedure call or argument
+	==> No! git.f doesn't know the Git Shell path. That needs manual setup by editing git.f
+		and I didn't do that for this computer yet.
+		
