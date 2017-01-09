@@ -1713,7 +1713,6 @@ code (.0r)      ( num|str n -- "0000num|str" ) \ Right adjusted print num|str in
 				// type(minus+i);
 				push(minus+i);
 				end-code
-				/// Negative numbers become "0000-123".
 				
 : .0r 			( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				(.0r) . ;

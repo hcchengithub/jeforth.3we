@@ -64,14 +64,14 @@ cd %~dp0
 \ 3ca	Chrome Applications
 	.( Chrome Applications jeforth.3ca ) cr
 	char ..\jeforth.3ca to _a _a GetFolder [if] [else]
-	s" md _a" :> replace(/_a/,vm[current]._a)      (dos) 110 ckp
-	setup-common-folders \ mirror of common folders
-	\ application specific files and folders
-	s" mklink    _a\_f  _h\log\_f" ahf 3ca.log.txt 	(dos) 111 ckp
+	s" md _a" :> replace(/_a/,vm[current]._a)        (dos) 110 ckp
+	setup-common-folders \ mirror of common folders  
+	\ application specific files and folders         
+	s" mklink    _a\_f  _h\log\_f" ahf 3ca.log.txt 	 (dos) 111 ckp
 	s" mklink    _a\_f  _h\3ca\_f" ahf manifest.json (dos) 112 ckp
-	s" mklink /d _a\3ca _h\3ca"    ah 				(dos) 113 ckp
-	s" mklink /h _a\_f  _h\_f"     ahf common.css	(dos) 114 ckp
-	s" mklink /h _a\_f  _h\_f"     ahf index.html	(dos) 115 ckp
+	s" mklink /d _a\3ca _h\3ca"    ah 				 (dos) 113 ckp
+	s" mklink /h _a\_f  _h\_f"     ahf common.css	 (dos) 114 ckp
+	s" mklink /h _a\_f  _h\_f"     ahf index.html	 (dos) 115 ckp
 	[then]
 \ 3ce	Chrome Extensions
 	.( Chrome Extensions jeforth.3ce ) cr
@@ -108,15 +108,26 @@ cd %~dp0
 \ 3nw	NW.js
 	.( NW.js jeofrth.3nw ) cr
 	char ..\jeforth.3nw to _a _a GetFolder [if] [else]
-	s" md _a" :> replace(/_a/,vm[current]._a)		(dos) 150 ckp
+	s" md _a" :> replace(/_a/,vm[current]._a)		 (dos) 150 ckp
+	setup-common-folders \ mirror of common folders  
+	\ application specific files and folders         
+	s" mklink /d _a\3nw _h\3nw" ah 					 (dos) 151 ckp
+	s" mklink /h _a\_f _h\_f"   ahf package.json	 (dos) 152 ckp
+	s" mklink /h _a\_f _h\_f"   ahf jeforth.3nw.html (dos) 152 ckp
+	s" mklink /h _a\_f _h\_f"   ahf common.css		 (dos) 153 ckp
+	s" mklink /d _a\3nd _h\3nd" ah 					 (dos) 154 ckp
+	[then]
+	
+\ 3htm HTML 
+	.( HTML jeforth.3htm ) cr
+	char ..\jeforth.3htm to _a _a GetFolder [if] [else]
+	s" md _a" :> replace(/_a/,vm[current]._a)        (dos) 160 ckp
 	setup-common-folders \ mirror of common folders
 	\ application specific files and folders
-	s" mklink /d _a\3nw _h\3nw" ah 					(dos) 151 ckp
-	s" mklink /h _a\_f _h\_f"   ahf package.json	(dos) 152 ckp
-	s" mklink /h _a\_f _h\_f"   ahf jeforth.3nw.html (dos) 152 ckp
-	s" mklink /h _a\_f _h\_f"   ahf common.css		(dos) 153 ckp
-	s" mklink /d _a\3nd _h\3nd" ah 					(dos) 154 ckp
+	s" mklink /h _a\_f  _h\_f"     ahf common.css	 (dos) 161 ckp
+	s" mklink /h _a\_f  _h\_f"     ahf index.html	 (dos) 162 ckp
 	[then]
+	
 \ Bye
 	<o> <h1 style="text-align:center"> 
 	jeforth.3we application setup is successfully done </h1>

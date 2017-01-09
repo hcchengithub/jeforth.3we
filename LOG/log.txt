@@ -3550,8 +3550,9 @@
         --> SysJustBody :> contentDocument.links[17].click() 成功!
         --> 17 經營績效 的 table id oMainTable 裏頭還有 select 在 tr id=oScrollHead 裡。
 
-[ ] Win7, jeforth.3we inputbox 怪怪的, back-space 倒不回去。
-[ ] Win7, jeforth.3we Alt-Up 之後, 上下鍵一跳兩行!
+[/] Win7, jeforth.3we inputbox 怪怪的, back-space 倒不回去。
+[/] Win7, jeforth.3we Alt-Up 之後, 上下鍵一跳兩行!
+	==> We don't support Windows 7 now.
 
 [x] excel.f or work.f 寫個 query 命令來查部門詳情。 ==> see-departments 1s1k
 
@@ -3649,7 +3650,7 @@
     So we need to improve words and help. --> 規定好 input 格式, 有助化簡程式。
     words/help [pattern [switch [argument]]]
 
-[ ] 老經驗
+[x] 老經驗
     nexttoken('\n|\r'); // if use only '\n' then we get an unexpected ending '\r'.
 
 [x] see ~(create)~
@@ -4042,7 +4043,7 @@
             EditMode 用 Ctrl-Enter 發出命令
     [x] 下過命令自動取消 EditMode。
 
-[ ] rename ntib to itib ok? think about it.
+[/] rename ntib to itib ok? think about it. --> forget it.
 
 [ ] 要不要突破第一行的限制?
     --> In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
@@ -4074,8 +4075,8 @@
 [x] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
     "JavaScript error : Safety settings on this computer prohibit accessing a data
      source on another domain." ===> 放棄 Windows XP.
-[ ] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
-    [ ] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
+[/] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
+    [/] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
         I wish HTA supports something to tell OS version?
     --> jeforth.hta uses the below method to distinguish Windows version:
         if(document.getElementsByClassName){
@@ -4084,6 +4085,7 @@
         } else{
             alert("Warning: Your system is old, IE10 or newer preferred. Try Windows upgrade.");
         }
+	==> Give up Windows 7
 
 [x] How to tell Windows version?
     > objEnumWin32_OperatingSystem :> item().Version .
@@ -4309,6 +4311,7 @@
     ==> 寫一個簡單的 index.html 裡面就是 include jquery 跟檢查。看能不能複製問題出來。
     ==> https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html?nop
         run 得很好。
+		
 [x] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
 [x] only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
     order 裡面。為了避免礙眼。
@@ -4327,10 +4330,7 @@
         定義中的 word 的 xt 變成前一個 word 的，而且該 error 觸發 Chrome F12 debugger 時，
         compiling 的值是個字串 "code"。
 
-[ ] hcchen5600 2015/11/13 10:46:32
-    hash>column2 改寫成好用的介面。
-
-[ ] hcchen5600 2015/11/13 10:46:37
+[x] hcchen5600 2015/11/13 10:46:37
     [solar-system.f] cloth.f 改寫,變成教材。
 
 [x] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
@@ -4355,8 +4355,6 @@
     a global, and it is.
     So cv will be a value, a global too.
     ==> this is a bigger effort to modify all existing .f files. Done.
-
-[ ] webserver.bat 要避免重複跑，multiple instance 搶著當 localHost server 不可能。
 
 [ ] This info seems a better way for ie.f to modify a web page
     https://msdn.microsoft.com/en-us/library/jj733572.aspx#Date
@@ -4455,7 +4453,7 @@
     execute ( Word|"name"|address|empty -- ... ) Execute the given word or the last() if stack is empty. (object)
     ==> 9/16'16 done
     
-[ ] Many older forth basic words appear stupied after having pop() tos() ...etc.
+[x] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
 [x] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
 	IE/Edge, and Firefox are facing the Access-Control-Allow-xxxxx 的問題。
@@ -4509,12 +4507,13 @@
     解法應該是： replace(/"/g,"\\\"") ---> Bingo!!
     to command 也有同樣的問題 --> Yes.
 
-[ ] vm.g.variable 應該是 vm.g.voc.variable 才對,
+[/] vm.g.variable 應該是 vm.g.voc.variable 才對,
     或者各自掛到 vocabulary object 底下去才對。
     --> 這個問題跟 forth 本身把所有的 variable constant value 都當成 global 所造成的
         隱憂差不多，頂多多一點。
-    [ ] 讓 value constant 檢查 the name 是否已經存在。
-    [ ] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
+    [/] 讓 value constant 檢查 the name 是否已經存在。
+    [/] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
+	==> automatically no longer a question after private supported.
 
 [ ] The template.f project ==> modify.f
 
@@ -4824,11 +4823,7 @@
 	--> Not 'include' but 'source-code-header' who skip existing vocabulary.
 	==> done, now include command will always prioritize the word-list even if it has
 		included already. It's not NOP anymore. 13:10 2017-01-08
-	
-[ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
-	[ ] The outputbox background color covers only half screen when cell phone is 
-		not vertical.
-	[ ] 12choc.f can not drag and drop objects on Andorid browser.
+
 [x] ls.f autoexec has a problem. If it include ~.f which uses source-code-header
     that will cause a self-test nested structre problem. Because autoexec is added to
     the end of tib by tib.insert. But included ~.f's are spposed to be completed before
@@ -5061,7 +5056,7 @@
                 header tib.insert 
         then ;
 
-[ ] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include 
+[x] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include 
 	command is not reliable either. So, sinclude command should save the pathname
 	itself or use the old way like source-code-header does that requires the module
 	name.f given explicitly.
@@ -5069,7 +5064,7 @@
 [x] I am warrying about the nested ~.f modules. An included module is to be tib.inserted
     to the position of ntib. The process should not hurt the original tib.
 	My sinclude command does it well. <--- OK.
-	[ ]	But source~ should insert the header and tailer into the right place or split tib
+	[/]	But source~ should insert the header and tailer into the right place or split tib
 		into 3 pices [used][ntib~EOF][after EOF] is also a method candidate.
 	
 [x] My recent modifications on sinclude to support private words also caused this problem. 
@@ -5086,7 +5081,7 @@
 [x] try 3nd ... failed too after the recent modification on rescan-word-hash to support private
 	that has caused the bug of accessing order[-1] which is of course undefined:
 	JavaScript error on word "rescan-word-hash" : Cannot read property 'length' of undefined
-	--> Try 3nw with f12 debugger ... 3nw and 3htm no problem <-- [ ] strange, should have the same problem.
+	--> Try 3nw with f12 debugger ... 3nw and 3htm no problem <-- [x] strange, should have the same problem.
 	--> Root cause is: after the 'only' command, order array become 0 length but words in
 		forth vocabulary are still visible because the rescan-word-hash command always scan
 		forth word-list. 'only 'clears the order array may be a mistake, should preserve forth
@@ -5500,8 +5495,6 @@
     [x] call by name must be reviewed especially utility vocabularies. 
 		--> tick() and execute() have run-time-warning in selftest mode
     [x] ls.f privacy is true now.
-[ ] (.0r) Negative numbers become "0000-123", 
-	--> use Math.sign to fix it.
 [ ] <task> ... </task> does not work as expected. Remove them.
 	: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
 					char </task> word ; immediate
@@ -5604,7 +5597,7 @@
 	-->	code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
 		\ it works now! see you tomorrow with my Metamoji note on X1 Yoga.
 	--> Test [x] 3htm (help)
-[ ] 準備 release master 新版 release 新版 master
+[x] 準備 release master 新版 release 新版 master : af266a3f8c4fefafc04947e9ba0b89d9f3601eed
     o search "kvm.minor_version" increase 版號。
         [x] jeforth.3nd.js --> kvm.minor_version = 203 -> 204
         [x] 3nw, jeforth.3we/package.json version 223 -> 224
@@ -5640,10 +5633,30 @@
 			切換到Master分支 : git checkout develop
 			合併 develop 分支進 master 來 : git merge --no-ff master
 		[ ] release note
-[ ] setup.bat to create one more folder	: jeforth.3htm 
 [x] git.f in trouble now, due to (fork) definition changed, it's quiet now, is that the root cause?
 		> launch-git-shell
 		JavaScript error on word "(fork)" : Invalid procedure call or argument
 	==> No! git.f doesn't know the Git Shell path. That needs manual setup by editing git.f
 		and I didn't do that for this computer yet.
 		
+[x] setup.bat to create one more folder	: jeforth.3htm 
+
+[x] (.0r) Negative numbers become "0000-123", 
+	--> use Math.sign to fix it. --> no such problem! Shit. True only for strings like:
+		> -123 :> toString() 8 .0r \ ==> 0000-123 OK 
+		that's normal.
+		
+[ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
+	[ ] The outputbox background color covers only half screen when cell phone is 
+		not vertical.
+	[ ] 12choc.f can not drag and drop objects on Andorid browser.
+
+[ ] webserver.bat 要避免重複跑，multiple instance 搶著當 localHost server 不可能。
+
+[ ] hcchen5600 2015/11/13 10:46:32
+    hash>column2 改寫成好用的介面。
+
+[ ] How to make a release on GitHub? Not only a master commit, but an official release.
+
+[ ] Unify the version. See above log of a master release, it takes a lot of efforts to modify
+	the version code of each application.
