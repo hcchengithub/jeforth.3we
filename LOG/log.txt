@@ -4457,7 +4457,7 @@
     
 [ ] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
-[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
+[x] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
 	IE/Edge, and Firefox are facing the Access-Control-Allow-xxxxx 的問題。
     可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
     ==> study https://pages.github.com/
@@ -4481,7 +4481,7 @@
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/readtextfile.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/f/jeforth.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/quit.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
-	[ ] 
+	==> use http://cdn.rawgit.com/... 	is the solution. 13:11 2017-01-08
 	
 [x] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
     --> See YNote: "在 Web browser 上直接編輯網頁內容"
@@ -4815,15 +4815,17 @@
 		:END
 	--> done! jeforth.3we/setup.bat setup all applications.
 [x] setup.bat should include the private folder
-[ ] include command may do nothing if the ~.f module was existing. This causes problem 
+[x] include command may do nothing if the ~.f module was existing. This causes problem 
     if word reDef is expected. For example, many-clocks.f uses 'save' command which is
 	defined in canvas.f module. When include many-clocks.f the 'save' command has been
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
 	of doing nothing when it's existing. 
 	--> Not 'include' but 'source-code-header' who skip existing vocabulary.
+	==> done, now include command will always prioritize the word-list even if it has
+		included already. It's not NOP anymore. 13:10 2017-01-08
 	
-[ ] jeforth.3htm run through rawgit.com has some problems,
+[ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
 	[ ] The outputbox background color covers only half screen when cell phone is 
 		not vertical.
 	[ ] 12choc.f can not drag and drop objects on Andorid browser.
@@ -4836,7 +4838,11 @@
         "" value tib-at-the-point js: vm.g.tib=tib.slice(ntib)
     and check tib-at-the-point
 
-[ ] Change the self-test design of jeforth.3we. No command line do nothing.
+[x] Change the self-test design of jeforth.3we. No command line do nothing.
+	--> Yuan-Yuan Teng's experience made me considered this modification. But actually
+		the problem was now RI, when a computer is off line then 3HTA selftest will fail
+		at printIPAddress. Simply remove the test item has temporary skipped the problem.
+		13:07 2017-01-08
 
 [x] support 'private' command to hide private words in the vocabulary	
     Forth 好用, 但是所有的 word 都是 global 令人想念有 local 的環境。應用 jeforth 用久了, 這
@@ -4885,7 +4891,7 @@
                     }
                     end-code
 
-[ ] change the include design. 
+[x] change the include design. 
     : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
                     dup readTextFileAuto ( pathname file )
                     \ js> tos().indexOf("-=e"+"Of=-")!=-1 if ( pathname file )  *debug* 111>
@@ -5100,7 +5106,7 @@
 
 [x] Make sure new source-code-header can handle nested include ... ok now. 
 
-[ ] See code word don't show the toString method.
+[x] See code word don't show the toString method.
 
 [x] words and help do not list private words by default. [/] pattern '*' to show all.
 	\ List all private words in wordhash{} and count word quantity
@@ -5137,7 +5143,7 @@
                 4. for in module applications , everything is in the ~.f module. Thus js> current  and js> 
                    context are the same vid. This is important and is done by source-code-header. Thus 
                    vm[context].name is the easist way.
-    [ ] check all vm.g.name and vm.g[name] values and constants
+    [x] check all vm.g.name and vm.g[name] values and constants
 		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
