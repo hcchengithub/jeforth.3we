@@ -732,7 +732,7 @@
 
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
-			js: outputbox.style.fontSize="1.5em"
+			\ js: outputbox.style.fontSize="1.5em"
 			cr .( Launch the briefing ) cr
 			<o> <iframe src="http://note.youdao.com/share/?id=79f8bd1b7d0a6174ff52e700dbadd1b2&type=note"
 			name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"

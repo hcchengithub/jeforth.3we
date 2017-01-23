@@ -5646,6 +5646,13 @@
 		> -123 :> toString() 8 .0r \ ==> 0000-123 OK 
 		that's normal.
 		
+					------ jeforth.3we release R1 -------
+
+[x] The correct way to run a jeforth release through rawgit.com is :
+	https://cdn.rawgit.com/hcchengithub/jeforth.3we/R1/index.html
+	IE works fine too. Where, the leading 'cdn.' is still necessary for IE but not for
+	Chrome browser.
+	
 [ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
 	[ ] The outputbox background color covers only half screen when cell phone is 
 		not vertical.
@@ -5660,3 +5667,15 @@
 
 [ ] Unify the version. See above log of a master release, it takes a lot of efforts to modify
 	the version code of each application.
+[x] Remove the :
+		js: outputbox.style.fontSize="1.5em"	
+	from the default autoexec of ls.f. I have resolved the problem for a while, no need this now.
+[ ] 3ce to support new command 'highlight' or 螢光筆 to modify active tab. Making Web browser to 
+	note taking annotating tool directly.
+[x] After supporting private, word count shown in words command and help command are still correct?
+	--> 3htm v3.204 no problem.
+[ ] 3htm v3.204 and all friends have a problem. After include 12choc.f, words still shows all
+	ls.f's 56 words. I thought include command is I/O bound and thus it should does rescan-word-hash
+	every time. Another symptom is after executing 
+		also misc.f
+	rescan-word-hash is expected too, but no! So it's a bug.
