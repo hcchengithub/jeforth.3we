@@ -1,3 +1,10 @@
+
+// 
+// project-k Forth kernel 
+// Use the same kernel code for all applications.
+// FigTaiwan H.C. Chen hcchen5600@gmail.com
+//
+
 "uses strict";
 function jeForth() {     
 	var vm = this;
