@@ -1,16 +1,16 @@
-
+##Things in jeforth.3we.wiki##
 兩個方括號 【【pictures/fig1.png】】 就是參考自己 Wiki 裡面的東西。If is a picture then it will be shown as a picture; if is a page then a hyperlink. For example : ```[[setup.bat]]``` is the [[setup.bat]] page in wiki. See, it's a hyperlink.  
 ```[[pictures/fig2.png]]``` is a picture in wiki and it's shown as a picture directly<br>
 [[pictures/fig2.png]]<br> 
+Above examples (A hyperlink and a picture) work only when this article is in a GitHub Wiki page.
 
 Where **jeforth.3we.wiki**, like jeforth.3we, is a stand alone GitHub repository. Add/remove files and sub-directories just as usual. What is special is that things in jeforth.3we.wiki can be reached by double brackets as mentioned above.<br>
 
-[ ] How about things in jeforth.3we repository?
-Another notation is '''[Linkage name](pictures/fig1.png)''' 
-
+##Things in jeforth.3we repository##
+Another notation is '''[Linkage name](pictures/fig1.png)''' for things in jeforth.3we repository (instead of in jeforth.3we.wiki).
 Note! jeforth.3we.wiki and jeforth.3we are still different repositories.
 Documents in repository can be also linked and visited. For example: <br>
-```[This](README.md/h2o.png)``` is [a picture linkage](README.md/h2o.png) and ```(README.md/h2o.png)``` is a picture shown directly : <br> ![](README.md/h2o.png) <br>
+```[a picture linkage](README.md/h2o.png)``` is [a picture linkage](README.md/h2o.png) and ```![A picture shown directly](README.md/h2o.png)``` is a picture shown directly : <br> ![A picture shown directly](README.md/h2o.png) <br>
 
 <h3> Can HTML be used?</h3>
 how about<br>
