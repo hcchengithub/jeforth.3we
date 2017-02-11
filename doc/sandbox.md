@@ -10,7 +10,7 @@ Another notation is '''[Linkage name](pictures/fig1.png)'''
 
 Note! jeforth.3we.wiki and jeforth.3we are still different repositories.
 Documents in repository can be also linked and visited. For example: <br>
-```[This](README.md/h2o.png)``` is [a picture](README.md/h2o.png)
+```[This](README.md/h2o.png)``` is [a picture linkage](README.md/h2o.png) and ```(README.md/h2o.png)``` is a picture shown directly : <br> (README.md/h2o.png) <br>
 
 <h3> Can HTML be used?</h3>
 how about<br>
