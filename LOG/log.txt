@@ -5663,10 +5663,22 @@
 [ ] hcchen5600 2015/11/13 10:46:32
     hash>column2 改寫成好用的介面。
 
-[ ] How to make a release on GitHub? Not only a master commit, but an official release.
-
-[ ] Unify the version. See above log of a master release, it takes a lot of efforts to modify
+[x] How to make a release on GitHub? Not only a master commit, but an official release.
+	==> Ynote: GitHub Creating Releases.note
+	
+[x] Unify the version. See above log of a master release, it takes a lot of efforts to modify
 	the version code of each application.
+    --> ./js/version.js minor_version all 301
+        [x] jeforth.3nd.js
+        [x] 3nw, jeforth.3we\jeforth.3nw.html 
+        [x] 3htm, 3ca, jeforth.3we\3htm\js\jeforth.3htm.js 
+        [x] 3ca, also jeforth.3htm.js above
+        [x] 3ce.js(3ce extension pages)
+        [x] 3ce, ce.f (Target page)
+        [x] 3ce, jeforth.3ce.background.html, background.js vm.minor_version=jeforth3we_minor_version
+        [x] 3hta, --> <HTA> tag. VERSION="204" -> VERSION="205"
+	
+	
 [x] Remove the :
 		js: outputbox.style.fontSize="1.5em"	
 	from the default autoexec of ls.f. I have resolved the problem for a while, no need this now.
@@ -5674,8 +5686,21 @@
 	note taking annotating tool directly.
 [x] After supporting private, word count shown in words command and help command are still correct?
 	--> 3htm v3.204 no problem.
-[ ] 3htm v3.204 and all friends have a problem. After include 12choc.f, words still shows all
+[x] 3htm v3.204 and all friends have a problem. After include 12choc.f, words still shows all
 	ls.f's 56 words. I thought include command is I/O bound and thus it should does rescan-word-hash
 	every time. Another symptom is after executing 
 		also misc.f
-	rescan-word-hash is expected too, but no! So it's a bug.
+	rescan-word-hash is expected too, but no! So it's a bug. Actually, for speed, only vocabulary words
+	do not rescan all other vocabulary words (only [*]also previous include [x]set-context not-only forget
+	prioritize marker) should rescan-word-hash.
+[x] Bug, execute not-only several times, it repeats all word-lists in order
+
+[ ] Release test automation
+	[ ] Selftest of all applications
+	[ ] 3ce attach manual test
+	[ ] All demos
+	
+[/] run command still of ls.f after executed forth.
+	--> shit! my fault. Windows 'run' command is defined in wsh.f.
+	
+	
