@@ -5752,3 +5752,20 @@
 		<div id="display"></div>
 		</o> drop
 		getFiles js: myfiles.onchange=pop() \ 3ce doesn't accept inline event handler
+    [ ] The upload form example from ipad "USB Disk Pro" http://192.168.0.196:8080/ HFS:
+        <form action="" method="post" enctype="multipart/form-data" name="form1">
+        <input type="hidden" name="folder" value="/">
+        <input type="file" multiple name="file"> <----------- add multiple see see
+        <input type="submit" value="Upload">
+        </form>    
+        --> It really works in 3ce attached console. So how to do the samething through 
+            JavaScript for automation?
+        [x] Post是将表单中的数据放在form的数据体中，按照变量和值相对应的方式，传递到action所指向URL。
+            --> So I don't need to attach to the real target page. Just letting above form's 
+                action="192.168.0.196:8080" <--- no it doesn't work. The page must be connected.
+        [x] 強行添加 multiple to <input type="file" multiple name="file"> --> it doesn't work.
+            only one file transfered still.
+        [ ] Try to assign pathname directly @ 3ce attached console
+            <js> $("input")[1].value="c:\Users\hcche\Downloads\1.au3" </js>
+            JavaScript error : Failed to set the 'value' property on 'HTMLInputElement': This input 
+            element accepts a filename, which may only be programmatically set to the empty string.        
