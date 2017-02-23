@@ -5703,4 +5703,52 @@
 [/] run command still of ls.f after executed forth.
 	--> shit! my fault. Windows 'run' command is defined in wsh.f.
 	
+[ ] 19:36 2017-02-18 The background story is that I want to transfer files from one computer to anohter
+	in my office. Possible ways are : USB HDD, Yun.Baidu.com, FTP server, and the likes. They all requires
+	two steps, copy to a media and then copy to the target computer. 
+	Install HFS or FTP server on one computer can really make it better but HFS is a failure, 
 	
+	see Ynote: 
+	"HFS ~ Http File Server , homepage and binary" 
+	
+	and sure FTP needs setup too. I actually don't remember
+	how to arrange a FTP server now. While, jeforth.3nd or 3nw webserver + wget is a solution I like.
+	Therefore, I am now insterested to study webserver.f and try to improve it.
+	
+	I was studying this : "Build Your First HTTP Server in Node.js"  https://www.diigo.com/user/hcchen/b/373115646
+	yesterday. See ~\jeforth.3we\playground\build_your_http_server.f 
+	
+	I studied how to use node.js to build a web site before, see Yun.baidu.com "ebook NODE.js"
+
+[x] 3ca's vm.appname should be jeforth.3ca (it's now ~.3htm)
+	solution is to read the name field in manifest.json: 
+	js> chrome :> app.getDetails().name \ ==> "jeforth.3ca" or "jeforth.3ce" 
+	Example:
+		js> vm.appname=='jeforth.3htm'&&chrome.app.getDetails().name=="jeforth.3ca" [if]
+			s" Abort: jeforth.3ca restricted HTML input file tag." 
+			"msg"abort cr
+		[then]
+[x] 18:18 2017-02-23 Studying how to use HTML post to upload files. 
+	[x]	Can't use 3ca to do this study due to its restrictions. 
+		誤會一場，只是 HTML event handler 不能 inline 指定而已。早已有解。 3ce & 3ca both ok
+	[x] Yes, we can use 3ca and 3ce to study input type=file tag
+		\ MSDN input type=file element | input type=file object
+		\ Example from this page https://msdn.microsoft.com/en-us/library/ms535263(v=vs.85).aspx
+		<js>
+			var f = function getFiles() {
+				debugger;
+				// Get input element
+				myFileList = document.getElementById("myfiles");
+				// loop through files property, using length to get number of files chosen
+				for (var i = 0; i < myFileList.files.length; i++) {
+					// display them in the div
+					document.getElementById("display").innerHTML += "<br/>" + myFileList.files[i].name ;
+				}
+			};f
+		</jsV> constant getFiles // ( -- func ) event handler
+		<o>
+		<label>Use <strong>shift</strong> or <strong>ctrl</strong> click to pick a few files: 
+		<input type="file" multiple id="myfiles" /></label>
+		<div id="display"></div>
+		</o> drop
+		getFiles js: myfiles.onchange=pop() \ 3ce doesn't accept inline event handler
