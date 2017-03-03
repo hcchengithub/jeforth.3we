@@ -5713,7 +5713,7 @@
 	
 	and sure FTP needs setup too. I actually don't remember
 	how to arrange a FTP server now. While, jeforth.3nd or 3nw webserver + wget is a solution I like.
-	Therefore, I am now insterested to study webserver.f and try to improve it.
+	Therefore, I am now interested to study webserver.f and try to improve it.
 	
 	I was studying this : "Build Your First HTTP Server in Node.js"  https://www.diigo.com/user/hcchen/b/373115646
 	yesterday. See ~\jeforth.3we\playground\build_your_http_server.f 
@@ -5769,3 +5769,8 @@
             <js> $("input")[1].value="c:\Users\hcche\Downloads\1.au3" </js>
             JavaScript error : Failed to set the 'value' property on 'HTMLInputElement': This input 
             element accepts a filename, which may only be programmatically set to the empty string.        
+[ ] 17:17 2017-03-01 RStudio Source box is a very good example to learn. ls.f ed [run] button
+	needs improvement. Running throught he entire field is not good for exercise. Run only
+	one line and a way to run multiple lines and also the entire field is an interesting 
+	challenge.
+	
