@@ -5765,12 +5765,17 @@
                 action="192.168.0.196:8080" <--- no it doesn't work. The page must be connected.
         [x] 強行添加 multiple to <input type="file" multiple name="file"> --> it doesn't work.
             only one file transfered still.
-        [ ] Try to assign pathname directly @ 3ce attached console
+        [x] Try to assign pathname directly @ 3ce attached console
             <js> $("input")[1].value="c:\Users\hcche\Downloads\1.au3" </js>
             JavaScript error : Failed to set the 'value' property on 'HTMLInputElement': This input 
             element accepts a filename, which may only be programmatically set to the empty string.        
+            --> is this to the "USB Disk Pro" page only? 
+                --> all input type=file do not accept value to be set to non-empty.
+        [x] Get filename though my input type=file but submit them manually
+            --> all input type=file do not accept value to be set to non-empty.
+    [ ] I also tried to use FTP server on my computer hoping iPad can then download files from it.
+        But cesarFTP does not work now! and Filezilla needs to learn how to use.
 [ ] 17:17 2017-03-01 RStudio Source box is a very good example to learn. ls.f ed [run] button
 	needs improvement. Running throught he entire field is not good for exercise. Run only
 	one line and a way to run multiple lines and also the entire field is an interesting 
 	challenge.
-	
