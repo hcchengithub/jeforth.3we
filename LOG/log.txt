@@ -5779,3 +5779,8 @@
 	needs improvement. Running throught he entire field is not good for exercise. Run only
 	one line and a way to run multiple lines and also the entire field is an interesting 
 	challenge.
+[ ] Installer!
+	jeforth.3htm run from rawgit or anywhere to be an installer of other jeforth.3we applications.
+	
+	
+	
