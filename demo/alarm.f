@@ -1,3 +1,9 @@
+\ alarmOff alarmStart alarmReset
+\ dictate('char r to reset/clear alarmReset');
+\ doTimeTick 
+\ doTimeout
+\ [ ] click reset doesn't work well now
+
 
 	s" alarm.f" source-code-header
 
@@ -86,6 +92,7 @@
 	char 00 value setting.sec // ( -- 'dd' ) Keet the user setting of second for reset.
 	char 00 value setting.min // ( -- 'dd' ) Keet the user setting of minute for reset.
 	char 00 value setting.hur // ( -- 'dd' ) Keet the user setting of hour   for reset.
+	false   value repeating // ( -- boolean ) The repeating flag
 	
 	\ <title></title> 不 support style 故無法改醒目顏色，只好多費點功夫用以下 blinking 程式也許更好。
 	0 value blink.intervalId // ( -- id ) The id of setInterval() 
@@ -107,42 +114,59 @@
 		js> almSecond.innerHTML to setting.sec \ save the recent setting for reset
 		js> almMinute.innerHTML to setting.min
 		js> almHour.innerHTML   to setting.hur ;
+
+	: h:m:s ( -- h m s ) \ Remaining time in h:m:s
+		js> almHour.innerHTML int
+		js> almMinute.innerHTML int
+        js> almSecond.innerHTML int ;
+		
+	: remaining ( -- sec ) \ Remaining time in seconds
+		h:m:s ( h m s )
+		swap 60 * ( h s-1 m*60 )
+		rot 3600 * ( s-1 m*60 h*3600 ) 
+		+ + ;
 		
     : alarmStart
-        alarmPause if 
+		repeating if else alarmOff then \ stop the alarm if not repeating
+        remaining alarmPause and if 
+			\ start counting down 
             intervalId if else js> vm.g.setInterval(function(){execute('doTimeTick')},1000) to intervalId then
             false to alarmPause
             \ js: alarmStart.innerHTML="PAUSE";
 			js> pause_button :: setAttribute('style','color:black')
 			js> start_button :: setAttribute('style','color:gray')
         else 
-            true to alarmPause
+			\ pause counting	
+            true to alarmPause \ this pauses the doTimeTick 
             \ js: alarmStart.innerHTML="START";
 			js> pause_button :: setAttribute('style','color:gray')
 			js> start_button :: setAttribute('style','color:black')
         then
         ;
 	char r value reset/clear // ( -- 'r'/'c' ) Toggle state of the reset/clear button
-    code alarmReset
-        execute('intervalId'); clearInterval(pop()); 
-		dictate("alarmOff 0 to intervalId false to alarmPause alarmStart");
-		execute('reset/clear'); if(pop()=='c'){
-			almSecond.innerHTML = '00';
-			almMinute.innerHTML = '00';
-			almHour.innerHTML   = '00';
-			dictate('char r to reset/clear');
-			reset_button.setAttribute('style','color:black')
-			clear_button.setAttribute('style','color:gray')
-		} else {
-			execute('setting.sec'); almSecond.innerHTML = pop();
-			execute('setting.min'); almMinute.innerHTML = pop();
-			execute('setting.hur'); almHour.innerHTML   = pop();
-			dictate('char c to reset/clear');
-			reset_button.setAttribute('style','color:gray')
-			clear_button.setAttribute('style','color:black')
-		}
-        // alarmStart.innerHTML="START";
-        end-code		
+	
+	code _clear ( -- ) \ Clear the alarm count down time
+		almSecond.innerHTML = '00';
+		almMinute.innerHTML = '00';
+		almHour.innerHTML   = '00';
+		dictate('char r to reset/clear');
+		reset_button.setAttribute('style','color:black')
+		clear_button.setAttribute('style','color:gray')
+		end-code
+
+	: _reset ( -- ) \ Reset the alarm count down time
+		setting.sec js: almSecond.innerHTML=pop()
+		setting.min js: almMinute.innerHTML=pop()
+		setting.hur js: almHour.innerHTML=pop() 
+		char c to reset/clear
+		js: reset_button.setAttribute('style','color:gray')
+		js: clear_button.setAttribute('style','color:black')
+		;
+	
+    : alarmReset
+        intervalId js: clearInterval(pop())
+		alarmOff 0 to intervalId false to alarmPause alarmStart
+		reset/clear char c == if _clear else _reset then ;
     code alarmHour10
         var h = parseInt(almHour.innerHTML) + 10;
         h = h > 59 ? 0 : h ;
@@ -173,23 +197,30 @@
         s = s > 59 ? 0 : s ;
         almSecond.innerHTML = ('0'+s.toString()).slice(-2);
 		execute('alarmOff');execute('saveSetting') end-code
+
     code doTimeTick ( -- ) \ Count down the timer.
-        var s = parseInt(almSecond.innerHTML), m = parseInt(almMinute.innerHTML), h = parseInt(almHour.innerHTML);
         execute('alarmPause'); var pause = pop();
         if(!pause) {
-            var t = s + 60*m + 3600*h - 1;
-            s = t % 60; 
-            t = parseInt(t/60);
-            m = t % 60;
-            h = parseInt(t/60);
-            if(s<=0&&m<=0&&h<=0){execute("doTimeout");s=m=h=0}
-            almSecond.innerHTML = ('0'+s.toString()).slice(-2);
-            almMinute.innerHTML = ('0'+m.toString()).slice(-2);
-            almHour.innerHTML   = ('0'+h.toString()).slice(-2);
+			execute('remaining');
+			debugger;
+            var t = pop() - 1;
+            var s = t % 60; 
+            var m = parseInt(t/60);
+            var h = parseInt(m/60);
+			m = m % 60;
+            if(t<=0){execute("doTimeout");s=m=h=0}
+            almSecond.innerHTML = ('   0'+s.toString()).slice(-2);
+            almMinute.innerHTML = ('   0'+m.toString()).slice(-2);
+            almHour.innerHTML   = ('   0'+h.toString()).slice(-2);
         }
         end-code
+		
 	: doTimeout ( -- ) \ The timer count down to 00:00:00 then do thhis.
-		char c to reset/clear alarmReset
+		repeating if 
+			char r to reset/clear alarmReset alarmStart
+		else
+			char c to reset/clear alarmReset
+		then
 		alarm-border <js> pop().innerHTML=".alarm { border: 12px solid pink; }"</js>
 		blink
 		<js> if (mp3player.readyState) {

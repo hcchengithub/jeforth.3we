@@ -5781,6 +5781,12 @@
 	challenge.
 [ ] Installer!
 	jeforth.3htm run from rawgit or anywhere to be an installer of other jeforth.3we applications.
-	
+[ ] alarm.f needs to support repeating. No interface, just a command would be good
+	enough.
+	[ ] when 00:00:00 click start or pause should stop the music and become Start.
+		if is not playing the music then do nothing.
+	[ ] when repeat is on then play the music for _given_ seconds the reset
+		and start again.
+		
 	
 	
