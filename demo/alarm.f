@@ -4,12 +4,33 @@
 \ doTimeout
 \ [ ] click reset doesn't work well now
 
+	\
+	\ URL example, 指定 description、音樂檔、repeating 等
+	\ ~/index.html? forth definitions s" 'private/ACIM wait a while.mp3'" value mp3 s" 'God is the mind with which I think'" value desc true value repeating include alarm.f
+	\
+	
+	\ How to 查出 audio player 當前播放哪個音樂檔：
+	\ <source type="audio/mpeg" src="pathname">
+	\ js> $("source")[0].src \ ==> chrome-extension://aemmobghiahkbclnbkokcgpblliogben/kvm.g.mp3 (string)
 
 	s" alarm.f" source-code-header
 
 	js> kvm.appname char jeforth.3nw = [if] .( Node-Webkit does not support HTML5 <audio> element, sorry!) cr \s [then]
 
-    <o>
+	\ 
+	\ 從外面設定好送進來的 variables 之 default 值，有點麻煩。
+	\
+	js> typeof(vm.forth.mp3)=="string" [if] [else]
+		s" demo/228.mp3" value mp3 // ( -- pathname ) Alarm music file
+	[then]
+	js> typeof(vm.forth.desc)=="string" [if] [else]
+		s" '小計時器 ─ 提醒事項222'" value desc // ( -- description ) Alarm description
+	[then]
+	js> typeof(vm.forth.repeating)=="boolean" [if] [else]
+		false value repeating // ( -- boolean ) The repeating switch
+	[then]
+
+	er <text>
     <style>
         .alarm, .alarm input { 
             border-collapse: collapse;
@@ -41,7 +62,7 @@
     <table class=alarm>
 		<tr>
 			<td colspan=7>
-			<input id=alarm_message type=text class=control size=36 value='小計時器 ─ 提醒事項' style="text-align:center;font-family:DFKai-SB;font-size:48px;text-shadow: 2px 2px 3px #505050;"/>
+			<input id=alarm_message type=text class=control size=36 value=_desc_ style="text-align:center;font-family:DFKai-SB;font-size:48px;text-shadow: 2px 2px 3px #505050;"/>
 			</td>
 		</tr>
 		<tr>
@@ -78,12 +99,13 @@
 				value="e.g. 'demo/filename.mp3' on server w/o the quote"
 			/></span>
 			<br><audio controls id=mp3player>
-			  <source type="audio/mpeg" src="demo/228.mp3">
+			  <source type="audio/mpeg" src=_src_>
 				Your browser does not support the audio element.
 			</audio>
 			</td>
 		</tr>
     </table>
+	</text> :> replace(/_src_/,vm.forth.mp3) :> replace(/_desc_/,vm.forth.desc)
     </o> drop
 	<o> <style> .alarm { border: 12px solid #f0f0f0; }</style></o> constant alarm-border // ( -- element ) use this to change color.
 	
@@ -92,7 +114,15 @@
 	char 00 value setting.sec // ( -- 'dd' ) Keet the user setting of second for reset.
 	char 00 value setting.min // ( -- 'dd' ) Keet the user setting of minute for reset.
 	char 00 value setting.hur // ( -- 'dd' ) Keet the user setting of hour   for reset.
-	false   value repeating // ( -- boolean ) The repeating flag
+
+	: stop-timer ( -- ) \ Stop the 1 sec interval events
+		intervalId js: clearInterval(pop()) 0 to intervalId ;
+		
+	: start-timer ( -- ) \ Start the 1 sec interval events 
+		intervalId if else 
+			js> vm.g.setInterval(function(){execute('doTimeTick')},1000) 
+			to intervalId 
+		then ;
 	
 	\ <title></title> 不 support style 故無法改醒目顏色，只好多費點功夫用以下 blinking 程式也許更好。
 	0 value blink.intervalId // ( -- id ) The id of setInterval() 
@@ -125,24 +155,26 @@
 		swap 60 * ( h s-1 m*60 )
 		rot 3600 * ( s-1 m*60 h*3600 ) 
 		+ + ;
+
+	: START/pause ( -- ) \ Set toggle button state, go on counting down
+		false to alarmPause \ pauses doTimeTick 
+		\ js: alarmStart.innerHTML="START";
+		js> pause_button :: setAttribute('style','color:black')
+		js> start_button :: setAttribute('style','color:gray')
+		;
 		
+	: start/PAUSE ( -- ) \ Set toggle button state, stop
+		true to alarmPause \ doTimeTick free run 
+		\ js: alarmStart.innerHTML="PAUSE";
+		js> pause_button :: setAttribute('style','color:gray')
+		js> start_button :: setAttribute('style','color:black')
+		;
+	
     : alarmStart
-		repeating if else alarmOff then \ stop the alarm if not repeating
-        remaining alarmPause and if 
-			\ start counting down 
-            intervalId if else js> vm.g.setInterval(function(){execute('doTimeTick')},1000) to intervalId then
-            false to alarmPause
-            \ js: alarmStart.innerHTML="PAUSE";
-			js> pause_button :: setAttribute('style','color:black')
-			js> start_button :: setAttribute('style','color:gray')
-        else 
-			\ pause counting	
-            true to alarmPause \ this pauses the doTimeTick 
-            \ js: alarmStart.innerHTML="START";
-			js> pause_button :: setAttribute('style','color:gray')
-			js> start_button :: setAttribute('style','color:black')
-        then
-        ;
+		alarmOff
+        alarmPause if START/pause else start/PAUSE then 
+		start-timer ;
+
 	char r value reset/clear // ( -- 'r'/'c' ) Toggle state of the reset/clear button
 	
 	code _clear ( -- ) \ Clear the alarm count down time
@@ -158,15 +190,16 @@
 		setting.sec js: almSecond.innerHTML=pop()
 		setting.min js: almMinute.innerHTML=pop()
 		setting.hur js: almHour.innerHTML=pop() 
+		10 nap 
 		char c to reset/clear
 		js: reset_button.setAttribute('style','color:gray')
 		js: clear_button.setAttribute('style','color:black')
 		;
 	
     : alarmReset
-        intervalId js: clearInterval(pop())
-		alarmOff 0 to intervalId false to alarmPause alarmStart
-		reset/clear char c == if _clear else _reset then ;
+        stop-timer alarmOff START/pause
+		reset/clear char r === if _reset else _clear then ;
+		
     code alarmHour10
         var h = parseInt(almHour.innerHTML) + 10;
         h = h > 59 ? 0 : h ;
@@ -200,27 +233,22 @@
 
     code doTimeTick ( -- ) \ Count down the timer.
         execute('alarmPause'); var pause = pop();
-        if(!pause) {
-			execute('remaining');
-			debugger;
-            var t = pop() - 1;
+		execute('remaining'); var t = pop();
+        if(!pause && t) {
+            t -= 1;
             var s = t % 60; 
             var m = parseInt(t/60);
             var h = parseInt(m/60);
 			m = m % 60;
-            if(t<=0){execute("doTimeout");s=m=h=0}
             almSecond.innerHTML = ('   0'+s.toString()).slice(-2);
             almMinute.innerHTML = ('   0'+m.toString()).slice(-2);
             almHour.innerHTML   = ('   0'+h.toString()).slice(-2);
+            if(t<=0){execute("doTimeout")}
         }
         end-code
 		
-	: doTimeout ( -- ) \ The timer count down to 00:00:00 then do thhis.
-		repeating if 
-			char r to reset/clear alarmReset alarmStart
-		else
-			char c to reset/clear alarmReset
-		then
+	: doTimeout ( -- ) \ The timer count down to 00:00:00 then do this.
+		repeating if _reset else char r to reset/clear alarmReset then
 		alarm-border <js> pop().innerHTML=".alarm { border: 12px solid pink; }"</js>
 		blink
 		<js> if (mp3player.readyState) {
