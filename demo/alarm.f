@@ -20,16 +20,17 @@
 	\ 
 	\ 從外面設定好送進來的 variables 之 default 值，有點麻煩。
 	\
+	also forth definitions \ for these switches they are in the common vocabulary 
 	js> typeof(vm.forth.mp3)=="string" [if] [else]
 		s" demo/228.mp3" value mp3 // ( -- pathname ) Alarm music file
 	[then]
 	js> typeof(vm.forth.desc)=="string" [if] [else]
-		s" '小計時器 ─ 提醒事項222'" value desc // ( -- description ) Alarm description
+		s" '小計時器 ─ 提醒事項'" value desc // ( -- description ) Alarm description
 	[then]
 	js> typeof(vm.forth.repeating)=="boolean" [if] [else]
 		false value repeating // ( -- boolean ) The repeating switch
 	[then]
-
+	previous definitions
 	er <text>
     <style>
         .alarm, .alarm input { 
