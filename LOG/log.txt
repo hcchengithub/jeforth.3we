@@ -5787,6 +5787,19 @@
 		if is not playing the music then do nothing.
 	[ ] when repeat is on then play the music for _given_ seconds the reset
 		and start again.
+[ ] 15:20 2017-05-04
+	debug why include alarm.f from http://cdn.rawgit.com/hcchengithub/jeforth.3we/develop/index.html 
+	makes errors like: repeating undefined, execute warnings about private variables that are called 
+	by name, etc. **Only** when running through rawgit.com.
+	[/] alarm.f does not play music when running through rawgit.com. <--- forget it. 
+		Through localhost is fine. See below good news.
+	[x] Good news! alarm.f works fine on Android cell phone if running through :
+		192.168.1.153:8888?include alarm.f ... etc
+		on Chrome browser. The repeating and the music are both ok.
+		The Web server side is my T550 notebook, webserver.bat of jeforth. 
+		[ ] does it still work if walk away from wifi?
+	[ ] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
+		file problem when reading them from GitHub through rawgit.com.
 		
-	
-	
+		
+		

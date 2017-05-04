@@ -2050,6 +2050,10 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 				</js> 
                 tib.insert ;
                 /// Cut after EOF and append EOF back to guarantee an EOF exists
+				/// So, if a ~.f file is copy-paste to jeforth.3we input box, 
+				/// instead of through sinclude, then EOF not found will be a problem 
+				/// when it is expected in, i.e. source-code-header. Add EOF manually
+				/// is the solution.
 
 : include       ( <filename> -- ... ) \ Load the source file
 				BL word sinclude ; interpret-only

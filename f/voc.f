@@ -385,7 +385,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
 				\ slice ntib~EOF 
 					js> tib.slice(ntib).indexOf(vm.forth.EOF.pattern) ( mname ieof )
-					dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
+					dup -1 = ?abort" Error! EOF mark not found. It is usually added by sinclude." ( mname ieof )
 					js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
 				\ append the tailer
 					tailer + ( mname ieof tib[ntib~before EOF]+tailer ) 
