@@ -6,6 +6,10 @@ Play now
 ===========
 Among the many applications, jeforth for web page (jeforth.3htm) can run on your web browser right now thus is good for demonstration. 
 
+#### [Markdown editor](https://www.evernote.com/shard/s22/sh/49f2b5ea-5005-4216-a8b8-a3dcc6ea4ad7/e679f4ad541710d02780638622a7e09c)
+NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw (NW.js application).
+![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
+<br> 
 #### [Solar system](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
 [簡介](https://www.evernote.com/shard/s22/sh/5066a906-fa5b-4594-9ff8-35fe3d180a14/d1f964de9e7e9b0550911410578482c2)<br>
 ![The Solar System](doc/README.md/solar-system.png)
@@ -21,13 +25,6 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 <br>
 #### [Chipmunk Physics Engine demo - Pyramid Stack](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
 ![Pyramid](doc/README.md/demo-pyramidstack.png)
-<br> 
-#### [Markdown editor](https://www.evernote.com/shard/s22/sh/49f2b5ea-5005-4216-a8b8-a3dcc6ea4ad7/e679f4ad541710d02780638622a7e09c)
-
-NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw (NW.js application).
-
-![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
-
 
 Get the project
 =================
