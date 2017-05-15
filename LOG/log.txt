@@ -5800,6 +5800,22 @@
 		[ ] does it still work if walk away from wifi?
 	[ ] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
 		file problem when reading them from GitHub through rawgit.com.
-		
+[ ]	How to maintain jeforth.3we wiki on Github? I make a record here.
+	[x]	This is how to clone the wiki from GitHub to local computer. Use Git Shell.
+		~\Documents\GitHub> git clone https://github.com/hcchengithub/jeforth.3we/wiki <------------ Wrong URL !!!
+		Cloning into 'wiki'...
+		fatal: https://github.com/hcchengithub/jeforth.3we/wiki/info/refs not valid: is this a git repository?
+		~\Documents\GitHub> git clone https://github.com/hcchengithub/jeforth.3we.wiki  <----------- Corect URL !!!
+		Cloning into 'jeforth.3we.wiki'...
+		remote: Counting objects: 199, done.
+		remote: Total 199 (delta 0), reused 0 (delta 0), pack-reused 199Receiving objects:  64% (129/199), 580.01 KiB | 63.00 Ki
+
+		Receiving objects: 100% (199/199), 629.37 KiB | 68.00 KiB/s, done.
+		Resolving deltas: 100% (97/97), done.
+		~\Documents\GitHub>		
+	[ ] I am now debugging why this hyperlink in README.md does not work??
+			![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
+		While this works
+			![SimpleMDE markdown editor](doc/README.md/demo-pyramidstack.png)
 		
 		
