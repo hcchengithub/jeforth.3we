@@ -24,7 +24,7 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 <br> 
 #### [Markdown editor](https://www.evernote.com/shard/s22/sh/49f2b5ea-5005-4216-a8b8-a3dcc6ea4ad7/e679f4ad541710d02780638622a7e09c)
 NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw.<br>
-![SimpleMDE markdown editor doc/README.md/demo 3nw mde editor.JPG](doc/README.md/demo-pyramidstack.png)
+![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG)
 
 Get the project
 =================
