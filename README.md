@@ -13,17 +13,14 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 #### [H2O](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f) 
 ![H2o](doc/README.md/h2o.png)
 <br>
-#### [Alarm clock](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
-![Alarm clock](doc/README.md/demo-alarm.png)
- 
-<br>
 #### [Box2Dweb Physics Engine demo - Arrows](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
 ![Arrow](doc/README.md/demo-arrow.png)
-
+<br>
+#### [Alarm clock](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
+![Alarm clock](doc/README.md/demo-alarm.png)
 <br>
 #### [Chipmunk Physics Engine demo - Pyramid Stack](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
 ![Pyramid](doc/README.md/demo-pyramidstack.png)
-
 <br> 
 #### [Markdown editor](https://www.evernote.com/shard/s22/sh/49f2b5ea-5005-4216-a8b8-a3dcc6ea4ad7/e679f4ad541710d02780638622a7e09c)
 
