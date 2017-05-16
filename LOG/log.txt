@@ -5800,7 +5800,8 @@
 		[ ] does it still work if walk away from wifi?
 	[ ] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
 		file problem when reading them from GitHub through rawgit.com.
-[ ]	How to maintain jeforth.3we wiki on Github? I make a record here.
+[x]	19:21 May 15, 2017
+	How to maintain jeforth.3we wiki on Github? I make a record here.
 	[x]	This is how to clone the wiki from GitHub to local computer. Use Git Shell.
 		~\Documents\GitHub> git clone https://github.com/hcchengithub/jeforth.3we/wiki <------------ Wrong URL !!!
 		Cloning into 'wiki'...
@@ -5813,9 +5814,17 @@
 		Receiving objects: 100% (199/199), 629.37 KiB | 68.00 KiB/s, done.
 		Resolving deltas: 100% (97/97), done.
 		~\Documents\GitHub>		
-	[ ] I am now debugging why this hyperlink in README.md does not work??
+	[x] I am now debugging why this hyperlink in README.md does not work??
 			![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
 		While this works
 			![SimpleMDE markdown editor](doc/README.md/demo-pyramidstack.png)
+		工作做一半的結果，又重新解了一次老問題。 README.md 或 wiki pages 裡 
+		![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG) path 可能是「不能有空格」，也可
+		能是我自己把檔名改成用 under line 取代空格了。
 		
+[ ]	README.md add the "12 choc" demo before update to master
+[ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
+[ ] 錄製 12choc.f 的說明影片。
+
+
 		
