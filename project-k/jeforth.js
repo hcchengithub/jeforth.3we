@@ -92,8 +92,10 @@ function jeForth() {
 	// Return {str:"string", flag:boolean}
 	// If delimiter is not found then return the entire remaining TIB, multi-lines, through result.str。
 	// result.flag indicates delimiter found or not found.
-	// o  If you want to read the entire TIB string, use nexttoken('\n|\r'). It eats the next 
-	//    white space after ntib. If use nextstring('\n|\r') then the leading white space(s) is included.
+	// o  If you want to read the entire line in TIB, use nexttoken('\n|\r'). 
+	//    nexttoken() skip the next character which is white space in Forth source code, 
+	//    e.g. s", this is reasonable because it's Forth. While the leading white space(s) 
+	//    will be included if useing the lower level nextstring('\\s') instead of nexttoken().
 	// o  If you need to know whether the delimiter is found, use nextstring()。
 	// o  result.str is "" if TIB has nothing left.
 	// o  The ending delimiter is remained. 
@@ -114,15 +116,22 @@ function jeForth() {
 	}
 	
 	// Get next token which is found after the recent ntib of TIB.
-	// If delimiter is RegEx white-space ('\\s') or absent then skip all leading white spaces first, 
-	// otherwise, only skip the first character which should be a white space.
+	// If delimiter is RegEx white-space ('\\s') or absent then skip all leading white spaces first.
+	// If delimiter is CR or LF, which is to read the entire line, leave the reset of the line alone, do nothing.
+	// otherwise, skip the next character which should be a white space.
 	// o  Return "" if TIB has nothing left. 
 	// o  Return the remaining TIB if delimiter is not found.
 	// o  The ending delimiter is remained. 
 	// o  The delimiter is a regular expression.
 	function nexttoken(deli){
 		if (arguments.length==0) deli='\\s';   // white space
-		if (deli=='\\s') skipWhiteSpaces(); else ntib += 1; // Doesn't matter if already at end of TIB. 
+		// if (deli=='\\s') skipWhiteSpaces(); else ntib += 1; // Doesn't matter if already at end of TIB. 
+		switch(deli){
+			case '\\s': skipWhiteSpaces(); break; // skip all leading white spaces
+			case '\\n': case '\\r': case '\\n|\\r': case '\\r|\\n': 
+			case '\n':  case '\r':  case '\n|\r':   case '\r|\n': break; // do nothing to avoid skipping the CRLF
+			default: ntib += 1; // skip next character
+		}
 		var token = nextstring(deli).str;
 		return token; 
 		function skipWhiteSpaces(){  // skip all white spaces at tib[ntib]

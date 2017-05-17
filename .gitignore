@@ -2,8 +2,8 @@ js/flot/*
 js/box2dweb/*
 js/chipmunk.js/*
 js/jquery*
-private/
-project-k/
+private/*
+project-k/*
 *.wav
 jeforth.hta.lnk
 _selftest_.xls

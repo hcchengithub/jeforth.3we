@@ -5798,8 +5798,83 @@
 		on Chrome browser. The repeating and the music are both ok.
 		The Web server side is my T550 notebook, webserver.bat of jeforth. 
 		[ ] does it still work if walk away from wifi?
-	[ ] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
-		file problem when reading them from GitHub through rawgit.com.
+	[x] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
+		done! "include MP3-wait-a-while.f" and then "wait-a-while.mp3 :: play()", works fine on 3ca.
+		[x] But find problem when reading them from GitHub through cdn.rawgit.com
+			include on URL or command line both create problem : "Error! Usage: unknown."
+			but the "Usage:" is in <comment> !! --> try w/o cdn. ... "Error! Failed to read f/jeforth.f" known problem.
+			--> 3ce, 3hta works fine too. --> how about local webserver? .. OK on local --> remote : Ok too!!
+			http://192.168.1.158:8888 then include then play(), really ok. --> try to read .f instead of include it
+			on the rawgit.com case ... Strange! readTextFile then tib.insert creates the same problem!! --> check
+			self-test first, something wrong maybe. ... No! --> copy-paste MP3-wait-a-while.f through <text> ...
+			Failed!! so it's easy now. Because copy-past .f still failed. Debug the <comment> then ... add a 
+			"js: debugger" before the comment fixed the problem!! --> try a blank line instead of the js: debugger 
+			... ok too! --> So, a \ comment seems eats the next word if it's followed with a total blank line!
+			Simply a space after the \ fixes the problem. The \ alone on the a line actually eats the next line
+			entirely. so study \ command .... it has only one statement : nexttoken('\n'), while definition of // is:
+			last().help = nexttoken('\n|\r'); ... so // has the same problem!! <---- YES!! 
+			==> Root cause is nexttoken(), it always eats the next character so \ ignores the \n and the next line
+				becomes the comment line. When it's <comment> then the following comments are interpreted unexpectedly.
+				--> why happen only on rawgit.com? ... Ha! Not only happen on rawgit.com but also other cases! If
+				testd directly by using :
+					<text>
+					\
+					<comment>
+					." Error"</comment></text> constant t t tib.insert
+				--> When the .f is read from readTextFile on 3ca, the \ line is actually "\\\r\n"
+					177: :13
+					178:
+					:10
+					179:\:92
+					180: :13
+					181:
+					:10
+					182:<:60
+					183:c:99
+					184:o:111
+					185:m:109
+					186:m:109
+					187:e:101
+					188:n:110
+					189:t:116
+					190:>:62
+					191: :13				
+					, every end-of-line are \r\n actually. But when running through rawgit.com, end-of-line become \n only.
+					when the \n eaten by nexttoken() the next line become comment. <--- Problem!! Root Cause !!!
+				--> Try 'word' command, it probably has the same problem.
+					> : comment CR word drop ;
+					> comment
+					." Hello"
+					 OK  <-------------- Indeed! the next line is eaten by 'comment' unexpectedly
+					> comment <--- add a space
+					." Hello"
+					Hello OK  <--------- then OK
+			[x] So, nexttoken() to always eat the next character is not very good. Should not when delimiter is :
+				case '\\n': case '\\r': case '\\n|\\r': case '\\r|\\n': 
+				case '\n':  case '\r':  case '\n|\r':   case '\r|\n':
+				Where '\n' and '\\n' are same or not depends on nextstring(RegEx), I think they are same.
+				Because a real '\n' and a symble '\\n' is same to String.search() I guess. The following experiment has proved this:
+					> <text>
+					aa
+					bb	cc
+					</text> :> search("\\t") \ ==> 5 (number)
+					 OK 
+					> <text>
+					aa
+					bb	cc
+					</text> :> search("\t") \ ==> 5 (number)  證明 '\t' '\\t' 效果一樣
+					 OK 
+					> <text>
+					aa
+					bb	cc
+					</text> :> search("cc") \ ==> 6 (number)
+					 OK 
+				But \s \w \d are RegEx symbole, they must be \\s \\w \\d if appear in a delimiter.
+					<text>
+					aa 123
+					bb    cc
+					</text> :> search("\\d") \ ==> 3 (number) , if "\d" instead then result will be -1.
+		
 [x]	19:21 May 15, 2017
 	How to maintain jeforth.3we wiki on Github? I make a record here.
 	[x]	This is how to clone the wiki from GitHub to local computer. Use Git Shell.
@@ -5822,7 +5897,7 @@
 		![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG) path 可能是「不能有空格」，也可
 		能是我自己把檔名改成用 under line 取代空格了。
 		
-[ ]	README.md add the "12 choc" demo before update to master
+[x]	README.md add the "12 choc" demo before update to master
 [ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
 [ ] 錄製 12choc.f 的說明影片。
 

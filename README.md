@@ -15,7 +15,7 @@ Among the many applications, jeforth for web page (jeforth.3htm) can run on your
 <br>
 #### [Box2Dweb Physics Engine demo - Arrows](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
 ![Arrow](doc/README.md/demo-arrow.png)
-<br> ****here**** [ ] 
+<br>
 #### [A simulation of the 12 coin problem](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_12choc.f)
 ![12choc](doc/README.md/demo-12choc.jpg)
 <br>
