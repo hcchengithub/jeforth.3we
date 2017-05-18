@@ -5902,6 +5902,7 @@
 
 [ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
 [ ] 準備 release master 新版 release 新版 master
+    [x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 303;
     o selftest them all
         [x] setup.bat
         [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
