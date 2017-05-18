@@ -1,36 +1,33 @@
 j e f o r t h . 3 w e
 ==============
-**Forth** is the simplest programming language ever. The jeforth.**3we** project is an implementation based on a **3 Words Engine** from [project-k](http://github.com/hcchengithub/project-k) for many applications: *HTA (jeforth.3hta)*, *HTML (jeforth.3htm)*, *Chrome Extension (jeforth.3ca)*, *Node.js (jeforth.3nd)*, *Node-webkit or NW.js (jeforth.3nw)*, and can be more. All of them have been tested on Windows 8 or Windows 10.
+**Forth** is the simplest programming language ever. The jeforth.**3we** project is an implementation based on a **3 Words Engine** from [project-k](http://github.com/hcchengithub/project-k) for many applications: Windows HTA (*jeforth.3hta*), HTML (*jeforth.3htm*), Chrome Extension (*jeforth.3ce*), Chrome Application (*jeforth.3ca*), Node.js (*jeforth.3nd*), Node-webkit or NW.js (*jeforth.3nw*), and can be more. All of them have been tested on Windows 8 or Windows 10.
 
 Play now
 ===========
 Among the many applications, jeforth for web page (jeforth.3htm) can run on your web browser right now thus is good for demonstration. 
 
-#### [Solar system](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
-[簡介](http://note.youdao.com/yws/public/redirect/share?id=94764cf57ba4365e2997f4a268ff7716&type=false)<br>
+#### [Solar system](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_solar-system.f)
+[簡介](https://www.evernote.com/shard/s22/sh/5066a906-fa5b-4594-9ff8-35fe3d180a14/d1f964de9e7e9b0550911410578482c2)<br>
 ![The Solar System](doc/README.md/solar-system.png)
 <br>
-#### [H2O](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f)
+#### [H2O](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_h2o.f) 
 ![H2o](doc/README.md/h2o.png)
 <br>
-#### [Alarm clock](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
-![Alarm clock](doc/README.md/demo-alarm.png)
- 
-<br>
-#### [Box2Dweb Physics Engine demo - Arrows](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
+#### [Box2Dweb Physics Engine demo - Arrows](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_box2dweb-arrow.f)
 ![Arrow](doc/README.md/demo-arrow.png)
-
 <br>
-#### [Chipmunk Physics Engine demo - Pyramid Stack](http://rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)
+#### [A simulation of the 12 coin problem](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_12choc.f)
+![12choc](doc/README.md/demo-12choc.jpg)
+<br>
+#### [Chipmunk Physics Engine demo - Pyramid Stack](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_chipmunk-js-pyramidstack.f)<br>
 ![Pyramid](doc/README.md/demo-pyramidstack.png)
-
+<br> 
+#### [Markdown editor](https://www.evernote.com/shard/s22/sh/49f2b5ea-5005-4216-a8b8-a3dcc6ea4ad7/e679f4ad541710d02780638622a7e09c)
+NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw.<br>
+![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG)
 <br>
-#### [Markdown editor](http://note.youdao.com/yws/public/redirect/share?id=1a8a342f3a9c1e0622a6050480af28b7&type=false)
-
-NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw (NW.js application).
-
-![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
-
+#### [Alarm clock](http://cdn.rawgit.com/hcchengithub/jeforth.3we/master/index.html?cls_include_alarm.f_er)
+![Alarm clock](doc/README.md/demo-alarm.png)
 
 Get the project
 =================
@@ -41,6 +38,10 @@ Get the project
 | Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
 
 Get source code from GitHub dwon to your computer through 'git clone' or Download Zip, either way.
+
+Questions and Suggestions
+------------------------
+Please open "issues" to the project on GitHub. My gmail is hard to work in the recent China.
 
 git clone
 ---------
@@ -62,21 +63,29 @@ Only for jeforth.3hta and only when you were **Download Zip** jeforth.3we from G
 
 If you were **git clone https://github.com/hcchengithub/jeforth.3we** instead of **Download Zip** then forget this step, GitHub shell for Windows converts new line characters to CRLF correctly already. 
 
+Setup
+=================
+jeforth.3ce and .3ca (Chrome Extension and Chrome Application) needs their own directly. **Setup.bat** does that for you. So far, only jeforth.3ce and .3ca (Chrome Extension and Chrome Application) needs their own directory. All other applications can run from jeforth.3we/ directly but it's still nice to have their own standalone directory because it's neat and clearer for a new comer to understand the project. 
+
+jeforth.3we/ directly contains everything for all applications. Many files are common for all applications. Chrome App and Chrome Extension both require a 'manifest.json' file at their home directory, so the jeforth.3we/ root can not be the common home. The solution is letting each application to have their own directory but share the same jeforth.3we/ root through mirror linkages of *symbolic link* and *hard link*. 
+
+At jeforth.3we/ root direcory, you can find batch program ```setup.bat```.  It creates application directories: jeforth.3ca/, jeforth.3ce/, jeforth.3hta/, jeforth.3nw/, jeforth.3nd/ and jeforth.3htm/ at the same level as jeforth.3we/. They are mirrors of subset of jefforth.3we/. It's safe to delete them. Run ```setup.bat``` again to rebuild them if any of them were not existing. ```setup.bat``` won't rebuild existing directories. **Note!** It must be "Run as administrator" due to priviledge commands like ```mklink.exe``` and ```fsutil.exe``` are utilized. Right click ```setup.bat``` and select "```Run as administrator```" to run it.
+
 Hello World!
 ========================
 Let's print "Hello World!" on different applications of jeforth.3we
 
 #### **HTA** / jeforth.3hta
-Double click the **jeforth.3we/jeforth.hta** or execute the below DOS command line in a DOS box,
+Double click the **jeforth.3we/jeforth.hta** (or jeforth.3hta/jeforth.hta) or execute the below DOS command line in a DOS box when currecnt directory is jeforth.3we/ or jeforth.3hta/,
 ```
 jeforth.hta cls .' Hello world' cr 3000 sleep bye
 ```
 ![Hellow world](doc/README.md/3htahello-world.png)
 
-The prior method runs self-test because there's no given task to do. The 2'nd method is expected to print 'Hello world' (as shown above) and return to DOS box after 3 seconds.
+The prior method runs self-test because there's no given task to do in command line. The 2'nd method is expected to print 'Hello world' (as shown above) and return to DOS box after 3 seconds.
 
 #### **Node.js** / jeforth.3nd
-Make sure you can run node.exe in a DOS box so your Node.js has been setup correctly. Let the jeforth.3we/ folder be your working directory. Execute one of the below demo command lines:
+Make sure you can run node.exe in a DOS box so your Node.js has been setup correctly. Let jeforth.3we/ or jeforth.3nd/ be your working directory. Execute one of the below demo command lines:
 ```
 node jeforth.3nd.js
 node jeforth.3nd.js cls .' Hello world' cr bye
@@ -98,11 +107,17 @@ http://localhost:8888/index.html?_cr_."_hello_world"_cr_cr
 IE10 , IE11 and Chrome have been tested. As shown above, forth words can be put in the URL after a '?'. jeforth.3htm will run through it like running through a command line and the self-test will be skipped when having a task to do. Space character can be replaced by underscore.
 
 #### **NW.js** / jeforth.3nw
-Install your Node.js and Node-Webkit (or NW.js now) in prior. Let jeforth.3we/ be your working directory, run either one of below command lines:
+Install your Node.js and Node-Webkit (or NW.js now) in prior. Let jeforth.3we/ (or jeforth.3nw/) be your working directory, run either one of below command lines:
 ```
 nw ../jeforth.3we
 nw ../jeforth.3we cls .' Hello World' 3000 sleep bye
 ```
+or below lines if your working directory is jeforth.3nw/ instead of jeforth.3we/
+```
+nw ../jeforth.3nw
+nw ../jeforth.3nw cls .' Hello World' 3000 sleep bye
+```
+
 The prior runs self-test because there's no given task to do. The 2'nd prints 'Hello world' and return to DOS prompt after 3 seconds.
 
 Applications in every day life
@@ -113,9 +128,9 @@ Demo: Compile the legendary eforth.com
 
 Jeforth.3nd for Node.js can be a handy x86 CPU assembler (any other CPU too). We have an example to compile the legendary eforth.com executable for 16 bits PC under MS-DOS by Bill Muench and C. H. Ting, 1990.
 
- 1. Install node.js correctly so you can run node.exe in a DOX box. Working directory at jeforth.3we/. 
+ 1. Install node.js correctly so you can run node.exe in a DOX box. Working directory at jeforth.3we/ (or jeforth.3nd/). 
  2. Run: node.exe jeforth.3nd.js include 86ef202.f bye
- 3. You got jeforth.3we/eforth.com
+ 3. You got jeforth.3we/eforth.com (or jeforth.3nd/eforth.com)
  4. I have a 32bits windows 8, so I can run eforth.com directly. If your Windows system is 64 bits, you'll need a DOS virtual machine like vmware, virtual box, or I recommend DOSBox, to run the created eforth.com.
 
 Demo: Excel automation

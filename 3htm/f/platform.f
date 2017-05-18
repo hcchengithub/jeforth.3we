@@ -454,30 +454,21 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 						  <td><b>Descriptions</b> (watch video)</td>
 						</tr>
 						<tr>
-						  <td>Introduction</td>
-						  <td>jeforth.3we is an implementation of the Forth programming 
-						  language written in JavaScript and runs on HTA, HTM, Node.js, and Node-webkit. 
-						  Watch <a href="http://www.camdemy.com/media/19253">video</a>.</td>
-						</tr>
-						<tr>
-						  <td>How to</td>
-						  <td><a href="http://www.camdemy.com/media/19254">Run the HTML version online</a>. Click <a href="http://figtaiwan.org/project/jeforth/jeforth.3we-master/index.html">here</a> to run.</td>
-						</tr>
-						<tr>
-						  <td>How to</td>
-						  <td><a href="http://www.camdemy.com/media/19255">Run the HTML version on local computer</a></td>
-						</tr>
-						<tr>
-						  <td>How to</td>
-						  <td><a href="http://www.camdemy.com/media/19256">Run the HTA version</a></td>
-						</tr>
-						<tr>
-						  <td>How to</td>
-						  <td><a href="http://www.camdemy.com/media/19257">Run Node.js and Node-Webkit version</a></td>
-						</tr>
-						<tr>
 						  <td>Hotkey F2</td>
 						  <td><a href="http://www.camdemy.com/media/19258">Toggle input box EditMode</a></td>
+						</tr>
+						<tr>
+						  <td>Hotkey Shift-F2</td>
+						  <td>Toggle output box EditMode</td>
+						</tr>
+						<tr>
+						  <td>Hotkey Ctrl-F2</td>
+						  <td>Click anywhere and press Ctrl-F2 to get the clicked HTML node to 
+						  the "current element", so we can manipulate it. Refer to "ce" command.</td>
+						</tr>
+						<tr>
+						  <td>Hotkey Alt-F2</td>
+						  <td>Click anywhere and press Alt-F2 to edit the clicked HTML node.</td>
 						</tr>
 						<tr>
 						  <td>Hotkey F4</td>
@@ -500,15 +491,15 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 						  <td><a href="http://www.camdemy.com/media/19263">Forth word auto-complete</a></td>
 						</tr>
 						<tr>
-						  <td>Hotkey Enter</td>
-						  <td><a href="http://www.camdemy.com/media/19264">Jump into the input box</a></td>
+						  <td>Hotkey Ctrl-Enter</td>
+						  <td>Execute the command line in the input box even when the input box is not focused.
+						  So we can click on a HTML node or element, then press ctrl-enter to execute the command 
+						  line that manipulates the HTML object.
+						  </td>
 						</tr>
 						<tr>
 						  <td>Hotkey Ctrl-Up/Ctrl-Down</td>
-						  <td><a href="http://www.camdemy.com/media/19265">Recall command history</a>
-						  Up/Down key (w/o Ctrl) pops up the command history if inputbox is empty. 
-						  Use Ctrl-M or Shift-Enter when you want a 'Carriage Return' in inputbox.
-						  </td>
+						  <td>Recall used command lines</td>
 						</tr>
 						<tr>
 						  <td>Hotkey Alt-Up/Alt-Down</td>
@@ -520,14 +511,11 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 						</tr>
 						<tr>
 						  <td>Hotkey Ctrl-Break</td>
-						  <td><a href="http://www.camdemy.com/media/19268">Stop all parallel running tasks</a></td>
+						  <td><a href="http://www.camdemy.com/media/19268">Break the Forth interpreter</a></td>
 						</tr>
 						<tr>
 						  <td>Hotkey BackSpace</td>
-						  <td><a href="http://www.camdemy.com/media/19269">Erase the outputbox</a>
-						   bottom-up, Alt-BackSpace top-down. But they don't erase elements.
-						   Ctrl-BackSpace to erase elements. Add Shift key makes it faster.
-						  </td>
+						  <td><a href="http://www.camdemy.com/media/19269">Erase outputbox text when inputbox is empty</a></td>
 						</tr>
 						<tr>
 						  <td>help [*|pattern [-t|-T|-n|-N]]</td>
@@ -543,8 +531,11 @@ code (help)		( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screene
 						<tr>
 						  <td>More information</td>
 						  <td>
-						  1. <a href="http://www.camdemy.com/folder/8691">Video presentation web site</a> <br> 
-						  2. <a href="https://github.com/hcchengithub/jeforth.3we/wiki">jeforth.3we GitHub Wiki.</a>
+						  1. <a href="http://www.camdemy.com/folder/8691">Video presentation web site</a><br> 
+						  
+						  2. <a href="https://github.com/hcchengithub/jeforth.3we/wiki">jeforth.3we GitHub Wiki</a><br>
+						  3. <a href="https://guides.github.com/activities/hello-world/">GitHub version control and collaboration</a>
+						  
 						  </td>
 						</tr>
 						</table>

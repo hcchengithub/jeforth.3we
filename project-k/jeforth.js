@@ -1,3 +1,10 @@
+
+// 
+// project-k Forth kernel 
+// Use the same kernel code for all applications.
+// FigTaiwan H.C. Chen hcchen5600@gmail.com
+//
+
 "uses strict";
 function jeForth() {     
 	var vm = this;
@@ -85,8 +92,10 @@ function jeForth() {
 	// Return {str:"string", flag:boolean}
 	// If delimiter is not found then return the entire remaining TIB, multi-lines, through result.str。
 	// result.flag indicates delimiter found or not found.
-	// o  If you want to read the entire TIB string, use nexttoken('\n|\r'). It eats the next 
-	//    white space after ntib. If use nextstring('\n|\r') then the leading white space(s) is included.
+	// o  If you want to read the entire line in TIB, use nexttoken('\n|\r'). 
+	//    nexttoken() skip the next character which is usually white space in Forth source code, 
+	//    e.g. s", this is reasonable because it's Forth. While the leading white space(s) 
+	//    will be included if useing the lower level nextstring('\\s') instead of nexttoken().
 	// o  If you need to know whether the delimiter is found, use nextstring()。
 	// o  result.str is "" if TIB has nothing left.
 	// o  The ending delimiter is remained. 
@@ -107,15 +116,23 @@ function jeForth() {
 	}
 	
 	// Get next token which is found after the recent ntib of TIB.
-	// If delimiter is RegEx white-space ('\\s') or absent then skip all leading white spaces first, 
-	// otherwise, only skip the first character which should be a white space.
+	// If delimiter is RegEx white-space ('\\s') or absent then skip all leading white spaces first.
+	// Usual case, skip the next character which should be a white space for Forth.
+	// But if delimiter is CRLF, which is to read the entire line, for blank lines the ending CRLF won't be skipped.
 	// o  Return "" if TIB has nothing left. 
 	// o  Return the remaining TIB if delimiter is not found.
 	// o  The ending delimiter is remained. 
 	// o  The delimiter is a regular expression.
 	function nexttoken(deli){
 		if (arguments.length==0) deli='\\s';   // white space
-		if (deli=='\\s') skipWhiteSpaces(); else ntib += 1; // Doesn't matter if already at end of TIB. 
+		switch(deli){
+			case '\\s': skipWhiteSpaces(); break; // skip all leading white spaces
+			case '\\n': case '\n': if (tib[ntib]!='\n') ntib += 1; break;
+			case '\\r': case '\r': if (tib[ntib]!='\r') ntib += 1; break; 
+			case '\\n|\\r': case '\n|\r': case '\\r|\\n': case '\r|\n': 
+				if (tib[ntib]!='\n' && tib[ntib]!='\r') ntib += 1; break; 
+			default: ntib += 1; // skip next character
+		}
 		var token = nextstring(deli).str;
 		return token; 
 		function skipWhiteSpaces(){  // skip all white spaces at tib[ntib]

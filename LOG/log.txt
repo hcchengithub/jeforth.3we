@@ -3550,8 +3550,9 @@
         --> SysJustBody :> contentDocument.links[17].click() 成功!
         --> 17 經營績效 的 table id oMainTable 裏頭還有 select 在 tr id=oScrollHead 裡。
 
-[ ] Win7, jeforth.3we inputbox 怪怪的, back-space 倒不回去。
-[ ] Win7, jeforth.3we Alt-Up 之後, 上下鍵一跳兩行!
+[/] Win7, jeforth.3we inputbox 怪怪的, back-space 倒不回去。
+[/] Win7, jeforth.3we Alt-Up 之後, 上下鍵一跳兩行!
+	==> We don't support Windows 7 now.
 
 [x] excel.f or work.f 寫個 query 命令來查部門詳情。 ==> see-departments 1s1k
 
@@ -3649,7 +3650,7 @@
     So we need to improve words and help. --> 規定好 input 格式, 有助化簡程式。
     words/help [pattern [switch [argument]]]
 
-[ ] 老經驗
+[x] 老經驗
     nexttoken('\n|\r'); // if use only '\n' then we get an unexpected ending '\r'.
 
 [x] see ~(create)~
@@ -4042,7 +4043,7 @@
             EditMode 用 Ctrl-Enter 發出命令
     [x] 下過命令自動取消 EditMode。
 
-[ ] rename ntib to itib ok? think about it.
+[/] rename ntib to itib ok? think about it. --> forget it.
 
 [ ] 要不要突破第一行的限制?
     --> In a code word definition, the ( foo ) \ baa must be at the first line with 'code' or
@@ -4074,8 +4075,8 @@
 [x] Windows XP can run jeforth.hta now. But can't readTextFile due to the error of :
     "JavaScript error : Safety settings on this computer prohibit accessing a data
      source on another domain." ===> 放棄 Windows XP.
-[ ] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
-    [ ] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
+[/] Try Windows 7. ==> Windows 7 不一定可以順利執行, 乾脆偵測到發個警告。
+    [/] 偵測 OS version needs objWMIService which is too late and <vb> is used, too late.
         I wish HTA supports something to tell OS version?
     --> jeforth.hta uses the below method to distinguish Windows version:
         if(document.getElementsByClassName){
@@ -4084,6 +4085,7 @@
         } else{
             alert("Warning: Your system is old, IE10 or newer preferred. Try Windows upgrade.");
         }
+	==> Give up Windows 7
 
 [x] How to tell Windows version?
     > objEnumWin32_OperatingSystem :> item().Version .
@@ -4309,6 +4311,7 @@
     ==> 寫一個簡單的 index.html 裡面就是 include jquery 跟檢查。看能不能複製問題出來。
     ==> https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html?nop
         run 得很好。
+		
 [x] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
 [x] only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
     order 裡面。為了避免礙眼。
@@ -4327,10 +4330,7 @@
         定義中的 word 的 xt 變成前一個 word 的，而且該 error 觸發 Chrome F12 debugger 時，
         compiling 的值是個字串 "code"。
 
-[ ] hcchen5600 2015/11/13 10:46:32
-    hash>column2 改寫成好用的介面。
-
-[ ] hcchen5600 2015/11/13 10:46:37
+[x] hcchen5600 2015/11/13 10:46:37
     [solar-system.f] cloth.f 改寫,變成教材。
 
 [x] backspace, Esc, Enter, arrow keys 等這些 hotkey 都應該只侷限在 inputbox 裡面,
@@ -4355,8 +4355,6 @@
     a global, and it is.
     So cv will be a value, a global too.
     ==> this is a bigger effort to modify all existing .f files. Done.
-
-[ ] webserver.bat 要避免重複跑，multiple instance 搶著當 localHost server 不可能。
 
 [ ] This info seems a better way for ie.f to modify a web page
     https://msdn.microsoft.com/en-us/library/jj733572.aspx#Date
@@ -4455,9 +4453,9 @@
     execute ( Word|"name"|address|empty -- ... ) Execute the given word or the last() if stack is empty. (object)
     ==> 9/16'16 done
     
-[ ] Many older forth basic words appear stupied after having pop() tos() ...etc.
+[x] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
-[ ] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
+[x] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
 	IE/Edge, and Firefox are facing the Access-Control-Allow-xxxxx 的問題。
     可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
     ==> study https://pages.github.com/
@@ -4481,7 +4479,7 @@
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/readtextfile.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/f/jeforth.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/quit.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
-	[ ] 
+	==> use http://cdn.rawgit.com/... 	is the solution. 13:11 2017-01-08
 	
 [x] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
     --> See YNote: "在 Web browser 上直接編輯網頁內容"
@@ -4509,12 +4507,13 @@
     解法應該是： replace(/"/g,"\\\"") ---> Bingo!!
     to command 也有同樣的問題 --> Yes.
 
-[ ] vm.g.variable 應該是 vm.g.voc.variable 才對,
+[/] vm.g.variable 應該是 vm.g.voc.variable 才對,
     或者各自掛到 vocabulary object 底下去才對。
     --> 這個問題跟 forth 本身把所有的 variable constant value 都當成 global 所造成的
         隱憂差不多，頂多多一點。
-    [ ] 讓 value constant 檢查 the name 是否已經存在。
-    [ ] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
+    [/] 讓 value constant 檢查 the name 是否已經存在。
+    [/] 當 selftest 時，把 ReDef 當作 big warning 看待，需要 user confirm。
+	==> automatically no longer a question after private supported.
 
 [ ] The template.f project ==> modify.f
 
@@ -4815,18 +4814,16 @@
 		:END
 	--> done! jeforth.3we/setup.bat setup all applications.
 [x] setup.bat should include the private folder
-[ ] include command may do nothing if the ~.f module was existing. This causes problem 
+[x] include command may do nothing if the ~.f module was existing. This causes problem 
     if word reDef is expected. For example, many-clocks.f uses 'save' command which is
 	defined in canvas.f module. When include many-clocks.f the 'save' command has been
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
 	of doing nothing when it's existing. 
 	--> Not 'include' but 'source-code-header' who skip existing vocabulary.
-	
-[ ] jeforth.3htm run through rawgit.com has some problems,
-	[ ] The outputbox background color covers only half screen when cell phone is 
-		not vertical.
-	[ ] 12choc.f can not drag and drop objects on Andorid browser.
+	==> done, now include command will always prioritize the word-list even if it has
+		included already. It's not NOP anymore. 13:10 2017-01-08
+
 [x] ls.f autoexec has a problem. If it include ~.f which uses source-code-header
     that will cause a self-test nested structre problem. Because autoexec is added to
     the end of tib by tib.insert. But included ~.f's are spposed to be completed before
@@ -4836,7 +4833,11 @@
         "" value tib-at-the-point js: vm.g.tib=tib.slice(ntib)
     and check tib-at-the-point
 
-[ ] Change the self-test design of jeforth.3we. No command line do nothing.
+[x] Change the self-test design of jeforth.3we. No command line do nothing.
+	--> Yuan-Yuan Teng's experience made me considered this modification. But actually
+		the problem was now RI, when a computer is off line then 3HTA selftest will fail
+		at printIPAddress. Simply remove the test item has temporary skipped the problem.
+		13:07 2017-01-08
 
 [x] support 'private' command to hide private words in the vocabulary	
     Forth 好用, 但是所有的 word 都是 global 令人想念有 local 的環境。應用 jeforth 用久了, 這
@@ -4885,7 +4886,7 @@
                     }
                     end-code
 
-[ ] change the include design. 
+[x] change the include design. 
     : sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
                     dup readTextFileAuto ( pathname file )
                     \ js> tos().indexOf("-=e"+"Of=-")!=-1 if ( pathname file )  *debug* 111>
@@ -5055,7 +5056,7 @@
                 header tib.insert 
         then ;
 
-[ ] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include 
+[x] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include 
 	command is not reliable either. So, sinclude command should save the pathname
 	itself or use the old way like source-code-header does that requires the module
 	name.f given explicitly.
@@ -5063,7 +5064,7 @@
 [x] I am warrying about the nested ~.f modules. An included module is to be tib.inserted
     to the position of ntib. The process should not hurt the original tib.
 	My sinclude command does it well. <--- OK.
-	[ ]	But source~ should insert the header and tailer into the right place or split tib
+	[/]	But source~ should insert the header and tailer into the right place or split tib
 		into 3 pices [used][ntib~EOF][after EOF] is also a method candidate.
 	
 [x] My recent modifications on sinclude to support private words also caused this problem. 
@@ -5080,7 +5081,7 @@
 [x] try 3nd ... failed too after the recent modification on rescan-word-hash to support private
 	that has caused the bug of accessing order[-1] which is of course undefined:
 	JavaScript error on word "rescan-word-hash" : Cannot read property 'length' of undefined
-	--> Try 3nw with f12 debugger ... 3nw and 3htm no problem <-- [ ] strange, should have the same problem.
+	--> Try 3nw with f12 debugger ... 3nw and 3htm no problem <-- [x] strange, should have the same problem.
 	--> Root cause is: after the 'only' command, order array become 0 length but words in
 		forth vocabulary are still visible because the rescan-word-hash command always scan
 		forth word-list. 'only 'clears the order array may be a mistake, should preserve forth
@@ -5100,7 +5101,7 @@
 
 [x] Make sure new source-code-header can handle nested include ... ok now. 
 
-[ ] See code word don't show the toString method.
+[x] See code word don't show the toString method.
 
 [x] words and help do not list private words by default. [/] pattern '*' to show all.
 	\ List all private words in wordhash{} and count word quantity
@@ -5137,7 +5138,7 @@
                 4. for in module applications , everything is in the ~.f module. Thus js> current  and js> 
                    context are the same vid. This is important and is done by source-code-header. Thus 
                    vm[context].name is the easist way.
-    [ ] check all vm.g.name and vm.g[name] values and constants
+    [x] check all vm.g.name and vm.g[name] values and constants
 		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\ball.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\blowing-in-the-wind.f
@@ -5494,8 +5495,6 @@
     [x] call by name must be reviewed especially utility vocabularies. 
 		--> tick() and execute() have run-time-warning in selftest mode
     [x] ls.f privacy is true now.
-[ ] (.0r) Negative numbers become "0000-123", 
-	--> use Math.sign to fix it.
 [ ] <task> ... </task> does not work as expected. Remove them.
 	: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
 					char </task> word ; immediate
@@ -5598,7 +5597,7 @@
 	-->	code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
 		\ it works now! see you tomorrow with my Metamoji note on X1 Yoga.
 	--> Test [x] 3htm (help)
-[ ] 準備 release master 新版 release 新版 master
+[x] 準備 release master 新版 release 新版 master : af266a3f8c4fefafc04947e9ba0b89d9f3601eed
     o search "kvm.minor_version" increase 版號。
         [x] jeforth.3nd.js --> kvm.minor_version = 203 -> 204
         [x] 3nw, jeforth.3we/package.json version 223 -> 224
@@ -5618,7 +5617,7 @@
         [x] 3ce 
 			[x] attach to target pages
         [x] 3ca
-		[ ] Testing all demo
+		[x] Testing all demo
 			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
 			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
 			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , 
@@ -5626,18 +5625,306 @@
 				[x] alarm.f has this problem so it doesn't work in 3ce and 3ca
 					Refused to execute inline event handler because it violates the following Content 
 					Security Policy ---> fixed.
-		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
 			切換到Master分支 : git checkout master 
 			合併 develop 分支進 master 來 : git merge --no-ff develop 
-		[ ] Test the master all over again ... pass        
-		[ ] Master 到回 develop
+		[/] Test the master all over again ... ignored, lazy.
+		[x] Master 到回 develop
 			切換到Master分支 : git checkout develop
 			合併 develop 分支進 master 來 : git merge --no-ff master
 		[ ] release note
-[ ] setup.bat to create one more folder	: jeforth.3htm 
 [x] git.f in trouble now, due to (fork) definition changed, it's quiet now, is that the root cause?
 		> launch-git-shell
 		JavaScript error on word "(fork)" : Invalid procedure call or argument
 	==> No! git.f doesn't know the Git Shell path. That needs manual setup by editing git.f
 		and I didn't do that for this computer yet.
+		
+[x] setup.bat to create one more folder	: jeforth.3htm 
+
+[x] (.0r) Negative numbers become "0000-123", 
+	--> use Math.sign to fix it. --> no such problem! Shit. True only for strings like:
+		> -123 :> toString() 8 .0r \ ==> 0000-123 OK 
+		that's normal.
+		
+					------ jeforth.3we release R1 -------
+
+[x] The correct way to run a jeforth release through rawgit.com is :
+	https://cdn.rawgit.com/hcchengithub/jeforth.3we/R1/index.html
+	IE works fine too. Where, the leading 'cdn.' is still necessary for IE but not for
+	Chrome browser.
+	
+[ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
+	[ ] The outputbox background color covers only half screen when cell phone is 
+		not vertical.
+	[ ] 12choc.f can not drag and drop objects on Andorid browser.
+
+[ ] webserver.bat 要避免重複跑，multiple instance 搶著當 localHost server 不可能。
+
+[ ] hcchen5600 2015/11/13 10:46:32
+    hash>column2 改寫成好用的介面。
+
+[x] How to make a release on GitHub? Not only a master commit, but an official release.
+	==> Ynote: GitHub Creating Releases.note
+	
+[x] Unify the version. See above log of a master release, it takes a lot of efforts to modify
+	the version code of each application.
+    --> ./js/version.js minor_version all 301
+        [x] jeforth.3nd.js
+        [x] 3nw, jeforth.3we\jeforth.3nw.html 
+        [x] 3htm, 3ca, jeforth.3we\3htm\js\jeforth.3htm.js 
+        [x] 3ca, also jeforth.3htm.js above
+        [x] 3ce.js(3ce extension pages)
+        [x] 3ce, ce.f (Target page)
+        [x] 3ce, jeforth.3ce.background.html, background.js vm.minor_version=jeforth3we_minor_version
+        [x] 3hta, --> <HTA> tag. VERSION="204" -> VERSION="205"
+	
+	
+[x] Remove the :
+		js: outputbox.style.fontSize="1.5em"	
+	from the default autoexec of ls.f. I have resolved the problem for a while, no need this now.
+[ ] 3ce to support new command 'highlight' or 螢光筆 to modify active tab. Making Web browser to 
+	note taking annotating tool directly.
+[x] After supporting private, word count shown in words command and help command are still correct?
+	--> 3htm v3.204 no problem.
+[x] 3htm v3.204 and all friends have a problem. After include 12choc.f, words still shows all
+	ls.f's 56 words. I thought include command is I/O bound and thus it should does rescan-word-hash
+	every time. Another symptom is after executing 
+		also misc.f
+	rescan-word-hash is expected too, but no! So it's a bug. Actually, for speed, only vocabulary words
+	do not rescan all other vocabulary words (only [*]also previous include [x]set-context not-only forget
+	prioritize marker) should rescan-word-hash.
+[x] Bug, execute not-only several times, it repeats all word-lists in order
+
+[ ] Release test automation
+	[ ] Selftest of all applications
+	[ ] 3ce attach manual test
+	[ ] All demos
+	
+[/] run command still of ls.f after executed forth.
+	--> shit! my fault. Windows 'run' command is defined in wsh.f.
+	
+[ ] 19:36 2017-02-18 The background story is that I want to transfer files from one computer to anohter
+	in my office. Possible ways are : USB HDD, Yun.Baidu.com, FTP server, and the likes. They all requires
+	two steps, copy to a media and then copy to the target computer. 
+	Install HFS or FTP server on one computer can really make it better but HFS is a failure, 
+	
+	see Ynote: 
+	"HFS ~ Http File Server , homepage and binary" 
+	
+	and sure FTP needs setup too. I actually don't remember
+	how to arrange a FTP server now. While, jeforth.3nd or 3nw webserver + wget is a solution I like.
+	Therefore, I am now interested to study webserver.f and try to improve it.
+	
+	I was studying this : "Build Your First HTTP Server in Node.js"  https://www.diigo.com/user/hcchen/b/373115646
+	yesterday. See ~\jeforth.3we\playground\build_your_http_server.f 
+	
+	I studied how to use node.js to build a web site before, see Yun.baidu.com "ebook NODE.js"
+
+[x] 3ca's vm.appname should be jeforth.3ca (it's now ~.3htm)
+	solution is to read the name field in manifest.json: 
+	js> chrome :> app.getDetails().name \ ==> "jeforth.3ca" or "jeforth.3ce" 
+	Example:
+		js> vm.appname=='jeforth.3htm'&&chrome.app.getDetails().name=="jeforth.3ca" [if]
+			s" Abort: jeforth.3ca restricted HTML input file tag." 
+			"msg"abort cr
+		[then]
+[x] 18:18 2017-02-23 Studying how to use HTML post to upload files. 
+	[x]	Can't use 3ca to do this study due to its restrictions. 
+		誤會一場，只是 HTML event handler 不能 inline 指定而已。早已有解。 3ce & 3ca both ok
+	[x] Yes, we can use 3ca and 3ce to study input type=file tag
+		\ MSDN input type=file element | input type=file object
+		\ Example from this page https://msdn.microsoft.com/en-us/library/ms535263(v=vs.85).aspx
+		<js>
+			var f = function getFiles() {
+				debugger;
+				// Get input element
+				myFileList = document.getElementById("myfiles");
+				// loop through files property, using length to get number of files chosen
+				for (var i = 0; i < myFileList.files.length; i++) {
+					// display them in the div
+					document.getElementById("display").innerHTML += "<br/>" + myFileList.files[i].name ;
+				}
+			};f
+		</jsV> constant getFiles // ( -- func ) event handler
+		<o>
+		<label>Use <strong>shift</strong> or <strong>ctrl</strong> click to pick a few files: 
+		<input type="file" multiple id="myfiles" /></label>
+		<div id="display"></div>
+		</o> drop
+		getFiles js: myfiles.onchange=pop() \ 3ce doesn't accept inline event handler
+    [ ] The upload form example from ipad "USB Disk Pro" http://192.168.0.196:8080/ HFS:
+        <form action="" method="post" enctype="multipart/form-data" name="form1">
+        <input type="hidden" name="folder" value="/">
+        <input type="file" multiple name="file"> <----------- add multiple see see
+        <input type="submit" value="Upload">
+        </form>    
+        --> It really works in 3ce attached console. So how to do the samething through 
+            JavaScript for automation?
+        [x] Post是将表单中的数据放在form的数据体中，按照变量和值相对应的方式，传递到action所指向URL。
+            --> So I don't need to attach to the real target page. Just letting above form's 
+                action="192.168.0.196:8080" <--- no it doesn't work. The page must be connected.
+        [x] 強行添加 multiple to <input type="file" multiple name="file"> --> it doesn't work.
+            only one file transfered still.
+        [x] Try to assign pathname directly @ 3ce attached console
+            <js> $("input")[1].value="c:\Users\hcche\Downloads\1.au3" </js>
+            JavaScript error : Failed to set the 'value' property on 'HTMLInputElement': This input 
+            element accepts a filename, which may only be programmatically set to the empty string.        
+            --> is this to the "USB Disk Pro" page only? 
+                --> all input type=file do not accept value to be set to non-empty.
+        [x] Get filename though my input type=file but submit them manually
+            --> all input type=file do not accept value to be set to non-empty.
+    [ ] I also tried to use FTP server on my computer hoping iPad can then download files from it.
+        But cesarFTP does not work now! and Filezilla needs to learn how to use.
+[ ] 17:17 2017-03-01 RStudio Source box is a very good example to learn. ls.f ed [run] button
+	needs improvement. Running throught he entire field is not good for exercise. Run only
+	one line and a way to run multiple lines and also the entire field is an interesting 
+	challenge.
+[ ] Installer!
+	jeforth.3htm run from rawgit or anywhere to be an installer of other jeforth.3we applications.
+[ ] alarm.f needs to support repeating. No interface, just a command would be good
+	enough.
+	[ ] when 00:00:00 click start or pause should stop the music and become Start.
+		if is not playing the music then do nothing.
+	[ ] when repeat is on then play the music for _given_ seconds the reset
+		and start again.
+[ ] 15:20 2017-05-04
+	debug why include alarm.f from http://cdn.rawgit.com/hcchengithub/jeforth.3we/develop/index.html 
+	makes errors like: repeating undefined, execute warnings about private variables that are called 
+	by name, etc. **Only** when running through rawgit.com.
+	[/] alarm.f does not play music when running through rawgit.com. <--- forget it. 
+		Through localhost is fine. See below good news.
+	[x] Good news! alarm.f works fine on Android cell phone if running through :
+		192.168.1.153:8888?include alarm.f ... etc
+		on Chrome browser. The repeating and the music are both ok.
+		The Web server side is my T550 notebook, webserver.bat of jeforth. 
+		[ ] does it still work if walk away from wifi?
+	[x] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
+		done! "include MP3-wait-a-while.f" and then "wait-a-while.mp3 :: play()", works fine on 3ca.
+		[x] But find problem when reading them from GitHub through cdn.rawgit.com
+			include on URL or command line both create problem : "Error! Usage: unknown."
+			but the "Usage:" is in <comment> !! --> try w/o cdn. ... "Error! Failed to read f/jeforth.f" known problem.
+			--> 3ce, 3hta works fine too. --> how about local webserver? .. OK on local --> remote : Ok too!!
+			http://192.168.1.158:8888 then include then play(), really ok. --> try to read .f instead of include it
+			on the rawgit.com case ... Strange! readTextFile then tib.insert creates the same problem!! --> check
+			self-test first, something wrong maybe. ... No! --> copy-paste MP3-wait-a-while.f through <text> ...
+			Failed!! so it's easy now. Because copy-past .f still failed. Debug the <comment> then ... add a 
+			"js: debugger" before the comment fixed the problem!! --> try a blank line instead of the js: debugger 
+			... ok too! --> So, a \ comment seems eats the next word if it's followed with a total blank line!
+			Simply a space after the \ fixes the problem. The \ alone on the a line actually eats the next line
+			entirely. so study \ command .... it has only one statement : nexttoken('\n'), while definition of // is:
+			last().help = nexttoken('\n|\r'); ... so // has the same problem!! <---- YES!! 
+			==> Root cause is nexttoken(), it always eats the next character so \ ignores the \n and the next line
+				becomes the comment line. When it's <comment> then the following comments are interpreted unexpectedly.
+				--> why happen only on rawgit.com? ... Ha! Not only happen on rawgit.com but also other cases! If
+				testd directly by using :
+					<text>
+					\
+					<comment>
+					." Error"</comment></text> constant t t tib.insert
+				--> When the .f is read from readTextFile on 3ca, the \ line is actually "\\\r\n"
+					177: :13
+					178:
+					:10
+					179:\:92
+					180: :13
+					181:
+					:10
+					182:<:60
+					183:c:99
+					184:o:111
+					185:m:109
+					186:m:109
+					187:e:101
+					188:n:110
+					189:t:116
+					190:>:62
+					191: :13				
+					, every end-of-line are \r\n actually. But when running through rawgit.com, end-of-line become \n only.
+					when the \n eaten by nexttoken() the next line become comment. <--- Problem!! Root Cause !!!
+				--> Try 'word' command, it probably has the same problem.
+					> : comment CR word drop ;
+					> comment
+					." Hello"
+					 OK  <-------------- Indeed! the next line is eaten by 'comment' unexpectedly
+					> comment <--- add a space
+					." Hello"
+					Hello OK  <--------- then OK
+			[x] So, nexttoken() to always eat the next character is not very good. Should not when delimiter is :
+				case '\\n': case '\\r': case '\\n|\\r': case '\\r|\\n': 
+				case '\n':  case '\r':  case '\n|\r':   case '\r|\n':
+				Where '\n' and '\\n' are same or not depends on nextstring(RegEx), I think they are same.
+				Because a real '\n' and a symble '\\n' is same to String.search() I guess. The following experiment has proved this:
+					> <text>
+					aa
+					bb	cc
+					</text> :> search("\\t") \ ==> 5 (number)
+					 OK 
+					> <text>
+					aa
+					bb	cc
+					</text> :> search("\t") \ ==> 5 (number)  證明 '\t' '\\t' 效果一樣
+					 OK 
+					> <text>
+					aa
+					bb	cc
+					</text> :> search("cc") \ ==> 6 (number)
+					 OK 
+				But \s \w \d are RegEx symbole, they must be \\s \\w \\d if appear in a delimiter.
+					<text>
+					aa 123
+					bb    cc
+					</text> :> search("\\d") \ ==> 3 (number) , if "\d" instead then result will be -1.
+		
+[x]	19:21 May 15, 2017
+	How to maintain jeforth.3we wiki on Github? I make a record here.
+	[x]	This is how to clone the wiki from GitHub to local computer. Use Git Shell.
+		~\Documents\GitHub> git clone https://github.com/hcchengithub/jeforth.3we/wiki <------------ Wrong URL !!!
+		Cloning into 'wiki'...
+		fatal: https://github.com/hcchengithub/jeforth.3we/wiki/info/refs not valid: is this a git repository?
+		~\Documents\GitHub> git clone https://github.com/hcchengithub/jeforth.3we.wiki  <----------- Corect URL !!!
+		Cloning into 'jeforth.3we.wiki'...
+		remote: Counting objects: 199, done.
+		remote: Total 199 (delta 0), reused 0 (delta 0), pack-reused 199Receiving objects:  64% (129/199), 580.01 KiB | 63.00 Ki
+
+		Receiving objects: 100% (199/199), 629.37 KiB | 68.00 KiB/s, done.
+		Resolving deltas: 100% (97/97), done.
+		~\Documents\GitHub>		
+	[x] I am now debugging why this hyperlink in README.md does not work??
+			![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
+		While this works
+			![SimpleMDE markdown editor](doc/README.md/demo-pyramidstack.png)
+		工作做一半的結果，又重新解了一次老問題。 README.md 或 wiki pages 裡 
+		![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG) path 可能是「不能有空格」，也可
+		能是我自己把檔名改成用 under line 取代空格了。
+		
+[x]	README.md add the "12 choc" demo before update to master
+[ ] 錄製 12choc.f 的說明影片。
+
+[ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
+[ ] 準備 release master 新版 release 新版 master
+    [x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 303;
+    o selftest them all
+        [x] setup.bat
+        [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
+        [x] 3nd
+			[x] run webserver.f
+        [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+        [x] 3hta
+        [x] 3ce 
+			[x] attach to target pages
+        [x] 3ca
+		[x] Testing all demo
+			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
+			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
+			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , alarm.f 
+			[x] solar-system.f			 
+		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+			切換到Master分支 : git checkout master 
+			合併 develop 分支進 master 來 : git merge --no-ff develop 
+		[ ] Test the master all over again ... ignored, lazy.
+		[ ] Master 到回 develop
+			切換到Master分支 : git checkout develop
+			合併 develop 分支進 master 來 : git merge --no-ff master
+		[ ] release note
+
 		

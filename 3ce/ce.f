@@ -247,6 +247,7 @@
 		<ce> typeof(jeForth)</ceV> char function != if 	
 			tabid {} js: tos().file="js/jquery-1.11.2.js" inject drop			
 		then
+		tabid {} js: tos().file="js/version.js" inject drop 
 		tabid {} js: tos().file="project-k/jeforth.js" inject drop 
 
 		\ Inject the main program of jeforrth.3ce (jeforth.3htm.js equivalent)
@@ -258,7 +259,8 @@
 			// We need to help it a little as the following example:
 			
 			(function(){
-				vm.minor_version = 204; // 3ce target page minor version. major version is from jeforth.js kernel.
+				// vm.minor_version = 204; // 3ce target page minor version. major version is from jeforth.js kernel.204; // 3ce target page minor version. major version is from jeforth.js kernel.
+				vm.minor_version = jeforth3we_minor_version;
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
 				vm.host = window; // DOM window is the root for 3HTM. global 掛那裡的根據。

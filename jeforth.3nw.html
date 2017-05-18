@@ -11,6 +11,7 @@
 			}
     </style>
     <script src="js/jquery-1.11.2.js"></script>
+    <script src="js/version.js"></script>
 	<Script src="project-k/jeforth.js"></Script>
 	<script id=js>
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
@@ -19,7 +20,8 @@
 		kvm.gui = require('nw.gui'); // 等效寫法 gui = global.window.nwDispatcher.requireNwGui(); https://github.com/rogerwang/node-webkit/issues/707
 		kvm.appname = kvm.gui.App.manifest.name; // defined by package.json
 		kvm.selftest_visible = true;
-		kvm.minor_version = kvm.gui.App.manifest.version; // defined by package.json
+		// kvm.minor_version = kvm.gui.App.manifest.version; // defined by package.json
+		kvm.minor_version = jeforth3we_minor_version // defined by version.js
 		kvm.host = window;  // global 掛那裡的根據。
 		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "demo", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready

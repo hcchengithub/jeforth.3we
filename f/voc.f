@@ -100,6 +100,11 @@ code set-current ( "vid" -- ) \ Set the new word's destination word list name.
 code also       order.push(order[order.length-1]) end-code immediate 
 				// ( -- ) dup vocabulary order[] array
 
+				\ The rescan after 'also' is a nullity because both are context and thus
+				\ private words are all still going into the wordhash.
+				\ : also ( -- ) \ Dup the top of vocabulary order[]
+				\ js: order.push(order[order.length-1]) rescan-word-hash ; immediate 
+
 code previous   if(order.length>1){order.pop();dictate("rescan-word-hash")} end-code immediate
 				// ( -- ) Drop vocabulary order[] array's TOS
 
@@ -131,7 +136,7 @@ code get-order  ( -- order-array ) \ Get the vocabulary order array
 : get-vocs		js> words obj>keys ; // ( -- vocs[] ) Get all vocabulary names.
 
 : not-only 		( -- ) \ Bring back all vocabulary 
-				only get-vocs <js> pop().join(" also ")</jsV> tib.insert ; interpret-only
+				[compile] only get-vocs <js> pop().join(" also ")</jsV> tib.insert ; interpret-only
 				/// Does not change the current.
 
 : vocs       	." vocs: " get-vocs . cr ; // ( -- ) List all vocabulary names.
@@ -380,7 +385,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 				\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
 				\ slice ntib~EOF 
 					js> tib.slice(ntib).indexOf(vm.forth.EOF.pattern) ( mname ieof )
-					dup -1 = ?abort" Error! EOF mark not found." ( mname ieof )
+					dup -1 = ?abort" Error! EOF mark not found. It is usually added by sinclude." ( mname ieof )
 					js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
 				\ append the tailer
 					tailer + ( mname ieof tib[ntib~before EOF]+tailer ) 

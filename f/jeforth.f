@@ -1713,7 +1713,6 @@ code (.0r)      ( num|str n -- "0000num|str" ) \ Right adjusted print num|str in
 				// type(minus+i);
 				push(minus+i);
 				end-code
-				/// Negative numbers become "0000-123".
 				
 : .0r 			( num|str n -- ) \ Right adjusted print num|str in n characters (FigTaiwan SamSuanChen)
 				(.0r) . ;
@@ -2051,6 +2050,10 @@ code tib.insert	( "string" -- ) \ Insert the "string" into TIB
 				</js> 
                 tib.insert ;
                 /// Cut after EOF and append EOF back to guarantee an EOF exists
+				/// So, if a ~.f file is copy-paste to jeforth.3we input box, 
+				/// instead of through sinclude, then EOF not found will be a problem 
+				/// when it is expected in, i.e. source-code-header. Add EOF manually
+				/// is the solution.
 
 : include       ( <filename> -- ... ) \ Load the source file
 				BL word sinclude ; interpret-only
