@@ -5898,8 +5898,32 @@
 		能是我自己把檔名改成用 under line 取代空格了。
 		
 [x]	README.md add the "12 choc" demo before update to master
-[ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
 [ ] 錄製 12choc.f 的說明影片。
 
+[ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
+[ ] 準備 release master 新版 release 新版 master
+    o selftest them all
+        [x] setup.bat
+        [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
+        [x] 3nd
+			[x] run webserver.f
+        [x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+        [x] 3hta
+        [x] 3ce 
+			[x] attach to target pages
+        [x] 3ca
+		[x] Testing all demo
+			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
+			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
+			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , alarm.f 
+			[x] solar-system.f			 
+		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+			切換到Master分支 : git checkout master 
+			合併 develop 分支進 master 來 : git merge --no-ff develop 
+		[ ] Test the master all over again ... ignored, lazy.
+		[ ] Master 到回 develop
+			切換到Master分支 : git checkout develop
+			合併 develop 分支進 master 來 : git merge --no-ff master
+		[ ] release note
 
 		

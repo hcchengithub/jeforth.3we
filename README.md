@@ -39,7 +39,7 @@ Get the project
 
 Get source code from GitHub dwon to your computer through 'git clone' or Download Zip, either way.
 
-Questions and Sugestions
+Questions and Suggestions
 ------------------------
 Please open "issues" to the project on GitHub. My gmail is hard to work in the recent China.
 
