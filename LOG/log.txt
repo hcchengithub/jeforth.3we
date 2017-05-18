@@ -5901,7 +5901,7 @@
 [ ] 錄製 12choc.f 的說明影片。
 
 [ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
-[ ] 準備 release master 新版 release 新版 master
+[x] 準備 release master 新版 release 新版 master
     [x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 303;
     o selftest them all
         [x] setup.bat
@@ -5918,13 +5918,15 @@
 			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
 			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , alarm.f 
 			[x] solar-system.f			 
-		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
+		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
 			切換到Master分支 : git checkout master 
 			合併 develop 分支進 master 來 : git merge --no-ff develop 
-		[ ] Test the master all over again ... ignored, lazy.
-		[ ] Master 到回 develop
+		[/] Test the master all over again ... ignored, lazy.
+		[x] Upload master to GitHub : git push
+		[x] Master 到回 develop
 			切換到Master分支 : git checkout develop
 			合併 develop 分支進 master 來 : git merge --no-ff master
+		[x] Complete this log.txt
 		[ ] release note
 
 		
