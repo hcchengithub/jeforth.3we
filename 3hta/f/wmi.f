@@ -39,6 +39,7 @@ t/c getWMIService js: vm.objWMIService=pop()
 					) 
 				</jsV> ;
 
+
 \ Iterate all network cards (NIC) in this computer list all Network adapters' IP address
 : printIPAddress 
 				( -- ) \ Print (all) IP Addresses
@@ -74,6 +75,53 @@ t/c getWMIService js: vm.objWMIService=pop()
 				\ 	-%-%-%-%-%-
 				\ </selftest>
 
+\ WMI Win32_NetworkAdapter class
+\ https://msdn.microsoft.com/en-us/library/aa394216(v=vs.85).aspx
+: objEnumWin32_NetworkAdapter 
+				( "where-clause" -- objEnumWin32_NetworkAdapter ) \ Get Win32_NetworkAdapter object onto TOS.
+				<js> 
+					new Enumerator(
+						vm.objWMIService.ExecQuery("Select * from Win32_NetworkAdapter "+pop())
+					) 
+				</jsV> ;
+				
+				<selftest>
+					." List all NIC" cr
+					"" objEnumWin32_NetworkAdapter >r  \ No where clause, 
+					[begin]
+						r@ js> pop().atEnd() [if] r> drop true [else]
+							r@ js> pop().item().caption . ."  / DeviceID: "
+							r@ js> pop().item().DeviceID . cr
+							r@ js: pop().moveNext() 
+							false
+						[then]
+					[until]
+					." List specific NIC through identifying its caption" cr
+					s" where caption like '%Intel(R) Ethernet Connection%'" objEnumWin32_NetworkAdapter >r
+					[begin]
+						r@ js> pop().atEnd() [if] r> drop true [else]
+							r@ js> pop().item().caption . ."  / DeviceID: "
+							r@ js> pop().item().DeviceID . cr
+							r@ js: pop().moveNext() 
+							false
+						[then]
+					[until]
+				</selftest>
+				
+: getNIC 		( "caption" -- objNIC ) \ Get NIC object so I can disable or enable it
+				s" where caption like '" swap + char ' + objEnumWin32_NetworkAdapter >r
+				begin
+					r@ js> pop().atEnd() if r> drop true else
+						r@ js> pop().item() \ get the last one if there are many
+						r@ js: pop().moveNext() 
+						false
+					then
+				until ;
+				/// Usage: Run jeforth.hta as administrator (through administrator DOS box is a way)
+				///        s" %Intel(R) Ethernet Connection%" getNIC :> disable() \ return 5 is failed when not an administrator
+				///        s" %Intel(R) Ethernet Connection%" getNIC :> enable() \ return 5 is failed when not an administrator
+				
+				
 \ 利用 jeforth for WSH 與其 JavaScript console 手動來操作 WMI 很有用，沒必要寫一大堆人機介面。
 \ 跑一下 objEnumWin32_OperatingSystem 準備好 Win32_OperatingSystem object 放在 TOS，此後用 console 進 js console, 
 \ var os = pop(), 即可用 os 來 access 所有 Win32_OperatingSystem 的東西。例如：
