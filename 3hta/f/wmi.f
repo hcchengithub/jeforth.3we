@@ -84,43 +84,92 @@ t/c getWMIService js: vm.objWMIService=pop()
 						vm.objWMIService.ExecQuery("Select * from Win32_NetworkAdapter "+pop())
 					) 
 				</jsV> ;
-				
-				<selftest>
-					." List all NIC" cr
-					"" objEnumWin32_NetworkAdapter >r  \ No where clause, 
-					[begin]
-						r@ js> pop().atEnd() [if] r> drop true [else]
-							r@ js> pop().item().caption . ."  / DeviceID: "
-							r@ js> pop().item().DeviceID . cr
-							r@ js: pop().moveNext() 
-							false
-						[then]
-					[until]
-					." List specific NIC through identifying its caption" cr
-					s" where caption like '%Intel(R) Ethernet Connection%'" objEnumWin32_NetworkAdapter >r
-					[begin]
-						r@ js> pop().atEnd() [if] r> drop true [else]
-							r@ js> pop().item().caption . ."  / DeviceID: "
-							r@ js> pop().item().DeviceID . cr
-							r@ js: pop().moveNext() 
-							false
-						[then]
-					[until]
-				</selftest>
-				
-: getNIC 		( "caption" -- objNIC ) \ Get NIC object so I can disable or enable it
-				s" where caption like '" swap + char ' + objEnumWin32_NetworkAdapter >r
+
+0 value #nic // ( -- n ) NIC count. A result of activeNIC or getNIC command.
+: getNIC 		( "where clause" -- objNIC[,objNIC] ) \ Get NIC objects screened by "where clause"
+				objEnumWin32_NetworkAdapter >r
+				0 to #nic
 				begin
 					r@ js> pop().atEnd() if r> drop true else
-						r@ js> pop().item() \ get the last one if there are many
+						#nic 1+ to #nic
+						r@ js> pop().item() \ get all of them if there are many
+						r@ js: pop().moveNext() 
+						false
+					then
+				until ;
+: activeNIC 	( -- objNIC[,objNIC] ) \ Get the wroking NIC object so I can disable or enable it
+				s" where NetEnabled='True'" objEnumWin32_NetworkAdapter >r
+				0 to #nic
+				begin
+					r@ js> pop().atEnd() if r> drop true else
+						#nic 1+ to #nic
+						r@ js> pop().item() \ get all of them if there are many
 						r@ js: pop().moveNext() 
 						false
 					then
 				until ;
 				/// Usage: Run jeforth.hta as administrator (through administrator DOS box is a way)
-				///        s" %Intel(R) Ethernet Connection%" getNIC :> disable() \ return 5 is failed when not an administrator
-				///        s" %Intel(R) Ethernet Connection%" getNIC :> enable() \ return 5 is failed when not an administrator
-				
+				///        activeNIC :> disable() \ return 5 is failed when not an administrator
+				///        activeNIC :> enable() \ return 5 is failed when not an administrator
+				///		   check #nic for the active NIC count if there are many.
+
+				<selftest>
+					." List all NIC" cr
+					"" getNIC  ( nic nic ... ) \ No where clause, get all of them
+					#nic ?dup [if] [for] 
+						>r r@ :> caption . cr
+						."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
+						."  / NetEnabled: " r@ :> NetEnabled . cr
+						."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
+						."  / PermanentAddress: " r@ :> PermanentAddress . cr
+						."  / Status: " r@ :> Status . cr
+						r> drop
+					[next] [then]
+					
+					." List active NIC" cr
+					activeNIC  ( nic nic ... ) \ assume there are many active NICs
+					#nic ?dup [if] [for] 
+						>r r@ :> caption . cr
+						."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
+						."  / NetEnabled: " r@ :> NetEnabled . cr
+						."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
+						."  / PermanentAddress: " r@ :> PermanentAddress . cr
+						."  / Status: " r@ :> Status . cr
+						r> drop
+					[next] [then]
+				</selftest>
+				<comment>
+					\ Obsoleted methods still good for reference
+					." List all NIC" cr
+					"" objEnumWin32_NetworkAdapter >r  \ No where clause, get all of them
+					[begin]
+						r@ js> pop().atEnd() [if] r> drop true [else]
+							r@ js> pop().item().caption . cr
+							."  / NetConnectionStatus: " r@ js> pop().item().NetConnectionStatus . cr
+							."  / NetEnabled: " r@ js> pop().item().NetEnabled . cr
+							."  / NetworkAddresses: " r@ js> pop().item().NetworkAddresses . cr
+							."  / PermanentAddress: " r@ js> pop().item().PermanentAddress . cr
+							."  / Status: " r@ js> pop().item().Status . cr
+							r@ js: pop().moveNext() 
+							false
+						[then]
+					[until]
+					." List specific NIC through identifying its properties" cr
+					\ s" where caption like '%Intel(R) Ethernet Connection%'" objEnumWin32_NetworkAdapter >r
+					s" where NetEnabled='True'" objEnumWin32_NetworkAdapter >r
+					[begin]
+						r@ js> pop().atEnd() [if] r> drop true [else]
+							r@ js> pop().item().caption . cr
+							."  / NetConnectionStatus: " r@ js> pop().item().NetConnectionStatus . cr
+							."  / NetEnabled: " r@ js> pop().item().NetEnabled . cr
+							."  / NetworkAddresses: " r@ js> pop().item().NetworkAddresses . cr
+							."  / PermanentAddress: " r@ js> pop().item().PermanentAddress . cr
+							."  / Status: " r@ js> pop().item().Status . cr
+							r@ js: pop().moveNext() 
+							false
+						[then]
+					[until]
+				</comment>
 				
 \ 利用 jeforth for WSH 與其 JavaScript console 手動來操作 WMI 很有用，沒必要寫一大堆人機介面。
 \ 跑一下 objEnumWin32_OperatingSystem 準備好 Win32_OperatingSystem object 放在 TOS，此後用 console 進 js console, 
