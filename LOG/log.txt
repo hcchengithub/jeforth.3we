@@ -5903,6 +5903,7 @@
 [ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
 [x] 準備 release master 新版 release 新版 master
     [x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 303;
+	[ ] Check the date stamp at the bottom of README.md 
     o selftest them all
         [x] setup.bat
         [x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
@@ -5917,7 +5918,7 @@
 			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
 			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
 			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , alarm.f 
-			[x] solar-system.f			 
+			[x] solar-system.f, [ ] tutor-cloth.f			 
 		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
 			切換到Master分支 : git checkout master 
 			合併 develop 分支進 master 來 : git merge --no-ff develop 
@@ -5928,5 +5929,7 @@
 			合併 develop 分支進 master 來 : git merge --no-ff master
 		[x] Complete this log.txt
 		[ ] release note
-
+[ ] README.md to include 
+	http://cdn.rawgit.com/hcchengithub/jeforth.3we/r2/index.html?cls_include_tutor-cloth.f
+[ ] Try to use Ubuntu NW.js or Node.js to try jeforth.3nw, 3nd on Ubuntu.
 		
