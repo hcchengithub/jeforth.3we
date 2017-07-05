@@ -2,9 +2,9 @@
 	s" luis.f" source-code-header
     
     \ My LUIS endpoint URL, the key is subject to be changed
-        <js>
-            "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/023ebea1-16f6-46ba-a1d9-8869025bf68b?subscription-key=e06b331fc1eb4253805197301ea2eed7&staging=true&verbose=true&timezoneOffset=480&q="
-        </jsV> value luis-endpoint-url // ( -- "url" )
+          \ ( Greeting ) s" https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/023ebea1-16f6-46ba-a1d9-8869025bf68b?subscription-key=e06b331fc1eb4253805197301ea2eed7&staging=true&verbose=true&timezoneOffset=480&q="
+			( jeforth  ) s" https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/dbd7feee-7224-4be0-a7f3-445780a7e083?subscription-key=e06b331fc1eb4253805197301ea2eed7&staging=true&verbose=true&timezoneOffset=480&q="
+			value luis-endpoint-url // ( -- "url" )
 
     \ Send the request to LUIS server 
 
