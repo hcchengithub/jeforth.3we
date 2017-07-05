@@ -3,7 +3,6 @@ cd %~dp0
 @rem 
 @rem   N I C . b a t 
 @rem   
-@rem   
 @rem   H.C. Chen 3:29 PM 6/27/2017
 @rem 
 

@@ -170,6 +170,23 @@ t/c getWMIService js: vm.objWMIService=pop()
 						[then]
 					[until]
 				</comment>
+
+: nicoff ( -- ) \ Turn off the NIC (the certain where clause is for my LRV2 only)
+				s" where deviceid = 19" getNIC :> disable() 
+				dup if 
+					." Failed! Error code " . ." . Make sure to run as an administrator." cr
+				else
+					drop ." NIC device turned off sucessfully." cr
+				then ;
+				/// return 5 is failed when not an administrator
+
+: nicon	( -- ) \ Turn on the NIC (the certain where clause is for my LRV2 only)
+				s" where deviceid = 19" getNIC :> enable() 
+				dup if 
+					." Failed! Error code " . ." . Make sure to run as an administrator." cr
+				else
+					drop ." NIC device turned on sucessfully." cr
+				then ;
 				
 \ 利用 jeforth for WSH 與其 JavaScript console 手動來操作 WMI 很有用，沒必要寫一大堆人機介面。
 \ 跑一下 objEnumWin32_OperatingSystem 準備好 Win32_OperatingSystem object 放在 TOS，此後用 console 進 js console, 
