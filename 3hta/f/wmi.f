@@ -97,6 +97,10 @@ t/c getWMIService js: vm.objWMIService=pop()
 						false
 					then
 				until ;
+				/// Example: 
+				///   "" getNIC \ to get them all into the stack, #nic is the count
+				///   s" where NetEnabled='True'" getNIC \ to get the active NIC, #nic should be 1.
+				
 : activeNIC 	( -- objNIC[,objNIC] ) \ Get the wroking NIC object so I can disable or enable it
 				s" where NetEnabled='True'" objEnumWin32_NetworkAdapter >r
 				0 to #nic
@@ -113,13 +117,27 @@ t/c getWMIService js: vm.objWMIService=pop()
 				///        activeNIC :> enable() \ return 5 is failed when not an administrator
 				///		   check #nic for the active NIC count if there are many.
 
+: list-all-nic 	( -- ) \ List all NIC devices
+				cr ." ---- List all NIC ----" cr
+				"" getNIC  ( nic nic ... ) \ No where clause, get all of them
+				#nic ?dup if for 
+					>r r@ :> caption . cr
+					."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
+					."  / NetEnabled(Active): " r@ :> NetEnabled . cr
+					."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
+					."  / PermanentAddress: " r@ :> PermanentAddress . cr
+					."  / DeviceID: " r@ :> DeviceID . cr
+					."  / Status: " r@ :> Status . cr
+					r> drop
+				next then ;
+
 				<selftest>
 					." List all NIC" cr
 					"" getNIC  ( nic nic ... ) \ No where clause, get all of them
 					#nic ?dup [if] [for] 
 						>r r@ :> caption . cr
 						."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
-						."  / NetEnabled: " r@ :> NetEnabled . cr
+						."  / NetEnabled(Active): " r@ :> NetEnabled . cr
 						."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
 						."  / PermanentAddress: " r@ :> PermanentAddress . cr
 						."  / Status: " r@ :> Status . cr
@@ -131,7 +149,7 @@ t/c getWMIService js: vm.objWMIService=pop()
 					#nic ?dup [if] [for] 
 						>r r@ :> caption . cr
 						."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
-						."  / NetEnabled: " r@ :> NetEnabled . cr
+						."  / NetEnabled(Active): " r@ :> NetEnabled . cr
 						."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
 						."  / PermanentAddress: " r@ :> PermanentAddress . cr
 						."  / Status: " r@ :> Status . cr
@@ -146,7 +164,7 @@ t/c getWMIService js: vm.objWMIService=pop()
 						r@ js> pop().atEnd() [if] r> drop true [else]
 							r@ js> pop().item().caption . cr
 							."  / NetConnectionStatus: " r@ js> pop().item().NetConnectionStatus . cr
-							."  / NetEnabled: " r@ js> pop().item().NetEnabled . cr
+							."  / NetEnabled(Active): " r@ js> pop().item().NetEnabled . cr
 							."  / NetworkAddresses: " r@ js> pop().item().NetworkAddresses . cr
 							."  / PermanentAddress: " r@ js> pop().item().PermanentAddress . cr
 							."  / Status: " r@ js> pop().item().Status . cr
@@ -161,7 +179,7 @@ t/c getWMIService js: vm.objWMIService=pop()
 						r@ js> pop().atEnd() [if] r> drop true [else]
 							r@ js> pop().item().caption . cr
 							."  / NetConnectionStatus: " r@ js> pop().item().NetConnectionStatus . cr
-							."  / NetEnabled: " r@ js> pop().item().NetEnabled . cr
+							."  / NetEnabled(Active): " r@ js> pop().item().NetEnabled . cr
 							."  / NetworkAddresses: " r@ js> pop().item().NetworkAddresses . cr
 							."  / PermanentAddress: " r@ js> pop().item().PermanentAddress . cr
 							."  / Status: " r@ js> pop().item().Status . cr

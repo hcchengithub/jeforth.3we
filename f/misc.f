@@ -61,36 +61,6 @@ code jquery.version ( -- string ) \ Check jQuery version
 				/// or push($().jquery) too
 				/// http://www.moreonfew.com/how-to-check-jquery-version
 
-' getNIC [if] \ Dependency wmi.f is for jeforth.3hta only 
-	: nicoff 	( -- ) \ Turn off the NIC (the certain where clause is for my LRV2 only)
-				s" where deviceid = 19" getNIC :> disable() 
-				\ "where deviceid = 19" is for my LRV2 OA only 
-				dup if 
-					\ return 5 is failed when not an administrator
-					." Failed! Error code " . ." . Make sure to run as an administrator." cr
-				else
-					drop ." NIC device turned off sucessfully." cr
-				then ;
-				/// Need administrator privilege, use 'dos' command to check that.
-				/// Run 3HTA.bat through right click to 'Run as administrator'.
-
-	: nicon		( -- ) \ Turn on the NIC (the certain where clause is for my LRV2 only)
-				s" where deviceid = 19" getNIC :> enable() 
-				\ "where deviceid = 19" is for my LRV2 OA only 
-				dup if 
-					\ return 5 is failed when not an administrator
-					." Failed! Error code " . ." . Make sure to run as an administrator." cr
-				else
-					drop ." NIC device turned on sucessfully." cr
-				then ;
-				last :: comment=tick('nicoff').comment
-
-	: rdlan 	( minutes -- ) \ Disable office LAN to use RD LAN through WiFi for a period of time that > 1 minute and <= 120 minutes
-				js> (tos()>=1)&&(tos()<=120) if else ." Error: Given time period must be > 1 and <= 120 (minutes)." cr exit then 
-				nicoff 60 * 1000 * nap nicon ;
-				last :: comment=tick('nicoff').comment
-[then]
-
 				<comment>
 				\ This was for test
 				code freeze 	( mS -- ) \ Freeze the entire system for mS time. Nobody can do anything.
