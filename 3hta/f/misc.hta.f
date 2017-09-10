@@ -89,8 +89,8 @@
 
 	: nicoff 	( <minutes> -- ) \ Turn off the NIC 1~120 minutes, default 15 minutes
 				CR word js> parseFloat(pop()) ( min|NaN ) 
-				?dup if else 15 then \ default 5 minutes
-				js> (tos()>=1)&&(tos()<=120) if else 
+				?dup if else 15 then \ default 15 minutes
+				js> (tos()>=1)&&(tos()<=360) if else 
 					." Error: Given time period must be > 1 and <= 120 (minutes)." cr exit 
 				then (nicoff) ." It'll be back " dup . ."  minutes later." cr 60 * 1000 * 
 				nap nicon ;
