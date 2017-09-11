@@ -8,6 +8,9 @@
 \ 今利用 jeforth 來管理這些命令跟建議。平時也可以簡化指令、做筆記、為每組命令添加 help 
 \ message。不管 GitHub 再怎麼複雜難用，配合 jeforth 只要 study 一次就永遠不會再忘記了。
 \
+\ 11:36 2017-09-11 參考本程式寫成的 python multiple line input tool pykb.f 
+\ 換台電腦跑就有點問題，一度以為 3hta 要 run as administrator 才可以，已證實不必。
+\
 
 js> vm.appname char jeforth.3hta != [if] ?abort" Sorry! git.f is for jeforth.3hta only." \s [then]
 include vb.f
