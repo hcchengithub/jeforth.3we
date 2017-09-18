@@ -353,7 +353,7 @@ function jeForth() {
 	// environment like Node-webkit.
 	function docode() {
 	    // All future code words can see local variables in here, so don't use
-		// any local variable. They can *see* variables & functions out side 
+		// any local variable here. They can *see* variables & functions out side 
 		// this function too, that's normal.
 		compiling = "code"; // it's true and a clue of compiling a code word.
 		newname = nexttoken();
