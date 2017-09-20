@@ -688,7 +688,7 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				///     s" where commandline like '%excel%'" see-process
 				
 
-: list-them		( "where-clause" -- count ) \ List processes.
+: list-them		( "where-clause" -- count ) \ List process ID's. "see-process" to see details.
 				0 swap objEnumWin32_Process >r  ( 0 | obj )
 				begin
 					r@  ( 0 obj | obj)
@@ -700,6 +700,8 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				/// Usage: Don't forget the where-clause, Case insensitive
 				///     s" where name = 'ExCeL.ExE'" list-them
 				///     s" where name like 'chrom%'" list-them 
+				///     s" where name like '%'" list-them \ List all of them
+				///     s" where processid > 0" list-them \ List all of them
 
 : count-process ( s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" -- count ) \ Count matched process 
 				0 swap objEnumWin32_Process >r  ( 0 | obj )
@@ -770,9 +772,10 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				///     s" where name = 'ExCeL.ExE'" see-process
 				///     s" where name like 'chrom%'" see-process
 				///     s" where commandline like '%excel%'" see-process
-				/// Also "kill-them' command
+				/// Also "kill-them" command
 				///     s" where name = 'ExCeL.ExE'" kill-them
 				///     s" where name like 'chrom%'" kill-them
+                /// Also "list-them" lists only process ID's
 
 : get-them		( "where-clause" -- [objWin32_Process,..] ) \ Get processes.
 				objEnumWin32_Process >r  [] ( [] | Enum )
