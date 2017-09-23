@@ -14,7 +14,7 @@ s" wmi.f"	source-code-header
 \ "localhost" by default. Define t/c before include wmi.f in command line if your target computer is not localhost.
 
 \ 如果在 include wmi.f 之前先設定 t/c 之值，則整套 wmi.f 都 refer to the specified t/c. 所以你可以去 access 別的機器.
-\ 例如 "cscript jeforth.js s' 10.34.98.76' constant t/c include wmi.f list-some-OS-properties" 可以去看遠端機器的內容。
+\ 例如 "cscript projectk.js s' 10.34.98.76' constant t/c include wmi.f list-some-OS-properties" 可以去看遠端機器的內容。
 \ 若不先給定 t/c 則以下這段程式會把 t/c 設成 localhost 所以是對本地電腦工作。我不想每次都得指定 target computer 因此
 \ 如此安排。
 
@@ -341,7 +341,7 @@ code objEnumWin32_PnPEntity ( "where-clause" -- objEnumWin32_PnPEntity ) \ Get W
 				;
 				
 				\ this is a one liner to list all devices. %errorlevel% is the count of devices.
-				\ cscript jeforth.js include wmi.f cr list-all-PnP-devices bye
+				\ cscript projectk.js include wmi.f cr list-all-PnP-devices bye
 
 				<selftest>
 					*** Demo how to use objEnumWin32_PnPEntity object
@@ -381,7 +381,7 @@ code objEnumWin32_PnPEntity ( "where-clause" -- objEnumWin32_PnPEntity ) \ Get W
 				;
 				
 				\ This is a one liner that lists yellow marks and red marks in Device Manager, leaving %errorlevel% with the abnormal item count.
-				\ cscript jeforth.js include wmi.f cr list-abnormal-items-in-device-manager bye
+				\ cscript projectk.js include wmi.f cr list-abnormal-items-in-device-manager bye
 
 				<selftest>
 					*** Let's see if there's any abnormal items in device manager
@@ -427,7 +427,7 @@ code objEnumWin32_CDROMDrive ( "where-clause" -- objEnumWin32_CDROMDrive ) \ Get
 				;
 				
 				\ This is a one liner to show CD/DVD drives, leaving %errorlevel% with the count.
-				\ cscript jeforth.js include wmi.f list-CD/DVD-drives bye
+				\ cscript projectk.js include wmi.f list-CD/DVD-drives bye
 				
 				<selftest>
 					*** Demo objEnumWin32_CDROMDrive object
@@ -498,13 +498,13 @@ code objEnumWin32_Processor ( -- objEnumWin32_Processor ) \ Get WMI Win32_Proces
 				;
 
 				\ This is a one liner to show processors, leaving %errorlevel% with the physical processor count.
-				\ cscript jeforth.js include wmi.f list-all-processors bye
+				\ cscript projectk.js include wmi.f list-all-processors bye
 
 				\ This is a one liner to show processors, leaving %errorlevel% with the logical processor count.
-				\ cscript jeforth.js include wmi.f list-all-processors drop bye
+				\ cscript projectk.js include wmi.f list-all-processors drop bye
 
 				\ This is a one liner to show processors, leaving %errorlevel% with the processor core count.
-				\ cscript jeforth.js include wmi.f list-all-processors drop drop bye
+				\ cscript projectk.js include wmi.f list-all-processors drop drop bye
 
 				<selftest>
 					*** Demo objEnumWin32_Processor object
@@ -570,7 +570,7 @@ code objEnumWin32_BIOS ( -- objEnumWin32_BIOS ) \ Get WMI Win32_BIOS object onto
 				</selftest>
 				
 				\ This is a one liner to show BIOS things.
-				\ cscript jeforth.js list-Win32_BIOS-properties bye /f0:wmi.f //nologo
+				\ cscript projectk.js list-Win32_BIOS-properties bye /f0:wmi.f //nologo
 
 \ View Battery info
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394074(v=vs.85).aspx
@@ -580,7 +580,7 @@ code objEnumWin32_Battery ( -- objEnumWin32_Battery ) \ Get WMI Win32_Battery ob
 				end-code 
 
 				\ This is a one liner to show battery things.
-				\ cscript jeforth.js list-Win32_Battery-properties bye /f0:wmi.f //nologo
+				\ cscript projectk.js list-Win32_Battery-properties bye /f0:wmi.f //nologo
 
 				<selftest>
 					*** Demo how to use objEnumWin32_Battery, list Win32_Battery properties

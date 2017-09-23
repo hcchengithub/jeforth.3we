@@ -128,9 +128,9 @@
 				c:\Users\hcche\Downloads\jeforth.3we\jeforth.3chrome.html  \ from jeforth.3we-59858c0208
 					<Script src="jeforth.3chrome.js"></Script>
 			-->	As shown above it's the .js file that is suspected --> compared, can't find any suspect.
-				so try to use jeforth.3chrome.js . . . still failed. --> Now I believe the jeforth.js
-				is different. Because it's blocked at jeforth.js --> Nope, jeforth.js is the same.
-				--> so try to use the jeforth.3chrome.html .. no work -> use the jeforth.js too ... 
+				so try to use jeforth.3chrome.js . . . still failed. --> Now I believe the projectk.js
+				is different. Because it's blocked at projectk.js --> Nope, projectk.js is the same.
+				--> so try to use the jeforth.3chrome.html .. no work -> use the projectk.js too ... 
 				failed --> use the manifest.json it self ... OK !!
 
 				------------ was --------------------------------------------

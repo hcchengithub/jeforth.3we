@@ -13,7 +13,7 @@
 		vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		vm.selftest_visible = true; // Dummy, background page does not have a display.
 		// vm.type() is the master typing or printing function.
-		// The type() called in code ... end-code is defined in the kernel jeforth.js.
+		// The type() called in code ... end-code is defined in the kernel projectk.js.
 		// type to vm.screenbuffer, although background page has no display.
 		vm.type = function (s) { 
 			try {
@@ -26,14 +26,14 @@
 		}
 		
 		// vm.panic() is the master panic handler. The panic() function defined in 
-		// project-k kernel jeforth.js is the one called in code ... end-code.
+		// project-k kernel projectk.js is the one called in code ... end-code.
 		vm.panic = function(state){ 
 			vm.type(state.msg);
 			if (state.serious) debugger;
 		}
 		
 		// Even in 3ce background page we still need the panic() function below 
-		// but we can't see the one in jeforth.js so one is defined here for convenience.
+		// but we can't see the one in projectk.js so one is defined here for convenience.
 		function panic(msg,level) {
 			var state = {
 					msg:msg, level:level

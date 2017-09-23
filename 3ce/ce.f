@@ -248,7 +248,7 @@
 			tabid {} js: tos().file="js/jquery-1.11.2.js" inject drop			
 		then
 		tabid {} js: tos().file="js/version.js" inject drop 
-		tabid {} js: tos().file="project-k/jeforth.js" inject drop 
+		tabid {} js: tos().file="project-k/projectk.js" inject drop 
 
 		\ Inject the main program of jeforrth.3ce (jeforth.3htm.js equivalent)
 		<ce>
@@ -259,7 +259,7 @@
 			// We need to help it a little as the following example:
 			
 			(function(){
-				// vm.minor_version = 204; // 3ce target page minor version. major version is from jeforth.js kernel.204; // 3ce target page minor version. major version is from jeforth.js kernel.
+				// vm.minor_version = 204; // 3ce target page minor version. major version is from projectk.js kernel.204; // 3ce target page minor version. major version is from projectk.js kernel.
 				vm.minor_version = jeforth3we_minor_version;
 				var version = vm.version = parseFloat(vm.major_version+"."+vm.minor_version);
 				vm.appname = "jeforth.3ce"; //  不要動， jeforth.3we kernel 用來分辨不同 application。
@@ -300,12 +300,12 @@
 				};
 				
 				// vm.panic() is the master panic handler. The panic() function defined in 
-				// project-k kernel jeforth.js is the one called in code ... end-code.
+				// project-k kernel projectk.js is the one called in code ... end-code.
 				vm.panic = function(state){ 
 					vm.type(state.msg);
 					if (state.serious) debugger;
 				}
-				// We need the panic() function below but we can't see the one in jeforth.js
+				// We need the panic() function below but we can't see the one in projectk.js
 				// so one is defined here for convenience.
 				function panic(msg,level) {
 					var state = {

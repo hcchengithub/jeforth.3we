@@ -42,7 +42,7 @@
 	</div>
 </body>
 <script src="js/jquery-1.11.2.js"></script>
-<Script src="project-k/jeforth.js"></Script>
+<Script src="project-k/projectk.js"></Script>
 <script src="js/version.js"></script>
 <script>
 	// 人家都把 script 放在 head 或 body。我怎麼發現可以放在這裡的，為什麼？
@@ -101,7 +101,7 @@
 		if(kvm.selftest_visible) $('#outputbox').append(kvm.plain(ss)); 
 	};
 	
-	// minor version is from js/version.js, major version is from jeforth.js kernel.
+	// minor version is from js/version.js, major version is from projectk.js kernel.
 	var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
 	kvm.greeting = function(){
 		kvm.type("j e f o r t h . 3 h t a -- v"+version+'\n');
@@ -121,7 +121,7 @@
 	kvm.clearScreen = function(){outputbox.innerHTML=""};
 	
 	// kvm.panic() is the master panic handler. The panic() function defined in 
-	// project-k kernel jeforth.js is the one called in code ... end-code and it's
+	// project-k kernel projectk.js is the one called in code ... end-code and it's
 	// not visible here.
 	kvm.panic = function(state){ 
 		kvm.type(state.msg);

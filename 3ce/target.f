@@ -97,7 +97,7 @@
 		//     js: $(".console3we")[0].style.visibility="hidden"
 		
 		// vm.type() is the master typing or printing function.
-		// The type() called in code ... end-code is defined in the kernel jeforth.js.
+		// The type() called in code ... end-code is defined in the kernel projectk.js.
 		// target_type(s) types to the target page outputbox, instead of to the host page 
 		// that may be the popup page or a 3ce extension page.
 		function target_type(s) { 

@@ -186,7 +186,7 @@ js> vm.appname char jeforth.3hta = [if]
 
 <js>
 	// vm.panic() is the master panic handler. The panic() function defined in 
-	// project-k kernel jeforth.js is the one called in code ... end-code. That 
+	// project-k kernel projectk.js is the one called in code ... end-code. That 
 	// panic() is actually calling vm.panic(). We redefine vm.panic() because jsc 
 	// is ready now while F12 debugger can be called from jsc still.
 

@@ -35,7 +35,7 @@ Get the project
 | Item | Address |
 ----------------|----------------------------------------------
 | jeforth.3we high level source code | *http://github.com/hcchengithub/jeforth.3we* |
-| Kernel, jeforth.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
+| Kernel, projectk.js 3-words-engine| *http://github.com/hcchengithub/project-k* |
 
 Get source code from GitHub dwon to your computer through 'git clone' or Download Zip, either way.
 

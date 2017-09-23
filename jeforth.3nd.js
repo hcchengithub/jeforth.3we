@@ -5,7 +5,7 @@
 // Usage: node.exe jeofrth.3nd.js cr .' Hello World!!' cr bye
 //
 
-var jeForth = require('./project-k/jeforth.js').jeForth;
+var jeForth = require('./project-k/projectk.js').jeForth;
 global.kvm = global.jeforth_project_k_virtual_machine_object = new jeForth()
 kvm.minor_version = require("./js/version.js").jeforth3we_minor_version;
 kvm.host = global;  // global 掛那裡的根據。
@@ -15,8 +15,8 @@ kvm.screenbuffer = ""; // used by both inside and outside vm.
 kvm.selftest_visible = true; // used by both inside and outside vm.
 
 // kvm.type() is the master typing or printing function.
-// The type() called in code ... end-code is defined in the kernel jeforth.js.
-// We need to use type() below, and we can't see the jeforth.js' type() so one 
+// The type() called in code ... end-code is defined in the kernel projectk.js.
+// We need to use type() below, and we can't see the projectk.js' type() so one 
 // is also defined here, even just for a few convenience. The two type() functions 
 // are both calling the same kvm.type().
 var type = kvm.type = function (s) { 
@@ -35,12 +35,12 @@ kvm.clearScreen =
 		// '\033c' or '\033[2J' http://stackoverflow.com/questions/9006988/node-js-on-windows-how-to-clear-console
 		
 // kvm.panic() is the master panic handler. The panic() function defined in 
-// project-k kernel jeforth.js is the one called in code ... end-code.
+// project-k kernel projectk.js is the one called in code ... end-code.
 kvm.panic = function (state) { 
 			type(state.msg);
 			if (state.serious) debugger;
 		}
-// We need the panic() function below but we can't see the one in jeforth.js
+// We need the panic() function below but we can't see the one in projectk.js
 // so one is defined here for convenience.
 function panic(msg,level) {
 	var state = {
