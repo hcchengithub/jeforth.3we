@@ -327,7 +327,7 @@
 	js: document.onmouseout=null
 	js: document.onmouseout=function(){fortheval('hi')} \ It works!!
 	: test begin 80 for char * . 100 sleep next cr again ; \ 弄一個印 * 的 long run 程式。
-	
+
 	用 forth colon word 當 event handler, interrupt service routine 的要領：
 	o  jeforth.hta inputbox 本身就是個最兇的 event 他會改 stack. 別的 event handler 都得
 	   balance data stack and return stack.
@@ -2389,9 +2389,9 @@
 		==> 這段 code is from index.html of jeforth.3htm, all others should follow this solution
 		[x]3htm [x]3hta, [x]3nw, [x]3nd, 唯 3wsh 沒有 setTimeout 故無此必要。
 
-[ ] need a tool addr>word ( addr -- Word ) for debugging, find the 
+[ ] need a tool addr>word ( addr -- Word ) for debugging, find the
 	word through the given address.
-	
+
 [x] need a 'breath' compile-only command to suspend and resume immediately ===> 從 cr 下手，用 1 nap 達成。
 	To avoid suddenly print a lot of things. 問題是 jeforth 本身就是 event driven 不靠 1 sleep
 	根本上不了手。---> 除非讓 sleep 單獨用另一組 suspend-resume 或者每一組 suspend-resume 都有自己的 call-back。
@@ -3917,6 +3917,11 @@
 [x] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
 	因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
 
+	Unzip the nw.js package (v0.14 now use SDK version to gain F12 Debugger or DevTool)
+	and set path to it, that's all. Or simply copy the entire nw.js unzip'ed folder to
+	node.js folder. This is because node.js has Windows installer and nw.js has not but
+	it can leverage node.js.
+
 [x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
 	---- modify jeforth.3nw.html --------------------
 	[x] kernel/jeforth.js --> project-k/jeforth.js
@@ -4311,7 +4316,7 @@
 	==> 寫一個簡單的 index.html 裡面就是 include jquery 跟檢查。看能不能複製問題出來。
 	==> https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html?nop
 		run 得很好。
-		
+
 [x] 試跑 solar-system.f 剪貼上去的 code 好像內碼有問題。
 [x] only cloth.f 的時候, words, help 等只列出 cloth.f。但是 forth words 總是常駐在
 	order 裡面。為了避免礙眼。
@@ -4350,7 +4355,7 @@
 	get-vocs js> tos().length [for] js> tos().shift() . cr [next] drop
 	get-vocs js> tos().length [for] js: order.push(tos().shift()) [next] drop rescan-word-hash
 	==> "not-only" command recalls all loaded vocabularies.
-	
+
 [x] vm.cv <--- is an inappropriate thing, should be vm.g.cv if it has to be
 	a global, and it is.
 	So cv will be a value, a global too.
@@ -4452,16 +4457,16 @@
 [x] This help message is wrong now?
 	execute ( Word|"name"|address|empty -- ... ) Execute the given word or the last() if stack is empty. (object)
 	==> 9/16'16 done
-	
+
 [x] Many older forth basic words appear stupied after having pop() tos() ...etc.
 
-[x] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run, 
+[x] 用 rawgit.com 直接跑 GitHub repo 只有 Chrome and Android built-in browser 能 run,
 	IE/Edge, and Firefox are facing the Access-Control-Allow-xxxxx 的問題。
 	可能是因為透過 rawgit.com 去跑 GitHub repo 觸動跨境 access 的安全機制之故。
 	==> study https://pages.github.com/
-	--> 9/16'16 tried https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html on 
+	--> 9/16'16 tried https://rawgit.com/hcchengithub/jeforth.3we/develop/index.html on
 		IE 11/Windows 10, really failed, as shown below:
-		--- jeforth.3htm error message at beginning --- 
+		--- jeforth.3htm error message at beginning ---
 		Error! Failed to read f/jeforth.f
 		--- F12 error messages ---
 		Navigation Event Separator
@@ -4480,7 +4485,7 @@
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/f/jeforth.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 		Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://raw.githubusercontent.com/hcchengithub/jeforth.3we/develop/3htm/f/quit.f?text. (Reason: CORS preflight channel did not succeed).(unknown)
 	==> use http://cdn.rawgit.com/...	is the solution. 13:11 2017-01-08
-	
+
 [x] jeforth.3we 可以直接當成 editor 用, 寫筆記, 寫文章皆可。
 	--> See YNote: "在 Web browser 上直接編輯網頁內容"
 	--> Edit by Chrome, press Ctrl-S and save as "完整的網頁" is profect.
@@ -4493,8 +4498,8 @@
 	--> 曾有過用 project-k 做成獨立的 template.html 實現此構想。直接執行:
 			chrome --allow-file-access-from-files
 		應該更好。有充分的資源可用。
-	==> now, ls.f Edit Box 
-	
+	==> now, ls.f Edit Box
+
 [x] 應用 chrome --allow-file-access-from-files 之前要把所有執行中的 chrome.exe 都停掉。
 	不如來寫一個命令叫做 powoer-chrome (引用 power user 的用法) 來一口氣完成。
 	: power-chrome ( -- ) \ Run chrome that
@@ -4546,10 +4551,10 @@
 
 [x] 立志要用 jeforth 來編輯 log.txt
 	js> vm.plain(vm.g["log.txt"]) js: article.innerHTML=pop()
-	[x] CSS tab-size IE/Edge 皆無效, 3hta either . . . 
+	[x] CSS tab-size IE/Edge 皆無效, 3hta either . . .
 		證實: char log.html readTextFile js: article.innerHTML=pop()
 	==> ls.f Edit Box is now good enough
-	
+
 [x] Ctrl-F2 之後,把 caret cursor 所在的 element 改成 command-line style.
 	\ caret at the target position
 	\ press Ctrl-F2
@@ -4573,12 +4578,12 @@
 
 	> <o> <h1 id=abc>xxx</h1></o> constant xxx
 	> xxx :> outerHTML ==> <h1 id="abc">xxx</h1>
-	> xxx :: removeAttribute("id") 
+	> xxx :: removeAttribute("id")
 	 > xxx :> outerHTML ==> <h1>xxx</h1>
 
 	動手了：
 
-	<o> 
+	<o>
 		<table class=commandline><td>
 		<code id=tempid class=source>
 		</code></td></table>
@@ -4594,18 +4599,18 @@
 		ce@ :> nodeValue js: tempid.innerText=pop()
 		js: tempid.removeAttribute("id")
 		ce@ :> parentNode replaceNode ;
-		
+
 [x] jeforth 分析 考勤 刷卡紀錄 上班時數 分析
-[x] private folder is a new project 
+[x] private folder is a new project
 	--> GitHub is not for private use unless pay the money. Use and Dropbox Yun.Baidu instead.
-	
+
 [x] 昨天忘了 sync GitHub at home. Today, in my office, I don't edit log.json and 3ce folder
 	so as to remain easy-to-sync of the project. Like maintained by two different people on
 	different topics.
 	--> 照這樣安排只 click 一下 [Sync] 按鈕, 兩邊這樣都成功了。
-	
-[x] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone 
-	取代，因為 outputbox 只接 log 起來太正點了 (ls.f has "snapshot" command now)。保留現有 
+
+[x] 如何把很大的檔案收一部分起來，以方便操作？ --> log.json 需要擴充。log.json 不能被 edit-zone
+	取代，因為 outputbox 只接 log 起來太正點了 (ls.f has "snapshot" command now)。保留現有
 	log.json 的 stack 架構, 但是擴充 random	access 的功能。讓它跟 outputbox 結合地更自然、更好用。
 	==> Done, ls.f Edit Box.
 
@@ -4621,54 +4626,54 @@
 		re-layout 還是用 reg.exe 配合 export -> edit -> import 的方法, 3hta dos command can help.
 		因為 REG_BINARY 問題太多。
 	[x] Review registry.f, notes of S7 keyboard remapping. If only I can read registry through
-		3hta then it's convenient enough. 
-	Conclusion is : run the 1 key and 5 key ~.reg files (attached below on this page) to remap 
-	the Acer S7 keyboard. 1 key is the Caps Lock changed to be Mute toggle. 5 keys are Caps Lock 
-	become 'delete', AltGr/Del become Home/End, Fn-Home/Fn-End become Pad-/Pad+ for Windows 10 
+		3hta then it's convenient enough.
+	Conclusion is : run the 1 key and 5 key ~.reg files (attached below on this page) to remap
+	the Acer S7 keyboard. 1 key is the Caps Lock changed to be Mute toggle. 5 keys are Caps Lock
+	become 'delete', AltGr/Del become Home/End, Fn-Home/Fn-End become Pad-/Pad+ for Windows 10
 	Zoom in and Zoom out. Refer to my Youdao YNote.
-[x] 3ce Improve readTextFile 
+[x] 3ce Improve readTextFile
 	: readTextFileAuto ( "pathname" -- "text" ) \ Read text file from jeforth.3ce host page.
 			s" s' " swap + s" ' readTextFileAuto " + \ command line 以下讓 Extention page (the host page) 執行
 			s" {} js: tos().forth='stopSleeping' js: tos().tos=pop() " + \ host side packing the message object
 			s" " \ host commands after resume from file I/O
-			
+
 			<js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
 			function(result){push(result);execute('stopSleeping')}) </js>
-			10000 sleep ;	
-[x] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f	
+			10000 sleep ;
+[x] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f
 [x] Popup page can attach 3ce to target page now, so 3ce default tabid should be the 'active' tab.
 	js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number) must be only one
 	js: push({active:true}) tabs.query :> [0] (see)
 	--> modiyf ce.f tabid command --> ok now!
 [x] 3ce attach works fine, but it has to check if the target page has been loaded!
-	Experiment: 0 [begin] active-tab :> status . space 500 nap 1+ dup 100 > [until] 
+	Experiment: 0 [begin] active-tab :> status . space 500 nap 1+ dup 100 > [until]
 	--> Correct, get 3 complete in a row to make sure it's really completed. I saw a complete
 		among "loading" that's why.
 	--> works fine now.
-		
+
 [x] This line does not print 50 stars, unless remove the 'cr' Bug!!
 	run: 50 for char * . cr next
-	This is ok --> 0 [begin] char * . cr 500 nap 1+ dup 10 > [until] 
+	This is ok --> 0 [begin] char * . cr 500 nap 1+ dup 10 > [until]
 	so [for] ... [next] in trouble? or run: for ... next in trouble?
 	--> try 50 [for] char * . cr 50 nap [next] ----> it works fine!
 	--> <text> 50 for char * . cr next </text> (run:) <--- works fine too!
 	--> So, run: for ... next in trouble!
 	==> (run:) uses 'dictate()' to run the string, change to use 'tib.insert'.
-	
-	利用別的軟體來畫表格, 例如 excel 可能是最好的辦法。可以 copy-paste 給 3hta 
+
+	利用別的軟體來畫表格, 例如 excel 可能是最好的辦法。可以 copy-paste 給 3hta
 	然後用 js> $('table')[0].outerHTML . 取得 HTML 放到 Notepad++ 去整理。
 
 [x] forget to sync, now I have to use log.txt -- 15:02 2016/02/20
-[x] Try Ctrl-Enter application, I already know textarea does not return correct element for 
+[x] Try Ctrl-Enter application, I already know textarea does not return correct element for
 	anchorNode, how about other things? Try 3ce directly....
 	返回本站首页hao123网址之家www.hao123.com
-	To study 
+	To study
 	> js> getSelection() tib. <--------- Alt-F2 gets the same result.
 	js> getSelection() \ ==>  (object) inputbox, null
-	 OK 
+	 OK
 	> js> getSelection() tib.
-	js> getSelection() \ ==>  (object) textarea, null 
-	 OK 
+	js> getSelection() \ ==>  (object) textarea, null
+	 OK
 
 	textarea 內不管在哪裡 getSelection() 都是拿到最近的 div parent
 	js> getSelection() js> getSelection()==pop() \ ==> true (boolean)
@@ -4681,9 +4686,9 @@
 
 [x] Now I hope that I can use some script in tr.table. So I can click and run scripts.
 	That requires a Security Policy:
-		Refused to execute inline event handler because it violates the following Content 
-		Security Policy directive: "script-src 'self' 'unsafe-eval'". Either the 'unsafe-inline' 
-		keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline 
+		Refused to execute inline event handler because it violates the following Content
+		Security Policy directive: "script-src 'self' 'unsafe-eval'". Either the 'unsafe-inline'
+		keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline
 		execution.
 	But after added 'unsafe-inline' into "content_security_policy", reload manifest.json gets
 	this error :
@@ -4700,59 +4705,59 @@
 			h1 :: onclick=function(e){dictate('.s')} <--- OK!!! it works fine.
 	==> 結論就是不要寫成 inline script 就行了, 那沒問題呀!
 	--> See Ynote: jeforth.3ce let tr.table to have script, do-able!
-	
+
 [x] is#text? paste-string erase-#text-anchorNode
 	==> See Ynote: jeforth.3ce window.getSelection() 得到的 Selection object 是揮發性
 		的！不能留下來以後用。
-	
+
 [x] project-k baby.html, sample.html 突然 run 起來之後 Ctrl-enter 沒有作用, F12 debugger 才看得見
 	問題, 原來是 jQuery 掛不起來：
 	Failed to load resource: net::ERR_NAME_NOT_RESOLVED http://ajax.microsoft.com/ajax/jQuery/jquery-1.11.2.js
 	baby.html:48 Uncaught ReferenceError: jQuery is not defined
 	這常有, 應該要有警告。
 	這是 GFW 的問題, 透過 VPN 就好了。中國境內有沒有 jQuery 的 mirror?
-	
-[x] 14:21 2016-04-12 jeforth.3ce startup page to advertise itself. Use YNote directly.
-	cls <o> <iframe src="http://note.youdao.com/share/?id=b76172957fccf6a35b31dd7936327c3f&type=note#/" 
-	name="An introduction to jeforth.3ce" align="center" width="96%" height="6800px" 
-	marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> er	
 
-[x] tutor-cloth.f console3we strange. 
-	[x] Improve the scrollto position. 
+[x] 14:21 2016-04-12 jeforth.3ce startup page to advertise itself. Use YNote directly.
+	cls <o> <iframe src="http://note.youdao.com/share/?id=b76172957fccf6a35b31dd7936327c3f&type=note#/"
+	name="An introduction to jeforth.3ce" align="center" width="96%" height="6800px"
+	marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> er
+
+[x] tutor-cloth.f console3we strange.
+	[x] Improve the scrollto position.
 	[x] Font size not consistant either.
 [x] 'Edit box style' 這種東西實在太煩了, 到底為什麼 font size 怎麼都調不好。
 	[x] RI: don't use absolute font-size like the 20px in common.css, it is exactly
 		the root cause of this problem.
 	--> js> $("style").length \ ==> 3
-	--> js> $("style")[0].innerHTML		
+	--> js> $("style")[0].innerHTML
 	--> The below study shows me the idea that a stand along style setting for font-size
 		may be the solution.
 
-		js> $("style")[0].outerHTML \ ==> <style id="commoncss"> 
+		js> $("style")[0].outerHTML \ ==> <style id="commoncss">
 			.console3we div , .console3we textarea {
 				color:black;
 				font-family: courier new;
 				font-size: 40px; <========== pull this line along out of this tag
-				padding:20px; 
+				padding:20px;
 				word-wrap:break-word;
 				border: 0px solid white;
 				background:#F0F0F0;
 			}
-			
+
 			.console3we textarea {
-				width:99%; 
-				padding:4px; 
+				width:99%;
+				padding:4px;
 				border: 0px solid;
 				background:#BBBBBB;
 			}
 		</style> (string)
 
-		js> $("style")[1].outerHTML 
+		js> $("style")[1].outerHTML
 		\ ==> <style type="text/css">canvas{border:solid 1px #CCC}</style> (string)
 
-		js> $("style")[2].outerHTML 
+		js> $("style")[2].outerHTML
 		\ ==> <style id="ebstyle" type="text/css">
-			.eb .box { width:90%; font-size:1.5em;	} 
+			.eb .box { width:90%; font-size:1.5em;	}
 			.eb .box, .eb .ebhtmlarea { border:1px solid black; }
 			.eb .ebtextarea { font-size:1.5em }
 			.eb input { font-size:0.7em	 }
@@ -4760,22 +4765,22 @@
 			.eb .ebname { font-size: 1em; }
 			</style> (string)
 
-		js> $("style")[3].outerHTML 
-		\ ==> <style id="styleTextareaFocus" type="text/css">.console3we textarea:focus { 
+		js> $("style")[3].outerHTML
+		\ ==> <style id="styleTextareaFocus" type="text/css">.console3we textarea:focus {
 				border: 0px solid; background:##E0E0E0;
 			}</style> (string)
 		*** If want to modify existing style tag, I have done that before!
-			See flot.f "remove-backgroundColor-style" command that modifies common.css 
+			See flot.f "remove-backgroundColor-style" command that modifies common.css
 			background color due to that flot.js does not work well with background color.
-		
+
 	[x] 乾脆把 font-size remove from the above [0] style section. The question of "what
-		is the "1.1em" font size refer to 
-		[x] remove font-size from jeforth.3we/common.css 
+		is the "1.1em" font size refer to
+		[x] remove font-size from jeforth.3we/common.css
 		[x] also change font-size in 3htm/ls.f, which is now refer to default font-size,
-			to 1.1em that works fine now. 
+			to 1.1em that works fine now.
 		--> it works!!
 		--> so the default font-size is good enough. <=== True !!!
-		
+
 [x] 3nw's Ctrl-{+}, Ctrl-{-} font size control does not work.
 	1) the two colon words' logic were wrong!! --> fixed
 	2) {pad +} and {pad -} and their normal equivlants are of different keycode, so
@@ -4789,12 +4794,12 @@
 		: @rem ;
 		@rem ' \ dup alias echo dup alias @echo dup alias @echo. dup alias @goto dup alias :end alias jeforth.hta
 		@echo.
-		@echo Executing %~nx0 . . . 
+		@echo Executing %~nx0 . . .
 		@goto batch
 		\ --------------- start jeforth code ----------------------
-		cls <o> <h1> Hello world! from jeforth</h1></o> 
-		<o> <h3> ---- wait 5 seconds ----</h3></o> 
-		5000 nap 
+		cls <o> <h1> Hello world! from jeforth</h1></o>
+		<o> <h3> ---- wait 5 seconds ----</h3></o>
+		5000 nap
 
 		bye \ TOS will be the errorlevel returned to DOS
 		\ ---------------- end jeforth code -----------------------
@@ -4814,12 +4819,12 @@
 		:END
 	--> done! jeforth.3we/setup.bat setup all applications.
 [x] setup.bat should include the private folder
-[x] include command may do nothing if the ~.f module was existing. This causes problem 
+[x] include command may do nothing if the ~.f module was existing. This causes problem
 	if word reDef is expected. For example, many-clocks.f uses 'save' command which is
 	defined in canvas.f module. When include many-clocks.f the 'save' command has been
 	reDef by ls.f and therefore running many-clocks.f will be a mess of failures. The
 	solution is that 'include' command should move the target module to the top instead
-	of doing nothing when it's existing. 
+	of doing nothing when it's existing.
 	--> Not 'include' but 'source-code-header' who skip existing vocabulary.
 	==> done, now include command will always prioritize the word-list even if it has
 		included already. It's not NOP anymore. 13:10 2017-01-08
@@ -4839,11 +4844,11 @@
 		at printIPAddress. Simply remove the test item has temporary skipped the problem.
 		13:07 2017-01-08
 
-[x] support 'private' command to hide private words in the vocabulary	
+[x] support 'private' command to hide private words in the vocabulary
 	Forth 好用, 但是所有的 word 都是 global 令人想念有 local 的環境。應用 jeforth 用久了, 這
 	個念頭越來越鮮明。要定義一個新的 word 時總覺得有點沉重，怕與過去或未來的 word 撞名。
 
-	希望 word 都是 private 只見於同一個 context 之內, 這樣寫起程式來就可以放心地重複定義新 word 
+	希望 word 都是 private 只見於同一個 context 之內, 這樣寫起程式來就可以放心地重複定義新 word
 	不怕撞名。偶而要用到某個 vocabulary 裡的 private word 時，切 context 即可，或把它 export 出來。
 
 	jeforth 的 word 都是 object, 屬 private 或 global 似乎加一個 property 標註一下即可。
@@ -4853,15 +4858,15 @@
 	每個 word 的 exported property 以及當時的 context 兩點即可決定。就怕會不會捅出更難收拾
 	的複雜結果？
 
-	應該有人做過了? 
+	應該有人做過了?
 
-	請問像 Win32forth 這麼龐大，他對撞名有何對策?	
+	請問像 Win32forth 這麼龐大，他對撞名有何對策?
 
 	vocabulary 是目前習見的辦法。然而有了 vocabulary 還是很想念 private (或 local) 環境。
 	我會把 private 在 jeforth 上實現出來, private 是個 word, 動詞, 意思是把 last word 設
 	定成 private。實作上就是在這個 word object 的 private property 打成 true。那麼當它所
-	屬的 vocabulary 不是 context 時就看不見它。不是完全看不到, 而是要把它所屬的 vocabulary 
-	切成 context 才看得到，即使其 vocabulary 已經在 order 裡也還是看不到。相較於沒有 
+	屬的 vocabulary 不是 context 時就看不見它。不是完全看不到, 而是要把它所屬的 vocabulary
+	切成 context 才看得到，即使其 vocabulary 已經在 order 裡也還是看不到。相較於沒有
 	private 觀念的 forth 系統—只要是名列 order 內的 vocabulary 他們所有的 word 都看得到—
 	有所不同。private 是針對個別 word 的設定, 類似 immediate, compile-only 之類。我們還可
 	以加上個系統層面的 variable 用來當總開關—稱作 private-support 吧 — 當關掉不 support 時
@@ -4880,13 +4885,13 @@
 					function scan_vocabulary(v,no_private) {
 						for (var i=1; i<words[v].length; i++){	// 第零個是0,一律跳過。
 							// skip the last() to avoid unexpected 'reveal'.
-							if (compiling) if (last()==words[v][i]) continue; 
+							if (compiling) if (last()==words[v][i]) continue;
 							if (no_private || !words[v][i].private) wordhash[words[v][i].name] = words[v][i];
 						}
 					}
 					end-code
 
-[x] change the include design. 
+[x] change the include design.
 	: sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
 					dup readTextFileAuto ( pathname file )
 					\ js> tos().indexOf("-=e"+"Of=-")!=-1 if ( pathname file )	*debug* 111>
@@ -4894,7 +4899,7 @@
 					\	s" Abort! EOF mark '-=eOf=-' is reserved but found in " + js> tos(2) + "msg"abort
 					\ then ( pathname file ) *debug* 222>
 					<js> ("\n\\ -=pathname[" + pop(1) + "]pathname=-\n" + pop())</jsV> ( file' )
-					\ <text> 
+					\ <text>
 					\	\ 跟 source_code_header 成對的尾部
 					\	<selftest>
 					\	js> tick('<selftest>').masterMarker tib.insert
@@ -4913,39 +4918,39 @@
 					/// Add -=pathname[pathname]pathname=- and cut after -=eof=-
 
 	\ developing new include and friends
-					
+
 	char -=EOF=- ( eof ) <js> (new RegExp(tos()))</jsV> ( eof /eof/ )
 	js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
 
 	: sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
 					dup readTextFileAuto ( pathname file )
 					<js> ("\n\\ -=pathname[" + pop(1) + "]pathname=-\n" + pop())</jsV> ( file' )
-					<js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV> 
+					<js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV>
 					\ The last \n 避免最後是 \ comment 時吃到後面來
 					tib.insert ;
 					/// Add -=pathname[pathname]pathname=- and cut after -=EOF=-
-					
+
 	: include		( <filename> -- ... ) \ Load the source file if it's not included yet.
 					BL word sinclude ; interpret-only
 
 	"" value TIB
 	0  value  nTIB
-	: source~ 
+	: source~
 		js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( ieof )
 		dup -1 = ?abort" Error! EOF mark not found." ( ieof )
 		js> ntib + ( ieof ) \ insert selftest section tail here
-		js> tib.slice(ntib,pop()) ( tib[ntib ~ before EOF] ) \ cut after EOF 
-		<text> 
+		js> tib.slice(ntib,pop()) ( tib[ntib ~ before EOF] ) \ cut after EOF
+		<text>
 			\ 跟 source_code_header 成對的尾部
 			<selftest>
 			js> tick('<selftest>').masterMarker tib.insert
 			</selftest>
 			js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
 			js: tick('<selftest>').buffer="" \ recycle the memory
-		</text> ( tib[ntib ~ before EOF] code ) + ( tib[ntib ~ before EOF]+code ) 
+		</text> ( tib[ntib ~ before EOF] code ) + ( tib[ntib ~ before EOF]+code )
 		s" \ " EOF :> pattern + js> '\n' + + ( tib[ntib~beforeEof+code+EOF] ) \ EOF mark appended back
 		js> tib.slice(0,ntib)+'\n' swap + js: tib=pop() ;
-					
+
 					<text>
 						?skip2 -=EOF=- \ skip it if already included
 						dup .( Including ) . cr char -- over over + +
@@ -4957,15 +4962,15 @@
 							js> tick('<selftest>').masterMarker (marker)
 						</selftest>
 					</text> swap + ( tib_a' )
-					js> tib to TIB js> ntib to nTIB *debug* 11> 
+					js> tib to TIB js> ntib to nTIB *debug* 11>
 					lastIndexOf()
-					
-					find the eof index, 
+
+					find the eof index,
 					<text> 11 33 44 -=eOf=- 44 55 66 </text> :> slice(3).indexOf("-=eOf=-") tib.
 					new RegExp(pattern, attributes);
 					<js> (new RegExp("pattern","img"))</jsV> \ ==> /pattern/gim (object)
-					
-	: source-code-header ( -- ) \ The source-code-file.f header macro 
+
+	: source-code-header ( -- ) \ The source-code-file.f header macro
 					<text>
 						?skip2 -=EOF=- \ skip it if already included
 						dup .( Including ) . cr char -- over over + +
@@ -4978,30 +4983,30 @@
 					</text> tib.insert ;
 					/// skip including if the module has been included.
 					/// setup the self-test module
-					/// initiate vocabulary for the including module				
+					/// initiate vocabulary for the including module
 
 	\ developing new include and friends
-					
+
 	char -=EOF=- ( eof ) <js> (new RegExp(tos()))</jsV> ( eof /eof/ )
 	js> ({regex:pop(),pattern:pop()}) constant EOF // ( -- {regex,pattern} ) End of file pattern and RegExp
 
 	: sinclude		( "pathname" -- ... ) \ Lodad the given forth source file.
 					dup readTextFileAuto ( pathname file )
 					<js> ("\n\\ -=pathname[" + pop(1) + "]pathname=-\n" + pop())</jsV> ( file' )
-					<js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV> 
+					<js> var ss=pop();(ss+'x').slice(0,ss.search(vm.g.EOF.regex))+'\n\\ '+vm.g.EOF.pattern+'\n'</jsV>
 					\ The last \n 避免最後是 \ comment 時吃到後面來
 					tib.insert ;
 					/// Add -=pathname[pathname]pathname=- and cut after -=EOF=-
-					
+
 	: include		( <filename> -- ... ) \ Load the source file if it's not included yet.
 					BL word sinclude ; interpret-only
 
 	: prioritize ( vid -- ) \ Make the vocabulary first priority
-		js> order.indexOf(tos()) ( vid i ) 
+		js> order.indexOf(tos()) ( vid i )
 		js> tos()==-1 ?abort" Error! unknown vocabulary." ( vid i )
 		js> order.splice(pop(),1);order.push(pop()) ;
 		/// works fine!
-		
+
 	\ Get .f module file name left by include command
 	: get-module-name ( -- "name" ) \ include command inserts it before ntib
 		char -=pathname[ js> tib.slice(0,ntib).lastIndexOf(tos()) ( pattern i )
@@ -5023,9 +5028,9 @@
 				js> tick('<selftest>').masterMarker (marker)
 			</selftest>
 		</text> :> replace("_eof_",pop()) ; private
-	
+
 	: tailer ( -- 'tailer' ) \ ~.f common tailer
-		<text> 
+		<text>
 			\ ~.f common tailer
 			<selftest>
 			js> tick('<selftest>').masterMarker tib.insert
@@ -5033,42 +5038,42 @@
 			js> tick('<selftest>').enabled [if] js> tick('<selftest>').buffer tib.insert [then]
 			js: tick('<selftest>').buffer="" \ recycle the memory
 		</text> ; private
-		
-	: source~ 
+
+	: source~
 		\ Check if the module is included already
 		get-module-name ( fname ) dup (') ( fname w )
-		if	\ already included ( fname ) 
+		if	\ already included ( fname )
 			*debug* 456> prioritize
-		else 
+		else
 			\ not included yet ( fname )
 				drop
-			\ cut after EOF 
+			\ cut after EOF
 				js> tib.slice(ntib).indexOf(vm.g.EOF.pattern) ( ieof )
 				dup -1 = ?abort" Error! EOF mark not found." ( ieof )
 				js> ntib + ( ieof ) \ insert selftest section tail here
-				js> tib.slice(ntib,pop()) ( tib[ntib ~ before EOF] ) 
+				js> tib.slice(ntib,pop()) ( tib[ntib ~ before EOF] )
 			\ append the tailer
-				tailer + ( tib[ntib ~ before EOF]+tailer ) 
+				tailer + ( tib[ntib ~ before EOF]+tailer )
 			\ append the EOF
 				s" \ " EOF :> pattern + js> '\n' + + ( tib[ntib~beforeEof+tailer+EOF] )
 			\ wrap up the tib
 				js> tib.slice(0,ntib) swap + js: tib=pop()
-				header tib.insert 
+				header tib.insert
 		then ;
 
-[x] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include 
+[x] Used tib is not reliable, the -=pathname[name.f]pathname=- mark left by include
 	command is not reliable either. So, sinclude command should save the pathname
 	itself or use the old way like source-code-header does that requires the module
 	name.f given explicitly.
-	
+
 [x] I am warrying about the nested ~.f modules. An included module is to be tib.inserted
 	to the position of ntib. The process should not hurt the original tib.
 	My sinclude command does it well. <--- OK.
-	[/]	But source~ should insert the header and tailer into the right place or split tib
+	[/] But source~ should insert the header and tailer into the right place or split tib
 		into 3 pices [used][ntib~EOF][after EOF] is also a method candidate.
-	
-[x] My recent modifications on sinclude to support private words also caused this problem. 
-	I am not so sure why the modification causes this problem, how ever, jquery defer is not 
+
+[x] My recent modifications on sinclude to support private words also caused this problem.
+	I am not so sure why the modification causes this problem, how ever, jquery defer is not
 	needed any more so I have fixed it by include jquery in jeforth.hta. The error message was:
 	'$' is undefined. So jQuery did not included correctly? --> jeforth.hta this line:
 		if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
@@ -5076,8 +5081,8 @@
 	Defer jquery to jquery.f was for Windows 7. Now it's not necessary. --> do it now! include
 	jquery in jeforth.hta. --> done. Seems easy. Include jquery in jeforth.hta. Move back
 	vm.plain, vm.type, vm.forthConsoleHandler from jquery.f back to jeforth.hta. That's all.
-	
-	
+
+
 [x] try 3nd ... failed too after the recent modification on rescan-word-hash to support private
 	that has caused the bug of accessing order[-1] which is of course undefined:
 	JavaScript error on word "rescan-word-hash" : Cannot read property 'length' of undefined
@@ -5085,36 +5090,36 @@
 	--> Root cause is: after the 'only' command, order array become 0 length but words in
 		forth vocabulary are still visible because the rescan-word-hash command always scan
 		forth word-list. 'only 'clears the order array may be a mistake, should preserve forth
-		word-list <-- Yes! according to ANSI : "Set the search order to the implementation-defined 
+		word-list <-- Yes! according to ANSI : "Set the search order to the implementation-defined
 		minimum search order." which is to have 'forth' at least.
 	--> Modify the definition of 'only' then the rescan-word-hash command can be simplified.
 	--> ok now.
-		
+
 [x] project-k jeoforth.js has a variable 'context'. It is actually the order[order.length-1]
 	so why need 'context'? --> Because ANSI or eforth has it. --> let it be.
 
 [x] 3hta can run, 'including wmi.f' and stop. Caused by my recent modifications on sinclude?
 	--> use 123.f new sinclude, source-code-header then problem gone. But I found html5.f
-	is being included multiple times! --> vb.f too, so source~ is in trouble. --> include 123.f 
+	is being included multiple times! --> vb.f too, so source~ is in trouble. --> include 123.f
 	before include html5.f see see --> shit, vb.f needs html5.f so it does! --> wsh.f includes vb.f
 	again too. --> ok now.
 
-[x] Make sure new source-code-header can handle nested include ... ok now. 
+[x] Make sure new source-code-header can handle nested include ... ok now.
 
 [x] See code word don't show the toString method.
 
 [x] words and help do not list private words by default. [/] pattern '*' to show all.
 	\ List all private words in wordhash{} and count word quantity
-		> <js> var count=0; for (var i in wordhash) { count++; 
+		> <js> var count=0; for (var i in wordhash) { count++;
 		  if(wordhash[i].private) type(wordhash[i]+"\n")}; count </jsV> .
 		header ( -- 'head' ) ~.f common header
 		tailer ( -- 'tailer' ) ~.f common tailer
 		test ( ?? ) No help message. Use // to add one.
-		493 OK 
+		493 OK
 [x] private support has a problem. variable, constant, value are all global! under vm.g
 	now they should be under vm.g.vid.name if they are private word. This is difficult because
 	definiton doesn't know if it's a private word. So, all of them are to be hooked under their
-	definition vid not only private words. 
+	definition vid not only private words.
 	--> This is easy, modify 'constant' would be enough.
 	--> ok now! Much much easier than I anticipated. 3hta and 3htm passed self-test already.
 	[x] context is a jeforth.js global variable. It should always be a copy of order[order.length-1].
@@ -5124,19 +5129,19 @@
 			: test3 also hte.f one previous ;
 		although the above example looks verbose, but 'one' in hte.f is a private word and test3
 		defined in a different context can use it. --> they work fine.
-		[x] See setup.bat (was vm.v[context]) vm[context] is not correct! Should be vm.[current]. 
+		[x] See setup.bat (was vm.v[context]) vm[context] is not correct! Should be vm.[current].
 			--> vm.v[current] was a mistake. context = current then still use vm[context] is correct.
 		[x] setup.bat uses value and vm.g.flag and vm.g._a thus is now not working because they should be
-			(was vm.v[]) vm.[context].flag and vm[context]._a 
-		[x] Am I going to modify all vm.g to vm[context] ? very annoying and I am afraid it's a bad 
-			idea and I'll have to modify again. 
+			(was vm.v[]) vm.[context].flag and vm[context]._a
+		[x] Am I going to modify all vm.g to vm[context] ? very annoying and I am afraid it's a bad
+			idea and I'll have to modify again.
 			--> See Ynote: "jeforth.3we private support value vm.g.name become vm.vid.name" discussion.
 				1. For code word, vm[_me.vid].name
-				2. For <js> ... </js> in tib, vm[context].name or vid js> vm[pop()].name 
+				2. For <js> ... </js> in tib, vm[context].name or vid js> vm[pop()].name
 				3. vid forth word is a private command, code vid push(_me.vid) end-code private
 				   so vid command can be used in colon words for js: statements
-				4. for in module applications , everything is in the ~.f module. Thus js> current  and js> 
-				   context are the same vid. This is important and is done by source-code-header. Thus 
+				4. for in module applications , everything is in the ~.f module. Thus js> current  and js>
+				   context are the same vid. This is important and is done by source-code-header. Thus
 				   vm[context].name is the easist way.
 	[x] check all vm.g.name and vm.g[name] values and constants
 		Total commander or Notepad++ RegEx : \s?vm\.g(\.|\[)
@@ -5161,9 +5166,9 @@
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\ce.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\3ce\target.f
 			[x] attach 3ce to target page does not work, yet the F7 command is fine.
-				> js> document.title . \ ==> hao123网址之家－在线繁体字转换 OK 
-				[x] I guess the readTextFile on target page does not work , because include & 
-				sinclude have been modified recently. --> actually readTextFile does not work 
+				> js> document.title . \ ==> hao123网址之家－在线繁体字转换 OK
+				[x] I guess the readTextFile on target page does not work , because include &
+				sinclude have been modified recently. --> actually readTextFile does not work
 				at all. it's good to have F7 enter so I know.
 				[x] Also, target.f no exist either. --> simply because not read
 				[x] Some older note recalled from jeforth.3we/log/Log of TR.html
@@ -5172,73 +5177,73 @@
 					o	檢驗 background-page <js> pop().vm.dictate("11 22 33 .s js: debugger")</js>
 					o	由 3ce extenstion page 對 background page 下令的公式:
 						background-page <js> tos().bvm.dictate("cr see readTextFile");pop().bvm.screenbuffer </jsV> .
-					o	對 background page jeforth 下令的範本：	
+					o	對 background page jeforth 下令的範本：
 							background-page <js> pop().bvm.dictate(".s")</js>
-							background-page :> bvm.screenbuffer .						 
-					o	若要重複 init background page 只要 
-						background-page :: jeforth_project_k_virtual_machine_object=null 
-						然後 refresh 3ce extension page 即可。 
+							background-page :> bvm.screenbuffer .
+					o	若要重複 init background page 只要
+						background-page :: jeforth_project_k_virtual_machine_object=null
+						然後 refresh 3ce extension page 即可。
 					--> er background-page :> document.head.outerHTML .
-						er background-page :> document.body.outerHTML . 
+						er background-page :> document.body.outerHTML .
 						both empty, so I guess the background page is not init'ed
 					--> use chrome://extensions/ > Inspect views: jeforth.3ce.background.html to check
-						background page --> no body, no head 
+						background page --> no body, no head
 							--> incorrect! We have jeforth.3ce.background.html
 							--> do the same inspect on the 3ce from Google Play --> the background page is correct
 								body and head are all as jeforth.3ce.background.html
 						which is not empty, title is <title>jeforth.3ce background page</title> besides
 						[x] I guess jeforth.3ce.background.html is a symbolic link instead of a hard link
-							in setup.bat is the root cause! --> Yeah!! 
+							in setup.bat is the root cause! --> Yeah!!
 						[x] Now check the background page title
-							> background-page :> document.title . \ ==> jeforth.3ce background page OK 
+							> background-page :> document.title . \ ==> jeforth.3ce background page OK
 							Bingo! so easy, run from 3ce page.
 				[x] Now, Bug fixed! Root cause is in setup.bat, jeforth.3ce.background.html should be hard link
 					should not be symbolic link. symbolic link jeforth.3ce.background.html causes no error
 					in manifest.json but it become an empty nothing like a null jeforth.3ce.background.html.
-					
+
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\solar-system.f
-			[x] 2016/12/27 15:48 
+			[x] 2016/12/27 15:48
 				This command line : '[begin] ." *" 100 nap [again]' stops the solar system!
 				F12 debugger shows that tib.slice[ntib] is at near ending of solar-system.f <-- Problem!
 				that point has passed --> [begin] ..[again] in trouble but only sometimes, strange.
 				--> use the debug trik of saving tib to TIB and ntib to nTIB, the actual tib is really
-					at that place but ntib was correctly points at the point before [again] of the 
+					at that place but ntib was correctly points at the point before [again] of the
 					solar-system.f main loop.
 				--> so the command line '[begin] ." *" 100 nap [again]' that was supposed to have its
 					own tib and ntib but it actually modifies the solar-system.f's tib and ntib <--- problem!!
-				--> 
-					"" value TIB 0 value nTIB 
-					[begin] 
-					." *" 
-					js> tib to TIB js> ntib to nTIB 
+				-->
+					"" value TIB 0 value nTIB
+					[begin]
+					." *"
+					js> tib to TIB js> ntib to nTIB
 					js: vm.debug=11;debugger
 					100 nap \ <----------- restores wrong tib and ntib , suspected
-					js> tib to TIB js> ntib to nTIB 
-					js: vm.debug=22;debugger 
+					js> tib to TIB js> ntib to nTIB
+					js: vm.debug=22;debugger
 					[again]
-				--> Test, if different nap2 shares the same tibwas? --> no, if use var 
+				--> Test, if different nap2 shares the same tibwas? --> no, if use var
 					save={tibwas,ntibwas,ipwas} then different nap2's save{} are different.
-				--> interpret state test1 test2 in log/archive.json field "[closed] log 2016/05/30"	
+				--> interpret state test1 test2 in log/archive.json field "[closed] log 2016/05/30"
 					failed! --> try older version 3htm from rawgit.com
 						commit: 3rd release of 12choc.f (committed on Nov 27'16)
-						http://rawgit.com/hcchengithub/jeforth.3we/26541aae54882fad713be4c9a93d55d00cc7b9ef/index.html 
+						http://rawgit.com/hcchengithub/jeforth.3we/26541aae54882fad713be4c9a93d55d00cc7b9ef/index.html
 						include solar-system.f
 						[begin] ." *" 100 nap [again]
 					--> shit! same problem has been there for long!!
-				--> try master (Latest commit 77afb32 on Sep 11'16) on rawgit.com 
+				--> try master (Latest commit 77afb32 on Sep 11'16) on rawgit.com
 					--> same problme on solar-system.f and "[begin] ." *" 100 nap [again]"
 					--> the [begin]..[again] loop in the source code does not work either!!
 				--> earlier commit --> committed on Jun 12 master
 					http://rawgit.com/hcchengithub/jeforth.3we/7360c64e00643808fb465ea5667e727689b3a53d/index.html
 					\ 讓太陽左右來回移動
-					js: e=d=0.5 
+					js: e=d=0.5
 					[begin]
-						js: h=vm.g.stars[0].x+=e 
-						js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+						js: h=vm.g.stars[0].x+=e
+						js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then]
 						js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
-					[again]				
+					[again]
 					--> failed!
-				-->	commit 4c009ce7a1e5aec19513b1fc66e7d651ba404b20
+				--> commit 4c009ce7a1e5aec19513b1fc66e7d651ba404b20
 					Author: H.C. Chen <hcchen5600@gmail.com>
 					Date:	Sun Jun 12 00:08:57 2016 +0800
 
@@ -5247,88 +5252,88 @@
 						solar-system.f ok now
 
 					\ 讓太陽左右來回移動
-						js: e=d=0.5 
+						js: e=d=0.5
 						[begin]
-							js: h=vm.g.stars[0].x+=e 
-							js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
+							js: h=vm.g.stars[0].x+=e
+							js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then]
 							js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
 						[again]
 
-					--> failed!!	
+					--> failed!!
 					> [begin] ." *" 100 nap [again]
 					*Error! ar unknown. <-------------------- exactly the same recent problem.
 				[x] According to the discussion on my Meta Moji Note, try to repro the problem through
-					interpret state test1 test2 and let's start over the debugging . . . 
-				--> run 1111 then run 3333. They seems ok but after 3333 an extra 1111 will be shown.		
+					interpret state test1 test2 and let's start over the debugging . . .
+				--> run 1111 then run 3333. They seems ok but after 3333 an extra 1111 will be shown.
 					[begin] 1111 dup . space nap [again]
 					[begin] 3333 dup . space nap [again]
-					
-					this exmpains why running the failed '[begin] ." *" 100 nap [again]' added extra 
+
+					this exmpains why running the failed '[begin] ." *" 100 nap [again]' added extra
 					stars to the solar system.
-					
+
 					\ try again the previous experiment that saw after nap tib has been changed
 					\ test1
 						js: vm.debug=false
-						[begin] 1111 dup . space 
+						[begin] 1111 dup . space
 						js: if(vm.debug){vm.debug=1111;debugger}
-						nap 
-						js: if(vm.debug){vm.debug=1122;tib=tib+"";debugger} \ after this 
+						nap
+						js: if(vm.debug){vm.debug=1122;tib=tib+"";debugger} \ after this
 						[again]
-						
+
 					\ test2
-						[begin] 3333 dup . space 
+						[begin] 3333 dup . space
 						js: vm.debug=2211;debugger
-						nap 
-						js: vm.debug=2222;debugger 
+						nap
+						js: vm.debug=2222;debugger
 						[again]
-						
+
 					[x] When F12 debug breakpoint at 1122, vm is undefined, tib either, only kvm is visible, isn't this strange?
 						If it's not F12 debugger's problem then it must be triggered by timeout() while timeout() event doesn't
 						know anything about the kvm internal!! --> check it out, can I access tib, compiling, or any other vm
 						internal variables?
-					\ test3 , 
-						js: vm.debug=false 
-						[begin] 1111 dup . space 
+					\ test3 ,
+						js: vm.debug=false
+						[begin] 1111 dup . space
 						js: if(vm.debug){alert(3311+tib);debugger}
-						nap 
+						nap
 						js: if(vm.debug){alert(3322+tib);debugger}
 						[again]
 						\ if only test3 then 3311 and 3322 are both shown correctly. So tib is there.
 						\ check by the debugger, compiling context and ntib are also all there. So try
 						\ to have test4 see see
 					\ test4
-						js: vm.debug=false 
-						[begin] 3333 dup . space 
+						js: vm.debug=false
+						[begin] 3333 dup . space
 						js: vm.debug=3333;alert(3333+tib);debugger
-						nap 
+						nap
 						js: vm.debug=3344;alert(3344+tib);debugger
 						[again]
 						\ after added with test4 to test3. test4 itself is ok. Test3 3322 is ok too.
 						\ but after test3's [again] problem happened.
-						[x] 1. 3ce run test3 w/ F12. no problem. 2. copy-paste run test4 --> alert@3333 ok. 
-							--> debug@3333 ok rstack=[]40,0,37,0] --> alert@3322 --> debug@3322 same rstack 
+						[x] 1. 3ce run test3 w/ F12. no problem. 2. copy-paste run test4 --> alert@3333 ok.
+							--> debug@3333 ok rstack=[]40,0,37,0] --> alert@3322 --> debug@3322 same rstack
 							--> I know after the [again] something will happen, start single step trace. So
 								I break F12 debugger in outer() in jeforth.js --> got next token is [again] Yeah.
 								--> at this point context, rstack become unknown!! --> kvm.rstack() is [40,0,37]
 								--> according to F12 debugger 'Call Stack' this thread was started from resume()
 									and then outer() so I check tibwas and ntibwas when in the outer() they are
-									still carring the correct values! But F12 debugger is really has its own 
-									limitation, at this time, only vm internal global variables that are also 
-									appear in resume() function can be seen. So tib,ntib,tibwas,ipwas can be 
+									still carring the correct values! But F12 debugger is really has its own
+									limitation, at this time, only vm internal global variables that are also
+									appear in resume() function can be seen. So tib,ntib,tibwas,ipwas can be
 									seen on F12 debugger. But not delay,context,stack,rstack..etc because they
 									are not appearing in resume() therefore when down to outer() they are not
 									visible either.
-								!*!	[x] This finding is very strange, how can outer() know it can't see stack
+								!*! [x] This finding is very strange, how can outer() know it can't see stack
 								!*!		and rstack sometimes? So this must be F12 debugger's limitation instead
 								!*!		of a JavaScript normal behavior. --> True!! When in resume() > outer()
 								!*!		compiling is not visible in F12 debugger, but further step to resume() >
 								!*!		outer() > outerExecute() then compiling become visible! So, this is caused
 								!*!		by JavaScript engin's optimization and thus become F12 debugger's limitation.
-								-->	so, forget about the "foobar is not defined" debugger limitations, go on debugging
+								--> so, forget about the "foobar is not defined" debugger limitations, go on debugging
 								--> trace into [again] it restores rtos() to ntib which is the 37 as mentioned above.
 									when in the xt of [again] code word, again, ntib can be seen but tib can't.
 								--> gotcha! ntib restored with 37 but tib.slice[37] points to the wrong place!! <-- RI!
-									The tib is wrong, I guess at first. But it's correct. We are now at test3 is 
+									The tib is wrong, I guess at first. But it's correct. We are now at test3 is
 									right. So do this again. But check rstack before adding test4. --> ha ha ha!!
 									You know what? the rstack is [40, 0]. So, root cause is test3's [again] rewind
 									with test4's [begin] position!!! <------ real RI!!!
@@ -5337,35 +5342,35 @@
 									that's not true. When test3 resume from nap, test4 is in nap and thus rstack
 									is keeping test4's resuming information, at this moment test3 time out and resume
 										will actually uses test4's resuming information and certainly it's a disaster.
-				[x]	Now, root cause identified. As mentioned before, root cause is stack/rstack must be balance
+				[x] Now, root cause identified. As mentioned before, root cause is stack/rstack must be balance
 					to my recent design of nap and sleep or actually [begin] ... [again] and friends because
-					they store their loop back ntib address in rstack and this is so fatal. However, nap/sleep 
+					they store their loop back ntib address in rstack and this is so fatal. However, nap/sleep
 					can't guarantee what will happen during their unconscious time. Test4 leaves further loop
-					back into rstack is an example. The workaround is : if allow only one loop in interpret 
+					back into rstack is an example. The workaround is : if allow only one loop in interpret
 					mode for each TSR command line. Then [begin] [for] , like cut, cut off all older tib
 					and thus the new ntib is always 0 then they don't need to save loop back address into
 					rstack, because they are always 0, and therefore there will be no rstack required to save
 					that loop back information and problem will be fixed. Just like using cut...rewind was ok.
 					--> No! I already have the solution, tib.push >t tib.pop t> tib.tos t@
-						
+
 					code tib.push ( int -- ) \ Push the integer to end of TIB as a comment
 						tib += "\n\\ " + String.fromCharCode(pop());
-						end-code 
+						end-code
 
-					code tib.tos ( -- int ) \ Get integer from end of the TIB 
+					code tib.tos ( -- int ) \ Get integer from end of the TIB
 						var value = tib.charCodeAt(tib.length-1);
-						push(value); 
-						end-code 
+						push(value);
+						end-code
 
-					: tib.pop ( -- int ) \ Pop integer from end of the TIB 
+					: tib.pop ( -- int ) \ Pop integer from end of the TIB
 						tib.tos ( int ) js: tib=tib.slice(0,-4) ;
-					
+
 					--> actually t> >t and t@ for tib.pop tib.push and tib.tos and used them
 						on [for][next], [begin][again][until] --> solar-system.f sun moving ok now, Bingo!
 					[x] test by the below one-liner. The 3 new words, they work just fine, balance perfectly
 						cls ( ------------- ) js> tib dup . cr 111 >t js> tib . cr t@ . cr js> tib . cr t> . cr js> tib dup . cr
 					--> See Ynote "jeforth.3we improve nap sleep add (sleep) and [sleep]"
-		
+
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\demo\h2o.f
 		xx	c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\12choc.f
 				[x] Math.sign was not in HTA, fixed by adding it in misc.hta.f.
@@ -5376,22 +5381,22 @@
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\3htm\pile.f
 			c:\Users\hcche\Documents\GitHub\jeforth.3we\playground\123.f
 
-[x] recently, only foo will crash the system , previous rescan-wordhash is better. 
-	Done, now: 
-		only work.f help * 
+[x] recently, only foo will crash the system , previous rescan-wordhash is better.
+	Done, now:
+		only work.f help *
 	works fine.
 [x] 3hta, include work.f, all words are private but not lookup, why? It's the only code word
 	Ha, this line in definition of 'code' is a mistake:
 		execute("privacy");last().private = Boolean(pop());
 	should be in 'end-code's definition because last() is not this word when in code.
-	re-define end-code like what I did to code does not work, although the experiment of 
-		code end-code alert(1234) end-code 
+	re-define end-code like what I did to code does not work, although the experiment of
+		code end-code alert(1234) end-code
 	works fine. However, modify end-code.xt directly can be an solution --> Bingo!
 [x] 3hta has a new problem. 1. include foo.f <-- file not found
 	then F5 and ctrl-up are all triggering jsc error! <== Problem!
 	--> 3ce is fine. Only 3HTA has this problem. So, 3hta's jsc is suspected.
 		debugging sinclude . . . --> no need to include foo.f, run jsc then the problem
-		begins --> run any command (cr, words) or trigger any event (single-click) 
+		begins --> run any command (cr, words) or trigger any event (single-click)
 		all cause the error : JavaScript error on word "cr" : Object expected
 		Panic jsc>
 	--> so, simplify jsc and see ... seem like executing reset() is the reason...Nope.
@@ -5402,21 +5407,21 @@
 		function(_me){ /* bd */
 			inner = vm.g.fastInner <--- should be vm.forth.fastInner now, because fastinner is a constant in jeforth.f
 			vm.jsc.enable = false; // 需要這個 flag 因為若已經進了 debugInner, 換掉 inner 也出不來。
-		}		
+		}
 	Bingo!! this bug is caused by the private support that changes vm.g to vm.vid.
-	So, review all constant --> 
+	So, review all constant -->
 		>words constant -t
 		-------- forth (5 words) --------
-		[x]EOF [x]fastInner [x]jsc.xt.hta [x]jsc.xt.F12 [x]forth-wordlist 
+		[x]EOF [x]fastInner [x]jsc.xt.hta [x]jsc.xt.F12 [x]forth-wordlist
 		-------- vb.f (1 words) --------
-		[x]vm.process 
+		[x]vm.process
 		-------- wsh.f (1 words) --------
-		[x]WshShell 
+		[x]WshShell
 		-------- env.f (3 words) --------
-		[x]WshProcEnv [x]WshUserEnv [x]BinaryStream 
+		[x]WshProcEnv [x]WshUserEnv [x]BinaryStream
 		> words value -t
 		-------- forth (4 words) --------
-		[x]base [x]breakPoint [x]args [x]up/down-recall-needs-alt-key? 
+		[x]base [x]breakPoint [x]args [x]up/down-recall-needs-alt-key?
 
 [x] 準備 release master 新版 release 新版 master
 	o search "kvm.minor_version" increase 版號。
@@ -5426,7 +5431,7 @@
 		[x] jeforth.3ce.js(3ce extension pages)-> 203
 		[x] jeforth.3ce, ce.f(Target page) -> vm.minor_version = 203
 		[x] jeforth.3ce, background.js vm.minor_version = 203
-		[x] jeforth.hta --> <HTA> tag. VERSION="204" 
+		[x] jeforth.hta --> <HTA> tag. VERSION="204"
 		[/] jeforth.3ca, also jeforth.3htm.js above
 	o selftest them all
 		[x] setup.bat
@@ -5442,12 +5447,12 @@
 		in HTML tags but using :
 			window.element的名字可以用中文！.onclick=function(){kvm.execute("wordname")}
 		that's very easy and doable. ==> Bingo!! new calc.f has done.
-	[x] setup.bat screen flashs badly, try not but beautiful progress info instead on the 3hta window.		
+	[x] setup.bat screen flashs badly, try not but beautiful progress info instead on the 3hta window.
 		[x] done with (run) (fork) and (dos) <--- they are now silently run.
 		[x] Simplify setup.bat to use (dos) instead of (run)
-	[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
-		切換到Master分支 : git checkout master 
-		合併 develop 分支進 master 來 : git merge --no-ff develop 
+	[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+		切換到Master分支 : git checkout master
+		合併 develop 分支進 master 來 : git merge --no-ff develop
 			Merge branch 'develop'
 			# Conflicts:
 			#	3ca/fig.tw128x128.png
@@ -5463,24 +5468,24 @@
 			他說我有問題的,很多不知何故,連 .png 都說是 conflict!? 解法是乾脆把它們都殺掉,因為確信 develop
 			版是沒問題的。先 git rm <所有 conflicts> 然後 commit 成功, 把這些檔案 copy 回來再 commit 一次
 			就可以解決。
-	[x] Test the master all over again ... pass		   
+	[x] Test the master all over again ... pass
 	[x] Master 到回 develop
 		切換到Master分支 : git checkout develop
 		合併 develop 分支進 master 來 : git merge --no-ff master
 	[x] release note
-		
+
 [/] Change the startup rule: Selftest to be run by selftest command instead of an empty command line.
-	--> js: tick('<selftest>').enabled=false in every quit.f 
+	--> js: tick('<selftest>').enabled=false in every quit.f
 	--> 算了麻煩
 [/] Do we need a command to inhibit any new tib commands during nap / sleep ?
-	--> to avoid stack/rstack or whatever system things to be changed during napping in waiting 
+	--> to avoid stack/rstack or whatever system things to be changed during napping in waiting
 		I/O. Sounds necessary, but how? --> where to add this line?
-			if(kvm.tick("sleep").timeoutId) return; // sleep if for I/O, avoid 
-	--> Add a 'sleeping' variable to project-k jeforth.js kernel to replace using 
+			if(kvm.tick("sleep").timeoutId) return; // sleep if for I/O, avoid
+	--> Add a 'sleeping' variable to project-k jeforth.js kernel to replace using
 		kvm.tick("sleep").timeoutId if outer() and dictate() are the right places to inhibit
 		executing during sleeping.
 	Let it be, abort, no actual reason so far.
-		
+
 [ ] setup.bat to build simplest working directories, e.g. jeforth.3hta/, jeforth.3htm, .. etc
 	without log/ demo/ background/ doc/ ... etc. According to Degn,Yuan-Yuan's request.
 [x] private support is good, but there are many event handlers like examples in ls.f
@@ -5492,36 +5497,36 @@
 		end-code
 	and the line will become:
 		['] eb.readonly word>handler js: $(".ebreadonly",tos(n))[0].onclick=pop()
-	[x] call by name must be reviewed especially utility vocabularies. 
+	[x] call by name must be reviewed especially utility vocabularies.
 		--> tick() and execute() have run-time-warning in selftest mode
 	[x] ls.f privacy is true now.
 [ ] <task> ... </task> does not work as expected. Remove them.
 	: <task>		( <forth words> -- "task" ) \ Invoke a dictate() to run the words.
 					char </task> word ; immediate
-					///	要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
-					///	rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
-					///	個則用 cut ... rewind 即可。
-					/// Ex. 
+					/// 要一次發動好幾個 rewinding TIB task 才需要用這個命令。如果不是
+					/// rewinding 的則同樣是循序做下去就不需要本命令了。如果只要發動一
+					/// 個則用 cut ... rewind 即可。
+					/// Ex.
 					///		<task> 1 . space 100 nap rewind</task> <task> 2 . space 100 nap rewind</task>
 
 	: </task>		( "task" -- ... ) \ Delimiter of <task>
-					compiling if literal js: push(function(){dictate(pop())}) , 
+					compiling if literal js: push(function(){dictate(pop())}) ,
 					else js: dictate(pop()) then ; immediate
 					/// See alternative method for command line by 'cut' and 'rewind'.
 	--> are they do-able? Is it possible to run interpret state tasks by using them?
 
 [/] Let context be like AX register in eforth x86. Therefore order[order.length-1] is not context.
 	After previous command the recent order[order.length-1] become new context. Purpose is to
-	switch context faster. context. Consider a two-pass search of the target word, in context and 
-	in wordhash if not found in context while context vocabulary word always has its own wordhash 
+	switch context faster. context. Consider a two-pass search of the target word, in context and
+	in wordhash if not found in context while context vocabulary word always has its own wordhash
 	ready.
 	[x] If use two-pass search, then all words need to be searched twice. Consider the cost!
 		==> Yeah, two pass is a bad idea.
-[x]	Switch context inevitably triggers a wordhash rescan, it's faster if rescan only the target
-	vocabulary into the current wordhash{} while the previous wordhash{} is not totally disappeared, 
+[x] Switch context inevitably triggers a wordhash rescan, it's faster if rescan only the target
+	vocabulary into the current wordhash{} while the previous wordhash{} is not totally disappeared,
 	only overritten with the alternative definitions. Un-replaced words are still visible.
 	--> So if we want to use vocabulary 'assembly' words, we don't need to 'also assembly' but
-		simply 'assembly'. If the order was [forth,misc] then all words in 'misc' were visible 
+		simply 'assembly'. If the order was [forth,misc] then all words in 'misc' were visible
 		while after running 'assembly' only public words in 'misc' are visible because it's not
 		the context now. In contrast with traditional forth, all 'misc' words are invisible once
 		context switched to 'assembly'. That's actually an overkill of switching to 'assembly'!
@@ -5531,7 +5536,7 @@
 	--> The downside is that after 'previous' command too many words will be disappeared.
 		However, that is not a new problems caused by the new design of vocabulary words.
 		So, the idea is still attractive.
-	==> Done !! 17:37 January 7, 2017	
+	==> Done !! 17:37 January 7, 2017
 	[x] Problem found but not a problem!!
 		Selftest failed when selftest 3hta because 'bye' redefined by vb.f that returns errorlevel
 		has been replaced by the original 'bye' defined in forth. Because context switched to forth
@@ -5539,23 +5544,23 @@
 		new design the active 'bye' is the older one. This is NOT 100% a problem because the vb.f bye
 		can be inactive anytime unexpectedly like this case. The correct way to reDef 'forth bye' is
 		to put the new 'bye' defined in vb.f into the 'forth' vocabulary. ---> Done, and it works now.
-	
+
 [x] 3ce, list-tabs hang up !!! --> Chrome in trouble, restart then ok.
-[x] setup.bat should not include private folder. If want to include private folder separately do 
+[x] setup.bat should not include private folder. If want to include private folder separately do
 	it manually. ==> done.
 	[x] Need a command to make many tokens alias of \ comment, useful for batch program.
 		==> aliases works fine, for 3HTA only.
-	
+
 [x] \r|\n  and \n|\r are different! char \r|\n word :> split(/\s+/) may having a ending
 	extra null string. ---> no, see log.txt beginning. The recent problem has been fixed
 	by using a dummy to the string.
-	
-[x] many words in jeforth.f and 3htm/f/platform.f are now private	
+
+[x] many words in jeforth.f and 3htm/f/platform.f are now private
 	[x] Big Problem!! I make doNext a private word, so tick("doNext") returns 0 then <--- problem!!
 		So not only execute("callByName") in trouble, tick("name") too!!!
 		--> let doNext be a public, it'll be carried too far to make it private.
-	[x]	Let execute() and tick() to warn if the target word is a private word when
-		selftest is on. That warning only appear in selftest on mode so they are different 
+	[x] Let execute() and tick() to warn if the target word is a private word when
+		selftest is on. That warning only appear in selftest on mode so they are different
 		versions. Refer to fastInner() and debugInner(), jeforth.js functions
 		can be replaced very easily.
 		--> This idea works! tick = vm.g.selftest_tick = function tick(name) catches private words
@@ -5563,8 +5568,8 @@
 			Warning! private word expected_rstack referenced by name in tick()!
 			Warning! private word expected_stack referenced by name in tick()!
 			Warning! private word test-result referenced by name in tick()!
-			Warning! private word [all-pass] referenced by name in tick()!		
-		[x]	These private words are only used in the same module, make them be private
+			Warning! private word [all-pass] referenced by name in tick()!
+		[x] These private words are only used in the same module, make them be private
 			at the end of the module :
 			' description	  :: private=true
 			' expected_rstack :: private=true
@@ -5573,18 +5578,18 @@
 			' [all-pass]	  :: private=true
 			--> this is annoying, because then we can't make the word private when define it.
 				Use this idea when in jeforth.f to avoid warnings is fine.
-		==> Done, default only warning when in selftest mode. 
+		==> Done, default only warning when in selftest mode.
 			warning-on to turn on the run-time warning any time.
-	[x] need a word 'all' to scan all words so they are all public temporarily. So 'all words' 
+	[x] need a word 'all' to scan all words so they are all public temporarily. So 'all words'
 		lists all words. --> it works fine!
-	[x]	what if to have executeAbs(vid,w) and tickAbs(vid,w) for refering to private words?
+	[x] what if to have executeAbs(vid,w) and tickAbs(vid,w) for refering to private words?
 		--> Make them public is easier and more natural. If a word is warned by execute()
 			and tick() then consider to make it public.
-		
-[x] 3nd selftest failed at 
+
+[x] 3nd selftest failed at
 		Including fs.f
 		Error! "msg"abort unknown. <---- can't be private.
-		
+
 [x] 3ce attach target tab in trouble again now!!
 	--> search "attach 3ce to target page does not work" above for how to debug.
 	--> F7 or (dictate) both need attach the target tab first, try them: --> both work!!!
@@ -5592,9 +5597,9 @@
 		> char manifest.json readTextFileAuto . \ {F7}
 		dummy,doc,f,3htm/f,3htm/canvas,3htm,3ce,playground OK	<--- problem! the file is not read correctly
 	--> trace back develop versions...	all failed --> re-start Chrome then OK! Shit
-	
+
 [x] Redefine (words) to support 'all' command. Rename to word_select.
-	-->	code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
+	--> code wordhash>array ( "vid" -- array ) \ Retrive a VID list from the recent active words hash
 		\ it works now! see you tomorrow with my Metamoji note on X1 Yoga.
 	--> Test [x] 3htm (help)
 [x] 準備 release master 新版 release 新版 master : af266a3f8c4fefafc04947e9ba0b89d9f3601eed
@@ -5614,20 +5619,20 @@
 			[x] run webserver.f
 		[x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
 		[x] 3hta
-		[x] 3ce 
+		[x] 3ce
 			[x] attach to target pages
 		[x] 3ca
 		[x] Testing all demo
-			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
-			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
-			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , 
-			[x] solar-system.f			 
+			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f ,
+			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f ,
+			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f ,
+			[x] solar-system.f
 				[x] alarm.f has this problem so it doesn't work in 3ce and 3ca
-					Refused to execute inline event handler because it violates the following Content 
+					Refused to execute inline event handler because it violates the following Content
 					Security Policy ---> fixed.
-		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
-			切換到Master分支 : git checkout master 
-			合併 develop 分支進 master 來 : git merge --no-ff develop 
+		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+			切換到Master分支 : git checkout master
+			合併 develop 分支進 master 來 : git merge --no-ff develop
 		[/] Test the master all over again ... ignored, lazy.
 		[x] Master 到回 develop
 			切換到Master分支 : git checkout develop
@@ -5638,23 +5643,23 @@
 		JavaScript error on word "(fork)" : Invalid procedure call or argument
 	==> No! git.f doesn't know the Git Shell path. That needs manual setup by editing git.f
 		and I didn't do that for this computer yet.
-		
-[x] setup.bat to create one more folder	: jeforth.3htm 
 
-[x] (.0r) Negative numbers become "0000-123", 
+[x] setup.bat to create one more folder : jeforth.3htm
+
+[x] (.0r) Negative numbers become "0000-123",
 	--> use Math.sign to fix it. --> no such problem! Shit. True only for strings like:
-		> -123 :> toString() 8 .0r \ ==> 0000-123 OK 
+		> -123 :> toString() 8 .0r \ ==> 0000-123 OK
 		that's normal.
-		
+
 					------ jeforth.3we release R1 -------
 
 [x] The correct way to run a jeforth release through rawgit.com is :
 	https://cdn.rawgit.com/hcchengithub/jeforth.3we/R1/index.html
 	IE works fine too. Where, the leading 'cdn.' is still necessary for IE but not for
 	Chrome browser.
-	
+
 [ ] jeforth.3htm run through rawgit.com has some problems on Android cell phone
-	[ ] The outputbox background color covers only half screen when cell phone is 
+	[ ] The outputbox background color covers only half screen when cell phone is
 		not vertical.
 	[ ] 12choc.f can not drag and drop objects on Andorid browser.
 
@@ -5665,30 +5670,30 @@
 
 [x] How to make a release on GitHub? Not only a master commit, but an official release.
 	==> Ynote: GitHub Creating Releases.note
-	
+
 [x] Unify the version. See above log of a master release, it takes a lot of efforts to modify
 	the version code of each application.
 	--> ./js/version.js minor_version all 301
 		[x] jeforth.3nd.js
-		[x] 3nw, jeforth.3we\jeforth.3nw.html 
-		[x] 3htm, 3ca, jeforth.3we\3htm\js\jeforth.3htm.js 
+		[x] 3nw, jeforth.3we\jeforth.3nw.html
+		[x] 3htm, 3ca, jeforth.3we\3htm\js\jeforth.3htm.js
 		[x] 3ca, also jeforth.3htm.js above
 		[x] 3ce.js(3ce extension pages)
 		[x] 3ce, ce.f (Target page)
 		[x] 3ce, jeforth.3ce.background.html, background.js vm.minor_version=jeforth3we_minor_version
 		[x] 3hta, --> <HTA> tag. VERSION="204" -> VERSION="205"
-	
-	
+
+
 [x] Remove the :
-		js: outputbox.style.fontSize="1.5em"	
+		js: outputbox.style.fontSize="1.5em"
 	from the default autoexec of ls.f. I have resolved the problem for a while, no need this now.
-[ ] 3ce to support new command 'highlight' or 螢光筆 to modify active tab. Making Web browser to 
+[ ] 3ce to support new command 'highlight' or 螢光筆 to modify active tab. Making Web browser to
 	note taking annotating tool directly.
 [x] After supporting private, word count shown in words command and help command are still correct?
 	--> 3htm v3.204 no problem.
 [x] 3htm v3.204 and all friends have a problem. After include 12choc.f, words still shows all
 	ls.f's 56 words. I thought include command is I/O bound and thus it should does rescan-word-hash
-	every time. Another symptom is after executing 
+	every time. Another symptom is after executing
 		also misc.f
 	rescan-word-hash is expected too, but no! So it's a bug. Actually, for speed, only vocabulary words
 	do not rescan all other vocabulary words (only [*]also previous include [x]set-context not-only forget
@@ -5699,37 +5704,37 @@
 	[ ] Selftest of all applications
 	[ ] 3ce attach manual test
 	[ ] All demos
-	
+
 [/] run command still of ls.f after executed forth.
 	--> shit! my fault. Windows 'run' command is defined in wsh.f.
-	
+
 [ ] 19:36 2017-02-18 The background story is that I want to transfer files from one computer to anohter
 	in my office. Possible ways are : USB HDD, Yun.Baidu.com, FTP server, and the likes. They all requires
-	two steps, copy to a media and then copy to the target computer. 
-	Install HFS or FTP server on one computer can really make it better but HFS is a failure, 
-	
-	see Ynote: 
-	"HFS ~ Http File Server , homepage and binary" 
-	
+	two steps, copy to a media and then copy to the target computer.
+	Install HFS or FTP server on one computer can really make it better but HFS is a failure,
+
+	see Ynote:
+	"HFS ~ Http File Server , homepage and binary"
+
 	and sure FTP needs setup too. I actually don't remember
 	how to arrange a FTP server now. While, jeforth.3nd or 3nw webserver + wget is a solution I like.
 	Therefore, I am now interested to study webserver.f and try to improve it.
-	
+
 	I was studying this : "Build Your First HTTP Server in Node.js"	 https://www.diigo.com/user/hcchen/b/373115646
-	yesterday. See ~\jeforth.3we\playground\build_your_http_server.f 
-	
+	yesterday. See ~\jeforth.3we\playground\build_your_http_server.f
+
 	I studied how to use node.js to build a web site before, see Yun.baidu.com "ebook NODE.js"
 
 [x] 3ca's vm.appname should be jeforth.3ca (it's now ~.3htm)
-	solution is to read the name field in manifest.json: 
-	js> chrome :> app.getDetails().name \ ==> "jeforth.3ca" or "jeforth.3ce" 
+	solution is to read the name field in manifest.json:
+	js> chrome :> app.getDetails().name \ ==> "jeforth.3ca" or "jeforth.3ce"
 	Example:
 		js> vm.appname=='jeforth.3htm'&&chrome.app.getDetails().name=="jeforth.3ca" [if]
-			s" Abort: jeforth.3ca restricted HTML input file tag." 
+			s" Abort: jeforth.3ca restricted HTML input file tag."
 			"msg"abort cr
 		[then]
-[x] 18:18 2017-02-23 Studying how to use HTML post to upload files. 
-	[x]	Can't use 3ca to do this study due to its restrictions. 
+[x] 18:18 2017-02-23 Studying how to use HTML post to upload files.
+	[x] Can't use 3ca to do this study due to its restrictions.
 		誤會一場，只是 HTML event handler 不能 inline 指定而已。早已有解。 3ce & 3ca both ok
 	[x] Yes, we can use 3ca and 3ce to study input type=file tag
 		\ MSDN input type=file element | input type=file object
@@ -5747,7 +5752,7 @@
 			};f
 		</jsV> constant getFiles // ( -- func ) event handler
 		<o>
-		<label>Use <strong>shift</strong> or <strong>ctrl</strong> click to pick a few files: 
+		<label>Use <strong>shift</strong> or <strong>ctrl</strong> click to pick a few files:
 		<input type="file" multiple id="myfiles" /></label>
 		<div id="display"></div>
 		</o> drop
@@ -5757,19 +5762,19 @@
 		<input type="hidden" name="folder" value="/">
 		<input type="file" multiple name="file"> <----------- add multiple see see
 		<input type="submit" value="Upload">
-		</form>	   
-		--> It really works in 3ce attached console. So how to do the samething through 
+		</form>
+		--> It really works in 3ce attached console. So how to do the samething through
 			JavaScript for automation?
 		[x] Post是将表单中的数据放在form的数据体中，按照变量和值相对应的方式，传递到action所指向URL。
-			--> So I don't need to attach to the real target page. Just letting above form's 
+			--> So I don't need to attach to the real target page. Just letting above form's
 				action="192.168.0.196:8080" <--- no it doesn't work. The page must be connected.
 		[x] 強行添加 multiple to <input type="file" multiple name="file"> --> it doesn't work.
 			only one file transfered still.
 		[x] Try to assign pathname directly @ 3ce attached console
 			<js> $("input")[1].value="c:\Users\hcche\Downloads\1.au3" </js>
-			JavaScript error : Failed to set the 'value' property on 'HTMLInputElement': This input 
-			element accepts a filename, which may only be programmatically set to the empty string.		   
-			--> is this to the "USB Disk Pro" page only? 
+			JavaScript error : Failed to set the 'value' property on 'HTMLInputElement': This input
+			element accepts a filename, which may only be programmatically set to the empty string.
+			--> is this to the "USB Disk Pro" page only?
 				--> all input type=file do not accept value to be set to non-empty.
 		[x] Get filename though my input type=file but submit them manually
 			--> all input type=file do not accept value to be set to non-empty.
@@ -5777,7 +5782,7 @@
 		But cesarFTP does not work now! and Filezilla needs to learn how to use.
 [ ] 17:17 2017-03-01 RStudio Source box is a very good example to learn. ls.f ed [run] button
 	needs improvement. Running throught he entire field is not good for exercise. Run only
-	one line and a way to run multiple lines and also the entire field is an interesting 
+	one line and a way to run multiple lines and also the entire field is an interesting
 	challenge.
 [ ] Installer!
 	jeforth.3htm run from rawgit or anywhere to be an installer of other jeforth.3we applications.
@@ -5788,15 +5793,15 @@
 	[ ] when repeat is on then play the music for _given_ seconds the reset
 		and start again.
 [ ] 15:20 2017-05-04
-	debug why include alarm.f from http://cdn.rawgit.com/hcchengithub/jeforth.3we/develop/index.html 
-	makes errors like: repeating undefined, execute warnings about private variables that are called 
+	debug why include alarm.f from http://cdn.rawgit.com/hcchengithub/jeforth.3we/develop/index.html
+	makes errors like: repeating undefined, execute warnings about private variables that are called
 	by name, etc. **Only** when running through rawgit.com.
-	[/] alarm.f does not play music when running through rawgit.com. <--- forget it. 
+	[/] alarm.f does not play music when running through rawgit.com. <--- forget it.
 		Through localhost is fine. See below good news.
 	[x] Good news! alarm.f works fine on Android cell phone if running through :
 		192.168.1.153:8888?include alarm.f ... etc
 		on Chrome browser. The repeating and the music are both ok.
-		The Web server side is my T550 notebook, webserver.bat of jeforth. 
+		The Web server side is my T550 notebook, webserver.bat of jeforth.
 		[ ] does it still work if walk away from wifi?
 	[x] How to make a ～.f file to have a music object? I wish the music object can resolve the mp3
 		done! "include MP3-wait-a-while.f" and then "wait-a-while.mp3 :: play()", works fine on 3ca.
@@ -5807,12 +5812,12 @@
 			http://192.168.1.158:8888 then include then play(), really ok. --> try to read .f instead of include it
 			on the rawgit.com case ... Strange! readTextFile then tib.insert creates the same problem!! --> check
 			self-test first, something wrong maybe. ... No! --> copy-paste MP3-wait-a-while.f through <text> ...
-			Failed!! so it's easy now. Because copy-past .f still failed. Debug the <comment> then ... add a 
-			"js: debugger" before the comment fixed the problem!! --> try a blank line instead of the js: debugger 
+			Failed!! so it's easy now. Because copy-past .f still failed. Debug the <comment> then ... add a
+			"js: debugger" before the comment fixed the problem!! --> try a blank line instead of the js: debugger
 			... ok too! --> So, a \ comment seems eats the next word if it's followed with a total blank line!
 			Simply a space after the \ fixes the problem. The \ alone on the a line actually eats the next line
 			entirely. so study \ command .... it has only one statement : nexttoken('\n'), while definition of // is:
-			last().help = nexttoken('\n|\r'); ... so // has the same problem!! <---- YES!! 
+			last().help = nexttoken('\n|\r'); ... so // has the same problem!! <---- YES!!
 			==> Root cause is nexttoken(), it always eats the next character so \ ignores the \n and the next line
 				becomes the comment line. When it's <comment> then the following comments are interpreted unexpectedly.
 				--> why happen only on rawgit.com? ... Ha! Not only happen on rawgit.com but also other cases! If
@@ -5838,7 +5843,7 @@
 					188:n:110
 					189:t:116
 					190:>:62
-					191: :13				
+					191: :13
 					, every end-of-line are \r\n actually. But when running through rawgit.com, end-of-line become \n only.
 					when the \n eaten by nexttoken() the next line become comment. <--- Problem!! Root Cause !!!
 				--> Try 'word' command, it probably has the same problem.
@@ -5850,7 +5855,7 @@
 					." Hello"
 					Hello OK  <--------- then OK
 			[x] So, nexttoken() to always eat the next character is not very good. Should not when delimiter is :
-				case '\\n': case '\\r': case '\\n|\\r': case '\\r|\\n': 
+				case '\\n': case '\\r': case '\\n|\\r': case '\\r|\\n':
 				case '\n':	case '\r':	case '\n|\r':	case '\r|\n':
 				Where '\n' and '\\n' are same or not depends on nextstring(RegEx), I think they are same.
 				Because a real '\n' and a symble '\\n' is same to String.search() I guess. The following experiment has proved this:
@@ -5858,26 +5863,26 @@
 					aa
 					bb	cc
 					</text> :> search("\\t") \ ==> 5 (number)
-					 OK 
+					 OK
 					> <text>
 					aa
 					bb	cc
 					</text> :> search("\t") \ ==> 5 (number)  證明 '\t' '\\t' 效果一樣
-					 OK 
+					 OK
 					> <text>
 					aa
 					bb	cc
 					</text> :> search("cc") \ ==> 6 (number)
-					 OK 
+					 OK
 				But \s \w \d are RegEx symbole, they must be \\s \\w \\d if appear in a delimiter.
 					<text>
 					aa 123
 					bb	  cc
 					</text> :> search("\\d") \ ==> 3 (number) , if "\d" instead then result will be -1.
-		
-[x]	19:21 May 15, 2017
+
+[x] 19:21 May 15, 2017
 	How to maintain jeforth.3we wiki on Github? I make a record here.
-	[x]	This is how to clone the wiki from GitHub to local computer. Use Git Shell.
+	[x] This is how to clone the wiki from GitHub to local computer. Use Git Shell.
 		~\Documents\GitHub> git clone https://github.com/hcchengithub/jeforth.3we/wiki <------------ Wrong URL !!!
 		Cloning into 'wiki'...
 		fatal: https://github.com/hcchengithub/jeforth.3we/wiki/info/refs not valid: is this a git repository?
@@ -5888,22 +5893,22 @@
 
 		Receiving objects: 100% (199/199), 629.37 KiB | 68.00 KiB/s, done.
 		Resolving deltas: 100% (97/97), done.
-		~\Documents\GitHub>		
+		~\Documents\GitHub>
 	[x] I am now debugging why this hyperlink in README.md does not work??
 			![SimpleMDE markdown editor](doc/README.md/demo 3nw mde editor.JPG)
 		While this works
 			![SimpleMDE markdown editor](doc/README.md/demo-pyramidstack.png)
-		工作做一半的結果，又重新解了一次老問題。 README.md 或 wiki pages 裡 
+		工作做一半的結果，又重新解了一次老問題。 README.md 或 wiki pages 裡
 		![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG) path 可能是「不能有空格」，也可
 		能是我自己把檔名改成用 under line 取代空格了。
-		
-[x]	README.md add the "12 choc" demo before update to master
+
+[x] README.md add the "12 choc" demo before update to master
 [ ] 錄製 12choc.f 的說明影片。
 
-[ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5 
+[ ] Make a master release and update the issue https://github.com/hcchengithub/jeforth.3we/issues/5
 [x] 準備 release master 新版 release 新版 master
 	[x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 303;
-	[ ] Check the date stamp at the bottom of README.md 
+	[ ] Check the date stamp at the bottom of README.md
 	o selftest them all
 		[x] setup.bat
 		[x] 3nw use 3hta to fork cmd /c start nw ../jeforth.3we
@@ -5911,17 +5916,17 @@
 			[x] run webserver.f
 		[x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
 		[x] 3hta
-		[x] 3ce 
+		[x] 3ce
 			[x] attach to target pages
 		[x] 3ca
 		[x] Testing all demo
-			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f , 
-			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f , 
-			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , alarm.f 
-			[x] solar-system.f, [ ] tutor-cloth.f			 
-		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 : 
-			切換到Master分支 : git checkout master 
-			合併 develop 分支進 master 來 : git merge --no-ff develop 
+			[x] 12choc.f , [x] alarm.f , [x] ball.f(non-selftest mode) , [x] blowing-in-the-wind.f ,
+			[x] box2dweb-arrow.f , [x] calc.f , [x] chipmunk-js-pyramidstack.f ,
+			[x] flot-demo.f , [x] h2o.f , [x] many-clocks.f , [x] numeric-demo.f , alarm.f
+			[x] solar-system.f, [ ] tutor-cloth.f
+		[x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+			切換到Master分支 : git checkout master
+			合併 develop 分支進 master 來 : git merge --no-ff develop
 		[/] Test the master all over again ... ignored, lazy.
 		[x] Upload master to GitHub : git push
 		[x] Master 到回 develop
@@ -5929,55 +5934,101 @@
 			合併 develop 分支進 master 來 : git merge --no-ff master
 		[x] Complete this log.txt
 		[ ] release note
-[ ] README.md to include 
+[ ] README.md to include
 	http://cdn.rawgit.com/hcchengithub/jeforth.3we/r2/index.html?cls_include_tutor-cloth.f
 [ ] Try to use Ubuntu NW.js or Node.js to try jeforth.3nw, 3nd on Ubuntu.
-[ ] 10:34 2017/07/01 faceapi.f does not work on 3ha. The error object returned from $.ajax() is 
+[ ] 10:34 2017/07/01 faceapi.f does not work on 3ha. The error object returned from $.ajax() is
 		{
 			"readyState": 0,
 			"status": 0,
 			"statusText": "No Transport"
-		} OK 
-    --> Has $.ajax ever been working in 3hta? search ajax see see . . . No, not used before. --> Check 
-    HTA and ajax on the net ...
-        http://3fwork.com/b402/003425MYM028859/ 
-        我最先定位到的是ajax方法返回status=0,statusText=No Transport。然后开始了我的查找问题之旅，我在
-        网上所查出的资料都说这个是由于跨域 cross Domain 造成的。 
-    [x] 試試別的 ajax function --> Good! 成功複製出了問題！--> [ ] 趁現在問 Microsoft 的論壇
-        js> $.ajax({url:"http://example.com/",async:false}).responseText tib.
-        --> 在 3ca 很成功地讀回該網頁的整個 HTML 
-        --> 在 3hta 就失敗了 
-            <js> 
-                $.ajax({url:"http://example.com/",async:false})
-                .done(function(response) {
-                        alert("success");
-                })
-                .fail(function(error) {
-                    alert("error");
-                    push(error);    
-                    execute('(see)'); // see the error message
-                });
-            </js>
-            {
-                "readyState": 0,
-                "status": 0,
-                "statusText": "No Transport"
-            }
-        --> But it fail in repro.htm too. So, jeforth.3htm has enabled something. what's that?
-            [x] Try project-k file:///C:/Users/hcche/Documents/GitHub/jeforth.3we/project-k/sample.html
-                Yes, same problem reproduced 
-                status :   0
-                statusText : NetworkError: Failed to execute 'send' on 'XMLHttpRequest': 
-                Failed to load 'http://example.com/'    
-            [x] 果然, jeforth.3htm web 也不行 --> 所以 3ce 3ca 都是特權, 3hta 不行是對的! 
-                "readyState": 0,
-                "status": 0,
-                "statusText": "NetworkError: Failed to execute 'send' on 'XMLHttpRequest': Failed to load 'http://example.com/?_=1498901836169'."            
-        --> 然而 faceapi.f 在 project-k sample.html and 3htm web are both working fine ! 
-            So, Azure server side is ok with cross domain. HTA really has problem.
-        [ ] Try faceapi.htm rename to ~.hta . . . 
-        
-    [ ] 可以 trace 進 jquery 去查。
-    [ ] 不用 ajax 能不能 POST ?
-    [ ] 別的 ajax POST 去處
-        
+		} OK
+	--> Has $.ajax ever been working in 3hta? search ajax see see . . . No, not used
+		before. --> Check
+	HTA and ajax on the net ...
+		http://3fwork.com/b402/003425MYM028859/
+		我最先定位到的是ajax方法返回status=0,statusText=No Transport。然后开始了我的查
+		找问题之旅，我在网上所查出的资料都说这个是由于跨域 cross Domain 造成的。
+	[x] 試試別的 ajax function --> Good! 成功複製出了問題！--> [ ] 趁現在問 Microsoft 的論壇
+		js> $.ajax({url:"http://example.com/",async:false}).responseText tib.
+		--> 在 3ca 很成功地讀回該網頁的整個 HTML
+		--> 在 3hta 就失敗了
+			<js>
+				$.ajax({url:"http://example.com/",async:false})
+				.done(function(response) {
+						alert("success");
+				})
+				.fail(function(error) {
+					alert("error");
+					push(error);
+					execute('(see)'); // see the error message
+				});
+			</js>
+			{
+				"readyState": 0,
+				"status": 0,
+				"statusText": "No Transport"
+			}
+		--> But it fail in repro.htm too. So, jeforth.3htm has enabled
+			something. what's that?
+			[x] Try project-k file:///C:/Users/hcche/Documents/GitHub/jeforth.3we/project-k/sample.html
+				Yes, same problem reproduced
+				status :   0
+				statusText : NetworkError: Failed to execute 'send' on 'XMLHttpRequest':
+				Failed to load 'http://example.com/'
+			[x] 果然, jeforth.3htm web 也不行 --> 所以 3ce 3ca 都是特權, 3hta 不行是對的!
+				"readyState": 0,
+				"status": 0,
+				"statusText": "NetworkError: Failed to execute 'send' on 'XMLHttpRequest': Failed to load 'http://example.com/?_=1498901836169'."
+		--> 然而 faceapi.f 在 project-k sample.html and 3htm web are both working fine !
+			So, Azure server side is ok with cross domain. HTA really has problem.
+		[ ] Try faceapi.htm rename to ~.hta . . .
+	[ ] 可以 trace 進 jquery 去查。
+	[ ] 不用 ajax 能不能 POST ?
+	[ ] 別的 ajax POST 去處
+	[?] 14:58 2017-09-23 忘了當初在解決什麼問題了？faceapi.f 當時已經做好了呀？好像
+		是從本地直接上傳照片的方式沒有成功。我的 kitchen 跟 face 都是用 url 給照片的。
+[x] rename project-k kernel from jeforth.js to projectk.js
+[ ] 整理 project-k 的 wiki. 特別是改名成 projectk.js 之後。
+[ ] 準備 release master 新版 release 新版 master
+	[x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 304;
+	[ ] Check the date stamp at the bottom of README.md <-- 可以從 GitHub 網頁上直接改。
+	o selftest them all
+		[x] Carefully delete all application and run setup.bat to rebuild them
+		[x] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
+		[x] 3nd use 3hta to: fork cmd /c node jeforth.3nd.js
+			[x] include webserver.f
+		[x] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+			[x] check version
+		[x] 3hta, use 3hta to: fork jeforth.hta
+		[x] 3ce, click its icon to launch it.
+			[x] check version.
+			[x] attach to target pages
+		[x] 3ca, click Chrome App icon to launch it.
+			[x] check version
+		[x] Testing all demo, use 3ce or 3ca
+			[x] 12choc.f ,
+			[x] solar-system.f,
+			[x] tutor-cloth.f
+			[x] alarm.f ,
+			[x] ball.f(non-selftest mode) ,
+			[x] blowing-in-the-wind.f ,
+			[x] box2dweb-arrow.f ,
+			[x] calc.f ,
+			[x] chipmunk-js-pyramidstack.f ,
+			[x] flot-demo.f ,
+			[x] numeric-demo.f
+			[x] h2o.f ,
+			[x] many-clocks.f ,
+		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+			切換到Master分支 : git checkout master
+			合併 develop 分支進 master 來 : git merge --no-ff develop
+		[ ] Test the master all over again ... ignored, lazy.
+		[ ] Upload master to GitHub : git push
+		[ ] Master 到回 develop
+			切換到Master分支 : git checkout develop
+			合併 develop 分支進 master 來 : git merge --no-ff master
+		[ ] Complete this log.txt
+		[ ] release note
+[ ] README.md to include
+	http://cdn.rawgit.com/hcchengithub/jeforth.3we/r2/index.html?cls_include_tutor-cloth.f
