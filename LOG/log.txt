@@ -5993,6 +5993,7 @@
 [ ] 準備 release master 新版 release 新版 master
 	[x] jeforth.3we\js\version.js --> jeforth3we_minor_version = 304;
 	[ ] Check the date stamp at the bottom of README.md <-- 可以從 GitHub 網頁上直接改。
+    [ ] Check project-k/projectk.js is included
 	o selftest them all
 		[x] Carefully delete all application and run setup.bat to rebuild them
 		[x] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
@@ -6020,15 +6021,18 @@
 			[x] numeric-demo.f
 			[x] h2o.f ,
 			[x] many-clocks.f ,
-		[ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+		[/] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
 			切換到Master分支 : git checkout master
 			合併 develop 分支進 master 來 : git merge --no-ff develop
-		[ ] Test the master all over again ... ignored, lazy.
-		[ ] Upload master to GitHub : git push
+            ==> 已經改用 GitHub Desktop 只要切到 master 然後 Menu > 
+                Branch > Merge into current branch 就行了。
+		[/] Test the master all over again ... ignored, lazy.
+		[x] Upload master to GitHub : git push
+        [ ] GitHub 上的 README.md 範例都指向 r2 要改成 r3         
+		[ ] Complete this log.txt
+		[ ] release note
 		[ ] Master 到回 develop
 			切換到Master分支 : git checkout develop
 			合併 develop 分支進 master 來 : git merge --no-ff master
-		[ ] Complete this log.txt
-		[ ] release note
 [ ] README.md to include
 	http://cdn.rawgit.com/hcchengithub/jeforth.3we/r2/index.html?cls_include_tutor-cloth.f
