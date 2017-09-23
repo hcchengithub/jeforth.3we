@@ -38,11 +38,11 @@ code code       push(nexttoken()); // name of the word
 				end-code
 				// ( <name ..code..> -- ) Start composing a code word.
                 
-code _init_		( -- ) \ Initialize vm.g.members that are moved out from jeforth.js which is thus kept pure.
+code _init_		( -- ) \ Initialize vm.g.members that are moved out from projectk.js which is thus kept pure.
 
                 // To support private word, END-CODE needs one more line
                 words.forth[2].xt = function(){ 
-                    // was from project-k jeforth.js, modified by jeforth.3we jeforth.f _init_ 
+                    // was from project-k projectk.js, modified by jeforth.3we jeforth.f _init_ 
                     if(compiling!="code"){ panic("Error! 'END-CODE' to a none code word.\n"); return};
                     current_word_list().push(new Word([newname,newxt]));
                     last().vid = current;
@@ -233,7 +233,7 @@ code </selftest> ( "selftest" -- ) \ Save the self-test statements to <selftest>
 					我嘗試了種種的 self-test 寫法。有的很醜，混在正常程式裡面相當有礙視線；不醜的很
 					累，佔很大 source code 篇幅。
 
-					以下是發展到目前最好的方法，jeforth.js kernel  裡只有 code end-code 兩個基本 
+					以下是發展到目前最好的方法，projectk.js kernel  裡只有 code end-code 兩個基本 
 					words, 剛進到 jeforth.f  只憑這兩個基本 words 就馬上要為每個 word 都做 self-test 
 					原本是很困難的。 然而，jeforth.f 是整個檔案一次讀進來成為大大的一個 TIB 的， 所
 					以其中已經含有 jeforth.f 的全部功能。如果 self-test 安排在所有的 words 都 load 

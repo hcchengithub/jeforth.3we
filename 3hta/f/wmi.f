@@ -14,7 +14,7 @@ s" wmi.f"	source-code-header
 \ "localhost" by default. Define t/c before include wmi.f in command line if your target computer is not localhost.
 
 \ 如果在 include wmi.f 之前先設定 t/c 之值，則整套 wmi.f 都 refer to the specified t/c. 所以你可以去 access 別的機器.
-\ 例如 "cscript jeforth.js s' 10.34.98.76' constant t/c include wmi.f list-some-OS-properties" 可以去看遠端機器的內容。
+\ 例如 "cscript projectk.js s' 10.34.98.76' constant t/c include wmi.f list-some-OS-properties" 可以去看遠端機器的內容。
 \ 若不先給定 t/c 則以下這段程式會把 t/c 設成 localhost 所以是對本地電腦工作。我不想每次都得指定 target computer 因此
 \ 如此安排。
 
@@ -38,6 +38,7 @@ t/c getWMIService js: vm.objWMIService=pop()
 						vm.objWMIService.ExecQuery("Select * from Win32_NetworkAdapterConfiguration "+pop())
 					) 
 				</jsV> ;
+
 
 \ Iterate all network cards (NIC) in this computer list all Network adapters' IP address
 : printIPAddress 
@@ -74,6 +75,120 @@ t/c getWMIService js: vm.objWMIService=pop()
 				\ 	-%-%-%-%-%-
 				\ </selftest>
 
+\ WMI Win32_NetworkAdapter class
+\ https://msdn.microsoft.com/en-us/library/aa394216(v=vs.85).aspx
+: objEnumWin32_NetworkAdapter 
+				( "where-clause" -- objEnumWin32_NetworkAdapter ) \ Get Win32_NetworkAdapter object onto TOS.
+				<js> 
+					new Enumerator(
+						vm.objWMIService.ExecQuery("Select * from Win32_NetworkAdapter "+pop())
+					) 
+				</jsV> ;
+
+0 value #nic // ( -- n ) NIC count. A result of activeNIC or getNIC command.
+: getNIC 		( "where clause" -- objNIC[,objNIC] ) \ Get NIC objects screened by "where clause"
+				objEnumWin32_NetworkAdapter >r
+				0 to #nic
+				begin
+					r@ js> pop().atEnd() if r> drop true else
+						#nic 1+ to #nic
+						r@ js> pop().item() \ get all of them if there are many
+						r@ js: pop().moveNext() 
+						false
+					then
+				until ;
+				/// Example: 
+				///   "" getNIC \ to get them all into the stack, #nic is the count
+				///   s" where NetEnabled='True'" getNIC \ to get the active NIC, #nic should be 1.
+				
+: activeNIC 	( -- objNIC[,objNIC] ) \ Get the wroking NIC object so I can disable or enable it
+				s" where NetEnabled='True'" objEnumWin32_NetworkAdapter >r
+				0 to #nic
+				begin
+					r@ js> pop().atEnd() if r> drop true else
+						#nic 1+ to #nic
+						r@ js> pop().item() \ get all of them if there are many
+						r@ js: pop().moveNext() 
+						false
+					then
+				until ;
+				/// Usage: Run jeforth.hta as administrator (through administrator DOS box is a way)
+				///        activeNIC :> disable() \ return 5 is failed when not an administrator
+				///        activeNIC :> enable() \ return 5 is failed when not an administrator
+				///		   check #nic for the active NIC count if there are many.
+
+: list-all-nic 	( -- ) \ List all NIC devices
+				cr ." ---- List all NIC ----" cr
+				"" getNIC  ( nic nic ... ) \ No where clause, get all of them
+				#nic ?dup if for 
+					>r r@ :> caption . cr
+					."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
+					."  / NetEnabled(Active): " r@ :> NetEnabled . cr
+					."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
+					."  / PermanentAddress: " r@ :> PermanentAddress . cr
+					."  / DeviceID: " r@ :> DeviceID . cr
+					."  / Status: " r@ :> Status . cr
+					r> drop
+				next then ;
+
+				<selftest>
+					." List all NIC" cr
+					"" getNIC  ( nic nic ... ) \ No where clause, get all of them
+					#nic ?dup [if] [for] 
+						>r r@ :> caption . cr
+						."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
+						."  / NetEnabled(Active): " r@ :> NetEnabled . cr
+						."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
+						."  / PermanentAddress: " r@ :> PermanentAddress . cr
+						."  / Status: " r@ :> Status . cr
+						r> drop
+					[next] [then]
+					
+					." List active NIC" cr
+					activeNIC  ( nic nic ... ) \ assume there are many active NICs
+					#nic ?dup [if] [for] 
+						>r r@ :> caption . cr
+						."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
+						."  / NetEnabled(Active): " r@ :> NetEnabled . cr
+						."  / NetworkAddresses: " r@ :> NetworkAddresses . cr
+						."  / PermanentAddress: " r@ :> PermanentAddress . cr
+						."  / Status: " r@ :> Status . cr
+						r> drop
+					[next] [then]
+				</selftest>
+				<comment>
+					\ Obsoleted methods still good for reference
+					." List all NIC" cr
+					"" objEnumWin32_NetworkAdapter >r  \ No where clause, get all of them
+					[begin]
+						r@ js> pop().atEnd() [if] r> drop true [else]
+							r@ js> pop().item().caption . cr
+							."  / NetConnectionStatus: " r@ js> pop().item().NetConnectionStatus . cr
+							."  / NetEnabled(Active): " r@ js> pop().item().NetEnabled . cr
+							."  / NetworkAddresses: " r@ js> pop().item().NetworkAddresses . cr
+							."  / PermanentAddress: " r@ js> pop().item().PermanentAddress . cr
+							."  / Status: " r@ js> pop().item().Status . cr
+							r@ js: pop().moveNext() 
+							false
+						[then]
+					[until]
+					." List specific NIC through identifying its properties" cr
+					\ s" where caption like '%Intel(R) Ethernet Connection%'" objEnumWin32_NetworkAdapter >r
+					s" where NetEnabled='True'" objEnumWin32_NetworkAdapter >r
+					[begin]
+						r@ js> pop().atEnd() [if] r> drop true [else]
+							r@ js> pop().item().caption . cr
+							."  / NetConnectionStatus: " r@ js> pop().item().NetConnectionStatus . cr
+							."  / NetEnabled(Active): " r@ js> pop().item().NetEnabled . cr
+							."  / NetworkAddresses: " r@ js> pop().item().NetworkAddresses . cr
+							."  / PermanentAddress: " r@ js> pop().item().PermanentAddress . cr
+							."  / Status: " r@ js> pop().item().Status . cr
+							r@ js: pop().moveNext() 
+							false
+						[then]
+					[until]
+				</comment>
+				
 \ 利用 jeforth for WSH 與其 JavaScript console 手動來操作 WMI 很有用，沒必要寫一大堆人機介面。
 \ 跑一下 objEnumWin32_OperatingSystem 準備好 Win32_OperatingSystem object 放在 TOS，此後用 console 進 js console, 
 \ var os = pop(), 即可用 os 來 access 所有 Win32_OperatingSystem 的東西。例如：
@@ -226,7 +341,7 @@ code objEnumWin32_PnPEntity ( "where-clause" -- objEnumWin32_PnPEntity ) \ Get W
 				;
 				
 				\ this is a one liner to list all devices. %errorlevel% is the count of devices.
-				\ cscript jeforth.js include wmi.f cr list-all-PnP-devices bye
+				\ cscript projectk.js include wmi.f cr list-all-PnP-devices bye
 
 				<selftest>
 					*** Demo how to use objEnumWin32_PnPEntity object
@@ -266,7 +381,7 @@ code objEnumWin32_PnPEntity ( "where-clause" -- objEnumWin32_PnPEntity ) \ Get W
 				;
 				
 				\ This is a one liner that lists yellow marks and red marks in Device Manager, leaving %errorlevel% with the abnormal item count.
-				\ cscript jeforth.js include wmi.f cr list-abnormal-items-in-device-manager bye
+				\ cscript projectk.js include wmi.f cr list-abnormal-items-in-device-manager bye
 
 				<selftest>
 					*** Let's see if there's any abnormal items in device manager
@@ -312,7 +427,7 @@ code objEnumWin32_CDROMDrive ( "where-clause" -- objEnumWin32_CDROMDrive ) \ Get
 				;
 				
 				\ This is a one liner to show CD/DVD drives, leaving %errorlevel% with the count.
-				\ cscript jeforth.js include wmi.f list-CD/DVD-drives bye
+				\ cscript projectk.js include wmi.f list-CD/DVD-drives bye
 				
 				<selftest>
 					*** Demo objEnumWin32_CDROMDrive object
@@ -383,13 +498,13 @@ code objEnumWin32_Processor ( -- objEnumWin32_Processor ) \ Get WMI Win32_Proces
 				;
 
 				\ This is a one liner to show processors, leaving %errorlevel% with the physical processor count.
-				\ cscript jeforth.js include wmi.f list-all-processors bye
+				\ cscript projectk.js include wmi.f list-all-processors bye
 
 				\ This is a one liner to show processors, leaving %errorlevel% with the logical processor count.
-				\ cscript jeforth.js include wmi.f list-all-processors drop bye
+				\ cscript projectk.js include wmi.f list-all-processors drop bye
 
 				\ This is a one liner to show processors, leaving %errorlevel% with the processor core count.
-				\ cscript jeforth.js include wmi.f list-all-processors drop drop bye
+				\ cscript projectk.js include wmi.f list-all-processors drop drop bye
 
 				<selftest>
 					*** Demo objEnumWin32_Processor object
@@ -455,7 +570,7 @@ code objEnumWin32_BIOS ( -- objEnumWin32_BIOS ) \ Get WMI Win32_BIOS object onto
 				</selftest>
 				
 				\ This is a one liner to show BIOS things.
-				\ cscript jeforth.js list-Win32_BIOS-properties bye /f0:wmi.f //nologo
+				\ cscript projectk.js list-Win32_BIOS-properties bye /f0:wmi.f //nologo
 
 \ View Battery info
 \ http://msdn.microsoft.com/en-us/library/windows/desktop/aa394074(v=vs.85).aspx
@@ -465,7 +580,7 @@ code objEnumWin32_Battery ( -- objEnumWin32_Battery ) \ Get WMI Win32_Battery ob
 				end-code 
 
 				\ This is a one liner to show battery things.
-				\ cscript jeforth.js list-Win32_Battery-properties bye /f0:wmi.f //nologo
+				\ cscript projectk.js list-Win32_Battery-properties bye /f0:wmi.f //nologo
 
 				<selftest>
 					*** Demo how to use objEnumWin32_Battery, list Win32_Battery properties
@@ -573,7 +688,7 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				///     s" where commandline like '%excel%'" see-process
 				
 
-: list-them		( "where-clause" -- count ) \ List processes.
+: list-them		( "where-clause" -- count ) \ List process ID's. "see-process" to see details.
 				0 swap objEnumWin32_Process >r  ( 0 | obj )
 				begin
 					r@  ( 0 obj | obj)
@@ -585,6 +700,8 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				/// Usage: Don't forget the where-clause, Case insensitive
 				///     s" where name = 'ExCeL.ExE'" list-them
 				///     s" where name like 'chrom%'" list-them 
+				///     s" where name like '%'" list-them \ List all of them
+				///     s" where processid > 0" list-them \ List all of them
 
 : count-process ( s" where CommandLine like '%GitHub%' and name = 'powershell.exe'" -- count ) \ Count matched process 
 				0 swap objEnumWin32_Process >r  ( 0 | obj )
@@ -655,9 +772,10 @@ code objEnumWin32_Process ( "where-clause" -- objEnumWin32_Process ) \ Get WMI W
 				///     s" where name = 'ExCeL.ExE'" see-process
 				///     s" where name like 'chrom%'" see-process
 				///     s" where commandline like '%excel%'" see-process
-				/// Also "kill-them' command
+				/// Also "kill-them" command
 				///     s" where name = 'ExCeL.ExE'" kill-them
 				///     s" where name like 'chrom%'" kill-them
+                /// Also "list-them" lists only process ID's
 
 : get-them		( "where-clause" -- [objWin32_Process,..] ) \ Get processes.
 				objEnumWin32_Process >r  [] ( [] | Enum )

@@ -166,11 +166,10 @@ code ActiveXObject	( "name.application" -- objApp ) \ Open the name.application 
 				<selftest> 
 					\ 以下這個測試示範看得人眼花撩亂，但不要低估它。
 					\ jeforth.3hta 能夠這樣玩弄 DOS 等於是大大地增強了 DOS 的能力。
-					
 					*** fork append time stamp into selftest.log ... 
 					s" fork and dos test " js> Date().toString() + \ ( pattern )
 					s" fork cmd /c echo " over + s" >> selftest.log
-					" + tib.insert 
+					" + tib.insert 100 nap \ 7:03 PM 6/26/2017 I found a delay is needed sometimes
 					s' dos find "' swap + s' " selftest.log & exit
 					' + tib.insert
 					[d 0 d] [p 'dos','(dos)','fork','(fork)' p]

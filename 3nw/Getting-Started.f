@@ -161,7 +161,7 @@ s" Getting-Started.f"	?skip2 --EOF-- \ skip if already included
 	<section>
 		js> win.width . \ 876
 		js: win.width=800 \ it works
-		js> win.title . \ jeforth.3nw -- 3 words jeforth.js for node-webkit with jQuery-terminal
+		js> win.title . \ jeforth.3nw -- 3 words projectk.js for node-webkit with jQuery-terminal
 		js: win.title="hahaha" \ it really changes the nw window's title
 		js> win.zoomLevel . \ 0 this is the font size of the forth console
 		js: win.zoomLevel=1

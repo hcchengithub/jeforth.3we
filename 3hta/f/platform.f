@@ -19,6 +19,7 @@
 			push(pathname ? pathname : "3hta/localstorage.json");
 			execute("readTextFile");
 			var ss = pop();
+			if (ss=="") return; // file not found
 			// if is from 3hta then it's utf-8 with BOM (EF BB BF) that bothers NW.js JSON.parse()
 			// ss.charCodeAt(0)==65279 that's utf-8 BOM 
 			if (ss.charCodeAt(0)==65279) ss = ss.slice(1); // resolve the utf-8 BOM issue

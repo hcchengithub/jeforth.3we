@@ -53,12 +53,12 @@ s" oklai.f"		?skip2 --EOF-- \ skip if already included
 
 	<section>
 		.(( Now 'win' is the nw.exe main program DOM window object )) 
-		win js> pop().title . \ jeforth.3nw -- 3 words jeforth.js for node-webkit with jQuery-terminal	
+		win js> pop().title . \ jeforth.3nw -- 3 words projectk.js for node-webkit with jQuery-terminal	
 	
 		\ [ ] the 'window' seen in debugger and the 'win' (gui.Window.get()) are different things.
 		\ jeforth global variables are window.variables, e.g. window.debug, window.stackwas, window.screenbuffer, etc.
 		\ Whild window.title is "undefined", but gui.Window.get().title is
-		\ "jeforth.3nw -- 3 words jeforth.js for node-webkit with jQuery-terminal"	
+		\ "jeforth.3nw -- 3 words projectk.js for node-webkit with jQuery-terminal"	
 		\ This is not so difficult to understand. i.e. gui.Window.get().minimize() ==> works fine and 
 		\ window.minimize() ==> TypeError: Object [object global] has no method 'minimize'	
 		
