@@ -57,7 +57,7 @@
 
 	\ ----- NIC on/off utility -----
 	
-	19 value officeLAN // ( -- n ) DeviceID of the OA LAN NIC. Change this for your case.
+	8 value officeLAN // ( -- n ) DeviceID of the OA LAN NIC. Change this for your case.
 					   /// "where deviceid = 19" is for my LRV2 OA only 
 					   /// Need administrator privilege, run 'dos' check title.
 					   /// Run 3HTA.bat through right click to 'Run as administrator'.
