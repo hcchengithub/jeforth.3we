@@ -65,11 +65,28 @@ If you were **git clone https://github.com/hcchengithub/jeforth.3we** instead of
 
 Setup
 =================
-jeforth.3ce and .3ca (Chrome Extension and Chrome Application) needs their own directly. **Setup.bat** does that for you. So far, only jeforth.3ce and .3ca (Chrome Extension and Chrome Application) needs their own directory. All other applications can run from jeforth.3we/ directly but it's still nice to have their own standalone directory because it's neat and clearer for a new comer to understand the project. 
+So far only jeforth.3ce and .3ca (Chrome Extension and Chrome Application) need 
+their own directory and **Setup.bat** does that for you. All 
+other applications can run from jeforth.3we/ directly but it's still nice to 
+have their own standalone directory because it's neat and clearer for a new 
+comer to understand each applications. 
 
-jeforth.3we/ directly contains everything for all applications. Many files are common for all applications. Chrome App and Chrome Extension both require a 'manifest.json' file at their home directory, so the jeforth.3we/ root can not be the common home. The solution is letting each application to have their own directory but share the same jeforth.3we/ root through mirror linkages of *symbolic link* and *hard link*. 
+jeforth.3we/ directory contains everything for all applications. Many files 
+are common for all applications. Chrome App and Chrome Extension both require 
+a 'manifest.json' file at their home directory, so the jeforth.3we/ root can 
+not be their common home. The solution is letting each application to have 
+their own directory but share the same jeforth.3we/ root through mirror 
+linkages of *symbolic link* and *hard link*. 
 
-At jeforth.3we/ root direcory, you can find batch program ```setup.bat```.  It creates application directories: jeforth.3ca/, jeforth.3ce/, jeforth.3hta/, jeforth.3nw/, jeforth.3nd/ and jeforth.3htm/ at the same level as jeforth.3we/. They are mirrors of subset of jefforth.3we/. It's safe to delete them. Run ```setup.bat``` again to rebuild them if any of them were not existing. ```setup.bat``` won't rebuild existing directories. **Note!** It must be "Run as administrator" due to priviledge commands like ```mklink.exe``` and ```fsutil.exe``` are utilized. Right click ```setup.bat``` and select "```Run as administrator```" to run it.
+At jeforth.3we/ root direcory, you can find the batch program ```setup.bat```.  
+It creates application directories: jeforth.3ca/, jeforth.3ce/, 
+jeforth.3hta/, jeforth.3nw/, jeforth.3nd/ and jeforth.3htm/ at the same level 
+as jeforth.3we/. They are mirrors of subset of jefforth.3we/. It's safe to 
+delete them. Run ```setup.bat``` again to rebuild them if any of them were 
+not existing. ```setup.bat``` won't rebuild existing directories. **Note!** 
+It must be "Run as administrator" due to priviledge commands like 
+```mklink.exe``` and ```fsutil.exe``` are utilized. Right click 
+```setup.bat``` and select "```Run as administrator```" to run it.
 
 Hello World!
 ========================
