@@ -269,6 +269,7 @@ function jeForth() {
 				panic("Error! please use inner("+w+") instead of execute("+w+").\n","severe");
 			else phaseB(w); 
 		}
+        return vm; // function cascading 
 	}
 
 	function inner (entry, resuming) {
@@ -419,6 +420,7 @@ function jeForth() {
 		tib = tibwas;
 		ntib = ntibwas;
 		ip = ipwas;
+        return vm; // function cascading 
 	}
 
 	// -------------------- end of main() -----------------------------------------
@@ -473,6 +475,7 @@ function jeForth() {
 							stack.splice(stack.length-1-index,0,data);
 						}
 		}
+        return vm; // function cascading 
 	}
 
 	// typeof(array) and typeof(null) are "object"! So a tweak is needed.
