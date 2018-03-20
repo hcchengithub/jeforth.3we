@@ -284,8 +284,10 @@
 	code bottom         ( Column -- row# ) \ Get the bottom row# of the column
 						push(pop().rows(65535).end(-4162).row) // xlUp = -4162
 						end-code
-						/// It's too stupid that takes a lot of time if going along down to row#65535
-						/// example: sheet char pop().range("B:B") js bottom tib. \ ==> 160 (number)
+						/// Example:
+                        /// activeCell column column#>letter dup char : + swap + ( H:H column )
+                        /// activeSheet :> range(pop()) bottom tib. \ ==> 6723
+                        
 
 	: column#>letter 	1- char A (ASCII) + ASCII>char ; // ( col# -- letter ) Get column letter, only support A~Z.
 	: letter>column# 	(ASCII) char A (ASCII) - 1+ ; // ( letter -- col# ) Get column number, only support 1~26.
