@@ -5,6 +5,7 @@
 	\ "Application Object (Excel)"             http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
 	\ VBA Language Reference                   http://msdn.microsoft.com/en-us/library/bb190882(v=office.11).aspx
 	\ Microsoft Excel Visual Basic Reference   http://msdn.microsoft.com/en-us/library/aa272254(v=office.11).aspx
+    \ Cell (Range) properties VBA Reference    http://msdn.microsoft.com/en-us/library/office/aa174290(v=office.11).aspx    
 	\ Excel constants, e.g. xlUp = -4162, can be found in AutoIt UDF source code excel.au3.
 	
 	include wsh.f
@@ -49,11 +50,22 @@
 	excel.app [if] \ excel.app exists
 
 	: activeCell		excel.app :> ActiveCell ; // ( -- obj ) Get the ActiveCell object
+                        /// The 3 active things: cell, sheet, and workbook
 						/// activeCell :> offset(0,1).formula tib.
+						/// activeCell :: Interior.Color=0xbbggrr
+                        /// activeCell :> worksheet.name tib. 
+                        /// activeCell :> application \ ==> Microsoft Excel (object)
+                        /// activeWorkbook :> worksheets(1).name tib. --> sheet name
+                        /// activeWorkbook :> worksheets('NaMe').name tib. --> case insensitive
+                        /// activeWorkbook :> worksheets('匯總').name \ ==> 匯總 (string)
+						/// activeWorkbook :> name tib.	\ ==> filename
+                        
 	: activeSheet		excel.app :> ActiveSheet ; // ( -- obj ) Get the ActiveSheet object
-						/// activeSheet :> name tib.
+                        ' activeCell :> comment last :: comment=pop()
+
 	: activeWorkbook	excel.app :> ActiveWorkbook ; // ( -- obj ) Get the ActiveWorkbook object
-						/// activeWorkbook :> name tib.	
+                        ' activeCell :> comment last :: comment=pop()
+                        
 	: selection 		excel.app :> selection ; // ( -- obj ) Get the selected object ( a range object )
 						/// selection :> count tib.
 						/// selection :: item(123).value="hello" 
