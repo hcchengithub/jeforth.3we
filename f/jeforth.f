@@ -54,6 +54,24 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from projectk.j
                     wordhash[last().name]=last();
                     compiling  = false;
                 }                
+
+                // Access variables in context from js code
+                vm.v = function(name){
+                    // FORTH variables (value or constant) can be accessed in js code
+                    // throuth vm[context].variableName or vm.forth.variableName
+                    // shorter form v(variableName) 
+                    // where 'v' means (V)ariable in the recent context.
+                    return vm[context][name]
+                }
+
+                // Access variables in root vocabulary from js code
+                vm.r = function(name){
+                    // FORTH variables (value or constant) can be accessed in js code
+                    // throuth vm[context].variableName or vm.forth.variableName
+                    // shorter form r(variableName) 
+                    // where 'r' means the (R)oot context which is the 'forth' word-list.
+                    return vm.forth[name]
+                }
                 
 				// An array's length is array.length but there's no such thing of hash.length for hash{}.
 				// memberCount(object) gets the given object's member count which is also a hash table's length.

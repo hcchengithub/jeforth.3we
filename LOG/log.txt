@@ -6038,3 +6038,19 @@
 			合併 develop 分支進 master 來 : git merge --no-ff master
 [ ] README.md to include
 	http://cdn.rawgit.com/hcchengithub/jeforth.3we/r2/index.html?cls_include_tutor-cloth.f
+[x] peforth 有新發現 ─ function cascading 
+    讓 vm.push() vm.execute() vm.dictate() 都傳回 vm 
+    以便 support function cascade. 從 projectk.js 裡面修改
+    --> 我都忘了 jeforth 的東西了。
+        o 直接改 projectk.js save 好就可以了。
+        o 已經在執行的 3hta 按一下 F5 reset 就生效
+        o 已經在執行的 3ca 也是！
+        o 試驗效果：
+            <js> push(123).push(456).dictate('+ . cr')</js>
+            579
+[x] jeforth 沒有 v() r() ? 那怎麼 access forth variables from js 呢？
+    js> vm[context].x 要簡化成 vm.v('x') , vm.forth.y 簡化成 vm.r('y')
+    13:11 2018-03-20 完成
+    
+    
+    

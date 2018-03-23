@@ -5,6 +5,7 @@
 	\ "Application Object (Excel)"             http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
 	\ VBA Language Reference                   http://msdn.microsoft.com/en-us/library/bb190882(v=office.11).aspx
 	\ Microsoft Excel Visual Basic Reference   http://msdn.microsoft.com/en-us/library/aa272254(v=office.11).aspx
+    \ Cell (Range) properties VBA Reference    http://msdn.microsoft.com/en-us/library/office/aa174290(v=office.11).aspx    
 	\ Excel constants, e.g. xlUp = -4162, can be found in AutoIt UDF source code excel.au3.
 	
 	include wsh.f
@@ -31,7 +32,7 @@
 						
 	null value excel.app 	// ( -- obj ) The Excel.Application object or undefined if no excel exists.
 						/// "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
-						s" where name = 'ExCeL.ExE'" count-process ( count ) 
+
 						excel.app.count 1 > [if] 
 							cr cr ." W A R N I N G !   (from excel.f)" cr cr
 							." Multiple Excel.Application are running, I can only handle one of them." cr 
@@ -39,6 +40,7 @@
 							." that one or you'll have to use the 'kill-excel' command to close all of them and" cr
 							." then '--excel.f-- include excel.f' to restart me, the excel.f module, again." cr cr
 						[then]
+
 						excel.app.count [if] 
 							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):vm.push(xl)</vb> 會開出新 Excel.Application。
 							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):vm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
@@ -49,11 +51,22 @@
 	excel.app [if] \ excel.app exists
 
 	: activeCell		excel.app :> ActiveCell ; // ( -- obj ) Get the ActiveCell object
+                        /// The 3 active things: cell, sheet, and workbook
 						/// activeCell :> offset(0,1).formula tib.
+						/// activeCell :: Interior.Color=0xbbggrr
+                        /// activeCell :> worksheet.name tib. 
+                        /// activeCell :> application \ ==> Microsoft Excel (object)
+                        /// activeWorkbook :> worksheets(1).name tib. --> sheet name
+                        /// activeWorkbook :> worksheets('NaMe').name tib. --> case insensitive
+                        /// activeWorkbook :> worksheets('匯總').name \ ==> 匯總 (string)
+						/// activeWorkbook :> name tib.	\ ==> filename
+                        
 	: activeSheet		excel.app :> ActiveSheet ; // ( -- obj ) Get the ActiveSheet object
-						/// activeSheet :> name tib.
+                        ' activeCell :> comment last :: comment=pop()
+
 	: activeWorkbook	excel.app :> ActiveWorkbook ; // ( -- obj ) Get the ActiveWorkbook object
-						/// activeWorkbook :> name tib.	
+                        ' activeCell :> comment last :: comment=pop()
+                        
 	: selection 		excel.app :> selection ; // ( -- obj ) Get the selected object ( a range object )
 						/// selection :> count tib.
 						/// selection :: item(123).value="hello" 
@@ -489,7 +502,7 @@
 	[then] \ excel.app exists
 
 	\ -- end of source code --
-	
+
 <comment>
 \	\ ================ How to open an Excel file ============================================
 \	\
