@@ -27,11 +27,14 @@
     \   skype js: tos().SendCommand(pop().Command(0,"PING","PONG",true)) 
     \   skype js: tos().SendCommand(pop().Command(0,"PING"))
 
-    : skype.CurrentUserHandle ( -- "skypeID" ) It returns "h.c.chen" for me
+    : skype.CurrentUserHandle ( -- "skypeID" ) \ It returns "h.c.chen" for me
         skype :> CurrentUserHandle ; 
 
-    \ 這個成功，好多！
-    skype :> Messages.Count \ ==> 1526 (number)
+    \ 這個成功，好多！同時暗示這些 messages 可以操作。
+    : skype.Messages ( -- obj ) \ All messages on the cloud I guess
+        skype :> Messages ; 
+    skype.Messages :> Count tib.
+    
     
     \ No error, but prints nothing
     <comment>
@@ -79,7 +82,8 @@
         Next
         </vb>
     </comment>
-
+    
+    <comment>
         > skype <vb>
         set oSkype = vm.pop()
         Set oUser = oSkype.User("echo123")
@@ -109,6 +113,7 @@
         \ 不知幹啥的
         skype <js> tos().SendCommand(tos().Command(5,"GET USER echo123 DISPLAYNAME", "USER echo123 DISPLAYNAME", true))</jsV> \ ==> undefined (undefined)
         skype <js> tos().SendCommand(pop().Command(3, "GET CURRENTUSERHANDLE", "CURRENTUSERHANDLE", true)) </jsV> \ ==> undefined (undefined)
+    </comment>
     
 
 stop
