@@ -32,7 +32,7 @@
 						
 	null value excel.app 	// ( -- obj ) The Excel.Application object or undefined if no excel exists.
 						/// "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
-						s" where name = 'ExCeL.ExE'" count-process ( count ) 
+
 						excel.app.count 1 > [if] 
 							cr cr ." W A R N I N G !   (from excel.f)" cr cr
 							." Multiple Excel.Application are running, I can only handle one of them." cr 
@@ -40,6 +40,7 @@
 							." that one or you'll have to use the 'kill-excel' command to close all of them and" cr
 							." then '--excel.f-- include excel.f' to restart me, the excel.f module, again." cr cr
 						[then]
+
 						excel.app.count [if] 
 							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):vm.push(xl)</vb> 會開出新 Excel.Application。
 							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):vm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
@@ -501,7 +502,7 @@
 	[then] \ excel.app exists
 
 	\ -- end of source code --
-	
+
 <comment>
 \	\ ================ How to open an Excel file ============================================
 \	\
