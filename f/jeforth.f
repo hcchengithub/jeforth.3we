@@ -1173,6 +1173,54 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					[d 1,0,2,2 d] [p "?dup" p]
 				</selftest>
 
+    \ case ... endcase definition is copied from 
+    \ https://github.com/phf/forth/blob/master/x86/jonesforth.f
+    \ Also thanks to FigTaiwan 吳政昌(亞斯) for the hints.
+
+: case          ( -- 0 ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                0 ; immediate
+                /// Usage:
+                /// ( key ) case 
+                ///     char a of char AAAA endof
+                ///     char b of char BBBB endof
+                ///     char c of char CCCC endof
+                ///     \ In default case, the key must be at TOS for being eaten by endcase 
+                ///     char ???? swap 
+                /// endcase
+
+: of            ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                ['] over , ['] = , [compile] if ['] drop , ; immediate
+                /// see help case
+
+: endof         ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                [compile] else ; immediate
+                /// see help case
+
+: endcase       ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                ['] drop , begin ?dup while [compile] then repeat ; immediate
+                /// see help case
+
+				<selftest>
+					*** case ... endcase 
+					marker ---
+                    : test
+                        case 
+                            char a of char AAAA endof
+                            char b of char BBBB endof
+                            char c of char CCCC endof
+                            \ In default case, the key must be at TOS for being eaten by endcase 
+                            char ???? swap 
+                        endcase ;
+                    char a test \ ==> AAAA (string)
+                    char b test \ ==> BBBB (string)
+                    char c test \ ==> CCCC (string)
+                    char d test \ ==> ???? (string)
+
+					[d 'AAAA','BBBB','CCCC','????' d]
+					[p 'case', 'of', 'endof', 'endcase' p]
+					---
+				</selftest>
+
 : variable      ( <string> -- ) \ Create a variable.
 				create 0 , [ char push(function(){last().type='colon-variable'}) jsEvalNo , ] ;
 				

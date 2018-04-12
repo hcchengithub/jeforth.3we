@@ -6108,4 +6108,16 @@
         可行的解法。 ----> 好了！ 改了 ls.f 的 list 之定義，利用分辨是否 string
         過濾掉非 editbox fields.
     FP @ 14:01 2018-04-12
-        
+
+[x] select-case 參考 T550 Downloads\jonesforth.f
+    [x] 先查看 if else then 的寫法一不一樣 ... 差不多，所以照抄有機會
+        : if ( -- a ) \ if..else..then, if..then
+            compile 0branch here 0 , ; immediate compile-only
+        : IF IMMEDIATE
+            ' 0BRANCH ,	\ compile 0BRANCH
+            HERE @		\ save location of the offset on the stack
+            0 ,		\ compile a dummy offset
+        ;
+    [x] 直接抄 joneforth 立刻成功.
+    [x] 3htm, 3hta 直接就通過了 selftest  
+    
