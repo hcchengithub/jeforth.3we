@@ -6052,5 +6052,60 @@
     js> vm[context].x 要簡化成 vm.v('x') , vm.forth.y 簡化成 vm.r('y')
     13:11 2018-03-20 完成
     
-    
-    
+[ ] 請問 FORTH 的 select - case 結構怎麼實現？
+    H.C.Chen
+    週三 2018/4/4, 下午 09:45
+    有網友問， 因為 if else then 多幾層之後，收尾就會有一大堆 then then then 
+    then . . . . 不好看。我試著「畫」個樣子出來（如下），添加 start-case, case, 
+    end-case 命令好像可以？有現成的設計嗎？
+
+    start-case boolean1 if
+      do case1  \ 然後跳到 end-case 之後
+    case boolean2 if
+      do case2  \ 然後跳到 end-case 之後
+    case boolean3 if
+      do case3  \ 然後跳到 end-case 之後
+    case boolean4 if
+      do case4  \ 然後跳到 end-case 之後
+    end-case 
+
+    - start-case 於 compile state 初始一個暫時獨立的 array 記錄每個 case 的位置；run time 不做事。
+    - if 若成立，往下執行到 else 或 case 或 then 為止，跳到 then 或 end-case 之後。
+    - if 若不成立，往下跳到 else 或 then 或 case。
+    - case ， compile 跳往 end-case 的 jump 命令，向 start-case 登記自己的位置供 end-case 來回填它的位置; 。然後回填 here 給前一個 if ，
+    - end-case ， compile time 要回填 here 給之前所有的 case。
+        
+    \ A1
+    吳政昌(亞斯) <ccwu660601@gmail.com>
+    週三 2018/4/11, 上午 08:45
+    參考 https://github.com/phf/forth/blob/master/x86/jonesforth.f
+
+    \ A2
+    吳政昌(亞斯) <ccwu660601@gmail.com>
+    週三 2018/4/11, 上午 08:36
+    參考 https://www.complang.tuwien.ac.at/forth/gforth/Docs-html/Selection.html
+    Selection - Gforth Manual
+    5.8.1 Selection. flag IF code ENDIF . If flag is non-zero (as far as IF etc. are concerned, a cell with any bit set represents truth) code is executed. flag IF code1 ELSE code2 ENDIF
+    www.complang.tuwien.ac.at
+
+[x] EditBox edit box 壞了，有些 fields 殺不掉，改不了。
+    [x] 先複習 ls.f 有啥東西 --> eb.delete 裡最後是這樣：
+        ( eb name ) js: storage.del(pop()) ( eb ) removeElement ;    
+    [x] storage <-- where from? ... from jeforth.3we\3htm\f\platform.f 
+        js> storage.all() (see) 
+        看到只有三個 fields 'ad' 'autoexec' 'pruning' 所以其他東西不該出現的難怪
+        不能 delete!
+    [x] 查 list command 怎麼回事？
+        js> storage.all() obj>keys . 
+            ad,autoexec,pruning,length,key,getItem,setItem,removeItem,clear OK 
+        除了前三個 field，其他都是 object members. <--------- RI! 
+        這些 members 可能是新的吧？ 為何以前沒有發現？
+        --> 3hta 沒有 js> storage.all().length 
+        [ ] 既然 chrome 有了新的 localStorage object members 咱就該考慮用上去，例
+            如用 storage.all().length storage.all().key(i) 等等，而非目前的解法
+            用 typeof(field)=='string' 來加一層分辨，有點簍。
+    [x] js> storage.all() obj>keys . <--- 其中只有 editbox 的 fields 的 type 是 string
+        可行的解法。 ----> 好了！ 改了 ls.f 的 list 之定義，利用分辨是否 string
+        過濾掉非 editbox fields.
+    FP @ 14:01 2018-04-12
+        

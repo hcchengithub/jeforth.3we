@@ -670,17 +670,21 @@
 			<o> <div class=lslist></div></o> swap ( DIV array ) \ 放整個 list 的 DIV, 非必要但可避免被 er 刪除。
 			begin js> tos().length while ( DIV array )
 				js> tos().pop()  ( DIV array fieldname )
-				<o>	<input class=lsfieldexport type=button value=Export></o> ( DIV array fieldname INPUT )
-					dup  ( DIV array fieldname INPUT INPUT ) 
-					char fieldname   ( DIV array fieldname INPUT INPUT "fieldname" ) 
-					js> tos(3)   ( DIV array fieldname INPUT INPUT "fieldname" fieldname ) 
-					setAttribute ( DIV array fieldname INPUT ) 
-					js> tos(3) swap appendChild  ( DIV array fieldname ) 
-				<o> <input class=lsfieldopen type=button value=Open></o> ( DIV array fieldname INPUT ) 
-					dup char fieldname js> tos(3) setAttribute ( DIV array fieldname INPUT ) 
-					js> tos(3) swap appendChild  ( DIV array fieldname ) 
-				s" <span> " swap + char <br></span> + </o> ( DIV array SPAN ) 
-				js> tos(2) swap appendChild ( DIV array ) 
+                js> typeof(storage.all()[tos()])=='string' if \ 過濾非 editbox fields 的東西
+                    <o>	<input class=lsfieldexport type=button value=Export></o> ( DIV array fieldname INPUT )
+                        dup  ( DIV array fieldname INPUT INPUT ) 
+                        char fieldname   ( DIV array fieldname INPUT INPUT "fieldname" ) 
+                        js> tos(3)   ( DIV array fieldname INPUT INPUT "fieldname" fieldname ) 
+                        setAttribute ( DIV array fieldname INPUT ) 
+                        js> tos(3) swap appendChild  ( DIV array fieldname ) 
+                    <o> <input class=lsfieldopen type=button value=Open></o> ( DIV array fieldname INPUT ) 
+                        dup char fieldname js> tos(3) setAttribute ( DIV array fieldname INPUT ) 
+                        js> tos(3) swap appendChild  ( DIV array fieldname ) 
+                    s" <span> " swap + char <br></span> + </o> ( DIV array SPAN ) 
+                    js> tos(2) swap appendChild ( DIV array ) 
+                else
+                    drop  ( DIV array )
+                then
 			repeat 2drop 
 		\ 給以上變出來的 buttons 畫龍點睛
 			['] (export-one-field) ['] (ed) <js> 
