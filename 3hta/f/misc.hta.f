@@ -84,7 +84,7 @@
                 next then ;
                 
     0 to officeLAN find-office-nic officeLAN [if] [else] 
-    <js> alert("officeLAN not found! nicon nicoff will not work") </js> [then]
+    <js> alert("officeLAN not found! Manually '8 to officeLAN' for nicon,nicoff") </js> [then]
 					   
 	: (nicoff) 	( -- ) \ Turn off the NIC (the certain where clause is for my LRV2 only)
 			  \ s" where deviceid = 19" getNIC :> disable() 
