@@ -117,9 +117,7 @@ t/c getWMIService js: vm.objWMIService=pop()
 				///        activeNIC :> enable() \ return 5 is failed when not an administrator
 				///		   check #nic for the active NIC count if there are many.
 
-: list-all-nic 	( -- ) \ List all NIC devices
-				cr ." ---- List all NIC ----" cr
-				"" getNIC  ( nic nic ... ) \ No where clause, get all of them
+: nics-on-stack ( nic1 nic2 ... -- ) \ Print NIC objects on data stack, #nic is their count
 				#nic ?dup if for 
 					>r r@ :> caption . cr
 					."  / NetConnectionStatus: " r@ :> NetConnectionStatus . cr
@@ -130,6 +128,16 @@ t/c getWMIService js: vm.objWMIService=pop()
 					."  / Status: " r@ :> Status . cr
 					r> drop
 				next then ;
+
+: list-all-nic 	( -- ) \ List all NIC devices
+				cr ." ---- List all NICs ----" cr
+				"" getNIC  ( nic nic ... ) \ No where clause, get all of them
+                nics-on-stack ;
+
+: list-active-nic 	( -- )
+				cr ." ---- List Acive NICs ----" cr
+				"" activeNIC  ( nic nic ... ) \ No where clause, get all of them
+                nics-on-stack ;
 
 				<selftest>
 					." List all NIC" cr
