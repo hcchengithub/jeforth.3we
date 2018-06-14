@@ -6126,4 +6126,17 @@
     Office Resources
     https://developer.microsoft.com/en-us/office/gallery/?filterBy=Samples
 
+[ ] 13:00 2018/06/14 用 jupyter notebook 有兩種選擇： 
+    1.  用 ijavascript kernel, 缺點就是沒有 magic 無法與其他 jupyter notebook 功能
+        協作.
+    2.  用 %%js 問題是跨 Cell 好像就斷了!
+    
+[x] 空谷居士：在我这边，因为，比源系统多增加include了一个汉化的文件，会有这么个小状况。
+    以前也没有，不知道为什么，这两天发现冒出来了。
+    yeap , include 1.f , 裡面只有一行 comment , 果真 stack 出現空 string 
+    有空看看      
+    RI: 本來的 || 定義有誤!!我當時知道，但是在 jeforth.3ca\3htm\f\quit.f 用上時忘了!
+       was: code || push(pop(1)||pop()) end-code // ( a b == a || b ) if a then swap else b endif
+      tobe: code || tos(1) ? pop() : pop(1) end-code // ( a b == a || b ) if a then a else b endif
+    解決了!
     

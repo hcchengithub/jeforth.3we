@@ -671,7 +671,7 @@ code and        var b=pop(),a=pop();push(Boolean(a)&&Boolean(b)) end-code // ( a
 code or         var b=pop(),a=pop();push(Boolean(a)||Boolean(b)) end-code // ( a b == a or b ) Logical or. See also '||' and 'OR'.
 code not        push(!Boolean(pop())) end-code // ( x == !x ) Logical not. Capital NOT is for bitwise.
 code &&         push(pop(1)&&pop()) end-code // ( a b == a && b ) if a then b else swap endif
-code ||         push(pop(1)||pop()) end-code // ( a b == a || b ) if a then swap else b endif
+code ||         tos(1) ? pop() : pop(1) end-code // ( a b == a || b ) if a then a else b endif
 code AND        push(pop() & pop()) end-code // ( a b -- a & b ) Bitwise AND. See also 'and' and '&&'.
 code OR         push(pop() | pop()) end-code // ( a b -- a | b ) Bitwise OR. See also 'or' and '||'.
 code NOT        push(~pop()) end-code // ( a -- ~a ) Bitwise NOT. Small 'not' is for logical.
