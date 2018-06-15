@@ -696,9 +696,9 @@ code null		push(null) end-code // ( -- null ) Get a null value.
 					true and \ true
 					true or \ true
 					false or \ true
-					{} [] || \ true [] {}
-					&& \ true []
-					|| \ [] true
+					{} [] || \ true {}
+					[] && \ true []
+					swap \ [] true
 					&& \ true
 					"" && \ true ""
 					not \ false

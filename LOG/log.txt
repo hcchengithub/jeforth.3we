@@ -6139,4 +6139,8 @@
        was: code || push(pop(1)||pop()) end-code // ( a b == a || b ) if a then swap else b endif
       tobe: code || tos(1) ? pop() : pop(1) end-code // ( a b == a || b ) if a then a else b endif
     解決了!
+    本來的寫法是直接套用 javascript 的 || 運算，當初想鐵定不會錯。
+    現在看，因為 pop(a) || pop(b) 的特性，如果 pop(a) 成立了，pop(b) 根本不會被執行, 
+    那就會把 b 留在 FORTH data stack 裡, 這個結果太奇怪，沒有用。所以要改寫。
+    || 很少用，我用上了時不記得這種詭異的行為，結果出錯了，幸好被您發現!!
     
