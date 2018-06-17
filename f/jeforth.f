@@ -54,6 +54,24 @@ code _init_		( -- ) \ Initialize vm.g.members that are moved out from projectk.j
                     wordhash[last().name]=last();
                     compiling  = false;
                 }                
+
+                // Access variables in context from js code
+                vm.v = function(name){
+                    // FORTH variables (value or constant) can be accessed in js code
+                    // throuth vm[context].variableName or vm.forth.variableName
+                    // shorter form v(variableName) 
+                    // where 'v' means (V)ariable in the recent context.
+                    return vm[context][name]
+                }
+
+                // Access variables in root vocabulary from js code
+                vm.r = function(name){
+                    // FORTH variables (value or constant) can be accessed in js code
+                    // throuth vm[context].variableName or vm.forth.variableName
+                    // shorter form r(variableName) 
+                    // where 'r' means the (R)oot context which is the 'forth' word-list.
+                    return vm.forth[name]
+                }
                 
 				// An array's length is array.length but there's no such thing of hash.length for hash{}.
 				// memberCount(object) gets the given object's member count which is also a hash table's length.
@@ -653,7 +671,7 @@ code and        var b=pop(),a=pop();push(Boolean(a)&&Boolean(b)) end-code // ( a
 code or         var b=pop(),a=pop();push(Boolean(a)||Boolean(b)) end-code // ( a b == a or b ) Logical or. See also '||' and 'OR'.
 code not        push(!Boolean(pop())) end-code // ( x == !x ) Logical not. Capital NOT is for bitwise.
 code &&         push(pop(1)&&pop()) end-code // ( a b == a && b ) if a then b else swap endif
-code ||         push(pop(1)||pop()) end-code // ( a b == a || b ) if a then swap else b endif
+code ||         tos(1) ? pop() : pop(1) end-code // ( a b == a || b ) if a then a else b endif
 code AND        push(pop() & pop()) end-code // ( a b -- a & b ) Bitwise AND. See also 'and' and '&&'.
 code OR         push(pop() | pop()) end-code // ( a b -- a | b ) Bitwise OR. See also 'or' and '||'.
 code NOT        push(~pop()) end-code // ( a -- ~a ) Bitwise NOT. Small 'not' is for logical.
@@ -678,9 +696,9 @@ code null		push(null) end-code // ( -- null ) Get a null value.
 					true and \ true
 					true or \ true
 					false or \ true
-					{} [] || \ true [] {}
-					&& \ true []
-					|| \ [] true
+					{} [] || \ true {}
+					[] && \ true []
+					swap \ [] true
 					&& \ true
 					"" && \ true ""
 					not \ false
@@ -1153,6 +1171,54 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
 					1 0 ?dup \ 1 0
 					2 ?dup \ 1 0 2 2 
 					[d 1,0,2,2 d] [p "?dup" p]
+				</selftest>
+
+    \ case ... endcase definition is copied from 
+    \ https://github.com/phf/forth/blob/master/x86/jonesforth.f
+    \ Also thanks to FigTaiwan 吳政昌(亞斯) for the hints.
+
+: case          ( -- 0 ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                0 ; immediate compile-only
+                /// Usage:
+                /// ( key ) case 
+                ///     char a of char AAAA endof
+                ///     char b of char BBBB endof
+                ///     char c of char CCCC endof
+                ///     \ In default case, the key must be at TOS for being eaten by endcase 
+                ///     char ???? swap 
+                /// endcase
+
+: of            ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                ['] over , ['] = , [compile] if ['] drop , ; immediate compile-only
+                /// see help case
+
+: endof         ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                [compile] else ; immediate compile-only
+                /// see help case
+
+: endcase       ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
+                ['] drop , begin ?dup while [compile] then repeat ; immediate compile-only
+                /// see help case
+
+				<selftest>
+					*** case ... endcase 
+					marker ---
+                    : test
+                        case 
+                            char a of char AAAA endof
+                            char b of char BBBB endof
+                            char c of char CCCC endof
+                            \ In default case, the key must be at TOS for being eaten by endcase 
+                            char ???? swap 
+                        endcase ;
+                    char a test \ ==> AAAA (string)
+                    char b test \ ==> BBBB (string)
+                    char c test \ ==> CCCC (string)
+                    char d test \ ==> ???? (string)
+
+					[d 'AAAA','BBBB','CCCC','????' d]
+					[p 'case', 'of', 'endof', 'endcase' p]
+					---
 				</selftest>
 
 : variable      ( <string> -- ) \ Create a variable.

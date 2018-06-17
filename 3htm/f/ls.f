@@ -670,17 +670,21 @@
 			<o> <div class=lslist></div></o> swap ( DIV array ) \ 放整個 list 的 DIV, 非必要但可避免被 er 刪除。
 			begin js> tos().length while ( DIV array )
 				js> tos().pop()  ( DIV array fieldname )
-				<o>	<input class=lsfieldexport type=button value=Export></o> ( DIV array fieldname INPUT )
-					dup  ( DIV array fieldname INPUT INPUT ) 
-					char fieldname   ( DIV array fieldname INPUT INPUT "fieldname" ) 
-					js> tos(3)   ( DIV array fieldname INPUT INPUT "fieldname" fieldname ) 
-					setAttribute ( DIV array fieldname INPUT ) 
-					js> tos(3) swap appendChild  ( DIV array fieldname ) 
-				<o> <input class=lsfieldopen type=button value=Open></o> ( DIV array fieldname INPUT ) 
-					dup char fieldname js> tos(3) setAttribute ( DIV array fieldname INPUT ) 
-					js> tos(3) swap appendChild  ( DIV array fieldname ) 
-				s" <span> " swap + char <br></span> + </o> ( DIV array SPAN ) 
-				js> tos(2) swap appendChild ( DIV array ) 
+                js> typeof(storage.all()[tos()])=='string' if \ 過濾非 editbox fields 的東西
+                    <o>	<input class=lsfieldexport type=button value=Export></o> ( DIV array fieldname INPUT )
+                        dup  ( DIV array fieldname INPUT INPUT ) 
+                        char fieldname   ( DIV array fieldname INPUT INPUT "fieldname" ) 
+                        js> tos(3)   ( DIV array fieldname INPUT INPUT "fieldname" fieldname ) 
+                        setAttribute ( DIV array fieldname INPUT ) 
+                        js> tos(3) swap appendChild  ( DIV array fieldname ) 
+                    <o> <input class=lsfieldopen type=button value=Open></o> ( DIV array fieldname INPUT ) 
+                        dup char fieldname js> tos(3) setAttribute ( DIV array fieldname INPUT ) 
+                        js> tos(3) swap appendChild  ( DIV array fieldname ) 
+                    s" <span> " swap + char <br></span> + </o> ( DIV array SPAN ) 
+                    js> tos(2) swap appendChild ( DIV array ) 
+                else
+                    drop  ( DIV array )
+                then
 			repeat 2drop 
 		\ 給以上變出來的 buttons 畫龍點睛
 			['] (export-one-field) ['] (ed) <js> 
@@ -733,12 +737,12 @@
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
 			\ js: outputbox.style.fontSize="1.5em"
-			cr .( Launch the briefing ) cr
-			<o> <iframe src="http://note.youdao.com/share/?id=79f8bd1b7d0a6174ff52e700dbadd1b2&type=note"
-			name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
-			marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
-			cr cr 
-			.( execute the 'list' command ) cr
+			\ cr .( Launch the briefing ) cr
+			\ <o> <iframe src="http://note.youdao.com/noteshare?id=b76172957fccf6a35b31dd7936327c3f&sub=43D112C5FDF447AD859EB3729F9B9ACA"
+			\ name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
+			\ marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
+			\ cr cr 
+			\ .( execute the 'list' command ) cr
 			list
 		</unindent></text> unindent 
 		{} js: tos().doc=pop(1) js: tos().readonly=true js: tos().mode=true

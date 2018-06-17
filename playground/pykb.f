@@ -6,15 +6,25 @@ include unindent.f
 s" pykb.f"   source-code-header
 
     <text>
-    取得 command line of DOS BOX cmd 
-        s" where processid = 4728" objEnumWin32_Process :> item().CommandLine .s
-    來看，明明是 "C:\Windows\System32\cmd.exe" (string)。而且： 
-        s" where CommandLine = CommandLine" objEnumWin32_Process :> atEnd()
-    傳回 false 表示有東西，而以下這樣竟然不行！
-        s" where CommandLine = 'C:\\Windows\\System32\\cmd.exe'" 
-        objEnumWin32_Process :> atEnd() \ ==> true (boolean) 表示沒找到！
-    這還不只，若用 like 最後的 % 也不能省，真搞不懂。這麼一來想濾掉 Chrome 產生的
-    cmd 眼前就沒好辦法了。通通列出來吧！試 hi 看看，不行就一個個試。
+    【問題】
+    
+        取得 command line of DOS BOX cmd 
+            s" where processid = 4728" objEnumWin32_Process :> item().CommandLine .s
+        來看，明明是 "C:\Windows\System32\cmd.exe" (string)。而且： 
+            s" where CommandLine = CommandLine" objEnumWin32_Process :> atEnd()
+        傳回 false 表示有東西，而以下這樣竟然不行！
+            s" where CommandLine = 'C:\\Windows\\System32\\cmd.exe'" 
+            objEnumWin32_Process :> atEnd() \ ==> true (boolean) 表示沒找到！
+        這還不只，若用 like 最後的 % 也不能省，真搞不懂。這麼一來想濾掉 Chrome 產生的
+        cmd 眼前就沒好辦法了。通通列出來吧！試 hi 看看，不行就用
+            
+            <id> to processid hi
+        
+        一個個試。
+        
+        s" where CommandLine like '%cmd.exe%'" list-them tib.
+        s" where name like '%python%'" list-them tib.
+        
     </text> . cr
 
     s" where CommandLine like '%cmd.exe%'" list-them tib.

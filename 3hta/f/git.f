@@ -337,9 +337,12 @@ s" git.f"   source-code-header
 
     \ git log 很有用！
 
-    : log-verbose ( -- ) \ Read the commit log, 'q' to stop.
-        <shell> git log </shell> ;
+    : log-verbose ( [options...] -- ) \ Read the commit log, 'q' to stop.
+        s" git log " CR word + </shell> ;
+        /// See also 'log' command.
         /// "git log -10" to see only the recent 10 commits
+        /// log-verbose master  \ to see also newer commits of 'master' branch
+        /// log-verbose develop \ to see also newer commits of 'develop' branch
 
     : 還原檔案 ( <filename1 filename2 ...> -- ) \ 把檔案從「最後的 commit」裡恢復回來。
         s" git checkout -- " CR word + </shell> ;
@@ -468,8 +471,13 @@ s" git.f"   source-code-header
 
     \ 第 10 天：認識 Git 物件的絕對名稱
 
-    : log ( -- ) \ Read the simplified commit log, 'q' to stop. Also 'log-verbose'.
+    : log ( -- ) \ Read the simplified commit log, 'q' to stop.
         <shell> git log --pretty=oneline --abbrev-commit </shell> ;
+        /// HEAD may not be at top of the list when debugging older commit.
+        /// Use below examples to see them all, even newer commits:
+        ///    git log master --pretty=oneline --abbrev-commit 
+        ///    git log develop --pretty=oneline --abbrev-commit 
+        /// See also 'log-verbose' command
         
     \ 第 11 天：認識 Git 物件的一般參照與符號參照
     
@@ -1054,7 +1062,4 @@ s" git.f"   source-code-header
 	<code>escape	\ convert "<>" to "&lt;&gt;" in code sections
 	js: dictate(pop()) ;
 	/// 抹掉本文 js> $(".article")[0] removeElement
-
-
-
 

@@ -5,6 +5,7 @@
 	\ "Application Object (Excel)"             http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
 	\ VBA Language Reference                   http://msdn.microsoft.com/en-us/library/bb190882(v=office.11).aspx
 	\ Microsoft Excel Visual Basic Reference   http://msdn.microsoft.com/en-us/library/aa272254(v=office.11).aspx
+    \ Cell (Range) properties VBA Reference    http://msdn.microsoft.com/en-us/library/office/aa174290(v=office.11).aspx    
 	\ Excel constants, e.g. xlUp = -4162, can be found in AutoIt UDF source code excel.au3.
 	
 	include wsh.f
@@ -31,7 +32,7 @@
 						
 	null value excel.app 	// ( -- obj ) The Excel.Application object or undefined if no excel exists.
 						/// "Application Object (Excel)" http://msdn.microsoft.com/en-us/library/office/ff194565(v=office.15).aspx
-						s" where name = 'ExCeL.ExE'" count-process ( count ) 
+
 						excel.app.count 1 > [if] 
 							cr cr ." W A R N I N G !   (from excel.f)" cr cr
 							." Multiple Excel.Application are running, I can only handle one of them." cr 
@@ -39,6 +40,7 @@
 							." that one or you'll have to use the 'kill-excel' command to close all of them and" cr
 							." then '--excel.f-- include excel.f' to restart me, the excel.f module, again." cr cr
 						[then]
+
 						excel.app.count [if] 
 							\ 用這行就錯了! <vb> On Error Resume Next:Set xl=GetObject("","excel.application"):vm.push(xl)</vb> 會開出新 Excel.Application。
 							<vb> On Error Resume Next:Set xl=GetObject(,"excel.application"):vm.push(xl)</vb> \ 這行才是沿用既有的 Excel.Application。
@@ -49,11 +51,22 @@
 	excel.app [if] \ excel.app exists
 
 	: activeCell		excel.app :> ActiveCell ; // ( -- obj ) Get the ActiveCell object
+                        /// The 3 active things: cell, sheet, and workbook
 						/// activeCell :> offset(0,1).formula tib.
+						/// activeCell :: Interior.Color=0xbbggrr
+                        /// activeCell :> worksheet.name tib. 
+                        /// activeCell :> application \ ==> Microsoft Excel (object)
+                        /// activeWorkbook :> worksheets(1).name tib. --> sheet name
+                        /// activeWorkbook :> worksheets('NaMe').name tib. --> case insensitive
+                        /// activeWorkbook :> worksheets('匯總').name \ ==> 匯總 (string)
+						/// activeWorkbook :> name tib.	\ ==> filename
+                        
 	: activeSheet		excel.app :> ActiveSheet ; // ( -- obj ) Get the ActiveSheet object
-						/// activeSheet :> name tib.
+                        ' activeCell :> comment last :: comment=pop()
+
 	: activeWorkbook	excel.app :> ActiveWorkbook ; // ( -- obj ) Get the ActiveWorkbook object
-						/// activeWorkbook :> name tib.	
+                        ' activeCell :> comment last :: comment=pop()
+                        
 	: selection 		excel.app :> selection ; // ( -- obj ) Get the selected object ( a range object )
 						/// selection :> count tib.
 						/// selection :: item(123).value="hello" 
@@ -225,12 +238,20 @@
 						else selection :: item(tos()).activate() then ; 
 						/// 這組工具:上,下,左,右,當格,的【判斷】都依賴這些 cell 有
 						/// 值，若不然時就要用本命令 i?stop 透過 selection 來完成。
-						/// \ Example, 選中的格子都去掉頭尾空白。
+						/// \ Example-1, 選中的格子都去掉頭尾空白，做完 i 自動消失
 						/// manual 0 cut ( 前置準備 ) 
-						/// i?stop ( 【判斷】兼【移位】,留下 i ) 
-						/// cell@ trim cell! ( do 把當格前後空白都刪掉 )
+						/// i?stop ( 【判斷】兼【移位】,留下 i，此 i 不能破壞 ) 
+						/// cell@ trim cell! ( do 把當格前後空白都刪掉，i 沒用到就放著 )
 						/// 1 nap rewind ( 重複 )
-						/// auto ( 收尾 )						
+						/// auto ( 收尾 )
+                        ///
+                        /// \ Example-2： 檢查選中的格子是否都是數字，若非就印出 i 繼續，做完 i 自動消失
+                        /// cr manual 0 [begin] ( 前置準備 )
+                        /// i?stop ( 【判斷】兼【移位】,留下 i，此 i 不能破壞 )
+                        /// cell@ js> typeof(pop())=='number' ( i number? )
+                        /// [if] ( i 不能破壞 ) [else] dup ( i 不能破壞 ) . cr [then] ( 若非 number 印出 i )
+                        /// 1 nap [again] ( 重複 )
+                        /// auto ( 收尾 )
 						
 	: @?stop 			?cell@ if drop else stop then ; // ( -- ) Stop if the activeCell is not value
 						/// Example, 一路往下只要【當格】有值就把它抄到右邊去:
@@ -489,7 +510,7 @@
 	[then] \ excel.app exists
 
 	\ -- end of source code --
-	
+
 <comment>
 \	\ ================ How to open an Excel file ============================================
 \	\

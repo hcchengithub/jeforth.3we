@@ -55,15 +55,38 @@
 		( Word array ) (aliases) ; 
 		/// Used in DOS box batch program for jeforth to ignore DOS words.
 
+proc-env COMPUTERNAME char 31ENB667 = [if]
+    
 	\ ----- NIC on/off utility -----
 	
-	17 value officeLAN // ( -- n ) DeviceID of the OA LAN NIC. Change this for your case.
-					   /// "where deviceid = 19" is for my LRV2 OA only 
-					   /// Need administrator privilege, run 'dos' check title.
-					   /// Run 3HTA.bat through right click to 'Run as administrator'.
-					   /// Set NIC deviceID : "19 to officeLAN" misc.f
-					   /// Get NIC deviceID : "activeNIC :> deviceid ." wmi.f
-					   /// See all NIC devices : "list-all-nic" wmi.f
+	0 value officeLAN  // ( -- n ) DeviceID of the OA LAN NIC. Change this for your case.
+                       /// Loaded by find-office-nic command automatically
+					   /// Need administrator privilege, Run 3HTA.bat through right click to 'Run as administrator'.
+					   /// Set NIC deviceID : 19 to officeLAN
+					   /// Get NIC deviceID : activeNIC :> deviceid
+					   /// See all NIC devices : list-all-nic
+					   /// "where deviceid = 8" is for my LRV2 OA
+
+    : is-office-nic? ( "caption" -- boolean ) \ 用 Caption 來辨認 OA 的 office LAN 是那個 nic
+                <js> tos().indexOf("ThinkPad USB-C Dock Ethernet")!=-1</jsV>
+                <js> pop(1).indexOf("Intel(R) Ethernet Connection (4) I219-LM")!=-1</jsV>
+                or ;
+                    
+    : find-office-nic ( -- ) \ Load officeLAN with office NIC automatically
+                "" getNIC  ( nic nic ... ) \ No where clause, get all of them
+                #nic ?dup if for 
+                    >r r@ :> caption is-office-nic? \ 找到了 
+                    if
+                        r@ :> NetConnectionStatus==2 \ must be connected
+                        if
+                            r@ :> DeviceID to officeLAN
+                        then
+                    then
+                    r> drop
+                next then ;
+                
+    0 to officeLAN find-office-nic officeLAN [if] [else] 
+    <js> alert("officeLAN not found! Manually '8 to officeLAN' for nicon,nicoff") </js> [then]
 					   
 	: (nicoff) 	( -- ) \ Turn off the NIC (the certain where clause is for my LRV2 only)
 			  \ s" where deviceid = 19" getNIC :> disable() 
@@ -101,5 +124,10 @@
 	\ 			js> (tos()>=1)&&(tos()<=120) if else ." Error: Given time period must be > 1 and <= 120 (minutes)." cr exit then 
 	\ 			nicoff 60 * 1000 * nap nicon ;
 	\ 			last :: comment=tick('officeLAN').comment
+
+[then]
+
+
+\ --- The End ---
 
 				

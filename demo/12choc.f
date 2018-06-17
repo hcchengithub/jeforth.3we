@@ -325,11 +325,11 @@ cls <text>
             sponge.setAngle(0);
             sponge.setVel(cp.v(0,0));
         </js> 1000 nap ;
-    : 6:6 ( 8 numbers -- ) \ Put 6 chocs on each side
+    : 6:6 ( 12 numbers -- ) \ Put 6 chocs on each side
         6 left:right home 
         hold< 6 for drop-choc-right drop-choc-left wait nap next >hold ;
 
-    : 5:5 ( 8 numbers -- ) \ Put 5 chocs on each side
+    : 5:5 ( 10 numbers -- ) \ Put 5 chocs on each side
         5 left:right home
         hold< 5 for drop-choc-right drop-choc-left wait nap next >hold ;
 
@@ -348,6 +348,11 @@ cls <text>
     : 1:1 ( 2 numbers -- ) \ Put 1 choc on each side
         home hold< drop-choc-right drop-choc-left wait nap >hold ;
 
+    : discover ( -- ) \ Put all chocs into the liquid to see which one is defect
+        12 [for] 12 t@ - drop-choc-left wait nap [next] ;
+        /// Move the sponge right side out of the tank but 
+        /// left side in the liquid.
+        
 \ Auxiliary tools
 
     : view ( -- ) \ See all chocolates' weight
