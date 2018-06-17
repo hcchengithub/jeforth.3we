@@ -1178,7 +1178,7 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
     \ Also thanks to FigTaiwan 吳政昌(亞斯) for the hints.
 
 : case          ( -- 0 ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
-                0 ; immediate
+                0 ; immediate compile-only
                 /// Usage:
                 /// ( key ) case 
                 ///     char a of char AAAA endof
@@ -1189,15 +1189,15 @@ code 2drop		stack.splice(stack.length-2,2) end-code // ( ... a b -- ... )
                 /// endcase
 
 : of            ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
-                ['] over , ['] = , [compile] if ['] drop , ; immediate
+                ['] over , ['] = , [compile] if ['] drop , ; immediate compile-only
                 /// see help case
 
 : endof         ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
-                [compile] else ; immediate
+                [compile] else ; immediate compile-only
                 /// see help case
 
 : endcase       ( -- ) \ ( key ) case <case1> of <do case1> endof <do default> endcase 
-                ['] drop , begin ?dup while [compile] then repeat ; immediate
+                ['] drop , begin ?dup while [compile] then repeat ; immediate compile-only
                 /// see help case
 
 				<selftest>

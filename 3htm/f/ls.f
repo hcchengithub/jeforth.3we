@@ -737,12 +737,12 @@
 	js> storage.get("autoexec") [if] [else] 
 		<text> <unindent>
 			\ js: outputbox.style.fontSize="1.5em"
-			cr .( Launch the briefing ) cr
-			<o> <iframe src="http://note.youdao.com/share/?id=79f8bd1b7d0a6174ff52e700dbadd1b2&type=note"
-			name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
-			marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
-			cr cr 
-			.( execute the 'list' command ) cr
+			\ cr .( Launch the briefing ) cr
+			\ <o> <iframe src="http://note.youdao.com/noteshare?id=b76172957fccf6a35b31dd7936327c3f&sub=43D112C5FDF447AD859EB3729F9B9ACA"
+			\ name="An introduction to jeforth.3ce" align="center" width="96%" height="1000px"
+			\ marginwidth="1" marginheight="1" frameborder="1" scrolling="Yes"> </iframe></o> drop
+			\ cr cr 
+			\ .( execute the 'list' command ) cr
 			list
 		</unindent></text> unindent 
 		{} js: tos().doc=pop(1) js: tos().readonly=true js: tos().mode=true
