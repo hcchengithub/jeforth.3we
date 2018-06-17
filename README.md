@@ -157,6 +157,8 @@ Assume that you have cloned the project to your local computer and have run
 
     It downloads a web page and then wait for one minute before proseed doing following jobs
     assume that you are downlaoding many many things programmatically. jeforth.3ce can do many other interesting things powered by Chrome Extensions.
+8. jeforth.3ce can also be found on the Google **Chrome Web Store** by searching 'jeforth' and installed by clicking the `[+ ADD TO CHROME]` button. But I prefer the above way that uses my local source code that can be modified anytime and takes effect immediately.
+
 
 #### Chrome Application / jeforth.3ca
 Assume that you have cloned the project to your local computer and have run
