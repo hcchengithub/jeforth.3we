@@ -137,6 +137,27 @@ nw ../jeforth.3nw cls .' Hello World' 3000 sleep bye
 
 The prior runs self-test because there's no given task to do. The 2'nd prints 'Hello world' and return to DOS prompt after 3 seconds.
 
+#### Chrome Extension / jeforth.3ce
+Assume that you have cloned the project to your local computer and have run
+`setup.bat` as mentioned above that have created the `jeforth.3ce/` directory then the following steps guide you to install jeforth.3ce Chrome Extension:
+
+1. Type this address `chrome://extensions` to Google Chrome Browser's address line.
+2. Turn on the "Developer mode" and see the **LOAD UNPACKED** appears.
+3. Click **[LOAD UNPACKED]** and bring the dialog to your `jeforth.3ce/` directory which was
+   created by the `setup.bat` mentioned above.
+4. Observe the FigTaiwan icon appears on the upper right corner and on the Chrome Extensions
+   page amongst other Chrome Extensions.
+5. Click the FigTaiwan icon on the upper right corner to launch jeforth.3ce pop-up window. jeforth command line is
+   at the bottom of the pop-up window. Click anywhere outside the pop-up window would close it, don't do that yet! Run `open-3ce-tab` to open jeforth.3ce on a normal tab instead of
+   the volatiling pop-up window. 
+6. Bookmark the jeforth.3ce tab so you can open it anytime a little easier than the above steps.
+7. Now play with the following line to download something from the Internet:
+
+    `<o> <h1> Hello World!</h1><a download href="http://example.com"></a></o> :: click() js> 1*60*1000 nap`
+
+    It downloads a web page and then wait for one minute before proseed doing following jobs
+    assume that you are downlaoding many many things programmatically. 
+
 Applications in every day life
 ==============================
 
@@ -185,6 +206,6 @@ Presentation videos
 The End
 =======
  - FigTaiwan [http://figtaiwan.org](http://figtaiwan.org) 
- - H.C. Chen [hcchen5600@gmail.com](hcchen5600@gmail.com) 2017/9/23
+ - H.C. Chen [hcchen5600@gmail.com](hcchen5600@gmail.com) 2018.6.17
  
 
