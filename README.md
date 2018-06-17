@@ -150,13 +150,31 @@ Assume that you have cloned the project to your local computer and have run
 5. Click the FigTaiwan icon on the upper right corner to launch jeforth.3ce pop-up window. jeforth command line is
    at the bottom of the pop-up window. Click anywhere outside the pop-up window would close it, don't do that yet! Run `open-3ce-tab` to open jeforth.3ce on a normal tab instead of
    the volatiling pop-up window. 
-6. Bookmark the jeforth.3ce tab so you can open it anytime a little easier than the above steps.
+6. Bookmark the jeforth.3ce tab so you can open it anytime a little faster than the above steps.
 7. Now play with the following line to download something from the Internet:
 
     `<o> <h1> Hello World!</h1><a download href="http://example.com"></a></o> :: click() js> 1*60*1000 nap`
 
     It downloads a web page and then wait for one minute before proseed doing following jobs
-    assume that you are downlaoding many many things programmatically. 
+    assume that you are downlaoding many many things programmatically. jeforth.3ce can do many other interesting things powered by Chrome Extensions.
+
+#### Chrome Application / jeforth.3ca
+Assume that you have cloned the project to your local computer and have run
+`setup.bat` as mentioned above that have created the `jeforth.3ca/` directory then the following steps guide you to install jeforth.3ca Chrome Application:
+
+1. Type this address `chrome://extensions` to Google Chrome Browser's address line.
+2. Turn on the "Developer mode" and see the **LOAD UNPACKED** appears.
+3. Click **[LOAD UNPACKED]** and bring the dialog to your `jeforth.3ca/` directory which was
+   created by the `setup.bat` mentioned above.
+4. Scroll down the chrome://extensions page if necessary to observe the jeforth.3ca appear in the Chrome Apps section.
+5. Type this address `chrome://apps` to Google Chrome Browser's address line, jeforth.3ca should have been created in that page. Click the (FigTaiwan) icon to launch jeforth.3ca on a tab. 
+6. Bookmark the jeforth.3ca tab so you can open it anytime a little faster than the above steps.
+7. Now play with the following line to download something from the Internet:
+
+    `<o> <h1> Hello World!</h1><a download href="http://example.com"></a></o> :: click() js> 1*60*1000 nap`
+
+    It downloads a web page and then wait for one minute before proseed doing following jobs
+    assume that you are downlaoding many many things programmatically. jeforth.3ca is a very handy tool on your Chrome browser.
 
 Applications in every day life
 ==============================
