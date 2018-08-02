@@ -225,6 +225,7 @@
 	: active-tab  ( -- objTab ) \ Get the active tab of Chrome browser.
 		js: push({active:true}) tabs.query :> [0] ;
 		/// Used by 3ce popup page.
+        /// active-tab :> ['id'] tabid! // set target tab
 
 	: attach ( tabid -- ) \ Attach 3ce to the target tab to be possessed
 		\ Activate the target tab
@@ -415,18 +416,19 @@
 		/// ( empty, tabid by default or active-tab if from popup ) attach 
 	
 	: pop<target ( -- x ) \ 3ce extension pages get and consumes the TOS from the target page
-		char NotYet s' shooo! <js> chrome.runtime.sendMessage({addr:"'
+		char NotYet11 s' shooo! <js> chrome.runtime.sendMessage({addr:"'
 		myTabId + s' ",tos:pop()})</js>' + (dictate)
-        \ (dictate) 之後如果不 nap 一下這整行有時候會印上 host 端，不知何故？ [ ] 被當成 F7 下的命令因此以 host 為 console
+        \ (dictate) 之後如果不 nap 一下這整行有時候會印上 host 端，不知何故？ 
+        \ [ ] 被當成 F7 下的命令因此以 host 為 console
         \ 後來乾脆把 10 nap 移進 (dictate) 了。
-		begin js> tos()=="NotYet" while 100 nap repeat nip ;
+		begin js> tos()=="NotYet11" while 100 nap repeat nip ;
 		/// for 3ce extension pages and popup page only
         /// Uncertain if target data stack is empty or TOS is an undefined
 		
 	: tos<target ( -- x ) \ 3ce extension pages get but not consumes the TOS from the target page
-		char NotYet s' shooo! <js> chrome.runtime.sendMessage({addr:"'
+		char NotYet22 s' shooo! <js> chrome.runtime.sendMessage({addr:"'
 		myTabId + s' ",tos:tos()})</js>' + (dictate)
-		begin js> tos()=="NotYet" while 100 nap repeat nip ;
+		begin js> tos()=="NotYet22" while 100 nap repeat nip ;
 		/// for 3ce extension pages and popup page only
         /// Uncertain if target data stack is empty or TOS is an undefined
 		
