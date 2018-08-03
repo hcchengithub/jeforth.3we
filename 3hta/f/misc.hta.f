@@ -55,6 +55,8 @@
 		( Word array ) (aliases) ; 
 		/// Used in DOS box batch program for jeforth to ignore DOS words.
 
+proc-env COMPUTERNAME char 31ENB667 = [if]
+    
 	\ ----- NIC on/off utility -----
 	
 	0 value officeLAN  // ( -- n ) DeviceID of the OA LAN NIC. Change this for your case.
@@ -122,5 +124,10 @@
 	\ 			js> (tos()>=1)&&(tos()<=120) if else ." Error: Given time period must be > 1 and <= 120 (minutes)." cr exit then 
 	\ 			nicoff 60 * 1000 * nap nicon ;
 	\ 			last :: comment=tick('officeLAN').comment
+
+[then]
+
+
+\ --- The End ---
 
 				
