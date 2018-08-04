@@ -6197,3 +6197,6 @@
         [ ] Master 到回 develop
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
+
+[ ] 17:27 18/08/02
+    3ce 不太穩定 ce.f 裡面有 shooo! 跟 notyet 的地方都要再加強測試。
