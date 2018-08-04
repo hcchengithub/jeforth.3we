@@ -6184,7 +6184,7 @@
             [ ] numeric-demo.f
             [ ] h2o.f ,
             [ ] many-clocks.f ,
-        [ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+        [x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
             切換到Master分支 : git checkout master
             合併 develop 分支進 master 來 : git merge --no-ff develop
             ==> 已經改用 GitHub Desktop 只要切到 master 然後 Menu > 
@@ -6192,8 +6192,8 @@
         [/] Test the master all over again ... ignored, lazy.
         [x] Upload master to GitHub : git push
         [x] Complete this log.txt
-        [ ] release note
         [/] GitHub 上的 README.md 範例都指向 r2 要改成 rn --> 懶得改
+        [ ] release note
         [ ] Master 到回 develop
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
