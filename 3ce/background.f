@@ -1,10 +1,16 @@
 
 	\ background.f for jeforth.3ce background page
 	\
+    \ 19:40 2018/08/08 複習時做個筆記。
+	\ 本檔只有在 chrome://extensions reload jeforth.3ce 時才會被執行到一次。
+    \ 重新啟動 Chrome 時推想也會來跑一次，平常根本不會來。以下所定義的 words 以及
+    \ 所掛的 event handler 只有去 attach 人家的頁面時才會用到。
+    \ 
 	\ QUIT is the traditional forth system's CLI loop. jeforth.f kernel is common for all
 	\ applications. quit.f is the good place to define propritary features of each application.
 	\ Due to that quit.f has already been used for 3ce extension pages, background.f is thus
 	\ the same thing but for the background page only.
+    \ 
 
 	\ ------------------ Self-test of the jeforth.f kernel --------------------------------------
 	js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert

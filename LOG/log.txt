@@ -6036,7 +6036,7 @@
         [ ] Master 到回 develop
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
-[x] peforth 有新發現 ─ function cascading 
+[ ] peforth 有新發現 ─ function cascading 
     讓 vm.push() vm.execute() vm.dictate() 都傳回 vm 
     以便 support function cascade. 從 projectk.js 裡面修改
     --> 我都忘了 jeforth 的東西了。
@@ -6046,6 +6046,7 @@
         o 試驗效果：
             <js> push(123).push(456).dictate('+ . cr')</js>
             579
+    --> 18:03 18/08/08 以前改好了，如今怎麼沒有? 再改一次吧！        
 [x] jeforth 沒有 v() r() ? 那怎麼 access forth variables from js 呢？
     js> vm[context].x 要簡化成 vm.v('x') , vm.forth.y 簡化成 vm.r('y')
     13:11 2018-03-20 完成
@@ -6200,3 +6201,7 @@
 
 [ ] 17:27 18/08/02
     3ce 不太穩定 ce.f 裡面有 shooo! 跟 notyet 的地方都要再加強測試。
+[ ] 3ce 光設定 tabid! 而沒有 attach 到 target tab 則 F7 就無效，是這樣嗎？ 複習一下。
+    --> 光看 ce.f 就對了
+    --> background.f 只有在 reload 3ce 時才會被 run 到，其中定義的東西只有在 attach
+        時才會被用到。直接研究 attach 就是 3ce 的精華。
