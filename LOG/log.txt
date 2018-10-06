@@ -4640,6 +4640,11 @@
             <js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
             function(result){push(result);execute('stopSleeping')}) </js>
             10000 sleep ;
+    --> 複習: 14:06 2018-08-11 從被 attached 的 target page, hao123 繁簡轉換 page, 執行：
+            char common.css readTextFile 
+        果然讀到 jeforth.3ce folder 之下的該檔案。 --> 檢查 readTextFile (沒有尾綴 Auto) 的定義，只出現在 ce.f 裡的
+        attach definition 裡。
+    
 [x] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f
 [x] Popup page can attach 3ce to target page now, so 3ce default tabid should be the 'active' tab.
     js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number) must be only one
@@ -6199,9 +6204,23 @@
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
 
+-----------------------------------------------------
 [ ] 17:27 18/08/02
     3ce 不太穩定 ce.f 裡面有 shooo! 跟 notyet 的地方都要再加強測試。
-[ ] 3ce 光設定 tabid! 而沒有 attach 到 target tab 則 F7 就無效，是這樣嗎？ 複習一下。
+[ ] 我想寫下導覽，把 3ce 的整套設計用實驗步驟的方式講清楚，以後自己複習也方便。
+    --> See Ynote "jeforth.3ce 導覽"
+    --> 查以前的筆記，找 dictate(), (dictate) 之類，找 sendMessage 可能更好
+        [ ] Log of TR.html 真的有
+        [ ] log.txt 本身也很多。 --> 直接在上面複習，寫下筆記。
+        [ ] ls.f search 3ce 有些 message 的例子
+    3ce 光設定 tabid! 而沒有 attach 到 target tab 則 F7 就無效，是這樣嗎？ 複習一下。
+    
     --> 光看 ce.f 就對了
     --> background.f 只有在 reload 3ce 時才會被 run 到，其中定義的東西只有在 attach
         時才會被用到。直接研究 attach 就是 3ce 的精華。
+    --> 都忘光光了 ce.f 裡的 ce3_host_onmessage() 只有在 attach 時才會被 call 到，而且一大堆。
+[ ] 先瞭解 sendMessage 有幾種，每個都試試看，確定他們的玩法
+    --> 從 target page 打給 background page
+        js: chrome.runtime.sendMessage({addr:"background",forth:pop()})         
+[ ] 直接 trace ce.f 吧！
+[ ] 搞懂之後，弄個 attach 選項，不要去干擾 target page 直接用 3ce page 去控制 target page。

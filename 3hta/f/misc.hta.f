@@ -55,7 +55,7 @@
 		( Word array ) (aliases) ; 
 		/// Used in DOS box batch program for jeforth to ignore DOS words.
 
-proc-env COMPUTERNAME char 31ENB667 = [if]
+proc-env COMPUTERNAME char WKS-31ENB667 = [if]
     
 	\ ----- NIC on/off utility -----
 	
@@ -65,6 +65,7 @@ proc-env COMPUTERNAME char 31ENB667 = [if]
 					   /// Set NIC deviceID : 19 to officeLAN
 					   /// Get NIC deviceID : activeNIC :> deviceid
 					   /// See all NIC devices : list-all-nic
+                       /// See active NIC : list-active-nic
 					   /// "where deviceid = 8" is for my LRV2 OA
 
     : is-office-nic? ( "caption" -- boolean ) \ 用 Caption 來辨認 OA 的 office LAN 是那個 nic
