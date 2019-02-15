@@ -6224,3 +6224,33 @@
         js: chrome.runtime.sendMessage({addr:"background",forth:pop()})         
 [ ] 直接 trace ce.f 吧！
 [ ] 搞懂之後，弄個 attach 選項，不要去干擾 target page 直接用 3ce page 去控制 target page。
+[ ] 寫個工具用來把網頁上的 youtube hyperlink 都列出來, 方便寫成 youtube-dl 的 script 
+-----------------------------------------------------
+[ ] 14:24 2019-01-22 Rawgit 已經熄燈了，改用 www.forth.org.tw 
+[/] element.f 合併到 html5.f 裡去 
+    No! element.f 會被個別用到, 例如 3ce 的 target.f 
+[/] ls.f & unindent.f 合併到 hte.f 裡去 (Hyper Text Editor)
+    No! unindent.f 很多地方有個別用到，是個很獨立的 module; 
+    hte.f is actually the alt-F2 editor; ls.f is the Local Storage code editor.
+    They are all different things. ls.f 還是很好用，只要它不要搶出頭就好了，保留。
+[ ] 把教學影片收集到 wiki 裡某頁面上。
+[x] 重複 include misc.f 會把 misc.f 變到 vocs 的最後 也就是 order 的最高，為何？
+    因為 source-code-header 有做了手腳，它發現 misc.f 已經 loaded 就不會重新 scan.
+    這個 trick 不錯，但是並沒有省掉 include 多浪費的 I/O 時間。實際把例子中的 misc.f
+    變成 context 的是 prioritize command. 我有點印象，差不多都忘了!
+[x] 17:36 2019-01-22 協會網址不該變來變去，否則文件、Tutorial等會到處斷鍊。
+    Look at the URL mentioned in this Tutorial of jeforth.3we. (https://www.camdemy.com/media/19253)
+    There have been many of them!! So how can people be sure that www.forth.org.tw 
+    will not be dropped some day? why not www.figtaiwan.org 
+    as before? 恕我直言。
+    協會官方網址要固定，因為以前錄好的影片上都說網址是 www.figtaiwan.org。
+    目前的例子是 jeforth 的 demo 程式網址因為 rawgit 停止服務而斷鍊。
+    幸好有 理事長提供 www.forth.org.tw 可以修復，可是以前都說是 www.figtaiwan.org
+    改掉就出問題了。同理，內容的目錄結構可能也要有規範，是不是？
+    --> 有點熱心總比停掉了好，別提了。
+    
+
+
+
+
+

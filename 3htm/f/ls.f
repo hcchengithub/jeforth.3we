@@ -1,5 +1,7 @@
 
-	\ Maintain source code in HTML5 local storage directly
+    \ Local Storage Code Editor for jeforth HTML based versions (3hta, 3html, 3ce, 3ca)
+	\ Maintain source code in HTML5 local storage directly. This is not like hte.f which
+    \ is the alt-f2 editor, a different thing. 
 
 	s" ls.f"		source-code-header
     true  constant privacy private // ( -- true ) All words in this module are private"
