@@ -59,13 +59,13 @@ marker ~~~
 	0 lineWidth \ processing.js noStroke() means no outline (balls)
 	
 	code newBall ( -- ) \ Create a Ball object and add into balls[]
-		function Ball(ID,X,Y,RADIUS,COLOR){with(this){
+		function Ball(ID,X,Y,RADIUS,COLOR){with(this){  // 有了 with(this) 區域內就可以直接用 id x y radius 省略前置 this. 了
 			this.id=ID; // 1,2,... balls.length
 			this.x=X; this.y=Y; this.radius=RADIUS; this.color=COLOR; this.vx=0; this.vy=0; 
 			this.see = function(){
-				type("--- "+id+" --- radius=" + this.radius);
-				type(", x=" + x + ", y=" + y);
-				type(", vx=" + vx + ", vy=" + vy);
+				type("--- " + id + " --- radius=" + parseInt(radius*100)/100);
+				type(", x=" + parseInt(x*100)/100 + ", y=" + parseInt(y*100)/100);
+				type(", vx=" + parseInt(vx*100)/100 + ", vy=" + parseInt(vy*100)/100);
 				execute("cr");
 			}
 			this.collide = function(){
