@@ -116,7 +116,11 @@
 	kvm.prompt = "OK";
 	kvm.ado = new ActiveXObject("ADODB.Stream");
 	kvm.fso = new ActiveXObject("Scripting.FileSystemObject");
-	kvm.argv = (hta.commandLine + " dummy").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
+
+	// allow spaces in jeforth.hta path
+	kvm.argv = (hta.commandLine + " dummy").split(/\"/).slice(1); // use double quote cut and get [0]pathname [1]argv+dummy
+	kvm.argv = kvm.argv.slice(0,1).concat(kvm.argv[1].split(/\s+/).slice(1,-1));  // jeforth does not allow double quote in command line 
+		
 	kvm.bye = function(){window.close()}; // vb.f will improve it
 	kvm.clearScreen = function(){outputbox.innerHTML=""};
 	

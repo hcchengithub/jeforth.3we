@@ -6210,7 +6210,7 @@
 [ ] 我想寫下導覽，把 3ce 的整套設計用實驗步驟的方式講清楚，以後自己複習也方便。
     --> See Ynote "jeforth.3ce 導覽"
     --> 查以前的筆記，找 dictate(), (dictate) 之類，找 sendMessage 可能更好
-        [ ] Log of TR.html 真的有
+        [ ] Log of TR.ht試ml 真的有
         [ ] log.txt 本身也很多。 --> 直接在上面複習，寫下筆記。
         [ ] ls.f search 3ce 有些 message 的例子
     3ce 光設定 tabid! 而沒有 attach 到 target tab 則 F7 就無效，是這樣嗎？ 複習一下。
@@ -6224,6 +6224,7 @@
         js: chrome.runtime.sendMessage({addr:"background",forth:pop()})         
 [ ] 直接 trace ce.f 吧！
 [ ] 搞懂之後，弄個 attach 選項，不要去干擾 target page 直接用 3ce page 去控制 target page。
+-----------------------------------------------------
 [ ] 寫個工具用來把網頁上的 youtube hyperlink 都列出來, 方便寫成 youtube-dl 的 script 
 -----------------------------------------------------
 [ ] 14:24 2019-01-22 Rawgit 已經熄燈了，改用 www.forth.org.tw 
@@ -6248,9 +6249,124 @@
     幸好有 理事長提供 www.forth.org.tw 可以修復，可是以前都說是 www.figtaiwan.org
     改掉就出問題了。同理，內容的目錄結構可能也要有規範，是不是？
     --> 有點熱心總比停掉了好，別提了。
+-----------------------------------------------------
+[X] 2020/03/21 10:45:24 前兩天玩 proeforth 時發現原先的 args 取得過程有缺陷，當 path 帶有空格時
+	不靈，當時已經找好 solution 了。。。 好像記錄在 proe.f 裡。。。 是的。
+	問題
+	原來的設計，整串 argv[0] 都沒有空格，這樣就沒問題：
+		> js> hta.commandLine . 
+		"C:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\jeforth.hta" 111 222 333 OK 
+		> dropall args .s
+			0: 111 222 333 (string)  <--------- args 就是 command line 上的 arguments, 這個正確。 
+	可是如果 argv[0] 裡有空格 args 就會出錯
+		> js> hta.commandLine .           v---- 這裡有個 space 
+		"C:\Users\8304018\OneDrive\OneNote Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta" 111 222 333 >>> 	
+		> dropall args .s
+			  0: Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta" 111 222 333 (string)
+                 ^
+				 '----- args 就是 command line 上的 arguments, 這個從 argv[0] 的 pathname 裡多抓了一些空格後的
+				        東西出來 mistakenly。 
+	-->	不論如何，argv[0] 的 ~.hta pathname 都會有 double quot 所以可以用 double quote 先把整
+		個 argv 切成三份，取中間跟尾巴兩份就對了，因為 jeforth command line 禁用 double quote.
+		這麼一來，solution is : 
+		dropall 
+		<js> (hta.commandLine + " dummy").split(/\"/).slice(1) </jsV> 
+		dup :> [0] swap :> [1] trim :> split(/\s+/).slice(0,-1) .s
+		結果：
+		0: C:\Users\8304018\OneDrive\OneNote Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta (string)
+		1: 111,222,333 (array)
+	-->	合併成 args array --> js: tos().unshift(pop(1))
+		0: C:\Users\8304018\OneDrive\OneNote Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta,111,222,333 (array)
+	--> args 在哪裡 composed 的? 之前的 vm.argv 就已經錯了
+		> dropall js> vm.argv .s
+			0: "C:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\jeforth.hta",111,222,333,"abc,def" (array)
+		> dropall js> vm.argv .s                 v------- 這裡錯了！
+			0: "C:\Users\8304018\OneDrive\OneNote,Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta",111,222,333 (array)
+	--> jeforth.hta 中 kvm.argv 應該這樣處理
+		kvm.argv = (hta.commandLine + " dummy").split(/\"/).slice(1); // double quote cut and get [0]pathname [1]argv+dummy
+		kvm.argv = kvm.argv[0].concat(kvm.argv[1].split(/\s+/).slice(1,-1));
+[X] 2020/03/21 15:02:24 忘了外掛的 .js 該怎麼處理。先找找看看 numeric-1.2.6.js 又是怎麼用的?
+	c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\external-modules\numeric\numeric-1.2.6.js 
+	c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\3htm\f\numeric.f 
+	--> 已經寫好 numeric.f 用 include numeric.f 就可以了，flot 也是這樣用。我好棒！
+	--> 直接把 CREOSON 的 .js copy-paste 放進 <js></js> 裡跑跑看。。。。 
+		> include.js creoson_creo.js \ 用這個方式跟 copy'n paste to <js></js> 是等效的，但是會出問題：
+		JavaScript error on word "sinclude.js" : Expected ';'
+		--> 原因是 creoson_???.js 中有用到很多新的 keyword "let" 而 HTA (JScript v11.0.16384) 不認得。
+		--> 解法是把所有 .js files in \web\assets\creoson_stuff\creoson_js 裡的 let 改成 var 就好了。
+[X] 2020/03/21 20:23:56 不只 let 連 Object 的 support 也不全，算了，別用 HTA for Creoson 了。
+	-->	改用 3ca 算了。
+--------------------------------
+[ ] 2020/03/21 20:48:05 改用 3ca 又有怪事 
+		cls char playground/1.jss readTextFile . <-- 1 或 1.jss 都可以讀到，改名成 1.js 就讀不到了。
+		既然本來就要加 push(creo) 了，乾脆改成 ~.f 算了 ==> 改寫成 creoson_creo.f 成功！ 
+	--> 改成 .f 太麻煩了，一大堆要改的。不如直接 <script></script> include 進去好了。
+
+		<!-- CREOSON_JS Libraries -->
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/common_creoson_ajax.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/common_creoson_utils.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_bom.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_connection.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_creo.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_dimension.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_drawing.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_familytable.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_feature.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_file.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_geometry.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_interface.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_layer.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_note.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_parameter.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_view.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_windchill.js"></script>
+	--> 以上 17個 .js 都直接 copy 進 jeforth.3ca\js\
+	--> 把上面這段抄進 jeforth.3ca\index.html 路徑改成 js/foobar.js, 這樣就成功了！
+	--> refresh jeforth.3ca 馬上生效，查 js> creo . 有東西
+	[ ]	LPM2 上的 develop branch 3ca index.html 改了, 不用要記得改回去。當初就該用分支 branch 才對。
+	[X] 研究 http://localhost:9056/playground.html 要花點時間，心生退意，用 python 就好了。
+		或者直接用 web-link 看看。。。。
+		--> shit, 超簡單：https://eacpds.com/getting-started-creo-web-link/ with diggo notes.
+
+[ ] 2020/03/24 13:51:41 是 pro/e weblink 時在 built-in browser 下 DOM windows 的 (see) 看到：
+		f :   function(a,b){
+				var id = setTimeout(a,b);
+				registered[id.toString()] = id;
+				return id;
+			}
+		colonxt :   function(){
+			rstack.push(ip);
+			inner(this.cfa);
+		}
+	看起來是 private 留下來的東西，應該是有問題。
+	
+[X] 2020/04/02 16:26:45 看到用 python webserver 閱讀 Web.Link 手冊還能用 Diigo 記筆記，想到何不用 Jupyternotebook?
+	結果發現若用 Jupyternotebook 當 webserver 還是可以與 Diigo 配合畫線、寫眉批、作筆記。但是跑 jeforth.3htm 就不行
+	了，因為會有 Cross-Origin Read Blocking (CORB) 的障礙。
+    https://onedrive.live.com/view.aspx?resid=A796EA18AC8C1DA9%2112567&id=documents&wd=target%282020.one%7CA8067B81-21D2-404E-85C4-C6E065D857AB%2F%5BClosed%5D%20Jeforth.3htm%20%E7%94%A8%20jupyternotebook%20%E8%B7%91%E4%B8%8D%E8%B5%B7%E4%BE%86%7CE2AC6CD4-292A-4DB5-989C-5017CC8825C4%2F%29
+	onenote:https://d.docs.live.net/a796ea18ac8c1da9/文件/OneNote2020/2020.one#%5bClosed%5d%20Jeforth.3htm%20用%20jupyternotebook%20跑不起來&section-id={A8067B81-21D2-404E-85C4-C6E065D857AB}&page-id={E2AC6CD4-292A-4DB5-989C-5017CC8825C4}&end
     
+[X] 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。
+    2020/04/28 14:31 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。--> trace baby.html of project-k to recall how to make a console --> 懂了，網頁 ready 時登記 hotKeyHandler() 給 document.onkeydown 而 hotKeyHandler 只負責把 command line 準備好就接著 call forthConsoleHandler(vm.inputbox) 它才是 main loop equivalent. --> 利用 baby.html 改成 test.html 把forthConsoleHandler(vm.inputbox) 改成處理 javascript 看看效果。。。。。成功！ Project-k baby.html 只改一小段即成：
+            // function forthConsoleHandler(cmd) {
+            //     type((cmd?'\n> ':"")+cmd+'\n');
+            //     vm.dictate(cmd);  // Pass the command line to jeForth VM
+            //     type(" " + vm.prompt + " ");
+            //     window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+            // }
 
-
-
-
-
+            function forthConsoleHandler(cmd) {
+                type((cmd?'\n> ':"")+cmd+'\n');
+                result = eval(cmd);
+                type(result + "\n");
+                window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+            }
+    結果：
+        > 123
+        123
+        > document.title
+        jeforth baby
+        > document
+        [object HTMLDocument]
+        變成 JavaScript console 了。
+[ ] 2020/04/28 16:36:48 接下來比照 peforth 也寫個 ok() 擔任 main loop 的腳色。

@@ -85,11 +85,14 @@
 		(unindent) :> slice(1,-1) \ remove dummy 'x'
 		;
 		
-	<comment> 
+    <comment>
+    include unindent.f
+    <text> 
 		\ 實驗範例
-		s" unindent.f" readTextFileAuto constant ss // ( -- string ) ss 是本程式 source code
-		ss . \ 看原來的 source code
-		ss unindent . \ 看過濾 <unindenT>..</unindenT> 之後的結果
+        Command 'unindent' 處理 multiple lines string 把其中用 
+        <un\indent>..</un\indent> 標示的部分做 unindent 處理。
+        方法就是把標示的部分整個左移到不能再移為止。且 TAG 本身
+        的頭尾最後都會消失，好像不存在一樣。
 		
 				I should be indented
 				x<unindent>
@@ -104,8 +107,9 @@
 				</unindent> 
 				I should be indented
 
-	</comment>
-
+	</text> unindent . cr
+    </comment>
+    
 	\ ----------- <code>escape -----------------
 	\ <code> ... </code> 裡面的 < > 不希望被 HTML 認到, 以下寫出 <code>escape 命令
 	\ 來避免之。方法是預先把 <code>...</code> 當中的 <> 改成 &lt;&gt;

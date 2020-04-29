@@ -2,18 +2,26 @@
 s" html5.f"		source-code-header
 
 : stringify		js> JSON.stringify(pop()) ; // ( obj -- "json" ) Convert the object to JSON string
-				/// Example:
-				/// activeSheet char a char b init-hash ( Get key-value hash table from Excel )
-				/// stringify char pathname.json writeTextFile ( Convert to JSON save to file )
+				/// ' + stringify --> {"name":"+","vid":"forth",...}(string)
+				/// ' + stringify parse (see)
+
 : parse			js> JSON.parse(pop()) ; // ( "json" -- obj ) Convert the "json" string to an object.
-				/// Example:
-				/// char pathname.json readTextFile ( Read JSON text )
-				/// parse value MyHashTable ( convert JSON text to hash table object )
+				/// ' + stringify --> {"name":"+","vid":"forth",...}(string)
+				/// ' + stringify parse (see)
+                \   {
+                \       "name": "+",
+                \       "vid": "forth",
+                \       "wid": 77,
+                \       "type": "code",
+                \       "help": "( a b -- a+b) Add two numbers or concatenate two strings. ",
+                \       "private": false,
+                \       "selftest": "pass"
+                \   } OK 
 
 : createElement	( <tagName> -- element ) \ Create an HTML element w/o instance yet
 				js> document.createElement(pop()) ; 
 				/// tagName can be 'div','script' or anything you like.
-				
+
 : setAttribute  ( oElement "attr" "value" -- ) \ Set an attribute to an element
 				js: pop(2).setAttribute(pop(1),pop()) ;
 
@@ -52,6 +60,7 @@ s" html5.f"		source-code-header
 : replaceNode  ( newNode targetNode -- ) \ Replace a HTML node or element
 				js: $(pop()).replaceWith(pop()) ;
 				/// jQuery replaceWith() http://api.jquery.com/replaceWith/
+                /// 不在 tag 裡的文字就是 node 的一種。
 
 : insertBefore	( target ref -- ) \ *Move* the target element to before the reference element
 				js: tos().parentElement.insertBefore(pop(1),pop()) ;
@@ -140,7 +149,7 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				else swap doElement then ; immediate
 				/// Example: char #outputbox <e> <h1>hi</h1></e>
 
-: open			( "http://url" "name" -- win ) \ Open the URL return the window element named 'name' for <a> and <form>.
+: open			( "http://url" "name" -- win ) \ Open the URL return the window element named 'name' for <a> and <form> HTML tags.
 				js> window.open(pop(1),pop()) ;
 				/// window.open() method http://www.w3schools.com/jsref/met_win_open.asp
 				/// Try "win :: focus()" to switch to the browser window/tab any time.
@@ -156,17 +165,39 @@ code <o>escape	( "HTML lines" -- "cooked" ) \ Convert <o> </o> to &lt;o&gt;brabr
 				\ 浙江淘?网?有限公司
 				</comment>
 
+: (pickFile)     ( -- HTMLInputElement ) \ Pick a file through web browser's GUI
+                char input createElement ( element )
+                dup char type  char file      setAttribute ( element )
+                dup char class char pick_file setAttribute ( element ) \ for debug, clue of the element
+                \ For none 3hta only, setup the event handler
+                js> vm.appname!="jeforth.3hta" if
+                    js: tos().onchange=function(){execute('stopSleeping')} ( element ) 
+                    js: tos().oncancel=function(){execute('stopSleeping')} ( element ) 
+                then
+                js> body over appendChild \ 要 append 才有作用。 ( element )
+                js: tos().click() ( element ) ; 
+                /// Through excel app's GetOpenFilename method can do the same thing:
+                ///     excel.app js> pop().GETopenFILENAME <== with or w/o () both fine
+                /// Excel's GetSaveAsFilename method too.
+
+                \ > (pickFile) <-- 手動選一個檔案
+                \ dup :> value --> C:\fakepath\607400643.993051.mp4(string)
+                \ dup :> type --> file(string)
+                \ dup :> files --> [object FileList](object)
+                \ dup :> readOnly --> false(boolean)
+                \ dup :> multiple --> false(boolean)
+                \ dup :> list --> null(object)
+                \ > dup :> files[0] <-- 取得 file object 
+                \ > .s
+                \     0: C:\fakepath\607400643.993051.mp4 (string)
+                \     1: [object HTMLInputElement] (object)
+                \     2: [object File] (object)  see https://developer.mozilla.org/zh-TW/docs/Web/API/File 
+                \ 2020/04/21 15:29:50 以上用以前寫的 pickFile 改成傳回 element, 然後用這 element
+                \     做了些實驗。但是如何讀出 file 內容，例如讀取 .f 檔，還是不會。。。 blob object 
+                \     好難懂難用的感覺。3HTA 測試過OK. 
+
 : pickFile 		( -- "pathname" ) \ Pick a file through web browser's GUI
-				char input createElement ( element )
-				dup char type  char file      setAttribute ( element )
-				dup char class char pick_file setAttribute ( element ) \ for debug, clue of the element
-				\ For none 3hta only, setup the event handler
-				js> vm.appname!="jeforth.3hta" if
-					js: tos().onchange=function(){execute('stopSleeping')} ( element ) 
-					js: tos().oncancel=function(){execute('stopSleeping')} ( element ) 
-				then
-				js> body over appendChild \ 要 append 才有作用。 ( element )
-				js: tos().click() ( element ) \ @ HTA 回來就表示 user 已經完成操作, @ NW.js 則馬上回來。
+				(pickFile) ( element ) \ @ HTA 回來就表示 user 已經完成操作, @ NW.js 則馬上回來。
 				\ For none 3hta only, wait for the onchange event
 				js> vm.appname!="jeforth.3hta" if
 					( minutes*60*1000 ) js> 5*60*1000 sleep ( element ) then
