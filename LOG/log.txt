@@ -6387,7 +6387,9 @@
     window.lang = 'js' or 'forth' 來切換 language. 這樣很簡單。這個 function 本來叫 forthConsoleHandler 
     要改名叫 consoleHandler 了，因為不只是 forth, js too. 
     結果 --> 
-         OK 改好 3we 在 3ca 上就馬上生效, default lang='forth'
+        OK jeforth.3we\3htm\js\jeforth.3htm.js > kvm.forthConsoleHandler = function(cmd){} 
+        改好 3we 在 3ca 上就馬上生效, 
+        default lang='forth'
         > js: lang='js'  切換
          OK 
         undefined  按 enter 變成回覆 undefined 了
@@ -6401,11 +6403,13 @@
     [ ] also these files contains forthConsoleHandler 
         [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3htm\f\platform.f
             --> run-inputbox code definition 裡面 ForthConsoleHandler 改成 consoleHandler 好了
-        [ ] jeforth.3ce.js
+        [X] jeforth.3ce.js
             --> 隨便敲甚麼都 error : JavaScript error on word "run-inputbox" : vm.consoleHandler is not a function
             --> ForthConsoleHandler 改成 consoleHandler 好了。但是改 lang='js' 無效。
-            --> 
-        [ ] jeforth.3nd.js    
+            --> 因為 forthConsoleHandler 要改寫, window.lang = 'forth' 初值也要給。
+            --> 3ce 果然好了。切換 'js' <> 'forth' ok 了
+        [X] jeforth.3nd.js    
+            --> 照上面改也好了。3nd 略有不同，但不難改。
         [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\target.f
         [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3hta\f\jquery.f
         [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\ce.f    

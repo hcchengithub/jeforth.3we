@@ -13,6 +13,7 @@ kvm.appname = "jeforth.3nd";
 kvm.path = ["dummy", "f", "3nd/f", "3nd", "3nd/eforth.com", "demo", "playground"];
 kvm.screenbuffer = ""; // used by both inside and outside vm.
 kvm.selftest_visible = true; // used by both inside and outside vm.
+global.lang = 'forth'; // 'js' or 'forth' let console support two languages
 
 // kvm.type() is the master typing or printing function.
 // The type() called in code ... end-code is defined in the kernel projectk.js.
@@ -106,24 +107,31 @@ kvm.argv.shift(); // remove node.exe to compatible with jeforth.hta
 // kvm.jsc.xt = kvm.fso.readFileSync('./3nd/f/jsc.js','utf-8');
 
 // There's no main loop, event driven call back function is this.
-kvm.forthConsoleHandler = function(cmd) {
-	var rlwas = kvm.rstack().length; // r)stack l)ength was
-	// type(cmd+'\n'); 3nd does not need this
-	kvm.dictate(cmd);  // Pass the command line to KsanaVM
-	(function retry(){
-		// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-		// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-		// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-		if(kvm.rstack().length!=rlwas)
-			setTimeout(retry,100); 
-		else {
-			type(" " + kvm.prompt + " ");
-		}
-	})();
+// 2020/05/01 17:57:32 為 support lang='js' 改寫
+kvm.consoleHandler = function(cmd) {
+    if (global.lang == 'js' || global.lang != 'forth'){
+        type((cmd?'\n> ':"")+cmd+'\n');
+        result = eval(cmd);
+        type(result + "\n");
+    }else{
+        var rlwas = kvm.rstack().length; // r)stack l)ength was
+        // type((cmd?'\n> ':"")+cmd+'\n');
+        kvm.dictate(cmd);  // Pass the command line to KsanaVM
+        (function retry(){
+            // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+            // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+            // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+            if(kvm.rstack().length!=rlwas)
+                setTimeout(retry,100); 
+            else {
+                type(" " + kvm.prompt + " ");
+            }
+        })();
+    }
 }
  
 kvm.stdio = require('readline').createInterface({input: process.stdin,output: process.stdout});
-kvm.stdio.on('line', kvm.forthConsoleHandler);
+kvm.stdio.on('line', kvm.consoleHandler);
 kvm.stdio.setPrompt(' '+kvm.prompt+' ',4);
 kvm.dictate(kvm.fso.readFileSync('f/jeforth.f','utf-8')+kvm.fso.readFileSync('3nd/f/quit.f','utf-8'));
 // dictate() 之後不能再有任何東西，否則因為有 sleep/suspend/resume 之故，會被意外執行到。
