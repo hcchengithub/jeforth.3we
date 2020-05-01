@@ -8,6 +8,7 @@
         kvm.path = ["dummy", "3ce", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "demo", "playground"];
         kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
         kvm.selftest_visible = true; // type() refers to it.
+        window.lang = 'forth'; // 'js' or 'forth' let console support two languages
         
         // kvm.type() is the master typing or printing function.
         // The type() called in code ... end-code is defined in the kernel projectk.js.
@@ -84,21 +85,28 @@
                                     
         // There's no main loop, event driven call back function is this.
         kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
-        kvm.forthConsoleHandler = function(cmd) {
-            var rlwas = kvm.rstack().length; // r)stack l)ength was
-            type((cmd?'\n> ':"")+cmd+'\n');
-            kvm.dictate(cmd);  // Pass the command line to KsanaVM
-            (function retry(){
-                // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-                // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-                // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-                if(kvm.rstack().length!=rlwas)
-                    setTimeout(retry,100); 
-                else {
-                    type(" " + kvm.prompt + " ");
-                    if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
-                }
-            })();
+        kvm.consoleHandler = function(cmd) {
+            if (window.lang == 'js' || window.lang != 'forth'){
+                type((cmd?'\n> ':"")+cmd+'\n');
+                result = eval(cmd);
+                type(result + "\n");
+                window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+            }else{
+                var rlwas = kvm.rstack().length; // r)stack l)ength was
+                type((cmd?'\n> ':"")+cmd+'\n');
+                kvm.dictate(cmd);  // Pass the command line to KsanaVM
+                (function retry(){
+                    // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+                    // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+                    // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+                    if(kvm.rstack().length!=rlwas)
+                        setTimeout(retry,100); 
+                    else {
+                        type(" " + kvm.prompt + " ");
+                        if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
+                    }
+                })();
+            }
         }
 
         // onkeydown,onkeypress,onkeyup
@@ -112,7 +120,7 @@
                 case 13: /* Enter */
                     var cmd = inputbox.value; // w/o the '\n' character ($10). 
                     inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-                    kvm.forthConsoleHandler(cmd);
+                    kvm.consoleHandler(cmd);
                     return(false); 
             }
             return (true); // pass down to following handlers 

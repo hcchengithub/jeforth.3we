@@ -6347,7 +6347,12 @@
 	onenote:https://d.docs.live.net/a796ea18ac8c1da9/文件/OneNote2020/2020.one#%5bClosed%5d%20Jeforth.3htm%20用%20jupyternotebook%20跑不起來&section-id={A8067B81-21D2-404E-85C4-C6E065D857AB}&page-id={E2AC6CD4-292A-4DB5-989C-5017CC8825C4}&end
     
 [X] 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。
-    2020/04/28 14:31 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。--> trace baby.html of project-k to recall how to make a console --> 懂了，網頁 ready 時登記 hotKeyHandler() 給 document.onkeydown 而 hotKeyHandler 只負責把 command line 準備好就接著 call forthConsoleHandler(vm.inputbox) 它才是 main loop equivalent. --> 利用 baby.html 改成 test.html 把forthConsoleHandler(vm.inputbox) 改成處理 javascript 看看效果。。。。。成功！ Project-k baby.html 只改一小段即成：
+    2020/04/28 14:31 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。
+    --> trace baby.html of project-k to recall how to make a console --> 懂了，網頁 ready 時登
+    記 hotKeyHandler() 給 document.onkeydown 而 hotKeyHandler 只負責把 command line 準備好就接
+    著 call forthConsoleHandler(vm.inputbox) 它才是 main loop equivalent. --> 利用 baby.html 改
+    成 test.html 把forthConsoleHandler(vm.inputbox) 改成處理 javascript 看看效果。。。。。成功！
+    Project-k baby.html 只改一小段即成：
             // function forthConsoleHandler(cmd) {
             //     type((cmd?'\n> ':"")+cmd+'\n');
             //     vm.dictate(cmd);  // Pass the command line to jeForth VM
@@ -6369,4 +6374,68 @@
         > document
         [object HTMLDocument]
         變成 JavaScript console 了。
+    
 [ ] 2020/04/28 16:36:48 接下來比照 peforth 也寫個 ok() 擔任 main loop 的腳色。
+    --> 先查看一下 peforth 的 ok() .... peforth\__init__.py 
+    function ok(prompt='OK ',cmd=""){
+        type((cmd?'\n> ':"")+cmd+'\n');
+        vm.dictate(cmd);  // Pass the command line to jeForth VM
+        type(" " + vm.prompt + " ");
+        window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+    }
+    2020/04/29 10:59:57 --> 錯了，不能比照 peforth.ok() 它是 synchronous 而 jeforth 可不是。只好引進
+    window.lang = 'js' or 'forth' 來切換 language. 這樣很簡單。這個 function 本來叫 forthConsoleHandler 
+    要改名叫 consoleHandler 了，因為不只是 forth, js too. 
+    結果 --> 
+         OK 改好 3we 在 3ca 上就馬上生效, default lang='forth'
+        > js: lang='js'  切換
+         OK 
+        undefined  按 enter 變成回覆 undefined 了
+        undefined
+        > kvm.dictate("char abc .")
+        abc[object Object] 早就有 function cascade 了, 
+        > kvm.dictate("")==kvm
+        true
+        > kvm.push(123).push(234).dictate("+").pop()
+        357    
+    [ ] also these files contains forthConsoleHandler 
+        [ ] jeforth.3ce.js
+        [ ] jeforth.3nd.js    
+        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\target.f
+        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3hta\f\jquery.f
+        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3htm\f\platform.f
+        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\ce.f    
+        [ ] actually many of them !!! 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
