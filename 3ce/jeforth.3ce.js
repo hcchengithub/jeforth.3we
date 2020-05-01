@@ -92,7 +92,7 @@
                                     
 		// There's no main loop, event driven call back function is this.
 		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
-		kvm.forthConsoleHandler = function(cmd) {
+		kvm.consoleHandler = function(cmd) {
 			var rlwas = kvm.rstack().length; // r)stack l)ength was
             type((cmd?'\n> ':"")+cmd+'\n');
 			kvm.dictate(cmd);  // Pass the command line to KsanaVM
@@ -120,7 +120,7 @@
 				case 13: /* Enter */
 					var cmd = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.forthConsoleHandler(cmd);
+					kvm.consoleHandler(cmd);
 					return(false); 
 			}
 			return (true); // pass down to following handlers 

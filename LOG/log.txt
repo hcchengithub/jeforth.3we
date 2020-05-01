@@ -6399,11 +6399,15 @@
         > kvm.push(123).push(234).dictate("+").pop()
         357    
     [ ] also these files contains forthConsoleHandler 
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3htm\f\platform.f
+            --> run-inputbox code definition 裡面 ForthConsoleHandler 改成 consoleHandler 好了
         [ ] jeforth.3ce.js
+            --> 隨便敲甚麼都 error : JavaScript error on word "run-inputbox" : vm.consoleHandler is not a function
+            --> ForthConsoleHandler 改成 consoleHandler 好了。但是改 lang='js' 無效。
+            --> 
         [ ] jeforth.3nd.js    
         [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\target.f
         [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3hta\f\jquery.f
-        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3htm\f\platform.f
         [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\ce.f    
         [ ] actually many of them !!! 
 
