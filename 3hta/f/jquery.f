@@ -32,23 +32,30 @@
 				if(vm.selftest_visible) $('#outputbox').append(vm.plain(ss)); 
 			};
 			
-			vm.forthConsoleHandler = function (cmd) {
+			vm.consoleHandler = function (cmd) {
 				// Modified in jquery.f
-				var rlwas = vm.rstack().length; // r)stack l)ength was
-				vm.type((cmd?'\n> ':"")+cmd+'\n');
-				vm.dictate(cmd);  // Pass the command line to jeForth VM
-				(function retry(){
-					// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-					// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-					// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-					if(vm.rstack().length!=rlwas)
-						setTimeout(retry,100); 
-					else {
-						vm.type(" " + vm.prompt + " ");
-						if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
-							vm.scroll2inputbox();
-					}
-				})();
+                if (vm.lang == 'js' || vm.lang != 'forth'){
+                    type((cmd?'\n> ':"")+cmd+'\n');
+                    result = eval(cmd);
+                    type(result + "\n");
+                    window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+                }else{
+                    var rlwas = vm.rstack().length; // r)stack l)ength was
+                    vm.type((cmd?'\n> ':"")+cmd+'\n');
+                    vm.dictate(cmd);  // Pass the command line to jeForth VM
+                    (function retry(){
+                        // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+                        // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+                        // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+                        if(vm.rstack().length!=rlwas)
+                            setTimeout(retry,100); 
+                        else {
+                            vm.type(" " + vm.prompt + " ");
+                            if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
+                                vm.scroll2inputbox();
+                        }
+                    })();
+                }
 			}
 			
 		</js>

@@ -269,6 +269,7 @@
 				vm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 				vm.selftest_visible = true; // type() refers to it.
 				vm.debug = false;
+                vm.lang = 'forth'; // 'js' or 'forth' let console support two languages
 
 				// Message (or F7 forth command line) from the host page needs an 
 				// event handler on this target page
@@ -280,7 +281,7 @@
 					} 
 					// 再執行命令
 					if (message.forth) {
-						vm.forthConsoleHandler(message.forth);
+						vm.consoleHandler(message.forth);
 					}
 				}
 				// Avoid multiple registration of the same handler.
@@ -324,29 +325,36 @@
 				// Forth vm has no idea about vm.prompt but your program may want to know.
 				// In that case, as an example, use vm property to store the vm global variables and functions.
 				vm.prompt = "OK";
-	
-				vm.forthConsoleHandler = function(cmd) {
-					var rlwas = vm.rstack().length; // r)stack l)ength was
-					// Avoid responding the ~.f source code when installing.
-					if(cmd.indexOf("shooo!")!=0)
-						vm.type((cmd?'\n> ':"")+cmd+'\n');
-					else
-						cmd = cmd.slice(6); // remove "shooo!"
-					vm.dictate(cmd);  // Pass the command line to jeForth VM
-					(function retry(){
-						// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-						// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-						// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-						if(vm.rstack().length!=rlwas)
-							setTimeout(retry,100); 
-						else {
-							vm.type(" " + vm.prompt + " ");
-							if (typeof(endofinputbox)!="undefined"){
-								if ($(inputbox).is(":focus"))
-									vm.scroll2inputbox();
-							}
-						}
-					})();
+				vm.consoleHandler = function(cmd) {
+                    if (vm.lang == 'js' || vm.lang != 'forth'){
+                        vm.type((cmd?'\n> ':"")+cmd+'\n');
+                        result = eval(cmd);
+                        vm.type(result + "\n");
+                        window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+                    }else{
+
+                        var rlwas = vm.rstack().length; // r)stack l)ength was
+                        // Avoid responding the ~.f source code when installing.
+                        if(cmd.indexOf("shooo!")!=0)
+                            vm.type((cmd?'\n> ':"")+cmd+'\n');
+                        else
+                            cmd = cmd.slice(6); // remove "shooo!"
+                        vm.dictate(cmd);  // Pass the command line to jeForth VM
+                        (function retry(){
+                            // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+                            // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+                            // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+                            if(vm.rstack().length!=rlwas)
+                                setTimeout(retry,100); 
+                            else {
+                                vm.type(" " + vm.prompt + " ");
+                                if (typeof(endofinputbox)!="undefined"){
+                                    if ($(inputbox).is(":focus"))
+                                        vm.scroll2inputbox();
+                                }
+                            }
+                        })();
+                    }
 				}
 				
 				// Take care of HTML special characters

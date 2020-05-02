@@ -3914,13 +3914,17 @@
 
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
-[x] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
-    因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
-
-    Unzip the nw.js package (v0.14 now use SDK version to gain F12 Debugger or DevTool)
-    and set path to it, that's all. Or simply copy the entire nw.js unzip'ed folder to
-    node.js folder. This is because node.js has Windows installer and nw.js has not but
-    it can leverage node.js.
+[x] How to install nw.js 
+    Method 1:
+        Unzip the nw.js package (v0.14 now use SDK version to gain F12 Debugger or DevTool)
+        and set path to it, that's all. 
+    Method 2:
+        就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder 
+        (c:\Program Files\nodejs) 因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突,
+        應該可以 ==> Yes, OK.
+        Simply copy the entire nw.js unzip'ed folder to node.js folder. This is because 
+        node.js has Windows installer and nw.js has not but it can leverage node.js.
+        2020/05/02 10:10:08 測試 lang='js' on OA used this way again and it works! 
 
 [x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
     ---- modify jeforth.3nw.html --------------------
@@ -6375,7 +6379,7 @@
         [object HTMLDocument]
         變成 JavaScript console 了。
     
-[ ] 2020/04/28 16:36:48 接下來比照 peforth 也寫個 ok() 擔任 main loop 的腳色。
+[X] 2020/04/28 16:36:48 接下來比照 peforth 也寫個 ok() 擔任 main loop 的腳色。
     --> 先查看一下 peforth 的 ok() .... peforth\__init__.py 
     function ok(prompt='OK ',cmd=""){
         type((cmd?'\n> ':"")+cmd+'\n');
@@ -6384,7 +6388,7 @@
         window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
     }
     2020/04/29 10:59:57 --> 錯了，不能比照 peforth.ok() 它是 synchronous 而 jeforth 可不是。只好引進
-    window.lang = 'js' or 'forth' 來切換 language. 這樣很簡單。這個 function 本來叫 forthConsoleHandler 
+    kvm.lang = 'js' or 'forth' 來切換 language. 這樣很簡單。這個 function 本來叫 forthConsoleHandler 
     要改名叫 consoleHandler 了，因為不只是 forth, js too. 
     結果 --> 
         OK jeforth.3we\3htm\js\jeforth.3htm.js > kvm.forthConsoleHandler = function(cmd){} 
@@ -6400,22 +6404,29 @@
         true
         > kvm.push(123).push(234).dictate("+").pop()
         357    
-    [ ] also these files contains forthConsoleHandler 
+    [X] also these files contains forthConsoleHandler 
         [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3htm\f\platform.f
             --> run-inputbox code definition 裡面 ForthConsoleHandler 改成 consoleHandler 好了
         [X] jeforth.3ce.js
             --> 隨便敲甚麼都 error : JavaScript error on word "run-inputbox" : vm.consoleHandler is not a function
             --> ForthConsoleHandler 改成 consoleHandler 好了。但是改 lang='js' 無效。
-            --> 因為 forthConsoleHandler 要改寫, window.lang = 'forth' 初值也要給。
+            --> 因為 forthConsoleHandler 要改寫, kvm.lang = 'forth' 初值也要給。
             --> 3ce 果然好了。切換 'js' <> 'forth' ok 了
         [X] jeforth.3nd.js    
             --> 照上面改也好了。3nd 略有不同，但不難改。
-        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\target.f
-        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3hta\f\jquery.f
-        [ ] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\ce.f    
-        [ ] actually many of them !!! 
-
-
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\target.f
+            --> attach 上 target page 與以上各處等價，都要改同樣的三個地方。
+                可是 target.f 裡的 run-inputbox 根本沒用到，所以沒改到也沒問題。。。怎麼回事？
+                --> 因為它自有一套 forthConsoleHandler 還在。可能在 ce.f? -- Yes!  
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\ce.f    
+            --> target web page 的 consoleHandler 改好就好了。
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3hta\f\jquery.f
+            --> 之前 jeforth.3htm.js 一改 3hta 就已經出問題了
+            --> 改了幾版，駕輕就熟，3hta 也好了。
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\jeforth.3nw.html 
+            --> 改好了要灌 nw.js 才行。。。好了。
+        [X] 用 window.lang 不好！ vm.lang 才對 --> all done. 
+[ ] release to master 吧，好了以後把 develop , develop2 都丟掉換新的 develop branch. 
 
 
 

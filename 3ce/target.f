@@ -121,7 +121,7 @@
 				case 13: /* Enter */
 					var cmd = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					vm.forthConsoleHandler(cmd);
+					vm.consoleHandler(cmd);
 					return(false); 
 			}
 			return (true); // pass down to following handlers 
@@ -158,7 +158,6 @@
 	
 	include 3htm/f/element.f		\ HTML element manipulation
 	include 3htm/f/platform.f		
-	
 
 	code run-inputbox ( -- ) \ Used in onKeyDown event handler.
 		// 當命令來自 local 就把 display 切回 local target page
@@ -166,7 +165,7 @@
 		var cmd = inputbox.value; // w/o the '\n' character ($10).
 		inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 		vm.cmdhistory.push(cmd);
-		vm.forthConsoleHandler(cmd);
+		vm.consoleHandler(cmd);
 		end-code
 		/// modified by 3ce target.f to auto switch dispaly back to local.
 	

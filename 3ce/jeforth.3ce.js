@@ -16,7 +16,7 @@
 		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3ce", "demo", "playground"];
 		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready; self-test needs it too.
 		kvm.selftest_visible = true; // type() refers to it.
-        window.lang = 'forth'; // 'js' or 'forth' let console support two languages
+        kvm.lang = 'forth'; // 'js' or 'forth' let console support two languages
 		
 		// kvm.type() is the master typing or printing function.
 		// The type() called in code ... end-code is defined in the kernel projectk.js.
@@ -94,7 +94,7 @@
 		// There's no main loop, event driven call back function is this.
 		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
         kvm.consoleHandler = function(cmd) {
-            if (window.lang == 'js' || window.lang != 'forth'){
+            if (kvm.lang == 'js' || kvm.lang != 'forth'){
                 type((cmd?'\n> ':"")+cmd+'\n');
                 result = eval(cmd);
                 type(result + "\n");
