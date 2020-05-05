@@ -6152,7 +6152,7 @@
     那就會把 b 留在 FORTH data stack 裡, 這個結果太奇怪，沒有用。所以要改寫。
     || 很少用，我用上了時不記得這種詭異的行為，結果出錯了，幸好被您發現!!
     
-[ ] 準備 release master 新版 release 新版 master
+[X] 準備 release master 新版 release 新版 master
     - case ... endcase 
     - fix bug on ||
     - 
@@ -6168,32 +6168,32 @@
         * git add or rm command is the final decision of what to add and what to remove.
     [x] officeLAN 的警告不適合發布出去 --> 只限 OA 這台電腦
     o selftest them all
-        [ ] Carefully delete all application and run setup.bat to rebuild them
-        [ ] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
-        [ ] 3nd use 3hta to: fork cmd /c node jeforth.3nd.js
-            [ ] include webserver.f
-        [ ] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
-            [ ] check version
-        [ ] 3hta, use 3hta to: fork jeforth.hta
-        [ ] 3ce, click its icon to launch it.
-            [ ] check version.
-            [ ] attach to target pages
+        [x] Carefully delete all application and run setup.bat to rebuild them
+        [x] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
+        [x] 3nd use 3hta to: fork cmd /c node jeforth.3nd.js
+            [X] include webserver.f
+        [X] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+            [X] check version
+        [x] 3hta, use 3hta to: fork jeforth.hta
+        [x] 3ce, click its icon to launch it.
+            [X] check version.
+            [X] attach to target pages
         [x] 3ca, click Chrome App icon to launch it.
             [x] check version  3.305 now
-        [ ] Testing all demo, use 3ce or 3ca
-            [ ] 12choc.f ,
-            [ ] solar-system.f,
-            [ ] tutor-cloth.f
-            [ ] alarm.f ,
-            [ ] ball.f(non-selftest mode) ,
-            [ ] blowing-in-the-wind.f ,
-            [ ] box2dweb-arrow.f ,
-            [ ] calc.f ,
-            [ ] chipmunk-js-pyramidstack.f ,
-            [ ] flot-demo.f ,
-            [ ] numeric-demo.f
-            [ ] h2o.f ,
-            [ ] many-clocks.f ,
+        [X] Testing all demo, use 3ce or 3ca
+            [X] 12choc.f ,
+            [X] solar-system.f,
+            [X] tutor-cloth.f
+            [X] alarm.f ,
+            [X] ball.f(non-selftest mode) ,
+            [X] blowing-in-the-wind.f ,
+            [X] box2dweb-arrow.f ,
+            [X] calc.f ,
+            [X] chipmunk-js-pyramidstack.f ,
+            [X] flot-demo.f ,
+            [X] numeric-demo.f
+            [X] h2o.f ,
+            [X] many-clocks.f ,
         [x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
             切換到Master分支 : git checkout master
             合併 develop 分支進 master 來 : git merge --no-ff develop
@@ -6203,8 +6203,8 @@
         [x] Upload master to GitHub : git push
         [x] Complete this log.txt
         [/] GitHub 上的 README.md 範例都指向 r2 要改成 rn --> 懶得改
-        [ ] release note
-        [ ] Master 到回 develop
+        [/] release note
+        [X] Master 到回 develop
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
 
@@ -6427,6 +6427,72 @@
             --> 改好了要灌 nw.js 才行。。。好了。
         [X] 用 window.lang 不好！ vm.lang 才對 --> all done. 
 [ ] release to master 吧，好了以後把 develop , develop2 都丟掉換新的 develop branch. 
+[ ] 準備 release master 新版 release 新版 master
+    - vm.lang='js' or 'forth' 
+    - proeforth support
+    [ ] ls.f 的東西要測一側，好像不靈。
+    [ ] 把 3ce 的啟始頁面改掉，不要用 Ynote 了，亂擋。
+    [ ] Check the date stamp at the bottom of README.md <-- 可以從 GitHub 網頁上直接改。
+    [ ] 示範如何 download 東西 from the python repo page 
+    [ ] Check project-k/projectk.js is included even when project-k folder is ignored
+        ~\jeforth.3we>git add -f project-k/projectk.js
+        * git add or rm command is the final decision of what to add and what to remove.
+    [ ] officeLAN 的警告不適合發布出去 --> 只限 OA 這台電腦
+    o selftest them all
+        [ ] Carefully delete all application and run setup.bat to rebuild them
+        [ ] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
+        [ ] 3nd use 3hta to: fork cmd /c node jeforth.3nd.js
+            [ ] include webserver.f
+        [ ] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+            [ ] check version
+        [ ] 3hta, use 3hta to: fork jeforth.hta
+        [ ] 3ce, click its icon to launch it.
+            [ ] check version.
+            [ ] attach to target pages
+        [ ] 3ca, click Chrome App icon to launch it.
+            [ ] check version  3.305 now
+        [ ] Testing all demo, use 3ce or 3ca
+            [ ] 12choc.f ,
+            [ ] solar-system.f,
+            [ ] tutor-cloth.f
+            [ ] alarm.f ,
+            [ ] ball.f(non-selftest mode) ,
+            [ ] blowing-in-the-wind.f ,
+            [ ] box2dweb-arrow.f ,
+            [ ] calc.f ,
+            [ ] chipmunk-js-pyramidstack.f ,
+            [ ] flot-demo.f ,
+            [ ] numeric-demo.f
+            [ ] h2o.f ,
+            [ ] many-clocks.f ,
+        [ ] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+            切換到Master分支 : git checkout master
+            合併 develop 分支進 master 來 : git merge --no-ff develop
+            ==> 已經改用 GitHub Desktop 只要切到 master 然後 Menu > 
+                Branch > Merge into current branch 就行了。
+        [ ] Test the master all over again ... ignored, lazy.
+        [ ] Upload master to GitHub : git push
+        [ ] Complete this log.txt
+        [ ] GitHub 上的 README.md 範例都指向 r2 要改成 rn --> 懶得改
+        [ ] release note
+        [ ] Master 到回 develop
+            切換到Master分支 : git checkout develop
+            合併 develop 分支進 master 來 : git merge --no-ff master
+    [ ] jeforth.3we\js\version.js --> jeforth3we_minor_version = 306; 2020/05/04 11:29:14 
+[X] 2020/05/04 16:49:45 如何在 HTML 裡夾檔 attachment embeded audio video and pictures, 以前研究
+    過 refer to html5_audio_demo.f also proeforth.  
+    圖片的 embeded or attachment 夾檔，寫法如下。
+    <img src="data:audio/mpeg;base64,整塊 base64 放這裡，空格都會被忽略。" style="width:auto;"></img>
+    mp3 的 embeded 夾檔，寫法如下，主要部份同上：
+    <audio controls>
+      <source src="data:audio/mpeg;base64,整塊 base64 放這裡，空格都會被忽略。" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    把圖片音樂檔轉成 base64 有 online 服務: 
+    \ Base64 encoder online 
+    \ http://www.motobit.com/util/base64-decoder-encoder.asp export to a file, 
+    \ then copy-paste the base64 code into the <source> tag as demo here.
+    
 
 
 
