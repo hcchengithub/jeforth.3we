@@ -66,7 +66,7 @@ code run-inputbox ( -- ) \ <Enter> key's run time.
 				var cmd = inputbox.value; // w/o the '\n' character ($10).
 				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
 				vm.cmdhistory.push(cmd);
-				vm.forthConsoleHandler(cmd);
+				vm.consoleHandler(cmd); // 2020/05/02 08:05:38 
 				end-code
 				/// 抽出本命令有很多用途，首先是 support Ctrl-Enter 用來執行 inputbox, 這除了
 				/// 原來 edit mode 時需要, 且可用於 focus 在別地方時下達執行命令, 因為 focus 本

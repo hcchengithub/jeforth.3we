@@ -6648,6 +6648,11 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==" type="audio/mpeg">
 	Your browser does not support the audio element.
 </audio>
+
+<p>
+圖片的 embeded or attachment 夾檔，寫法如下。
+<textarea> <img src="data:audio/mpeg;base64,整塊 base64 放這裡，空格都會被忽略。" style="width:auto;"></img> </textarea>
+
 </o> constant music.mp3 // ( -- [object HTMLAudioElement] ) HTML5 audio element
 	/// Useful properties and methods: 
 	///   autobuffer,autoplay,buffered,controls,currentSrc,currentTime,defaultPlaybackRate,duration,ended,

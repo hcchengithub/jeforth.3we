@@ -3914,13 +3914,17 @@
 
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
-[x] install nw.js 就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder.
-    因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突, 應該可以 ==> Yes, OK.
-
-    Unzip the nw.js package (v0.14 now use SDK version to gain F12 Debugger or DevTool)
-    and set path to it, that's all. Or simply copy the entire nw.js unzip'ed folder to
-    node.js folder. This is because node.js has Windows installer and nw.js has not but
-    it can leverage node.js.
+[x] How to install nw.js 
+    Method 1:
+        Unzip the nw.js package (v0.14 now use SDK version to gain F12 Debugger or DevTool)
+        and set path to it, that's all. 
+    Method 2:
+        就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder 
+        (c:\Program Files\nodejs) 因為 node.js 有 installer, nw.js 沒有. 正好目錄結構不衝突,
+        應該可以 ==> Yes, OK.
+        Simply copy the entire nw.js unzip'ed folder to node.js folder. This is because 
+        node.js has Windows installer and nw.js has not but it can leverage node.js.
+        2020/05/02 10:10:08 測試 lang='js' on OA used this way again and it works! 
 
 [x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
     ---- modify jeforth.3nw.html --------------------
@@ -4640,6 +4644,11 @@
             <js> chrome.runtime.sendMessage({isCommand:true,text:pop()},
             function(result){push(result);execute('stopSleeping')}) </js>
             10000 sleep ;
+    --> 複習: 14:06 2018-08-11 從被 attached 的 target page, hao123 繁簡轉換 page, 執行：
+            char common.css readTextFile 
+        果然讀到 jeforth.3ce folder 之下的該檔案。 --> 檢查 readTextFile (沒有尾綴 Auto) 的定義，只出現在 ce.f 裡的
+        attach definition 裡。
+    
 [x] 3nw.bat js> 1000*60*60*2 nap include hibernatin.f
 [x] Popup page can attach 3ce to target page now, so 3ce default tabid should be the 'active' tab.
     js: push({active:true}) tabs.query js> tos().length \ ==> 1 (number) must be only one
@@ -6036,7 +6045,7 @@
         [ ] Master 到回 develop
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
-[x] peforth 有新發現 ─ function cascading 
+[ ] peforth 有新發現 ─ function cascading 
     讓 vm.push() vm.execute() vm.dictate() 都傳回 vm 
     以便 support function cascade. 從 projectk.js 裡面修改
     --> 我都忘了 jeforth 的東西了。
@@ -6046,6 +6055,7 @@
         o 試驗效果：
             <js> push(123).push(456).dictate('+ . cr')</js>
             579
+    --> 18:03 18/08/08 以前改好了，如今怎麼沒有? 再改一次吧！        
 [x] jeforth 沒有 v() r() ? 那怎麼 access forth variables from js 呢？
     js> vm[context].x 要簡化成 vm.v('x') , vm.forth.y 簡化成 vm.r('y')
     13:11 2018-03-20 完成
@@ -6142,7 +6152,7 @@
     那就會把 b 留在 FORTH data stack 裡, 這個結果太奇怪，沒有用。所以要改寫。
     || 很少用，我用上了時不記得這種詭異的行為，結果出錯了，幸好被您發現!!
     
-[ ] 準備 release master 新版 release 新版 master
+[X] 準備 release master 新版 release 新版 master
     - case ... endcase 
     - fix bug on ||
     - 
@@ -6158,6 +6168,277 @@
         * git add or rm command is the final decision of what to add and what to remove.
     [x] officeLAN 的警告不適合發布出去 --> 只限 OA 這台電腦
     o selftest them all
+        [x] Carefully delete all application and run setup.bat to rebuild them
+        [x] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
+        [x] 3nd use 3hta to: fork cmd /c node jeforth.3nd.js
+            [X] include webserver.f
+        [X] 3htm use 3nw or 3nd to include webserver.f and then localhost:8888
+            [X] check version
+        [x] 3hta, use 3hta to: fork jeforth.hta
+        [x] 3ce, click its icon to launch it.
+            [X] check version.
+            [X] attach to target pages
+        [x] 3ca, click Chrome App icon to launch it.
+            [x] check version  3.305 now
+        [X] Testing all demo, use 3ce or 3ca
+            [X] 12choc.f ,
+            [X] solar-system.f,
+            [X] tutor-cloth.f
+            [X] alarm.f ,
+            [X] ball.f(non-selftest mode) ,
+            [X] blowing-in-the-wind.f ,
+            [X] box2dweb-arrow.f ,
+            [X] calc.f ,
+            [X] chipmunk-js-pyramidstack.f ,
+            [X] flot-demo.f ,
+            [X] numeric-demo.f
+            [X] h2o.f ,
+            [X] many-clocks.f ,
+        [x] commit develop -> 將 develop 分支發佈到 Master 分支的命令 :
+            切換到Master分支 : git checkout master
+            合併 develop 分支進 master 來 : git merge --no-ff develop
+            ==> 已經改用 GitHub Desktop 只要切到 master 然後 Menu > 
+                Branch > Merge into current branch 就行了。
+        [/] Test the master all over again ... ignored, lazy.
+        [x] Upload master to GitHub : git push
+        [x] Complete this log.txt
+        [/] GitHub 上的 README.md 範例都指向 r2 要改成 rn --> 懶得改
+        [/] release note
+        [X] Master 到回 develop
+            切換到Master分支 : git checkout develop
+            合併 develop 分支進 master 來 : git merge --no-ff master
+
+-----------------------------------------------------
+[ ] 17:27 18/08/02
+    3ce 不太穩定 ce.f 裡面有 shooo! 跟 notyet 的地方都要再加強測試。
+[ ] 我想寫下導覽，把 3ce 的整套設計用實驗步驟的方式講清楚，以後自己複習也方便。
+    --> See Ynote "jeforth.3ce 導覽"
+    --> 查以前的筆記，找 dictate(), (dictate) 之類，找 sendMessage 可能更好
+        [ ] Log of TR.ht試ml 真的有
+        [ ] log.txt 本身也很多。 --> 直接在上面複習，寫下筆記。
+        [ ] ls.f search 3ce 有些 message 的例子
+    3ce 光設定 tabid! 而沒有 attach 到 target tab 則 F7 就無效，是這樣嗎？ 複習一下。
+    
+    --> 光看 ce.f 就對了
+    --> background.f 只有在 reload 3ce 時才會被 run 到，其中定義的東西只有在 attach
+        時才會被用到。直接研究 attach 就是 3ce 的精華。
+    --> 都忘光光了 ce.f 裡的 ce3_host_onmessage() 只有在 attach 時才會被 call 到，而且一大堆。
+[ ] 先瞭解 sendMessage 有幾種，每個都試試看，確定他們的玩法
+    --> 從 target page 打給 background page
+        js: chrome.runtime.sendMessage({addr:"background",forth:pop()})         
+[ ] 直接 trace ce.f 吧！
+[ ] 搞懂之後，弄個 attach 選項，不要去干擾 target page 直接用 3ce page 去控制 target page。
+-----------------------------------------------------
+[ ] 寫個工具用來把網頁上的 youtube hyperlink 都列出來, 方便寫成 youtube-dl 的 script 
+-----------------------------------------------------
+[ ] 14:24 2019-01-22 Rawgit 已經熄燈了，改用 www.forth.org.tw 
+[/] element.f 合併到 html5.f 裡去 
+    No! element.f 會被個別用到, 例如 3ce 的 target.f 
+[/] ls.f & unindent.f 合併到 hte.f 裡去 (Hyper Text Editor)
+    No! unindent.f 很多地方有個別用到，是個很獨立的 module; 
+    hte.f is actually the alt-F2 editor; ls.f is the Local Storage code editor.
+    They are all different things. ls.f 還是很好用，只要它不要搶出頭就好了，保留。
+[ ] 把教學影片收集到 wiki 裡某頁面上。
+[x] 重複 include misc.f 會把 misc.f 變到 vocs 的最後 也就是 order 的最高，為何？
+    因為 source-code-header 有做了手腳，它發現 misc.f 已經 loaded 就不會重新 scan.
+    這個 trick 不錯，但是並沒有省掉 include 多浪費的 I/O 時間。實際把例子中的 misc.f
+    變成 context 的是 prioritize command. 我有點印象，差不多都忘了!
+[x] 17:36 2019-01-22 協會網址不該變來變去，否則文件、Tutorial等會到處斷鍊。
+    Look at the URL mentioned in this Tutorial of jeforth.3we. (https://www.camdemy.com/media/19253)
+    There have been many of them!! So how can people be sure that www.forth.org.tw 
+    will not be dropped some day? why not www.figtaiwan.org 
+    as before? 恕我直言。
+    協會官方網址要固定，因為以前錄好的影片上都說網址是 www.figtaiwan.org。
+    目前的例子是 jeforth 的 demo 程式網址因為 rawgit 停止服務而斷鍊。
+    幸好有 理事長提供 www.forth.org.tw 可以修復，可是以前都說是 www.figtaiwan.org
+    改掉就出問題了。同理，內容的目錄結構可能也要有規範，是不是？
+    --> 有點熱心總比停掉了好，別提了。
+-----------------------------------------------------
+[X] 2020/03/21 10:45:24 前兩天玩 proeforth 時發現原先的 args 取得過程有缺陷，當 path 帶有空格時
+	不靈，當時已經找好 solution 了。。。 好像記錄在 proe.f 裡。。。 是的。
+	問題
+	原來的設計，整串 argv[0] 都沒有空格，這樣就沒問題：
+		> js> hta.commandLine . 
+		"C:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\jeforth.hta" 111 222 333 OK 
+		> dropall args .s
+			0: 111 222 333 (string)  <--------- args 就是 command line 上的 arguments, 這個正確。 
+	可是如果 argv[0] 裡有空格 args 就會出錯
+		> js> hta.commandLine .           v---- 這裡有個 space 
+		"C:\Users\8304018\OneDrive\OneNote Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta" 111 222 333 >>> 	
+		> dropall args .s
+			  0: Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta" 111 222 333 (string)
+                 ^
+				 '----- args 就是 command line 上的 arguments, 這個從 argv[0] 的 pathname 裡多抓了一些空格後的
+				        東西出來 mistakenly。 
+	-->	不論如何，argv[0] 的 ~.hta pathname 都會有 double quot 所以可以用 double quote 先把整
+		個 argv 切成三份，取中間跟尾巴兩份就對了，因為 jeforth command line 禁用 double quote.
+		這麼一來，solution is : 
+		dropall 
+		<js> (hta.commandLine + " dummy").split(/\"/).slice(1) </jsV> 
+		dup :> [0] swap :> [1] trim :> split(/\s+/).slice(0,-1) .s
+		結果：
+		0: C:\Users\8304018\OneDrive\OneNote Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta (string)
+		1: 111,222,333 (array)
+	-->	合併成 args array --> js: tos().unshift(pop(1))
+		0: C:\Users\8304018\OneDrive\OneNote Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta,111,222,333 (array)
+	--> args 在哪裡 composed 的? 之前的 vm.argv 就已經錯了
+		> dropall js> vm.argv .s
+			0: "C:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\jeforth.hta",111,222,333,"abc,def" (array)
+		> dropall js> vm.argv .s                 v------- 這裡錯了！
+			0: "C:\Users\8304018\OneDrive\OneNote,Notebooks\Work2020(local)\attachments\proeforth\proeforth.hta",111,222,333 (array)
+	--> jeforth.hta 中 kvm.argv 應該這樣處理
+		kvm.argv = (hta.commandLine + " dummy").split(/\"/).slice(1); // double quote cut and get [0]pathname [1]argv+dummy
+		kvm.argv = kvm.argv[0].concat(kvm.argv[1].split(/\s+/).slice(1,-1));
+[X] 2020/03/21 15:02:24 忘了外掛的 .js 該怎麼處理。先找找看看 numeric-1.2.6.js 又是怎麼用的?
+	c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\external-modules\numeric\numeric-1.2.6.js 
+	c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\3htm\f\numeric.f 
+	--> 已經寫好 numeric.f 用 include numeric.f 就可以了，flot 也是這樣用。我好棒！
+	--> 直接把 CREOSON 的 .js copy-paste 放進 <js></js> 裡跑跑看。。。。 
+		> include.js creoson_creo.js \ 用這個方式跟 copy'n paste to <js></js> 是等效的，但是會出問題：
+		JavaScript error on word "sinclude.js" : Expected ';'
+		--> 原因是 creoson_???.js 中有用到很多新的 keyword "let" 而 HTA (JScript v11.0.16384) 不認得。
+		--> 解法是把所有 .js files in \web\assets\creoson_stuff\creoson_js 裡的 let 改成 var 就好了。
+[X] 2020/03/21 20:23:56 不只 let 連 Object 的 support 也不全，算了，別用 HTA for Creoson 了。
+	-->	改用 3ca 算了。
+--------------------------------
+[ ] 2020/03/21 20:48:05 改用 3ca 又有怪事 
+		cls char playground/1.jss readTextFile . <-- 1 或 1.jss 都可以讀到，改名成 1.js 就讀不到了。
+		既然本來就要加 push(creo) 了，乾脆改成 ~.f 算了 ==> 改寫成 creoson_creo.f 成功！ 
+	--> 改成 .f 太麻煩了，一大堆要改的。不如直接 <script></script> include 進去好了。
+
+		<!-- CREOSON_JS Libraries -->
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/common_creoson_ajax.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/common_creoson_utils.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_bom.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_connection.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_creo.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_dimension.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_drawing.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_familytable.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_feature.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_file.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_geometry.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_interface.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_layer.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_note.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_parameter.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_view.js"></script>
+		<script type="text/javascript" src="assets/creoson_stuff/creoson_js/creoson_windchill.js"></script>
+	--> 以上 17個 .js 都直接 copy 進 jeforth.3ca\js\
+	--> 把上面這段抄進 jeforth.3ca\index.html 路徑改成 js/foobar.js, 這樣就成功了！
+	--> refresh jeforth.3ca 馬上生效，查 js> creo . 有東西
+	[ ]	LPM2 上的 develop branch 3ca index.html 改了, 不用要記得改回去。當初就該用分支 branch 才對。
+	[X] 研究 http://localhost:9056/playground.html 要花點時間，心生退意，用 python 就好了。
+		或者直接用 web-link 看看。。。。
+		--> shit, 超簡單：https://eacpds.com/getting-started-creo-web-link/ with diggo notes.
+
+[ ] 2020/03/24 13:51:41 是 pro/e weblink 時在 built-in browser 下 DOM windows 的 (see) 看到：
+		f :   function(a,b){
+				var id = setTimeout(a,b);
+				registered[id.toString()] = id;
+				return id;
+			}
+		colonxt :   function(){
+			rstack.push(ip);
+			inner(this.cfa);
+		}
+	看起來是 private 留下來的東西，應該是有問題。
+	
+[X] 2020/04/02 16:26:45 看到用 python webserver 閱讀 Web.Link 手冊還能用 Diigo 記筆記，想到何不用 Jupyternotebook?
+	結果發現若用 Jupyternotebook 當 webserver 還是可以與 Diigo 配合畫線、寫眉批、作筆記。但是跑 jeforth.3htm 就不行
+	了，因為會有 Cross-Origin Read Blocking (CORB) 的障礙。
+    https://onedrive.live.com/view.aspx?resid=A796EA18AC8C1DA9%2112567&id=documents&wd=target%282020.one%7CA8067B81-21D2-404E-85C4-C6E065D857AB%2F%5BClosed%5D%20Jeforth.3htm%20%E7%94%A8%20jupyternotebook%20%E8%B7%91%E4%B8%8D%E8%B5%B7%E4%BE%86%7CE2AC6CD4-292A-4DB5-989C-5017CC8825C4%2F%29
+	onenote:https://d.docs.live.net/a796ea18ac8c1da9/文件/OneNote2020/2020.one#%5bClosed%5d%20Jeforth.3htm%20用%20jupyternotebook%20跑不起來&section-id={A8067B81-21D2-404E-85C4-C6E065D857AB}&page-id={E2AC6CD4-292A-4DB5-989C-5017CC8825C4}&end
+    
+[X] 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。
+    2020/04/28 14:31 構想 proeforth 除了 forth 也提供 javascript console 類似 peforth 的結構。
+    --> trace baby.html of project-k to recall how to make a console --> 懂了，網頁 ready 時登
+    記 hotKeyHandler() 給 document.onkeydown 而 hotKeyHandler 只負責把 command line 準備好就接
+    著 call forthConsoleHandler(vm.inputbox) 它才是 main loop equivalent. --> 利用 baby.html 改
+    成 test.html 把forthConsoleHandler(vm.inputbox) 改成處理 javascript 看看效果。。。。。成功！
+    Project-k baby.html 只改一小段即成：
+            // function forthConsoleHandler(cmd) {
+            //     type((cmd?'\n> ':"")+cmd+'\n');
+            //     vm.dictate(cmd);  // Pass the command line to jeForth VM
+            //     type(" " + vm.prompt + " ");
+            //     window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+            // }
+
+            function forthConsoleHandler(cmd) {
+                type((cmd?'\n> ':"")+cmd+'\n');
+                result = eval(cmd);
+                type(result + "\n");
+                window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+            }
+    結果：
+        > 123
+        123
+        > document.title
+        jeforth baby
+        > document
+        [object HTMLDocument]
+        變成 JavaScript console 了。
+    
+[X] 2020/04/28 16:36:48 接下來比照 peforth 也寫個 ok() 擔任 main loop 的腳色。
+    --> 先查看一下 peforth 的 ok() .... peforth\__init__.py 
+    function ok(prompt='OK ',cmd=""){
+        type((cmd?'\n> ':"")+cmd+'\n');
+        vm.dictate(cmd);  // Pass the command line to jeForth VM
+        type(" " + vm.prompt + " ");
+        window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+    }
+    2020/04/29 10:59:57 --> 錯了，不能比照 peforth.ok() 它是 synchronous 而 jeforth 可不是。只好引進
+    kvm.lang = 'js' or 'forth' 來切換 language. 這樣很簡單。這個 function 本來叫 forthConsoleHandler 
+    要改名叫 consoleHandler 了，因為不只是 forth, js too. 
+    結果 --> 
+        OK jeforth.3we\3htm\js\jeforth.3htm.js > kvm.forthConsoleHandler = function(cmd){} 
+        改好 3we 在 3ca 上就馬上生效, 
+        default lang='forth'
+        > js: lang='js'  切換
+         OK 
+        undefined  按 enter 變成回覆 undefined 了
+        undefined
+        > kvm.dictate("char abc .")
+        abc[object Object] 早就有 function cascade 了, 
+        > kvm.dictate("")==kvm
+        true
+        > kvm.push(123).push(234).dictate("+").pop()
+        357    
+    [X] also these files contains forthConsoleHandler 
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3htm\f\platform.f
+            --> run-inputbox code definition 裡面 ForthConsoleHandler 改成 consoleHandler 好了
+        [X] jeforth.3ce.js
+            --> 隨便敲甚麼都 error : JavaScript error on word "run-inputbox" : vm.consoleHandler is not a function
+            --> ForthConsoleHandler 改成 consoleHandler 好了。但是改 lang='js' 無效。
+            --> 因為 forthConsoleHandler 要改寫, kvm.lang = 'forth' 初值也要給。
+            --> 3ce 果然好了。切換 'js' <> 'forth' ok 了
+        [X] jeforth.3nd.js    
+            --> 照上面改也好了。3nd 略有不同，但不難改。
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\target.f
+            --> attach 上 target page 與以上各處等價，都要改同樣的三個地方。
+                可是 target.f 裡的 run-inputbox 根本沒用到，所以沒改到也沒問題。。。怎麼回事？
+                --> 因為它自有一套 forthConsoleHandler 還在。可能在 ce.f? -- Yes!  
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3ce\ce.f    
+            --> target web page 的 consoleHandler 改好就好了。
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\3hta\f\jquery.f
+            --> 之前 jeforth.3htm.js 一改 3hta 就已經出問題了
+            --> 改了幾版，駕輕就熟，3hta 也好了。
+        [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\jeforth.3nw.html 
+            --> 改好了要灌 nw.js 才行。。。好了。
+        [X] 用 window.lang 不好！ vm.lang 才對 --> all done. 
+[ ] release to master 吧，好了以後把 develop , develop2 都丟掉換新的 develop branch. 
+[ ] 準備 release master 新版 release 新版 master
+    - vm.lang='js' or 'forth' 
+    - proeforth support
+    [ ] ls.f 的東西要測一側，好像不靈。
+    [ ] 把 3ce 的啟始頁面改掉，不要用 Ynote 了，亂擋。
+    [ ] Check the date stamp at the bottom of README.md <-- 可以從 GitHub 網頁上直接改。
+    [ ] 示範如何 download 東西 from the python repo page 
+    [ ] Check project-k/projectk.js is included even when project-k folder is ignored
+        ~\jeforth.3we>git add -f project-k/projectk.js
+        * git add or rm command is the final decision of what to add and what to remove.
+    [ ] officeLAN 的警告不適合發布出去 --> 只限 OA 這台電腦
+    o selftest them all
         [ ] Carefully delete all application and run setup.bat to rebuild them
         [ ] 3nw use 3hta to: fork cmd /c start nw ../jeforth.3we
         [ ] 3nd use 3hta to: fork cmd /c node jeforth.3nd.js
@@ -6168,8 +6449,8 @@
         [ ] 3ce, click its icon to launch it.
             [ ] check version.
             [ ] attach to target pages
-        [x] 3ca, click Chrome App icon to launch it.
-            [x] check version  3.305 now
+        [ ] 3ca, click Chrome App icon to launch it.
+            [ ] check version  3.305 now
         [ ] Testing all demo, use 3ce or 3ca
             [ ] 12choc.f ,
             [ ] solar-system.f,
@@ -6189,11 +6470,177 @@
             合併 develop 分支進 master 來 : git merge --no-ff develop
             ==> 已經改用 GitHub Desktop 只要切到 master 然後 Menu > 
                 Branch > Merge into current branch 就行了。
-        [/] Test the master all over again ... ignored, lazy.
-        [x] Upload master to GitHub : git push
-        [x] Complete this log.txt
+        [ ] Test the master all over again ... ignored, lazy.
+        [ ] Upload master to GitHub : git push
+        [ ] Complete this log.txt
+        [ ] GitHub 上的 README.md 範例都指向 r2 要改成 rn --> 懶得改
         [ ] release note
-        [/] GitHub 上的 README.md 範例都指向 r2 要改成 rn --> 懶得改
         [ ] Master 到回 develop
             切換到Master分支 : git checkout develop
             合併 develop 分支進 master 來 : git merge --no-ff master
+    [ ] jeforth.3we\js\version.js --> jeforth3we_minor_version = 306; 2020/05/04 11:29:14 
+[X] 2020/05/04 16:49:45 如何在 HTML 裡夾檔 attachment embeded audio video and pictures, 以前研究
+    過 refer to html5_audio_demo.f also proeforth.  
+    圖片的 embeded or attachment 夾檔，寫法如下。
+    <img src="data:audio/mpeg;base64,整塊 base64 放這裡，空格都會被忽略。" style="width:auto;"></img>
+    mp3 的 embeded 夾檔，寫法如下，主要部份同上：
+    <audio controls>
+      <source src="data:audio/mpeg;base64,整塊 base64 放這裡，空格都會被忽略。" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    把圖片音樂檔轉成 base64 有 online 服務: 
+    \ Base64 encoder online 
+    \ http://www.motobit.com/util/base64-decoder-encoder.asp export to a file, 
+    \ then copy-paste the base64 code into the <source> tag as demo here.
+
+----- proeforth for web.link ------------------ 
+我發現開發 proeforth 也會到回來影響 jeforth , 例如 kvm vm 徒增麻煩 --> 都改成 vm 就是個好覺醒。
+[X] 2020/05/05 13:10:07 dd3f was ok 0560 in trouble what's the difference? 
+[x] 2020/05/05 15:58:03 pfc 都改成 sess
+[x] 2020/05/05 15:58:03 pwl 都改成 pfcScript
+[X] 2020/05/05 15:58:03 wlc, wlf 同時也弄成 window.wlc window.wlf 
+[X] 2020/05/05 15:58:03 enumerator 改寫成 create does> 用來產生 enumerator e.g. pfcArgValueType
+    使用時就是 pfcArgValueType :> ARG_V_STRING 或者 js> pfcArgValueType.ARG_V_STRING
+[X] 2020/05/06 09:16:47 把所有 kvm 都改成 vm 之後其實很成功 lang='js' 切成 js 之後：
+    res = pfcScript.pwlParameterValueGet("cube.prt",wlc.PWL_MODEL,0,"ACER_PN")
+    type(res+"\n")
+    JavaScript error on word "run-inputbox" : Object doesn't support this property or method
+    這個錯誤不是問題！Web.Link 的 object 直接印出有 native object 的 .toString() 沒問題；
+    但是 + "\n" 就把它考倒了，因此出錯很自然。
+    [ ] jeforth, peforth 全改了吧！把 kvm 都改成 vm. 不太放心。。。。
+[X] 如果 js console 前一行 command line 的結果是 undefined 就不要顯示了。
+        vm.consoleHandler = function(cmd) --> if(result != undefined) type(result + "\n");
+    [X] jeforth, peforth 全改了吧！
+    
+[X] 2020/05/07 18:31:13 proeforth 這段不對，所以 Creo 5 can't run proeforth.
+    js> typeof(ActiveXObject)=="undefined" [if]
+        ." I don't sense running in Pro/E, skip including weblink.f." cr
+    正確方法是用所有 browser 都有的 navigator.appVersion 來查，但小心！兩個 or 起來：   
+    js> navigator.appVersion.indexOf('Creo') \ Check Creo -1:Fail otherwise:OK  for Creo 5.0
+    js> navigator.appVersion.indexOf('ProE') \ Check ProE -1:Fail otherwise:OK  for Creo 2.0
+        
+[X] 既然介紹人家讀 http://wiki.laptop.org/go/Forth_Lesson_1 就該讓 words 盡量一致
+    --> 放在 quit_f section
+[ ] 2020/05/12 08:10:19 proeforth 下，check js> window obj>keys --> found f,s,clearTimeout,setInterval,setTimeout,clearImmediate,msClearImmediate,msSetImmediate,setImmediate(object)         
+    colonxt,s,storage, o,result, etc 
+    [ ] 所有 jeforth 版本都該查一查。。。
+[X] 2020/05/12 10:23:21 意外發現 0 execute 會半路停止 colon word!!
+    e.g. : test 123 456 0 execute 789 ; 
+    i.e. : test 123 456 ['] foobar execute 789 ; 
+    --> this is normal!! 0 execute is exactly RET EXIT equivalent !!
+
+[ ] 查 vm 看到一些 selftest 留下的雜物，應該要清掉
+    delete(vm.vvv000) delete(vm.vvv) 
+    [ ] jeforth, peforth 全改了吧！
+    [ ] why 3HTA js> vm obj>keys 就沒有 vvv vvv000 殘留？ 3CA 有。3nd 也有。3nw 也沒有。
+        設斷點檢查。。。
+[X] 為何 vocabulary 要出現在 vm？ --> check what are they? 哈！我自創設計的 private 啦！
+    爽哥的建議，既然要讓 forth variables 能從 js 直接取用，就都各自放進 vocabulary 裡去。
+        
+[ ] Variables 要有 destructer! 否則 forget 或 marker 之後會殘留在 vocabulary 裡。
+    [ ] 2020/05/12 08:15:02 何不直接用 vm['misc.f']['x'].value ? 跟著 x 被 forget 就好了。
+    [ ] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
+        vm['volcabulary'] when the forth variable is forgot or removed by marker the js copy 
+        will be still there. So a destructor is needed for them. The design is not completed 
+        at all.
+    [ ] peforth 也要變革    
+    [ ] variable 何不用自己的 object? 何必用 vm, vm.g, vm.forth, vm.vocabulary 這種東西？
+        目前 jeforth value & constant 是這樣
+        > see base or see args or see tab-spaces 
+                    name : base (string)
+                     vid : forth (string)
+                     wid : 199 (number)
+                    type : value (string)
+                 private : false (boolean)
+                    help : ( -- base ) decimal base is 10, hex base is 16, can be any number. (string)
+                selftest : pass (string)
+                      xt :
+        function(){push(vm["forth"]["base"])}  <---- 這就是可能會有殘留的方法
+        --> 如果是這樣 
+            tick('x').value 
+            反而是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
+        [ ] 仿 peforth 進一步用 v('varName') or r('varName') 即可。
+            但目前 v() 不是用 tick('x') 的，應該不是很正確。r('y') 可能還好，但可能根本不必存在。
+            def v(name):
+                return getattr(vm,context)[name]
+            def r(name):
+                return vm.forth[name]
+
+[X] 2020/05/18 09:11:09 Web.Link, Gary Wei 的 Creo 可以離線 run 結果在公司沒有 Internet 跑 proeforth
+    就會卡在 including jquery --> 改成先從 local include 沒有才從 internet include. 
+[ ] 刪簡 words 改寫 selftest 使其變成 proeforth 的說明文件
+
+
+[X] 2020/05/26 09:52:22 推算 stack 的小工具。
+    真實的場景是
+        char pfcModelItemType pfcCreate :> ITEM_COORD_SYS ( "NODE_REF8" diameter instrs solid ITEM_COORD_SYS )  
+        想要：over :> GetItemByName(ITEM_COORD_SYS,"NODE_REF8") constant csys // ( -- obj ) 要種 UDF 上去的參考座標     
+        應作：over :> GetItemByName(pop(),tos(3)) constant csys // ( -- obj ) 要種 UDF 上去的參考座標     
+    不容易有把握地推算出 tos(3) 因此需要這個實驗工具。
+        <js>
+        func = function(a,b){ type('a=' + a + ', b=' + b) }
+        push(func)
+        </js> constant func
+        > func :: (12,34) --> a=12, b=34 OK 
+        > 12 34 56 func 78 over :: (pop(),tos(3)) --> a=78, b=12 OK 
+        > .s
+              0:          12           ch (number)
+              1:          34          22h (number)
+              2:          56          38h (number)
+              3: function(a,b){ type('a=' + a + ', b=' + b) } (function)
+         OK 
+[ ] proeforth 發現的問題， forth order 應該是從後往前找，hash 從前往後加就可以後蓋前達到效果。可是
+    為何 include playground 之後 see . 變成舊版？明明 playground 之前就是 web.link 了。
+    2020/05/27 16:34:08 只要來一下 rescan-word-hash 就可以解決這個問題。那為何 include playground
+    沒有自動做(嗎)？ 我記得以前想讓 include vvv 與執行 vvv 等效，這是在照顧重複執行 include vvv 時
+    的效果，值得嗎？執行 vvv 肯定是沒有做 rescan 的，這是為了在 interpret state 執行 [repeat]...[again]
+    之類的 loop 時若有切換 context 不會影響 performance 太大。結論是： include 應該自動 rescan.  
+    也有可能是 proeforth 的 include 改寫過了出的問題。 
+    --> 以上推論錯了，加 rescan-word-hash 到 sinclude 與 include 都無效，因為問題出在 source-code-header
+    與 include 關連不大。因為 header 為了把新 vocabulary 放進 forth root 而有切到 forth 去
+    隨後「切換到新 vocabulary 時」有切換卻沒有 rescan 這本來就有問題了。修改如下：
+    
+    : header        ( -- 'head' ) \ ~.f common header
+                    EOF :> pattern <text>
+                        \ ~.f common header
+                        ?skip2 _eof_ \ skip it if already included
+                        dup .( Including ) . cr char -- over over + +
+                        js: tick('<selftest>').masterMarker=tos()+"selftest--";
+                        also forth definitions (marker) (vocabulary)
+                        last execute definitions rescan-word-hash \ <===== 加 rescan 
+                        <selftest>
+                            js> tick('<selftest>').masterMarker (marker)
+                        </selftest>
+                    </text> :> replace("_eof_",pop()) ; private
+                    
+    全部都要改： [X] proeforth [ ] jeforth [ ] peforth 
+    
+[X] include playground 之後 . 大亂。
+    2020/05/27 16:14:38 RI, 以前發現過，問題出在 weblink.f 的 >js 用到 
+        vm.v('wlkeys').forEach(function(key){. . .  
+    這種用法，一旦 context 切走，它就失效了。偏偏 web.link 裡有重新定義過 . 而且 web.link 的 order 
+    又高於 root forth , 所以就完蛋了。改成:
+        vm['weblink.f']['wlkeys'].forEach(function(key){
+    解決了這個問題。
+    
+[ ] 常用的 for loop example improved
+    /// 5 dup [for] dup t@ - ( count i ) . space ( count ) [next] drop
+    /// 5 dup for dup r@ - ( count i ) . space ( count ) next drop 
+    [ ] proeforth [ ] peforth [ ] jeforth 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

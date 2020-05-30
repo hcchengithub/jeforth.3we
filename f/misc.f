@@ -1,5 +1,22 @@
 
 s" misc.f"	source-code-header
+
+\ OLPC compatibility
+\ 推薦人家看 OLPC Forth 書 http://wiki.laptop.org/go/Forth_Lessons 所以要盡量減少困惑。
+
+' .s alias showstack 
+    /// Compatable to OLPC
+: noshowstack   ( -- ) \ OLPC's Turn off showstack. Not supported
+    ." OLPC's Turn off showstack. Not supported!" cr ;
+: type ( addr len -- ) \ OLPC's type. Not supported. Use js: type('string') instead 
+    [ last literal ] :> help . cr ;
+: recursive ( -- ) \ Use "[ last literal ] execute" to execute the word under definition.
+    [ last literal ] :> help . cr ;
+    /// This is an example: 
+    /// : factorial  dup 1 > if dup 1- [ last literal ] execute * then  ;
+    last alias recurse
+
+\ Miscellaneous
 		
 code tib.       ( result -- ) \ Print the command line and the TOS.
 				var lastCRindex = tib.slice(0, ntib).lastIndexOf('\n')+1;
@@ -122,3 +139,25 @@ code jquery.version ( -- string ) \ Check jQuery version
 					日幣有；1元，5元，10元，50元，100元，500元。
 					港幣有；10分，20分，50分，1元，2元，5元，10元。
 				</comment>
+
+: sign      ( n -- sign ) \ sign of n, result is 1 or -1 
+			?dup if dup abs ( n abs(n) ) / int else 1 then ;
+
+: round-off ( float 100(desimal) -- f' ) \ Round at 0.00 in this example, 0.005 --> 0.01, 0.00499 --> 0.0
+			over sign ( f 100 sign ) swap ( f sign 100 ) 
+			rot ( sign 100 f ) abs ( sign 100 |f| ) over * ( sign 100 |f|*100 ) 
+			0.500000000001 +  ( sign 100 |f|*100+0.5 )
+			int swap / * ; 
+			/// where decimal=0 means integer
+			
+: -->   	( result -- ) \ Print the result with the command line.
+			js> tib :> substring(0,ntib) ( result tib' )
+			dup :> lastIndexOf("\n") ( result tib' idxLastCR )
+			swap :> substring(Math.max(0,pop()),ntib) ( result tib" )
+			trim . \ print the TIB line 
+            space dup ( value value ) . \ print the value 
+            ( value ) js> typeof(pop()) char ( . . char ) . cr ;
+
+
+
+

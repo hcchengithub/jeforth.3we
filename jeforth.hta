@@ -58,6 +58,8 @@
 	kvm.host = window; // global 掛那裡的根據。
 	kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3hta/f", "3hta/vbs", "3hta/excel", "3hta", "demo", "playground", "private"];
 	kvm.selftest_visible = true; // static variable, self-test adjusts it, type() checks it. both sides need to access it.
+    kvm.lang = 'forth'; // 'js' or 'forth' let console support two languages
+
 
 	// Useful common tool, need to be redefined after jQuery also.
 	kvm.plain = function (s) {
@@ -116,7 +118,11 @@
 	kvm.prompt = "OK";
 	kvm.ado = new ActiveXObject("ADODB.Stream");
 	kvm.fso = new ActiveXObject("Scripting.FileSystemObject");
-	kvm.argv = (hta.commandLine + " dummy").split(/\s+/).slice(0,-1); // An array, 去掉行尾會出問題的 white spaces.
+
+	// allow spaces in jeforth.hta path
+	kvm.argv = (hta.commandLine + " dummy").split(/\"/).slice(1); // use double quote cut and get [0]pathname [1]argv+dummy
+	kvm.argv = kvm.argv.slice(0,1).concat(kvm.argv[1].split(/\s+/).slice(1,-1));  // jeforth does not allow double quote in command line 
+		
 	kvm.bye = function(){window.close()}; // vb.f will improve it
 	kvm.clearScreen = function(){outputbox.innerHTML=""};
 	
@@ -228,40 +234,30 @@
 	// There's no main loop, event driven call back function is this.
 	kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
 	
-	// kvm.forthConsoleHandler = function (cmd) {
-	// 	// No jquery. Original version in jeforth.hta, will be reDef in jquery.f
-	// 	var rlwas = kvm.rstack().length; // r)stack l)ength was
-	// 	kvm.type((cmd?'\n> ':"")+cmd+'\n');
-	// 	kvm.dictate(cmd);  // Pass the command line to jeForth VM
-	// 	(function retry(){
-	// 		// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-	// 		// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-	// 		// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-	// 		if(kvm.rstack().length!=rlwas)
-	// 			setTimeout(retry,100); 
-	// 		else {
-	// 			kvm.type(" " + kvm.prompt + " ");
-	// 			if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
-	// 		}
-	// 	})();
-	// }
-	kvm.forthConsoleHandler = function (cmd) {
+	kvm.consoleHandler = function (cmd) {
 		// Use jquery 
-		var rlwas = kvm.rstack().length; // r)stack l)ength was
-		kvm.type((cmd?'\n> ':"")+cmd+'\n');
-		kvm.dictate(cmd);  // Pass the command line to jeForth VM
-		(function retry(){
-			// rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
-			// event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
-			// 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-			if(kvm.rstack().length!=rlwas)
-				setTimeout(retry,100); 
-			else {
-				kvm.type(" " + kvm.prompt + " ");
-				if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
-					kvm.scroll2inputbox();
-			}
-		})();
+        if (kvm.lang == 'js' || kvm.lang != 'forth'){
+            kvm.type((cmd?'\n> ':"")+cmd+'\n');
+            result = eval(cmd);
+            if(result != undefined) kvm.type(result + "\n");
+            window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+        }else{
+            var rlwas = kvm.rstack().length; // r)stack l)ength was
+            kvm.type((cmd?'\n> ':"")+cmd+'\n');
+            kvm.dictate(cmd);  // Pass the command line to jeForth VM
+            (function retry(){
+                // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
+                // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
+                // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
+                if(kvm.rstack().length!=rlwas)
+                    setTimeout(retry,100); 
+                else {
+                    kvm.type(" " + kvm.prompt + " ");
+                    if ($(inputbox).is(":focus")) // more accurate, Ctrl-Enter usages need this
+                        kvm.scroll2inputbox();
+                }
+            })();
+        }
 	}
 	
 
@@ -275,7 +271,7 @@
 			case 13: /* Enter */
 				var cmd = inputbox.value; // w/o the '\n' character ($10). 
 				inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-				kvm.forthConsoleHandler(cmd);
+				kvm.consoleHandler(cmd);
 				return(false); 
 		}
 		return (true); // pass down to following handlers 

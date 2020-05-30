@@ -11,7 +11,7 @@
 	
 	element 是帶有 children 的 node -- node 比較廣泛，但因我們通常對 HTML element
 	比較感興趣，故 ce 命令引 element 為名，其實探索 HTML tree 時遇到 none element 的
-	node 也是照樣使用。
+	node 也是照樣適用。
 	
 	Pointing to the 目光焦點所在的 current element 是個 stack 結構，而非單一 variable. 原因
 	是調皮的 HTML 探索者可以把 current-element 殺掉（html5.f 有 removeElement 命令），此後 
@@ -72,8 +72,9 @@
 			ce! \ 以接在後面的原 #text 取代 ce 
 		then \ 一番迂迴轉進以上成功了
 		;  
-		/// 沒有 jump-to-node 因為過程中原 #text node 會發生變
-		/// 化，所也要靠 ce 來保持聯繫。
+        /// 玩法：某 element ce! 然後故意 words 讓畫面滾上去，然後 jump-to-ce@ 3000 nap
+        /// 就可以看到畫面跳到該 element 處，過三秒跳回 inputbox 處。
+		/// 沒有 jump-to-node 因為過程中原 #text node 會發生變化，所也要靠 ce 來保持聯繫。
 
 	: se ( element -- ) \ See the element
 		dup children ( -- element array ) <js> 
