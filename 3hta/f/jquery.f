@@ -37,7 +37,7 @@
                 if (vm.lang == 'js' || vm.lang != 'forth'){
                     type((cmd?'\n> ':"")+cmd+'\n');
                     result = eval(cmd);
-                    type(result + "\n");
+                    if(result != undefined) type(result + "\n");
                     window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
                 }else{
                     var rlwas = vm.rstack().length; // r)stack l)ength was

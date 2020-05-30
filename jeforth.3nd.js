@@ -112,7 +112,7 @@ kvm.consoleHandler = function(cmd) {
     if (global.lang == 'js' || global.lang != 'forth'){
         type((cmd?'\n> ':"")+cmd+'\n');
         result = eval(cmd);
-        type(result + "\n");
+        if(result != undefined) type(result + "\n");
     }else{
         var rlwas = kvm.rstack().length; // r)stack l)ength was
         // type((cmd?'\n> ':"")+cmd+'\n');

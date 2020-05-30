@@ -1,5 +1,22 @@
 
 s" misc.f"	source-code-header
+
+\ OLPC compatibility
+\ 推薦人家看 OLPC Forth 書 http://wiki.laptop.org/go/Forth_Lessons 所以要盡量減少困惑。
+
+' .s alias showstack 
+    /// Compatable to OLPC
+: noshowstack   ( -- ) \ OLPC's Turn off showstack. Not supported
+    ." OLPC's Turn off showstack. Not supported!" cr ;
+: type ( addr len -- ) \ OLPC's type. Not supported. Use js: type('string') instead 
+    [ last literal ] :> help . cr ;
+: recursive ( -- ) \ Use "[ last literal ] execute" to execute the word under definition.
+    [ last literal ] :> help . cr ;
+    /// This is an example: 
+    /// : factorial  dup 1 > if dup 1- [ last literal ] execute * then  ;
+    last alias recurse
+
+\ Miscellaneous
 		
 code tib.       ( result -- ) \ Print the command line and the TOS.
 				var lastCRindex = tib.slice(0, ntib).lastIndexOf('\n')+1;

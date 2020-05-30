@@ -329,7 +329,7 @@
                     if (vm.lang == 'js' || vm.lang != 'forth'){
                         vm.type((cmd?'\n> ':"")+cmd+'\n');
                         result = eval(cmd);
-                        vm.type(result + "\n");
+                        if(result != undefined) vm.type(result + "\n");
                         window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
                     }else{
 

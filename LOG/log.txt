@@ -6492,21 +6492,141 @@
     \ Base64 encoder online 
     \ http://www.motobit.com/util/base64-decoder-encoder.asp export to a file, 
     \ then copy-paste the base64 code into the <source> tag as demo here.
+
+----- proeforth for web.link ------------------ 
+我發現開發 proeforth 也會到回來影響 jeforth , 例如 kvm vm 徒增麻煩 --> 都改成 vm 就是個好覺醒。
+[X] 2020/05/05 13:10:07 dd3f was ok 0560 in trouble what's the difference? 
+[x] 2020/05/05 15:58:03 pfc 都改成 sess
+[x] 2020/05/05 15:58:03 pwl 都改成 pfcScript
+[X] 2020/05/05 15:58:03 wlc, wlf 同時也弄成 window.wlc window.wlf 
+[X] 2020/05/05 15:58:03 enumerator 改寫成 create does> 用來產生 enumerator e.g. pfcArgValueType
+    使用時就是 pfcArgValueType :> ARG_V_STRING 或者 js> pfcArgValueType.ARG_V_STRING
+[X] 2020/05/06 09:16:47 把所有 kvm 都改成 vm 之後其實很成功 lang='js' 切成 js 之後：
+    res = pfcScript.pwlParameterValueGet("cube.prt",wlc.PWL_MODEL,0,"ACER_PN")
+    type(res+"\n")
+    JavaScript error on word "run-inputbox" : Object doesn't support this property or method
+    這個錯誤不是問題！Web.Link 的 object 直接印出有 native object 的 .toString() 沒問題；
+    但是 + "\n" 就把它考倒了，因此出錯很自然。
+    [ ] jeforth, peforth 全改了吧！把 kvm 都改成 vm. 不太放心。。。。
+[X] 如果 js console 前一行 command line 的結果是 undefined 就不要顯示了。
+        vm.consoleHandler = function(cmd) --> if(result != undefined) type(result + "\n");
+    [X] jeforth, peforth 全改了吧！
     
+[X] 2020/05/07 18:31:13 proeforth 這段不對，所以 Creo 5 can't run proeforth.
+    js> typeof(ActiveXObject)=="undefined" [if]
+        ." I don't sense running in Pro/E, skip including weblink.f." cr
+    正確方法是用所有 browser 都有的 navigator.appVersion 來查，但小心！兩個 or 起來：   
+    js> navigator.appVersion.indexOf('Creo') \ Check Creo -1:Fail otherwise:OK  for Creo 5.0
+    js> navigator.appVersion.indexOf('ProE') \ Check ProE -1:Fail otherwise:OK  for Creo 2.0
+        
+[X] 既然介紹人家讀 http://wiki.laptop.org/go/Forth_Lesson_1 就該讓 words 盡量一致
+    --> 放在 quit_f section
+[ ] 2020/05/12 08:10:19 proeforth 下，check js> window obj>keys --> found f,s,clearTimeout,setInterval,setTimeout,clearImmediate,msClearImmediate,msSetImmediate,setImmediate(object)         
+    colonxt,s,storage, o,result, etc 
+    [ ] 所有 jeforth 版本都該查一查。。。
+[X] 2020/05/12 10:23:21 意外發現 0 execute 會半路停止 colon word!!
+    e.g. : test 123 456 0 execute 789 ; 
+    i.e. : test 123 456 ['] foobar execute 789 ; 
+    --> this is normal!! 0 execute is exactly RET EXIT equivalent !!
+
+[ ] 查 vm 看到一些 selftest 留下的雜物，應該要清掉
+    delete(vm.vvv000) delete(vm.vvv) 
+    [ ] jeforth, peforth 全改了吧！
+    [ ] why 3HTA js> vm obj>keys 就沒有 vvv vvv000 殘留？ 3CA 有。3nd 也有。3nw 也沒有。
+        設斷點檢查。。。
+[X] 為何 vocabulary 要出現在 vm？ --> check what are they? 哈！我自創設計的 private 啦！
+    爽哥的建議，既然要讓 forth variables 能從 js 直接取用，就都各自放進 vocabulary 裡去。
+        
+[ ] Variables 要有 destructer! 否則 forget 或 marker 之後會殘留在 vocabulary 裡。
+    [ ] 2020/05/12 08:15:02 何不直接用 vm['misc.f']['x'].value ? 跟著 x 被 forget 就好了。
+    [ ] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
+        vm['volcabulary'] when the forth variable is forgot or removed by marker the js copy 
+        will be still there. So a destructor is needed for them. The design is not completed 
+        at all.
+    [ ] peforth 也要變革    
+    [ ] variable 何不用自己的 object? 何必用 vm, vm.g, vm.forth, vm.vocabulary 這種東西？
+        目前 jeforth value & constant 是這樣
+        > see base or see args or see tab-spaces 
+                    name : base (string)
+                     vid : forth (string)
+                     wid : 199 (number)
+                    type : value (string)
+                 private : false (boolean)
+                    help : ( -- base ) decimal base is 10, hex base is 16, can be any number. (string)
+                selftest : pass (string)
+                      xt :
+        function(){push(vm["forth"]["base"])}  <---- 這就是可能會有殘留的方法
+        --> 如果是這樣 
+            tick('x').value 
+            反而是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
+        [ ] 仿 peforth 進一步用 v('varName') or r('varName') 即可。
+            但目前 v() 不是用 tick('x') 的，應該不是很正確。r('y') 可能還好，但可能根本不必存在。
+            def v(name):
+                return getattr(vm,context)[name]
+            def r(name):
+                return vm.forth[name]
+
+[X] 2020/05/18 09:11:09 Web.Link, Gary Wei 的 Creo 可以離線 run 結果在公司沒有 Internet 跑 proeforth
+    就會卡在 including jquery --> 改成先從 local include 沒有才從 internet include. 
+[ ] 刪簡 words 改寫 selftest 使其變成 proeforth 的說明文件
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+[X] 2020/05/26 09:52:22 推算 stack 的小工具。
+    真實的場景是
+        char pfcModelItemType pfcCreate :> ITEM_COORD_SYS ( "NODE_REF8" diameter instrs solid ITEM_COORD_SYS )  
+        想要：over :> GetItemByName(ITEM_COORD_SYS,"NODE_REF8") constant csys // ( -- obj ) 要種 UDF 上去的參考座標     
+        應作：over :> GetItemByName(pop(),tos(3)) constant csys // ( -- obj ) 要種 UDF 上去的參考座標     
+    不容易有把握地推算出 tos(3) 因此需要這個實驗工具。
+        <js>
+        func = function(a,b){ type('a=' + a + ', b=' + b) }
+        push(func)
+        </js> constant func
+        > func :: (12,34) --> a=12, b=34 OK 
+        > 12 34 56 func 78 over :: (pop(),tos(3)) --> a=78, b=12 OK 
+        > .s
+              0:          12           ch (number)
+              1:          34          22h (number)
+              2:          56          38h (number)
+              3: function(a,b){ type('a=' + a + ', b=' + b) } (function)
+         OK 
+[ ] proeforth 發現的問題， forth order 應該是從後往前找，hash 從前往後加就可以後蓋前達到效果。可是
+    為何 include playground 之後 see . 變成舊版？明明 playground 之前就是 web.link 了。
+    2020/05/27 16:34:08 只要來一下 rescan-word-hash 就可以解決這個問題。那為何 include playground
+    沒有自動做(嗎)？ 我記得以前想讓 include vvv 與執行 vvv 等效，這是在照顧重複執行 include vvv 時
+    的效果，值得嗎？執行 vvv 肯定是沒有做 rescan 的，這是為了在 interpret state 執行 [repeat]...[again]
+    之類的 loop 時若有切換 context 不會影響 performance 太大。結論是： include 應該自動 rescan.  
+    也有可能是 proeforth 的 include 改寫過了出的問題。 
+    --> 以上推論錯了，加 rescan-word-hash 到 sinclude 與 include 都無效，因為問題出在 source-code-header
+    與 include 關連不大。因為 header 為了把新 vocabulary 放進 forth root 而有切到 forth 去
+    隨後「切換到新 vocabulary 時」有切換卻沒有 rescan 這本來就有問題了。修改如下：
+    
+    : header        ( -- 'head' ) \ ~.f common header
+                    EOF :> pattern <text>
+                        \ ~.f common header
+                        ?skip2 _eof_ \ skip it if already included
+                        dup .( Including ) . cr char -- over over + +
+                        js: tick('<selftest>').masterMarker=tos()+"selftest--";
+                        also forth definitions (marker) (vocabulary)
+                        last execute definitions rescan-word-hash \ <===== 加 rescan 
+                        <selftest>
+                            js> tick('<selftest>').masterMarker (marker)
+                        </selftest>
+                    </text> :> replace("_eof_",pop()) ; private
+                    
+    全部都要改： [X] proeforth [ ] jeforth [ ] peforth 
+    
+[X] include playground 之後 . 大亂。
+    2020/05/27 16:14:38 RI, 以前發現過，問題出在 weblink.f 的 >js 用到 
+        vm.v('wlkeys').forEach(function(key){. . .  
+    這種用法，一旦 context 切走，它就失效了。偏偏 web.link 裡有重新定義過 . 而且 web.link 的 order 
+    又高於 root forth , 所以就完蛋了。改成:
+        vm['weblink.f']['wlkeys'].forEach(function(key){
+    解決了這個問題。
+    
+[ ] 常用的 for loop example improved
+    /// 5 dup [for] dup t@ - ( count i ) . space ( count ) [next] drop
+    /// 5 dup for dup r@ - ( count i ) . space ( count ) next drop 
+    [ ] proeforth [ ] peforth [ ] jeforth 
 
 
 
