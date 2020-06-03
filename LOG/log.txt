@@ -6623,14 +6623,25 @@
         vm['weblink.f']['wlkeys'].forEach(function(key){
     解決了這個問題。
     
-[ ] 常用的 for loop example improved
+[ ] 2020/06/03 10:30:04 
+    常用的 for loop example improved
     /// 5 dup [for] dup t@ - ( count i ) . space ( count ) [next] drop
     /// 5 dup for dup r@ - ( count i ) . space ( count ) next drop 
     [ ] proeforth [ ] peforth [ ] jeforth 
 
+[ ] 2020/06/03 10:30:10 
+    ?skip2 拆分出 skip2 ( "@#$mark$#@" --  ) \ skip TIB to after "@#$mark$#@"
+    相當於 stop including command. peforth 有 break-include 但它是跳過整個 tib 比較侷限。
+    [ ]peforth [ ]jeforth.3we  
 
+[ ] 2020/06/03 10:29:52 proeforth 裡, unindent 應該由 tutor 來 include 
+    include unindent_f
+  \ include tutor
 
-
+[X] 2020/06/03 10:38:04 proeforth
+    乾脆不讓 proeforth 自動 include weblink 了，讓 user 自己手動作可避免 proeforth 當成 homepage 
+    時 ActiveX 的 warning 跳出來，此時 Creo 也跳出來問要不要 retrieve 先前的檔案，變成打架。
+    [X] 把 unindent.f tutor.f 都移進 outputbox. 
 
 
 
