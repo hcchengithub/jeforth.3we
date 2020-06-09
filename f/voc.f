@@ -363,7 +363,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					dup .( Including ) . cr char -- over over + +
 					js: tick('<selftest>').masterMarker=tos()+"selftest--";
 					also forth definitions (marker) (vocabulary)
-					last execute definitions
+					last execute definitions rescan-word-hash \ <===== 2020/06/09 加 rescan 
 					<selftest>
 						js> tick('<selftest>').masterMarker (marker)
 					</selftest>

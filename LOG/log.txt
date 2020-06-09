@@ -6425,7 +6425,8 @@
             --> 改了幾版，駕輕就熟，3hta 也好了。
         [X] c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\jeforth.3nw.html 
             --> 改好了要灌 nw.js 才行。。。好了。
-        [X] 用 window.lang 不好！ vm.lang 才對 --> all done. 
+        [X] 用 window.lang 不好！ vm.lang 才對 --> all done. <=== 錯！
+            
 [ ] release to master 吧，好了以後把 develop , develop2 都丟掉換新的 develop branch. 
 [ ] 準備 release master 新版 release 新版 master
     - vm.lang='js' or 'forth' 
@@ -6510,7 +6511,7 @@
     [ ] jeforth, peforth 全改了吧！把 kvm 都改成 vm. 不太放心。。。。
 [X] 如果 js console 前一行 command line 的結果是 undefined 就不要顯示了。
         vm.consoleHandler = function(cmd) --> if(result != undefined) type(result + "\n");
-    [X] jeforth, peforth 全改了吧！
+    [X] proeforth, [x] jeforth, [ ] peforth 
     
 [X] 2020/05/07 18:31:13 proeforth 這段不對，所以 Creo 5 can't run proeforth.
     js> typeof(ActiveXObject)=="undefined" [if]
@@ -6594,7 +6595,7 @@
     2020/05/27 16:34:08 只要來一下 rescan-word-hash 就可以解決這個問題。那為何 include playground
     沒有自動做(嗎)？ 我記得以前想讓 include vvv 與執行 vvv 等效，這是在照顧重複執行 include vvv 時
     的效果，值得嗎？執行 vvv 肯定是沒有做 rescan 的，這是為了在 interpret state 執行 [repeat]...[again]
-    之類的 loop 時若有切換 context 不會影響 performance 太大。結論是： include 應該自動 rescan.  
+    之類的 loop 時若有切換 context 不會影響 performance 太大。結論是： include 應該自動 rescan.  <== 錯！
     也有可能是 proeforth 的 include 改寫過了出的問題。 
     --> 以上推論錯了，加 rescan-word-hash 到 sinclude 與 include 都無效，因為問題出在 source-code-header
     與 include 關連不大。因為 header 為了把新 vocabulary 放進 forth root 而有切到 forth 去
@@ -6613,7 +6614,7 @@
                         </selftest>
                     </text> :> replace("_eof_",pop()) ; private
                     
-    全部都要改： [X] proeforth [ ] jeforth [ ] peforth 
+    全部都要改： [X] proeforth [X]jeforth@2020/06/09  [ ] peforth 
     
 [X] include playground 之後 . 大亂。
     2020/05/27 16:14:38 RI, 以前發現過，問題出在 weblink.f 的 >js 用到 
@@ -6627,14 +6628,14 @@
     常用的 for loop example improved
     /// 5 dup [for] dup t@ - ( count i ) . space ( count ) [next] drop
     /// 5 dup for dup r@ - ( count i ) . space ( count ) next drop 
-    [ ] proeforth [ ] peforth [ ] jeforth 
+    [X] proeforth [ ] peforth [ ] jeforth 
 
 [ ] 2020/06/03 10:30:10 
     ?skip2 拆分出 skip2 ( "@#$mark$#@" --  ) \ skip TIB to after "@#$mark$#@"
     相當於 stop including command. peforth 有 break-include 但它是跳過整個 tib 比較侷限。
-    [ ]peforth [ ]jeforth.3we  
+    [X]proeforth  [ ]peforth [ ]jeforth.3we  
 
-[ ] 2020/06/03 10:29:52 proeforth 裡, unindent 應該由 tutor 來 include 
+[X] 2020/06/03 10:29:52 proeforth 裡, unindent 應該由 tutor 來 include 
     include unindent_f
   \ include tutor
 
@@ -6643,14 +6644,54 @@
     時 ActiveX 的 warning 跳出來，此時 Creo 也跳出來問要不要 retrieve 先前的檔案，變成打架。
     [X] 把 unindent.f tutor.f 都移進 outputbox. 
 
+[X] 2020/06/03 15:39:37 HTML button onclick handler event call back 設定不能直接寫在 HTML tag 裡，被禁止。
+    這個簡單，我的 alarm.f 就有範例。簡單的例子如下：
+    <o> <input type="button" value="include weblink"></o>
+    <js> pop().onclick=function(){vm.dictate("include weblink")} </js>
+    
+[ ] 2020/06/04 10:16:11 help 漏了一點東西
+    Sift+BackSpace is faster, Ctrl+BackSpace to also erase DOM elements, Ctrl+Shift+BackSpace does it faster
+    [, Alt+ all above combinations to erase from top].
+    [X]proeforth  [ ]jeforth  [ ]peforth
+
+[ ] 2020/06/04 11:23:13 改寫 (help) 讓 help * 有滾動，自然一點。
+    : (help) ( "['pattern' [-t|-T|-n|-f]]" -- )  \ Print help message of screened words
+            <js> pop().replace(/\s+/g," ").split(" ") </jsV> ( spec[pattern,option,rests] )
+            \ for (var j=0; j<order.length; j++) { // 越後面的 priority 越新
+            js> order.length         ( spec[pattern,option,rests] COUNT )
+            ?dup if dup for dup r@ - ( spec[pattern,option,rests] COUNT i ) 
+                js> order[tos()]     ( spec[pattern,option,rests] COUNT i vocabulary ) 
+                js> tos(3)[0]||""    ( spec[pattern,option,rests] COUNT i vocabulary pattern )        \ push(spec[0]||"")
+                js> tos(4)[1]||""    ( spec[pattern,option,rests] COUNT i vocabulary pattern option ) \ push(spec[1]||"")
+                word_select          ( spec[pattern,option,rests] COUNT i [words...] ) 
+                \ var word_list = pop();
+                \ var voc = "\n--------- " + order[j] +" ("+ word_list.length + " words) ---------\n";
+                s" \n--------- orderj ( word_list_length words) ---------\n"                        ( i [words...] s ) 
+                js> pop().replace(/orderj/,order[tos(2)]).replace(/word_list_length/,tos(1).length) ( i [words...] s ) 
+                \ 印出                            ( i [words...] s ) 
+                js> tos(1).length if . else drop then ( i [words...] ) 
+                js> tos().length ?dup if dup for dup r@ - 
+                    ( i [words...] COUNT j ) 
+                    js> tos(2)[pop()] help(word) 1 nap js: vm.scroll2inputbox();inputbox.focus()
+                    ( i [words...] COUNT ) 
+                next drop then
+            ( spec[pattern,option,rests] COUNT i [words...] ) 2drop ( COUNT ) next drop then
+            ( spec[pattern,option,rests] ) drop ;
+    [x] proeforth [ ] jeforth [ ] peforth 
 
 
 
-
-
-
-
-
+[X] 2020/06/09 11:00:09 3HTA selftest failed at clipboard test on calc.
+[X] 2020/06/09 10:10:48 發現 3hta UI 有經 selftest 全都在 UI command line 發生
+    JavaScript error on word "run—inputbox" doesn't support property or method 'consoleHandler'
+    原因是 jeforth.hta 裡仍有 ForthConsoleHandler 沒改到，改成 'consoleHandler' 就好了。但奇怪
+    的是，不經 selftest 就沒問題。。。。 RI: 這兩個 file 竟然不同！斷鏈了？非也，是我自己搞忘了. . . 
+        c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3hta\jeforth.hta <--- 這個是獨立的，改它只為暫時實驗。其他 application 也都是這樣，好像是 executable 必須。
+        c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3we\jeforth.hta
+    [X] 趕快補救。。 比對，還好只有這個問題。clipboard selftest 也好了。
+[X] 3hta does not include jquery.f and jeforth.htm.js but they are still in there.
+    2020/06/09 10:26:02 jquery.f        確定已經 obsoleted 可以拿掉了。
+                        jeforth.htm.js  只是因為整個 3htm folder 都含進 3hta 以便共用其中的東西 e.g. canvas.
 
 
 
