@@ -6615,6 +6615,10 @@
                     </text> :> replace("_eof_",pop()) ; private
                     
     全部都要改： [X] proeforth [X]jeforth@2020/06/09  [ ] peforth 
+
+    檢查 header - tailer 的方法，只要在 .f 檔前面 source-code-header 後面加上
+        js> tib . *debug* >>
+    即可。
     
 [X] include playground 之後 . 大亂。
     2020/05/27 16:14:38 RI, 以前發現過，問題出在 weblink.f 的 >js 用到 
@@ -6693,6 +6697,66 @@
     2020/06/09 10:26:02 jquery.f        確定已經 obsoleted 可以拿掉了。
                         jeforth.htm.js  只是因為整個 3htm folder 都含進 3hta 以便共用其中的東西 e.g. canvas.
 
+[ ] 2020/06/10 10:34:16 improve proeforth unexpected blank lines 
+        > list-mdls
+        assembly.asm
+        plate.prt,base.prt,bolt.prt,cube.prt
+
+
+        layout.lay
+         OK 
+
+[X] 2020/06/12 15:26:22 在 Creo embedded browser (IE) 中利用 <h>...</h> 可以把 Web.Link 的 demo .js include 進 proeforth 來玩！ 
+    IE 也可以，Chrome 跟 Chromium 版的 Edge 都不行。
+
+    > version
+    p r o e f o r t h -- v1.01
+    Source code http://10.34.152.106/Bonobo.Git.Server/Creo.Weblink.git
+    Forth kernel http://github.com/hcchengithub/project-k
+    Predecessor http://github.com/hcchengithub/jeforth.3we
+    Program path file:///D:/PTC/Creo%202.0/Common%20Files/M230/weblink/weblinkexamples/html/proeforth.html
+     OK 
+    > <h> <script src="../jscript/pfcUtils.js"></script></h>
+     OK 
+    > js> top obj>keys .
+     $,jQuery,jeForth,jeforth_project_k_virtual_machine_object,vm,lang,f,colonxt,s,storage,...snip...
+     $0,$1,$2,$3,$4,__BROWSERTOOLS_DEBUGGER,__BROWSERTOOLS_NETWORK_TOOL_ADDED,isProEEmbeddedBrowser,
+ ==> pfcIsWindows,pfcIsMozilla,pfcCreate,pfcGetProESession,pfcGetScript,pfcGetExceptionDescription,
+     pfcGetExceptionType,onpointercancel,onpointerdown,...snip....
+
+[X] 2020/06/15 09:06:31 proeforth input button click to CD change directory
+    搞了幾下沒有成功，問題在 onclick 的定義。有趣的挑戰，可能用 create> does 才對。
+    [X] 2020/06/15 09:55:42 確定用 F4 從 outputbox 上 copy 下來的 path 有看不出來的異常，用一般的 copy'paste 就 OK。
+        以上也可能是這個原因。
+    [X] 2020/06/17 16:14:54 最後是 c:\path\ 當中的 \ 出的問題，我拿去做 .replace() 所以 \ 都要改成 \\ 才行。
+    
+[X] 2020/06/17 18:26:46 proeforth 
+    why weblink.f when js> tick('<selftest>').enabled --> false(boolean) still running self-test?     
+    1.  It is run time already when include weblink and playground, not including time so the tick('<selftest>').enabled
+        is not so meaningful. 
+    2.  I thought if there's not self-test then clicking the [include weblink] button will be  un-observing. 
+        Probably I made the self-test visible myself. <---- correct. 
+        The self-test is not in <selftest> section!  <--- RI
+[X] 2020/06/19 10:01:39 proeforth UDF module does not work now. 
+    2020/06/23 08:17:00 fix provided 
+    
+[X] 2020/06/23 12:54:44 proeforth 
+    New words to open a new window for proeforth and WindChill 
+        proeforth 
+            http://localhost:8800/8304018/Documents/GitHub/Creo.Weblink/proeforth.html 
+            so it can include .js on examples http://localhost:8800/Creo%202.0/Common%20Files/M230/weblink/weblinkexamples/
+        windchill
+            js: open("http://proi.wistron.com/Windchill/app","_blank","status")
+            so it is opened on a separated windows for a better usage. 
+    --> done open-window-windchill and open-window-proeforth
+    
 
 
 
+
+
+
+
+
+
+        
