@@ -6537,35 +6537,6 @@
         設斷點檢查。。。
 [X] 為何 vocabulary 要出現在 vm？ --> check what are they? 哈！我自創設計的 private 啦！
     爽哥的建議，既然要讓 forth variables 能從 js 直接取用，就都各自放進 vocabulary 裡去。
-        
-[ ] Variables 要有 destructer! 否則 forget 或 marker 之後會殘留在 vocabulary 裡。
-    [ ] 2020/05/12 08:15:02 何不直接用 vm['misc.f']['x'].value ? 跟著 x 被 forget 就好了。
-    [ ] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
-        vm['volcabulary'] when the forth variable is forgot or removed by marker the js copy 
-        will be still there. So a destructor is needed for them. The design is not completed 
-        at all.
-    [ ] peforth 也要變革    
-    [ ] variable 何不用自己的 object? 何必用 vm, vm.g, vm.forth, vm.vocabulary 這種東西？
-        目前 jeforth value & constant 是這樣
-        > see base or see args or see tab-spaces 
-                    name : base (string)
-                     vid : forth (string)
-                     wid : 199 (number)
-                    type : value (string)
-                 private : false (boolean)
-                    help : ( -- base ) decimal base is 10, hex base is 16, can be any number. (string)
-                selftest : pass (string)
-                      xt :
-        function(){push(vm["forth"]["base"])}  <---- 這就是可能會有殘留的方法
-        --> 如果是這樣 
-            tick('x').value 
-            反而是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
-        [ ] 仿 peforth 進一步用 v('varName') or r('varName') 即可。
-            但目前 v() 不是用 tick('x') 的，應該不是很正確。r('y') 可能還好，但可能根本不必存在。
-            def v(name):
-                return getattr(vm,context)[name]
-            def r(name):
-                return vm.forth[name]
 
 [X] 2020/05/18 09:11:09 Web.Link, Gary Wei 的 Creo 可以離線 run 結果在公司沒有 Internet 跑 proeforth
     就會卡在 including jquery --> 改成先從 local include 沒有才從 internet include. 
@@ -6697,7 +6668,7 @@
     2020/06/09 10:26:02 jquery.f        確定已經 obsoleted 可以拿掉了。
                         jeforth.htm.js  只是因為整個 3htm folder 都含進 3hta 以便共用其中的東西 e.g. canvas.
 
-[ ] 2020/06/10 10:34:16 improve proeforth unexpected blank lines 
+[X] 2020/06/10 10:34:16 improve proeforth unexpected blank lines 
         > list-mdls
         assembly.asm
         plate.prt,base.prt,bolt.prt,cube.prt
@@ -6750,13 +6721,83 @@
             so it is opened on a separated windows for a better usage. 
     --> done open-window-windchill and open-window-proeforth
     
+[X] Variables 要有 destructer! 否則 forget 或 marker 之後會殘留在 vocabulary 裡。
+    [X] 2020/05/12 08:15:02 何不直接用 word(vm['misc.f']['x']).value ? 跟著 x 被 forget 就好了。
+    [ ] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
+        vm['volcabulary'] when the forth variable is forgot or removed by marker the js copy 
+        will be still there. So a destructor is needed for them. The design is not completed 
+        at all. --> need to review them all with vm.g vm.v vm.r things 
+        --> in running alarm.f vm.forth obj>keys is : > js> vm.forth obj>keys .
+            base,EOF,fastInner,description,expected_rstack,expected_stack,test-result,[all-pass],url,args,x,xxx,y,
+            jsc.xt.hta,jsc.xt.F12,forth-wordlist,up/down-recall-needs-alt-key?,mp3,desc,repeating OK 
+            不盡合理。
+    [X] variable 何不用自己的 object? 何必用 vm, vm.g, vm.forth, vm.vocabulary 這種東西？
+        目前 jeforth value & constant 是這樣
+        > see base or see args or see tab-spaces 
+                    name : base (string)
+                     vid : forth (string)
+                     wid : 199 (number)
+                    type : value (string)
+                 private : false (boolean)
+                    help : ( -- base ) decimal base is 10, hex base is 16, can be any number. (string)
+                selftest : pass (string)
+                      xt :
+        function(){push(vm["forth"]["base"])}  <---- 這就是可能會有殘留的方法
+    [X] see OneNote2020 > 2020 > "Jeforth variable 變革" jeforth.3we 改好了, 幸好沒多少 vm.forth.var 
+    [ ] peforth , [ ] jeforth 總測試 
+[ ] 如何從 js code 中直接 access FORTH values ?
+    與以上舊寫法相較 tick('x').value 是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
+    [ ] jeforth 的 tick() 會檢查 如果是 public word (none-private) 用到了就會發警告。tick() 很危險！
+        萬一 context 切換了該 word 就會失常。如果是 compile 過的 runtime 就不會有 tick() 從而是安全的。
+    --> 要從 js code 中直接 access 的 variable 就直接用 js code 好了。
+        想要讓 js 直接來 access FORTH variable 的想法可能有點繞。js variables 要掛哪裡是個問題，如果是 compiled
+        word 就可以直接掛在該 word 的 properties 之內。用 [ last literal ] 就可以動態取得該 word。以下示範成功！
+            > : test [ last literal ] :: value=123 ;
+             OK 
+            > test
+             OK 
+            > see test
+                        name : test (string)
+                         vid : ls.f (string)
+                         wid : 56 (number)
+                        type : colon (string)
+                     private : true (boolean)
+                         cfa : 2893 (number)
+                        help : ( ?? ) No help message. Use // to add one. (string)
+                       value : 123 (number)
 
-
-
-
-
-
-
-
-
+            -------- Definition in dictionary --------
+            02893: function(){push(literal)/*(object)test ( ?? ) No help  */} (function)
+            02894: function(){pop().value=123} (function)
+            02895: RET (null)
+            ---------- End of the definition -----------
+             OK 
         
+[ ] 仿 peforth 進一步用 v('varName') or r('varName') 在沒有 support jeforth 的 private 特性時是可以的。。嗎？
+    但目前 v() 不是用 tick('x') 的，應該不是很正確。r('y') 可能還好，但可能根本不必存在。
+    def v(name):
+        return getattr(vm,context)[name]
+    def r(name):
+        return vm.forth[name]
+
+[X] 2020/07/17 13:08:37 準備開發 proeforth DOS 版。Search evernote 找到了 weforth wef01 wef02 fsharp f# dropbox. 
+    --> dropbox 找不到！可能已經上 github 了？
+    --> 在 WKS KM 上找到了 WF06 http://mfgkm-wks.wistron.com/RD/Shared%20Documents/Forms/AllItems.aspx?RootFolder=%2fRD%2fShared%20Documents%2fSoftware%2dWiki%2fH%2eC%2e%20Chen&FolderCTID=&View=%7b29E14948%2dA35E%2d47EF%2d8919%2dD41AE804B644%7d
+    --> 在 elearnwksrd http://elearnwksrd.wistron.com.cn/xms/index.php?view=forum_show&id=2536 找到了 1kf 的精簡版
+    以上蒐集在 OneNote2020「回朔 weforth fsharp wf08 1kf 」
+    [X] 準備在 GitHub 上開個 weforth. toolkit 的東西就 call .DLL.  
+[ ] 2020/07/17 15:19:24 weforth first compile , refer to OneNote2020 "實驗回想 C language 如何分好幾個 .c 檔？"        
+    [ ] 2020/07/17 16:09:51 io.c KVMFuncall() comment out, _asm not supported. Try to fix it later. We are attemping to 
+        make a first success. 
+    [ ] ditto vm.c KVMInt3() , winapi.c KVMdoWinapi() 
+    [ ] run but terminated with no response --> I need debugger . . . refer to evernote "2008/10/05" for how to compile fsharp.
+        no, this is not the correct article to read. I remember the compiling guide is on google sites.
+        --> google docs 上又找到了一些 weforth 相關的東西。
+    [X] wanted to use debugger but forget it, I am not dare to install different VC++ that might hurt the existing one for
+        TK courses. --> So, let's use fprintf to output a log file and let's see . . . yes, log.txt works!
+        --> So, now I can go on debug. 
+    [ ]     
+
+
+
+

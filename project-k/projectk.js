@@ -244,11 +244,11 @@ function jeForth() {
 				ip = w; // jump , 
 				break;
 			case "function": 
-				w();
+				w();  // if w(w) then w will be the arguments.callee in the function so is not necessary
 				break;
 			case "object": // Word object
 				try { // take care of JavaScript errors to avoid being kicked out very easily
-					w.xt(w);
+					w.xt(w); // w become _me in the function, the word itself.
 				} catch(err) {
 					panic('JavaScript error on word "'+w.name+'" : '+err.message+'\n',"error");
 				}
