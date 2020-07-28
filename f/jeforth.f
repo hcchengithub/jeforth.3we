@@ -40,7 +40,7 @@ code code       push(nexttoken()); // name of the word
                 
 code _init_     ( -- ) \ Initialize vm.g.members that are moved out from projectk.js which is thus kept pure.
 
-                // vm's global variable storage
+                // forth's global variable storage
                 vm.forth = {};
                 
                 // To support private word, END-CODE needs one more line
@@ -1498,13 +1498,13 @@ variable '<text> private
 \               </js> reveal ; 
 \ 2020/07/08 17:17:53 use value word directly for the the variable value instead of putting in current vocabulary 
 
-: constant      ( n <name> -- ) \ Create a 'constnat'
-                BL word (create) <js> 
-                    last().type = "constant";
-                    var s = '(function(_me){push(_me.value)})';
-                    last().xt = eval(s);
-                    last().value = pop();
-                </js> reveal ; 
+: constant      ( n <name> -- ) \ Create a 'constnat'
+                BL word (create) <js> 
+                    last().type = "constant";
+                    var s = '(function(_me){push(_me.value)})';
+                    last().xt = eval(s);
+                    last().value = pop();
+                </js> reveal ; 
 
 : value         ( n <name> -- ) \ Create a 'value' variable.
                 constant last :: type='value' ; 

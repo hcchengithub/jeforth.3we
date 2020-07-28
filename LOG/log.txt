@@ -6723,7 +6723,7 @@
     
 [X] Variables 要有 destructer! 否則 forget 或 marker 之後會殘留在 vocabulary 裡。
     [X] 2020/05/12 08:15:02 何不直接用 word(vm['misc.f']['x']).value ? 跟著 x 被 forget 就好了。
-    [ ] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
+    [X] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
         vm['volcabulary'] when the forth variable is forgot or removed by marker the js copy 
         will be still there. So a destructor is needed for them. The design is not completed 
         at all. --> need to review them all with vm.g vm.v vm.r things 
@@ -6731,8 +6731,10 @@
             base,EOF,fastInner,description,expected_rstack,expected_stack,test-result,[all-pass],url,args,x,xxx,y,
             jsc.xt.hta,jsc.xt.F12,forth-wordlist,up/down-recall-needs-alt-key?,mp3,desc,repeating OK 
             不盡合理。
+        2020/07/24 15:54:34 check "js> vm.forth obj>keys" on jeforth.3ca --> only: base,fastInner OK 
+            and proeforth is similar to the problem above, there are too many messy things. 
     [X] variable 何不用自己的 object? 何必用 vm, vm.g, vm.forth, vm.vocabulary 這種東西？
-        目前 jeforth value & constant 是這樣
+        目前 (before fixing) jeforth value & constant 是這樣
         > see base or see args or see tab-spaces 
                     name : base (string)
                      vid : forth (string)
@@ -6744,12 +6746,16 @@
                       xt :
         function(){push(vm["forth"]["base"])}  <---- 這就是可能會有殘留的方法
     [X] see OneNote2020 > 2020 > "Jeforth variable 變革" jeforth.3we 改好了, 幸好沒多少 vm.forth.var 
-    [ ] peforth , [ ] jeforth 總測試 
-[ ] 如何從 js code 中直接 access FORTH values ?
+    [X] jeforth.3ca ok now, also 3hta, 3nd, [X] proeforth, [ ] peforth
+        [X] 2020/07/24 16:47:28 copy 3 words 'constant value to' from 3we to proeforth 
+            [X] 2020/07/24 17:45:17 try to run proeforth there are several errors due to vm.forth.something, all fixed by refer to .3we code
+        [ ] 2020/07/24 17:46:53 proceed to peforth with the 3 words
+        
+[X] 如何從 js code 中直接 access FORTH values ?
     與以上舊寫法相較 tick('x').value 是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
-    [ ] jeforth 的 tick() 會檢查 如果是 public word (none-private) 用到了就會發警告。tick() 很危險！
+    [X] jeforth 的 tick() 會檢查 如果是 public word (none-private) 用到了就會發警告。tick() 很危險！
         萬一 context 切換了該 word 就會失常。如果是 compile 過的 runtime 就不會有 tick() 從而是安全的。
-    --> 要從 js code 中直接 access 的 variable 就直接用 js code 好了。
+    * ==> 要從 js code 中直接 access 的 variable 就直接用 js code 好了。
         想要讓 js 直接來 access FORTH variable 的想法可能有點繞。js variables 要掛哪裡是個問題，如果是 compiled
         word 就可以直接掛在該 word 的 properties 之內。用 [ last literal ] 就可以動態取得該 word。以下示範成功！
             > : test [ last literal ] :: value=123 ;
@@ -6774,7 +6780,7 @@
              OK 
         
 [ ] 仿 peforth 進一步用 v('varName') or r('varName') 在沒有 support jeforth 的 private 特性時是可以的。。嗎？
-    但目前 v() 不是用 tick('x') 的，應該不是很正確。r('y') 可能還好，但可能根本不必存在。
+    目前 v() 不是用 tick('x') 的，用 tick() 應該不是很正確，危險。r('y') 可能還好，但可能根本不必存在。
     def v(name):
         return getattr(vm,context)[name]
     def r(name):
@@ -6796,8 +6802,6 @@
     [X] wanted to use debugger but forget it, I am not dare to install different VC++ that might hurt the existing one for
         TK courses. --> So, let's use fprintf to output a log file and let's see . . . yes, log.txt works!
         --> So, now I can go on debug. 
-    [ ]     
+    [ ] see OneNote2020 > Visual Studio for proeforth > Proeforth develop > 2020/07/20 14:28, I give this up now with that reasons. 
 
-
-
-
+[X] 2020/07/21 10:35:07 proeforth 整合所有 constants 成單一 const: <--- it works.
