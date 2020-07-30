@@ -6,27 +6,27 @@ Play now
 ===========
 Among the many applications, jeforth for web page (jeforth.3htm) can run on your web browser right now thus is good for demonstration. 
 
-#### [Solar system](http://cdn.rawgit.com/hcchengithub/jeforth.3we/r4/index.html?cls_include_solar-system.f)
+#### [Solar system](http://hcchengithub.github.io/jeforth.3we?cls_include_solar-system.f)
 [簡介](https://www.evernote.com/shard/s22/sh/5066a906-fa5b-4594-9ff8-35fe3d180a14/d1f964de9e7e9b0550911410578482c2)<br>
 ![The Solar System](doc/README.md/solar-system.png)
 <br>
-#### [H2O](http://cdn.rawgit.com/hcchengithub/jeforth.3we/r4/index.html?cls_include_h2o.f) 
+#### [H2O](http://hcchengithub.github.io/jeforth.3we?cls_include_h2o.f) 
 ![H2o](doc/README.md/h2o.png)
 <br>
-#### [Box2Dweb Physics Engine demo - Arrows](http://cdn.rawgit.com/hcchengithub/jeforth.3we/r4/index.html?cls_include_box2dweb-arrow.f)
+#### [Box2Dweb Physics Engine demo - Arrows](http://hcchengithub.github.io/jeforth.3we?cls_include_box2dweb-arrow.f)
 ![Arrow](doc/README.md/demo-arrow.png)
 <br>
-#### [A simulation of the 12 coin problem](http://cdn.rawgit.com/hcchengithub/jeforth.3we/r4/index.html?cls_include_12choc.f)
+#### [A simulation of the 12 coin problem](http://hcchengithub.github.io/jeforth.3we?cls_include_12choc.f)
 ![12choc](doc/README.md/demo-12choc.jpg)
 <br>
-#### [Chipmunk Physics Engine demo - Pyramid Stack](http://cdn.rawgit.com/hcchengithub/jeforth.3we/r4/index.html?cls_include_chipmunk-js-pyramidstack.f)<br>
+#### [Chipmunk Physics Engine demo - Pyramid Stack](http://hcchengithub.github.io/jeforth.3we?cls_include_chipmunk-js-pyramidstack.f)<br>
 ![Pyramid](doc/README.md/demo-pyramidstack.png)
 <br> 
 #### [Markdown editor](https://www.evernote.com/shard/s22/sh/49f2b5ea-5005-4216-a8b8-a3dcc6ea4ad7/e679f4ad541710d02780638622a7e09c)
 NW.js can access files in your local computer that allows jeforth.3nw to do things web browsers can't do. For example, [SimpleMDE](https://simplemde.com) is a Markdown Editor that works fine on jeofrth.3nw.<br>
 ![SimpleMDE markdown editor](doc/README.md/demo_3nw_mde_editor.JPG)
 <br>
-#### [Alarm clock](http://cdn.rawgit.com/hcchengithub/jeforth.3we/r4/index.html?cls_include_alarm.f_er)
+#### [Alarm clock](http://hcchengithub.github.io/jeforth.3we?cls_include_alarm.f_er)
 ![Alarm clock](doc/README.md/demo-alarm.png)
 
 Get the project
