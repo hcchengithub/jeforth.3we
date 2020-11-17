@@ -6805,3 +6805,10 @@
     [ ] see OneNote2020 > Visual Studio for proeforth > Proeforth develop > 2020/07/20 14:28, I give this up now with that reasons. 
 
 [X] 2020/07/21 10:35:07 proeforth 整合所有 constants 成單一 const: <--- it works.
+[X] 08:25 2020/07/30 已經發現有 GitHub Pages 可以取代 rawgit.com 以及 CDN 因此 3hta 可以改寫了，projectk.js 在本地
+    同 jquery 只是 option --> 試試看。。。
+
+    <script src="https://hcchengithub.github.io/project-k/projectk.js"></script>
+    <script> vm = new jeForth(); </script>
+    16:53 2020/07/30 done jeforth 各種版本都改了。Homepage 上的 demo 也改了，不再用 rawgit.com.
+[ ] 現在 jeforth.3htm 可以從 GitHub Pages 上直接執行了，啟動畫面改一改。。。。想想怎麼弄？     
