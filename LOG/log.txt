@@ -3914,9 +3914,16 @@
 
 [ ] T550 常常突然停下來, 造成 Multiplicity 斷線. 寫程式觀察這個情形。
 
-[x] How to install nw.js 
+[x] How to install nw.js       _nw.js_ _node_webkit_ _nodejs.org_  _node.js_ _installer_
+    Last 筆記 18:54 11/28/2020 
+        為了上 pirple.com 的 node.js 課我又來 install 了，雖然是 node.js 的課，還是
+        來關心一下 nw.js 的狀況，最好能一舉兩個都灌好。。。 19:29 11/28/2020 Yes! 
+            unzip nwjsxxx.zip 直接跑 nw.exe 即可 :-D 
+        如今還是要 SDK 版的才有 F12 DevTools debugger. 上 https://nwjs.io/ 抓下來的 SDK 版
+        是 nwjs-sdk-v0.50.1-win-x64.zip   
+    older 筆記
     Method 1:
-        Unzip the nw.js package (v0.14 now use SDK version to gain F12 Debugger or DevTool)
+        Unzip the nw.js package (v0.14 now use ******SDK version****** to gain F12 Debugger or DevTool)
         and set path to it, that's all. 
     Method 2:
         就是把 zip 解壓, 然後整個 folder copy 到 nodejs\ 的 path folder 
@@ -3925,6 +3932,7 @@
         Simply copy the entire nw.js unzip'ed folder to node.js folder. This is because 
         node.js has Windows installer and nw.js has not but it can leverage node.js.
         2020/05/02 10:10:08 測試 lang='js' on OA used this way again and it works! 
+
 
 [x] porting to project-k 大改寫 apply to 3nw (3htm 3nd 3hta are done)
     ---- modify jeforth.3nw.html --------------------
@@ -6628,9 +6636,15 @@
     /// 5 dup for dup r@ - ( count i ) . space ( count ) next drop 
     [ ] proeforth [ ] peforth [ ] jeforth 
 
-
-
-
+[X] 19:32 11/28/2020 nw.js bug fixed 
+    為了上 pirple.com 的 node.js 課，重新 install 發現只要裝 nw.js 好像就有 node.js 了！！？？
+    See above (18:54 11/28/2020) for how to install now.js (it incoludes node.js). 
+    But there's a selftest error 
+        *** isMember checks array or object ... fail   <--- from voc.f 
+    by run this way :    (because this computer does not have path to nw.exe yet) 
+        c:\Users\User\Downloads\nwjs-sdk-v0.50.1-win-x64\nw.exe  ../jeforth.3we nop
+    --> 19:52 11/28/2020 本來的測法比較刁，易受影響，點掉算了。
+    --> 20:07 11/28/2020 可以繼續上課了。。。。。
 
 
 

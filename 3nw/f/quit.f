@@ -19,7 +19,7 @@
 	\ Do we have jobs from command line?
 	args [if] \ Yes, disable self-test.
 		warning-off
-		js: tick('<selftest>').enabled=false
+		js: tick('<selftest>').enabled=true
 	[else] \ No, so we do the self-test.
 		warning-on
 		js> tick('<selftest>').enabled=true;tick('<selftest>').buffer tib.insert

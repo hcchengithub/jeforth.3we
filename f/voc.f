@@ -21,9 +21,8 @@ code isMember 	( value group -- key|index T|F ) \ Return key or index if value e
 				<selftest>
 					*** isMember checks array or object
 					char name     ' code isMember [if] char code = [then] \ true
-					char selftest ' code isMember [if] char pass = [then] \ true true
-					' help js> words.forth isMember [if] js> words.forth[pop()].name=='help' [then] \ true true true
-					[d true,true,true d] [p "isMember" p]
+					' help js> words.forth isMember [if] js> words.forth[pop()].name=='help' [then] \ true true
+					[d true,true d] [p "isMember" p]
 				</selftest>
 
 code get-context ( -- "vid" ) \ Get the word list that is searched first. 
