@@ -6,7 +6,7 @@
 
 	\
 	\ URL example, 指定 description、音樂檔、repeating 等
-	\ ~/index.html? forth definitions s" 'private/ACIM wait a while.mp3'" value mp3 s" 'God is the mind with which I think'" value desc true value repeating include alarm.f
+	\ ~/index.html?s` 'demo/Rae Morris - Wait A While 7sec.m4a'` js: vm.forth.mp3=pop() s` 'God is the mind with which I think'` js: vm.forth.desc=pop() true js: vm.forth.repeating=pop() include alarm.f 
 	\
 	
 	\ How to 查出 audio player 當前播放哪個音樂檔：
@@ -22,13 +22,13 @@
 	\
 	also forth definitions \ for these switches they are in the common vocabulary 
 	js> typeof(vm.forth.mp3)=="string" [if] [else]
-		s" demo/228.mp3" value mp3 // ( -- pathname ) Alarm music file
+		s" demo/228.mp3" js: vm.forth.mp3=pop() \ ( -- pathname ) Alarm music file
 	[then]
 	js> typeof(vm.forth.desc)=="string" [if] [else]
-		s" '小計時器 ─ 提醒事項'" value desc // ( -- description ) Alarm description
+		s" '小計時器 ─ 提醒事項'" js: vm.forth.desc=pop() \ ( -- description ) Alarm description
 	[then]
 	js> typeof(vm.forth.repeating)=="boolean" [if] [else]
-		false value repeating // ( -- boolean ) The repeating switch
+		false js: vm.forth.repeating=pop() \ ( -- boolean ) The repeating switch
 	[then]
 	previous definitions
 	er <text>
@@ -249,7 +249,7 @@
         end-code
 		
 	: doTimeout ( -- ) \ The timer count down to 00:00:00 then do this.
-		repeating if _reset else char r to reset/clear alarmReset then
+		js> vm.forth.repeating if _reset else char r to reset/clear alarmReset then
 		alarm-border <js> pop().innerHTML=".alarm { border: 12px solid pink; }"</js>
 		blink
 		<js> if (mp3player.readyState) {

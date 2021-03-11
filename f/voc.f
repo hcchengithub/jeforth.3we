@@ -362,7 +362,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					dup .( Including ) . cr char -- over over + +
 					js: tick('<selftest>').masterMarker=tos()+"selftest--";
 					also forth definitions (marker) (vocabulary)
-					last execute definitions
+					last execute definitions rescan-word-hash \ <===== 2020/06/09 加 rescan 
 					<selftest>
 						js> tick('<selftest>').masterMarker (marker)
 					</selftest>
@@ -383,7 +383,7 @@ code words		( <["pattern" [-t|-T|-n|-f]]> -- ) \ List all words or words screene
 					dup (') ( mname w ) if dup prioritize then \ ?skip2 will skip to EOF ( mname )
 				\ not included yet ( mname ) split tib into [used][ntib~EOF][after EOF]
 				\ slice ntib~EOF 
-					js> tib.slice(ntib).indexOf(vm.forth.EOF.pattern) ( mname ieof )
+					EOF js> tib.slice(ntib).indexOf(pop().pattern) ( mname ieof )
 					dup -1 = ?abort" Error! EOF mark not found. It is usually added by sinclude." ( mname ieof )
 					js> ntib + ( ..ieof ) js> tib.slice(ntib,tos()) ( mname ieof tib[ntib~EOF] ) 
 				\ append the tailer

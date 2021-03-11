@@ -1,4 +1,3 @@
-
 \ quit.f for jeforth.3htm
 \
 \ QUIT is the traditional forth system's CLI loop. jeforth.f kernel is common for all

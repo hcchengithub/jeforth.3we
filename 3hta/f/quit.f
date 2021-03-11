@@ -70,7 +70,7 @@
 	\ Windows 8  :  6.2.9200
 	\ Windows 10 : 10.0.10240
 	include element.f	\ HTML element manipulation
-  \ include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems, obsoleted now. Not support old OS.
+  \ include jquery.f    \ Avoid Windows XP, Windows 7 HTA problems, obsoleted now. Don't support old OS any more.
 	include platform.f 	\ Hotkey handlers and platform features
 	include wsh.f		\ Windows Shell Host
 	include env.f 		\ Windows environment variables
