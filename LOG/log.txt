@@ -6812,3 +6812,6 @@
     <script> vm = new jeForth(); </script>
     16:53 2020/07/30 done jeforth 各種版本都改了。Homepage 上的 demo 也改了，不再用 rawgit.com.
 [ ] 現在 jeforth.3htm 可以從 GitHub Pages 上直接執行了，啟動畫面改一改。。。。想想怎麼弄？     
+[X] 09:28 2021/03/11 把 proeforth.html 搬過來放在 ....
+    [X] 09:32 2021/03/11 proeforth.html 計畫停止，搬到 jeforth.3we\playground\proeforth\ 保存。
+        [ ] proeforth.exe 在 Bonobo repo creo.console 打算搬到 GitLab 去。
