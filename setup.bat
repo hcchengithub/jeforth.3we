@@ -46,7 +46,7 @@ cd %~dp0
     "" value _a // ( -- path ) Path of the Application currently working on.
     char ..\jeforth.3we constant _h // ( -- path ) path of the Home directory
     : ah ( s -- s' ) \ Replace _a and _h with application path and home path
-        :> replace(/_a/g,vm[current]._a).replace(/_h/g,vm[current]._h) ;
+        :> replace(/_a/g,tick('_a').value).replace(/_h/g,tick('_h').value) ;
     : ahf ( s <filename> -- s' ) \ ah plus _f with filename
         BL word swap ( filename s ) ah :> replace(/_f/g,pop()) ;
     : setup-common-folders ( -- ) \ Setup jeforth common folders
@@ -64,7 +64,7 @@ cd %~dp0
 \ 3ca   Chrome Applications
     .( Chrome Applications jeforth.3ca ) cr
     char ..\jeforth.3ca to _a _a GetFolder [if] [else]
-    s" md _a" :> replace(/_a/,vm[current]._a)        (dos) 110 ckp
+    s" md _a" :> replace(/_a/,tick('_a').value)        (dos) 110 ckp
     setup-common-folders \ mirror of common folders  
     \ application specific files and folders         
     s" mklink    _a\_f  _h\log\_f" ahf 3ca.log.txt   (dos) 111 ckp
@@ -76,7 +76,7 @@ cd %~dp0
 \ 3ce   Chrome Extensions
     .( Chrome Extensions jeforth.3ce ) cr
     char ..\jeforth.3ce to _a _a GetFolder [if] [else]
-    s" md _a" :> replace(/_a/,vm[current]._a)                       (dos) 120 ckp
+    s" md _a" :> replace(/_a/,tick('_a').value)                       (dos) 120 ckp
     setup-common-folders \ mirror of common folders
     \ application specific files and folders
     s" mklink    _a\_f  _h\3ce\_f" ahf manifest.json                (dos) 121 ckp
@@ -88,7 +88,7 @@ cd %~dp0
 \ 3hta  Windows HEML Applications
     .( Windows HEML Applications jeforth.3hta ) cr
     char ..\jeforth.3hta to _a _a GetFolder [if] [else]
-    s" md _a" :> replace(/_a/,vm[current]._a)       (dos) 130 ckp
+    s" md _a" :> replace(/_a/,tick('_a').value)       (dos) 130 ckp
     setup-common-folders \ mirror of common folders
     \ application specific files and folders
     s" mklink /d _a\3hta _h\3hta" ah                (dos) 131 ckp
@@ -99,7 +99,7 @@ cd %~dp0
 \ 3nd   Node.js
     .( Node.js jeforth.3nd ) cr
     char ..\jeforth.3nd to _a _a GetFolder [if] [else]
-    s" md _a" :> replace(/_a/,vm[current]._a)       (dos) 140 ckp
+    s" md _a" :> replace(/_a/,tick('_a').value)       (dos) 140 ckp
     setup-common-folders \ mirror of common folders
     \ application specific files and folders
     s" mklink /d _a\3nd _h\3nd" ah                  (dos) 141 ckp
@@ -109,7 +109,7 @@ cd %~dp0
 \ 3nw   NW.js
     .( NW.js jeofrth.3nw ) cr
     char ..\jeforth.3nw to _a _a GetFolder [if] [else]
-    s" md _a" :> replace(/_a/,vm[current]._a)        (dos) 150 ckp
+    s" md _a" :> replace(/_a/,tick('_a').value)        (dos) 150 ckp
     setup-common-folders \ mirror of common folders  
     \ application specific files and folders         
     s" mklink /d _a\3nw _h\3nw" ah                   (dos) 151 ckp
@@ -123,7 +123,7 @@ cd %~dp0
 \ 3htm HTML 
     .( HTML jeforth.3htm ) cr
     char ..\jeforth.3htm to _a _a GetFolder [if] [else]
-    s" md _a" :> replace(/_a/,vm[current]._a)        (dos) 160 ckp
+    s" md _a" :> replace(/_a/,tick('_a').value)        (dos) 160 ckp
     setup-common-folders \ mirror of common folders
     \ application specific files and folders
     s" mklink /h _a\_f  _h\_f"     ahf common.css    (dos) 161 ckp

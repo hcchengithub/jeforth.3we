@@ -87,11 +87,12 @@
         kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
         kvm.consoleHandler = function(cmd) {
             // from jeforth.3htm.js 
+            kvm.lang = forthbtn.checked ? 'forth' : 'js';
             if (kvm.lang == 'js' || kvm.lang != 'forth'){
                 type((cmd?'\n> ':"")+cmd+'\n');
                 result = eval(cmd);
                 if(result != undefined) type(result + "\n");
-                window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
+                kvm.scroll2inputbox(); inputbox.focus();
             }else{
                 var rlwas = kvm.rstack().length; // r)stack l)ength was
                 type((cmd?'\n> ':"")+cmd+'\n');

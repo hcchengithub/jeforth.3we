@@ -6740,7 +6740,14 @@
     --> done open-window-windchill and open-window-proeforth
     
 [X] Variables 要有 destructer! 否則 forget 或 marker 之後會殘留在 vocabulary 裡。
-    [X] 2020/05/12 08:15:02 何不直接用 word(vm['misc.f']['x']).value ? 跟著 x 被 forget 就好了。
+    [X] 2020/05/12 08:15:02 何不直接用 word(vm['misc.f']['x']).value ? 跟著 x 被 forget 就好了。 
+        --> 16:38 2021/03/11 可以，絕對定址就一定對，否則 interpret state 還 OK
+        [OK] word(vm['misc.f']['x']).value 絕對位址 OK.
+        [OK] tick('x').value interpret state 這樣用沒問題。 
+        [NG] 隱憂， tick('x').value x 若是 private word 又被照這樣 compile 進新 word 就有疑慮，切換過 context 會變成不認得 x. 
+             用到 private word 時 tick('x') 應該已經會發警告。
+        [OK] 直接 compile object 如以下 2020/07/24 17:47:00 的例子，這個已經寫好了，靠 run time compiler 做到。
+
     [X] 2020/05/07 14;01:02 jeforth's variables are also existing in vm.forth or vm or vm.g or 
         vm['volcabulary'] when the forth variable is forgot or removed by marker the js copy 
         will be still there. So a destructor is needed for them. The design is not completed 
@@ -6752,7 +6759,7 @@
         2020/07/24 15:54:34 check "js> vm.forth obj>keys" on jeforth.3ca --> only: base,fastInner OK 
             and proeforth is similar to the problem above, there are too many messy things. 
     [X] variable 何不用自己的 object? 何必用 vm, vm.g, vm.forth, vm.vocabulary 這種東西？
-        目前 (before fixing) jeforth value & constant 是這樣
+        目前 (before fixing 的舊方法) jeforth value & constant 是這樣
         > see base or see args or see tab-spaces 
                     name : base (string)
                      vid : forth (string)
@@ -6762,33 +6769,30 @@
                     help : ( -- base ) decimal base is 10, hex base is 16, can be any number. (string)
                 selftest : pass (string)
                       xt :
-        function(){push(vm["forth"]["base"])}  <---- 這就是可能會有殘留的方法
+        function(){push(vm["forth"]["base"])}  <---- 這就是缺乏 destructor 故會有殘留的舊方法。但它不怕 private 的問題，因為是絕對定址。
+        14:31 2021/03/11 現在已經改成 function(_me){push(_me.value)} 了
     [X] see OneNote2020 > 2020 > "Jeforth variable 變革" jeforth.3we 改好了, 幸好沒多少 vm.forth.var 
+        also see Evernote > OneNote2020 > "Jeforth variable 變革"
     [X] jeforth.3ca ok now, also 3hta, 3nd, [X] proeforth, [ ] peforth
         [X] 2020/07/24 16:47:28 copy 3 words 'constant value to' from 3we to proeforth 
             [X] 2020/07/24 17:45:17 try to run proeforth there are several errors due to vm.forth.something, all fixed by refer to .3we code
-        [ ] 2020/07/24 17:46:53 proceed to peforth with the 3 words
+        [X] 2020/07/24 17:46:53 proceed to peforth with the 3 words 'constant' 'value' and 'to'.
+            15:09 2021/03/11 v1.25 已經有了。
         
-[X] 如何從 js code 中直接 access FORTH values ?
-    與以上舊寫法相較 tick('x').value 是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
-    [X] jeforth 的 tick() 會檢查 如果是 public word (none-private) 用到了就會發警告。tick() 很危險！
-        萬一 context 切換了該 word 就會失常。如果是 compile 過的 runtime 就不會有 tick() 從而是安全的。
-    * ==> 要從 js code 中直接 access 的 variable 就直接用 js code 好了。
-        想要讓 js 直接來 access FORTH variable 的想法可能有點繞。js variables 要掛哪裡是個問題，如果是 compiled
-        word 就可以直接掛在該 word 的 properties 之內。用 [ last literal ] 就可以動態取得該 word。以下示範成功！
-            > : test [ last literal ] :: value=123 ;
-             OK 
-            > test
-             OK 
-            > see test
-                        name : test (string)
-                         vid : ls.f (string)
-                         wid : 56 (number)
-                        type : colon (string)
-                     private : true (boolean)
-                         cfa : 2893 (number)
-                        help : ( ?? ) No help message. Use // to add one. (string)
-                       value : 123 (number)
+[X] 2020/07/24 17:47:00 與以上舊寫法相較 tick('x').value 似乎是又快、又合理的方法，因為 tick() 有考慮到且用到 wordhash[]。
+    [X] jeforth.3ca 的 tick() 會檢查，如果是 private word 用到了就會發警告。但是 compiled word 裡用到 
+        tick() 就變成很危險！萬一 context 切換了該 word 就會失常。如果是 compile 過的 runtime 不會有 tick() 就是安全的。
+    [X] variables 要掛哪裡？答案就是該 word 的 properties 之內。用 [ last literal ] 就可以動態取得該 word。以下示範成功！
+            > : test [ last literal ] :: value=123 ;  15:13 2021/03/11 補記，或者 : test2 [ ' x literal ] :> value . cr ;
+            > see test   (2020/07/24 17:47:00)
+                name : test (string)
+                 vid : ls.f (string)
+                 wid : 56 (number)
+                type : colon (string)
+             private : true (boolean)
+                 cfa : 2893 (number)
+                help : ( ?? ) No help message. Use // to add one. (string)
+               value : 123 (number)
 
             -------- Definition in dictionary --------
             02893: function(){push(literal)/*(object)test ( ?? ) No help  */} (function)
@@ -6796,6 +6800,7 @@
             02895: RET (null)
             ---------- End of the definition -----------
              OK 
+[ ] 15:28 2021/03/11 如何從 js code 中直接 access FORTH values ?
         
 [ ] 仿 peforth 進一步用 v('varName') or r('varName') 在沒有 support jeforth 的 private 特性時是可以的。。嗎？
     目前 v() 不是用 tick('x') 的，用 tick() 應該不是很正確，危險。r('y') 可能還好，但可能根本不必存在。
@@ -6832,4 +6837,65 @@
 [ ] 現在 jeforth.3htm 可以從 GitHub Pages 上直接執行了，啟動畫面改一改。。。。想想怎麼弄？     
 [X] 09:28 2021/03/11 把 proeforth.html 搬過來放在 ....
     [X] 09:32 2021/03/11 proeforth.html 計畫停止，搬到 jeforth.3we\playground\proeforth\ 保存。
-        [ ] proeforth.exe 在 Bonobo repo creo.console 打算搬到 GitLab 去。
+[ ] proeforth.exe 在 Bonobo repo creo.console 打算搬到 GitLab 去。
+[ ] 09:20 2021/03/11 整個 jeforth.3we & proeforth.hhtml 的 CSS 都應該要修整，考慮用 bootstrap？
+[X] 09:04 2021/03/11 proeforth 的 binlingual repl 在 chrome maximum 時跑到 inputbox 底下去了，看不到。
+    11:57 2021/03/11 Not a problem, the line actually appear on the buttom of the web page but partially hidden by 
+    windows task bar. 
+[X] 09:04 2021/03/11 仿照 proeforth.htm 的方式提供 jeforth.3we .兩種 repl 的選擇 forth and JavaScript 
+    * 用 setup.bat 重建的各 application folder 裡直接改 code 因 hard link/symbolic link 之故直接改到 3we 的母版，用 GitHub desktop 查看即可見得。
+    [X] 09:17 2021/03/11 jeforth.3we, proeforth.html 用到 window.scrollTo(0,endofinputbox.offsetTop) 都改成 vm.scroll2inputbox() 
+        好像應該要這樣 --> 算了，不重要，本來就到處都有用到 window.scrollTo。
+    [X] this section to /index.html let's see 影響到全部 applications 了嗎？ [X]3hta [X]3htm [X]3nw [X]3ca [X]3ce 
+        </div><!-- outputbox -->
+        <textarea id="inputbox" cols=100 rows=2></textarea><a id=jump2endofinputbox href="#endofinputbox"></a>
+        <span id=endofinputbox class=std>
+            <input type="radio" id="forthbtn" value="forth" name="lang" checked="checked"><label class=std>FORTH</label> 
+            <input type="radio" id="jsbtn" value="js" name="lang"><label class=std>JavaScript</label>
+        </span>
+        </div><!--console3we-->
+        [X] 3ca 成功 
+        [X] 3ce 沒有 bilingual radio button 因為 index 檔不同，js 檔也不同，都好了。之前弄好一半了，很簡單。
+        [X] 3hta index = js = jeforth.hta。之前弄好一半了，很簡單。 
+        [X] 3nw index = js = jeforth\jeforth.3nw\jeforth.3nw.html。之前弄好一半了，很簡單。 
+    [X] REPL 之前就弄差不多了。全部都好了。
+        vm.consoleHandler = function(cmd) {....}
+    
+[X] 15:41 2021/03/11 run jeforth.3we\setup.bat 發生 variable 的問題。前一陣子有經過改革，如今有後遺症，
+    setup.bat 裡用到了這類已經作廢的舊用法：vm[current]._a 當時沒改到。
+        > s" md _a" :> replace(/_a/,vm[current]._a) -->
+        JavaScript error : Unable to get property '_a' of undefined or null reference
+    訂正為：
+        s" md _a" :> replace(/_a/,tick('_a').value) --> md ..\jeforth.3ca(string)
+        OK 
+    [ ] commit --> 
+
+[X] 17:04 2021/03/11 install 3cd by drag and drop "c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3ce" 到 Chrome Browser 的 setup > extension
+    page 時發生 CSP error. See my OneNote2021 > "jeforth.3ce 好久沒用一 install 冒出 CSP error"
+    --> 把
+            c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3ce\jeforth.3ce.html
+            c:\Users\8304018\Documents\GitHub\jeforth\jeforth.3ce\jeforth.3ce.background.html
+        裡的 
+            <script src="https://hcchengithub.github.io/project-k/projectk.js"></script>
+        都點掉只留
+            <script src="project-k/projectk.js"></script>  <-------- project-k/ folder in the project folder is the altimate solution 
+        就好了，這已經是 100% 最好的答案了。
+        [ ] commit --> 
+    [/] 照 F12 DevTools CSP error direction to read the Google's webpage
+        tried something like this <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://hcchengithub.github.io/project-k/projectk.js">    
+        沒有成功，理解到我其實不需要這些坑坑巴巴的答案了。
+    
+[ ] 16:27 2021/03/11 用 setup.bat 跑失敗時 3hta 的 tick() 看來沒有做 private 檢查，可能因為經 .f defered reDef 之後才有？錯，真的沒有！ 3nw 也沒有檢查。
+    --> 應該做進 common project-k 裡去。這個太重要了。喔，不，應該是有 support private 的才需要。
+        2021/03/12 09:26:15 我想想 private 功能是很重要的。在 vocabulary 範圍內某些 token 都可以看得見，出了該 vocabulary 就看不見了，這好。好像是這樣。
+
+[ ] 16:34 2021/03/11 前兩天發現本地的 3ca 例子跑不起來了 (e.g. include h2o.f and include solar-system.f )，應該也是這個問題。
+    vm[context].x or vm[current].x 都要改成 tick('x').value
+
+
+
+
+
+
+
+

@@ -11,7 +11,6 @@
 			}
     </style>
     <script src="js/jquery-1.11.2.js"></script>
-    <script src="https://hcchengithub.github.io/project-k/projectk.js"></script>
 	<script src="project-k/projectk.js"></script>
     <script src="js/version.js"></script>
 	<script src="3htm/js/jeforth.3htm.js"></script>
@@ -34,8 +33,11 @@
 	<div class=console3we>
 	<div id="outputbox"></div>
 	<textarea id="inputbox" rows=1></textarea>
-	<span id=endofinputbox></span>
-	</div>
+    <span id=endofinputbox class=std>
+        <input type="radio" id="forthbtn" value="forth" name="lang" checked="checked"><label class=std>Forth</label> 
+        <input type="radio" id="jsbtn" value="js" name="lang"><label class=std>JavaScript</label>
+    </span>
+    </div><!--console3we-->
 </body>
 </html>
 

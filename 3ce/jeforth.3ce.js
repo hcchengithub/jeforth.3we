@@ -94,6 +94,7 @@
 		// There's no main loop, event driven call back function is this.
 		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
         kvm.consoleHandler = function(cmd) {
+            kvm.lang = forthbtn.checked ? 'forth' : 'js';
             if (kvm.lang == 'js' || kvm.lang != 'forth'){
                 type((cmd?'\n> ':"")+cmd+'\n');
                 result = eval(cmd);

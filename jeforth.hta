@@ -38,7 +38,10 @@
 	<div class=console3we>
 	<div id="outputbox"></div>
 	<textarea id="inputbox" rows=1></textarea>
-	<span id=endofinputbox></span>
+    <span id=endofinputbox class=std>
+        <input type="radio" id="forthbtn" value="forth" name="lang" checked="checked"><label class=std>FORTH</label> 
+        <input type="radio" id="jsbtn" value="js" name="lang"><label class=std>JavaScript</label>
+    </span>
 	</div>
 </body>
 <script src="js/jquery-1.11.2.js"></script>
@@ -237,6 +240,7 @@
 	
 	kvm.consoleHandler = function (cmd) {
 		// Defined in jeforth.hta 
+        kvm.lang = forthbtn.checked ? 'forth' : 'js';
         if (kvm.lang == 'js' || kvm.lang != 'forth'){
             kvm.type((cmd?'\n> ':"")+cmd+'\n');
             result = eval(cmd);

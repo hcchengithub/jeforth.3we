@@ -1262,6 +1262,15 @@
     }
 
 [ ] 09:04 2021/03/11 仿照 proeforth.htm 的方式提供 jeforth.3we .兩種 repl 的選擇 forth and JavaScript 
-[ ] 09:04 2021/03/11 proeforth 的 binlingual repl 在 chrome maximum 時跑到 inputbox 底下去了，看不到。
-    [ ] 09:17 2021/03/11 jeforth.3we, proeforth.html 用到 window.scrollTo(0,endofinputbox.offsetTop) 都改成 vm.scroll2inputbox() 好像應該要這樣。我在研究為何 proeforth.html bilingal line at the button 當 chrome maximum 時看不見。
 [ ] 09:20 2021/03/11 整個 jeforth.3we & proeforth.hhtml 的 CSS 都應該要修整，考慮用 bootstrap？
+    [X] 09:04 2021/03/11 proeforth 的 binlingual repl 在 chrome maximum 時跑到 inputbox 底下去了，看不到。
+        11:57 2021/03/11 Not a problem, the line actually appear on the buttom of the web page but partially hidden by 
+        windows task bar. 
+    [ ] 09:17 2021/03/11 jeforth.3we, proeforth.html 用到 window.scrollTo(0,endofinputbox.offsetTop) 都改成 vm.scroll2inputbox() 
+        好像應該要這樣。
+        [X] proeforth.html 
+        [ ] jeforth.3we [ ] jeforth.3htm [ ] jeforth.3hta
+
+
+
+
