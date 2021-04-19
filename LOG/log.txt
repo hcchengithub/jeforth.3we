@@ -6835,6 +6835,7 @@
     <script> vm = new jeForth(); </script>
     16:53 2020/07/30 done jeforth 各種版本都改了。Homepage 上的 demo 也改了，不再用 rawgit.com.
 [ ] 現在 jeforth.3htm 可以從 GitHub Pages 上直接執行了，啟動畫面改一改。。。。想想怎麼弄？     
+
 [X] 09:28 2021/03/11 把 proeforth.html 搬過來放在 ....
     [X] 09:32 2021/03/11 proeforth.html 計畫停止，搬到 jeforth.3we\playground\proeforth\ 保存。
 [ ] proeforth.exe 在 Bonobo repo creo.console 打算搬到 GitLab 去。
@@ -6891,6 +6892,12 @@
 
 [ ] 16:34 2021/03/11 前兩天發現本地的 3ca 例子跑不起來了 (e.g. include h2o.f and include solar-system.f )，應該也是這個問題。
     vm[context].x or vm[current].x 都要改成 tick('x').value
+
+[ ] 04:15 11/30/2020 只裝了 nw.js (沒有裝 node.js 但是 nw.js 有自帶 node.dll 跑得起來)
+    但 try "c:\Users\User\Documents\GitHub\jeforth\jeforth.3nw\playground\Anatomy of a Node Application" 時
+    已經忘了怎麼 
+        <js> var mathLib = require('lib\\math'); </js>
+    --> 04:26 11/30/2020 別搞了，先把 node.js 灌起來再說。。。上課要緊，不到節外生枝。
 
 
 

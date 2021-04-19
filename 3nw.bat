@@ -9,5 +9,6 @@ if a%COMPUTERNAME%==aWKS-38EN3476     set NODEJSHOME=C:\Program Files\nodejs
 if a%COMPUTERNAME%==aWKS-4AEN0404     set NODEJSHOME=C:\Program Files\nodejs
 if a%COMPUTERNAME%==aDESKTOP-Q4DUVFG  set NODEJSHOME=C:\Program Files\nodejs
 set NODE_PATH=%NODEJSHOME%\node_modules;%NODEJSHOME%\node_modules\simplemde\node_modules
+path=%path%;c:\Users\User\Downloads\nwjs-sdk-v0.50.1-win-x64
 start nw ../jeforth.3we nop %*
 
