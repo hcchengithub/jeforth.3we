@@ -1,7 +1,7 @@
 
 	\ utf-8
 	\ word.f  Microsoft Office Word automation by jeforth.3hta
-	\ Excel 2013 developer reference           https://docs.microsoft.com/en-us/office/vba/api/overview/excel
+	\ Excel 2013 developer reference           https://docs.microsoft.com/en-us/office/vba/api/overview/word
 	\ "Application Object (Word)"              https://docs.microsoft.com/en-us/office/vba/api/word.application
 
 	\ Sample code of basics  
@@ -58,18 +58,26 @@
 		js> hta.commandLine dup ( line line ) :> lastIndexOf('pdf2docx') 8 + ( line n ) 
 		swap :> slice(pop()) ( pathname )  
 		dup isPDF? ( pathname y|n ) if ( pathname ) 
-			trim dup rename>docx swap ( .docx .pdf )
+			trim dup rename>docx swap dup ( .docx .pdf .pdf )
 			." Opening " dup . cr 
 			word.app :> documents.open(FileName=pop(),ConfirmConversions=false,NoEncodingDialog=true,Revert=true) 
-			." Converting ..." cr 
-			( .docx document ) :: SaveAs2(FileName=pop())
-			." Closing ..." cr 
-			word.app :> ActiveDocument.close()
-			0 \ errorlevel 0 == OK
-			." OK! " cr 
+			( .docx .pdf obj ) swap over :> name ( .docx obj .pdf obj.name ) \ 有 obj.name 表示成功了 
+			swap :> indexOf(pop())!=-1 if  ( .docx obj ) 
+				." Converting ..." cr 
+				( .docx document ) :: SaveAs2(FileName=pop())
+				." Closing ..." cr 
+				word.app :> ActiveDocument.close()
+				0 \ errorlevel 0 == OK
+				." OK! " cr 
+			else ( .docx obj ) 
+				s" Failed to open its pdf file! : " swap + js: alert(pop()) 
+				1 \ errorlevel 1 == Failed 
+				*debug* err1>
+			then
 		else
 			s" Not a pdf file : " swap + js: alert(pop()) 
 			1 \ errorlevel 1 == Failed 
+			*debug* err2>
 		then bye ;
 		/// Usage:
 		///    3hta.bat include word.f pdf2docx d:\document\panel spec extraction\AUO abc-1234.pdf 

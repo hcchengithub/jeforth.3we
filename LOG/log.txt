@@ -6899,6 +6899,25 @@
         <js> var mathLib = require('lib\\math'); </js>
     --> 04:26 11/30/2020 別搞了，先把 node.js 灌起來再說。。。上課要緊，不到節外生枝。
 
+[X] 11:54 Saturday, July 09, 2022 改良 3hta.bat 
+		@echo jeforth.hta
+		%~d0       <--------- 增加這行，切換 drive letter 也是必要的
+		cd %~dp0   
+		start /wait jeforth.hta nop %*
+		exit 
+	上面 3hta.bat 裡每一行都是必要的：
+	    @rem Necessary lines: "%~d0" switch to correct drive and "cd %~dp0" to working directory 
+	    @rem because running from home directory is required with .3htm and thus .3hta follows the rule although should not and it thus is a todo item @log.txt(11:39 2022/7/9). 
+	    @rem Necessary switch: "start /wait . . . . " avoid running all paralelly when, e.g. !start /wait 3hta.bat include word.f pdf2docx $pathname, is in a loop.
+	    @rem Necessary line: exit to leave from python script e.g. !start /wait 3hta.bat . . . when in a loop
+
+[ ] 11:39 2022/7/9 jeforth.hta 要改良它要求只能從 project directory 執行的規定。這個規定對 .3htm .3ca .3ce 等是有意義的，但是對
+	.3hta 這樣的 desktop app 就很彆扭了。前面可以加個 working_directory 若其為 ".\\" 就跟現在一樣，若為 absolute path 即為所求。
+	The success at above (11:54 Saturday, July 09, 2022) reduced the need of improving the path behavior. However still nice to have. 
+	[ ] 還得要設法取得 jefoth.hta 本身的所在位置。
+		// jeforth.hta 的 init() 
+		kvm.dictate(kvm.readTextFile("f/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 
+	[ ] 11:51 Saturday, July 09, 2022 js> hta.commandLine <-- 線索在這裡
 
 
 
