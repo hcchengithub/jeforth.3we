@@ -6922,6 +6922,7 @@
 	--> See (14:18 2022/8/2): If a word is warned by execute() and tick() then consider to make it public. 
 	--> 16:14 2022/8/2 yes, it works! Solar-system.f ok now
 	--> 16:24 2022/8/2 h2o.f ok now
+	--> 12choc.f
 
 
 
