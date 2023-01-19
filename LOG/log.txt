@@ -6916,7 +6916,7 @@
 		kvm.dictate(kvm.readTextFile("f/jeforth.f")+kvm.readTextFile("3hta/f/quit.f"));  // Run once. 
 	[ ] 11:51 Saturday, July 09, 2022 js> hta.commandLine <-- 線索在這裡
 
-[ ] 16:34 2021/03/11 前兩天發現本地的 3ca 例子跑不起來了 (e.g. include h2o.f and include solar-system.f )，應該也是這個問題。
+[X] 16:34 2021/03/11 前兩天發現本地的 3ca 例子跑不起來了 (e.g. include h2o.f and include solar-system.f )，應該也是這個問題。
     vm[context].x or vm[current].x 都要改成 tick('x').value.
 	14:12 2022/8/2 但是改用 tick() 又會觸發: Warning! private word istar referenced by name in tick()!
 	--> See (14:18 2022/8/2): If a word is warned by execute() and tick() then consider to make it public. 
