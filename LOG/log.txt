@@ -4289,6 +4289,30 @@
 [ ] A gh-pages branch which was created via GitHub .... don't know what it is for?
     --> Ah! it's the project's web page!! I should use it.
 
+    > i: GitHub hcchengithub is me. How to make my static .htm to be able to be view on 
+         https://hcchengithub.github.io? My project name is openaiapi and the file is ChatLKK.htm at 
+         root of the repo.
+    
+    ChatLKK: To make your static .htm file viewable on https://hcchengithub.github.io, you'll need 
+    to follow these steps:
+
+    - Create a new branch in your GitHub repository called gh-pages. This is the branch that will 
+      be used to host your website.
+    
+    - Push your static .htm file and any other required assets (e.g., images, CSS files) to the 
+      gh-pages branch.
+    
+    - Wait a few minutes for GitHub Pages to generate the website based on the contents of your 
+      gh-pages branch.
+    
+    - Visit https://hcchengithub.github.io/openaiapi/ChatLKK.htm in your web browser to see if your 
+      webpage is now live! Note that there are some additional configuration options you can use with 
+      GitHub Pages, such as custom domain names and HTTPS encryption. You can find more information 
+      about setting up a GitHub Pages site here: https://pages.github.com/.
+    
+    [21] ChatVD1500 Wed Apr 05 2023 18:40:06 GMT+0800 (台北標準時間)
+
+
 [ ] project-k/jeforth.js >> vm.major_version = 2; // major version, jeforth.js kernel version.
     --> 應該如實稱作 kernel_version 才對。
 

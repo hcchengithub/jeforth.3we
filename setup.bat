@@ -1,5 +1,6 @@
 : @rem ; ' \ aliases echo @echo @echo. @goto :end jeforth.hta @rem cd call @if :ERR pause :END
 cd %~dp0
+cd
 @rem 
 @rem   S e t u p . b a t 
 @rem   
