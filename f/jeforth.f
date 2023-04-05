@@ -2270,6 +2270,26 @@ code passed     ( -- ) \ List words their sleftest flag are 'pass'.
                 }
                 end-code
 
+\ ---------- xstack ----------------------------------------------------------------
+[] value xstack // ( -- array ) The xstack 
+: x@            xstack :> slice(-1)[0] ; // ( -- n ) Get TOS of the xstack
+: x>            xstack :> pop() ; // ( -- n ) Pop the xstack
+: >x            xstack :: push(pop()) ; // ( n -- ) Push n into the xstack
+: .sx           char [ . xstack . char ] . cr ; // ( -- ) List xstack 
+: xdrop         x> drop ; // ( X: ... a -- X: ... ) drop xstack 
+: xdropall      [] to xstack ; // ( X: ... -- X: empty ) clear xstack 
+
+                <selftest>
+                *** xstack commands x@ x> >x .sx xdrop xdropall 
+                    1 >x 2 >x dropall xdropall xstack js> pop().length 0= ( T )
+                    4567 >x 1234 >x depth 0= ( TF ) 
+                    x@ 1234 = ( TFT  )
+                    x> 1234 = ( TFTT )
+                    xdrop xstack js> pop().length 0= ( TFTTT )
+                    [d true, false, true, true, true d]
+                    [p 'x@', 'x>', '>x', '.sx', 'xdrop', 'xdropall' p]
+                </selftest>
+
 \ -------------- Debugger : set breakpoint to a colon word -------------------------
 
 js: vm.forth.fastInner=inner \ ( -- inner ) Original inner() without breakpoint support

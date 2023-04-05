@@ -15,24 +15,25 @@ marker ~~~
 	</o> js> $(".console3we")[0] insertBefore er 
 	
 \ setup
-	20	value interval		// ( -- f ) 調整 frame speed 
-	2000 value gravity       // ( -- f ) falling force, increment of y downward distance every frame.
-	0	value friction		// ( -- f ) 負的摩擦力好像有「加溫」的效果。
-	30 value maxPlanet		// ( -- n ) Maximum radius of a planet 
+	20	value interval		  // ( -- f ) 調整 frame speed 
+	2000 value gravity        // ( -- f ) falling force, increment of y downward distance every frame.
+	0	value friction		  // ( -- f ) 負的摩擦力好像有「加溫」的效果。
+	30 value maxPlanet public // ( -- n ) Maximum radius of a planet 
 	1200 400	setCanvasSize	\ ( width height -- ) 
 	0 lineWidth \ processing.js noStroke() means no outline (balls)
+
 	
 \ 建立 stars array 以及 star 專屬的 properties, methods.
 	
-	[] value stars // ( -- [] ) The stars array
-	0 value istar // ( -- index ) The current star of the solar system. Word 裡用到 istar 都要 save-restore.
+	[] value stars public // ( -- [] ) The stars array
+	0  value istar public // ( -- index ) The current star of the solar system. Word 裡用到 istar 都要 save-restore.
 	: to ( n <value> -- ) \ A proprietory 'to' command that assigns n to a 'star.property'.
 		' ( n word ) 
 		js> tos().type!="star.property" ?abort" Error! Assigning to a none star.property."
 		compiling if ( n word ) 
-			<js> var s='var f;f=function(){/* to star.property */ vm[context].stars[vm[context].istar]["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
+			<js> var s='var f;f=function(){/* to star.property */ tick(\'stars\').value[tick(\'istar\').value]["'+pop().name+'"]=pop()}';push(eval(s))</js> ( f ) ,
 		else ( n word )
-			js: vm[context].stars[vm[context].istar][pop().name]=pop()
+			js: tick('stars').value[tick('istar').value][pop().name]=pop()
 		then ; immediate
 		/// 以下要用 Function Overloading 的手法把專為 'star.property' 寫就的這個 'to' command 加
 		/// 回原 'to' 使它能處理多種 type。
@@ -59,11 +60,10 @@ marker ~~~
 	: property ( <name> -- ) \ Create a property of a stars[istar]
 		BL word (create) <js> 
 		last().type = "star.property";
-		var s = 'var f;f=function(){push(vm[context].stars[vm[context].istar]["' 
+		var s = 'var f;f=function(){push(tick(\'stars\').value[tick(\'istar\').value]["' 
 				+ last().name 
 				+ '"])}';
 		last().xt = eval(s);
-		// vm[context].stars[vm[context].istar][last().name] = undefined;
 		</js> reveal ;
 		/// A property is a global variable but pointed by a common index, istar.
 		/// Like 'value', use 'to' to assign data into a property. You may need to use 
@@ -88,10 +88,9 @@ marker ~~~
 	\	stars[istar] 靠的是 istar 當作 index 指定了特定的 object。 所有對 istar 寫值的
 	\	word 都要 save-restore 只有 forth console 本身不必。
 	\	不設計成: property x y vx vy ... 一行搞定是要讓每個 word 都能寫 help。
-	
 	: newStar ( -- ) \ Create a New stars[istar]
 		istar ( save ) stars :> length to istar \ point to the last star which is the New Star
-		js: if(!vm[context].stars[vm[context].istar])vm[context].stars[vm[context].istar]={} \ if it's empty then declair
+		js: if(!tick('stars').value[tick('istar').value])tick('stars').value[tick('istar').value]={} \ if it's empty then declair
 		<js>  // get color fillStyle string
 			(function(){
 			var r=80,g=80,b=100,range=100,c="rgba(";
@@ -102,8 +101,8 @@ marker ~~~
 			push(c)})() 
 		</js> to color
 		js> Math.random()*(30-10)+10 to radius \ radius 10 ~ 30
-		js> Math.random()*vm[context].maxPlanet+vm.g.cv.canvas.width to x \ 座標位置，初值在畫面之外
-		js> Math.random()*vm[context].maxPlanet+vm.g.cv.canvas.height to y
+		js> Math.random()*tick('maxPlanet').value+vm.g.cv.canvas.width to x \ 座標位置，初值在畫面之外
+		js> Math.random()*tick('maxPlanet').value+vm.g.cv.canvas.height to y
 		js> Math.random()*5-2.5 to vx \ 速度向量 between -2.5 ~ 2.5 
 		js> Math.random()*5-2.5 to vy
 		0 to ax 0 to ay \ 重力加速度
@@ -161,7 +160,7 @@ marker ~~~
 		next
 		stars :> length-1 for r@ to istar \ where istar : numBalls,...,3,2,1 
 			\ 垃圾清理撞進太陽湮滅掉的行星，換一個新的上去
-			radius if else stars :: splice(vm[context].istar,1) newStar then
+			radius if else stars :: splice(tick('istar').value,1) newStar then
 		next
 		( restore ) to istar
 	;
@@ -202,9 +201,11 @@ marker ~~~
 	\ 上面是個 infinit loop 所以根本不會下來，必須手動 copy-paste 在 inputbox 執行。
 	js: e=d=0.5 
 	[begin]
-		js: h=vm[context].stars[0].x+=e 
+		js: h=tick('stars').value[0].x+=e 
 		js> h>=(vm.g.cv.canvas.width-vm.g.cv.canvas.height/2) [if] js: e=-d [then] 
 		js> h<=vm.g.cv.canvas.height/2 [if] js: e=d [then] 50 nap
 	[again]
 
-
+<comment>
+14:52 2022/8/2 'to' 有經過 overload 這下 vm[context].x 要改成 tick('x').value 之後，variable 結構已經與當時不同了！
+</comment>

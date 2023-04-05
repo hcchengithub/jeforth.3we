@@ -1,3 +1,4 @@
+
 \
 \  12choc.f -- A simulation of the 12 coins problem
 \
@@ -27,15 +28,15 @@ cls <text>
     <script src="external-modules/chipmunk/demo/demo.js"></script>
 </text> /*remove*/ </o> drop 
 
-{} constant bb // ( -- obj ) Study the bb. Now I know it's a simple object of 4 corners. 
+{} constant bb public // ( -- obj ) Study the bb. Now I know it's a simple object of 4 corners. 
 			   /// For the bucket in this example.
-{} constant water // ( -- obj ) water is a sensor shape
-[] constant choc // ( -- array ) The 12 chocolates
-{} constant sponge // ( -- obj ) The floating balance scale
-0 value standard // ( -- n ) The standard weight of chocolates
+{} constant water public // ( -- obj ) water is a sensor shape
+[] constant choc public // ( -- array ) The 12 chocolates
+{} constant sponge public // ( -- obj ) The floating balance scale
+0 value standard public // ( -- n ) The standard weight of chocolates
 0 value lighter // ( -- n ) The lighter chocolates' weight
 0 value heavier // ( -- n ) The heavier chocolates' weight
-30 constant choc_size // ( -- n ) Chocolate size
+30 constant choc_size public // ( -- n ) Chocolate size
 
 <js>
 
@@ -94,7 +95,7 @@ cls <text>
 			// Add the edges of the bucket
 			//                 l    b    r    t
 			var bb = new cp.BB(140, 65, 630, 200);   
-			vm[context].bb = bb; // [x] study the bb
+			tick('bb').value = bb; // [x] study the bb
 				// > bb (see)
 				// {
 				//    "l": 20,  left
@@ -128,7 +129,7 @@ cls <text>
 			shape.setSensor(true);
 			shape.setCollisionType(1);
 			shape.setFriction(1); // [ ] 變成冰時,希望不要滑動
-			vm[context].water = shape; // [x] study the water shape
+			tick('water').value = shape; // [x] study the water shape
 				// > water obj>keys .
 				// verts,tVerts,planes,tPlanes,type,body,bb_t,bb_r,bb_b,bb_l,hashid,sensor,e,u,surface_v,
 				// collision_type,group,layers,space,collisionCode,setVerts,transformVerts,transformAxes,
@@ -148,10 +149,10 @@ cls <text>
 			body.setVel( cp.v(0, -100));
 			body.setAngVel( 1 );
 			// [ ] keep parameters that I don't yet know how to read back
-			vm[context].sponge = body;
-			vm[context].sponge.width = width;
-			vm[context].sponge.height = height;
-			vm[context].sponge.mass = mass;
+			tick('sponge').value = body;
+			tick('sponge').value.width = width;
+			tick('sponge').value.height = height;
+			tick('sponge').value.mass = mass;
 			
 			// 本 body 大塊海綿若不加進 shape 是看不見的
 			shape = space.addShape( new cp.BoxShape(body, width, height));
@@ -159,7 +160,7 @@ cls <text>
 		// }
 		
 		// { 12 chocolates 
-			width = vm[context].choc_size;
+			width = tick('choc_size').value;
 			height = width;
 			mass = 0.2675; // was 2.5*FLUID_DENSITY*width*height;
                            // try and error gets the mass of water, so standard chocs will balance in the water
@@ -175,7 +176,7 @@ cls <text>
 
 				shape = space.addShape(new cp.BoxShape(body, width, height));
 				shape.setFriction(0.8);
-				vm[context].choc.push(body);
+				tick('choc').value.push(body);
 			}
 		// }
 
@@ -274,28 +275,28 @@ cls <text>
 
 \ Drag and drop chocolates is fun but using below commands are more efficient    
 
-    0 constant vel_limit // ( -- n ) Don't move when dropping to sponge
-    0 constant angVel_limit // ( -- n ) Don't rotate when dropping to sponge
+    0 constant vel_limit public // ( -- n ) Don't move when dropping to sponge
+    0 constant angVel_limit public // ( -- n ) Don't rotate when dropping to sponge
     code calm ( i -- ) \ Reduce choc's horizantal speed and rotation when dropping to sponge
-        var i=pop(), choc=vm[context].choc;
+        var i=pop(), choc=tick('choc').value;
         var v = choc[i].getVel(); 
-        v.x = Math.min(Math.abs(v.x), vm[context].vel_limit) * Math.sign(v.x);
+        v.x = Math.min(Math.abs(v.x), tick('vel_limit').value) * Math.sign(v.x);
         var w = choc[i].getAngVel();
-        w = Math.min(Math.abs(w), vm[context].angVel_limit) * Math.sign(w);
+        w = Math.min(Math.abs(w), tick('angVel_limit').value) * Math.sign(w);
         choc[i].setVel(v); 
         choc[i].setAngle(w);
         end-code
 
     : drop-choc-left ( i -- ) \ Drop choc[i] on the left edge of the sponge
         {} sponge :> getPos() ( i o p )
-        js: tos(1).x=tos().x-vm[context].sponge.width/2+vm[context].choc_size/2
-        js: tos(1).y=pop().y+vm[context].choc_size*8 ( i o )
+        js: tos(1).x=tos().x-tick('sponge').value.width/2+tick('choc_size').value/2
+        js: tos(1).y=pop().y+tick('choc_size').value*8 ( i o )
         choc :: [tos(1)].setPos(pop())  ( i ) calm ;
         
     : drop-choc-right ( i -- ) \ Drop choc[i] on the right edge of the sponge
         {} sponge :> getPos() ( i o p )
-        js: tos(1).x=tos().x+vm[context].sponge.width/2-vm[context].choc_size/2;
-        js: tos(1).y=pop().y+vm[context].choc_size*8 ( i o )
+        js: tos(1).x=tos().x+tick('sponge').value.width/2-tick('choc_size').value/2;
+        js: tos(1).y=pop().y+tick('choc_size').value*8 ( i o )
         choc :: [tos(1)].setPos(pop()) ( i ) calm ;
 
     1200 value wait	// ( -- n ) Delay time, mS
@@ -349,7 +350,7 @@ cls <text>
         home hold< drop-choc-right drop-choc-left wait nap >hold ;
 
     : discover ( -- ) \ Put all chocs into the liquid to see which one is defect
-        12 [for] 12 t@ - drop-choc-left wait nap [next] ;
+        12 for 12 r@ - drop-choc-left wait nap next ;
         /// Move the sponge right side out of the tank but 
         /// left side in the liquid.
         
@@ -376,8 +377,8 @@ cls <text>
     : replay ( -- ) \ Reassign the defect choc and all chocs go home
         <js>
             for(var i=0; i<12; i++){
-                vm[context].choc[i].setMass(vm[context].standard);
-                vm[context].choc[i].w_limit = 0.5; 
+                tick('choc').value[i].setMass(tick('standard').value);
+                tick('choc').value[i].w_limit = 0.5; 
                 // [ ] was Infinit, body.w is the 角速度 Anglular Velocity
                 // 改小一點不要讓它亂打轉。
             }

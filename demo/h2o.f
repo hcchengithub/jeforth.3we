@@ -29,7 +29,7 @@
 	1 to spring 1 to wallBounce ( 100% 彈性 ) 
 	0 to friction 0 to gravity ( 為了做碰撞實驗，去掉重力 )
 	800 400 setCanvasSize	\ ( width height -- ) 
-	js: vm.debug=false;vm[context].balls[1].vx=5;vm[context].balls[1].vy=3 \ 初始擾動
+	js: vm.debug=false;tick('balls').value[1].vx=5;tick('balls').value[1].vy=3 \ 初始擾動
 	0 value count cut 
 	draw total-motivation . space \ 畫一禎印總動量
 	count 1+ dup to count 3000 > [if] cls 0 to count [then] \ 避免網頁太長怕 browser 受不了。
@@ -47,14 +47,14 @@ true  constant privacy private // ( -- true ) All words in this module are priva
 marker ~~~
 	
 \ setup
-	20	value interval		// ( -- f ) 調整 frame speed 
-	1	value spring 	    // ( -- f ) bounce back force's ratio. 0~1
-	0.3	value gravity       // ( -- f ) falling force, increment of y downward distance every frame.
+	20	 value interval		// ( -- f ) 調整 frame speed 
+	1	 value spring 	    // ( -- f ) bounce back force's ratio. 0~1
+	0.3	 value gravity public      // ( -- f ) falling force, increment of y downward distance every frame.
 							/// 重力是所有動量的來源。如果彈力指數是 1 摩擦係數是 0 則永遠不會停。
-	1	value wallBounce    // ( -- f ) 四周圍牆的材質。超過一變成超強力彈性牆。零就是超級海綿完全吸收任何撞擊。
-	0	value friction    	// ( -- f ) 原本想的是摩擦係數、空氣阻力。但若放負值補償不知哪去的動能損失，變得像是加熱溫度！
-	0.58 value sticky		// ( -- f ) 動量不平衡的上限，超過就忽略該反作用力，這會造成「粘性」。
-	[]	value balls 		// ( -- [] ) 所有的球 is an array。第 0 個不用，因為純 for .. next 不含零。
+	1	 value wallBounce public    // ( -- f ) 四周圍牆的材質。超過一變成超強力彈性牆。零就是超級海綿完全吸收任何撞擊。
+	0	 value friction public    	// ( -- f ) 原本想的是摩擦係數、空氣阻力。但若放負值補償不知哪去的動能損失，變得像是加熱溫度！
+	0.58 value sticky  public	// ( -- f ) 動量不平衡的上限，超過就忽略該反作用力，這會造成「粘性」。
+	[]	 value balls public 		// ( -- [] ) 所有的球 is an array。第 0 個不用，因為純 for .. next 不含零。
 	800 400	setCanvasSize	\ ( width height -- ) 
 	0 lineWidth \ processing.js noStroke() means no outline (balls)
 	
@@ -70,7 +70,7 @@ marker ~~~
 			}
 			this.collide = function(){
 				for (var i = id - 1; i >= 1; i--) {  // 只管自己 id 以下兩兩之間的 collision
-					var a=vm[context].balls[id], b=vm[context].balls[i]; // a 是本球 b 是他球。這樣不會搞混。他球是一個個輪著計算的不一定是哪個。
+					var a=tick('balls').value[id], b=tick('balls').value[i]; // a 是本球 b 是他球。這樣不會搞混。他球是一個個輪著計算的不一定是哪個。
 					
 					// the distance from this ball to another ball
 					var dx = b.x - a.x;  // a.x == x, a.y == y
@@ -110,49 +110,49 @@ marker ~~~
 						var diff = (mv1+mv2)-(mv1p+mv2p);
 if(vm.debug>2) type("diff="+diff+" "); // [ ]
 if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
-						if (Math.abs(diff) < vm[context].sticky) {  // 據實驗觀察，正常情況下動量不平衡似乎皆小於 0.42。
+						if (Math.abs(diff) < tick('sticky').value) {  // 據實驗觀察，正常情況下動量不平衡似乎皆小於 0.42。
 							vx = avx;  // 本球
 							vy = avy;  
-							vm[context].balls[i].vx = bvx;  // 他球
-							vm[context].balls[i].vy = bvy;  
+							tick('balls').value[i].vx = bvx;  // 他球
+							tick('balls').value[i].vy = bvy;  
 						}
 						
 					}  
 				}     
 			}
 			this.animate = function(){
-				vy += vm[context].gravity;  // 「力」表現為速度、方向的改變，而重力就是在 vy 上加成（加速度==重力）.
+				vy += tick('gravity').value;  // 「力」表現為速度、方向的改變，而重力就是在 vy 上加成（加速度==重力）.
 								  // vx,vy 是該 ball 的瞬時速度向量，單位是 pixcel/frame 畫素/每禎。
 								  // 靜止在地板上時照樣施以重力，往下計算 y+=vy 會陷入地板，再往下計算，撞上地板時
-								  // y 又被移回地板上，但得到一個反向(上升)的 -vm[context].gravity 速度。下一 frame 時這個速度被
-								  // vy += vm[context].gravity 消除，恢復原狀態。如此不斷重複。靜止的球 vy 會如此震盪，算不算
+								  // y 又被移回地板上，但得到一個反向(上升)的 -tick('gravity').value 速度。下一 frame 時這個速度被
+								  // vy += tick('gravity').value 消除，恢復原狀態。如此不斷重複。靜止的球 vy 會如此震盪，算不算
 								  // 是問題？不算。以上是 wallBounce=1 時，當 wallBounce=(0,1)之間，震盪最後 vy 會趨近
 								  // 一個負值（往上彈）的附近，但仍繼續震盪。
-				vx += vx>0 ? -vm[context].friction : vm[context].friction ; // 扣除摩擦係數, 每 frame 都扣，等於取一個總趨勢。
-				vy += vy>0 ? -vm[context].friction : vm[context].friction ;
-				vx = Math.abs(vx) < vm[context].friction? 0 : vx ; // 比摩擦力小就是零，否則可能會抖。
-				vy = Math.abs(vy) < vm[context].friction? 0 : vy ;
+				vx += vx>0 ? -tick('friction').value : tick('friction').value ; // 扣除摩擦係數, 每 frame 都扣，等於取一個總趨勢。
+				vy += vy>0 ? -tick('friction').value : tick('friction').value ;
+				vx = Math.abs(vx) < tick('friction').value? 0 : vx ; // 比摩擦力小就是零，否則可能會抖。
+				vy = Math.abs(vy) < tick('friction').value? 0 : vy ;
 				x += vx;  // 當 vx or vy 大於兩球半徑之合時，一次就直接穿越。這應該是 v 的上限。電腦模擬的限制。
 				y += vy;  // 所有的動量都來自 gravity，我猜要計算從上邊落下到下邊的最後速度會不會超過。
 
 				// 如果不考慮牆面，以上就是 move() 了！撞近牆面之前，先預測，並反應。
-				// vy *= -vm[context].wallBounce;  撞牆就把分量反向，對呀！？ 但是考慮撞上上邊的情況，反彈之後
+				// vy *= -tick('wallBounce').value;  撞牆就把分量反向，對呀！？ 但是考慮撞上上邊的情況，反彈之後
 				// 開始往下加速度，這樣來回會不會越加越多？好像也不會，從地板彈回來時又都被減回去了。但是
 				// 預測到撞牆時，球被直接移置到牆面上，這個處置會不會干擾物理現實？不會，不然才反而會減損
 				// 重力加速度落下的距離，因而越彈越低，最後沉沒到地板之下！
 				if (x + radius > vm.g.cv.canvas.width) {  // 超過 canvas 右邊
 					x = vm.g.cv.canvas.width - radius;  // 無法超過牆面，位置就在牆面上。
-					vx = -Math.abs(vx)*vm[context].wallBounce;               // 牆壁的反彈力
+					vx = -Math.abs(vx)*tick('wallBounce').value;               // 牆壁的反彈力
 				} else if (x - radius < 0) {   // 超過 canvas 左邊
 					x = radius;  
-					vx = Math.abs(vx)*vm[context].wallBounce;               // 牆壁的反彈力
+					vx = Math.abs(vx)*tick('wallBounce').value;               // 牆壁的反彈力
 				}  
 				if (y + radius > vm.g.cv.canvas.height) {  // 撞上地板
 					y = vm.g.cv.canvas.height - radius;  
-					vy = -Math.abs(vy)*vm[context].wallBounce;               // 地板的反彈力
+					vy = -Math.abs(vy)*tick('wallBounce').value;               // 地板的反彈力
 				} else if (y - radius < 0) {  // 超過 canvas 上邊
 					y = radius;  
-					vy = Math.abs(vy)*vm[context].wallBounce;               // 天花板的反彈力
+					vy = Math.abs(vy)*tick('wallBounce').value;               // 天花板的反彈力
 				}  
 			}
 			this.display = function(){
@@ -162,8 +162,8 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 				vm.g.cv.fill(); 
 			}
 		}};
-		vm[context].balls.push(new Ball(
-			vm[context].balls.length, 	// id
+		tick('balls').value.push(new Ball(
+			tick('balls').value.length, 	// id
 			Math.random()*vm.g.cv.canvas.width, // x
 			Math.random()*vm.g.cv.canvas.height,	// y
 			Math.random()*(50-20)+20,			// radius=[20~50]
@@ -181,20 +181,20 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 \ draw
 	: draw ( -- ) \ Mimic processing's draw() function
 		clearCanvas
-		js> vm[context].balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> tick('balls').value.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [tos()].collide()
 			balls :: [tos()].animate()
 			balls :: [pop()].display()
 		next
 	;
 	: dump ( -- ) \ See all balls
-		js> vm[context].balls.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
+		js> tick('balls').value.length-1 for r@ ( -- id ) \ where id = numBalls,...,3,2,1 
 			balls :: [pop()].see()
 		next
 	;
 	: total-motivation ( -- f ) \ All |(vx,vy)| summation
 		0 ( sum )
-		js> vm[context].balls.length-1 for r@ ( -- sum id ) \ where id = numBalls,...,3,2,1 
+		js> tick('balls').value.length-1 for r@ ( -- sum id ) \ where id = numBalls,...,3,2,1 
 			balls :> [tos()].vx balls :> [pop(1)].vy dup * swap dup * + 
 			js> Math.sqrt(pop()) ( -- sum Mid ) +
 		next ;
@@ -208,7 +208,7 @@ if(vm.debug>10){vm.jsc.prompt='222>>>';eval(vm.jsc.xt)} // [ ]
 	1 to spring 1 to wallBounce ( 100% 彈性 ) 
 	0 to friction 0 to gravity ( 為了做碰撞實驗，去掉重力 )
 	800 400 setCanvasSize	\ ( width height -- ) 
-	js: vm.debug=false;vm[context].balls[1].vx=5;vm[context].balls[1].vy=3 \ 初始擾動
+	js: vm.debug=false;tick('balls').value[1].vx=5;tick('balls').value[1].vy=3 \ 初始擾動
 
 \ The main loop
 	[begin] draw 40 nap [again]
