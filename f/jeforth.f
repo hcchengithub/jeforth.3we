@@ -657,7 +657,7 @@ code here       push(here) end-code // ( -- a ) 系統 dictionary 編碼位址 a
                         : dummy ; ' dummy js> pop().cfa 10000 >= ( true )
                         (forget)
                         ---
-                        : dummy ; ' dummy js> pop().cfa 888 < ( true )
+                        : dummy ; ' dummy js> pop().cfa 1000 < ( true )
                         [d 10000,true,true d] [p 'here', 'here!', ">=", "<" p]
                         (forget)
                     ~~~ 
