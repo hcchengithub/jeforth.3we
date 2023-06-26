@@ -16,47 +16,47 @@
 	<Script src="project-k/projectk.js"></Script>
 	<script id=js>
 	var jeforth_project_k_virtual_machine_object = new jeForth(); // A permanent name.
-	var kvm = jeforth_project_k_virtual_machine_object; // "kvm" may not be so permanent.
+	var vm = jeforth_project_k_virtual_machine_object; // "vm" may not be so permanent.
 	(function(){
-		kvm.gui = require('nw.gui'); // 等效寫法 gui = global.window.nwDispatcher.requireNwGui(); https://github.com/rogerwang/node-webkit/issues/707
-		kvm.appname = kvm.gui.App.manifest.name; // defined by package.json
-		kvm.selftest_visible = true;
-		// kvm.minor_version = kvm.gui.App.manifest.version; // defined by package.json
-		kvm.minor_version = jeforth3we_minor_version // defined by version.js
-		kvm.host = window;  // global 掛那裡的根據。
-		kvm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "demo", "playground"];
-		kvm.screenbuffer = ""; // type() to screenbuffer before I/O ready
-		var type = kvm.type = function (s) { 
+		vm.gui = require('nw.gui'); // 等效寫法 gui = global.window.nwDispatcher.requireNwGui(); https://github.com/rogerwang/node-webkit/issues/707
+		vm.appname = vm.gui.App.manifest.name; // defined by package.json
+		vm.selftest_visible = true;
+		// vm.minor_version = vm.gui.App.manifest.version; // defined by package.json
+		vm.minor_version = jeforth3we_minor_version // defined by version.js
+		vm.host = window;  // global 掛那裡的根據。
+		vm.path = ["dummy", "doc", "f", "3htm/f", "3htm/canvas", "3htm", "3nd/f", "3nw/f", "3nw", "demo", "playground"];
+		vm.screenbuffer = ""; // type() to screenbuffer before I/O ready
+		var type = vm.type = function (s) { 
 			try {
 				var ss = s + ''; // Print-able test
 			} catch(err) {
 				ss = Object.prototype.toString.apply(s);
 			}
-			if(kvm.screenbuffer!=null) kvm.screenbuffer += ss; // 填 null 就可以關掉。
-			if(kvm.selftest_visible) $('#outputbox').append(plain(ss)); 
+			if(vm.screenbuffer!=null) vm.screenbuffer += ss; // 填 null 就可以關掉。
+			if(vm.selftest_visible) $('#outputbox').append(plain(ss)); 
 		};
-		var version = parseFloat(kvm.major_version+"."+kvm.minor_version);
-		kvm.greeting = function(){
+		var version = parseFloat(vm.major_version+"."+vm.minor_version);
+		vm.greeting = function(){
 			type("j e f o r t h . 3 n w -- v"+version+'\n');
 			type("source code http://github.com/hcchengithub/jeforth.3we\n");
-			kvm.type("Program path " + process.cwd());
+			vm.type("Program path " + process.cwd());
 			return(version);
 		}
-		// kvm.panic() is the master panic handler. The panic() function defined in 
+		// vm.panic() is the master panic handler. The panic() function defined in 
 		// project-k kernel projectk.js is the one called in code ... end-code and it's
 		// not visible here.
-		kvm.panic = function(state){ 
-			kvm.type(state.msg);
+		vm.panic = function(state){ 
+			vm.type(state.msg);
 			if (state.serious) debugger;
 		}
-		kvm.debug = false;
-		kvm.fso = require( "fs" ); // http://nodejs.org/api/fs.html
-		kvm.readTextFile = function(pathname){return kvm.fso.readFileSync(pathname,'utf8')}
-		kvm.writeTextFile = function(pathname,data){kvm.fso.writeFileSync(pathname,data,'utf8')}
- 		kvm.prompt = "OK";
-		kvm.argv = kvm.gui.App.argv;
-		kvm.bye = function(){process.exit()};
-        kvm.lang = 'forth'; // 'js' or 'forth' let console support two languages
+		vm.debug = false;
+		vm.fso = require( "fs" ); // http://nodejs.org/api/fs.html
+		vm.readTextFile = function(pathname){return vm.fso.readFileSync(pathname,'utf8')}
+		vm.writeTextFile = function(pathname,data){vm.fso.writeFileSync(pathname,data,'utf8')}
+ 		vm.prompt = "OK";
+		vm.argv = vm.gui.App.argv;
+		vm.bye = function(){process.exit()};
+        vm.lang = 'forth'; // 'js' or 'forth' let console support two languages
 		
 		// System initialization
 		jQuery(document).ready(
@@ -64,34 +64,34 @@
 			function() {
 				$('#rev').html(version); // also .commandLine, .applicationName, ...
 				$('#location').html(window.location.toString()); // it's built-in in DOM
-				$('.appname').html(kvm.appname);
+				$('.appname').html(vm.appname);
 				document.onkeydown = hotKeyHandler; // Must be using onkeydown so as to grab the control.
-				kvm.dictate(kvm.readTextFile("f/jeforth.f")+kvm.readTextFile("3nw/f/quit.f"));
+				vm.dictate(vm.readTextFile("f/jeforth.f")+vm.readTextFile("3nw/f/quit.f"));
 			}                       
 		);                          
                                     
 		// There's no main loop, event driven call back function is this.
-		kvm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
-		kvm.consoleHandler = function(cmd) {
-            kvm.lang = forthbtn.checked ? 'forth' : 'js';
-            if (kvm.lang == 'js' || kvm.lang != 'forth'){
-                kvm.type((cmd?'\n> ':"")+cmd+'\n');
+		vm.scroll2inputbox = function(){window.scrollTo(0,endofinputbox.offsetTop)}
+		vm.consoleHandler = function(cmd) {
+            vm.lang = forthbtn.checked ? 'forth' : 'js';
+            if (vm.lang == 'js' || vm.lang != 'forth'){
+                vm.type((cmd?'\n> ':"")+cmd+'\n');
                 result = eval(cmd);
-                if(result != undefined) kvm.type(result + "\n");
+                if(result != undefined) vm.type(result + "\n");
                 window.scrollTo(0,endofinputbox.offsetTop); inputbox.focus();
             }else{
-                var rlwas = kvm.rstack().length; // r)stack l)ength was
+                var rlwas = vm.rstack().length; // r)stack l)ength was
                 type((cmd?'\n> ':"")+cmd+'\n');
-                kvm.dictate(cmd);  // Pass the command line to KsanaVM
+                vm.dictate(cmd);  // Pass the command line to KsanaVM
                 (function retry(){
                     // rstack 平衡表示這次 command line 都完成了，這才打 'OK'。
                     // event handler 從 idle 上手，又回到 idle 不會讓別人看到它的 rstack。
                     // 雖然未 OK, 仍然可以 key in 新的 command line 且立即執行。
-                    if(kvm.rstack().length!=rlwas)
+                    if(vm.rstack().length!=rlwas)
                         setTimeout(retry,100); 
                     else {
-                        type(" " + kvm.prompt + " ");
-                        if ($(inputbox).is(":focus")) kvm.scroll2inputbox();
+                        type(" " + vm.prompt + " ");
+                        if ($(inputbox).is(":focus")) vm.scroll2inputbox();
                     }
                 })();
             }
@@ -106,17 +106,17 @@
 				case 13: /* Enter */
 					var cmd = inputbox.value; // w/o the '\n' character ($10). 
 					inputbox.value = ""; // 少了這行，如果壓下 Enter 不放，就會變成重複執行。
-					kvm.consoleHandler(cmd);
+					vm.consoleHandler(cmd);
 					return(false); 
 			}
 			return (true); // pass down to following handlers 
 		}
 		
-		kvm.clearScreen = function () {
+		vm.clearScreen = function () {
 			$('#outputbox').empty();
 		}
 		
-		var plain = kvm.plain = function (s) {
+		var plain = vm.plain = function (s) {
 			var ss = s + ""; // avoid numbers to fail at s.replace()
 			ss = ss.replace(/&/g,'&amp;')
 			       .replace(/\t/g,' &nbsp; &nbsp;')

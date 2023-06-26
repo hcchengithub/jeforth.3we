@@ -6951,8 +6951,10 @@
 [ ] 13:00 2023/2/23 jeforth.3ca 已經被 Google deprecated 了。3ce 也有問題，error message 如下：
     Manifest version 2 is deprecated, and support will be removed in 2023. See https://developer.chrome.com/blog/mv2-transition/ for more details.
 
-[ ] 11:17 2023/3/21 HTA 已經認得 JSON 但是要 enable, see Evernote (https://www.evernote.com/shard/s22/nl/2472143/3dfcc201-eb53-4fe9-a6a2-81c018dd5ee6?title=HTA%20jscript%20uses%20JSON%20needs%20to%20enable%20something)
+[X] 11:17 2023/3/21 HTA 已經認得 JSON 但是要 enable, see Evernote (https://www.evernote.com/shard/s22/nl/2472143/3dfcc201-eb53-4fe9-a6a2-81c018dd5ee6?title=HTA%20jscript%20uses%20JSON%20needs%20to%20enable%20something)
     The meta tag to do the JSON enabling:
     	<meta http-equiv="x-ua-compatible" content="ie=9" />
-
+    Worked on ChatLKK 又複習了一遍。
+[ ] 15:59 2023/6/26 ChatLKK 已經有 Shift+Tab auto-complete with selector menu 用上下鍵選擇了。
+    https://github.com/hcchengithub/ChatFORTH/issues/4
 
