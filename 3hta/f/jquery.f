@@ -8,7 +8,7 @@
 \ 				
 \ 	js> typeof(jQuery)=="undefined" [if]
 \ 		char script createElement ( -- eleScript )
-\ 		dup char src char js/jquery-1.11.2.js setAttribute ( -- eleScript )
+\ 		dup char src char js/jquery-3.7.1.js setAttribute ( -- eleScript )
 \ 		js> document.getElementsByTagName('head')[0] swap ( -- eleHead eleScript ) appendChild
 \ 
 \ 		<js>

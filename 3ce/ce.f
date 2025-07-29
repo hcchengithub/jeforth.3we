@@ -246,7 +246,7 @@
 		  then 
 		\ Inject jQuery and project-k to target tab.
 		<ce> typeof(jeForth)</ceV> char function != if 	
-			tabid {} js: tos().file="js/jquery-1.11.2.js" inject drop			
+			tabid {} js: tos().file="js/jquery-3.7.1.js" inject drop			
 		then
 		tabid {} js: tos().file="js/version.js" inject drop 
 		tabid {} js: tos().file="project-k/projectk.js" inject drop 
